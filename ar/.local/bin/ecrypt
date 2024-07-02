@@ -1,0 +1,45 @@
+#!/bin/sh
+
+mount_luks() {
+    if ! mount | grep -q " /mnt/second "; then
+        SIZE_NVME0=$(sudo blockdev --getsize64 /dev/nvme0n1p1)
+        SIZE_NVME1=$(sudo blockdev --getsize64 /dev/nvme1n1p1)
+        if [ ! -z "$SIZE_NVME0" ] && [ ! -z "$SIZE_NVME1" ]; then
+            [ "$SIZE_NVME1" -lt "$SIZE_NVME0" ] && TARGET_DEVICE="/dev/nvme0n1p1" || TARGET_DEVICE="/dev/nvme1n1p1"
+            ${TERMINAL:-st} -n floatterm -g 60x1 -e sudo cryptsetup open "$TARGET_DEVICE" "second"
+            sudo -A mount "/dev/mapper/second" "/mnt/second" -o uid="$(id -u)",gid="$(id -g)" || sudo -A mount "/dev/mapper/second" "/mnt/second"
+        fi
+    fi
+}
+
+mount_encrypted() {
+    ! mount | grep -q " $1 " && echo "$PASSPHRASE" | sudo mount -t ecryptfs "$1" "$2" \
+        -o ecryptfs_cipher=aes,ecryptfs_key_bytes=32,ecryptfs_passthrough=no,ecryptfs_enable_filename_crypto=yes,ecryptfs_sig=$ECRYPTFS_SIG,ecryptfs_fnek_sig=$FNEK_SIG,passwd=$(printf '%s' "$PASSPHRASE")
+}
+
+attempt_mount() {
+    if mount | grep -q " $2 "; then
+        sudo umount "$2" && notify-send "📁 Locked: $3" || notify-send "❗ Unable to lock" "Mounted: $3"
+    elif mount | grep -q " $2 " && mount | grep -q " $(dirname $2) "; then
+        sudo umount "$2" && notify-send "📁 Locked: $3" || notify-send "❗ Unable to lock" "Mounted: $3"
+    else
+        ECRYPTFS_SIG=$(sudo cat /root/.ecryptfs/sig-cache.txt)
+        FNEK_SIG=$ECRYPTFS_SIG
+        PASSPHRASE=$(pass show encryption/ecryptfs)
+        [ -z "$PASSPHRASE" ] && { notify-send "❌ Failed to retrieve passphrase."; exit 1; }
+        mount_luks && mount_encrypted "$1" "$2" && notify-send "📂 Unlocked: $3" || notify-send "❌ Failed to unlock: $3"
+    fi
+}
+
+targets="$HOME/.secret /mnt/second/videos"
+mounts="$HOME/Private /mnt/second/videos"
+
+set -- $mounts  # Set positional parameters to mounts
+i=1
+for target in $targets; do
+    mp=$(eval echo "\$$i")  # Get the mount point using indirect expansion
+    path=$(basename "$mp")  # Extract last directory component
+
+    attempt_mount "$target" "$mp" "$path"
+    i=$((i+1))
+done

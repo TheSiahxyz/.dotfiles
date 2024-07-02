@@ -1,0 +1,8 @@
+*/3 * * * * /usr/bin/mailsync
+*/15 * * * * /home/si/.local/bin/cron/newsup
+0 0 * * * sudo /usr/bin/pacman -Sy
+0 0 * * * NVIM_APPNAME=Starter nvim --headless "+Lazy! sync" +qa
+0 * * * * NVIM_APPNAME=LazyVim nvim --headless "+Lazy! sync" +qa
+0 0 * * * NVIM_APPNAME=NvChad nvim --headless "+Lazy! sync" +qa
+0 * * * * /usr/bin/nvim --headless "+Lazy! sync" +qa
+@daily /usr/bin/trash-empty 30

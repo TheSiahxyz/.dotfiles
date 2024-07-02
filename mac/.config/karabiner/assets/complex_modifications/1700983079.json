@@ -1,0 +1,62 @@
+{
+  "title": "Use ctrl + hl to Switch Tabs in Chrome, Brave & Firefox",
+  "rules": [
+    {
+      "description": "Use ctrl + hl to Switch Tabs in Chrome, Brave & Firefox",
+      "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "h",
+            "modifiers": {
+              "mandatory": ["control"],
+              "optional": ["any"]
+            }
+          },
+          "to": [
+            {
+              "key_code": "left_arrow",
+              "modifiers": ["command", "option"]
+            }
+          ],
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "bundle_identifiers": [
+                "^com.google.Chrome",
+                "^com.brave.Browser",
+                "^org.mozilla.firefox"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "l",
+            "modifiers": {
+              "mandatory": ["control"],
+              "optional": ["any"]
+            }
+          },
+          "to": [
+            {
+              "key_code": "right_arrow",
+              "modifiers": ["command", "option"]
+            }
+          ],
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "bundle_identifiers": [
+                "^com.google.Chrome",
+                "^com.brave.Browser",
+                "^org.mozilla.firefox"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

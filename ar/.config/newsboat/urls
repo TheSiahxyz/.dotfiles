@@ -1,0 +1,18 @@
+# News
+https://artixlinux.org/feed.php "Arch" "Tech" "~Artix Linux Updates"
+https://www.archlinux.org/feeds/news/ "Arch" "Tech" "~Arch Linux Updates"
+
+# Blog
+https://lukesmith.xyz/rss.xml "Blog" "~Luke Smith (Blog)"
+
+# Git
+https://github.com/LukeSmithxyz/voidrice/commits/master.atom "Git" "~Luke Smith dotfiles (Git)"
+
+# Youtube
+https://www.youtube.com/feeds/videos.xml?channel_id=UC2eYFnH61tmytImy1mTYvhA "Linux" "Youtube" "~Luke Smith (Youtube)"
+https://www.youtube.com/feeds/videos.xml?channel_id=UCNjdEsQSWDgNcvYueavebFQ "Devices" "Info" "Tech" "~3분테크 (Youtube)"
+https://www.youtube.com/feeds/videos.xml?channel_id=UCDNvRZRgvkBTUkQzFoT_8rA "Entertainment" "Fun" "Youtube" "~핑계고 (Youtube)"
+https://www.youtube.com/feeds/videos.xml?channel_id=UCYJ0Ucu9jPX5kn6SeDcNaIQ "Fun" "LOL" "Stream" "Youtube" "~Wolf (Youtube)"
+https://www.youtube.com/feeds/videos.xml?channel_id=UCSzHok6X5qXEO7cjvVnE62g "Fun" "LOL" "Stream" "Youtube" "~프레이 (Youtube)"
+https://www.youtube.com/feeds/videos.xml?channel_id=UCBA9XaL5wCdHnC5EmEzwrqw "Fun" "LOL" "Stream" "Youtube" "AfreecaTV" "~김민교 (AfreecaTV)"
+https://www.youtube.com/feeds/videos.xml?channel_id=UCkgDHJNdiidw67LAAVooc1A "Fun" "LOL" "Stream" "Youtube" "AfreecaTV" "~김민교 full (AfreecaTV)"

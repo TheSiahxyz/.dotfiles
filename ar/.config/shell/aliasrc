@@ -1,0 +1,319 @@
+#!/bin/sh
+
+# Use neovim for vim if present.
+[ -x "$(command -v nvim)" ] && alias vimdiff="nvim -d"
+
+# Use $XINITRC variable if file exists.
+[ -f "$XINITRC" ] && alias startx="startx $XINITRC"
+
+# Use $MBSYNCRC variable if file exists to sync mailbox.
+[ -f "$MBSYNCRC" ] && alias mbsync="mbsync -c $MBSYNCRC"
+
+# sudo not required for some system commands
+for command in mount umount sv pacman updatedb su shutdown poweroff reboot; do
+    alias $command="sudo $command"
+done
+unset command
+
+case "$(readlink -f /sbin/init)" in
+    *systemd*)
+        # journal
+        alias j="journalctl -xe"
+        # pipewire
+        alias rpi="systemctl --user restart wireplumber pipewire pipewire-pulse pipewire-jack"
+        # systemctl
+        alias s="systemctl"
+        # timedatectl
+        alias t="timedatectl"
+        ;;
+esac
+
+# Go back
+alias ...='../..'
+alias ....='../../..'
+alias .....='../../../..'
+
+# bat
+alias bath="bat cache --build"
+alias cat="bat -n"
+alias -g -- -h='-h 2>&1 | bat --language=help --style=plain'
+alias -g -- --help='--help 2>&1 | bat --language=help --style=plain'
+
+# bash
+alias sbs="source ~/.bashrc"
+
+# bc
+alias bc="bc -ql"
+
+# bluetooth
+alias bctl="bluetoothctl"
+
+# cd
+alias cdo="cd $OLDPWD"
+alias pd="cd -"
+
+# chmod
+alias che="find . -type f -exec chmod +x {};"
+alias chfd="find . -type d -exec chmod 755 {}; -o -type f -exec chmod 644 {};"
+alias cx='chmod a+x'
+alias 000='chmod -R 000'
+alias 600='chmod -R 600'
+alias 644='chmod -R 644'
+alias 666='chmod -R 666'
+alias 755='chmod -R 755'
+alias 777='chmod -R 777'
+
+# copy
+alias cp="cp -iv"
+
+# delete
+alias _fd="find . -type f -name '._*' -print0 | xargs -0 rm -f"
+alias _fp="find . -type f -name '._*' -print"
+
+# df
+alias df='df -h'
+
+# dotbare
+alias dg="dotbare"
+alias dga="dotbare add"
+alias dgaa="dotbare add ."
+alias dgcm="dotbare commit -m"
+alias dgcam="dotbare commit -am"
+alias dgd="dotbare diff"
+alias dgl="dotbare log"
+alias dgp="dotbare push"
+alias dgst="dotbare status"
+
+# disk usage
+alias du='du -sh'
+
+# # ecryptfs
+# alias emt="echo "$(pass show encryption/ecryptfs)" | sudo mount -t ecryptfs "$1" "$2" \
+#     -o ecryptfs_cipher=aes,ecryptfs_key_bytes=32,ecryptfs_passthrough=no,ecryptfs_enable_filename_crypto=yes,ecryptfs_sig="$(sudo cat /root/.ecryptfs/sig-cache.txt)",ecryptfs_fnek_sig="$(sudo cat /root/.ecryptfs/sig-cache.txt)",passwd="$(printf '%s' "$(pass show encryption/ecryptfs)")""
+
+# eza
+[ -x "$(command -v eza)" ] && { 
+    alias l="eza --icons --group-directories-first"
+    alias la="eza --icons -aa --group-directories-first"
+    alias lh="eza --icons -aa --group-directories-first"
+    alias ll="eza -gl --group-directories-first"
+    alias lla="eza -glaa --group-directories-first"
+    alias lm="eza -glA --group-directories-first | more"
+    alias lr="eza --icons -R --group-directories-first"
+    alias ls="eza --icons -A --group-directories-first"
+    alias lsb="eza --icons -b --group-directories-first"
+    alias lsby="eza --icons -B --group-directories-first"
+    alias lsd="eza --icons -Dl --group-directories-first"
+    alias lsda="eza --icons -aaDl --group-directories-first"
+    alias lsf="eza --icons -fl"
+    alias lsfa="eza --icons -aafl"
+    alias lsa="eza --icons -l -s=accessed"
+    alias lsaa="eza --icons -aal -s=accessed"
+    alias lsc="eza --icons -l -s=created"
+    alias lsca="eza --icons -aal -s=created"
+    alias lse="eza --icons -l -s=extension"
+    alias lsea="eza --icons -aal -s=extension"
+    alias lsm="eza --icons -l -s=modified"
+    alias lsma="eza --icons -aal -s=modified"
+    alias lsn="eza --icons -l -s=name"
+    alias lsna="eza --icons -aal -s=name"
+    alias lss="eza --icons -l -s=size"
+    alias lssa="eza --icons -aal -s=size"
+    alias lst="eza --icons -l -s=type"
+    alias lsta="eza --icons -aal -s=type"
+    alias lt="eza --icons -T -L"
+    alias ltd="eza --icons -TD -L"
+    alias ltdr="eza --icons -TDr -L"
+    alias ltr="eza --icons -Tr -L"
+} || { 
+    alias l="/usr/bin/ls -h --color=always --group-directories-first"
+    alias la="/usr/bin/ls -alh --color=always --group-directories-first"
+    alias ll="/usr/bin/ls -Fls --color=always --group-directories-first"
+    alias lla="/usr/bin/ls -aFls --color=always --group-directories-first"
+    alias lm="/usr/bin/ls -alh --color=always |more --group-directories-first"
+    alias lr="/usr/bin/ls -hlR --color=always --group-directories-first"
+    alias ls="/usr/bin/ls -AFh --color=always --group-directories-first"
+    alias lsa="/usr/bin/ls -hlru --color=always --group-directories-first"
+    alias lsc="/usr/bin/ls -hclr --color=always --group-directories-first"
+    alias lsd="/usr/bin/ls -l --color=always | egrep '^d'"
+    alias lsda="/usr/bin/ls -la --color=always | egrep '^d'"
+    alias lse="/usr/bin/ls -BhlX --color=always --group-directories-first"
+    alias lsf="/usr/bin/ls -l --color=always | egrep -v '^d'"
+    alias lsfa="/usr/bin/ls -la --color=always | egrep -v '^d'"
+    alias lsm="/usr/bin/ls -hlr --time=mtime --color=always --group-directories-first"
+    alias lsn="/usr/bin/ls -alp --color=always --group-directories-first"
+    alias lss="/usr/bin/ls -hlrS --color=always --group-directories-first"
+    alias lst="/usr/bin/ls -hlrt --color=always --group-directories-first"
+    alias lw="/usr/bin/ls -Ahx --color=always --group-directories-first"
+}
+
+# fcitx5-remote
+alias fr="fcitx5-remote"
+
+# ffmpeg
+alias ffmpeg="ffmpeg -hide_banner"
+
+# git
+alias ggg="ssh $THESIAH_GIT"
+
+# greb
+alias grep="grep --color"
+alias grepw="grep -R --include='*'"
+
+# hugo
+alias hss="hugo server --noHTTPCache"
+alias hcl="hugo --cleanDestinationDir"
+
+# ip
+alias ip="ip -color=auto"
+alias whatsmyip="curl -s ifconfig.me | xargs"
+
+# jupyter
+alias ji="git clone git@github.com:jupyter/jupyter_client.git"
+alias jn="jupyter notebook"
+
+# killall
+alias ka="killall"
+
+# lf
+alias lf="lfub"
+
+# mkcd
+alias mc="mkcd"
+
+# mkdir
+alias mkdir="mkdir -pv"
+
+# move
+alias mv="mv -iv"
+
+# mysql
+alias msr="mysql -u si -p"
+
+# nvim
+alias e="$EDITOR"
+alias v="$EDITOR"
+alias nv="nvim"
+alias nts="NVIM_APPNAME=TheSiahxyz nvim"
+alias nlv="NVIM_APPNAME=LazyVim nvim"
+alias nvc="NVIM_APPNAME=NvChad nvim"
+alias snv="sudo nvim"
+
+# nxsiv
+alias nsxiv="nsxiv -p"
+
+# obsidian
+alias vo="cd $HOME/Obsidian/SI/ && nvim Dashboard.md"
+
+# open
+alias open="xdg-open"
+
+# pass
+alias potp="pass otp totp-secret"
+
+# ps
+alias ps="ps auxf"
+alias psg="ps auxf | grep "
+alias topcpu="/bin/ps -eo pcpu,pid,user,args | sort -k 1 -r | head -10"
+
+# python
+alias py="python3"
+
+# remove
+alias rm="rm -vI"
+
+# rsync
+alias rsc="rsync -vrazPlu"
+alias rscd="rsync -vrazPlu --delete"
+alias rscr="rsync -vrazPlu --remove-source-files"
+
+# samba
+alias winip="sudo mount -t cifs //192.168.0.1/HDD1 /media/hdd -o username=si,vers=2.0"
+alias win10="sudo mount -t cifs //192.168.0.3/Share /media/win10 -o username=THESIAHXYZ-WIN1"
+
+# sc-im
+alias scim="sc-im"
+
+# scp
+alias scp="scp -r"
+
+# setxkbmap 
+alias RM="setxkbmap -option"
+
+# sha1
+alias sha1="openssl sha1"
+
+# shell
+alias tobash="sudo chsh $USER -s /bin/bash && 'Now log out.'"
+alias tozsh="sudo chsh $USER -s /bin/zsh && 'Now log out.'"
+alias tofish="sudo chsh $USER -s /bin/fish && 'Now log out.'"
+
+# shellcheck
+alias shck="shellcheck --color=always"
+
+# shortcut
+alias ref="shortcuts >/dev/null; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutrc && source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/zshnameddirrc"
+
+# skype
+alias skype="skypeforlinux"
+
+# ssh
+alias gts="ssh $THESIAH_SERVER"
+
+# stow
+alias dstw="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/default/.local/bin/stw"
+
+# sudo
+alias su="sudo su -l root"
+alias smi="rm -rf *.rej *.orig; sudo make clean install"
+
+# tmux
+alias pktm="pkill tmux"
+alias sts="tmux source $XDG_CONFIG_HOME/tmux/tmux.conf"
+alias tma="tmux a"
+alias tmka="tmux kill-session -a"
+alias tml="tmux ls"
+alias tm="tmux"
+alias tmc="tmux new -s (pwd | sed 's/.*\///g')"
+
+# tmuxinator
+alias tid="tmuxinator delete"
+alias til="tmuxinator list"
+alias tis="tmuxinator start"
+alias tic="tmuxinator config"
+alias tio="tmuxinator obsidian"
+alias tipv="tmuxinator private"
+alias tipb="tmuxinator public"
+alias tiw="tmuxinator work"
+alias tin="tmuxinator new"
+alias ti="tmuxinator"
+alias tir="txo && txp && txw"
+
+# transmission-remote
+alias trem="transmission-remote"
+
+# trash
+alias trd="trash-rm"
+alias tre="trash-empty"
+alias trl="trash-list"
+alias trp="trash-put"
+alias trr="trash-restore"
+
+# vim
+alias vi="vim"
+
+# wget
+alias wget=wget --hsts-file="${XDG_CACHE_HOME:-${HOME}/.cache}/wget-hsts"
+
+# xev
+alias keys='xev -event keyboard | awk '\''/^KeyPress/,/^KeyRelease/ { if ($0 ~ /keysym/) print $0 }'\'''
+
+# youtube-viewer
+alias ytv="youtube-viewer"
+
+# zathura
+alias za="zathura"
+
+# zsh
+alias sps="source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/profile"
+alias szs="source ${XDG_CONFIG_HOME:-${HOME}/.config}/zsh/.zshrc"

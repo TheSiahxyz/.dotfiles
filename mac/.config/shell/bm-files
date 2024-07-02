@@ -1,0 +1,36 @@
+# Keys                  Filename                                                Description
+vab     ${XDG_CONFIG_HOME:-${HOME}/.config}/abook/addressbook                     # Address book config
+vbc     ${XDG_CONFIG_HOME:-${HOME}/.config}/bash/bashrc                           # Bash (shell) config
+vbd     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/bm-dirs                         # A list of bookmarked directories similar to this file
+vbf     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/bm-files                        # This file, a list of bookmarked files
+vbi     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/inputrc                         # This file is for gnu readline
+vbp     ${XDG_CONFIG_HOME:-${HOME}/.config}/bash/bash_profile                     # Bash profile
+vdb     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwmblocks/config.h       # Dwmblocks: the status bar for dwm
+vlf     ${XDG_CONFIG_HOME:-${HOME}/.config}/lf/lfrc                               # LF (file browser) config
+vls     ${XDG_CONFIG_HOME:-${HOME}/.config}/lf/scope                              # LF's scope/preview file
+vmc     ${XDG_CONFIG_HOME:-${HOME}/.config}/ncmpcpp/config                        # Ncmpcpp (music player) config
+vmw     ${XDG_CONFIG_HOME:-${HOME}/.config}/mutt/muttrc                           # Mutt (email client) config
+Vmw     /usr/share/mutt-wizard/mutt-wizard.muttrc                               # Global mutt config
+vnb     ${XDG_CONFIG_HOME:-${HOME}/.config}/ncmpcpp/bindings                      # Ncmpcpp (music player) keybinds file
+vnc     ${XDG_CONFIG_HOME:-${HOME}/.config}/newsboat/config                       # Newsboat config (RSS reader)
+vnu     ${XDG_CONFIG_HOME:-${HOME}/.config}/newsboat/urls                         # Newsboat url (RSS reader)
+vpf     ${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/passfzf                           # Passfzf
+vpi     ${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/pacinstall                        # Pacman install
+Vsm     /etc/samba/smb.conf                                                     # Samba config
+vst     ${XDG_CONFIG_HOME:-${HOME}/.config}/starship/starship.toml                # Starship
+vsx     ${XDG_CONFIG_HOME:-${HOME}/.config}/nsxiv/exec/key-handler                # Nsxiv (image viewer) key/script handler
+vtm     ${XDG_CONFIG_HOME:-${HOME}/.config}/tmux/tmux.conf                        # Tmux config
+vtt     ${XDG_CONFIG_HOME:-${HOME}/.config}/transmission-daemon/settings.json     # Transmission-daemon config
+vvc     ${XDG_CONFIG_HOME:-${HOME}/.config}/vim/vimrc                             # Vim config
+vvi     ${XDG_CONFIG_HOME:-${HOME}/.config}/vim/init.vim                          # Vim init
+vvp     ${XDG_CONFIG_HOME:-${HOME}/.config}/vim/plugins.vim                       # Vim plugins
+vvw     ${XDG_DATA_HOME:-${HOME}/.local/share}/vimwiki                            # Vimwiki
+vxc     ${XDG_CONFIG_HOME:-${HOME}/.config}/x11/xinitrc                           # X11 config
+vxp     ${XDG_CONFIG_HOME:-${HOME}/.config}/x11/xprofile                          # Start up - X11 profile
+vxr     ${XDG_CONFIG_HOME:-${HOME}/.config}/x11/xresources                        # Colors, themes and variables for X11
+vya     ${XDG_CONFIG_HOME:-${HOME}/.config}/youtube-viewer/api.json               # API config for youtube-viewer
+vza     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/aliasrc                         # Aliases used by zsh (and potentially other shells)
+vzc     $ZDOTDIR/.zshrc                                                         # Zsh config
+vzk     $ZDOTDIR/keymaps.zsh                                                    # Zsh keymaps
+vzp     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/profile                         # Zsh profile
+vzs     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/scriptrc                        # Shell functions

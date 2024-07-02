@@ -1,0 +1,16 @@
+#!/bin/sh
+
+case "$(uname)" in
+    Linux)
+        [ -f /etc/os-release ] && echo "$(grep NAME /etc/os-release | cut -d'=' -f2- | tr -d '"')" | sed 's/Linux//g;s/^[[:space:]]*//;s/[[:space:]]*$//' | tr '[:upper:]' '[:lower:]'
+        ;;
+    Darwin)
+        echo "mac"
+        ;;
+    CYGWIN* | MINGW32* | MSYS* | MINGW*)
+        echo "windows"
+        ;;
+    *)
+        echo "unknown"
+        ;;
+esac

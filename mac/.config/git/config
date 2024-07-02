@@ -1,0 +1,37 @@
+[init]
+    defaultBranch = main
+
+[core]
+    excludesFile = ~/.config/git/ignore
+    pager = delta
+
+[credential]
+    helper = store
+
+[delta]
+    features = Catppuccin-mocha
+    hyperlinks = true
+    hyperlinks-file-link-format = "file-line://{path}:{line}"
+    light = false      # set to true if you're in a terminal w/ a light background color (e.g. the default macOS terminal)
+    line-numbers = true
+    navigate = true    # use n and N to move between diff sections
+    side-by-side = true
+    true-color = always
+    ; hyperlinks-file-link-format = "vscode://file/{path}:{line}"
+    ; syntax-theme = Catppuccin-mocha # Use bat theme
+
+[diff]
+    colorMoved = default
+
+[include]
+    path = /etc/delta/themes.gitconfig
+
+[interactive]
+    diffFilter = delta --color-only
+
+[merge]
+    conflictstyle = diff3
+
+[user]
+    name = TheSiahxyz
+    email = 164138827+TheSiahxyz@users.noreply.github.com

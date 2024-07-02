@@ -1,0 +1,43 @@
+# Api/Keys
+api.json
+credentials
+
+# Backup files
+*~
+*.swp
+
+# Compiled files
+*.o
+*.out
+
+# Cookie
+cookie
+
+# History
+*history*
+.zcompdump
+
+# IDE directories
+.idea/
+
+# Lock
+*lock*.json
+
+# Private
+*personal*
+
+# Shortcuts
+shortcutrc
+zshnameddirrc
+
+# Tmux
+*/tmux/plugins/
+
+# Transmission
+*/transmission-daemon/bandwidth-groups.json
+
+# Vim
+*/vim/*/
+
+# thesiah.mom
+*/thesiah/thesiah.mom

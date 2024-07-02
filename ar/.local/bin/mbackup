@@ -1,0 +1,14 @@
+#!/bin/sh
+
+batch_file="${XDG_MUSIC_DIR:-${HOME}/Music}/.music.txt"
+backup="/tmp/music_backup.txt"
+[ -f "$batch_file" ] || exit 1
+echo "Backing up music files..."
+[ -f "$backup" ] && rm -f "$backup" >/dev/null 2>&1
+while read -r line; do
+    video_id="${line#* }"
+    echo "https://www.youtube.com/watch?v=$video_id" >> "$backup"
+done < "$batch_file"
+yt-dlp --continue --embed-metadata --ignore-errors --no-force-overwrites --verbose --audio-format best --audio-quality 0 --batch-file "$backup" --extract-audio --recode-video mp3 --output "${XDG_MUSIC_DIR:-${HOME}/Music}/%(artist)s - %(title)s.%(ext)s" >/dev/null 2>&1
+rm -f "$backup" >/dev/null 2>&1
+echo "Done!"

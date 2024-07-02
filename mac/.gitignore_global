@@ -1,0 +1,14 @@
+# macOS system files
+.DS_Store
+._*
+
+# Text editor backup files
+*~
+*.swp
+
+# Compiled files
+*.o
+*.out
+
+# IDE directories
+.idea/

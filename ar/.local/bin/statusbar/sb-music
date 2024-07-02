@@ -1,0 +1,37 @@
+#!/bin/sh
+
+filter() {
+	if ps -C mpd >/dev/null 2>&1; then
+        [ $(echo -n "$(mpc current -f %artist%)" | wc -m) -gt 30 ] && artist="$(echo "$(mpc current -f %artist%)" | cut -c 1-15)..." || artist="$(mpc current -f %artist%)"
+        [ $(echo -n "$(mpc current -f %title%)" | wc -m) -gt 30 ] && title="$(echo "$(mpc current -f %title%)" | cut -c 1-15)..." || title="$(mpc current -f %title%)"
+		prefix=""
+		echo "$(mpc status)" | grep -q 'playing' && prefix="🎵"
+		echo "$(mpc status)" | grep -q 'paused' && prefix="⏸"
+		[ -z "$prefix" ] && return
+		indicators=""
+		echo "$(mpc status)" | grep -q 'random: on' && indicators="${indicators}🔀"
+		echo "$(mpc status)" | grep -q 'repeat: on' && indicators="${indicators}🔁"
+		echo "$(mpc status)" | grep -q 'single: on' && indicators="${indicators}🔂"
+        echo "$prefix$artist - $title $(echo "$(mpc status)" | grep -o '[0-9]\+:[0-9]\+/[0-9]\+:[0-9]\+')$([ -n "$indicators" ] && echo "$indicators")"
+    fi
+}
+
+# pidof -x sb-mpdup >/dev/null 2>&1 || sb-mpdup >/dev/null 2>&1 &
+
+# Handling interaction based on button press
+case $BLOCK_BUTTON in
+    1) mpc status | filter ; setsid "$TERMINAL" -e ncmpcpp ;; # left click, opens ncmpcpp
+    2) mpc toggle | filter ;; # right click, pause/unpause
+    3) mpc status | filter ; notify-send "🎵 Music module" "- Shows mpd song playing and status
+- 🎵 if playing
+- ⏸ if paused
+- 🔂 if single on
+- 🔁 if repeat on
+- 🔀 if random on
+- Left click opens ncmpcpp
+- Middle click pauses
+- Scroll changes track" ;; 4) mpc prev | filter ;; # scroll up, previous
+    5) mpc next | filter ;; # scroll down, next
+    6) mpc status | filter ; setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
+    *) mpc status | filter ;; # default, show current status
+esac

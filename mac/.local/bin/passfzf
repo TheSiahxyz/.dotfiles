@@ -1,0 +1,71 @@
+#!/bin/sh
+
+set -e
+
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+	printf "Usage: passfzf [-h|--help]\n"
+	printf "Keyboard shortcuts:\n"
+	printf "  return     - echo password and copy to clipboard (wayland only)\n"
+	printf "  ctrl+e     - edit selected password\n"
+	printf "  ctrl+n     - new password (named as per the prompt)\n"
+	printf "  ctrl+d     - delete selected password\n"
+	printf "  ctrl+g     - regenerate selected password\n"
+	printf "  ctrl+j     - move cursor down\n"
+	printf "  ctrl+k     - move cursor up\n"
+	printf "  tab        - tab complete\n"
+	printf "  esc/ctrl+c - exit\n"
+	exit 0
+fi
+
+PASSDIR=${PASSWORD_STORE_DIR:-$HOME/.local/share/.password-store}
+cd $PASSDIR
+
+# Unlock the password for this session
+pass show "$(tree -Ffi | grep '.gpg' | sed 's/.gpg$//g' | sed 's/^..//' | head -n 1)" >/dev/null
+
+# Main fzf session
+PASSFILE=$(tree -Ffi | grep '.gpg' | sed 's/.gpg$//g' | sed 's/^..//' |
+	fzf \
+		--header="🔑 Password Manager" \
+		--layout=reverse \
+		--no-mouse \
+		--preview="pass {}" \
+		--bind="ctrl-e:execute(pass edit {} < /dev/tty > /dev/tty 2>&1)+reload(tree -Ffi | grep '.gpg' | sed 's/.gpg$//g')" \
+		--bind="ctrl-n:execute(if [ -z {q} ]; then read -p \"Can't generate empty password. Press enter to continue...\"; else pass generate -n {q} < /dev/tty > /dev/tty 2>&1 && pass edit {q} < /dev/tty > /dev/tty 2>&1; fi)+reload(tree -Ffi | grep '.gpg' | sed 's/.gpg$//g')" \
+		--bind="ctrl-d:execute(pass rm {} < /dev/tty > /dev/tty 2>&1)+reload(tree -Ffi | grep '.gpg' | sed 's/.gpg$//g')" \
+		--bind="ctrl-g:execute(if [ -z {} ]; then read -p \"Can't generate empty password. Press enter to continue...\"; else pass generate -in {} < /dev/tty > /dev/tty 2>&1 && pass edit {} < /dev/tty > /dev/tty 2>&1; fi)+reload(tree -Ffi | grep '.gpg' | sed 's/.gpg$//g')" \
+		--bind="ctrl-j:down" \
+		--bind="ctrl-k:up" \
+		--bind="tab:replace-query")
+
+PASSDATA="$(pass $PASSFILE)"
+PASSWORD="$(echo "$PASSDATA" | head -n 1)"
+SHOW_PASSDATA=false
+
+if [ "$1" = "-i" ]; then
+	SHOW_PASSDATA=true
+	shift
+fi
+
+if [ "$SHOW_PASSDATA" = true ]; then
+	PASSDATA="$(pass "$PASSFILE")"
+	echo "$PASSDATA"
+else
+	PASSWORD="$(pass show "$PASSFILE" | head -n 1)"
+	echo "$PASSWORD"
+
+	if [ -n "$PASSWORD" ]; then
+		case "$(uname)" in
+		Darwin*)
+			echo "$PASSWORD" | pbcopy # Use pbcopy on macOS
+			;;
+		Linux*)
+			echo "$PASSWORD" | xclip -selection clipboard # Use xclip on Linux
+			;;
+		*)
+			echo "Unsupported operating system"
+			;;
+		esac
+		sleep 0.1
+	fi
+fi

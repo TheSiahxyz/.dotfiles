@@ -1,0 +1,325 @@
+#!/bin/sh
+
+# Use neovim for vim if present.
+[ -x "$(command -v nvim)" ] && alias vimdiff="nvim -d"
+
+# Use $XINITRC variable if file exists.
+[ -f "$XINITRC" ] && alias startx="startx $XINITRC"
+
+# Use $MBSYNCRC variable if file exists to sync mailbox.
+[ -f "$MBSYNCRC" ] && alias mbsync="mbsync -c $MBSYNCRC"
+
+# sudo not required for some system commands
+for command in mount umount sv pacman updatedb su shutdown poweroff reboot; do
+	alias $command="sudo $command"
+done
+unset command
+
+# Go back
+alias \
+	...='../..' \
+	....='../../..' \
+	.....='../../../..'
+
+# bat
+alias \
+	bath="bat cache --build" \
+	cat="bat -n" \
+	-g -- -h='-h 2>&1 | bat --language=help --style=plain' \
+	-g -- --help='--help 2>&1 | bat --language=help --style=plain'
+
+# bash
+alias sbs="source ~/.bashrc"
+
+# bc
+alias bc="bc -ql"
+
+# bluetooth
+alias bctl="bluetoothctl"
+
+# cd
+alias \
+	cdo="cd $OLDPWD" \
+	pd="cd -"
+
+# chmod
+alias \
+	che="find . -type f -exec chmod +x {} \;" \
+	chfd="find . -type d -exec chmod 755 {} \; -o -type f -exec chmod 644 {} \;" \
+	cx='chmod a+x' \
+	000='chmod -R 000' \
+	600='chmod -R 600' \
+	644='chmod -R 644' \
+	666='chmod -R 666' \
+	755='chmod -R 755' \
+	777='chmod -R 777'
+
+# copy
+alias cp="cp -iv"
+
+# delete
+alias \
+	_fd="find . -type f -name '._*' -print0 | xargs -0 rm -f" \
+	_fp="find . -type f -name '._*' -print"
+
+# df
+alias df='df -h'
+
+# dotbare
+alias \
+	dg="dotbare" \
+	dga="dotbare add" \
+	dgaa="dotbare add ." \
+	dgcm="dotbare commit -m" \
+	dgcam="dotbare commit -am" \
+	dgd="dotbare diff" \
+	dgl="dotbare log" \
+	dgp="dotbare push" \
+	dgst="dotbare status"
+
+# disk usage
+alias du='du -sh'
+
+# eza
+[ -x "$(command -v eza)" ] && alias \
+	l="eza --icons --group-directories-first" \
+	la="eza --icons -aa --group-directories-first" \
+	lh="eza --icons -aa --group-directories-first" \
+	ll="eza -gl --group-directories-first" \
+	lla="eza -glaa --group-directories-first" \
+	lm="eza -glA --group-directories-first | more" \
+	lr="eza --icons -R --group-directories-first" \
+	ls="eza --icons -A --group-directories-first" \
+	lsb="eza --icons -b --group-directories-first" \
+	lsby="eza --icons -B --group-directories-first" \
+	lsd="eza --icons -Dl --group-directories-first" \
+	lsda="eza --icons -aaDl --group-directories-first" \
+	lsf="eza --icons -fl" \
+	lsfa="eza --icons -aafl" \
+	lsa="eza --icons -l -s=accessed" \
+	lsaa="eza --icons -aal -s=accessed" \
+	lsc="eza --icons -l -s=created" \
+	lsca="eza --icons -aal -s=created" \
+	lse="eza --icons -l -s=extension" \
+	lsea="eza --icons -aal -s=extension" \
+	lsm="eza --icons -l -s=modified" \
+	lsma="eza --icons -aal -s=modified" \
+	lsn="eza --icons -l -s=name" \
+	lsna="eza --icons -aal -s=name" \
+	lss="eza --icons -l -s=size" \
+	lssa="eza --icons -aal -s=size" \
+	lst="eza --icons -l -s=type" \
+	lsta="eza --icons -aal -s=type" \
+	lt="eza --icons -T -L" \
+	ltd="eza --icons -TD -L" \
+	ltdr="eza --icons -TDr -L" \
+	ltr="eza --icons -Tr -L" || alias \
+	l="/usr/bin/ls -h --color=always --group-directories-first" \
+	la="/usr/bin/ls -alh --color=always --group-directories-first" \
+	ll="/usr/bin/ls -Fls --color=always --group-directories-first" \
+	lla="/usr/bin/ls -aFls --color=always --group-directories-first" \
+	lm="/usr/bin/ls -alh --color=always |more --group-directories-first" \
+	lr="/usr/bin/ls -hlR --color=always --group-directories-first" \
+	ls="/usr/bin/ls -AFh --color=always --group-directories-first" \
+	lsa="/usr/bin/ls -hlru --color=always --group-directories-first" \
+	lsc="/usr/bin/ls -hclr --color=always --group-directories-first" \
+	lsd="/usr/bin/ls -l --color=always | egrep '^d'" \
+	lsda="/usr/bin/ls -la --color=always | egrep '^d'" \
+	lse="/usr/bin/ls -BhlX --color=always --group-directories-first" \
+	lsf="/usr/bin/ls -l --color=always | egrep -v '^d'" \
+	lsfa="/usr/bin/ls -la --color=always | egrep -v '^d'" \
+	lsm="/usr/bin/ls -hlr --time=mtime --color=always --group-directories-first" \
+	lsn="/usr/bin/ls -alp --color=always --group-directories-first" \
+	lss="/usr/bin/ls -hlrS --color=always --group-directories-first" \
+	lst="/usr/bin/ls -hlrt --color=always --group-directories-first" \
+	lw="/usr/bin/ls -Ahx --color=always --group-directories-first"
+
+# fcitx5-remote
+alias fr="fcitx5-remote"
+
+# ffmpeg
+alias ffmpeg="ffmpeg -hide_banner"
+
+# greb
+alias \
+	grep="grep --color" \
+	grepw="grep -Rw --include='*'"
+
+# hugo
+alias \
+	hss="hugo server --noHTTPCache" \
+	hcl="hugo --cleanDestinationDir"
+
+# ip
+alias ip="ip -color=auto"
+
+# journal
+alias j="journalctl -xe"
+
+# jupyter
+alias \
+	ji="git clone git@github.com:jupyter/jupyter_client.git" \
+	jn="jupyter notebook"
+
+# killall
+alias ka="killall"
+
+# lf
+alias lf="lfub"
+
+# mkcd
+alias mc="mkcd"
+
+# mkdir
+alias mkdir="mkdir -pv"
+
+# move
+alias mv="mv -iv"
+
+# mysql
+alias msr="mysql -u si -p"
+
+# nvim
+alias \
+	e="$EDITOR" \
+	v="$EDITOR" \
+	nv="nvim" \
+	nts="NVIM_APPNAME=TheSiahxyz nvim" \
+	nlv="NVIM_APPNAME=LazyVim nvim" \
+	nvc="NVIM_APPNAME=NvChad nvim" \
+	snv="sudo nvim"
+
+# nxsiv
+alias nsxiv="nsxiv -p"
+
+# obsidian
+alias vo="cd $HOME/Obsidian/SI/ && nvim Dashboard.md"
+
+# open
+alias open="xdg-open"
+
+# pass
+alias potp="pass otp totp-secret"
+
+# pipewire
+alias rpi="systemctl --user restart wireplumber pipewire pipewire-pulse pipewire-jack"
+
+# ps
+alias \
+	ps="ps auxf" \
+	psg="ps auxf | grep " \
+	topcpu="/bin/ps -eo pcpu,pid,user,args | sort -k 1 -r | head -10"
+
+# python
+alias py="python3"
+
+# reflector
+alias rref="sudo reflector --verbose --latest 10 --protocol https --sort rate --save /etc/pacman.d/mirrorlist"
+
+# remove
+alias rm="rm -vI"
+
+# rsync
+alias \
+	rsc="rsync -vrazPlu" \
+	rscd="rsync -vrazPlu --delete" \
+	rscr="rsync -vrazPlu --remove-source-files"
+
+# sc-im
+alias scim="sc-im"
+
+# scp
+alias scp="scp -r"
+
+# sha1
+alias sha1="openssl sha1"
+
+# shell
+alias \
+	tobash="sudo chsh $USER -s /bin/bash && 'Now log out.'" \
+	tozsh="sudo chsh $USER -s /bin/zsh && 'Now log out.'" \
+	tofish="sudo chsh $USER -s /bin/fish && 'Now log out.'"
+
+# shellcheck
+alias shck="shellcheck --color=always"
+
+# shortcut
+alias ref="shortcuts >/dev/null; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutrc && source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/zshnameddirrc"
+
+# skype
+alias skype="skypeforlinux"
+
+# ssh
+alias \
+	gts="ssh $THESIAH"
+
+# stow
+alias stw="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/.local/bin/stw"
+
+# sudo
+alias \
+	su="sudo su -l root" \
+	smi="rm -rf *.rej *.orig; sudo make clean install"
+
+# systemctl
+alias s="systemctl"
+
+# timedatectl
+alias t="timedatectl"
+
+# tmux
+alias \
+	pktm="pkill tmux" \
+	sts="tmux source $XDG_CONFIG_HOME/tmux/tmux.conf" \
+	tma="tmux a" \
+	tmka="tmux kill-session -a" \
+	tml="tmux ls" \
+	tm="tmux" \
+	tmc="tmux new -s (pwd | sed 's/.*\///g')"
+
+# tmuxinator
+alias \
+	tid="tmuxinator delete" \
+	til="tmuxinator list" \
+	tis="tmuxinator start" \
+	tic="tmuxinator config" \
+	tio="tmuxinator obsidian" \
+	tip="tmuxinator personal" \
+	tiw="tmuxinator work" \
+	tin="tmuxinator new" \
+	ti="tmuxinator" \
+	tir="txo && txp && txw"
+
+# transmission-remote
+alias trem="transmission-remote"
+
+# trash
+alias \
+	trd="trash-rm" \
+	tre="trash-empty" \
+	trl="trash-list" \
+	trp="trash-put" \
+	trr="trash-restore"
+
+# vim
+alias vi="vim"
+
+# weather
+alias weath="less -S ${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport"
+
+# wget
+alias wget=wget --hsts-file="${XDG_CACHE_HOME:-${HOME}/.cache}/wget-hsts"
+
+# xev
+alias keys='xev -event keyboard | awk '\''/^KeyPress/,/^KeyRelease/ { if ($0 ~ /keysym/) print $0 }'\'''
+
+# youtube-viewer
+alias ytv="youtube-viewer"
+
+# zathura
+alias za="zathura"
+
+# zsh
+alias \
+	sps="source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/profile" \
+	szs="source ${XDG_CONFIG_HOME:-${HOME}/.config}/zsh/.zshrc"

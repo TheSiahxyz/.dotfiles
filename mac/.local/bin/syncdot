@@ -1,0 +1,56 @@
+#!/bin/sh
+
+# Determine the operating system name and convert it to lowercase for consistency
+if [ -f /etc/os-release ]; then
+	. /etc/os-release
+	os_name=$(echo "$NAME" | tr '[:upper:]' '[:lower:]')
+elif [ "$(uname)" = "Darwin" ]; then
+	os_name="mac"
+else
+	os_name=$(uname | tr '[:upper:]' '[:lower:]')
+fi
+
+# Define ANSI color codes for better readability in script output
+GREEN='\033[1;32m'
+BLUE='\033[1;34m'
+RED='\033[1;31m'
+NC='\033[0m' # No Color
+
+# Ensure the script exits on any error
+set -e
+
+# Navigate to the dotfiles directory, assuming this script is located within ~/.dotfiles/.bin
+cd "$(dirname "${BASH_SOURCE[0]}")"/..
+
+echo -e "${BLUE}Stashing existing changes...${NC}"
+stash_result=$(git stash push -m "sync-dotfiles: Before syncing dotfiles" 2>&1)
+needs_pop=0
+if ! echo "$stash_result" | grep -q "No local changes to save"; then
+	needs_pop=1
+fi
+
+echo -e "${BLUE}Pulling updates from dotfiles repo...${NC}"
+git pull origin main
+
+if [ $needs_pop -eq 1 ]; then
+	echo -e "${BLUE}Popping stashed changes...${NC}"
+	git stash pop
+fi
+
+# Check for merge conflicts after attempting to pop the stash
+unmerged_files=$(git diff --name-only --diff-filter=U)
+if [ -n "$unmerged_files" ]; then
+	echo -e "${RED}The following files have merge conflicts after popping the stash:${NC}"
+	printf "%s\n" "$unmerged_files"
+	exit 1
+else
+	echo -e "${GREEN}No merge conflicts detected. Proceeding with dotfiles linkage...${NC}"
+	# Ensure GNU Stow is installed
+	if ! command -v stow &>/dev/null; then
+		echo -e "${RED}GNU Stow not found. Please install GNU Stow to continue.${NC}"
+		exit 1
+	fi
+	# Run stow to ensure all new dotfiles are linked, targeting directories named after the OS
+	stow --target="$HOME" -S "$os_name" -v # Verbose output
+	echo -e "${GREEN}Dotfiles successfully linked.${NC}"
+fi
