@@ -33,10 +33,10 @@ local settings = {
 	--favorites in format { 'Path to directory, notice trailing /' }
 	--on windows use double backslash c:\\my\\directory\\
 	favorites = {
-        "/media/hdd",
-        "/media/ssd",
-        "/mnt/extra/videos",
+        "/media/storage",
+        "/mnt/second/videos",
 		"/home/si/Downloads",
+		"/home/si/Torrents/complete",
 		"/home/si/Videos",
 		"/home/si/.config/mpv/playlists",
 	},
