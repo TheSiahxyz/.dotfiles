@@ -260,9 +260,6 @@ alias skype="skypeforlinux"
 # ssh
 alias gts="ssh $THESIAH_SERVER"
 
-# stow
-alias dstw="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/default/.local/bin/stw"
-
 # sudo
 alias su="sudo su -l root"
 alias smi="rm -rf *.rej *.orig; sudo make clean install"
