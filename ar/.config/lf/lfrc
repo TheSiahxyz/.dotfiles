@@ -306,7 +306,15 @@ cmd alt-paste &{{
     if [ -n "$fs" ]; then
         lf -remote "send $id :$1; save-select"
     fi
-    lf -remote "send $id paste"
+    lf -remote "send $id paste" || {
+        printf "%s\n\t" "$fx"
+        printf "Permissions needs.\n"
+        printf "Continue in root?[y/N]"
+        read root
+        [ $root = "y" ] && {
+            sudo lf -remote "send $id paste"
+        }
+    }
     lf -remote "send clear"
     lf -remote "send $id reload"
 }}
