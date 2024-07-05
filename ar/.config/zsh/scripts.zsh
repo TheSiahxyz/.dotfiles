@@ -4,7 +4,7 @@
 ###########################################################################################
 ### --- Stow --- ###
 dstw() {
-    "${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/ar/.local/bin/stw"   
+    "${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/$(whereami)/.local/bin/stw"   
 }
 
 ###########################################################################################
@@ -397,7 +397,7 @@ mkcd() { mkdir -p "$@" && cd "$_"; }
 ### --- neovim --- ###
 # folder
 cnf() {
-    local base_dir="${XDG_DOTFILES_DIR:-$HOME/.dotfiles}/.config"     # Base directory for Neovim configs
+	local base_dir="${XDG_DOTFILES_DIR:-$HOME/.dotfiles}/$(whereami)/.config"     # Base directory for Neovim configs
     local target_dir="${XDG_CONFIG_HOME:-$HOME/.config}/nvim"             # Target directory for active Neovim config
     local target_share="${XDG_DATA_HOME:-$HOME/.local/share}/nvim"        # Neovim"s share directory
     local target_state="${XDG_STATE_HOME:-$HOME/.local/state}/nvim"       # Neovim"s state directory
