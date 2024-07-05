@@ -11,11 +11,11 @@ web_path="${THESIAH_WWW:-${HOME}/Private/git/THESIAH}"
 USER_HOME=$(eval echo ~"$USER")
 
 # targets
-bash_path="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/.config/bash"
-shell_path="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/.config/shell"
-vim_path="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/.config/vim"
+bash_path="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/ar/.config/bash"
+shell_path="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/ar/.config/shell"
+vim_path="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/ar/.config/vim"
 thesiah_path="$web_path/public"
-lf_path="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/.config/lf"
+lf_path="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/ar/.config/lf"
 
 error() {
 	printf "%s\n" "$1" >&2
