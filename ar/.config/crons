@@ -4,5 +4,6 @@
 0 0 * * * NVIM_APPNAME=Starter nvim --headless "+Lazy! sync" +qa
 0 * * * * NVIM_APPNAME=LazyVim nvim --headless "+Lazy! sync" +qa
 0 0 * * * NVIM_APPNAME=NvChad nvim --headless "+Lazy! sync" +qa
+0 0 * * * NVIM_APPNAME=TheSiahxyz nvim --headless "+Lazy! sync" +qa
 0 * * * * /usr/bin/nvim --headless "+Lazy! sync" +qa
 @daily /usr/bin/trash-empty 30
