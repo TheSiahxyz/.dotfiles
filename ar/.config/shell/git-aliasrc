@@ -104,7 +104,7 @@ compdef _git ggpnp=git-checkout
 
 alias ggpur='ggu'
 alias g='git'
-alias gaa='git add --all'
+! pidof transmission-daemon >/dev/null && alias gaa='git add --all' || alias gaa='echo "Turn off transmission-daemon first!"'
 alias gapa='git add --patch'
 alias gau='git add --update'
 alias gav='git add --verbose'
