@@ -52,7 +52,8 @@ attempt_mount() {
         FNEK_SIG=$ECRYPTFS_SIG
         PASSPHRASE=$(pass show encryption/ecryptfs)
         [ -z "$PASSPHRASE" ] && { notify-send "❌ Failed to retrieve passphrase."; exit 1; }
-        mount_luks && mount_encrypted "$1" "$2" && notify-send "📂 Unlocked: $3" || notify-send "⛔ Failed to unlock: $3"
+        mount_luks
+        mount_encrypted "$1" "$2" && notify-send "📂 Unlocked: $3" || notify-send "⛔ Failed to unlock: $3"
     fi
 }
 
