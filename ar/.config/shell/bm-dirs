@@ -54,7 +54,7 @@ Hmf             /media/flash
 Hmh             /media/hdd
 Hms             /media/ssd
 Hmt             /mnt
-Hmv             /media/win10/Videos
+Hmv             /media/storage/G
 Hmw             /usr/share/mutt-wizard
 Hrr             /run/runit/service
 Hsc             /mnt/second
@@ -62,6 +62,7 @@ Hsm             /etc/samba
 Hsv             /etc/runit/sv
 Hvt             /media/Ventoy
 Hvv             /mnt/second/videos
+Hwv             /media/win10/Videos
 pae             ${PASSWORD_STORE_DIR:-$XDG_DATA_HOME/.password-store}/exported_keys
 pah             ${PASSWORD_STORE_DIR:-$XDG_DATA_HOME/.password-store}/ssh
 pas             ${PASSWORD_STORE_DIR:-$XDG_DATA_HOME/.password-store}

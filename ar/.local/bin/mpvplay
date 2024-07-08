@@ -49,9 +49,9 @@ list_and_play() {
 	case "$CHOICE" in
         "Enter filenames")
             search_term=$(echo | dmenu -i -p "File names:")
-            [ -z "$search_term" ] && return
+            [ -z "$search_term" ] && exit
             files=$(find "$directory" -type f \( -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.mov" -o -iname "*.flv" -o -iname "*.wmv" -o -iname "*.webm" -o -iname "*.mpeg" -o -iname "*.mpg" \) -iname "*$search_term*")
-            [ -z "$files" ] && return
+            [ -z "$files" ] && exit
             tmpplaylist=$(mktemp /tmp/mpv_playlist.XXXXXX)
             echo "$files" | while read -r file; do
                 echo "$file"
