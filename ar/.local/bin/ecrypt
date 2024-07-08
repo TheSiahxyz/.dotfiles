@@ -4,7 +4,7 @@ mount_luks() {
     if ! mount | grep -q " /mnt/second "; then
         # Check for drives.
         lsblkoutput="$(sudo lsblk -rpo "uuid,name,type,size,label,mountpoint,fstype")"
-        [ -n "$(echo $lsblkoutput | grep 'second')" ] || return
+        [ -z "$(echo $lsblkoutput | grep 'second')" ] && return
         # Get all LUKS drives
         allluks="$(echo "$lsblkoutput" | grep crypto_LUKS)"
         # Get a list of the LUKS drive UUIDs already decrypted.
