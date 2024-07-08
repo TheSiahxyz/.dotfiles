@@ -89,7 +89,10 @@ alias du='du -sh'
 
 # # ecryptfs
 # alias emt="echo "$(pass show encryption/ecryptfs)" | sudo mount -t ecryptfs "$1" "$2" \
-#     -o ecryptfs_cipher=aes,ecryptfs_key_bytes=32,ecryptfs_passthrough=no,ecryptfs_enable_filename_crypto=yes,ecryptfs_sig="$(sudo cat /root/.ecryptfs/sig-cache.txt)",ecryptfs_fnek_sig="$(sudo cat /root/.ecryptfs/sig-cache.txt)",passwd="$(printf '%s' "$(pass show encryption/ecryptfs)")""
+#     -o ecryptfs_cipher=aes,ecryptfs_key_bytes=32,ecryptfs_passthrough=no,ecryptfs_enable_filename_crypto=yes, \
+#     ecryptfs_sig="$(sudo cat /root/.ecryptfs/sig-cache.txt)", \
+#     ecryptfs_fnek_sig="$(sudo cat /root/.ecryptfs/sig-cache.txt)", \
+#     passwd="$(printf '%s' "$(pass show encryption/ecryptfs)")""
 
 # eza
 [ -x "$(command -v eza)" ] && { 

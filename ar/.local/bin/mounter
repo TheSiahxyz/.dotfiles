@@ -11,6 +11,33 @@ IFS='
 # Function for escaping cell-phone names.
 escape() { echo "$@" | iconv -cf UTF-8 -t ASCII//TRANSLIT | tr -d '[:punct:]' | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | sed "s/-\+/-/g;s/\(^-\|-\$\)//g"; }
 
+# Function for prompting user for a mountpoint.
+getmount() {
+	[ -z "$1" ] && mp="$(find /media /mnt -mindepth 1 -maxdepth 1 -type d 2>/dev/null | dmenu -i -p "Mount this drive where?")" || mp="$1"
+	test -n "$mp"
+	if [ ! -d "$mp" ]; then
+		mkdiryn=$(printf "No\\nYes" | dmenu -i -p "$mp does not exist. Create it?")
+		[ "$mkdiryn" = "Yes" ] && (mkdir -p "$mp" 2>/dev/null || sudo -A mkdir -p "$mp")
+	fi
+}
+
+attemptmount() {
+	# Attempt to mount without a mountpoint, to see if drive is in fstab.
+    mplabel=$(sudo lsblk -no "label" $chosen)
+    [ -n "$mplabel" ] || return
+    if [ ! -d "/media/$mplabel" ] && [ ! -d "/mnt/$mplabel" ]; then
+        getmount "/media/$mplabel" && sudo -A mount "$chosen" "/media/$mplabel" || return 1
+    elif [ -d "/media/$mplabel" ] && [ ! -d "/mnt/$mplabel" ]; then
+        sudo -A mount "$chosen" /media/$mplabel || return 1
+    elif [ -d "/mnt/$mplabel" ]; then 
+        getmount "/mnt/$mplabel" && sudo -A mount "$chosen" "/mnt/$mplabel" || return 1
+    else
+        sudo -A mount "$chosen" || return 1
+    fi
+	notify-send "💾 Drive Mounted." "$chosen mounted."
+	exit
+}
+
 # Check for phones.
 phones="$(simple-mtpfs -l 2>/dev/null | sed "s/^/📱/")"
 mountedphones="$(grep "simple-mtpfs" /etc/mtab)"
@@ -42,6 +69,7 @@ unopenedluks="$(for drive in $allluks; do
 	echo "🔒 $drive"
 done | filter)"
 
+echo "$unopenedluks"
 # Get all normal, non-encrypted or decrypted partitions that are not mounted.
 normalparts="$(echo "$lsblkoutput" | grep -v crypto_LUKS | grep 'part\|rom\|crypt' | sed "s/^/💾 /" | filter)"
 
@@ -57,33 +85,6 @@ test -n "$alldrives"
 
 # Feed all found drives to dmenu and get user choice.
 chosen="$(echo "$alldrives" | dmenu -p "Mount which drive?" -i)"
-
-# Function for prompting user for a mountpoint.
-getmount() {
-	[ -z "$1" ] && mp="$(find /media /mnt -mindepth 1 -maxdepth 1 -type d 2>/dev/null | dmenu -i -p "Mount this drive where?")" || mp="$1"
-	test -n "$mp"
-	if [ ! -d "$mp" ]; then
-		mkdiryn=$(printf "No\\nYes" | dmenu -i -p "$mp does not exist. Create it?")
-		[ "$mkdiryn" = "Yes" ] && (mkdir -p "$mp" 2>/dev/null || sudo -A mkdir -p "$mp")
-	fi
-}
-
-attemptmount() {
-	# Attempt to mount without a mountpoint, to see if drive is in fstab.
-    mplabel=$(sudo lsblk -no "label" $chosen)
-    [ -n "$mplabel" ] || return
-    if [ ! -d "/media/$mplabel" ] && [ ! -d "/mnt/$mplabel" ]; then
-        getmount "/media/$mplabel" && sudo -A mount "$chosen" "/media/$mplabel" || return 1
-    elif [ -d "/media/$mplabel" ] && [ ! -d "/mnt/$mplabel" ]; then
-        sudo -A mount "$chosen" /media/$mplabel || return 1
-    elif [ -d "/mnt/$mplabel" ]; then 
-        getmount "/mnt/$mplabel" && sudo -A mount "$chosen" "/mnt/$mplabel" || return 1
-    else
-        sudo -A mount "$chosen" || return 1
-    fi
-	notify-send "💾 Drive Mounted." "$chosen mounted."
-	exit
-}
 
 case "$chosen" in
     💾*)

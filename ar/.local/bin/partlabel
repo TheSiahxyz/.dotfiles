@@ -8,7 +8,7 @@ label_ntfs() { sudo ntfslabel --force --quiet "$1" "$2" ;}
 label_btrfs() { sudo btrfs filesystem label "$1" "$2" ;}
 label_luks() { sudo cryptsetup config "$1" --label "$2" ;}
 label_parted() { sudo parted "$1" name "$2" "$3" ;}
-verify_label() { sudo lsblk -o NAME,LABEL ;}
+print_label() { sudo lsblk -o NAME,LABEL ;}
 
 echo "Partition Labeling Script"
 for cmd in blkid e2label fatlabel ntfslabel btrfs parted lsblk cryptsetup; do
@@ -45,7 +45,7 @@ for cmd in blkid e2label fatlabel ntfslabel btrfs parted lsblk cryptsetup; do
     fi
 done
 
-lsblk
+print_label
 echo -n "\nEnter the partition (e.g., /dev/sda1): "
 read partition
 
@@ -80,5 +80,5 @@ case "$fs_type" in
 esac
 
 echo "Partition labeled successfully. Verifying..."
-verify_label
+print_label
 echo "Done."
