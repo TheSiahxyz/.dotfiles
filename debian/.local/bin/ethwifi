@@ -1,0 +1,16 @@
+#!/bin/sh
+
+check_ethernet() {
+    interfaces=$(ip link | awk '/^[0-9]+: e/ {print substr($2, 1, length($2)-1)}')
+    for iface in $interfaces; do
+        ip link show "$iface" | grep -q 'state UP' && return 0
+    done
+    return 1
+}
+
+check_ethernet && nmcli radio wifi off && notify-send "📡 wifi: OFF" || {
+    nmcli radio wifi on
+    notify-send "📡 wifi: ON"
+}
+
+pkill -RTMIN+4 "${STATUSBAR:-dwmblocks}"

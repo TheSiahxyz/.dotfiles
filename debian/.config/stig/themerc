@@ -1,0 +1,600 @@
+# Color names: default, #1E1E2E, #CDD6F4, #45475A, #BAC2DE, #9D0006,
+# #CC241D, #40A02B, #A6DA95, #2A84D2, #89B4FA, #F38BA8,
+# #F5C2E7, #179299, #94E2D5, #B57614, #F9E2AF
+#
+# Attribute names: bold, underline, standout
+
+cli             #1E1E2E      on #BAC2DE
+prompt          #1E1E2E,bold on #F9E2AF
+find.highlight  #1E1E2E on #F9E2AF
+
+tabs.unfocused                #CDD6F4   on #1E1E2E
+tabs.focused                  #1E1E2E   on #CDD6F4
+tabs.torrentlist.unfocused    #A6DA95   on #45475A
+tabs.torrentlist.focused      #1E1E2E   on #179299
+tabs.torrentdetails.unfocused #89B4FA   on #45475A
+tabs.torrentdetails.focused   #1E1E2E   on #89B4FA
+tabs.filelist.unfocused       #F5C2E7   on #45475A
+tabs.filelist.focused         #1E1E2E   on #F38BA8
+tabs.peerlist.unfocused       #94E2D5   on #45475A
+tabs.peerlist.focused         #1E1E2E   on #40A02B
+tabs.trackerlist.unfocused    #CDD6F4   on #45475A
+tabs.trackerlist.focused      #1E1E2E   on #BAC2DE
+tabs.settinglist.unfocused    #F9E2AF   on #2A84D2
+tabs.settinglist.focused      #2A84D2   on #F9E2AF
+tabs.help.unfocused           #A6DA95   on #2A84D2
+tabs.help.focused             #2A84D2   on #A6DA95
+
+$topbar_bg = #2A84D2
+topbar                    #BAC2DE   on $topbar_bg
+topbar.host.connected     #CDD6F4   on $topbar_bg
+topbar.host.connecting    #1E1E2E   on #F5C2E7
+topbar.host.disconnected  #1E1E2E   on #CC241D
+topbar.help.key           #94E2D5   on $topbar_bg
+topbar.help.equals        #94E2D5   on $topbar_bg
+topbar.help.label         #94E2D5   on $topbar_bg
+topbar.help.space         #94E2D5   on $topbar_bg
+
+$bottombar_bg = #45475A
+bottombar                             #BAC2DE       on $bottombar_bg
+bottombar.important                   #CC241D,bold  on $bottombar_bg
+bottombar.marked                      #1E1E2E,bold  on #F9E2AF
+bottombar.bandwidth.up                #40A02B       on $bottombar_bg
+bottombar.bandwidth.up.highlighted    #A6DA95       on $bottombar_bg
+bottombar.bandwidth.down              #179299       on $bottombar_bg
+bottombar.bandwidth.down.highlighted  #94E2D5       on $bottombar_bg
+
+$log_bg = #45475A
+log                        #BAC2DE      on $log_bg
+log.timestamp              #179299      on $log_bg
+log.info                   #A6DA95      on $log_bg
+log.error                  #CC241D,bold on $log_bg
+log.debug                  #F9E2AF      on $log_bg
+log.dupecount              #94E2D5      on $log_bg
+log.scrollbar              #BAC2DE      on #45475A
+
+$keychains_bg = #1E1E2E
+keychains              #BAC2DE  on $keychains_bg
+keychains.header       #BAC2DE  on #45475A
+keychains.keys         #BAC2DE  on $keychains_bg
+keychains.keys.next    #F9E2AF  on $keychains_bg
+keychains.action       #CDD6F4  on $keychains_bg
+keychains.description  #CDD6F4  on $keychains_bg
+
+$completion_bg = #45475A
+completion               #BAC2DE                on $completion_bg
+completion.category      #BAC2DE,bold,underline on $completion_bg
+completion.item          #BAC2DE                on $completion_bg
+completion.item.focused  #1E1E2E,bold           on #F9E2AF
+completion.scrollbar     #BAC2DE                on $completion_bg
+
+
+helptext            #BAC2DE on #1E1E2E
+helptext.scrollbar  #BAC2DE on #45475A
+
+
+$tlist_bg.uf = #1E1E2E
+$tlist_bg.f  = #45475A
+torrentlist                                        default              on $tlist_bg.uf
+torrentlist.focused                                default              on $tlist_bg.f
+torrentlist.header                                 #BAC2DE,underline    on $tlist_bg.uf
+torrentlist.scrollbar                              #BAC2DE              on #45475A
+
+$id_fg = #CDD6F4
+torrentlist.id.header                              $id_fg,underline on $tlist_bg.uf
+torrentlist.id.unfocused                           $id_fg           on $tlist_bg.uf
+torrentlist.id.focused                             $id_fg           on $tlist_bg.f
+
+$downloaded_fg = #179299
+$downloaded_hl = #94E2D5
+torrentlist.downloaded.header                      $downloaded_fg,underline on $tlist_bg.uf
+torrentlist.downloaded.unfocused                   $downloaded_fg           on $tlist_bg.uf
+torrentlist.downloaded.focused                     $downloaded_fg           on $tlist_bg.f
+torrentlist.downloaded.highlighted.unfocused       $downloaded_hl           on $tlist_bg.uf
+torrentlist.downloaded.highlighted.focused         $downloaded_hl           on $tlist_bg.f
+
+$uploaded_fg = #40A02B
+$uploaded_hl = #A6DA95
+torrentlist.uploaded.header                        $uploaded_fg,underline   on $tlist_bg.uf
+torrentlist.uploaded.unfocused                     $uploaded_fg             on $tlist_bg.uf
+torrentlist.uploaded.focused                       $uploaded_fg             on $tlist_bg.f
+torrentlist.uploaded.highlighted.unfocused         $uploaded_hl             on $tlist_bg.uf
+torrentlist.uploaded.highlighted.focused           $uploaded_hl             on $tlist_bg.f
+
+$available_fg = #2A84D2
+$available_hl = #89B4FA
+torrentlist.available.header                       $available_fg,underline   on $tlist_bg.uf
+torrentlist.available.unfocused                    $available_fg             on $tlist_bg.uf
+torrentlist.available.focused                      $available_fg             on $tlist_bg.f
+torrentlist.available.highlighted.unfocused        $available_hl             on $tlist_bg.uf
+torrentlist.available.highlighted.focused          $available_hl             on $tlist_bg.f
+
+$marked_fg = #CDD6F4
+torrentlist.marked.header                          $marked_fg,underline on $tlist_bg.uf
+torrentlist.marked.unfocused                       $marked_fg           on $tlist_bg.uf
+torrentlist.marked.focused                         $marked_fg           on $tlist_bg.f
+
+$path_fg = #BAC2DE
+torrentlist.path.header                            $path_fg,underline on $tlist_bg.uf
+torrentlist.path.unfocused                         $path_fg           on $tlist_bg.uf
+torrentlist.path.focused                           $path_fg           on $tlist_bg.f
+
+$peers_fg = #BAC2DE
+$peers_hl = #CDD6F4
+torrentlist.peers.header                           $peers_fg,underline on $tlist_bg.uf
+torrentlist.peers.unfocused                        $peers_fg           on $tlist_bg.uf
+torrentlist.peers.focused                          $peers_fg           on $tlist_bg.f
+torrentlist.peers.highlighted.unfocused            $peers_hl           on $tlist_bg.uf
+torrentlist.peers.highlighted.focused              $peers_hl           on $tlist_bg.f
+
+$seeds_fg = #BAC2DE
+$seeds_hl = #CDD6F4
+torrentlist.seeds.header                           $seeds_fg,underline on $tlist_bg.uf
+torrentlist.seeds.unfocused                        $seeds_fg           on $tlist_bg.uf
+torrentlist.seeds.focused                          $seeds_fg           on $tlist_bg.f
+torrentlist.seeds.highlighted.unfocused            $seeds_hl           on $tlist_bg.uf
+torrentlist.seeds.highlighted.focused              $seeds_hl           on $tlist_bg.f
+
+$%downloaded_fg = #2A84D2
+$%downloaded_hl = #89B4FA
+torrentlist.%downloaded.header                     $%downloaded_fg,underline on $tlist_bg.uf
+torrentlist.%downloaded.unfocused                  $%downloaded_fg           on $tlist_bg.uf
+torrentlist.%downloaded.focused                    $%downloaded_fg           on $tlist_bg.f
+torrentlist.%downloaded.highlighted.unfocused      $%downloaded_hl           on $tlist_bg.uf
+torrentlist.%downloaded.highlighted.focused        $%downloaded_hl           on $tlist_bg.f
+
+$%available_fg = #2A84D2
+$%available_hl = #89B4FA
+torrentlist.%available.header                      $%available_fg,underline on $tlist_bg.uf
+torrentlist.%available.unfocused                   $%available_fg           on $tlist_bg.uf
+torrentlist.%available.focused                     $%available_fg           on $tlist_bg.f
+torrentlist.%available.highlighted.unfocused       $%available_hl           on $tlist_bg.uf
+torrentlist.%available.highlighted.focused         $%available_hl           on $tlist_bg.f
+
+$rate-down_fg = #179299
+$rate-down_hl = #94E2D5
+torrentlist.rate-down.header                       $rate-down_fg,underline on $tlist_bg.uf
+torrentlist.rate-down.unfocused                    $rate-down_fg           on $tlist_bg.uf
+torrentlist.rate-down.focused                      $rate-down_fg           on $tlist_bg.f
+torrentlist.rate-down.highlighted.unfocused        $rate-down_hl           on $tlist_bg.uf
+torrentlist.rate-down.highlighted.focused          $rate-down_hl           on $tlist_bg.f
+
+$rate-up_fg = #40A02B
+$rate-up_hl = #A6DA95
+torrentlist.rate-up.header                         $rate-up_fg,underline on $tlist_bg.uf
+torrentlist.rate-up.unfocused                      $rate-up_fg           on $tlist_bg.uf
+torrentlist.rate-up.focused                        $rate-up_fg           on $tlist_bg.f
+torrentlist.rate-up.highlighted.unfocused          $rate-up_hl           on $tlist_bg.uf
+torrentlist.rate-up.highlighted.focused            $rate-up_hl           on $tlist_bg.f
+
+$limit-rate-down_fg = #179299
+$limit-rate-down_hl = #94E2D5
+torrentlist.limit-rate-down.header                 $limit-rate-down_fg,underline on $tlist_bg.uf
+torrentlist.limit-rate-down.unfocused              $limit-rate-down_fg           on $tlist_bg.uf
+torrentlist.limit-rate-down.focused                $limit-rate-down_fg           on $tlist_bg.f
+torrentlist.limit-rate-down.highlighted.unfocused  $limit-rate-down_hl           on $tlist_bg.uf
+torrentlist.limit-rate-down.highlighted.focused    $limit-rate-down_hl           on $tlist_bg.f
+
+$limit-rate-up_fg = #40A02B
+$limit-rate-up_hl = #A6DA95
+torrentlist.limit-rate-up.header                   $limit-rate-up_fg,underline on $tlist_bg.uf
+torrentlist.limit-rate-up.unfocused                $limit-rate-up_fg           on $tlist_bg.uf
+torrentlist.limit-rate-up.focused                  $limit-rate-up_fg           on $tlist_bg.f
+torrentlist.limit-rate-up.highlighted.unfocused    $limit-rate-up_hl           on $tlist_bg.uf
+torrentlist.limit-rate-up.highlighted.focused      $limit-rate-up_hl           on $tlist_bg.f
+
+$ratio_fg = #2A84D2
+$ratio_hl = #89B4FA
+torrentlist.ratio.header                           $ratio_fg,underline on $tlist_bg.uf
+torrentlist.ratio.unfocused                        $ratio_fg           on $tlist_bg.uf
+torrentlist.ratio.focused                          $ratio_fg           on $tlist_bg.f
+torrentlist.ratio.highlighted.unfocused            $ratio_hl           on $tlist_bg.uf
+torrentlist.ratio.highlighted.focused              $ratio_hl           on $tlist_bg.f
+
+$size_fg = #F38BA8
+torrentlist.size.header                            $size_fg,underline on $tlist_bg.uf
+torrentlist.size.unfocused                         $size_fg           on $tlist_bg.uf
+torrentlist.size.focused                           $size_fg           on $tlist_bg.f
+
+$tracker_fg = #BAC2DE
+torrentlist.tracker.header                         $tracker_fg,underline on $tlist_bg.uf
+torrentlist.tracker.unfocused                      $tracker_fg           on $tlist_bg.uf
+torrentlist.tracker.focused                        $tracker_fg           on $tlist_bg.f
+
+$error_fg = #CC241D
+torrentlist.error.header                           $error_fg,underline on $tlist_bg.uf
+torrentlist.error.unfocused                        $error_fg           on $tlist_bg.uf
+torrentlist.error.focused                          $error_fg           on $tlist_bg.f
+
+$added_fg = #B57614
+torrentlist.added.header                           $added_fg,underline on $tlist_bg.uf
+torrentlist.added.unfocused                        $added_fg           on $tlist_bg.uf
+torrentlist.added.focused                          $added_fg           on $tlist_bg.f
+
+$activity_fg = #B57614
+torrentlist.activity.header                        $activity_fg,underline on $tlist_bg.uf
+torrentlist.activity.unfocused                     $activity_fg           on $tlist_bg.uf
+torrentlist.activity.focused                       $activity_fg           on $tlist_bg.f
+
+$created_fg = #B57614
+torrentlist.created.header                         $created_fg,underline on $tlist_bg.uf
+torrentlist.created.unfocused                      $created_fg           on $tlist_bg.uf
+torrentlist.created.focused                        $created_fg           on $tlist_bg.f
+
+$completed_fg = #B57614
+$completed_hl = #F9E2AF
+torrentlist.completed.header                       $completed_fg,underline on $tlist_bg.uf
+torrentlist.completed.unfocused                    $completed_fg           on $tlist_bg.uf
+torrentlist.completed.focused                      $completed_fg           on $tlist_bg.f
+torrentlist.completed.highlighted.unfocused        $completed_hl           on $tlist_bg.uf
+torrentlist.completed.highlighted.focused          $completed_hl           on $tlist_bg.f
+
+$eta_fg = #B57614
+$eta_hl = #F9E2AF
+torrentlist.eta.header                             $eta_fg,underline on $tlist_bg.uf
+torrentlist.eta.unfocused                          $eta_fg           on $tlist_bg.uf
+torrentlist.eta.focused                            $eta_fg           on $tlist_bg.f
+torrentlist.eta.highlighted.unfocused              $eta_hl           on $tlist_bg.uf
+torrentlist.eta.highlighted.focused                $eta_hl           on $tlist_bg.f
+
+$started_fg = #B57614
+torrentlist.started.header                         $started_fg,underline on $tlist_bg.uf
+torrentlist.started.unfocused                      $started_fg           on $tlist_bg.uf
+torrentlist.started.focused                        $started_fg           on $tlist_bg.f
+
+
+$status.idle_fg        = #BAC2DE
+$status.downloading_fg = #94E2D5
+$status.uploading_fg   = #40A02B
+$status.connected_fg   = #F38BA8
+$status.seeding_fg     = #BAC2DE
+$status.stopped_fg     = #2A84D2
+$status.queued_fg      = #B57614
+$status.isolated_fg    = #9D0006
+$status.verifying_fg   = #F9E2AF
+$status.discovering_fg = #89B4FA
+
+torrentlist.status.header                   $status.idle_fg,underline on $tlist_bg.uf
+
+torrentlist.status.idle.unfocused           $status.idle_fg        on $tlist_bg.uf
+torrentlist.status.idle.focused             $status.idle_fg        on $tlist_bg.f
+
+torrentlist.status.uploading.unfocused      $status.uploading_fg   on $tlist_bg.uf
+torrentlist.status.uploading.focused        $status.uploading_fg   on $tlist_bg.f
+
+torrentlist.status.downloading.unfocused    $status.downloading_fg on $tlist_bg.uf
+torrentlist.status.downloading.focused      $status.downloading_fg on $tlist_bg.f
+
+torrentlist.status.connected.unfocused      $status.connected_fg   on $tlist_bg.uf
+torrentlist.status.connected.focused        $status.connected_fg   on $tlist_bg.f
+
+torrentlist.status.seeding.unfocused        $status.seeding_fg     on $tlist_bg.uf
+torrentlist.status.seeding.focused          $status.seeding_fg     on $tlist_bg.f
+
+torrentlist.status.stopped.unfocused        $status.stopped_fg     on $tlist_bg.uf
+torrentlist.status.stopped.focused          $status.stopped_fg     on $tlist_bg.f
+
+torrentlist.status.isolated.unfocused       $status.isolated_fg    on $tlist_bg.uf
+torrentlist.status.isolated.focused         $status.isolated_fg    on $tlist_bg.f
+
+torrentlist.status.queued.unfocused         $status.queued_fg      on $tlist_bg.uf
+torrentlist.status.queued.focused           $status.queued_fg      on $tlist_bg.f
+
+torrentlist.status.verifying.unfocused      $status.verifying_fg   on $tlist_bg.uf
+torrentlist.status.verifying.focused        $status.verifying_fg   on $tlist_bg.f
+
+torrentlist.status.discovering.unfocused    $status.discovering_fg on $tlist_bg.uf
+torrentlist.status.discovering.focused      $status.discovering_fg on $tlist_bg.f
+
+
+$name.idle_fg = $status.idle_fg
+torrentlist.name.header                            $name.idle_fg,underline on $tlist_bg.uf
+torrentlist.name.idle.progress1.unfocused          $name.idle_fg,underline on $tlist_bg.uf
+torrentlist.name.idle.progress1.focused            $name.idle_fg,underline on $tlist_bg.f
+torrentlist.name.idle.progress2.unfocused          $name.idle_fg           on $tlist_bg.uf
+torrentlist.name.idle.progress2.focused            $name.idle_fg           on $tlist_bg.f
+torrentlist.name.idle.complete.unfocused           $name.idle_fg           on $tlist_bg.uf
+torrentlist.name.idle.complete.focused             $name.idle_fg           on $tlist_bg.f
+
+$name.seeding_fg = $status.seeding_fg
+torrentlist.name.seeding.progress1.unfocused       $name.seeding_fg,underline on $tlist_bg.uf
+torrentlist.name.seeding.progress1.focused         $name.seeding_fg,underline on $tlist_bg.f
+torrentlist.name.seeding.progress2.unfocused       $name.seeding_fg           on $tlist_bg.uf
+torrentlist.name.seeding.progress2.focused         $name.seeding_fg           on $tlist_bg.f
+torrentlist.name.seeding.complete.unfocused        $name.seeding_fg           on $tlist_bg.uf
+torrentlist.name.seeding.complete.focused          $name.seeding_fg           on $tlist_bg.f
+
+$name.uploading_fg = $status.uploading_fg
+torrentlist.name.uploading.progress1.unfocused     $name.uploading_fg,underline on $tlist_bg.uf
+torrentlist.name.uploading.progress1.focused       $name.uploading_fg,underline on $tlist_bg.f
+torrentlist.name.uploading.progress2.unfocused     $name.uploading_fg           on $tlist_bg.uf
+torrentlist.name.uploading.progress2.focused       $name.uploading_fg           on $tlist_bg.f
+torrentlist.name.uploading.complete.unfocused      $name.uploading_fg           on $tlist_bg.uf
+torrentlist.name.uploading.complete.focused        $name.uploading_fg           on $tlist_bg.f
+
+$name.downloading_fg = $status.downloading_fg
+torrentlist.name.downloading.progress1.unfocused   $name.downloading_fg,underline on $tlist_bg.uf
+torrentlist.name.downloading.progress1.focused     $name.downloading_fg,underline on $tlist_bg.f
+torrentlist.name.downloading.progress2.unfocused   $name.downloading_fg           on $tlist_bg.uf
+torrentlist.name.downloading.progress2.focused     $name.downloading_fg           on $tlist_bg.f
+torrentlist.name.downloading.complete.unfocused    $name.downloading_fg           on $tlist_bg.uf
+torrentlist.name.downloading.complete.focused      $name.downloading_fg           on $tlist_bg.f
+
+$name.isolated_fg = $status.isolated_fg
+torrentlist.name.isolated.progress1.unfocused      $name.isolated_fg,underline on $tlist_bg.uf
+torrentlist.name.isolated.progress1.focused        $name.isolated_fg,underline on $tlist_bg.f
+torrentlist.name.isolated.progress2.unfocused      $name.isolated_fg           on $tlist_bg.uf
+torrentlist.name.isolated.progress2.focused        $name.isolated_fg           on $tlist_bg.f
+torrentlist.name.isolated.complete.unfocused       $name.isolated_fg           on $tlist_bg.uf
+torrentlist.name.isolated.complete.focused         $name.isolated_fg           on $tlist_bg.f
+
+$name.connected_fg = $status.connected_fg
+torrentlist.name.connected.progress1.unfocused     $name.connected_fg,underline on $tlist_bg.uf
+torrentlist.name.connected.progress1.focused       $name.connected_fg,underline on $tlist_bg.f
+torrentlist.name.connected.progress2.unfocused     $name.connected_fg           on $tlist_bg.uf
+torrentlist.name.connected.progress2.focused       $name.connected_fg           on $tlist_bg.f
+torrentlist.name.connected.complete.unfocused      $name.connected_fg           on $tlist_bg.uf
+torrentlist.name.connected.complete.focused        $name.connected_fg           on $tlist_bg.f
+
+$name.queued_fg = $status.queued_fg
+torrentlist.name.queued.progress1.unfocused        $name.queued_fg,underline on $tlist_bg.uf
+torrentlist.name.queued.progress1.focused          $name.queued_fg,underline on $tlist_bg.f
+torrentlist.name.queued.progress2.unfocused        $name.queued_fg           on $tlist_bg.uf
+torrentlist.name.queued.progress2.focused          $name.queued_fg           on $tlist_bg.f
+torrentlist.name.queued.complete.unfocused         $name.queued_fg           on $tlist_bg.uf
+torrentlist.name.queued.complete.focused           $name.queued_fg           on $tlist_bg.f
+
+$name.stopped_fg = $status.stopped_fg
+torrentlist.name.stopped.progress1.unfocused       $name.stopped_fg,underline on $tlist_bg.uf
+torrentlist.name.stopped.progress1.focused         $name.stopped_fg,underline on $tlist_bg.f
+torrentlist.name.stopped.progress2.unfocused       $name.stopped_fg           on $tlist_bg.uf
+torrentlist.name.stopped.progress2.focused         $name.stopped_fg           on $tlist_bg.f
+torrentlist.name.stopped.complete.unfocused        $name.stopped_fg           on $tlist_bg.uf
+torrentlist.name.stopped.complete.focused          $name.stopped_fg           on $tlist_bg.f
+
+$name.verifying_fg = $status.verifying_fg
+torrentlist.name.verifying.progress1.unfocused     $name.verifying_fg,underline on $tlist_bg.uf
+torrentlist.name.verifying.progress1.focused       $name.verifying_fg,underline on $tlist_bg.f
+torrentlist.name.verifying.progress2.unfocused     $name.verifying_fg           on $tlist_bg.uf
+torrentlist.name.verifying.progress2.focused       $name.verifying_fg           on $tlist_bg.f
+torrentlist.name.verifying.complete.unfocused      $name.verifying_fg           on $tlist_bg.uf
+torrentlist.name.verifying.complete.focused        $name.verifying_fg           on $tlist_bg.f
+
+$name.discovering_fg = $status.discovering_fg
+torrentlist.name.discovering.progress1.unfocused   $name.discovering_fg,underline on $tlist_bg.uf
+torrentlist.name.discovering.progress1.focused     $name.discovering_fg,underline on $tlist_bg.f
+torrentlist.name.discovering.progress2.unfocused   $name.discovering_fg           on $tlist_bg.uf
+torrentlist.name.discovering.progress2.focused     $name.discovering_fg           on $tlist_bg.f
+torrentlist.name.discovering.complete.unfocused    $name.discovering_fg           on $tlist_bg.uf
+torrentlist.name.discovering.complete.focused      $name.discovering_fg           on $tlist_bg.f
+
+
+torrentdetails            #BAC2DE   on #1E1E2E
+torrentdetails.error      #CC241D   on #1E1E2E
+torrentdetails.scrollbar  #BAC2DE   on #45475A
+
+
+$flist_bg.uf = #1E1E2E
+$flist_bg.f  = #45475A
+filelist                                   default              on $flist_bg.uf
+filelist.focused                           default              on $flist_bg.f
+filelist.header                            #BAC2DE,underline    on $flist_bg.uf
+filelist.scrollbar                         #BAC2DE              on #45475A
+
+$marked_fg = #CDD6F4
+filelist.marked.header                     $marked_fg,underline on $flist_bg.uf
+filelist.marked.unfocused                  $marked_fg           on $flist_bg.uf
+filelist.marked.focused                    $marked_fg           on $flist_bg.f
+
+$file_fg = #BAC2DE
+$folder_fg = #CDD6F4
+filelist.name.header                       #BAC2DE,underline    on $flist_bg.uf
+filelist.name.file.unfocused               $file_fg             on $flist_bg.uf
+filelist.name.file.focused                 $file_fg             on $flist_bg.f
+filelist.name.folder.unfocused             $folder_fg           on $flist_bg.uf
+filelist.name.folder.focused               $folder_fg           on $flist_bg.f
+
+$size_fg = #F38BA8
+filelist.size.header                       $size_fg,underline on $flist_bg.uf
+filelist.size.unfocused                    $size_fg           on $flist_bg.uf
+filelist.size.focused                      $size_fg           on $flist_bg.f
+
+$downloaded_fg = #179299
+$downloaded_hl = #94E2D5
+filelist.downloaded.header                 $downloaded_fg,underline on $flist_bg.uf
+filelist.downloaded.unfocused              $downloaded_fg           on $flist_bg.uf
+filelist.downloaded.focused                $downloaded_fg           on $flist_bg.f
+filelist.downloaded.highlighted.unfocused  $downloaded_hl           on $flist_bg.uf
+filelist.downloaded.highlighted.focused    $downloaded_hl           on $flist_bg.f
+
+$%downloaded_fg = #2A84D2
+$%downloaded_hl = #89B4FA
+filelist.%downloaded.header                $%downloaded_fg,underline on $flist_bg.uf
+filelist.%downloaded.unfocused             $%downloaded_fg           on $flist_bg.uf
+filelist.%downloaded.focused               $%downloaded_fg           on $flist_bg.f
+filelist.%downloaded.highlighted.unfocused $%downloaded_hl           on $flist_bg.uf
+filelist.%downloaded.highlighted.focused   $%downloaded_hl           on $flist_bg.f
+
+$priority_fg = #B57614
+$priority_hl = #F9E2AF
+filelist.priority.header                   $priority_fg,underline   on $flist_bg.uf
+filelist.priority.unfocused                $priority_fg             on $flist_bg.uf
+filelist.priority.focused                  $priority_fg             on $flist_bg.f
+filelist.priority.low.unfocused            $priority_fg             on $flist_bg.uf
+filelist.priority.low.focused              $priority_fg             on $flist_bg.f
+filelist.priority.high.unfocused           $priority_hl             on $flist_bg.uf
+filelist.priority.high.focused             $priority_hl             on $flist_bg.f
+filelist.priority.off.unfocused            #2A84D2                  on $flist_bg.uf
+filelist.priority.off.focused              #2A84D2                  on $flist_bg.f
+
+
+$plist_bg = #1E1E2E
+peerlist                                   default              on $plist_bg
+peerlist.focused                           default              on $plist_bg
+peerlist.header                            #BAC2DE,underline    on $plist_bg
+peerlist.scrollbar                         #BAC2DE              on #45475A
+
+$torrent_fg = #BAC2DE
+peerlist.torrent.header                    $torrent_fg,underline on $plist_bg
+peerlist.torrent.unfocused                 $torrent_fg           on $plist_bg
+
+$host_fg = #BAC2DE
+peerlist.host.header                       $host_fg,underline on $plist_bg
+peerlist.host.unfocused                    $host_fg           on $plist_bg
+
+$port_fg = #BAC2DE
+peerlist.port.header                       $port_fg,underline on $plist_bg
+peerlist.port.unfocused                    $port_fg           on $plist_bg
+
+$client_fg = #F38BA8
+peerlist.client.header                     $client_fg,underline on $plist_bg
+peerlist.client.unfocused                  $client_fg           on $plist_bg
+
+$%downloaded_fg = #2A84D2
+$%downloaded_hl = #89B4FA
+peerlist.%downloaded.header                $%downloaded_fg,underline on $plist_bg
+peerlist.%downloaded.unfocused             $%downloaded_fg           on $plist_bg
+peerlist.%downloaded.highlighted.unfocused $%downloaded_hl           on $plist_bg
+
+$rate-down_fg = #179299
+$rate-down_hl = #94E2D5
+peerlist.rate-down.header                  $rate-down_fg,underline on $plist_bg
+peerlist.rate-down.unfocused               $rate-down_fg           on $plist_bg
+peerlist.rate-down.highlighted.unfocused   $rate-down_hl           on $plist_bg
+
+$rate-up_fg = #40A02B
+$rate-up_hl = #A6DA95
+peerlist.rate-up.header                    $rate-up_fg,underline on $plist_bg
+peerlist.rate-up.unfocused                 $rate-up_fg           on $plist_bg
+peerlist.rate-up.highlighted.unfocused     $rate-up_hl           on $plist_bg
+
+$rate-est_fg = #40A02B
+$rate-est_hl = #A6DA95
+peerlist.rate-est.header                   $rate-est_fg,underline on $plist_bg
+peerlist.rate-est.unfocused                $rate-est_fg           on $plist_bg
+peerlist.rate-est.highlighted.unfocused    $rate-est_hl           on $plist_bg
+
+$eta_fg = #B57614
+$eta_hl = #F9E2AF
+peerlist.eta.header                        $eta_fg,underline on $plist_bg
+peerlist.eta.unfocused                     $eta_fg           on $plist_bg
+peerlist.eta.highlighted.unfocused         $eta_hl           on $plist_bg
+
+
+$trklist_bg.uf = #1E1E2E
+$trklist_bg.f  = #45475A
+trackerlist                                default              on $trklist_bg.uf
+trackerlist.focused                        default              on $trklist_bg.f
+trackerlist.header                         #BAC2DE,underline on $trklist_bg.uf
+trackerlist.scrollbar                      #BAC2DE           on #45475A
+
+$torrent_fg = #BAC2DE
+trackerlist.torrent.header                 $torrent_fg,underline on $trklist_bg.uf
+trackerlist.torrent.unfocused              $tracker_fg           on $trklist_bg.uf
+trackerlist.torrent.focused                $tracker_fg           on $trklist_bg.f
+
+$tier_fg = #B57614
+trackerlist.tier.header                    $tier_fg,underline on $trklist_bg.uf
+trackerlist.tier.unfocused                 $tier_fg           on $trklist_bg.uf
+trackerlist.tier.focused                   $tier_fg           on $trklist_bg.f
+
+$domain_fg = #F38BA8
+trackerlist.domain.header                  $domain_fg,underline on $trklist_bg.uf
+trackerlist.domain.unfocused               $domain_fg           on $trklist_bg.uf
+trackerlist.domain.focused                 $domain_fg           on $trklist_bg.f
+
+$url-announce_fg = #89B4FA
+trackerlist.url-announce.header            $url-announce_fg,underline on $trklist_bg.uf
+trackerlist.url-announce.unfocused         $url-announce_fg           on $trklist_bg.uf
+trackerlist.url-announce.focused           $url-announce_fg           on $trklist_bg.f
+
+$url-scrape_fg = #89B4FA
+trackerlist.url-scrape.header              $url-scrape_fg,underline on $trklist_bg.uf
+trackerlist.url-scrape.unfocused           $url-scrape_fg           on $trklist_bg.uf
+trackerlist.url-scrape.focused             $url-scrape_fg           on $trklist_bg.f
+
+$status_fg = #179299
+trackerlist.status.header                  $status_fg,underline on $trklist_bg.uf
+trackerlist.status.unfocused               $status_fg           on $trklist_bg.uf
+trackerlist.status.focused                 $status_fg           on $trklist_bg.f
+
+$error_fg = #9D0006
+trackerlist.error.header                   $error_fg,underline on $trklist_bg.uf
+trackerlist.error.unfocused                $error_fg           on $trklist_bg.uf
+trackerlist.error.focused                  $error_fg           on $trklist_bg.f
+
+$error-announce_fg = #9D0006
+trackerlist.error-announce.header          $error_fg,underline on $trklist_bg.uf
+trackerlist.error-announce.unfocused       $error_fg           on $trklist_bg.uf
+trackerlist.error-announce.focused         $error_fg           on $trklist_bg.f
+
+$error-scrape_fg = #9D0006
+trackerlist.error-scrape.header            $error_fg,underline on $trklist_bg.uf
+trackerlist.error-scrape.unfocused         $error_fg           on $trklist_bg.uf
+trackerlist.error-scrape.focused           $error_fg           on $trklist_bg.f
+
+$downloads_fg = #BAC2DE
+trackerlist.downloads.header               $downloads_fg,underline on $trklist_bg.uf
+trackerlist.downloads.unfocused            $downloads_fg           on $trklist_bg.uf
+trackerlist.downloads.focused              $downloads_fg           on $trklist_bg.f
+
+$leeches_fg = #BAC2DE
+trackerlist.leeches.header                 $leeches_fg,underline on $trklist_bg.uf
+trackerlist.leeches.unfocused              $leeches_fg           on $trklist_bg.uf
+trackerlist.leeches.focused                $leeches_fg           on $trklist_bg.f
+
+$seeds_fg = #BAC2DE
+trackerlist.seeds.header                   $seeds_fg,underline on $trklist_bg.uf
+trackerlist.seeds.unfocused                $seeds_fg           on $trklist_bg.uf
+trackerlist.seeds.focused                  $seeds_fg           on $trklist_bg.f
+
+$last-announce_fg = #CDD6F4
+trackerlist.last-announce.header           $last-announce_fg,underline on $trklist_bg.uf
+trackerlist.last-announce.unfocused        $last-announce_fg           on $trklist_bg.uf
+trackerlist.last-announce.focused          $last-announce_fg           on $trklist_bg.f
+
+$next-announce_fg = #CDD6F4
+trackerlist.next-announce.header           $next-announce_fg,underline on $trklist_bg.uf
+trackerlist.next-announce.unfocused        $next-announce_fg           on $trklist_bg.uf
+trackerlist.next-announce.focused          $next-announce_fg           on $trklist_bg.f
+
+$last-scrape_fg = #CDD6F4
+trackerlist.last-scrape.header             $last-scrape_fg,underline on $trklist_bg.uf
+trackerlist.last-scrape.unfocused          $last-scrape_fg           on $trklist_bg.uf
+trackerlist.last-scrape.focused            $last-scrape_fg           on $trklist_bg.f
+
+$next-scrape_fg = #CDD6F4
+trackerlist.next-scrape.header             $next-scrape_fg,underline on $trklist_bg.uf
+trackerlist.next-scrape.unfocused          $next-scrape_fg           on $trklist_bg.uf
+trackerlist.next-scrape.focused            $next-scrape_fg           on $trklist_bg.f
+
+
+$slist_bg.uf = #1E1E2E
+$slist_bg.f  = #45475A
+settinglist                                default              on $slist_bg.uf
+settinglist.focused                        default              on $slist_bg.f
+settinglist.header                         #BAC2DE,underline on $slist_bg.uf
+settinglist.scrollbar                      #BAC2DE           on #45475A
+
+$name_fg = #89B4FA
+settinglist.name.header                    $name_fg,underline on $slist_bg.uf
+settinglist.name.unfocused                 $name_fg           on $slist_bg.uf
+settinglist.name.focused                   $name_fg           on $slist_bg.f
+
+$value_fg = #BAC2DE
+$value_hl = #CDD6F4,bold
+settinglist.value.header                   $value_fg,underline on $slist_bg.uf
+settinglist.value.unfocused                $value_fg           on $slist_bg.uf
+settinglist.value.focused                  $value_fg           on $slist_bg.f
+settinglist.value.highlighted.unfocused    $value_hl           on $slist_bg.uf
+settinglist.value.highlighted.focused      $value_hl           on $slist_bg.f
+
+$default_fg = #BAC2DE
+settinglist.default.header                 $default_fg,underline on $slist_bg.uf
+settinglist.default.unfocused              $default_fg           on $slist_bg.uf
+settinglist.default.focused                $default_fg           on $slist_bg.f
+
+$description_fg = #BAC2DE
+settinglist.description.header             $description_fg,underline on $slist_bg.uf
+settinglist.description.unfocused          $description_fg           on $slist_bg.uf
+settinglist.description.focused            $description_fg           on $slist_bg.f

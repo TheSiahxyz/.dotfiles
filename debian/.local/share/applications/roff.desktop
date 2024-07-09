@@ -1,0 +1,4 @@
+[Desktop Entry]
+Type=Application
+Name=Groff/Troff Viewer
+Exec=/usr/bin/groff -mom %u -Tpdf | zathura -

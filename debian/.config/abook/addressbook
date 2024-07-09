@@ -1,0 +1,34 @@
+# abook addressbook file
+
+[format]
+program=abook
+version=0.6.1
+
+
+[0]
+name=Soomin Im
+email=si@thesiah.xyz,soominimxyz@gmail.com,naver@thesiah.xyz,gmail@thesiah.xyz,microsoft@thesiah.xyz,shop@thesiah.xyz
+address=200 16th St S
+address2=APT 6003B
+city=Birmingham
+state=Alabama
+zip=35233
+country=United States
+phone=010-6803-0613
+mobile=513-658-0207
+nick=SI
+url=thesiah.xyz
+anniversary=2021-01-28
+
+[1]
+name=Yejin Sung
+email=sungyejin01@gmail.com
+address=426 Lafayette Ave
+address2=APT 3D
+city=Brooklyn
+state=New York
+zip=11238
+country=United States
+mobile=678-800-9172
+nick=Heart
+anniversary=2021-01-28

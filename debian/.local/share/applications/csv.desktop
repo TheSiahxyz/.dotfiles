@@ -1,0 +1,4 @@
+[Desktop Entry]
+Type=Application
+Name=CSV Reader
+Exec=/usr/local/bin/st -e sc-im %f

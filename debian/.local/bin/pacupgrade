@@ -1,0 +1,30 @@
+#!/bin/sh
+
+# Check for available updates
+[ -z "$(apt list --upgradable 2>/dev/null | grep -v 'Listing...')" ] && (notify-send "✅ Your system is up-to-date."; exit 0)
+
+# Get a list of upgradable packages
+upgradable=$(apt list --upgradable 2>/dev/null | grep -v 'Listing...' | awk -F/ '{print $1}')
+
+# Use dmenu to select an action
+selection=$(printf "Upgrade All\n$upgradable" | dmenu -i -l 10 -p "Upgrade or Open URL:")
+
+case "$selection" in
+    "Upgrade All")
+        if [ "$(printf "No\nYes\n" | dmenu -i -p 'Proceed with upgrade?')" = "Yes" ]; then
+            notify-send "📦 Upgrading packages..."
+            sudo apt-get upgrade -y
+            notify-send "✅ Upgrade packages completed."
+        else
+            notify-send "❌ Upgrade cancelled."
+            exit 0
+        fi
+        ;;
+    *)
+        if [ "$(printf "No\nYes\n" | dmenu -i -p 'Open URL?')" = "Yes" ]; then
+            xdg-open "https://packages.debian.org/search?keywords=$(printf "$selection")" >/dev/null 2>&1 &
+        else
+            exit
+        fi
+        ;;
+esac
