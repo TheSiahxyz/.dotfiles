@@ -17,6 +17,5 @@ if [ "$(fcitx5-remote)" -eq 2 ]; then
 else
     echo "⌨️US"
 fi
-echo "1"
+
 kill -63 "$(pidof "${STATUSBAR:-dwmblocks}")"
-echo "2"

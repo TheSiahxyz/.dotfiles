@@ -23,20 +23,20 @@ bind-key U show-urls
 bind-key x pb-delete
 
 browser linkhandler
-macro , open-in-browser ; -- "Open url based on types"
-macro a set browser "tsp yt-dlp --embed-metadata -xic -f bestvideo*+bestaudio/best --restrict-filenames" ; open-in-browser ; set browser linkhandler ; -- "Add queue to download a file via yt-dlp"
-macro d set browser "dmenuhandler" ; open-in-browser ; set browser linkhandler ; -- "dmenu handler"
-macro e set browser "nvim ~/.config/newsboat/config" ; open-in-browser ; set browser linkhandler ; -- "newsboat config"
-macro l set browser "lynx" ; open-in-browser ; set browser linkhandler ; -- "lynx"
-macro m set browser "mpc add $(yt-dlp -f bestaudio --get-url %u | tail -n 1) && mpc play" ; open-in-browser ; -- "Play url"
-macro M set browser "qndl -m" ; open-in-browser ; set browser linkhandler ; -- "Download a music file via qndl"
-macro t set browser "peertubetorrent %u 480" ; open-in-browser ; set browser linkhandler ; -- "Torrent 480p"
-macro T set browser "peertubetorrent %u 1080" ; open-in-browser ; set browser linkhandler ; -- "Torrent 1080p"
-macro v set browser "setsid -f mpv" ; open-in-browser ; set browser linkhandler ; -- "Play a video"
-macro V set browser "qndl -v" ; open-in-browser ; set browser linkhandler ; -- "Download a video file via qndl"
-macro w set browser "firefox" ; open-in-browser ; set browser linkhandler ; -- "Open url in browser"
-macro y set browser "echo %u | xclip -r -sel c" ; open-in-browser ; set browser linkhandler ; -- "Copy url to clipboard"
-macro Y set browser "youtube-viewer ; --comments=%u" ; open-in-browser ; set browser linkhandler -- "Open youtube comments via youtube-viewer"
+macro , open-in-browser
+macro a set browser "tsp yt-dlp --embed-metadata -xic -f bestvideo*+bestaudio/best --restrict-filenames" ; open-in-browser ; set browser linkhandler
+macro d set browser "dmenuhandler" ; open-in-browser ; set browser linkhandler
+macro e set browser "nvim ~/.config/newsboat/config" ; open-in-browser ; set browser linkhandler
+macro l set browser "lynx" ; open-in-browser ; set browser linkhandler
+macro m set browser "mpc add $(yt-dlp -f bestaudio --get-url %u | tail -n 1) && mpc play" ; open-in-browser
+macro M set browser "qndl -m" ; open-in-browser ; set browser linkhandler
+macro t set browser "peertubetorrent %u 480" ; open-in-browser ; set browser linkhandler
+macro T set browser "peertubetorrent %u 1080" ; open-in-browser ; set browser linkhandler
+macro v set browser "setsid -f mpv" ; open-in-browser ; set browser linkhandler
+macro V set browser "qndl -v" ; open-in-browser ; set browser linkhandler
+macro w set browser "firefox" ; open-in-browser ; set browser linkhandler
+macro y set browser "echo %u | xclip -r -sel c" ; open-in-browser ; set browser linkhandler
+macro Y set browser "youtube-viewer ; --comments=%u" ; open-in-browser ; set browser linkhandler
 
 color listnormal cyan default
 color listfocus black yellow standout bold
