@@ -52,8 +52,9 @@ Hbk             /mnt/second/backup
 Hme             /media
 Hmf             /media/flash
 Hmh             /media/hdd
+Hmn             /mnt
 Hms             /media/ssd
-Hmt             /mnt
+Hmt             /media/storage
 Hmv             /media/storage/G
 Hmw             /usr/share/mutt-wizard
 Hrr             /run/runit/service
