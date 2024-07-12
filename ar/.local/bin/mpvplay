@@ -35,7 +35,9 @@ play_playlist() {
 }
 
 tmp_playlist() {
-    tmplist="$HOME/.config/mpv/playlists/tmplist.m3u" 
+    playlistdir="$HOME/.config/mpv/playlists"
+    [ -d "$playlistdir" ] || mkdir -p "$playlistdir"
+    tmplist="$playlistdir/tmplist.m3u" 
     [ -f "$tmplist" ] && rm -rf "$tmplist"
     find "$1" -maxdepth 1 -type f \( -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.mov" -o -iname "*.flv" -o -iname "*.wmv" -o -iname "*.webm" -o -iname "*.mpeg" -o -iname "*.mpg" \) \
         -exec echo {} >> "$tmplist" \;
