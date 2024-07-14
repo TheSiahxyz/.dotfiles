@@ -14,14 +14,23 @@ while getopts "mvr" opt; do
             ;;
         v)
             DOWNLOAD_TYPE="video"
+            VIDEO_FORMATS="--format bestvideo+bestaudio/best"
             OUTPUT_DIR="${XDG_VIDEOS_DIR:-${HOME}/Videos}"
             YTDL_OUTPUT_FORMAT="${OUTPUT_DIR}/%(title)s [%(id)s].%(ext)s"
-            VIDEO_EXT=$(printf "default\nmp4\nmkv" | dmenu -i -p "Choose an encoding for the video") || exit
+            VIDEO_EXT=$(printf "default\n720p\nmp4\nmkv" | dmenu -i -p "Choose an encoding for the video") || exit
             case $VIDEO_EXT in
-                "default") VIDEO_OPTIONS="" ;;
-                *) VIDEO_OPTIONS="--recode-video $VIDEO_EXT" ;;
+                default)
+                    VIDEO_OPTIONS=""
+                    ;;
+                *720p*) 
+                    VIDEO_FORMATS="--format \"bestvideo[height<=720]+bestaudio/best\""
+                    VIDEO_OPTIONS=""
+                    ;;
+                *)
+                    VIDEO_OPTIONS="--recode-video $VIDEO_EXT"
+                    ;;
             esac
-            YTDL_CMD_BASE="$YTDL_CMD_BASE --buffer-size 1M --embed-thumbnail --format bestvideo+bestaudio/best --no-sponsorblock $VIDEO_OPTIONS"
+            YTDL_CMD_BASE="$YTDL_CMD_BASE --buffer-size 1M --embed-thumbnail $VIDEO_FORMATS --no-sponsorblock $VIDEO_OPTIONS"
             ;;
         r)
             OUTPUT_DIR="${XDG_MUSIC_DIR:-${HOME}/Music}"
