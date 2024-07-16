@@ -3,8 +3,7 @@
 monitor=$(xrandr --query | grep -i '\sconnected' | grep '[0-9]x[0-9]' | grep -i 'primary' | cut -d ' ' -f1)
 [ -z "$monitor" ] && monitor=$(xrandr --query | grep -i '\sconnected' | grep '[0-9]x[0-9]' | cut -d ' ' -f1)
 case "$monitor" in
-    *eDP*|*LVDS*|*LFP*) printf "🪟%.0f%%\n" "$(brillo)" ;;
-    *) 
+    *DP*|*HDMI*) 
         current_brightness=$(xrandr --verbose | grep -i "^$monitor connected" -A5 | grep -i "Brightness:" | cut -d ' ' -f2)
         [ -z "$current_brightness" ] && exit 1
         if [ "$#" -eq 2 ]; then
