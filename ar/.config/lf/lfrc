@@ -417,7 +417,7 @@ map Me moveto; clear
 map Mpv :mpvdir; unselect
 
 # Nsxiv
-map th $nsxiv -pt "$(pwd)" # opens thumbnail mode
+map th $nsxiv -t "$(pwd)" # opens thumbnail mode
 
 # Open
 map O $mimeopen "$f"

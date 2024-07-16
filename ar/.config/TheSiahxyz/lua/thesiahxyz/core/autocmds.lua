@@ -114,7 +114,7 @@ autocmd({ "BufWritePre" }, {
     end,
 })
 
--- Automatically deletes all trailing whitespace and newlines at end of file on save. & reset cursor position
+-- Automatically delete all trailing whitespace and newlines at end of file on save
 autocmd("BufWritePre", {
     group = augroup("file_save"),
     pattern = "*",
@@ -126,20 +126,20 @@ autocmd("BufWritePre", {
     end,
 })
 
+-- Add a trailing newline for C files
 autocmd("BufWritePre", {
     group = augroup("file_save"),
     pattern = "*.[ch]",
     callback = function()
-        -- Add a trailing newline for C files
         vim.cmd([[ %s/\%$/\r/e ]])
     end,
 })
 
+-- Correct email signature delimiter in neomutt files
 autocmd("BufWritePre", {
     group = augroup("file_save"),
     pattern = "*neomutt*",
     callback = function()
-        -- Correct email signature delimiter in neomutt files
         vim.cmd([[ %s/^--$/-- /e ]])
     end,
 })

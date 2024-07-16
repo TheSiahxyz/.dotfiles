@@ -28,26 +28,26 @@ insert-last-command-output() {
 ###########################################################################################
 ###########################################################################################
 ### --- Weather --- ###
-weath() {
-    [ "$MANPAGER" = "less -s" ] && pager=true || pager=false
-    [ "$pager" = "false" ] && {
-        export MANPAGER='less -s'
-        export LESS="R"
-        export LESS_TERMCAP_mb="$(printf '%b' '[1;31m')"
-        export LESS_TERMCAP_md="$(printf '%b' '[1;36m')"
-        export LESS_TERMCAP_me="$(printf '%b' '[0m')"
-        export LESS_TERMCAP_so="$(printf '%b' '[01;44;33m')"
-        export LESS_TERMCAP_se="$(printf '%b' '[0m')"
-        export LESS_TERMCAP_us="$(printf '%b' '[1;32m')"
-        export LESS_TERMCAP_ue="$(printf '%b' '[0m')"
-        export LESSOPEN="| /usr/bin/highlight -O ansi %s 2>/dev/null"
-    }
-    less -S ${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport
-    [ "$pager" = "false" ] && {
-        export MANPAGER="sh -c 'col -bx | bat -l man -p'"
-        export MANROFFOPT="-c"
-    }
-}
+# weath() {
+#     [ "$MANPAGER" = "less -s" ] && pager=true || pager=false
+#     [ "$pager" = "false" ] && {
+#         export MANPAGER='less -s'
+#         export LESS="R"
+#         export LESS_TERMCAP_mb="$(printf '%b' '[1;31m')"
+#         export LESS_TERMCAP_md="$(printf '%b' '[1;36m')"
+#         export LESS_TERMCAP_me="$(printf '%b' '[0m')"
+#         export LESS_TERMCAP_so="$(printf '%b' '[01;44;33m')"
+#         export LESS_TERMCAP_se="$(printf '%b' '[0m')"
+#         export LESS_TERMCAP_us="$(printf '%b' '[1;32m')"
+#         export LESS_TERMCAP_ue="$(printf '%b' '[0m')"
+#         export LESSOPEN="| /usr/bin/highlight -O ansi %s 2>/dev/null"
+#     }
+#     less -S ${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport
+#     [ "$pager" = "false" ] && {
+#         export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+#         export MANROFFOPT="-c"
+#     }
+# }
 
 
 ###########################################################################################
