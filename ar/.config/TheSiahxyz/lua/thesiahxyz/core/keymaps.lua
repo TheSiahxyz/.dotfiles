@@ -69,11 +69,11 @@ vim.keymap.set("x", "<leader>p", [["_dP]])
 
 -- Diagnostic
 local diagnostic_goto = function(next, severity)
-    local go = next and vim.diagnostic.goto_next or vim.diagnostic.goto_prev
-    severity = severity and vim.diagnostic.severity[severity] or nil
-    return function()
-        go({ severity = severity })
-    end
+	local go = next and vim.diagnostic.goto_next or vim.diagnostic.goto_prev
+	severity = severity and vim.diagnostic.severity[severity] or nil
+	return function()
+		go({ severity = severity })
+	end
 end
 vim.keymap.set("n", "[d", diagnostic_goto(false))
 vim.keymap.set("n", "]d", diagnostic_goto(true))
@@ -124,7 +124,7 @@ vim.keymap.set("n", "<C-Right>", "<cmd>vertical resize +2<cr>", { desc = "Increa
 
 -- Source
 vim.keymap.set("n", "<leader><leader>", function()
-    vim.cmd("so")
+	vim.cmd("so")
 end)
 
 -- Sudo
@@ -149,7 +149,7 @@ vim.keymap.set("n", "<C-l>", "<C-w><C-l>")
 -- vim.keymap.set("n", "<C-j>", "<C-w>j", { remap = true })
 -- vim.keymap.set("n", "<C-k>", "<C-w>k", { remap = true })
 -- vim.keymap.set("n", "<C-l>", "<C-w>l", { remap = true })
-vim.keymap.set("n", "<C-f>", "<cmd>silent !~/.config/tmux/plugins/tmux-fzf/scripts/session.sh<CR>")
+vim.keymap.set("n", "<leader>tf", "<cmd>silent !~/.config/tmux/plugins/tmux-fzf/scripts/session.sh<CR>")
 
 -- Lazy
 vim.keymap.set("n", "<leader>l", "<cmd>Lazy<cr>")
@@ -159,8 +159,8 @@ vim.keymap.set("n", "<leader>m", "<cmd>Mason<cr>")
 
 -- Word Definition
 vim.api.nvim_set_keymap(
-    "n",
-    "<leader>gd",
-    ":lua WordDefinition(vim.fn.expand('<cword>'))<CR>",
-    { noremap = true, silent = true }
+	"n",
+	"<leader>gd",
+	":lua WordDefinition(vim.fn.expand('<cword>'))<CR>",
+	{ noremap = true, silent = true }
 )

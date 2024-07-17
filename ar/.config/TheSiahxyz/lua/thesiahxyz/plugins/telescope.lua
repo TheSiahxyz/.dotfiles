@@ -12,7 +12,7 @@ return {
 				or "cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build",
 			enabled = have_make or have_cmake,
 			config = function(plugin)
-                require("telescope").load_extension("fzf")
+				require("telescope").load_extension("fzf")
 			end,
 		},
 	},

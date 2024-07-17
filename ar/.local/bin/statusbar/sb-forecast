@@ -3,7 +3,7 @@
 # Displays today's precipication chance (☔), daily high (🎐), and daily low (🥶) and high (🌞).
 # Usually intended for the statusbar.
 
-LOCATION=$(curl -s ipinfo.io | jq -r '[.city, .country] | join(",")')
+LOCATION=$(curl -s http://ip-api.com/json | jq -r '[.regionName, .countryCode] | join(",")')
 
 url="${WTTRURL:-wttr.in}"
 weatherreport="${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport"

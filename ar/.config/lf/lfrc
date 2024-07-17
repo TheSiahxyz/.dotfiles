@@ -89,7 +89,7 @@ cmd yank-basename-without-extension &basename -a -- $fx | cut -d. -f1 | head -c-
 cmd mkdir ${{ clear; tput cup $(($(tput lines)/3)); tput bold
     printf "Directory Name: "
     read ans
-    mkdir $ans
+    mkdir -p $ans
 }}
 cmd mkfile ${{
     clear; tput cup $(($(tput lines)/3)); tput bold
