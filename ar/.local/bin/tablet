@@ -8,29 +8,29 @@ case "$rotation" in
     normal)
         # rotate to the left
         xrandr -o left
-        xsetwacom set "Serial Wacom Penabled 2FG Touchscreen Pen stylus" rotate ccw
-        xsetwacom set "Serial Wacom Penabled 2FG Touchscreen Pen eraser" rotate ccw
-        xsetwacom set "Serial Wacom Penabled 2FG Touchscreen Finger touch" rotate ccw
+        xsetwacom set "Wacom Serial Penabled 2FG Touchscreen Pen stylus" rotate ccw
+        xsetwacom set "Wacom Serial Penabled 2FG Touchscreen Pen eraser" rotate ccw
+        xsetwacom set "Wacom Serial Penabled 2FG Touchscreen Finger touch" rotate ccw
         ;;
     left)
         # rotate to normal
         xrandr -o inverted
-        xsetwacom set "Serial Wacom Penabled 2FG Touchscreen Pen stylus" rotate ccw
-        xsetwacom set "Serial Wacom Penabled 2FG Touchscreen Pen eraser" rotate ccw
-        xsetwacom set "Serial Wacom Penabled 2FG Touchscreen Finger touch" rotate ccw
+        xsetwacom set "Wacom Serial Penabled 2FG Touchscreen Pen stylus" rotate ccw
+        xsetwacom set "Wacom Serial Penabled 2FG Touchscreen Pen eraser" rotate ccw
+        xsetwacom set "Wacom Serial Penabled 2FG Touchscreen Finger touch" rotate ccw
         ;;
     inverted)
         # rotate to normal
         xrandr -o right
-        xsetwacom set "Serial Wacom Penabled 2FG Touchscreen Pen stylus" rotate ccw
-        xsetwacom set "Serial Wacom Penabled 2FG Touchscreen Pen eraser" rotate ccw
-        xsetwacom set "Serial Wacom Penabled 2FG Touchscreen Finger touch" rotate ccw
+        xsetwacom set "Wacom Serial Penabled 2FG Touchscreen Pen stylus" rotate ccw
+        xsetwacom set "Wacom Serial Penabled 2FG Touchscreen Pen eraser" rotate ccw
+        xsetwacom set "Wacom Serial Penabled 2FG Touchscreen Finger touch" rotate ccw
         ;;
     right)
         # rotate to normal
         xrandr -o normal
-        xsetwacom set "Serial Wacom Penabled 2FG Touchscreen Pen stylus" rotate none
-        xsetwacom set "Serial Wacom Penabled 2FG Touchscreen Pen eraser" rotate none
-        xsetwacom set "Serial Wacom Penabled 2FG Touchscreen Finger touch" rotate none
+        xsetwacom set "Wacom Serial Penabled 2FG Touchscreen Pen stylus" rotate none
+        xsetwacom set "Wacom Serial Penabled 2FG Touchscreen Pen eraser" rotate none
+        xsetwacom set "Wacom Serial Penabled 2FG Touchscreen Finger touch" rotate none
         ;;
 esac
