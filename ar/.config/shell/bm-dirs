@@ -31,6 +31,8 @@ cxc             ${XDG_CONFIG_HOME:-${HOME}/.config}/x11
 cyv             ${XDG_CONFIG_HOME:-${HOME}/.config}/youtube-viewer
 czc             ${XDG_CONFIG_HOME:-${HOME}/.config}/zsh
 dot             ${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}
+esm             /etc/samba
+esv             /etc/runit/sv
 gdc             ${XDG_DOCUMENTS_DIR:-${HOME}/Documents}
 gdk             ${XDG_DESKTOP_DIR:-${HOME}/Desktop}
 gdn             ${XDG_DOWNLOAD_DIR:-${HOME}/Downloads}
@@ -53,14 +55,13 @@ Hme             /media
 Hmf             /media/flash
 Hmh             /media/hdd
 Hmn             /mnt
+Hsm             /media/samba
 Hms             /media/ssd
 Hmt             /media/storage
 Hmv             /media/storage/G
 Hmw             /usr/share/mutt-wizard
 Hrr             /run/runit/service
 Hsc             /mnt/second
-Hsm             /etc/samba
-Hsv             /etc/runit/sv
 Hvt             /media/Ventoy
 Hvv             /mnt/second/videos
 Hwv             /media/win10/Videos
