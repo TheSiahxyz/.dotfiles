@@ -21,6 +21,7 @@ EOF
 
 # Select share using dmenu
 SHARE=$(echo "$SHARES" | dmenu -i -p "Select a share to mount:")
+echo "$SHARE"
 [ -z "$SHARE" ] && { echo "No share selected. Exiting." ; exit 1 ; }
 
 # Create mount point if it doesn't exist

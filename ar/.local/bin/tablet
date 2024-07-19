@@ -15,16 +15,16 @@ case "$rotation" in
     left)
         # rotate to normal
         xrandr -o inverted
-        xsetwacom set "Wacom Serial Penabled 2FG Touchscreen Pen stylus" rotate ccw
-        xsetwacom set "Wacom Serial Penabled 2FG Touchscreen Pen eraser" rotate ccw
-        xsetwacom set "Wacom Serial Penabled 2FG Touchscreen Finger touch" rotate ccw
+        xsetwacom set "Wacom Serial Penabled 2FG Touchscreen Pen stylus" rotate half
+        xsetwacom set "Wacom Serial Penabled 2FG Touchscreen Pen eraser" rotate half
+        xsetwacom set "Wacom Serial Penabled 2FG Touchscreen Finger touch" rotate half
         ;;
     inverted)
         # rotate to normal
         xrandr -o right
-        xsetwacom set "Wacom Serial Penabled 2FG Touchscreen Pen stylus" rotate ccw
-        xsetwacom set "Wacom Serial Penabled 2FG Touchscreen Pen eraser" rotate ccw
-        xsetwacom set "Wacom Serial Penabled 2FG Touchscreen Finger touch" rotate ccw
+        xsetwacom set "Wacom Serial Penabled 2FG Touchscreen Pen stylus" rotate cw
+        xsetwacom set "Wacom Serial Penabled 2FG Touchscreen Pen eraser" rotate cw
+        xsetwacom set "Wacom Serial Penabled 2FG Touchscreen Finger touch" rotate cw
         ;;
     right)
         # rotate to normal
