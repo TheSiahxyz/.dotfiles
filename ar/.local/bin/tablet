@@ -2,35 +2,38 @@
 
 # Find the line in "xrandr -q --verbose" output that contains current screen orientation and "strip" out current orientation.
 rotation="$(xrandr -q --verbose | grep 'connected' | grep -Eo '\) (normal|left|inverted|right) \(' | grep -Eo '(normal|left|inverted|right)')"
+penstylus="$(xsetwacom list devices | grep 'Pen' | grep 'stylus' | sed 's/\s*id.*//g')"
+penerase="$(xsetwacom list devices | grep 'Pen' | grep 'erase' | sed 's/\s*id.*//g')"
+fingertouch="$(xsetwacom list devices | grep 'Finger' | grep 'touch' | sed 's/\s*id.*//g')"
 
 # Using current screen orientation proceed to rotate screen and input tools.
 case "$rotation" in
     normal)
         # rotate to the left
         xrandr -o left
-        xsetwacom set "Wacom Serial Penabled 2FG Touchscreen Pen stylus" rotate ccw
-        xsetwacom set "Wacom Serial Penabled 2FG Touchscreen Pen eraser" rotate ccw
-        xsetwacom set "Wacom Serial Penabled 2FG Touchscreen Finger touch" rotate ccw
+        xsetwacom set "$penstylus" rotate ccw
+        xsetwacom set "$penerase" rotate ccw
+        xsetwacom set "$fingertouch" rotate ccw
         ;;
     left)
         # rotate to normal
         xrandr -o inverted
-        xsetwacom set "Wacom Serial Penabled 2FG Touchscreen Pen stylus" rotate half
-        xsetwacom set "Wacom Serial Penabled 2FG Touchscreen Pen eraser" rotate half
-        xsetwacom set "Wacom Serial Penabled 2FG Touchscreen Finger touch" rotate half
+        xsetwacom set "$penstylus" rotate half
+        xsetwacom set "$penerase" rotate half
+        xsetwacom set "$fingertouch" rotate half
         ;;
     inverted)
         # rotate to normal
         xrandr -o right
-        xsetwacom set "Wacom Serial Penabled 2FG Touchscreen Pen stylus" rotate cw
-        xsetwacom set "Wacom Serial Penabled 2FG Touchscreen Pen eraser" rotate cw
-        xsetwacom set "Wacom Serial Penabled 2FG Touchscreen Finger touch" rotate cw
+        xsetwacom set "$penstylus" rotate cw
+        xsetwacom set "$penerase" rotate cw
+        xsetwacom set "$fingertouch" rotate cw
         ;;
     right)
         # rotate to normal
         xrandr -o normal
-        xsetwacom set "Wacom Serial Penabled 2FG Touchscreen Pen stylus" rotate none
-        xsetwacom set "Wacom Serial Penabled 2FG Touchscreen Pen eraser" rotate none
-        xsetwacom set "Wacom Serial Penabled 2FG Touchscreen Finger touch" rotate none
+        xsetwacom set "$penstylus" rotate none
+        xsetwacom set "$penerase" rotate none
+        xsetwacom set "$fingertouch" rotate none
         ;;
 esac
