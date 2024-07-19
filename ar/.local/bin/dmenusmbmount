@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# define variables
+server="127.0.0.1"
+mp="/media/samba"
+
+# prompt for password using dmenupass
+password=$(dmenu -fn monospace-18 -p -p "enter samba password:" <&-)
+[ -z "$password" ] && echo "no password entered. exiting." && exit 1
+
+# get list of shares
+shares=$(smbclient -l $server -u% -a <(echo -ne "username=$(whoami)\npassword=$password\n") 2>/dev/null | awk '/disk/ {print $1}')
+[ -z "$shares" ] && echo "no shares available. exiting." && exit 1
+
+# select share using dmenu
+share=$(echo "$shares" | dmenu -i -p "select a share to mount:")
+[ -z "$share" ] && echo "no share selected. exiting." && exit 1 
+
+# create mount point if it doesn't exist
+[ -d "$mp" ] || mkdir -p "$mp"
+
+# mount the selected share using sudo with sudo_askpass
+echo "$password" | sudo -a mount -t cifs -o username=$(whoami),password="$password" //$server/$share "$mp"
+
+# notify the user
+[ $? -eq 0 ] && notify-send "samba mount" "successfully mounted //$server/$share to $mp" || notify-send "samba mount" "failed to mount //$server/$share"
