@@ -1,26 +1,33 @@
-#!/bin/bash
+#!/bin/sh
 
-# define variables
-server="127.0.0.1"
-mp="/media/samba"
+# Define variables
+SERVER="127.0.0.1"
+MOUNT_POINT="/media/samba"
 
-# prompt for password using dmenupass
-password=$(dmenu -fn monospace-18 -p -p "enter samba password:" <&-)
-[ -z "$password" ] && echo "no password entered. exiting." && exit 1
+# Set SUDO_ASKPASS to use the dmenupass script
+export SUDO_ASKPASS="$HOME/.local/bin/dmenupass"
 
-# get list of shares
-shares=$(smbclient -l $server -u% -a <(echo -ne "username=$(whoami)\npassword=$password\n") 2>/dev/null | awk '/disk/ {print $1}')
-[ -z "$shares" ] && echo "no shares available. exiting." && exit 1
+# Prompt for password using dmenupass
+PASSWORD=$(dmenu -fn Monospace-18 -P -p "Enter Samba Password:" <&-)
+[ -z "$PASSWORD" ] && { echo "No password entered. Exiting." ; exit 1 ; }
 
-# select share using dmenu
-share=$(echo "$shares" | dmenu -i -p "select a share to mount:")
-[ -z "$share" ] && echo "no share selected. exiting." && exit 1 
+# Get list of shares
+SHARES=$(smbclient -L "$SERVER" -U% -A /dev/stdin <<EOF 2>/dev/null | awk '/Disk/ {print $1}'
+username=$(whoami)
+password=$PASSWORD
+EOF
+)
+[ -z "$SHARES" ] && { echo "No shares available. Exiting." ; exit 1 ; }
 
-# create mount point if it doesn't exist
-[ -d "$mp" ] || mkdir -p "$mp"
+# Select share using dmenu
+SHARE=$(echo "$SHARES" | dmenu -i -p "Select a share to mount:")
+[ -z "$SHARE" ] && { echo "No share selected. Exiting." ; exit 1 ; }
 
-# mount the selected share using sudo with sudo_askpass
-echo "$password" | sudo -a mount -t cifs -o username=$(whoami),password="$password" //$server/$share "$mp"
+# Create mount point if it doesn't exist
+[ -d "$mp" ] || mkdir -p "$MOUNT_POINT"
 
-# notify the user
-[ $? -eq 0 ] && notify-send "samba mount" "successfully mounted //$server/$share to $mp" || notify-send "samba mount" "failed to mount //$server/$share"
+# Mount the selected share using sudo with SUDO_ASKPASS
+echo "$PASSWORD" | sudo -A mount -t cifs -o username=$(whoami),password="$PASSWORD" //$SERVER/$SHARE "$MOUNT_POINT"
+
+# Notify the user
+[ $? -eq 0 ] && notify-send "Samba Mount" "Successfully mounted //$SERVER/$SHARE to $MOUNT_POINT" || notify-send "Samba Mount" "Failed to mount //$SERVER/$SHARE"
