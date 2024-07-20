@@ -17,7 +17,7 @@ zstyle ':vcs_info:git*+set-message:*' hooks git-untracked git-incoming-commits g
     if [[ $(git rev-parse --is-inside-work-tree 2> /dev/null) == "true" ]] && \
         git status --porcelain | grep -m 1 "^??" &>/dev/null
     then
-        hook_com[misc]+="%{$fg[magenta]%}?"
+        hook_com[misc]+="%{$fg[yellow]%}?"
     fi
 }
 +vi-git-incoming-commits() {
