@@ -31,8 +31,8 @@ cxc             ${XDG_CONFIG_HOME:-${HOME}/.config}/x11
 cyv             ${XDG_CONFIG_HOME:-${HOME}/.config}/youtube-viewer
 czc             ${XDG_CONFIG_HOME:-${HOME}/.config}/zsh
 dot             ${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}
-esm             /etc/samba
-esv             /etc/runit/sv
+Esm             /etc/samba
+Esv             /etc/runit/sv
 gdc             ${XDG_DOCUMENTS_DIR:-${HOME}/Documents}
 gdk             ${XDG_DESKTOP_DIR:-${HOME}/Desktop}
 gdn             ${XDG_DOWNLOAD_DIR:-${HOME}/Downloads}
