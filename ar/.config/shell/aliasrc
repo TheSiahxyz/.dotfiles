@@ -70,9 +70,6 @@ alias cp="cp -iv"
 alias _fd="find . -type f -name '._*' -print0 | xargs -0 rm -f"
 alias _fp="find . -type f -name '._*' -print"
 
-# df
-alias df='df -h'
-
 # dotbare
 alias dg="dotbare"
 alias dga="dotbare add"
@@ -83,9 +80,6 @@ alias dgd="dotbare diff"
 alias dgl="dotbare log"
 alias dgp="dotbare push"
 alias dgst="dotbare status"
-
-# disk usage
-alias du='du -sh'
 
 # # ecryptfs
 # alias emt="echo "$(pass show encryption/ecryptfs)" | sudo mount -t ecryptfs "$1" "$2" \
