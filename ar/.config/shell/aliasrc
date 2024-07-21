@@ -287,7 +287,7 @@ alias tipb="tmuxinator public"
 alias tiw="tmuxinator work"
 alias tin="tmuxinator new"
 alias ti="tmuxinator"
-alias tir="txo && txp && txw"
+alias tir="tic && tipv && tipb && tiw"
 
 # transmission-remote
 alias trem="transmission-remote"
