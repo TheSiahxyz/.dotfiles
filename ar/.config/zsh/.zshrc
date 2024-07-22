@@ -14,14 +14,22 @@ zstyle ':vcs_info:git:*' formats       "%{$fg[blue]%}(%{$fg[black]%}%b%{$fg[blue
 zstyle ':vcs_info:git:*' actionformats "%{$fg[blue]%}(%{$fg[black]%}%b%{$fg[blue]%}:%r%{$reset_color%}|%{$fg[red]%}%a%u%c%{$fg[blue]%})"
 zstyle ':vcs_info:git*+set-message:*' hooks git-untracked git-incoming-commits git-unpushed-commits
 +vi-git-untracked() {
-    [ $(git rev-parse --is-inside-work-tree 2> /dev/null) = "true" ] && git status --porcelain | grep -m 1 "^??" &>/dev/null && hook_com[misc]+="%{$fg[yellow]%}?"
+    if [[ $(git rev-parse --is-inside-work-tree 2> /dev/null) == "true" ]] && \
+        git status --porcelain | grep -m 1 "^??" &>/dev/null
+    then
+        hook_com[misc]+="%{$fg[yellow]%}?"
+    fi
 }
 +vi-git-incoming-commits() {
     # git fetch > /dev/null 2>&1
-    [ $(git rev-list HEAD..origin/$(git rev-parse --abbrev-ref HEAD) --count) -gt 0 ] && hook_com[misc]+="%{$fg[red]%}!"
+    if [[ $(git rev-list HEAD..origin/$(git rev-parse --abbrev-ref HEAD) --count) -gt 0 ]]; then
+        hook_com[misc]+="%{$fg[red]%}!"
+    fi
 }
 +vi-git-unpushed-commits() {
-    [ $(git rev-list origin/$(git rev-parse --abbrev-ref HEAD)..HEAD --count) -gt 0 ] && hook_com[misc]+="%{$fg[green]%}="
+    if [[ $(git rev-list origin/$(git rev-parse --abbrev-ref HEAD)..HEAD --count) -gt 0 ]]; then
+        hook_com[misc]+="%{$fg[green]%}="
+    fi
 }
 
 ### --- ZSH --- ###
