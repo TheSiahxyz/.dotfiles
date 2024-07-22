@@ -36,22 +36,28 @@ return {
 	{
 		"quarto-dev/quarto-nvim",
 		dependencies = {
-			"jmbuhr/otter.nvim",
-			lazy = false,
-			dependencies = {
-				"nvim-treesitter/nvim-treesitter",
+			{
+				"jmbuhr/otter.nvim",
+				lazy = false,
+				dependencies = {
+					"nvim-treesitter/nvim-treesitter",
+				},
+				opts = {},
+				config = function()
+					require("otter").setup()
+				end,
 			},
-			opts = {},
-			config = function()
-				require("otter").setup()
-			end,
+			"nvim-cmp",
+			"neovim/nvim-lspconfig",
+			"nvim-treesitter/nvim-treesitter",
+			"otter.nvim",
 		},
 		ft = { "quarto", "markdown" },
 		command = "QuartoActivate",
 		config = function()
 			require("quarto").setup({
 				lspFeatures = {
-					languages = { "r", "python", "rust" },
+					languages = { "r", "python", "rust", "lua" },
 					chunks = "all",
 					diagnostics = {
 						enabled = true,
@@ -70,6 +76,9 @@ return {
 				},
 				codeRunner = {
 					enabled = true,
+					ft_runners = {
+						bash = "slime",
+					},
 					default_method = "molten",
 				},
 			})
@@ -78,10 +87,21 @@ return {
 			vim.keymap.set("n", "<leader>jC", runner.run_above, { silent = true })
 			vim.keymap.set("n", "<leader>jl", runner.run_line, { silent = true })
 			vim.keymap.set("v", "<leader>jv", runner.run_range, { silent = true })
-			vim.keymap.set("n", "<leader>ja", runner.run_all, { silent = true })
-			vim.keymap.set("n", "<leader>jA", function()
-				runner.run_all(true)
-			end, { silent = true })
+			vim.keymap.set("n", "<leader>jA", runner.run_all, { silent = true })
+			vim.keymap.set(
+				"n",
+				"<leader>qp",
+				require("quarto").quartoPreview,
+				{ desc = "Preview the Quarto document", silent = true, noremap = true }
+			)
+			-- to create a cell in insert mode, I have the ` snippet
+			vim.keymap.set("n", "<leader>cc", "i```python\n```<Esc>O", { desc = "Create a new code cell", silent = true })
+			vim.keymap.set(
+				"n",
+				"<leader>cs",
+				"i```\r\r```{}<Left>",
+				{ desc = "Split code cell", silent = true, noremap = true }
+			)
 		end,
 	},
 	{
@@ -105,7 +125,7 @@ return {
 			vim.g.molten_image_provider = "image.nvim"
 			vim.g.molten_output_show_more = false
 			vim.g.molten_output_win_max_height = 30
-            vim.g.molten_output_win_style = "minimal"
+			vim.g.molten_output_win_style = "minimal"
 			-- this will make it so the output shows up below the \`\`\` cell delimiter
 			vim.g.molten_virt_lines_off_by_1 = true
 			-- Output as virtual text. Allows outputs to always be shown, works with images, but can
@@ -113,7 +133,7 @@ return {
 			vim.g.molten_virt_text_output = true
 			-- optional, works for virt text and the output window
 			vim.g.molten_wrap_output = true
-            vim.g.molten_virt_text_max_lines = 20
+			vim.g.molten_virt_text_max_lines = 20
 		end,
 		config = function()
 			-- image nvim options table. Pass to `require('image').setup`
@@ -132,7 +152,7 @@ return {
 				end,
 			})
 			vim.keymap.set("n", "<leader>ji", ":MoltenImagePopup<CR>", { silent = true })
-			vim.keymap.set("n", "<leader>jb", ":MoltenOpenInBrowser<CR>", { silent = true })
+			vim.keymap.set("n", "<leader>jw", ":MoltenOpenInBrowser<CR>", { silent = true })
 			vim.keymap.set("n", "<leader>jj", function()
 				local venv = os.getenv("VIRTUAL_ENV")
 				if venv ~= nil then

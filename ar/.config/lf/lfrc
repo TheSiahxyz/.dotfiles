@@ -191,6 +191,14 @@ cmd extract ${{
     }
 }}
 
+# iPython
+cmd create-ipynb ${{
+    clear; tput cup $(($(tput lines)/3)); tput bold
+    printf "File Name: "
+    read ans
+    vipy $ans
+}}
+
 # Move
 cmd moveto ${{
     clear; tput cup $(($(tput lines)/3)); tput bold
@@ -409,6 +417,9 @@ map V push :!nvim<space>
 
 # Extract
 map E extract; clear
+
+# iPython
+map Mi create-ipynb
 
 # Move
 map Me moveto; clear
