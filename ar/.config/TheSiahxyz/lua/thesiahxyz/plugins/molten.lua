@@ -18,19 +18,38 @@ return {
 			rocks = { "magick" },
 		},
 	},
+	{ "benlubas/image-save.nvim", dev = true, cmd = "SaveImage" },
 	{
 		"3rd/image.nvim",
-		opts = {
-			backend = "ueberzug", -- whatever backend you would like to use
-			max_width = 100,
-			max_height = 12,
-			max_height_window_percentage = math.huge,
-			max_width_window_percentage = math.huge,
-			window_overlap_clear_enabled = true, -- toggles images when windows are overlapped
-			window_overlap_clear_ft_ignore = { "cmp_menu", "cmp_docs", "" },
-		},
+		dependencies = { "leafo/magick" },
 		config = function()
-			require("image").setup({})
+			require("image").setup({
+				backend = "ueberzug", -- whatever backend you would like to use
+				integrations = {
+					markdown = {
+						enabled = true,
+						clear_in_insert_mode = false,
+						download_remote_images = false,
+						only_render_image_at_cursor = false,
+						filetypes = { "markdown", "quarto" }, -- markdown extensions (ie. quarto) can go here
+					},
+					neorg = {
+						enabled = true,
+						clear_in_insert_mode = false,
+						download_remote_images = false,
+						only_render_image_at_cursor = false,
+						filetypes = { "norg" },
+					},
+				},
+				max_width = 100,
+				max_height = 8,
+				max_height_window_percentage = math.huge,
+				max_width_window_percentage = math.huge,
+				window_overlap_clear_enabled = true, -- toggles images when windows are overlapped
+				editor_only_render_when_focused = true, -- auto show/hide images when the editor gains/looses focus
+				tmux_show_only_in_active_window = true, -- auto show/hide images in the correct Tmux window (needs visual-activity off)
+				window_overlap_clear_ft_ignore = { "cmp_menu", "cmp_docs", "fidget", "" },
+			})
 		end,
 	},
 	{
@@ -95,11 +114,16 @@ return {
 				{ desc = "Preview the Quarto document", silent = true, noremap = true }
 			)
 			-- to create a cell in insert mode, I have the ` snippet
-			vim.keymap.set("n", "<leader>cc", "i```python\n```<Esc>O", { desc = "Create a new code cell", silent = true })
+			vim.keymap.set(
+				"n",
+				"<leader>cc",
+				"i```python\n```<Esc>O",
+				{ desc = "Create a new code cell", silent = true }
+			)
 			vim.keymap.set(
 				"n",
 				"<leader>cs",
-				"i```\r\r```{}<Left>",
+				"i```\r\r```{}<left>",
 				{ desc = "Split code cell", silent = true, noremap = true }
 			)
 		end,
