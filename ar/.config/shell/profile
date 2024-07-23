@@ -205,7 +205,7 @@ export WGETRC="$XDG_CONFIG_HOME/wget/wgetrc"
 export XINITRC="$XDG_CONFIG_HOME/x11/xinitrc"
 
 ### --- XAUTH --- ###
-pgrep -x "dwm" >/dev/null && export XAUTHORITY="$XDG_RUNTIME_DIR/Xauthority" # This line will break some DMs.
+export XAUTHORITY="$XDG_RUNTIME_DIR/Xauthority" # This line will break some DMs.
 
 ### --- ZSH --- ###
 export ZDOTDIR="$XDG_CONFIG_HOME/zsh"
