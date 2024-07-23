@@ -5,8 +5,6 @@ vim.g.maplocalleader = "\\"
 -- Buffers
 vim.keymap.set("n", "<S-h>", "<cmd>bprevious<cr>")
 vim.keymap.set("n", "<S-l>", "<cmd>bnext<cr>")
-vim.keymap.set("n", "[b", "<cmd>bprevious<cr>")
-vim.keymap.set("n", "]b", "<cmd>bnext<cr>")
 vim.keymap.set("n", "<leader>bb", "<cmd>e #<cr>")
 vim.keymap.set("n", "<leader>`", "<cmd>e #<cr>")
 
