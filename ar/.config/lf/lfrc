@@ -228,6 +228,8 @@ cmd mpvdir ${{
 cmd open ${{
     case $(file --mime-type "$(readlink -f $f)" -b) in
         application/vnd.openxmlformats-officedocument.spreadsheetml.sheet) localc $fx ;;
+        application/vnd.openxmlformats-officedocument.presentationml.presentation) libreoffice $fx ;;
+        application/vnd.openxmlformats-officedocument.wordprocessingml.document) libreoffice $fx ;;
         image/vnd.djvu|application/pdf|application/postscript) setsid -f zathura $fx >/dev/null 2>&1 ;;
         text/csv) sc-im $fx;;
         text/xml) lynx $fx;;
