@@ -46,16 +46,6 @@ autocmd VimEnter * silent execute '!echo -ne "\e[2 q"'
 " }}}
 
 
-" COLORS ----------------------------------------------------------------- {{{
-
-hi User1 ctermbg=brown ctermfg=white guibg=black guifg=white
-hi User2 ctermbg=lightgreen ctermfg=black guibg=lightgreen guifg=black
-hi User3 ctermbg=brown ctermfg=lightcyan guibg=black guifg=lightblue
-hi User4 ctermbg=brown ctermfg=green guibg=black guifg=lightgreen
-
-" }}}
-
-
 " Hex_Toggle_Functions --------------------------------------------------- {{{
 
 function! DoHex()
@@ -266,12 +256,6 @@ nnoremap <leader>so :so<CR>
 
 " SETTINGS --------------------------------------------------------------- {{{
 
-" Terminal color
-set t_Co=256
-if exists('+termguicolors')
-  set termguicolors
-endif
-
 " Cursor shapes
 let &t_SI = "\<Esc>[6 q"
 let &t_SR = "\<Esc>[4 q"
@@ -333,7 +317,6 @@ colorscheme desert
 
 " Highlight cursor line underneath the cursor horizontally.
 set cursorline
-hi CursorLine cterm=NONE ctermbg=236 ctermfg=NONE gui=NONE guibg=Grey30 guifg=NONE
 
 " Disable highlight cursor line underneath the cursor vertically.
 set nocursorcolumn
@@ -559,5 +542,30 @@ endif
 if filereadable(expand("~/.config/vim/rootshortcuts.vim"))
     silent! source ~/.config/vim/rootshortcuts.vim
 endif
+
+" }}}
+
+
+" COLORS ----------------------------------------------------------------- {{{
+
+" Terminal color
+set t_Co=256
+if exists('+termguicolors')
+  set termguicolors
+endif
+
+" Cursor
+hi CursorLine cterm=NONE ctermbg=236 ctermfg=NONE gui=NONE guibg=Grey30 guifg=NONE
+
+" Transparent
+hi Normal ctermbg=NONE guibg=NONE
+hi NonText ctermbg=NONE guibg=NONE
+hi LineNr ctermbg=NONE guibg=NONE
+hi Folded ctermbg=NONE guibg=NONE
+
+hi User1 ctermbg=brown ctermfg=white guibg=black guifg=white
+hi User2 ctermbg=lightgreen ctermfg=black guibg=lightgreen guifg=black
+hi User3 ctermbg=brown ctermfg=lightcyan guibg=black guifg=lightblue
+hi User4 ctermbg=brown ctermfg=green guibg=black guifg=lightgreen
 
 " }}}
