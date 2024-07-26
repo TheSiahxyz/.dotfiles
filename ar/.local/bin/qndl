@@ -23,7 +23,7 @@ while getopts "mvr" opt; do
                     VIDEO_OPTIONS=""
                     ;;
                 *720p*) 
-                    VIDEO_FORMATS="--format \"bestvideo[height<=720]+bestaudio/best\""
+                    VIDEO_FORMATS='--format "((bv*[fps=30]/bv*)[height<=720]/(wv*[fps=30]/wv*)) + ba / (b[fps=30]/b)[height<=720]/(w[fps=30]/w)"'
                     VIDEO_OPTIONS=""
                     ;;
                 *)
