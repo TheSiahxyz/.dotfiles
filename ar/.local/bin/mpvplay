@@ -3,14 +3,14 @@
 MOUNT_SCRIPT="${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/ecrypt"
 
 check_mount() {
-    mount | grep -q " $HOME/Private " && mount | grep -q " /mnt/second/videos " || $MOUNT_SCRIPT
+    mount | grep -q " $HOME/Private " && mount | grep -q " /mnt/second" || $MOUNT_SCRIPT
 }
 
 check_unmount() {
     if lsof +D "$HOME/Private" || lsof +D "/mnt/second/videos"; then
         return
     else
-        mount | grep -q " $HOME/Private " && mount | grep -q " /mnt/second/videos " && $MOUNT_SCRIPT
+        mount | grep -q " $HOME/Private " && mount | grep -q " /mnt/second" && $MOUNT_SCRIPT
     fi
 }
 

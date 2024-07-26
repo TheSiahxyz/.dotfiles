@@ -33,13 +33,13 @@ return {
 				end
 			end, { silent = true, desc = "previous spot in the snippet" })
 
-			vim.keymap.set({ "i", "x" }, "<C-l>", function()
+			vim.keymap.set({ "i", "x" }, "<C-j>", function()
 				if ls.choice_active() then
 					ls.change_choice(1)
 				end
 			end, { silent = true, desc = "next snippet choice" })
 
-			vim.keymap.set({ "i", "x" }, "<C-h>", function()
+			vim.keymap.set({ "i", "x" }, "<C-k>", function()
 				if ls.choice_active() then
 					ls.change_choice(-1)
 				end

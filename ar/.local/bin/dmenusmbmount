@@ -4,6 +4,15 @@
 SERVER="192.168.0.5"
 MOUNT_POINT="/media/samba"
 
+getmount() {
+	[ -z "$1" ] && mp="$(find /media /mnt -mindepth 1 -maxdepth 1 -type d 2>/dev/null | dmenu -i -p "Mount this drive where?")" || mp="$1"
+	test -n "$mp"
+	if [ ! -d "$mp" ]; then
+		mkdiryn=$(printf "No\\nYes" | dmenu -i -p "$mp does not exist. Create it?")
+		[ "$mkdiryn" = "Yes" ] && (mkdir -p "$mp" 2>/dev/null || sudo -A mkdir -p "$mp")
+	fi
+}
+
 # Set SUDO_ASKPASS to use the dmenupass script
 export SUDO_ASKPASS="$HOME/.local/bin/dmenupass"
 
@@ -24,13 +33,8 @@ SHARE=$(echo "$SHARES" | dmenu -i -p "Select a share to mount:")
 echo "$SHARE"
 [ -z "$SHARE" ] && { echo "No share selected. Exiting." ; exit 1 ; }
 
-# Create mount point if it doesn't exist
-[ -d "$mp" ] || { 
-    mkdir -p "$MOUNT_POINT" >/dev/null 2>&1 || sudo mkdir -p "$MOUNT_POINT" >/dev/null 2>&1
-}
-
 # Mount the selected share using sudo with SUDO_ASKPASS
-echo "$PASSWORD" | sudo -A mount -t cifs -o username=$(whoami),password="$PASSWORD" //$SERVER/$SHARE "$MOUNT_POINT"
+getmount && echo "$PASSWORD" | sudo -A mount -t cifs -o username=$(whoami),password="$PASSWORD" //$SERVER/$SHARE "$mp"
 
 # Notify the user
 [ $? -eq 0 ] && notify-send "Samba Mount" "Successfully mounted //$SERVER/$SHARE to $MOUNT_POINT" || notify-send "Samba Mount" "Failed to mount //$SERVER/$SHARE"

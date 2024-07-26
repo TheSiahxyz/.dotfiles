@@ -40,7 +40,7 @@ return {
 		vim.keymap.set("n", "<leader>rb", ":Refactor extract_block")
 		vim.keymap.set("n", "<leader>rbf", ":Refactor extract_block_to_file")
 		-- prompt for a refactor to apply when the remap is triggered
-		vim.keymap.set({ "n", "x" }, "<leader>rr", function()
+		vim.keymap.set({ "n", "x" }, "<leader>rs", function()
 			require("refactoring").select_refactor()
 		end)
 		-- Note that not all refactor support both normal and visual mode
