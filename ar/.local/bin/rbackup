@@ -118,7 +118,7 @@ sync_nextcloud() {
 
 echo "Backup starts to $backup_path..."
 mount_luks && echo "Mount backup drive... " && echo "Success to mount luks drive!" || error "Failed to mount $backup_path"
-[ -d "$backup_path" ] || mkdir -p "$backup_path"
+[ -d "$backup_path" ] || sudo mkdir -p "$backup_path"
 echo "Sync home files..." && sync_files && echo "Success to sync files!" || error "Failed back up files"
 echo "Sync root files..." && sync_root && echo "Success to sync root!" || error "Failed back up root"
 echo "Sync server files..." && sync_server && echo "Success to sync server!" || error "Failed back up server"
