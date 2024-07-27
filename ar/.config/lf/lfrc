@@ -477,6 +477,14 @@ map su :unselect; save-select
 map sv :invert; save-select
 load-select
 
+# Sort
+map sa :set sortby atime; set info atime
+map sc :set sortby ctime; set info ctime
+map se :set sortby ext; set info
+map si :set sortby size; set info size
+map sn :set sortby natural; set info
+map st :set sortby time; set info time
+
 # Tag
 map tg tag-toggle
 
