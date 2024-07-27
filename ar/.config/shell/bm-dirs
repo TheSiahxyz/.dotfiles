@@ -73,6 +73,7 @@ sdw             ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwm
 shm             ${XDG_DATA_HOME:-${HOME}/.local/share}/mail
 shr             ${XDG_DATA_HOME:-${HOME}/.local/share}
 shz             ${XDG_DATA_HOME:-${HOME}/.local/share}/zsh
+slr             ${XDG_DATA_HOME:-${HOME}/.local/share}/lyrics
 sr              ${XDG_SOURCES_HOME:-${HOME}/.local/src}
 ssl             ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/slock
 sst             ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/st

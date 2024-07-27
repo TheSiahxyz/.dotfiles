@@ -215,12 +215,12 @@ cmd moveto ${{
 cmd mpvdir ${{
     if [ -n "$fx" ]; then
         set -- $fx
-        setsid -f mpv -- "$@"
+        setsid -f mpv --really-quiet -- "$@"
     else
         for file in *.mp4 *.mkv *.avi *.flv *.webm *.mov; do
             [ -e "$file" ] && set -- "$@" "$file"
         done
-        [ -n "$1" ] && setsid -f mpv -- "$@"
+        [ -n "$1" ] && setsid -f mpv --really-quiet -- "$@"
     fi
 }}
 
