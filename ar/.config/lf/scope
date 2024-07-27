@@ -59,6 +59,12 @@ application/vnd.openxmlformats-officedocument.presentationml.presentation)
     [ ! -f "$CACHE.jpg" ] && unoconv -f jpg -o "$CACHE.jpg" "$1"
     image "$CACHE.jpg" "$2" "$3" "$4" "$5" "$1"
     ;;
+application/x-hwp)
+    CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/thumb.$(stat --printf '%n\0%i\0%F\0%s\0%W\0%Y' -- "$(readlink -f "$1")" | sha256sum | cut -d' ' -f1)"
+    OUT_DIR="$(dirname "$CACHE")"
+    [ ! -f "$CACHE.jpg" ] && libreoffice --headless --convert-to jpg --outdir "$OUT_DIR" "$1" && mv "$OUT_DIR/$(basename "$1" .hwp).jpg" "$CACHE.jpg"
+    image "$CACHE.jpg" "$2" "$3" "$4" "$5" "$1"
+    ;;
 */epub+zip | */mobi*)
     CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/thumb.$(stat --printf '%n\0%i\0%F\0%s\0%W\0%Y' -- "$(readlink -f "$1")" | sha256sum | cut -d' ' -f1)"
     [ ! -f "$CACHE.jpg" ] && gnome-epub-thumbnailer "$1" "$CACHE.jpg"
@@ -71,13 +77,6 @@ application/vnd.openxmlformats-officedocument.wordprocessingml.document)
     CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/thumb.$(stat --printf '%n\0%i\0%F\0%s\0%W\0%Y' -- "$(readlink -f "$1")" | sha256sum | cut -d' ' -f1)"
     [ ! -f "$CACHE.txt" ] && pandoc "$1" -t plain -o "$CACHE.txt"
     bat -p --theme ansi --terminal-width "$(($4 - 2))" -f "$CACHE.txt"
-    ;;
-application/x-hwp)
-    CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/thumb.$(stat --printf '%n\0%i\0%F\0%s\0%W\0%Y' -- "$(readlink -f "$1")" | sha256sum | cut -d' ' -f1)"
-    OUT_DIR="$(dirname "$CACHE")"
-    OUT_FILE="$OUT_DIR/$(basename "$CACHE").txt"
-    [ ! -f "$OUT_FILE" ] && libreoffice --headless --convert-to txt:Text "$1" --outdir "$OUT_DIR" && mv "$OUT_DIR/$(basename "$1" .hwp).txt" "$OUT_FILE"
-    bat -p --theme ansi --terminal-width "$(($4 - 2))" -f "$OUT_FILE"
     ;;
 esac
 exit 1
