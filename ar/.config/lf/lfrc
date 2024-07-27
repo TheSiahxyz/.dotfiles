@@ -481,9 +481,9 @@ load-select
 map sa :set sortby atime; set info atime
 map sc :set sortby ctime; set info ctime
 map se :set sortby ext; set info
-map si :set sortby size; set info size
 map sn :set sortby natural; set info
 map st :set sortby time; set info time
+map sz :set sortby size; set info size
 
 # Tag
 map tg tag-toggle
