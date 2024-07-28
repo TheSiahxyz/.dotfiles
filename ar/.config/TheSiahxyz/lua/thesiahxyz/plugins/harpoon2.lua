@@ -18,7 +18,7 @@ return {
 				end,
 			},
 			{
-				"<leader>h",
+				"<C-w>",
 				function()
 					local harpoon = require("harpoon")
 					harpoon.ui:toggle_quick_menu(harpoon:list())
@@ -47,7 +47,7 @@ return {
 			})
 
 			table.insert(keys, {
-				"<leader>h" .. i,
+				"<leader>x" .. i,
 				function()
 					require("harpoon"):list():replace_at(i)
 				end,

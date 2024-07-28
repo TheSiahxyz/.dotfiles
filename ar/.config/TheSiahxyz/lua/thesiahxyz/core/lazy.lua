@@ -8,7 +8,6 @@ vim.opt.rtp:prepend(lazypath)
 require("lazy").setup({
 	spec = {
 		{ import = "thesiahxyz.plugins" },
-		{ import = "thesiahxyz.plugins.lsp" },
 	},
 	change_detection = { notify = false },
 	checker = { enabled = false },
