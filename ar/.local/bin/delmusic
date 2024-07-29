@@ -24,7 +24,7 @@ confirm=$(printf "Yes\nNo" | dmenu -i -p "Delete $selected_filename and update m
 }
 
 # More portable sed command without -i and updating mpc
-if rm "$selected_file" && grep -v "$video_id" "$music_txt" >"${music_txt}.tmp" && mv "${music_txt}.tmp" "$music_txt"; then
+if grep -v "$video_id" "$music_txt" >"${music_txt}.tmp" && mv "${music_txt}.tmp" "$music_txt"; then
     # Search and remove the filename from playlists
 	for playlist in "$playlist_dir"/*.m3u; do
 		[ -e "$playlist" ] || continue
@@ -34,8 +34,9 @@ if rm "$selected_file" && grep -v "$video_id" "$music_txt" >"${music_txt}.tmp" &
 			sed -i '/^$/d' "$playlist"
 		fi
 	done
-    
-	# Update mpc database
+
+    # Delete the music file
+    rm "$selected_file"
 	mpc update >/dev/null
 	notify-send "🎵 Success to delete:" "$selected_filename"
 else
