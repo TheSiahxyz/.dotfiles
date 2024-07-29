@@ -155,7 +155,7 @@ alias ggg="ssh $THESIAH_GIT"
 
 # greb
 alias grep="grep --color"
-alias grepw="grep -R --include='*'"
+alias grepw="grep -R -i --include='*'"
 
 # hugo
 alias hss="hugo server --noHTTPCache"
