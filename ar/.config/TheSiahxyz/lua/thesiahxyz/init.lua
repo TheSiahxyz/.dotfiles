@@ -3,11 +3,6 @@ require("thesiahxyz.core.keymaps")
 require("thesiahxyz.core.options")
 require("thesiahxyz.core.lazy")
 
-vim.cmd("let g:netrw_liststyle = 0")
-vim.g.netrw_browse_split = 0
-vim.g.netrw_banner = 0
-vim.g.netrw_winsize = 25
-
 -- Plenary
 function R(name)
 	require("plenary.reload").reload_module(name)

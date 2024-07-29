@@ -4,6 +4,15 @@ end
 
 local autocmd = vim.api.nvim_create_autocmd
 
+-- Change the color of symlink files to distinguish between directory and symlink files
+autocmd("FileType", {
+	group = augroup("linked_files"),
+	pattern = "netrw",
+	callback = function()
+		vim.cmd("highlight NetrwSymlink guifg=#689D6A ctermfg=214")
+	end,
+})
+
 -- Check if we need to reload the file when it changed
 autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
 	group = augroup("checktime"),

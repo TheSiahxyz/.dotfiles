@@ -1,4 +1,8 @@
 vim.g.have_nerd_font = true
+vim.g.netrw_browse_split = 0
+vim.g.netrw_banner = 1
+vim.g.netrw_liststyle = 0
+vim.g.netrw_winsize = 25
 vim.opt.backup = false
 vim.opt.breakindent = true
 vim.opt.cursorline = true
