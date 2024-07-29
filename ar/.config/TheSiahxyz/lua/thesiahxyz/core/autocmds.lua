@@ -302,15 +302,34 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 
 -- Recompile dwmblocks on config edit.
 local home = os.getenv("HOME") -- Gets the home directory
+local dmenu_path = home .. "/.local/src/suckless/dmenu/config.h"
 local dwmblocks_path = home .. "/.local/src/suckless/dwmblocks/config.h"
+local st_path = home .. "/.local/src/suckless/st/config.h"
+local slock_path = home .. "/.local/src/suckless/slock/config.h"
+
 vim.api.nvim_create_autocmd("BufWritePost", {
-	pattern = dwmblocks_path,
-	group = vim.api.nvim_create_augroup("DwmblocksConfigGroup", { clear = true }),
+	pattern = {dmenu_path, dwmblocks_path, slock_path, st_path},
+	group = vim.api.nvim_create_augroup("SucklessConfigGroup", { clear = true }),
 	callback = function()
 		vim.cmd(
 			"!cd "
 				.. home
+				.. "/.local/src/suckless/dmenu/ && sudo make install"
+		)
+		vim.cmd(
+			"!cd "
+				.. home
 				.. "/.local/src/suckless/dwmblocks/ && sudo make install && { killall -q dwmblocks; setsid -f dwmblocks; }"
+		)
+		vim.cmd(
+			"!cd "
+				.. home
+				.. "/.local/src/suckless/slock/ && sudo make install"
+		)
+		vim.cmd(
+			"!cd "
+				.. home
+				.. "/.local/src/suckless/st/ && sudo make install"
 		)
 	end,
 })
