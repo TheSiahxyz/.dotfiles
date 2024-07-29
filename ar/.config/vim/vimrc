@@ -113,7 +113,7 @@ if has('gui_running')
 	if has("macvim")
 		set guifont=Menlo\ Regular:h14
 	elseif has("win32")
-		set guifont="Consolas 14"
+		set guifont=Consolas\ 14
 	else
 		set guifont=Consolas\ 18
 	endif
@@ -562,6 +562,7 @@ hi Normal ctermbg=NONE guibg=NONE
 hi NonText ctermbg=NONE guibg=NONE
 hi LineNr ctermbg=NONE guibg=NONE
 hi Folded ctermbg=NONE guibg=NONE
+hi EndOfBuffer ctermfg=Grey guifg=Grey
 
 hi User1 ctermbg=brown ctermfg=white guibg=black guifg=white
 hi User2 ctermbg=lightgreen ctermfg=black guibg=lightgreen guifg=black

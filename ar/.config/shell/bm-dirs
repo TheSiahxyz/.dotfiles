@@ -60,6 +60,7 @@ Hst             /media/storage
 Hvt             /media/Ventoy
 Hvv             /mnt/second/videos
 Hwv             /media/win10/Videos
+kdn             ${XDG_DATA_HOME:-${HOME}/.local/share}/kakaotalk/drive_c/users/si/Documents/"카카오톡 받은 파일"
 pae             ${PASSWORD_STORE_DIR:-$XDG_DATA_HOME/.password-store}/exported_keys
 pah             ${PASSWORD_STORE_DIR:-$XDG_DATA_HOME/.password-store}/ssh
 pas             ${PASSWORD_STORE_DIR:-$XDG_DATA_HOME/.password-store}
