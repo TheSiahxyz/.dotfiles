@@ -28,7 +28,7 @@ elif [ "$(cat /sys/class/net/w*/operstate 2>/dev/null)" = 'down' ]; then
 fi
 
 # Ethernet
-[ "$(cat /sys/class/net/e*/operstate 2>/dev/null)" = 'up' ] && ethericon=" 🌐" || ethericon=" ❎"
+[ "$(cat /sys/class/net/e*/operstate 2>/dev/null)" = 'up' ] && ethericon="🌐" || ethericon="❎"
 
 # TUN
 [ -n "$(cat /sys/class/net/tun*/operstate 2>/dev/null)" ] && tunicon=" 🔒"
@@ -38,5 +38,5 @@ if [ "$(cat /sys/class/net/w*/operstate 2>/dev/null)" = 'up' ] && [ ! "$(cat /sy
 elif [ ! "$(cat /sys/class/net/w*/operstate 2>/dev/null)" = 'up' ] && [ "$(cat /sys/class/net/e*/operstate 2>/dev/null)" = 'up' ]; then
     printf "%s%s\n" "$ethericon" "$tunicon"
 else
-    printf "%s%s%s\n" "$wifiicon" "$ethericon" "$tunicon"
+    printf "%s%s%s\n" "$wifiicon" " $ethericon" "$tunicon"
 fi
