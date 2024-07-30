@@ -44,7 +44,7 @@ xinput list | grep 'id=' | while read -r line; do
                 xinput set-prop "$id" "libinput Tapping Enabled" 0
                 ;;
             *"Lite-On Tech Lenovo USB Travel Keyboard with Ultra Nav Mouse"*)
-                [ -z "$1" ] && xinput set-prop "$id" "Coordinate Transformation Matrix" 5, 0, 0, 0, 5, 0, 0, 0, 1 || xinput set-prop "$id" "Coordinate Transformation Matrix" $1, 0, 0, 0, $1, 0, 0, 0, 1
+                [ -z "$1" ] && xinput set-prop "$id" "Coordinate Transformation Matrix" 3, 0, 0, 0, 3, 0, 0, 0, 1 || xinput set-prop "$id" "Coordinate Transformation Matrix" $1, 0, 0, 0, $1, 0, 0, 0, 1
                 xinput set-prop "$id" "libinput Scroll Method Enabled" 0, 0, 1
                 ;;
             *"Logitech USB Receiver"*)
