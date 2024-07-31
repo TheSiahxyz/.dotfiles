@@ -84,7 +84,7 @@ case "$CONTENT_CHOICE" in
 	;;
 "Local Files")
 	check_mount
-    printf "%s\n%s\n%s\n%s\n%s\n%s\n" "$HOME/Downloads" "$HOME/Private" "$HOME/Torrents/complete" "$HOME/Videos" "/media" "/mnt/second" | dmenu -i -p "Choose your initial directory:" | {
+    printf "%s\n%s\n%s\n%s\n%s\n%s\n" "$HOME/Downloads" "$HOME/Private" "$HOME/Torrents/complete" "$HOME/Videos" "/media/$USER" "/mnt/second" | dmenu -i -p "Choose your initial directory:" | {
 		read -r initial_directory
 		[ -z "$initial_directory" ] && exit
 		SELECTED_FOLDER="$initial_directory"

@@ -2,10 +2,10 @@
 
 # Define variables
 SERVER="192.168.0.5"
-MOUNT_POINT="/media/samba"
+MOUNT_POINT="/media/$USER/samba"
 
 getmount() {
-	[ -z "$1" ] && mp="$(find /media /mnt -mindepth 1 -maxdepth 1 -type d 2>/dev/null | dmenu -i -p "Mount this drive where?")" || mp="$1"
+	[ -z "$1" ] && mp="$(find /media/$USER /mnt -mindepth 1 -maxdepth 1 -type d 2>/dev/null | dmenu -i -p "Mount this drive where?")" || mp="$1"
 	test -n "$mp"
 	if [ ! -d "$mp" ]; then
 		mkdiryn=$(printf "No\\nYes" | dmenu -i -p "$mp does not exist. Create it?")

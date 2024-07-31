@@ -225,8 +225,8 @@ alias rscd="rsync -vrazPlu --delete"
 alias rscr="rsync -vrazPlu --remove-source-files"
 
 # samba
-alias winip="sudo mount -t cifs //192.168.0.1/HDD1 /media/hdd -o username=si,vers=2.0"
-alias win10="sudo mount -t cifs //192.168.0.3/Share /media/win10 -o username=THESIAHXYZ-WIN1"
+alias winip="sudo mount -t cifs //192.168.0.1/HDD1 /media/$USER/hdd -o username=si,vers=2.0"
+alias win10="sudo mount -t cifs //192.168.0.3/Share /media/$USER/win10 -o username=THESIAHXYZ-WIN1"
 
 # sc-im
 alias scim="sc-im"

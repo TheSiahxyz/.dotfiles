@@ -22,7 +22,7 @@ test -n "$chosen"
 [ "${chosen#*/}" = "${chosen}" ] && [ "${chosen##*/}" = "$(sudo lsblk -no "label" $(df /${chosen#*/} | tail -n 1 | awk '{print $1}'))" ] && rmcheck=true || rmcheck=false
 mountpath="$(sudo lsblk -no "mountpoints" $(df /${chosen#*/} | tail -n 1 | awk '{print $1}'))"
 sudo -A umount -l "/${chosen#*/}"
-[ "/media/${chosen##*/}" = "$mountpath" ] && [ $rmcheck ] && {
+[ "/media/$USER/${chosen##*/}" = "$mountpath" ] && [ $rmcheck ] && {
     [ -e "/${chosen#*/}" ] && [ -z "$(ls -A "/${chosen#*/}")" ] && (rm -rf "/${chosen#*/}" || sudo rm -rf "/${chosen#*/}") || {
         rmdiryn=$(printf "No\\nYes" | dmenu -i -p "Do you want to delete /${chosen#*/}?")
         [ "$rmdiryn" = "Yes" ] && (rm -rf "/${chosen#*/}" 2>/dev/null || sudo -A rm -r "/${chosen#*/}")
