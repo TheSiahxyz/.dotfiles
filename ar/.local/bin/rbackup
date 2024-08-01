@@ -18,8 +18,8 @@ thesiah_path="$web_path/public"
 lf_path="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/ar/.config/lf"
 
 error() {
-	printf "%s\n" "$1" >&2
-	exit 1
+    printf "%s\n" "$1" >&2
+    exit 1
 }
 
 mount_luks() {
@@ -44,8 +44,6 @@ sync_files() {
 
 sync_root() {
     # clean targets
-    ssh "$THESIAH_SERVER" "rm -rf /root/.config /var/www/thesiah"
-    ssh "$THESIAH_SERVER" "mkdir -p /root/.config/bash /root/.config/shell /root/.config/vim /root/.local/bin /root/.local/share /root/.local/state /var/www/thesiah"
     sudo rm -rf /root/.config
     sudo mkdir -p /root/.config/{bash,lf,shell,vim} /root/.local/{bin,share,state}
 
@@ -74,6 +72,10 @@ sync_root() {
 }
 
 sync_server() {
+    # clean targets
+    ssh "$THESIAH_SERVER" "rm -rf /root/.config /var/www/thesiah"
+    ssh "$THESIAH_SERVER" "mkdir -p /root/.config/bash /root/.config/shell /root/.config/vim /root/.local/bin /root/.local/share /root/.local/state /var/www/thesiah"
+
     # Sync operations with explicit error checking
     rsync -vrazPlu --delete "$thesiah_path/" "$THESIAH_SERVER:/var/www/thesiah/" >/dev/null 2>&1
     rsync -vrazPlu --delete "$vim_path/vimrc" "$THESIAH_SERVER:/root/.config/vim/" >/dev/null 2>&1
@@ -84,7 +86,7 @@ sync_server() {
 
     # Adding custom shortcuts to root's shell configuration on the remote system
     ssh "$THESIAH_SERVER" "echo 'web=\"cd /var/www && ls -A\" \\' >> /root/.config/shell/rootshortcutrc"
-    ssh "$THESIAH_SERVER" "echo 'wen=\"cd /var/www/nextcloud && ls -A\" \\' >> /root/.config/shell/rootshortcutrc" 
+    ssh "$THESIAH_SERVER" "echo 'wen=\"cd /var/www/nextcloud && ls -A\" \\' >> /root/.config/shell/rootshortcutrc"
     ssh "$THESIAH_SERVER" "echo 'wep=\"cd /var/www/prosody && ls -A\" \\' >> /root/.config/shell/rootshortcutrc"
     ssh "$THESIAH_SERVER" "echo 'wet=\"cd /var/www/thesiah && ls -A\" \\' >> /root/.config/shell/rootshortcutrc"
     ssh "$THESIAH_SERVER" "echo 'gng=\"cd /etc/nginx/sites-available && ls -A\" \\' >> /root/.config/shell/rootshortcutrc"
@@ -95,7 +97,7 @@ sync_server() {
     ssh "$THESIAH_SERVER" "chown -R root:root /root/.config/"
     ssh "$THESIAH_SERVER" "ln -sf /root/.config/bash/bash_profile /root/.profile"
     ssh "$THESIAH_SERVER" "source /root/.profile"
-    
+
     # Sync for Git
     ssh "$THESIAH_SERVER" "cp -r /root/.config /var/www/git/"
     ssh "$THESIAH_SERVER" "chown -R git:git /var/www/git/.config/"
@@ -117,10 +119,17 @@ sync_nextcloud() {
 }
 
 echo "Backup starts to $backup_path..."
-mount_luks && echo "Mount backup drive... " && echo "Success to mount luks drive!" || error "Failed to mount $backup_path"
-[ -d "$backup_path" ] || sudo mkdir -p "$backup_path"
-echo "Sync home files..." && sync_files && echo "Success to sync files!" || error "Failed back up files"
-echo "Sync root files..." && sync_root && echo "Success to sync root!" || error "Failed back up root"
-echo "Sync server files..." && sync_server && echo "Success to sync server!" || error "Failed back up server"
-echo "Sync files to nextcloud..." && sync_nextcloud && echo "Success to sync nextcloud!" || error "Failed back up nextcloud"
-echo "Done!"
+while getopts "r" opt; do
+    case $opt in
+    r) echo "Sync root files..." && sync_root && echo "Success to sync root!" || error "Failed back up root" ;;
+    *)
+        mount_luks && echo "Mount backup drive... " && echo "Success to mount luks drive!" || error "Failed to mount $backup_path"
+        [ -d "$backup_path" ] || sudo mkdir -p "$backup_path"
+        echo "Sync home files..." && sync_files && echo "Success to sync files!" || error "Failed back up files"
+        echo "Sync root files..." && sync_root && echo "Success to sync root!" || error "Failed back up root"
+        echo "Sync server files..." && sync_server && echo "Success to sync server!" || error "Failed back up server"
+        echo "Sync files to nextcloud..." && sync_nextcloud && echo "Success to sync nextcloud!" || error "Failed back up nextcloud"
+        echo "Done!"
+        ;;
+    esac
+done
