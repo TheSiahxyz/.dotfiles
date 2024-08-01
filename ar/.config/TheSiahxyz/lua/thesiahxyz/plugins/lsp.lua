@@ -64,6 +64,7 @@ return {
 			ensure_installed = {
 				"beautysh", -- zsh formatter
 				"black", -- python formatter
+                "debugpy", -- python debuger
 				"eslint_d",
 				"isort", -- python formatter
 				"prettier", -- prettier formatter
