@@ -129,7 +129,7 @@ while getopts "r" opt; do
         echo "Sync root files..." && sync_root && echo "Success to sync root!" || error "Failed back up root"
         echo "Sync server files..." && sync_server && echo "Success to sync server!" || error "Failed back up server"
         echo "Sync files to nextcloud..." && sync_nextcloud && echo "Success to sync nextcloud!" || error "Failed back up nextcloud"
-        echo "Done!"
         ;;
     esac
 done
+echo "Done!"

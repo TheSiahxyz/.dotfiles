@@ -22,7 +22,7 @@ play_url() {
 }
 
 play_media() {
-    if echo "$1" | grep -q "/home/$USER/Private"; then
+    if echo "$1" | grep -q "/home/$USER/Private" || echo "$1" | grep -q "/mnt/second"; then
         mpv "$@" && check_unmount || exit
     else
         check_unmount && mpv "$@" || exit
@@ -30,8 +30,7 @@ play_media() {
 }
 
 play_playlist() {
-	playlist_name=$1
-	mpv --playlist="$HOME/.config/mpv/playlists/$playlist_name.m3u"
+	mpv --playlist="$1"
 }
 
 tmp_playlist() {
@@ -41,7 +40,7 @@ tmp_playlist() {
     [ -f "$tmplist" ] && rm -rf "$tmplist"
     find "$1" -maxdepth 1 -type f \( -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.mov" -o -iname "*.flv" -o -iname "*.wmv" -o -iname "*.webm" -o -iname "*.mpeg" -o -iname "*.mpg" \) \
         -exec echo {} >> "$tmplist" \;
-    play_playlist "tmplist"
+    play_playlist "$tmplist"
     rm -rf "$tmplist"
 }
 
@@ -54,13 +53,13 @@ list_and_play() {
             [ -z "$search_term" ] && exit
             files=$(find "$directory" -type f \( -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.mov" -o -iname "*.flv" -o -iname "*.wmv" -o -iname "*.webm" -o -iname "*.mpeg" -o -iname "*.mpg" \) -iname "*$search_term*")
             [ -z "$files" ] && exit
-            tmpplaylist=$(mktemp /tmp/mpv_playlist.XXXXXX)
+            tmpplaylist=$(mktemp /tmp/mpv_playlist_XXXXXX.m3u)
             echo "$files" | while read -r file; do
                 echo "$file"
             done >"$tmpplaylist"
             cat "$tmpplaylist" # For debugging: output the contents of the playlist to verify.
-            play_media --playlist="$tmpplaylist"
-            rm -f "$tmpplaylist"
+            play_playlist "$tmpplaylist"
+            rm -rf "$tmpplaylist"
             ;;
         "List files")
             files_with_paths=$(find "$directory" -mindepth 1 -maxdepth 1 -type f \( -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.webm" -o -iname "*.avi" -o -iname "*.flv" -o -iname "*.wmv" -o -iname "*.ts" \) | sort)
