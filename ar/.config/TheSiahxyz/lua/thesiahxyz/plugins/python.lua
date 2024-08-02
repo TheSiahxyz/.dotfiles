@@ -64,8 +64,6 @@ return {
 			end
 		end,
 		keys = {
-			{ "<leader>d", "", desc = "+debug", mode = { "n", "v" } },
-
 			{
 				"<leader>dB",
 				function()
