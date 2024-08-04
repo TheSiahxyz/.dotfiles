@@ -9,6 +9,21 @@ IFS="${IFS%_}"
 image() {
     if [ -f "$1" ] && [ -n "$DISPLAY" ] && [ -z "$WAYLAND_DISPLAY" ] && command -V ueberzug >/dev/null 2>&1; then
         printf '{"action": "add", "identifier": "PREVIEW", "x": "%s", "y": "%s", "width": "%s", "height": "%s", "scaler": "contain", "path": "%s"}\n' "$4" "$5" "$(($2 - 1))" "$(($3 - 1))" "$1" >"$FIFO_UEBERZUG"
+        for ((i=0; i<"$(($3-4))"; i++)); do
+            printf '\n'
+        done
+        for ((i=0; i<"$(($2-20))"; i++)); do
+            printf ' '
+        done
+        mediainfo --Output="General;%FileSize/String%" "$6"
+        for ((i=0; i<"$(($2-20))"; i++)); do
+            printf ' '
+        done
+        mediainfo --Output="Video;%Duration/String%" "$6"
+        for ((i=0; i<"$(($2-20))"; i++)); do
+            printf ' '
+        done
+        mediainfo --Output="Video;%Width%x%Height%" "$6"
     else
         mediainfo "$6"
     fi
