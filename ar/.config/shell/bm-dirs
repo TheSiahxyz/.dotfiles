@@ -29,8 +29,8 @@ dot             ${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}
 Esm             /etc/samba
 Esv             /etc/runit/sv
 gdc             ${XDG_DOCUMENTS_DIR:-${HOME}/Documents}
-gdk             ${XDG_DESKTOP_DIR:-${HOME}/Desktop}
 gdn             ${XDG_DOWNLOAD_DIR:-${HOME}/Downloads}
+gds             ${XDG_DESKTOP_DIR:-${HOME}/Desktop}
 gmu             ${XDG_MUSIC_DIR:-${HOME}/Music}
 gmx             $HOME/.mozilla/firefox/si.default
 gob             $HOME/Private/git/Obsidian/SI
