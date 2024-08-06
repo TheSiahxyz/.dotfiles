@@ -16,10 +16,14 @@ while getopts "mvr" opt; do
             DOWNLOAD_TYPE="video"
             OUTPUT_DIR="${XDG_VIDEOS_DIR:-${HOME}/Videos}"
             YTDL_OUTPUT_FORMAT="${OUTPUT_DIR}/%(title)s [%(id)s].%(ext)s"
-            VIDEO_EXT=$(printf "default\n720p\nmp4\nmkv" | dmenu -i -p "Choose an encoding for the video") || exit
+            VIDEO_EXT=$(printf "default\n1080p\n720p\nmp4\nmkv" | dmenu -i -p "Choose an encoding for the video") || exit
             case $VIDEO_EXT in
                 default)
                     VIDEO_FORMATS="--format bestvideo+bestaudio/best"
+                    VIDEO_OPTIONS=""
+                    ;;
+                *1080p*) 
+                    VIDEO_FORMATS='--format "((bv*[fps=60]/bv*)[height<=1080]/(wv*[fps=60]/wv*)) + ba / (b[fps=60]/b)[height<=1080]/(w[fps=60]/w)"'
                     VIDEO_OPTIONS=""
                     ;;
                 *720p*) 
