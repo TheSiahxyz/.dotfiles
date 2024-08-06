@@ -4,13 +4,13 @@ bs              ${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/statusbar
 cab             ${XDG_CONFIG_HOME:-${HOME}/.config}/abook
 cac             ${XDG_CACHE_HOME:-${HOME}/.cache}
 cbc             ${XDG_CONFIG_HOME:-${HOME}/.config}/bash
-cf              ${XDG_CONFIG_HOME:-${HOME}/.config}
+cfg             ${XDG_CONFIG_HOME:-${HOME}/.config}
+cfx             ${XDG_CONFIG_HOME:-${HOME}/.config}/firefox
 clf             ${XDG_CONFIG_HOME:-${HOME}/.config}/lf
 clv             ${XDG_CONFIG_HOME:-${HOME}/.config}/LazyVim
 cmd             ${XDG_CONFIG_HOME:-${HOME}/.config}/mpd
 cmv             ${XDG_CONFIG_HOME:-${HOME}/.config}/mpv
 cmw             ${XDG_CONFIG_HOME:-${HOME}/.config}/mutt
-cmx             ${XDG_CONFIG_HOME:-${HOME}/.config}/firefox
 cnc             ${XDG_CONFIG_HOME:-${HOME}/.config}/NvChad
 cnp             ${XDG_CONFIG_HOME:-${HOME}/.config}/ncmpcpp
 cns             ${XDG_CONFIG_HOME:-${HOME}/.config}/newsboat

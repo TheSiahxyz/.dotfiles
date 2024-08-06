@@ -38,7 +38,7 @@ if grep -v "$video_id" "$music_txt" >"${music_txt}.tmp" && mv "${music_txt}.tmp"
     # Delete the music file
     rm "$selected_file"
 	mpc update >/dev/null
-	notify-send "🎵 Success to delete:" "$selected_filename"
+	notify-send " Success to delete:" "$selected_filename"
 else
 	notify-send "❌ An error occurred."
 fi
