@@ -122,8 +122,6 @@ echo "Backup starts to $backup_path..."
 while getopts "r" opt; do
     case $opt in
     r) echo "Sync root files..." && sync_root && echo "Success to sync root!" && echo "Done!" && exit || error "Failed back up root" ;;
-    *)
-        ;;
     esac
 done
 
