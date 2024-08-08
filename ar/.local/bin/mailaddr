@@ -8,5 +8,5 @@ for file in "${XDG_CONFIG_HOME:-${HOME}/.config}/mutt/accounts/"*.muttrc; do
 done
 
 [ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/mutt/muttrc" ] && [ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/mutt/thesiah.muttrc" ] &&
-    ! grep -qF "source \/home\/$USER\/\.config\/mutt\/thesiah\.muttrc" "${XDG_CONFIG_HOME:-${HOME}/.config}/mutt/muttrc" &&
+    ! grep -qF "source /home/$USER/.config/mutt/thesiah.muttrc" "${XDG_CONFIG_HOME:-${HOME}/.config}/mutt/muttrc" &&
     sed -i "/source \/usr\/share\/mutt-wizard\/mutt-wizard\.muttrc/a source \/home\/$USER\/.config\/mutt\/thesiah\.muttrc" /home/"$USER"/.config/mutt/muttrc
