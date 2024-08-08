@@ -52,6 +52,12 @@ stow_package() {
 	fi
 }
 
+mail_sync() {
+    [ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/mutt/muttrc" ] && [ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/mutt/thesiah.muttrc" ] &&
+        ! grep -qF "source \/home\/$USER\/\.config\/mutt\/thesiah\.muttrc" "${XDG_CONFIG_HOME:-${HOME}/.config}/mutt/muttrc" &&
+        sed -i "/source \/usr\/share\/mutt-wizard\/mutt-wizard\.muttrc/a source \/home\/$USER\/.config\/mutt\/thesiah\.muttrc" /home/"$USER"/.config/mutt/muttrc
+}
+
 # Ensure running from the correct directory
 cd "$stowdir" || exit 1
 
@@ -62,8 +68,7 @@ targetdir=$(select_stow_package) || exit 1
 resolve=$(ask_resolution_strategy) || exit 1
 
 # Attempt to stow the package and resolve any conflicts
-stow_package "$targetdir" "$resolve"
-stow_package "default" "$resolve"
+stow_package "$targetdir" "$resolve" && stow_package "default" "$resolve" && mail_sync
 ln -sf "$stowdir/$targetdir/.config/shell/profile" "$HOME/.zprofile"
 
 # Link for bash
