@@ -50,9 +50,6 @@ stow_package() {
 		output=$(stow --no-folding -S "$target" 2>&1)
 		status=$?
 	fi
-
-	# Final notification based on status
-    [ "$status" -eq 0 ] && stow --no-folding -S default && notify-send "🔗 Successfully stowed" || { notify-send "❌ Failed to stow"; exit 1; }
 }
 
 # Ensure running from the correct directory
@@ -66,6 +63,7 @@ resolve=$(ask_resolution_strategy) || exit 1
 
 # Attempt to stow the package and resolve any conflicts
 stow_package "$targetdir" "$resolve"
+stow_package "default" "$resolve"
 ln -sf "$stowdir/$targetdir/.config/shell/profile" "$HOME/.zprofile"
 
 # Link for bash

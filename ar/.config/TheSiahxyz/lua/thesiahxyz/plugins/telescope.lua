@@ -78,7 +78,7 @@ return {
 			})
 		end)
 		vim.keymap.set("n", "<leader>fF", function()
-            require("telescope.builtin").find_files({ cwd = vim.fn.expand("~") })
+			require("telescope.builtin").find_files({ cwd = vim.fn.expand("~") })
 		end)
 		vim.keymap.set("n", "<leader>fg", vim.find_files_from_project_git_root)
 		vim.keymap.set("n", "<leader>fG", function()
@@ -96,6 +96,9 @@ return {
 			require("telescope.builtin").oldfiles({
 				find_command = { "rg", "--files", "--follow", "--hidden", "--glob", "!**/.git/*" },
 			})
+		end)
+		vim.keymap.set("n", "<leader>fp", function()
+			require("telescope.builtin").find_files({ cwd = vim.fn.expand("~/Private") })
 		end)
 		vim.keymap.set("n", "<leader>fr", function()
 			require("telescope.builtin").find_files({
