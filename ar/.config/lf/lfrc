@@ -478,8 +478,14 @@ map sm share-samba
 
 # Select
 map <space> :toggle; down; save-select
+map sb :invert-below; save-select
+map si :invert; save-select
+map sp :glob-select "*.png"; glob-select "*.jpg"; glob-select "*.jpeg"; glob-select "*.bmp"; glob-select "*.gif"; glob-select "*.tiff"; glob-select "*.tif"; glob-select "*.svg"; glob-select "*.webp"; save-select
 map su :unselect; save-select
-map sv :invert; save-select
+map sU :glob-unselect; save-select
+map sv :glob-select "*.mp4"; glob-select "*.mkv"; glob-select "*.mov"; glob-select "*.flv"; glob-select "*.wmv"; glob-select "*.webm"; glob-select "*.mpeg"; glob-select "*.mpg"; save-select
+load-select
+
 load-select
 
 # Sort
