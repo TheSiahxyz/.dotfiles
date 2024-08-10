@@ -96,6 +96,3 @@
 .gitattributes export-ignore
 .gitignore     export-ignore
 .gitkeep       export-ignore
-
-# Custom
-snippets   binary 
