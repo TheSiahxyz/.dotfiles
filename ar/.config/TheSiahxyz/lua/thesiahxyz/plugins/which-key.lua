@@ -1,10 +1,8 @@
 return {
 	"folke/which-key.nvim",
-	lazy = false,
+	event = "VeryLazy",
 	cmd = "WhichKey",
-	opts = {
-		plugins = { spelling = true },
-	},
+	opts = {},
 	config = function()
 		local wk = require("which-key")
 		wk.add({
