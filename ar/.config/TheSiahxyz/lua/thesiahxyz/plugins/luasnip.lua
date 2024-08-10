@@ -19,31 +19,31 @@ return {
 				return c(pos, choices, opts)
 			end
 
-            vim.cmd.runtime({ args = { "lua/thesiahxyz/snippets/*.lua" }, bang = true }) -- load custom snippets
+			vim.cmd.runtime({ args = { "lua/thesiahxyz/snippets/*.lua" }, bang = true }) -- load custom snippets
 
 			vim.keymap.set({ "i", "x" }, "<A-L>", function()
 				if ls.expand_or_jumpable() then
 					ls.expand_or_jump()
 				end
-			end, { silent = true, desc = "expand snippet or jump to the next snippet node" })
+			end, { silent = true, desc = "Expand Snippet or Jump to the Next Snippet Node" })
 
 			vim.keymap.set({ "i", "x" }, "<A-H>", function()
 				if ls.jumpable(-1) then
 					ls.jump(-1)
 				end
-			end, { silent = true, desc = "previous spot in the snippet" })
+			end, { silent = true, desc = "Previous Spot in the Snippet" })
 
 			vim.keymap.set({ "i", "x" }, "<A-l>", function()
 				if ls.choice_active() then
 					ls.change_choice(1)
 				end
-			end, { silent = true, desc = "next snippet choice" })
+			end, { silent = true, desc = "Next Snippet Choice" })
 
 			vim.keymap.set({ "i", "x" }, "<A-h>", function()
 				if ls.choice_active() then
 					ls.change_choice(-1)
 				end
-			end, { silent = true, desc = "previous snippet choice" })
+			end, { silent = true, desc = "Previous Snippet Choice" })
 		end,
 	},
 }

@@ -156,37 +156,36 @@ autocmd("BufWritePre", {
 autocmd("LspAttach", {
 	group = augroup("lsp_attach"),
 	callback = function(e)
-		local opts = { buffer = e.buf }
 		vim.keymap.set("n", "gD", function()
 			vim.lsp.buf.definition()
-		end, opts)
+		end, { buffer = e.buf, desc = "Go to Definition" })
 		vim.keymap.set("n", "K", function()
 			vim.lsp.buf.hover()
-		end, opts)
+		end, { buffer = e.buf, desc = "Go to Keywords" })
 		vim.keymap.set("n", "<leader>vws", function()
 			vim.lsp.buf.workspace_symbol()
-		end, opts)
+		end, { buffer = e.buf, desc = "Workspace Symbol" })
 		vim.keymap.set("n", "<leader>vd", function()
 			vim.diagnostic.open_float()
-		end, opts)
+		end, { buffer = e.buf, desc = "Open Diagnostic" })
 		vim.keymap.set("n", "<leader>vca", function()
 			vim.lsp.buf.code_action()
-		end, opts)
+		end, { buffer = e.buf, desc = "Code Action" })
 		vim.keymap.set("n", "<leader>vrr", function()
 			vim.lsp.buf.references()
-		end, opts)
+		end, { buffer = e.buf, desc = "References" })
 		vim.keymap.set("n", "<leader>vrn", function()
 			vim.lsp.buf.rename()
-		end, opts)
+		end, { buffer = e.buf, desc = "Rename" })
 		vim.keymap.set("i", "<leader>vh", function()
 			vim.lsp.buf.signature_help()
-		end, opts)
-		vim.keymap.set("n", "[d", function()
-			vim.diagnostic.goto_next()
-		end, opts)
+		end, { buffer = e.buf, desc = "Signature Help" })
 		vim.keymap.set("n", "]d", function()
 			vim.diagnostic.goto_prev()
-		end, opts)
+		end, { buffer = e.buf, desc = "Go to Previous Diagnostic" })
+		vim.keymap.set("n", "[d", function()
+			vim.diagnostic.goto_next()
+		end, { buffer = e.buf, desc = "Go to Next Diagnostic" })
 	end,
 })
 
@@ -308,29 +307,17 @@ local st_path = home .. "/.local/src/suckless/st/config.h"
 local slock_path = home .. "/.local/src/suckless/slock/config.h"
 
 vim.api.nvim_create_autocmd("BufWritePost", {
-	pattern = {dmenu_path, dwmblocks_path, slock_path, st_path},
+	pattern = { dmenu_path, dwmblocks_path, slock_path, st_path },
 	group = vim.api.nvim_create_augroup("SucklessConfigGroup", { clear = true }),
 	callback = function()
-		vim.cmd(
-			"!cd "
-				.. home
-				.. "/.local/src/suckless/dmenu/ && sudo make install"
-		)
+		vim.cmd("!cd " .. home .. "/.local/src/suckless/dmenu/ && sudo make install")
 		vim.cmd(
 			"!cd "
 				.. home
 				.. "/.local/src/suckless/dwmblocks/ && sudo make install && { killall -q dwmblocks; setsid -f dwmblocks; }"
 		)
-		vim.cmd(
-			"!cd "
-				.. home
-				.. "/.local/src/suckless/slock/ && sudo make install"
-		)
-		vim.cmd(
-			"!cd "
-				.. home
-				.. "/.local/src/suckless/st/ && sudo make install"
-		)
+		vim.cmd("!cd " .. home .. "/.local/src/suckless/slock/ && sudo make install")
+		vim.cmd("!cd " .. home .. "/.local/src/suckless/st/ && sudo make install")
 	end,
 })
 

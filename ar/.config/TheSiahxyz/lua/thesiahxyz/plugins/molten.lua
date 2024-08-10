@@ -102,29 +102,29 @@ return {
 				},
 			})
 			local runner = require("quarto.runner")
-			vim.keymap.set("n", "<leader>jc", runner.run_cell, { silent = true })
-			vim.keymap.set("n", "<leader>jC", runner.run_above, { silent = true })
-			vim.keymap.set("n", "<leader>jl", runner.run_line, { silent = true })
-			vim.keymap.set("v", "<leader>jv", runner.run_range, { silent = true })
-			vim.keymap.set("n", "<leader>jA", runner.run_all, { silent = true })
+			vim.keymap.set("n", "<leader>jc", runner.run_cell, { silent = true, desc = "Run Cell" })
+			vim.keymap.set("n", "<leader>jC", runner.run_above, { silent = true, desc = "Run Above Cell" })
+			vim.keymap.set("n", "<leader>jl", runner.run_line, { silent = true, desc = "Run Line" })
+			vim.keymap.set("v", "<leader>jv", runner.run_range, { silent = true, desc = "Run Block" })
+			vim.keymap.set("n", "<leader>jA", runner.run_all, { silent = true, desc = "Run All" })
 			vim.keymap.set(
 				"n",
 				"<leader>qp",
 				require("quarto").quartoPreview,
-				{ desc = "Preview the Quarto document", silent = true, noremap = true }
+				{ noremap = true, silent = true, desc = "Preview the Quarto Document" }
 			)
 			-- to create a cell in insert mode, I have the ` snippet
 			vim.keymap.set(
 				"n",
 				"<leader>cc",
 				"i```python\n```<Esc>O",
-				{ desc = "Create a new code cell", silent = true }
+				{ silent = true, desc = "Create a New Code Cell" }
 			)
 			vim.keymap.set(
 				"n",
 				"<leader>cs",
 				"i```\r\r```{}<left>",
-				{ desc = "Split code cell", silent = true, noremap = true }
+				{ noremap = true, silent = true, desc = "Split Code Cell" }
 			)
 		end,
 	},
@@ -161,22 +161,37 @@ return {
 		end,
 		config = function()
 			-- image nvim options table. Pass to `require('image').setup`
-			vim.keymap.set("n", "<leader>jJ", ":MoltenInit<CR>", { silent = true })
-			vim.keymap.set("n", "<leader>jo", ":MoltenEvaluateOperator<CR>", { silent = true })
-			vim.keymap.set("n", "<leader>jL", ":MoltenEvaluateLine<CR>", { silent = true })
-			vim.keymap.set("n", "<leader>jr", ":MoltenReevaluateCell<CR>", { silent = true })
-			vim.keymap.set("v", "<leader>jV", ":<C-u>MoltenEvaluateVisual<CR>gv<Esc>", { silent = true })
-			vim.keymap.set("n", "<leader>jd", ":MoltenDelete<CR>", { silent = true })
-			vim.keymap.set("n", "<leader>jh", ":MoltenHideOutput<CR>", { silent = true })
-			vim.keymap.set("n", "<leader>jm", ":noautocmd MoltenEnterOutput<CR>", { silent = true })
+			vim.keymap.set("n", "<leader>jJ", ":MoltenInit<CR>", { silent = true, desc = "Init Molten" })
+			vim.keymap.set(
+				"n",
+				"<leader>jo",
+				":MoltenEvaluateOperator<CR>",
+				{ silent = true, desc = "Evaluate Operator" }
+			)
+			vim.keymap.set("n", "<leader>jL", ":MoltenEvaluateLine<CR>", { silent = true, desc = "Evaluate Line" })
+			vim.keymap.set("n", "<leader>jr", ":MoltenReevaluateCell<CR>", { silent = true, desc = "Re-evaluate Cell" })
+			vim.keymap.set(
+				"v",
+				"<leader>jV",
+				":<C-u>MoltenEvaluateVisual<CR>gv<Esc>",
+				{ silent = true, desc = "Evaluate Visual Block" }
+			)
+			vim.keymap.set("n", "<leader>jd", ":MoltenDelete<CR>", { silent = true, desc = "Delete Molten" })
+			vim.keymap.set("n", "<leader>jh", ":MoltenHideOutput<CR>", { silent = true, desc = "Hide Output" })
+			vim.keymap.set(
+				"n",
+				"<leader>jm",
+				":noautocmd MoltenEnterOutput<CR>",
+				{ silent = true, desc = "Enter Output" }
+			)
 			vim.api.nvim_create_autocmd("User", {
 				pattern = "MoltenInitPost",
 				callback = function()
 					require("quarto").activate()
 				end,
 			})
-			vim.keymap.set("n", "<leader>ji", ":MoltenImagePopup<CR>", { silent = true })
-			vim.keymap.set("n", "<leader>jw", ":MoltenOpenInBrowser<CR>", { silent = true })
+			vim.keymap.set("n", "<leader>ji", ":MoltenImagePopup<CR>", { silent = true, desc = "Pop-up Image" })
+			vim.keymap.set("n", "<leader>jw", ":MoltenOpenInBrowser<CR>", { silent = true, desc = "Open In Browser" })
 			vim.keymap.set("n", "<leader>jj", function()
 				local venv = os.getenv("VIRTUAL_ENV")
 				if venv ~= nil then
@@ -186,7 +201,7 @@ return {
 				else
 					vim.cmd("MoltenInit python3")
 				end
-			end)
+			end, { desc = "Init Default Molten" })
 		end,
 	},
 }

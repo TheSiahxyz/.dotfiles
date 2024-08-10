@@ -65,123 +65,140 @@ return {
 		end,
 		keys = {
 			{
+				mode = "n",
 				"<leader>dB",
 				function()
 					require("dap").set_breakpoint(vim.fn.input("Breakpoint condition: "))
 				end,
-				desc = "Breakpoint Condition",
+				{ desc = "Breakpoint Condition" },
 			},
 			{
+				mode = "n",
 				"<leader>db",
 				function()
 					require("dap").toggle_breakpoint()
 				end,
-				desc = "Toggle Breakpoint",
+				{ desc = "Toggle Breakpoint" },
 			},
 			{
+				mode = "n",
 				"<leader>dc",
 				function()
 					require("dap").continue()
 				end,
-				desc = "Continue",
+				{ desc = "Continue" },
 			},
 			{
+				mode = "n",
 				"<leader>da",
 				function()
 					require("dap").continue({ before = get_args })
 				end,
-				desc = "Run with Args",
+				{ desc = "Run with Args" },
 			},
 			{
+				mode = "n",
 				"<leader>dC",
 				function()
 					require("dap").run_to_cursor()
 				end,
-				desc = "Run to Cursor",
+				{ desc = "Run to Cursor" },
 			},
 			{
+				mode = "n",
 				"<leader>dg",
 				function()
 					require("dap").goto_()
 				end,
-				desc = "Go to Line (No Execute)",
+				{ desc = "Go to Line (No Execute)" },
 			},
 			{
+				mode = "n",
 				"<leader>di",
 				function()
 					require("dap").step_into()
 				end,
-				desc = "Step Into",
+				{ desc = "Step Into" },
 			},
 			{
+				mode = "n",
 				"<leader>dj",
 				function()
 					require("dap").down()
 				end,
-				desc = "Down",
+				{ desc = "Down" },
 			},
 			{
+				mode = "n",
 				"<leader>dk",
 				function()
 					require("dap").up()
 				end,
-				desc = "Up",
+				{ desc = "Up" },
 			},
 			{
+				mode = "n",
 				"<leader>dl",
 				function()
 					require("dap").run_last()
 				end,
-				desc = "Run Last",
+				{ desc = "Run Last" },
 			},
 			{
+				mode = "n",
 				"<leader>do",
 				function()
 					require("dap").step_out()
 				end,
-				desc = "Step Out",
+				{ desc = "Step Out" },
 			},
 			{
+				mode = "n",
 				"<leader>dO",
 				function()
 					require("dap").step_over()
 				end,
-				desc = "Step Over",
+				{ desc = "Step Over" },
 			},
 			{
+				mode = "n",
 				"<leader>dp",
 				function()
 					require("dap").pause()
 				end,
-				desc = "Pause",
+				{ desc = "Pause" },
 			},
 			{
+				mode = "n",
 				"<leader>dr",
 				function()
 					require("dap").repl.toggle()
 				end,
-				desc = "Toggle REPL",
+				{ desc = "Toggle REPL" },
 			},
 			{
+				mode = "n",
 				"<leader>ds",
 				function()
 					require("dap").session()
 				end,
-				desc = "Session",
+				{ desc = "Session" },
 			},
 			{
+				mode = "n",
 				"<leader>dt",
 				function()
 					require("dap").terminate()
 				end,
-				desc = "Terminate",
+				{ desc = "Terminate" },
 			},
 			{
+				mode = "n",
 				"<leader>dw",
 				function()
 					require("dap.ui.widgets").hover()
 				end,
-				desc = "Widgets",
+				{ desc = "Widgets" },
 			},
 		},
 	},
@@ -195,19 +212,21 @@ return {
 		end,
 		keys = {
 			{
+				mode = "n",
 				"<leader>dPt",
 				function()
 					require("dap-python").test_method()
 				end,
-				desc = "Debug Method",
+				{ desc = "Debug Method" },
 				ft = "python",
 			},
 			{
+				mode = "n",
 				"<leader>dPc",
 				function()
 					require("dap-python").test_class()
 				end,
-				desc = "Debug Class",
+				{ desc = "Debug Class" },
 				ft = "python",
 			},
 		},
@@ -231,19 +250,20 @@ return {
 		end,
 		keys = {
 			{
+				mode = "n",
 				"<leader>du",
 				function()
 					require("dapui").toggle({})
 				end,
-				desc = "Dap UI",
+				{ desc = "Dap UI" },
 			},
 			{
+				mode = { "n", "v" },
 				"<leader>de",
 				function()
 					require("dapui").eval()
 				end,
-				desc = "Eval",
-				mode = { "n", "v" },
+				{ desc = "Eval" },
 			},
 		},
 	},
@@ -260,7 +280,7 @@ return {
 		},
 		--  Call config for python files and load the cached venv automatically
 		ft = "python",
-		keys = { { "<leader>cv", "<cmd>:VenvSelect<cr>", desc = "Select VirtualEnv", ft = "python" } },
+		keys = { { "<leader>cv", "<cmd>:VenvSelect<cr>", { desc = "Select VirtualEnv" }, ft = "python" } },
 	},
 	{
 		"jay-babu/mason-nvim-dap.nvim",

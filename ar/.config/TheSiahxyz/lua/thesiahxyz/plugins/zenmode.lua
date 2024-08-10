@@ -13,7 +13,7 @@ return {
 			vim.wo.number = true
 			vim.wo.rnu = true
 			ColorMyPencils()
-		end)
+		end, { desc = "Zenmode with Default" })
 
 		vim.keymap.set("n", "<leader>zZ", function()
 			require("zen-mode").setup({
@@ -28,6 +28,6 @@ return {
 			vim.wo.rnu = false
 			vim.opt.colorcolumn = "0"
 			ColorMyPencils("seoul256")
-		end)
+		end, { desc = "Zenmode with Custom" })
 	end,
 }
