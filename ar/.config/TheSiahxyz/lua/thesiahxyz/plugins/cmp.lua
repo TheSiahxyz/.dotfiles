@@ -1,15 +1,32 @@
 return {
 	{
 		"L3MON4D3/LuaSnip",
-		vim.keymap.set("i", "<tab>", function()
-			return require("luasnip").jumpable(1) and "<Plug>luasnip-jump-next" or "<tab>"
-		end, { expr = true, silent = true, desc = "Jump to Next Snippet" }),
-		vim.keymap.set("s", "<tab>", function()
-			require("luasnip").jump(1)
-		end, { desc = "Jump to Next Snippet" }),
-		vim.keymap.set({ "i", "s" }, "<s-tab>", function()
-			require("luasnip").jump(-1)
-		end, { desc = "Jump to Previous Snippet" }),
+		keys = {
+			{
+				mode = "i",
+				"<tab>",
+				function()
+					return require("luasnip").jumpable(1) and "<Plug>luasnip-jump-next" or "<tab>"
+				end,
+				{ expr = true, silent = true, desc = "Jump to next snippet" },
+			},
+			{
+				mode = "s",
+				"<tab>",
+				function()
+					require("luasnip").jump(1)
+				end,
+				desc = "Jump to next snippet",
+			},
+			{
+				mode = { "i", "s" },
+				"<s-tab>",
+				function()
+					require("luasnip").jump(-1)
+				end,
+				desc = "Jump to previous snippet",
+			},
+		},
 	},
 	{
 		"hrsh7th/nvim-cmp",

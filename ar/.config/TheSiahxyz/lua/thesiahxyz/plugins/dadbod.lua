@@ -17,7 +17,7 @@ return {
 	keys = {
 		{ "<leader>ddb", "<cmd>DBUI<cr>", desc = "DB UI" },
 		{ "<leader>ddu", "<cmd>DBUIToggle<cr>", desc = "Toggle DB UI" },
-		{ "<leader>dda", "<cmd>DBUIAddConnection<cr>", desc = "Add Connection" },
+		{ "<leader>dda", "<cmd>DBUIAddConnection<cr>", desc = "Add connection" },
 		{ "<leader>ddf", "<cmd>DBUIFindBuffer<cr>", desc = "Find buffer" },
 		{ "<leader>ddr", "<cmd>DBUIRenameBuffer<cr>", desc = "Rename buffer" },
 		{ "<leader>ddl", "<cmd>DBUILastQueryInfo<cr>", desc = "Last query info" },

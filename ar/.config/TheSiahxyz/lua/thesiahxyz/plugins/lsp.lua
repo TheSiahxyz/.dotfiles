@@ -129,9 +129,15 @@ return {
 				zsh = { "beautysh" },
 			},
 		})
-
-		vim.keymap.set({ "n", "v" }, "<leader>cf", function()
-			require("conform").format({ lsp_fallback = true, async = false, timeout_ms = 1000 })
-		end)
 	end,
+	keys = {
+		{
+			mode = { "n", "v" },
+			"<leader>cf",
+			function()
+				require("conform").format({ lsp_fallback = true, async = false, timeout_ms = 1000 })
+			end,
+			desc = "Format Buffer By LSP",
+		},
+	},
 }

@@ -6,20 +6,20 @@ return {
 	config = function()
 		local wk = require("which-key")
 		wk.add({
+			{ "m", desc = "+Marks" },
 			{ "g", desc = "+Goto" },
-			{ "gz", desc = "+Surround" },
+			{ "s", desc = "+Surround" },
 			{ "z", desc = "+Fold" },
+			{ "`", desc = "+Marks" },
+			{ "'", desc = "+Marks" },
+			{ "\"", desc = "+Registers" },
 			{ "]", desc = "+Next" },
 			{ "[", desc = "+Prev" },
 			{ "=", desc = "+Line paste" },
-			{ "\\", desc = "+Local Leader" },
+			{ "\\", desc = "+Local Leader (bookmarks)" },
+			{ "<C-w>", desc = "+Windows" },
+			{ "<M-x>", desc = "+Delete Harpoon List" },
 			{ "<leader>", desc = "+Leader" },
-			{ "<leader>1", desc = "Go to Harpoon List 1" },
-			{ "<leader>2", desc = "Go to Harpoon List 2" },
-			{ "<leader>3", desc = "Go to Harpoon List 3" },
-			{ "<leader>4", desc = "Go to Harpoon List 4" },
-			{ "<leader>5", desc = "Go to Harpoon List 5" },
-			{ "<leader>a", desc = "Add Buffer to Harpoon List" },
 			{ "<leader>b", desc = "+Buffer" },
 			{ "<leader>c", desc = "+Format" },
 			{ "<leader>d", desc = "+Diagnostics" },
@@ -42,7 +42,7 @@ return {
 			function()
 				require("which-key").show({ global = false })
 			end,
-			desc = "Buffer Local Keymaps (which-key)",
+			desc = "Buffer local keymaps (which-key)",
 		},
 		{
 			"<leader>wk",
@@ -50,14 +50,14 @@ return {
 				local input = vim.fn.input("WhichKey: ")
 				vim.cmd("WhichKey " .. input)
 			end,
-			{ desc = "Which-key Query Lookup" },
+			desc = "Which-key query lookup",
 		},
 		{
 			"<leader>wK",
 			function()
 				vim.cmd("WhichKey")
 			end,
-			{ desc = "Which-key All Key" },
+			desc = "Which-key all key",
 		},
 	},
 }

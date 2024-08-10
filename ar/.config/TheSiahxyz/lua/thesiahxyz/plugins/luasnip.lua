@@ -25,25 +25,25 @@ return {
 				if ls.expand_or_jumpable() then
 					ls.expand_or_jump()
 				end
-			end, { silent = true, desc = "Expand Snippet or Jump to the Next Snippet Node" })
+			end, { silent = true, desc = "Expand snippet or jump to the next snippet node" })
 
 			vim.keymap.set({ "i", "x" }, "<A-H>", function()
 				if ls.jumpable(-1) then
 					ls.jump(-1)
 				end
-			end, { silent = true, desc = "Previous Spot in the Snippet" })
+			end, { silent = true, desc = "Previous spot in the snippet" })
 
 			vim.keymap.set({ "i", "x" }, "<A-l>", function()
 				if ls.choice_active() then
 					ls.change_choice(1)
 				end
-			end, { silent = true, desc = "Next Snippet Choice" })
+			end, { silent = true, desc = "Next snippet choice" })
 
 			vim.keymap.set({ "i", "x" }, "<A-h>", function()
 				if ls.choice_active() then
 					ls.change_choice(-1)
 				end
-			end, { silent = true, desc = "Previous Snippet Choice" })
+			end, { silent = true, desc = "Previous snippet choice" })
 		end,
 	},
 }

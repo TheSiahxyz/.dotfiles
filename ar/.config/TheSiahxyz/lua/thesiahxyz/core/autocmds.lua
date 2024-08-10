@@ -158,19 +158,19 @@ autocmd("LspAttach", {
 	callback = function(e)
 		vim.keymap.set("n", "gD", function()
 			vim.lsp.buf.definition()
-		end, { buffer = e.buf, desc = "Go to Definition" })
+		end, { buffer = e.buf, desc = "Go to definition" })
 		vim.keymap.set("n", "K", function()
 			vim.lsp.buf.hover()
-		end, { buffer = e.buf, desc = "Go to Keywords" })
+		end, { buffer = e.buf, desc = "Go to keywords" })
 		vim.keymap.set("n", "<leader>vws", function()
 			vim.lsp.buf.workspace_symbol()
-		end, { buffer = e.buf, desc = "Workspace Symbol" })
+		end, { buffer = e.buf, desc = "Workspace symbol" })
 		vim.keymap.set("n", "<leader>vd", function()
 			vim.diagnostic.open_float()
-		end, { buffer = e.buf, desc = "Open Diagnostic" })
+		end, { buffer = e.buf, desc = "Open diagnostic" })
 		vim.keymap.set("n", "<leader>vca", function()
 			vim.lsp.buf.code_action()
-		end, { buffer = e.buf, desc = "Code Action" })
+		end, { buffer = e.buf, desc = "Code action" })
 		vim.keymap.set("n", "<leader>vrr", function()
 			vim.lsp.buf.references()
 		end, { buffer = e.buf, desc = "References" })
@@ -179,13 +179,13 @@ autocmd("LspAttach", {
 		end, { buffer = e.buf, desc = "Rename" })
 		vim.keymap.set("i", "<leader>vh", function()
 			vim.lsp.buf.signature_help()
-		end, { buffer = e.buf, desc = "Signature Help" })
+		end, { buffer = e.buf, desc = "Signature help" })
 		vim.keymap.set("n", "]d", function()
 			vim.diagnostic.goto_prev()
-		end, { buffer = e.buf, desc = "Go to Previous Diagnostic" })
+		end, { buffer = e.buf, desc = "Go to previous diagnostic" })
 		vim.keymap.set("n", "[d", function()
 			vim.diagnostic.goto_next()
-		end, { buffer = e.buf, desc = "Go to Next Diagnostic" })
+		end, { buffer = e.buf, desc = "Go to next diagnostic" })
 	end,
 })
 
@@ -219,14 +219,14 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
 			"n",
 			"<leader>gx",
 			":Goyo|x!<CR>",
-			{ noremap = true, silent = true, desc = "Goyo Quit" }
+			{ noremap = true, silent = true, desc = "Goyo quit" }
 		)
 		vim.api.nvim_buf_set_keymap(
 			0,
 			"n",
 			"<leader>gq",
 			":Goyo|q!<CR>",
-			{ noremap = true, silent = true, desc = "Goyo Abort" }
+			{ noremap = true, silent = true, desc = "Goyo abort" }
 		)
 	end,
 })

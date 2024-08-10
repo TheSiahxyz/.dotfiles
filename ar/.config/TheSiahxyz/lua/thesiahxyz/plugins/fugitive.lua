@@ -17,22 +17,23 @@ return {
 				local bufnr = vim.api.nvim_get_current_buf()
 				vim.keymap.set("n", "<leader>p", function()
 					vim.cmd.Git("push")
-				end, { buffer = bufnr, remap = false, desc = "Git Push" })
+				end, { buffer = bufnr, remap = false, desc = "Git push" })
 
 				vim.keymap.set("n", "<leader>P", function()
 					vim.cmd.Git({ "pull", "--rebase" })
-				end, { buffer = bufnr, remap = false, desc = "Git Pull" })
+				end, { buffer = bufnr, remap = false, desc = "Git pull" })
 
 				vim.keymap.set(
 					"n",
 					"<leader>t",
 					":Git push -u origin ",
-					{ buffer = bufnr, remap = false, desc = "Git Push Origin" }
+					{ buffer = bufnr, remap = false, desc = "Git push origin" }
 				)
 			end,
 		})
-
-		vim.keymap.set("n", "gu", "<cmd>diffget //2<CR>", { desc = "Git Diff" })
-		vim.keymap.set("n", "gh", "<cmd>diffget //3<CR>", { desc = "Git Diff" })
 	end,
+	keys = {
+		{ mode = "n", "gu", "<cmd>diffget //2<cr>", desc = "Git diff on my side" },
+		{ mode = "n", "gh", "<cmd>diffget //3<cr>", desc = "Git diff on their side" },
+	},
 }
