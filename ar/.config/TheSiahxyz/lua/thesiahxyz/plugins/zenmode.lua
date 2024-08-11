@@ -1,33 +1,46 @@
 return {
 	"folke/zen-mode.nvim",
+	opts = {},
 	config = function()
 		vim.keymap.set("n", "<leader>zz", function()
-			require("zen-mode").setup({
-				window = {
-					width = 90,
-					options = {},
-				},
+			require("zen-mode").toggle({
+				-- callback where you can add custom code when the Zen window opens
+				on_open = function(win)
+					vim.wo.wrap = true
+					vim.wo.number = true
+					vim.wo.rnu = true
+				end,
+				-- callback where you can add custom code when the Zen window closes
+				on_close = function()
+					vim.wo.wrap = false
+					vim.wo.number = true
+					vim.wo.rnu = true
+					ColorMyPencils()
+				end,
 			})
-			require("zen-mode").toggle()
-			vim.wo.wrap = false
-			vim.wo.number = true
-			vim.wo.rnu = true
-			ColorMyPencils()
-		end, { desc = "Zenmode with Default" })
+		end, { desc = "Zenmode with default" })
 
 		vim.keymap.set("n", "<leader>zZ", function()
-			require("zen-mode").setup({
+			require("zen-mode").toggle({
 				window = {
-					width = 80,
-					options = {},
+					width = 90,
 				},
+				-- callback where you can add custom code when the Zen window opens
+				on_open = function(win)
+					vim.wo.wrap = true
+					vim.wo.number = false
+					vim.wo.rnu = false
+					vim.opt.colorcolumn = "0"
+					ColorMyPencils("seoul256")
+				end,
+				-- callback where you can add custom code when the Zen window closes
+				on_close = function()
+					vim.wo.wrap = false
+					vim.wo.number = true
+					vim.wo.rnu = true
+					ColorMyPencils()
+				end,
 			})
-			require("zen-mode").toggle()
-			vim.wo.wrap = false
-			vim.wo.number = false
-			vim.wo.rnu = false
-			vim.opt.colorcolumn = "0"
-			ColorMyPencils("seoul256")
-		end, { desc = "Zenmode with Custom" })
+		end, { desc = "Zenmode with custom" })
 	end,
 }
