@@ -301,39 +301,47 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 
 -- Recompile dwmblocks on config edit.
 local home = os.getenv("HOME") -- Gets the home directory
-local dmenu_path = home .. "/.local/src/suckless/dmenu/config.h"
-local dwmblocks_path = home .. "/.local/src/suckless/dwmblocks/config.h"
-local slock_path = home .. "/.local/src/suckless/slock/config.h"
+vim.api.nvim_create_augroup("SucklessConfigGroup", { clear = true })
 
 vim.api.nvim_create_autocmd("BufWritePost", {
-	pattern = { dmenu_path, dwmblocks_path, slock_path },
-	group = vim.api.nvim_create_augroup("SucklessConfigGroup", { clear = true }),
+	pattern = home .. "/.local/src/suckless/dmenu/config.h",
+	group = "SucklessConfigGroup",
 	callback = function()
 		vim.cmd("!cd " .. home .. "/.local/src/suckless/dmenu/ && sudo make install")
+	end,
+})
+
+vim.api.nvim_create_autocmd("BufWritePost", {
+	pattern = home .. "/.local/src/suckless/dwmblocks/config.h",
+	group = "SucklessConfigGroup",
+	callback = function()
 		vim.cmd(
 			"!cd "
-				.. home
-				.. "/.local/src/suckless/dwmblocks/ && sudo make install && { killall -q dwmblocks; setsid -f dwmblocks; }"
+			.. home
+			.. "/.local/src/suckless/dwmblocks/ && sudo make install && { killall -q dwmblocks; setsid -f dwmblocks; }"
 		)
+	end,
+})
+
+vim.api.nvim_create_autocmd("BufWritePost", {
+	pattern = home .. "/.local/src/suckless/slock/config.h",
+	group = "SucklessConfigGroup",
+	callback = function()
 		vim.cmd("!cd " .. home .. "/.local/src/suckless/slock/ && sudo make install")
 	end,
 })
 
--- Autocommand group for DWM
-vim.api.nvim_create_augroup("DwmConfigGroup", { clear = true })
 vim.api.nvim_create_autocmd("BufWritePost", {
 	pattern = home .. "/.local/src/suckless/dwm/config.h",
-	group = "DwmConfigGroup",
+	group = "SucklessConfigGroup",
 	callback = function()
 		vim.cmd("!extractkeys")
 	end,
 })
 
--- Autocommand group for ST
-vim.api.nvim_create_augroup("StConfigGroup", { clear = true })
 vim.api.nvim_create_autocmd("BufWritePost", {
 	pattern = home .. "/.local/src/suckless/st/config.h",
-	group = "StConfigGroup",
+	group = "SucklessConfigGroup",
 	callback = function()
 		vim.cmd("!extractkeys")
 	end,
