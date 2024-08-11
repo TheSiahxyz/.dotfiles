@@ -1,0 +1,9 @@
+#!/bin/sh
+
+set -e
+[ -z "$1" ] && echo "Usage: ${0##*/} <minutes> [message]" && exit 1
+mins=$1
+message=${2:-Time out!}
+secs=$(expr "$mins" \* 60)
+sleep "$secs"
+notify-send -t 0 "${message}" "Your timer of $mins min is over" -u normal

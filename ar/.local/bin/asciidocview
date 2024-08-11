@@ -1,0 +1,22 @@
+#!/bin/sh
+
+[ -z "$1" ] && echo "Usage: ${0##*/} <file.adoc>" && exit 2
+set -e
+input=$1
+
+# Check if the first argument is a hyphen (indicating stdin)
+if [ "$1" = "-" ]; then
+    input=/tmp/tmp.adoc
+    rm -f "$input"
+    while IFS= read -r line; do
+        echo "$line" >>"$input"
+    done
+fi
+
+file=/tmp/tmp.html
+
+# Generate the HTML file from the AsciiDoc file
+asciidoctor "$input" -a source-highlighter=coderay -o "$file" >/dev/null 2>&1
+
+# Open the file in browser
+"$BROWSER" "$file" >/dev/null 2>&1 &

@@ -1,0 +1,19 @@
+#!/bin/sh
+
+if [ -z "$1" ]; then
+    echo "Usage: ${0##*/} <mins> [message]"
+    exit 1
+fi
+
+mins=$1
+message=$2
+
+# Start the timer in the background
+{
+    sleep $(($mins * 60))
+    echo "$message"
+    # Optionally, add any notification command here
+} &
+
+echo "Timer started for $mins min"
+logger -t timer "Timer started for $mins min, message: '$message'"

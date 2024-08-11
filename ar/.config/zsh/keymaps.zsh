@@ -37,23 +37,22 @@ bindkey -M visual '^[[P' vi-delete      # delete
 bindkey -M viins 'jk' vi-cmd-mode       # normal mode
 
 # programs
-bindkey -s '^b' '^ubc -lq\n'
-bindkey -s '^d' '^ucdi\n'
-bindkey -s '^f' '^uff\n'
-bindkey -s '^g' '^ufdot\n'
-bindkey -s '^k' '^uhtop\n'
-bindkey -s '^n' '^unv .\n'
-bindkey -s '^o' '^ulf\n'
-bindkey -s '^p' '^upd\n'
-bindkey -s '^t' '^utm\n'
-bindkey -s '^y' '^ulfcd\n'
-bindkey -s '^z' '^ucdo\n'
+bindkey -s '^B' '^ubc -lq\n'
+bindkey -s '^D' '^ucdi\n'
+bindkey -s '^F' '^uff\n'
+bindkey -s '^G' '^ufdot\n'
+bindkey -s '^K' '^uhtop\n'
+bindkey -s '^N' '^unv .\n'
+bindkey -s '^O' '^ulf\n'
+bindkey -s '^P' '^upd\n'
+bindkey -s '^T' '^utm\n'
+bindkey -s '^Y' '^ulfcd\n'
+bindkey -s '^Z' '^ucdo\n'
 bindkey -s '^_' '^usscs\n'
-bindkey -s '^x^b' '^urbackup\n'
-bindkey -s '^x^d' '^ufD\n'
-bindkey -s '^x^f' '^ufF\n'
-bindkey -s '^x^o' '^usudo lf\n'
-bindkey -s '^x^s' '^usshadd\n'
+bindkey -s '^X^B' '^urbackup\n'
+bindkey -s '^X^D' '^ufD\n'
+bindkey -s '^X^F' '^ufF\n'
+bindkey -s '^X^S' '^usshadd\n'
 
 # man
 man-command-line() {
