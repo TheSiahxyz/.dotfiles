@@ -392,7 +392,6 @@ alias scp='scp -r'
 
 # scripts
 alias cs='createscript'
-alias tibg='timer'
 alias tmzs='timezones'
 
 # setxkbmap 
