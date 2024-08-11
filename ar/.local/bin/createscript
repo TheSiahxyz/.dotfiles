@@ -2,6 +2,6 @@
 
 [ -z "$1" ] && echo "Usage: ${0##*/} <script-name>" && exit 2
 set -e
-printf '#!/bin/sh\nset -e\n\n' > "$1"
+printf '#!/bin/sh\nset -e\n\n\n' > "$1"
 chmod +x "$1"
-"$EDITOR" "$1"
+"$EDITOR" + "$1"

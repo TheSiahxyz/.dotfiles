@@ -391,20 +391,9 @@ alias scim='sc-im'
 alias scp='scp -r'
 
 # scripts
-alias cs='create-script'
-alias ij='start-intellij'
-balias se='session-'
-alias acd='asciidoctor'
-alias ti='timer'
+alias cs='createscript'
+alias tibg='timer'
 alias tmzs='timezones'
-alias dea='direnv allow'
-alias dee='direnv edit'
-ialias curl='curl --silent --show-error'
-balias clh='curl localhost:'
-balias clh8='curl localhost:8080'
-balias clh9='curl localhost:9080'
-balias c100='curl 192.168.99.100:'
-ialias cal='cal -y --monday'
 
 # setxkbmap 
 alias RM='setxkbmap -option'

@@ -79,14 +79,6 @@ vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move line up in visual mo
 -- Check Health
 vim.keymap.set("n", "<leader>ch", ":checkhealth<cr>", { desc = "Check neovim health" })
 
--- Compiler
-vim.api.nvim_set_keymap(
-	"n",
-	"<leader>rr",
-	':w!<CR>:!compiler "%:p"<CR>',
-	{ noremap = true, silent = true, desc = "Run compiler" }
-)
-
 -- Cut, Yank & Paste
 vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]], { desc = "Yank to clipboard" })
 vim.keymap.set("n", "<leader>Y", [["+Y]], { desc = "Yank line to clipboard" })
@@ -154,6 +146,14 @@ vim.keymap.set("n", "<C-Up>", "<cmd>resize +2<cr>", { desc = "Increase window he
 vim.keymap.set("n", "<C-Down>", "<cmd>resize -2<cr>", { desc = "Decrease window height" })
 vim.keymap.set("n", "<C-Left>", "<cmd>vertical resize -2<cr>", { desc = "Decrease window width" })
 vim.keymap.set("n", "<C-Right>", "<cmd>vertical resize +2<cr>", { desc = "Increase window width" })
+
+-- Scripts
+vim.api.nvim_set_keymap(
+	"n",
+	"<leader>rr",
+	':w!<CR>:!compiler "%:p"<CR>',
+	{ noremap = true, silent = true, desc = "Run compiler" }
+)
 
 -- Source
 vim.keymap.set("n", "<leader><leader>", function()

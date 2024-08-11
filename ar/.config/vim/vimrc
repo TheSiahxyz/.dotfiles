@@ -251,6 +251,11 @@ vnoremap . :normal .<CR>
 
 nnoremap <leader>so :so<CR>
 
+" Scripts
+nmap <leader>cp :.!capitalizetitle -<CR>
+vnoremap <leader>cp :.!capitalizetitle -<CR>
+
+
 " }}}
 
 
