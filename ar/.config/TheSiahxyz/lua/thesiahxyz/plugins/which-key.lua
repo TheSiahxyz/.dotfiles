@@ -12,7 +12,7 @@ return {
 			{ "z", desc = "+Fold" },
 			{ "`", desc = "+Marks" },
 			{ "'", desc = "+Marks" },
-			{ "\"", desc = "+Registers" },
+			{ '"', desc = "+Registers" },
 			{ "]", desc = "+Next" },
 			{ "[", desc = "+Prev" },
 			{ "=", desc = "+Line paste" },
@@ -24,11 +24,13 @@ return {
 			{ "<leader>c", desc = "+Format" },
 			{ "<leader>d", desc = "+Diagnostics" },
 			{ "<leader>f", desc = "+Find" },
+			{ "<leader>fp", desc = "+Private/Public" },
 			{ "<leader>g", desc = "+Git" },
 			{ "<leader>j", desc = "+Molten (Jupyter)" },
 			{ "<leader>o", desc = "+Open" },
 			{ "<leader>r", desc = "+Refactoring" },
 			{ "<leader>s", desc = "+Search" },
+			{ "<leader>sb", desc = "+Buffer" },
 			{ "<leader>t", desc = "+Toggle" },
 			{ "<leader>v", desc = "+View" },
 			{ "<leader>w", desc = "+Which Key" },
@@ -47,16 +49,13 @@ return {
 		{
 			"<leader>wk",
 			function()
-				local input = vim.fn.input("WhichKey: ")
-				vim.cmd("WhichKey " .. input)
+				vim.cmd("WhichKey " .. vim.fn.input("WhichKey: "))
 			end,
 			desc = "Which-key query lookup",
 		},
 		{
 			"<leader>wK",
-			function()
-				vim.cmd("WhichKey")
-			end,
+			"<cmd>WhichKey <CR>",
 			desc = "Which-key all key",
 		},
 	},

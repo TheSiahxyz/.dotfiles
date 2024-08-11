@@ -160,13 +160,6 @@ vim.keymap.set("n", "<leader><leader>", function()
 	vim.cmd("so")
 end, { desc = "Source current file" })
 
--- Split
-vim.keymap.set("n", "<leader>w=", "<C-W>=", { desc = "Equal window" })
-vim.keymap.set("n", "<leader>wo", "<C-W>p", { desc = "Other window" })
-vim.keymap.set("n", "<leader>wx", "<C-W>c", { desc = "Close window" })
-vim.keymap.set("n", "<leader>-", "<C-W>s", { desc = "Split window below" })
-vim.keymap.set("n", "<leader>|", "<C-W>v", { desc = "Split window right" })
-
 -- Sudo
 vim.keymap.set("n", "<leader>ww", "<cmd>SudoWrite<cr><cr>", { silent = true, desc = "Save file with sudo" })
 vim.keymap.set("n", "<leader>wq", "<cmd>SudoWritequit<cr>", { silent = true, desc = "Save and quit with sudo" })
@@ -187,9 +180,9 @@ vim.keymap.set("n", "<C-k>", "<C-w><C-k>", { desc = "Move to window above" })
 vim.keymap.set("n", "<C-l>", "<C-w><C-l>", { desc = "Move to right window" })
 vim.keymap.set(
 	"n",
-	"<leader>tf",
+	"<leader>ft",
 	"<cmd>silent !~/.config/tmux/plugins/tmux-fzf/scripts/session.sh<CR>",
-	{ desc = "Switch tmux session" }
+	{ desc = "Find tmux session" }
 )
 
 -- Lazy
