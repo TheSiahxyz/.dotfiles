@@ -52,7 +52,7 @@ return {
 			})
 
 			table.insert(keys, {
-				"<M-x>" .. i,
+				"<leader>" .. i,
 				function()
 					require("harpoon"):list():replace_at(i)
 				end,
