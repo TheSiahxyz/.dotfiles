@@ -4,6 +4,9 @@ bs              ${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/statusbar
 cab             ${XDG_CONFIG_HOME:-${HOME}/.config}/abook
 cac             ${XDG_CACHE_HOME:-${HOME}/.cache}
 cbc             ${XDG_CONFIG_HOME:-${HOME}/.config}/bash
+cdb             ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwmblocks
+cdm             ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dmenu
+cdw             ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwm
 cfg             ${XDG_CONFIG_HOME:-${HOME}/.config}
 cfx             ${XDG_CONFIG_HOME:-${HOME}/.config}/firefox
 clf             ${XDG_CONFIG_HOME:-${HOME}/.config}/lf
@@ -16,6 +19,8 @@ cnp             ${XDG_CONFIG_HOME:-${HOME}/.config}/ncmpcpp
 cns             ${XDG_CONFIG_HOME:-${HOME}/.config}/newsboat
 cnv             ${XDG_CONFIG_HOME:-${HOME}/.config}/nvim/lua/thesiahxyz
 csh             ${XDG_CONFIG_HOME:-${HOME}/.config}/shell
+csl             ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/slock
+cst             ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/st
 cti             ${XDG_CONFIG_HOME:-${HOME}/.config}/tmuxinator
 ctp             ${XDG_CONFIG_HOME:-${HOME}/.config}/tmux/plugins
 cts             ${XDG_CONFIG_HOME:-${HOME}/.config}/TheSiahxyz/lua/thesiahxyz
@@ -68,17 +73,12 @@ pvg             $HOME/Private/git
 pvn             $HOME/Private/git/neetcode
 pvo             $HOME/Private/git/Obsidian/SI
 pvp             $HOME/Private/photo
-sdb             ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwmblocks
-sdm             ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dmenu
-sdw             ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwm
 shm             ${XDG_DATA_HOME:-${HOME}/.local/share}/mail
 shr             ${XDG_DATA_HOME:-${HOME}/.local/share}
 shz             ${XDG_DATA_HOME:-${HOME}/.local/share}/zsh
 sk              ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless
 slr             ${XDG_DATA_HOME:-${HOME}/.local/share}/lyrics
 sr              ${XDG_SOURCES_HOME:-${HOME}/.local/src}
-ssl             ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/slock
-sst             ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/st
 tr              ${XDG_DATA_HOME:-${HOME}/.local/share}/Trash/files
 ts              ${XDG_DATA_HOME:-${HOME}/.local/share}/thesiah
 tsk             ${XDG_DATA_HOME:-${HOME}/.local/share}/thesiah/keys

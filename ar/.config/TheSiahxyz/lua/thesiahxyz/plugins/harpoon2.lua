@@ -31,14 +31,14 @@ return {
 				function()
 					require("harpoon"):list():prev()
 				end,
-				desc = "Go to previous harpoon list",
+				desc = "Previous harpoon list",
 			},
 			{
 				"<C-n>",
 				function()
 					require("harpoon"):list():next()
 				end,
-				desc = "Go to next harpoon list",
+				desc = "Next harpoon list",
 			},
 		}
 
@@ -48,7 +48,7 @@ return {
 				function()
 					require("harpoon"):list():select(i)
 				end,
-				desc = "Go to harpoon list " .. i,
+				desc = "Harpoon list " .. i,
 			})
 
 			table.insert(keys, {

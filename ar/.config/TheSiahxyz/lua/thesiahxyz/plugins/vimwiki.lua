@@ -14,12 +14,12 @@ return {
 		"VimwikiDiaryGenerateLinks",
 	},
 	keys = {
-		{ "<leader>v-", ":VimwikiVSplitLink<CR>", { silent = true, desc = "Vertical split" } },
 		{
 			"<leader>v|",
 			":VimwikiSplitLink<CR>",
 			{ silent = true, desc = "Horizontal split" },
 		},
+		{ "<leader>v-", ":VimwikiVSplitLink<CR>", { silent = true, desc = "Vertical split" } },
 		{
 			"<leader>va",
 			":VimwikiAll2HTML<CR>",

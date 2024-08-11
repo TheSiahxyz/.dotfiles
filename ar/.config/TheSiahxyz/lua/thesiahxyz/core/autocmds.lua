@@ -180,12 +180,12 @@ autocmd("LspAttach", {
 		vim.keymap.set("i", "<leader>vh", function()
 			vim.lsp.buf.signature_help()
 		end, { buffer = e.buf, desc = "Signature help" })
-		vim.keymap.set("n", "]d", function()
-			vim.diagnostic.goto_prev()
-		end, { buffer = e.buf, desc = "Go to previous diagnostic" })
 		vim.keymap.set("n", "[d", function()
 			vim.diagnostic.goto_next()
-		end, { buffer = e.buf, desc = "Go to next diagnostic" })
+		end, { buffer = e.buf, desc = "Previous diagnostic" })
+		vim.keymap.set("n", "]d", function()
+			vim.diagnostic.goto_prev()
+		end, { buffer = e.buf, desc = "Next diagnostic" })
 	end,
 })
 

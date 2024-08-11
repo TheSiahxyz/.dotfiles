@@ -34,7 +34,6 @@ return {
 			{ "<leader>t", desc = "+Toggle" },
 			{ "<leader>v", desc = "+View" },
 			{ "<leader>w", desc = "+Which Key" },
-			{ "<leader>x", desc = "+Harpoon Deletes" },
 			{ "<leader>z", desc = "+Zenmode" },
 		})
 	end,

@@ -3,8 +3,8 @@ vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 
 -- Buffers
-vim.keymap.set("n", "<S-h>", "<cmd>bprevious<cr>", { desc = "Go to previous buffer" })
-vim.keymap.set("n", "<S-l>", "<cmd>bnext<cr>", { desc = "Go to next buffer" })
+vim.keymap.set("n", "<S-h>", "<cmd>bprevious<cr>", { desc = "Previous buffer" })
+vim.keymap.set("n", "<S-l>", "<cmd>bnext<cr>", { desc = "Next buffer" })
 vim.keymap.set("n", "<leader>bb", "<cmd>e #<cr>", { desc = "Switch to last buffer" })
 vim.keymap.set("n", "<leader>`", "<cmd>e #<cr>", { desc = "Switch to last buffer" })
 
@@ -103,12 +103,12 @@ local diagnostic_goto = function(next, severity)
 		go({ severity = severity })
 	end
 end
-vim.keymap.set("n", "[d", diagnostic_goto(false), { desc = "Go to previous diagnostic" })
-vim.keymap.set("n", "]d", diagnostic_goto(true), { desc = "Go to next diagnostic" })
-vim.keymap.set("n", "[e", diagnostic_goto(false, "ERROR"), { desc = "Go to previous error" })
-vim.keymap.set("n", "]e", diagnostic_goto(true, "ERROR"), { desc = "Go to next error" })
-vim.keymap.set("n", "[w", diagnostic_goto(false, "WARN"), { desc = "Go to previous warning" })
-vim.keymap.set("n", "]w", diagnostic_goto(true, "WARN"), { desc = "Go to next warning" })
+vim.keymap.set("n", "[d", diagnostic_goto(false), { desc = "Previous diagnostic" })
+vim.keymap.set("n", "]d", diagnostic_goto(true), { desc = "Next diagnostic" })
+vim.keymap.set("n", "[e", diagnostic_goto(false, "ERROR"), { desc = "Previous error" })
+vim.keymap.set("n", "]e", diagnostic_goto(true, "ERROR"), { desc = "Next error" })
+vim.keymap.set("n", "[w", diagnostic_goto(false, "WARN"), { desc = "Previous warning" })
+vim.keymap.set("n", "]w", diagnostic_goto(true, "WARN"), { desc = "Next warning" })
 vim.keymap.set("n", "<leader>de", vim.diagnostic.open_float, { desc = "Open diagnostic message" })
 vim.keymap.set("n", "<leader>dq", vim.diagnostic.setloclist, { desc = "Add diagnostics to location list" })
 
@@ -116,10 +116,10 @@ vim.keymap.set("n", "<leader>dq", vim.diagnostic.setloclist, { desc = "Add diagn
 vim.keymap.set("n", "<leader>fn", "<cmd>enew<cr>", { desc = "Open new buffer" })
 
 -- Fix List & Trouble
-vim.keymap.set("n", "[l", "<cmd>lprev<CR>zz", { desc = "Go to previous location list item" })
-vim.keymap.set("n", "]l", "<cmd>lnext<CR>zz", { desc = "Go to next location list item" })
-vim.keymap.set("n", "[q", "<cmd>cprev<CR>zz", { desc = "Go to previous quickfix item" })
-vim.keymap.set("n", "]q", "<cmd>cnext<CR>zz", { desc = "Go to next quickfix item" })
+vim.keymap.set("n", "[l", "<cmd>lprev<CR>zz", { desc = "Previous location list item" })
+vim.keymap.set("n", "]l", "<cmd>lnext<CR>zz", { desc = "Next location list item" })
+vim.keymap.set("n", "[q", "<cmd>cprev<CR>zz", { desc = "Previous quickfix item" })
+vim.keymap.set("n", "]q", "<cmd>cnext<CR>zz", { desc = "Next quickfix item" })
 vim.keymap.set(
 	"n",
 	"<leader>/",
@@ -180,7 +180,7 @@ vim.keymap.set("n", "<C-k>", "<C-w><C-k>", { desc = "Move to window above" })
 vim.keymap.set("n", "<C-l>", "<C-w><C-l>", { desc = "Move to right window" })
 vim.keymap.set(
 	"n",
-	"<leader>ft",
+	"<leader>tm",
 	"<cmd>silent !~/.config/tmux/plugins/tmux-fzf/scripts/session.sh<CR>",
 	{ desc = "Find tmux session" }
 )
