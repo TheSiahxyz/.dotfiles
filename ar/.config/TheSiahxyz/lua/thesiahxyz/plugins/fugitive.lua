@@ -33,7 +33,7 @@ return {
 		})
 	end,
 	keys = {
-		{ mode = "n", "gu", "<cmd>diffget //2<cr>", desc = "Git diff on my side" },
-		{ mode = "n", "gh", "<cmd>diffget //3<cr>", desc = "Git diff on their side" },
+		{ mode = "n", "gm", "<cmd>diffget //2<cr>", desc = "Git diff on my side" },
+		{ mode = "n", "go", "<cmd>diffget //3<cr>", desc = "Git diff on their side" },
 	},
 }

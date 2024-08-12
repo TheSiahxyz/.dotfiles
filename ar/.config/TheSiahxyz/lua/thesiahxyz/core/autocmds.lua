@@ -153,9 +153,21 @@ autocmd("BufWritePre", {
 	end,
 })
 
+local function organize_imports()
+	local params = {
+		command = "pyright.organizeimports",
+		arguments = { vim.uri_from_bufnr(0) },
+	}
+	vim.lsp.buf.execute_command(params)
+end
+
 autocmd("LspAttach", {
 	group = augroup("lsp_attach"),
 	callback = function(e)
+		local client = vim.lsp.get_client_by_id(e.data.client_id)
+		if client and client.name == "pyright" then
+			vim.api.nvim_create_user_command("PyrightOrganizeImports", organize_imports, { desc = "Organize Imports" })
+		end
 		vim.keymap.set("n", "gD", function()
 			vim.lsp.buf.definition()
 		end, { buffer = e.buf, desc = "Go to definition" })
@@ -317,8 +329,8 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 	callback = function()
 		vim.cmd(
 			"!cd "
-			.. home
-			.. "/.local/src/suckless/dwmblocks/ && sudo make install && { killall -q dwmblocks; setsid -f dwmblocks; }"
+				.. home
+				.. "/.local/src/suckless/dwmblocks/ && sudo make install && { killall -q dwmblocks; setsid -f dwmblocks; }"
 		)
 	end,
 })
