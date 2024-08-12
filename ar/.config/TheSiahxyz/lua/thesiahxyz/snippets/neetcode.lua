@@ -2,7 +2,6 @@ local ls = require("luasnip")
 
 local s = ls.snippet
 local i = ls.insert_node
-local t = ls.text_node
 local fmt = require("luasnip.extras.fmt").fmt
 local rep = require("luasnip.extras").rep
 
@@ -19,42 +18,42 @@ Question
 
 class Solution:
     def {2}(self, {3}) -> {4}:
+        return {5}
 
 
 
-case1 = {5}
-case2 = {6}
-case3 = {7}
+case1 = {6}
+case2 = {7}
+case3 = {8}
 
 solution = Solution()
-print(f" {fn} case1: {{solution.{fn}(case1, {args})}}")
-print(f" {fn} case2: {{solution.{fn}(case2, {args})}}")
-print(f" {fn} case3: {{solution.{fn}(case3, {args})}}")
+print(f" {fn} case1: {{solution.{fn}(case1)}}")
+print(f" {fn} case2: {{solution.{fn}(case2)}}")
+print(f" {fn} case3: {{solution.{fn}(case3)}}")
 
 
 """
 Solution
 
-url: {8}
-video: {9}
-code: {10}
-
-
+url: {9}
+video: {10}
+code:
+    {11}
 """
 ]],
 		{
 			i(1, "Describe the question here"),
-			i(2, "function name"), -- Primary insert node for method name
+			i(2, "fn_name"), -- Primary insert node for method name
 			fn = rep(2), -- Repeat the method name
 			i(3, "parameters"),
-			args = rep(3),
-			i(4, "return type"),
-			i(5, "case1"),
-			i(6, "case2"),
-			i(7, "case3"),
-			i(8, "url"),
-			i(9, "video"),
-			i(10, "code"),
+			i(4, "return_type"),
+			i(5, "return"),
+			i(6, "case1"),
+			i(7, "case2"),
+			i(8, "case3"),
+			i(9, "url"),
+			i(10, "video"),
+			i(11, "code"),
 		}
 	)
 )
