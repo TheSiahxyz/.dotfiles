@@ -27,18 +27,18 @@ case2 = {7}
 case3 = {8}
 
 solution = Solution()
-print(f" {fn} case1: {{solution.{fn}(case1)}}")
-print(f" {fn} case2: {{solution.{fn}(case2)}}")
-print(f" {fn} case3: {{solution.{fn}(case3)}}")
+print(f" {fn} case1: {{solution.{fn}(case1{9})}}")
+print(f" {fn} case2: {{solution.{fn}(case2{args2})}}")
+print(f" {fn} case3: {{solution.{fn}(case3{args3})}}")
 
 
 """
 Solution
 
-url: {9}
-video: {10}
+url: {10}
+video: {11}
 code:
-    {11}
+    {12}
 """
 ]],
 		{
@@ -51,9 +51,12 @@ code:
 			i(6, "case1"),
 			i(7, "case2"),
 			i(8, "case3"),
-			i(9, "url"),
-			i(10, "video"),
-			i(11, "code"),
+			i(9, "args"),
+            args2 = rep(9),
+            args3 = rep(9),
+			i(10, "url"),
+			i(11, "video"),
+			i(12, "code"),
 		}
 	)
 )
