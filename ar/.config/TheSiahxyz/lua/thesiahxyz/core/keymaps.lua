@@ -198,3 +198,9 @@ vim.api.nvim_set_keymap(
 	":lua WordDefinition(vim.fn.expand('<cword>'))<CR>",
 	{ noremap = true, silent = true, desc = "Get word definition" }
 )
+
+-- Ascii
+vim.keymap.set("n","<leader>7",":.!toilet -w 200 -f bfraktur<CR>", { desc = "Ascii art standard" })
+vim.keymap.set("n","<leader>8",":.!toilet -w 200 -f future<CR>", { desc = "Ascii art small" })
+vim.keymap.set("n","<leader>9",":.!toilet -w 200 -f pagga<CR>", { desc = "Ascii art small" })
+vim.keymap.set("n","<leader>0",":.!toilet -w 200 -f emboss<CR>", { desc = "Ascii art small" })
