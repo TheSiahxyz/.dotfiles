@@ -186,10 +186,10 @@ vim.keymap.set(
 )
 
 -- Lazy
-vim.keymap.set("n", "<leader>l", "<cmd>Lazy<cr>", { desc = "Open lazy plugin manager" })
+vim.keymap.set("n", "<leader>lz", "<cmd>Lazy<cr>", { desc = "Open lazy plugin manager" })
 
 -- Mason
-vim.keymap.set("n", "<leader>m", "<cmd>Mason<cr>", { desc = "Open mason" })
+vim.keymap.set("n", "<leader>ms", "<cmd>Mason<cr>", { desc = "Open mason" })
 
 -- Word Definition
 vim.api.nvim_set_keymap(
@@ -200,7 +200,7 @@ vim.api.nvim_set_keymap(
 )
 
 -- Ascii
-vim.keymap.set("n","<leader>7",":.!toilet -w 200 -f bfraktur<CR>", { desc = "Ascii art standard" })
-vim.keymap.set("n","<leader>8",":.!toilet -w 200 -f future<CR>", { desc = "Ascii art small" })
-vim.keymap.set("n","<leader>9",":.!toilet -w 200 -f pagga<CR>", { desc = "Ascii art small" })
-vim.keymap.set("n","<leader>0",":.!toilet -w 200 -f emboss<CR>", { desc = "Ascii art small" })
+vim.keymap.set("n", "<leader>7", ":.!toilet -w 200 -f bfraktur<CR>", { desc = "Ascii art standard" })
+vim.keymap.set("n", "<leader>8", ":.!toilet -w 200 -f future<CR>", { desc = "Ascii art small" })
+vim.keymap.set("n", "<leader>9", ":.!toilet -w 200 -f pagga<CR>", { desc = "Ascii art small" })
+vim.keymap.set("n", "<leader>0", ":.!toilet -w 200 -f emboss<CR>", { desc = "Ascii art small" })
