@@ -27,31 +27,6 @@ insert-last-command-output() {
 
 ###########################################################################################
 ###########################################################################################
-### --- Weather --- ###
-# weath() {
-#     [ "$MANPAGER" = "less -s" ] && pager=true || pager=false
-#     [ "$pager" = "false" ] && {
-#         export MANPAGER='less -s'
-#         export LESS="R"
-#         export LESS_TERMCAP_mb="$(printf '%b' '[1;31m')"
-#         export LESS_TERMCAP_md="$(printf '%b' '[1;36m')"
-#         export LESS_TERMCAP_me="$(printf '%b' '[0m')"
-#         export LESS_TERMCAP_so="$(printf '%b' '[01;44;33m')"
-#         export LESS_TERMCAP_se="$(printf '%b' '[0m')"
-#         export LESS_TERMCAP_us="$(printf '%b' '[1;32m')"
-#         export LESS_TERMCAP_ue="$(printf '%b' '[0m')"
-#         export LESSOPEN="| /usr/bin/highlight -O ansi %s 2>/dev/null"
-#     }
-#     less -S ${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport
-#     [ "$pager" = "false" ] && {
-#         export MANPAGER="sh -c 'col -bx | bat -l man -p'"
-#         export MANROFFOPT="-c"
-#     }
-# }
-
-
-###########################################################################################
-###########################################################################################
 ### --- Mount ecryptfs --- ###
 emt() {
     ! mount | grep -q " $1 " && echo "$(pass show encryption/ecryptfs)" | sudo mount -t ecryptfs "$1" "$2" \
@@ -88,43 +63,6 @@ gp() {
 gkey() {
     grep --color -E "$1" /usr/share/X11/xkb/rules/base.lst
 }
-
-
-###########################################################################################
-###########################################################################################
-### --- Abbreviation --- ###
-# declare a list of expandable aliases to fill up later
-typeset -a ealiases
-ealiases=()
-
-# write a function for adding an alias to the list mentioned above
-abbrev-alias() {
-    alias $1
-    ealiases+=(${1%%\=*})
-}
-
-# expand any aliases in the current line buffer
-expand-ealias() {
-    if [[ $LBUFFER =~ "\<(${(j:|:)ealiases})\$" ]]; then
-        zle _expand_alias
-        zle expand-word
-    fi
-    zle magic-space
-}
-zle -N expand-ealias
-
-# Bind the space key to the expand-alias function above, so that space will expand any expandable aliases
-bindkey ' '        expand-ealias
-bindkey '^ '       magic-space     # control-space to bypass completion
-bindkey -M isearch " "      magic-space     # normal space during searches
-
-# A function for expanding any aliases before accepting the line as is and executing the entered command
-expand-alias-and-accept-line() {
-    expand-ealias
-    zle .backward-delete-char
-    zle .accept-line
-}
-zle -N accept-line expand-alias-and-accept-line
 
 
 ###########################################################################################

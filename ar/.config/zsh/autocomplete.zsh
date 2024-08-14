@@ -34,6 +34,7 @@ expand-alias-space() {
     [[ $LBUFFER =~ "\<(${(j:|:)baliases})\$" ]]; insertBlank=$?
     if [[ ! $LBUFFER =~ "\<(${(j:|:)ialiases})\$" ]]; then
         zle _expand_alias
+        zle expand-word
     fi
     zle self-insert
     if [[ "$insertBlank" = "0" ]]; then
@@ -51,19 +52,20 @@ background() {
 }
 
 
+# A function for expanding any aliases before accepting the line as is and executing the entered command
+expand-alias-and-accept-line() {
+    expand-alias-space
+    zle .backward-delete-char
+    zle .accept-line
+}
+# zle -N accept-line expand-alias-and-accept-line
+
+
 bindkey " " expand-alias-space
+# bindkey '^ '       magic-space     # control-space to bypass completion
 bindkey -M isearch " " magic-space
 
 
 # file completion patterns
-zstyle ':completion:*:*:vim:*' file-patterns '^*.(pdf|odt|ods|doc|docx|xls|xlsx|odp|ppt|pptx|mp4|mkv|aux):source-files' '*:all-files'
-zstyle ':completion:*:*:(build-workshop|build-document):*' file-patterns '*.adoc'
-
-
-sourceIfExists() {
-    if [ -e $1 ]; then
-        source $1;
-    fi
-}
-
-sourceIfExists ~/.config/shell/aliasrc
+zstyle ':completion:*:*:nvim:*' file-patterns '^*.(pdf|odt|ods|doc|docx|xls|xlsx|odp|ppt|pptx|mp4|mkv|aux):source-files' '*:all-files'
+zstyle ':completion:*:*:(build-workshop|build-document):*' file-patterns '*.mom'

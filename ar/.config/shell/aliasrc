@@ -1,67 +1,3 @@
-#!/bin/sh
-
-# auto-completes aliases
-# enables to define
-# - normal aliases (completed with trailing space)
-# - blank aliases (completed without space)
-# - ignored aliases (not completed)
-
-
-# ignored aliases
-typeset -a ialiases
-ialiases=()
-
-ialias() {
-    alias $@
-    args="$@"
-    args=${args%%\=*}
-    ialiases+=(${args##* })
-}
-
-
-# blank aliases
-typeset -a baliases
-baliases=()
-
-balias() {
-    alias $@
-    args="$@"
-    args=${args%%\=*}
-    baliases+=(${args##* })
-}
-
-
-# functionality
-expand-alias-space() {
-    [[ $LBUFFER =~ "\<(${(j:|:)baliases})\$" ]]; insertBlank=$?
-    if [[ ! $LBUFFER =~ "\<(${(j:|:)ialiases})\$" ]]; then
-        zle _expand_alias
-    fi
-    zle self-insert
-    if [[ "$insertBlank" = "0" ]]; then
-        zle backward-delete-char
-    fi
-}
-zle -N expand-alias-space
-
-
-# starts multiple args as programs in background
-background() {
-    for ((i=2;i<=$#;i++)); do
-        ${@[1]} ${@[$i]} &> /dev/null &
-    done
-}
-
-
-bindkey " " expand-alias-space
-bindkey -M isearch " " magic-space
-
-
-# file completion patterns
-zstyle ':completion:*:*:vim:*' file-patterns '^*.(pdf|odt|ods|doc|docx|xls|xlsx|odp|ppt|pptx|mp4|mkv|aux):source-files' '*:all-files'
-zstyle ':completion:*:*:(build-workshop|build-document):*' file-patterns '*.adoc'
-
-
 # Use neovim for vim if present.
 [ -x "$(command -v nvim)" ] && alias vimdiff="nvim -d"
 
@@ -78,21 +14,21 @@ done
 unset command
 
 case "$(readlink -f /sbin/init)" in
-    *systemd*)
-        # journal
-        alias -g jctl='journalctl -xe'
-        alias -g jctlou='sudo journalctl -b -n 200 -f'
-        alias -g rpi='systemctl --user restart wireplumber pipewire pipewire-pulse pipewire-jack'
-        alias -g sctl='systemctl'
-        alias -g sctlss='systemctl status'
-        alias -g sctle='systemctl enable'
-        alias -g sctld='systemctl disable'
-        alias -g sctlr='systemctl restart'
-        alias -g sctls='systemctl start'
-        alias -g sctlt='systemctl stop'
-        alias -g sctldr='systemctl daemon-reload'
-        alias -g tctl='timedatectl'
-        ;;
+*systemd*)
+    # journal
+    alias -g jctl='journalctl -xe'
+    alias -g jctlou='sudo journalctl -b -n 200 -f'
+    alias -g rpi='systemctl --user restart wireplumber pipewire pipewire-pulse pipewire-jack'
+    alias -g sctl='systemctl'
+    alias -g sctlss='systemctl status'
+    alias -g sctle='systemctl enable'
+    alias -g sctld='systemctl disable'
+    alias -g sctlr='systemctl restart'
+    alias -g sctls='systemctl start'
+    alias -g sctlt='systemctl stop'
+    alias -g sctldr='systemctl daemon-reload'
+    alias -g tctl='timedatectl'
+    ;;
 esac
 
 # Go back
@@ -202,7 +138,7 @@ alias dgst='dotbare status'
 #     passwd="$(printf '%s' "$(pass show encryption/ecryptfs)")""
 
 # eza
-[ -x "$(command -v eza)" ] && { 
+[ -x "$(command -v eza)" ] && {
     ialias l='eza --icons --group-directories-first'
     ialias la='eza --icons -aa --group-directories-first'
     ialias lh='eza --icons -aa --group-directories-first'
@@ -235,7 +171,7 @@ alias dgst='dotbare status'
     ialias ltd='eza --icons -TD -L'
     ialias ltdr='eza --icons -TDr -L'
     ialias ltr='eza --icons -Tr -L'
-} || { 
+} || {
     ialias l='/usr/bin/ls -h --color=always --group-directories-first'
     ialias la='/usr/bin/ls -alh --color=always --group-directories-first'
     ialias ll='/usr/bin/ls -Fls --color=always --group-directories-first'
@@ -394,7 +330,7 @@ alias scp='scp -r'
 alias cs='createscript'
 alias tmzs='timezones'
 
-# setxkbmap 
+# setxkbmap
 alias RM='setxkbmap -option'
 
 # sha1
