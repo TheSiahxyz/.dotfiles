@@ -3,18 +3,17 @@
 # local backup
 backup_path="/mnt/second/backup"
 dot_path="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}"
+git_path="$HOME/Private/git"
 music_path="${XDG_MUSIC_DIR:-${HOME}/Music}"
-obsidian_path="$HOME/Private/git/Obsidian"
 pass_path="${PASSWORD_STORE_DIR:-${XDG_DATA_HOME:-${HOME}/.local/share}/.password-store}/exported_keys"
 suck_path="${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless"
-web_path="${THESIAH_WWW:-${HOME}/Private/git/THESIAH}"
 USER_HOME=$(eval echo ~"$USER")
 
 # targets
 bash_path="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/ar/.config/bash"
 shell_path="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/ar/.config/shell"
 vim_path="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/ar/.config/vim"
-thesiah_path="$web_path/public"
+thesiah_path="${THESIAH_WWW:-${HOME}/Private/git/THESIAH}/public"
 lf_path="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/ar/.config/lf"
 
 error() {
@@ -34,7 +33,7 @@ mount_luks() {
 
 # Using a loop over space-separated strings instead of an array
 sync_files() {
-    for source in "$dot_path" "$music_path" "$obsidian_path" "$pass_path" "$suck_path" "$web_path"; do
+    for source in "$dot_path" "$music_path" "$git_path" "$pass_path" "$suck_path"; do
         rsync -vrazPlu --exclude=".music.txt" --delete "$source" "$backup_path/" >/dev/null 2>&1 || {
             echo "Failed to sync $(basename "$source")"
         }
@@ -108,7 +107,6 @@ sync_nextcloud() {
     base="$(basename $backup_path)"
     parent="$(dirname $backup_path)"
     tmpdir="$(mktemp -d)"
-    pw="$(pass show server/nextcloud)"
     cd "$tmpdir"
     tar -C "$parent" -zcf "$base".tar.gz "$base" >/dev/null 2>&1
     rsync -vrazPlu --delete "$tmpdir/$base".tar.gz "$THESIAH_SERVER:/var/www/nextcloud/data/si@thesiah.xyz/files/backup/" >/dev/null 2>&1
@@ -121,6 +119,7 @@ echo "Backup starts to $backup_path..."
 while getopts "r" opt; do
     case $opt in
     r) echo "Sync root files..." && sync_root && echo "Success to sync root!" && echo "Done!" && exit || error "Failed back up root" ;;
+    *) ;;
     esac
 done
 
