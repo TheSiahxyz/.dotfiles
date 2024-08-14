@@ -22,7 +22,6 @@ set scrolloff 10
 set shellopts '-eu'
 set truncatepct 50
 
-
 ### --- Custom Functions --- ###
 # Chmod
 cmd chmods ${{
@@ -227,6 +226,12 @@ cmd mpvdir ${{
         done
         [ -n "$1" ] && setsid -f mpv --really-quiet -- "$@"
     fi
+}}
+cmd videoselect ${{
+    for ext in "*.mp4" "*.mkv" "*.mov" "*.flv" "*.wmv" "*.webm" "*.mpeg" "*.mpg" "*.ts"; do
+        lf -remote "send glob-select $ext"
+    done
+    lf -remote "send save-select"
 }}
 
 # Open
@@ -483,9 +488,7 @@ map si :invert; save-select
 map sp :glob-select "*.png"; glob-select "*.jpg"; glob-select "*.jpeg"; glob-select "*.bmp"; glob-select "*.gif"; glob-select "*.tiff"; glob-select "*.tif"; glob-select "*.svg"; glob-select "*.webp"; save-select
 map su :unselect; save-select
 map sU :glob-unselect; save-select
-map sv :glob-select "*.mp4"; glob-select "*.mkv"; glob-select "*.mov"; glob-select "*.flv"; glob-select "*.wmv"; glob-select "*.webm"; glob-select "*.mpeg"; glob-select "*.mpg"; glob-select "*.ts"; save-select
-load-select
-
+map sv videoselect
 load-select
 
 # Sort
