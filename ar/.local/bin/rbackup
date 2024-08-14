@@ -35,11 +35,10 @@ mount_luks() {
 # Using a loop over space-separated strings instead of an array
 sync_files() {
     for source in "$dot_path" "$music_path" "$obsidian_path" "$pass_path" "$suck_path" "$web_path"; do
-        rsync -vrazPlu --delete "$source" "$backup_path/" >/dev/null 2>&1 || {
+        rsync -vrazPlu --exclude=".music.txt" --delete "$source" "$backup_path/" >/dev/null 2>&1 || {
             echo "Failed to sync $(basename "$source")"
         }
     done
-    sudo rm -rf "$backup_path/Music/.music.txt"
 }
 
 sync_root() {
