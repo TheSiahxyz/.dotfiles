@@ -8,16 +8,20 @@ endif
 
 call plug#begin(system('echo -n "${XDG_CONFIG_HOME:-$HOME/.config}/vim/plugged"'))
 Plug 'ap/vim-css-color'
-Plug 'morhetz/gruvbox'
+Plug 'ervandew/supertab'
 Plug 'jiangmiao/auto-pairs'
 Plug 'junegunn/fzf.vim'
 Plug 'junegunn/goyo.vim'
 Plug 'junegunn/seoul256.vim'
 Plug 'liuchengxu/vim-which-key', { 'on': ['WhichKey', 'WhichKey!'] }
 Plug 'mbbill/undotree', { 'on': 'UndotreeToggle' }
+Plug 'morhetz/gruvbox'
 Plug 'preservim/nerdtree', { 'on': 'NERDTreeToggle' }
+Plug 'SirVer/ultisnips'
+Plug 'sdaschner/vim-snippets'
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-fugitive'
+Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-surround'
 Plug 'vimwiki/vimwiki'
 Plug 'vim-airline/vim-airline'
