@@ -273,9 +273,9 @@ nnoremap <leader>gc :Commits<CR>
 nnoremap <leader>gC :BCommits<CR>
 
 " snippets
-let g:SuperTabDefaultCompletionType    = '<C-n>'
+let g:SuperTabDefaultCompletionType    = '<c-n>'
 let g:SuperTabCrMapping                = 0
-let g:UltiSnipsExpandTrigger           = '<tab>'
+let g:UltiSnipsExpandTrigger           = '<c-e>'
 let g:UltiSnipsJumpForwardTrigger      = '<tab>'
 let g:UltiSnipsJumpBackwardTrigger     = '<s-tab>'
 let g:UltiSnipsEditSplit               = 'vertical'
