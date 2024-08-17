@@ -213,8 +213,8 @@ augroup END
 
 let g:lsp_fold_enabled = 0
 let g:lsp_log_verbose = 1
-let g:lsp_log_file = expand('~/vim-lsp.log')
-let g:asyncomplete_log_file = expand('~/asyncomplete.log')
+let g:lsp_log_file = expand('~/.cache/vim/log/vim-lsp.log')
+let g:asyncomplete_log_file = expand('~/.cache/vim/log/asyncomplete.log')
 let g:lsp_settings_filetype_python = ['pyright-langserver', 'ruff', 'ruff-lsp']
 
 nnoremap <leader>li :LspInstallServer<CR>
@@ -343,10 +343,6 @@ let g:UltiSnipsEditSplit               = 'vertical'
 let g:UltiSnipsAutoTrigger             = 1
 let g:asyncomplete_auto_completeopt    = 0
 let g:asyncomplete_auto_popup          = 1
-let g:asyncomplete_log_file            = '~/.cache/vim'
-let g:asyncomplete_log_file            = expand('~/.cache/vim/asyncomplete.log')
-let g:lsp_log_verbose                  = 1
-let g:lsp_log_file                     = expand('~/.cache/vim/vim-lsp.log')
 
 set completeopt=menuone,noinsert,noselect,preview
 autocmd! CompleteDone * if pumvisible() == 0 | pclose | endif
