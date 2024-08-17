@@ -107,52 +107,54 @@ endfunction
 " }}}
 
 
-" PLUGIN MAPPINGS -------------------------------------------------------- {{{
+" PLUGIN MAPPINGS & SETTINGS -------------------------------------------------------- {{{
+
+" Open quickfix/location list
+let g:which_key_map.o       = {
+            \ 'name' : '+Open'        ,
+            \ 'q' : 'Quickfix-list'   ,
+            \ 'l' : 'Location-list'   ,
+            \ }
 
 " Check health
 nnoremap <leader>ch :CheckHealth<CR>
-let g:which_key_map.c = { 'name' : 'Check' }
-let g:which_key_map.c.h = 'Check-health'
+let g:which_key_map.c       = { 'name' : 'Check' }
+let g:which_key_map.c.h     = 'Check-health'
 
 " Fugitive
 nnoremap <leader>gs :Git<CR>
-let g:which_key_map.g = { 'name' : 'Git/Goyo' }
-let g:which_key_map.g.s = 'Git'
+let g:which_key_map.g       = { 'name' : 'Git/Goyo' }
+let g:which_key_map.g.s     = 'Git'
 
 " Goyo plugin makes text more readable when writing prose:
 nnoremap <leader>gy :call ToggleGoyo()<CR>
-let g:which_key_map.g.y = 'Toggle-goyo'
+let g:which_key_map.g.y     = 'Toggle-goyo'
 
 " Nerd tree
 map <leader>n :NERDTreeToggle<CR>
-let g:which_key_map.n = 'Toggle-nerd-tree'
+let g:which_key_map.n       = 'Toggle-nerd-tree'
 
 " Undotree
 nnoremap <leader>u :UndotreeToggle<CR>
-let g:which_key_map.u = 'Toggle-undo-tree'
+let g:which_key_map.u       = 'Toggle-undo-tree'
 
 " vimwiki
 map <leader>vw :VimwikiIndex<CR>
-let g:which_key_map.v = { 'name' : '+Vim-wiki' }
-let g:which_key_map.v.w = 'Vim-wiki-index'
+let g:which_key_map.v       = { 'name' : '+Vim-wiki' }
+let g:which_key_map.v.w     = 'Vim-wiki-index'
 
 " vim-plug
 nnoremap <leader>pc :PlugClean<CR>
 nnoremap <leader>pi :PlugInstall<CR>
 nnoremap <leader>pu :PlugUpdate<CR>
-let g:which_key_map.p = { 'name' : '+Plug' }
-let g:which_key_map.p.c = 'Plug-clean'
-let g:which_key_map.p.i = 'Plug-install'
-let g:which_key_map.p.u = 'Plug-update'
+let g:which_key_map.p       =   { 'name' : '+Plug' }
+let g:which_key_map.p.c     =   'Plug-clean'
+let g:which_key_map.p.i     =   'Plug-install'
+let g:which_key_map.p.u     =   'Plug-update'
 
 " whichkey
 nnoremap <silent> <leader>      :<c-u>WhichKey '<Space>'<CR>
 nnoremap <silent> <localleader> :<c-u>WhichKey '\'<CR>
-
-" }}}
-
-
-" PLUGIN SETTINGS -------------------------------------------------------- {{{
 
 " lsp
 if executable('pylsp')
@@ -174,7 +176,7 @@ function! s:on_lsp_buffer_enabled() abort
     nmap <buffer> gr <plug>(lsp-references)
     nmap <buffer> gi <plug>(lsp-implementation)
     nmap <buffer> gt <plug>(lsp-type-definition)
-    nmap <buffer> <leader>rn <plug>(lsp-rename)
+    nmap <buffer> <leader>lr <plug>(lsp-rename)
     nmap <buffer> [t <plug>(lsp-previous-diagnostic)
     nmap <buffer> ]t <plug>(lsp-next-diagnostic)
     nmap <buffer> K <plug>(lsp-hover)
@@ -186,6 +188,22 @@ function! s:on_lsp_buffer_enabled() abort
 
     " refer to doc to add more commands
 endfunction
+
+let g:which_key_map.g = {
+            \ 'name' : '+Goto'          ,
+            \ 'd' : 'Definition'        ,
+            \ 's' : 'Symbol'            ,
+            \ 'S' : 'Workspace-symbol'  ,
+            \ 'r' : 'References'        ,
+            \ 'i' : 'Implementation'    ,
+            \ 't' : 'Type-definition'   ,
+            \ }
+
+let g:which_key_map['['] = { 'name' : '+Previous' }
+let g:which_key_map[']'] = { 'name' : '+Next' }
+let g:which_key_map['[t'] = 'Diagnostic'
+let g:which_key_map[']t'] = 'Diagnostic'
+let g:which_key_map.K = 'Keyword'
 
 augroup lsp_install
     au!
@@ -217,7 +235,7 @@ endif
 
 " fzf
 let g:fzf_vim = {}
-let $FZF_DEFAULT_OPTS = "--layout=default --preview-window 'right:90%' --preview 'bat --style=numbers --line-range :300 {}'
+let $FZF_DEFAULT_OPTS = "--layout=default --preview-window 'right:60%' --preview 'bat --style=numbers --line-range :300 {}'
             \ --bind ctrl-y:preview-up,ctrl-e:preview-down,
             \ctrl-b:preview-page-up,ctrl-f:preview-page-down,
             \ctrl-u:preview-half-page-up,ctrl-d:preview-half-page-down,
@@ -240,10 +258,11 @@ function! s:build_quickfix_list(lines)
 endfunction
 
 let g:fzf_action = {
-            \ 'ctrl-q': function('s:build_quickfix_list'),
-            \ 'ctrl-t': 'tab split',
-            \ 'ctrl-x': 'split',
-            \ 'ctrl-v': 'vsplit' }
+            \ 'ctrl-q' : function('s:build_quickfix_list'),
+            \ 'ctrl-t' : 'tab split' ,
+            \ 'ctrl-x' : 'split'     ,
+            \ 'ctrl-v' : 'vsplit'    ,
+            \ }
 
 nnoremap <leader>cl :Colors<CR>
 nnoremap <leader>fb :Files ~/.local/bin<CR>
@@ -272,6 +291,48 @@ nnoremap <leader>st :Filetypes<CR>
 nnoremap <leader>gc :Commits<CR>
 nnoremap <leader>gC :BCommits<CR>
 
+let g:which_key_map.c = 'Color-schemes'
+let g:which_key_map.f = {
+            \ 'name' : '+Find'          ,
+            \ 'b' : 'Scripts'           ,
+            \ 'c' : 'Config'            ,
+            \ 'd' : 'Dotfiles'          ,
+            \ 'f' : 'Files'             ,
+            \ 'F' : 'Root-files'        ,
+            \ 'g' : 'Git-files'         ,
+            \ 'G' : 'Git-status'        ,
+            \ 's' : 'Suckless'          ,
+            \ }
+
+let g:which_key_map.g = {
+            \ 'name' : '+Git'           ,
+            \ 'c' : 'Commits'           ,
+            \ 'C' : 'Buffer-commits'    ,
+            \ }
+
+let g:which_key_map.s = {
+            \ 'name' : '+Search'        ,
+            \ 'b' : 'Buffers'           ,
+            \ 'c' : 'Changes'           ,
+            \ 'C' : 'Commands'          ,
+            \ 'g' : 'Rip-grep'          ,
+            \ 'G' : 'Rip-Grep'          ,
+            \ 'h' : {
+                \  'name' : '+History'      ,
+                \ 'c' : 'Command-history'   ,
+                \ 'h' : 'History'           ,
+                \ 'p' : 'Help-tags'         ,
+                \ 's' : 'Search-history'    ,
+                \ },
+            \ 'j' : 'Jumps'             ,
+            \ 'k' : 'Key-maps'          ,
+            \ 'l' : 'Locate'            ,
+            \ 'm' : 'Marks'             ,
+            \ 'n' : 'Snippets'          ,
+            \ 't' : 'File-types'        ,
+            \ }
+
+
 " snippets
 let g:SuperTabDefaultCompletionType    = '<c-n>'
 let g:SuperTabCrMapping                = 0
@@ -282,6 +343,10 @@ let g:UltiSnipsEditSplit               = 'vertical'
 let g:UltiSnipsAutoTrigger             = 1
 let g:asyncomplete_auto_completeopt    = 0
 let g:asyncomplete_auto_popup          = 1
+let g:asyncomplete_log_file            = '~/.cache/vim'
+let g:asyncomplete_log_file            = expand('~/.cache/vim/asyncomplete.log')
+let g:lsp_log_verbose                  = 1
+let g:lsp_log_file                     = expand('~/.cache/vim/vim-lsp.log')
 
 set completeopt=menuone,noinsert,noselect,preview
 autocmd! CompleteDone * if pumvisible() == 0 | pclose | endif
@@ -310,35 +375,37 @@ inoremap <expr> <cr>    pumvisible() ? asyncomplete#close_popup() : "\<cr>"
 " whichkey
 set timeoutlen=500
 
-let g:which_key_map.a = 'Select all the text'
-let g:which_key_map.b = { 'name' : '+Buffer' }
-let g:which_key_map.b.n = 'New/open buffer'
-let g:which_key_map.c = { 'name' : '+Format' }
-let g:which_key_map.c.f = 'Format buffer'
-let g:which_key_map.e = 'Explorer'
-let g:which_key_map.h = { 'name' : '+Hex' }
-let g:which_key_map.h.x = 'Toggle hex/reverse conversion'
-let g:which_key_map.l = { 'name' : '+Lex/Lsp' }
-let g:which_key_map.l.e = 'Open lex'
-let g:which_key_map.l.i = 'Lsp install server'
-let g:which_key_map.o = 'Orthography'
-let g:which_key_map.Q = 'Force quit all'
-let g:which_key_map.r = { 'name' : '+Replace' }
-let g:which_key_map.r.w = 'Replace word'
-let g:which_key_map.s = { 'name' : '+Surround' }
-let g:which_key_map.s.o = 'Source file'
-let g:which_key_map.s.w = 'Surround word'
-let g:which_key_map.t = 'Go to tab'
-let g:which_key_map["'"] = 'Register'
-let g:which_key_map['w'] = {
+let g:which_key_map.a       =   'Select-all-the-text'
+let g:which_key_map.b       =   { 'name' : '+Buffer' }
+let g:which_key_map.b.n     =   'New/open-buffer'
+let g:which_key_map.c       =   { 'name' : '+Format' }
+let g:which_key_map.c.f     =   'Format-buffer'
+let g:which_key_map.e       =   'Explorer'
+let g:which_key_map.h       =   { 'name' : '+Hex' }
+let g:which_key_map.h.x     =   'Toggle-hex/reverse-conversion'
+let g:which_key_map.l       =   { 'name' : '+Lex/Lsp' }
+let g:which_key_map.l.e     =   'Open-lex'
+let g:which_key_map.l.i     =   'Lsp-install-server'
+let g:which_key_map.l.r     =   'Rename'
+let g:which_key_map.o       =   { 'name' : '+Open' }
+let g:which_key_map.o.g     =   'Orthography'
+let g:which_key_map.Q       =   'Force-quit-all'
+let g:which_key_map.r       =   { 'name' : '+Replace' }
+let g:which_key_map.r.w     =   'Replace word'
+let g:which_key_map.s       =   { 'name' : '+Surround' }
+let g:which_key_map.s.o     =   'Source-file'
+let g:which_key_map.s.w     =   'Surround-word'
+let g:which_key_map.t       =   'Go-to-tab'
+let g:which_key_map["'"]    =   'Register'
+let g:which_key_map['w']    =   {
             \ 'name' : '+windows' ,
             \ 'd' : ['<C-W>c'     , 'Delete-window']         ,
             \ 'h' : ['<C-W>h'     , 'Window-left']           ,
             \ 'H' : ['<C-W>5<'    , 'Expand-window-left']    ,
             \ 'j' : ['<C-W>j'     , 'Window-below']          ,
-            \ 'J' : [':resize +5'  , 'Expand-window-below']   ,
+            \ 'J' : [':resize +5' , 'Expand-window-below']   ,
             \ 'k' : ['<C-W>k'     , 'Window-up']             ,
-            \ 'K' : [':resize -5'  , 'Expand-window-up']      ,
+            \ 'K' : [':resize -5' , 'Expand-window-up']      ,
             \ 'l' : ['<C-W>l'     , 'Window-right']          ,
             \ 'L' : ['<C-W>5>'    , 'Expand-window-right']   ,
             \ 's' : ['<C-W>s'     , 'Split-window-below']    ,

@@ -149,7 +149,7 @@ nnoremap <c-c> :
 inoremap <c-c> <Esc>:
 
 " Spell-check on\off to <leader>o, 'o' for 'orthography':
-map <leader>o :setlocal spell! spelllang=en_us<CR>
+map <leader>og :setlocal spell! spelllang=en_us<CR>
 
 " Type jk to exit insert mode quickly.
 inoremap jk <Esc>
@@ -262,6 +262,9 @@ nnoremap <leader>so :so<CR>
 " Compiler
 nnoremap <leader>rr :w<CR>:terminal compiler %<CR>:resize 10<CR>
 
+" Open quickfix/location list"
+nnoremap <silent> <leader>oq  :copen<CR>
+nnoremap <silent> <leader>ol  :lopen<CR>
 
 " }}}
 
