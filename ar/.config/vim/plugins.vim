@@ -8,6 +8,7 @@ endif
 
 call plug#begin(system('echo -n "${XDG_CONFIG_HOME:-$HOME/.config}/vim/plugged"'))
 Plug 'ap/vim-css-color'
+Plug 'honza/vim-snippets'
 Plug 'jiangmiao/auto-pairs'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
@@ -24,10 +25,8 @@ Plug 'prabirshrestha/asyncomplete.vim'
 Plug 'prabirshrestha/asyncomplete-lsp.vim'
 Plug 'prabirshrestha/vim-lsp'
 Plug 'preservim/nerdtree', { 'on': 'NERDTreeToggle' }
-Plug 'rafamadriz/friendly-snippets'
 Plug 'rhysd/vim-healthcheck'
 Plug 'SirVer/ultisnips'
-Plug 'sdaschner/vim-snippets'
 Plug 'thomasfaingnaert/vim-lsp-snippets'
 Plug 'thomasfaingnaert/vim-lsp-ultisnips'
 Plug 'tpope/vim-commentary'

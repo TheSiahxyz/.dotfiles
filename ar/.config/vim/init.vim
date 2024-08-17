@@ -182,7 +182,7 @@ function! s:on_lsp_buffer_enabled() abort
     nnoremap <buffer> <expr><c-u> lsp#scroll(-4)
 
     let g:lsp_format_sync_timeout = 1000
-    autocmd! BufWritePre *.rs,*.go,*py call execute('LspDocumentFormatSync')
+    autocmd! BufWritePre *.rs,*.go,*.py call execute('LspDocumentFormatSync')
 
     " refer to doc to add more commands
 endfunction
@@ -281,7 +281,7 @@ let g:UltiSnipsJumpBackwardTrigger     = '<s-tab>'
 let g:UltiSnipsEditSplit               = 'vertical'
 let g:UltiSnipsAutoTrigger             = 1
 let g:asyncomplete_auto_completeopt    = 0
-let g:asyncomplete_auto_popup          = 0
+let g:asyncomplete_auto_popup          = 1
 
 set completeopt=menuone,noinsert,noselect,preview
 autocmd! CompleteDone * if pumvisible() == 0 | pclose | endif
@@ -296,7 +296,6 @@ if executable('pyls')
 endif
 
 if has('python3')
-    let g:UltiSnipsExpandTrigger="<c-e>"
     call asyncomplete#register_source(asyncomplete#sources#ultisnips#get_source_options({
                 \ 'name': 'ultisnips',
                 \ 'allowlist': ['*'],
