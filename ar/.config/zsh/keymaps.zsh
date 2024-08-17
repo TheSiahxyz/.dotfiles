@@ -59,18 +59,18 @@ man-command-line() {
     command_line "man"
 }
 zle -N man-command-line
-bindkey -M emacs '^x^m' man-command-line
-bindkey -M vicmd '^x^m' man-command-line
-bindkey -M viins '^x^m' man-command-line
+bindkey -M emacs '^X^M' man-command-line
+bindkey -M vicmd '^X^M' man-command-line
+bindkey -M viins '^X^M' man-command-line
 
 # sudo
 sudo-command-line() {
     command_line "sudo"
 }
 zle -N sudo-command-line
-bindkey -M emacs '^s' sudo-command-line
-bindkey -M vicmd '^s' sudo-command-line
-bindkey -M viins '^s' sudo-command-line
+bindkey -M emacs '^S' sudo-command-line
+bindkey -M vicmd '^S' sudo-command-line
+bindkey -M viins '^S' sudo-command-line
 
 # last command output
 zle -N insert-last-command-output

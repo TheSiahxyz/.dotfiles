@@ -1,24 +1,35 @@
 if ! filereadable(system('echo -n "${XDG_CONFIG_HOME:-$HOME/.config}/vim/autoload/plug.vim"'))
-	echo "Downloading junegunn/vim-plug to manage plugins..."
+    echo "Downloading junegunn/vim-plug to manage plugins..."
     silent !mkdir -p ${XDG_CONFIG_HOME:-$HOME/.config}/vim/autoload/
     silent !mkdir -p ${XDG_CONFIG_HOME:-$HOME/.config}/vim/plugged/
     silent !curl "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim" > ${XDG_CONFIG_HOME:-$HOME/.config}/vim/autoload/plug.vim
-	autocmd VimEnter * PlugInstall
+    autocmd VimEnter * PlugInstall
 endif
 
 call plug#begin(system('echo -n "${XDG_CONFIG_HOME:-$HOME/.config}/vim/plugged"'))
 Plug 'ap/vim-css-color'
-Plug 'ervandew/supertab'
 Plug 'jiangmiao/auto-pairs'
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 Plug 'junegunn/goyo.vim'
 Plug 'junegunn/seoul256.vim'
+Plug 'LutfiLokman/supertab'
 Plug 'liuchengxu/vim-which-key', { 'on': ['WhichKey', 'WhichKey!'] }
+Plug 'mattn/vim-lsp-settings'
 Plug 'mbbill/undotree', { 'on': 'UndotreeToggle' }
 Plug 'morhetz/gruvbox'
+Plug 'prabirshrestha/async.vim'
+Plug 'prabirshrestha/asyncomplete-ultisnips.vim'
+Plug 'prabirshrestha/asyncomplete.vim'
+Plug 'prabirshrestha/asyncomplete-lsp.vim'
+Plug 'prabirshrestha/vim-lsp'
 Plug 'preservim/nerdtree', { 'on': 'NERDTreeToggle' }
+Plug 'rafamadriz/friendly-snippets'
+Plug 'rhysd/vim-healthcheck'
 Plug 'SirVer/ultisnips'
 Plug 'sdaschner/vim-snippets'
+Plug 'thomasfaingnaert/vim-lsp-snippets'
+Plug 'thomasfaingnaert/vim-lsp-ultisnips'
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-repeat'

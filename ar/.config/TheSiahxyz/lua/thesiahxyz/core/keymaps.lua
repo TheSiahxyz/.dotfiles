@@ -153,6 +153,12 @@ vim.api.nvim_set_keymap(
 	':w!<CR>:!compiler "%:p"<CR>',
 	{ noremap = true, silent = true, desc = "Run compiler" }
 )
+vim.api.nvim_set_keymap(
+	"n",
+	"<leader>op",
+	":!output <C-r>%<CR><CR>",
+	{ noremap = true, silent = true, desc = "Run compiler" }
+)
 
 -- Source
 vim.keymap.set("n", "<leader><leader>", function()
@@ -193,9 +199,9 @@ vim.keymap.set("n", "<leader>ms", "<cmd>Mason<cr>", { desc = "Open mason" })
 -- Word Definition
 vim.api.nvim_set_keymap(
 	"n",
-	"<leader>gd",
+	"<leader>k",
 	":lua WordDefinition(vim.fn.expand('<cword>'))<CR>",
-	{ noremap = true, silent = true, desc = "Get word definition" }
+	{ noremap = true, silent = true, desc = "Word definition" }
 )
 
 -- Ascii
