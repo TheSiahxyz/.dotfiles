@@ -29,7 +29,22 @@ return {
 		)
 
 		local lspconfig = require("lspconfig")
-		require("fidget").setup()
+		require("fidget").setup({
+			notification = {
+				window = {
+					normal_hl = "Comment", -- Base highlight group in the notification window
+					winblend = 0, -- Background color opacity in the notification window
+					border = "none", -- Border around the notification window
+					zindex = 45, -- Stacking priority of the notification window
+					max_width = 0, -- Maximum width of the notification window
+					max_height = 0, -- Maximum height of the notification window
+					x_padding = 1, -- Padding from right edge of window boundary
+					y_padding = 0, -- Padding from bottom edge of window boundary
+					align = "bottom", -- How to align the notification window
+					relative = "editor", -- What the notification window position is relative to
+				},
+			},
+		})
 		require("mason").setup()
 		require("mason-lspconfig").setup({
 			ensure_installed = {
@@ -184,11 +199,30 @@ return {
 				yaml = { "prettier" },
 				zsh = { "beautysh" },
 			},
-			-- format_on_save = {
-			-- 	lsp_fallback = true,
-			-- 	async = false,
-			-- 	timeout_ms = 500,
-			-- },
+			default_format_opts = {},
+			format_on_save = function(bufnr)
+				if vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat then
+					return
+				end
+				return { lsp_format = "fallback", timeout_ms = 500, async = false }
+			end,
+		})
+
+		vim.api.nvim_create_user_command("FormatDisable", function(args)
+			if args.bang then
+				vim.b.disable_autoformat = true
+			else
+				vim.g.disable_autoformat = true
+			end
+		end, {
+			desc = "Disable autoformat-on-save",
+			bang = true,
+		})
+		vim.api.nvim_create_user_command("FormatEnable", function()
+			vim.b.disable_autoformat = false
+			vim.g.disable_autoformat = false
+		end, {
+			desc = "Re-enable autoformat-on-save",
 		})
 	end,
 	keys = {
@@ -196,7 +230,7 @@ return {
 			mode = { "n", "v" },
 			"<leader>cf",
 			function()
-				require("conform").format({ lsp_fallback = true, async = false, timeout_ms = 500 })
+				require("conform").format({ async = true })
 			end,
 			desc = "Format buffer by lsp",
 		},
@@ -206,11 +240,26 @@ return {
 			desc = "Organize imports",
 		},
 		{
-			"<leader>ll",
+			"<leader>cl",
 			function()
 				require("lint").try_lint()
 			end,
 			desc = "Lint buffer",
+		},
+		{
+			"<leader>tfe",
+			"<cmd>FormatEnable<CR>",
+			desc = "Enable format",
+		},
+		{
+			"<leader>tfd",
+			"<cmd>FormatDisable<CR>",
+			desc = "Disable format",
+		},
+		{
+			"<leader>tfD",
+			"<cmd>FormatDisable!<CR>",
+			desc = "Disable current buffer format",
 		},
 	},
 }
