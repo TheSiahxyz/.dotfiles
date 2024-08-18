@@ -82,7 +82,7 @@ vim.keymap.set("n", "<leader>ch", ":checkhealth<cr>", { desc = "Check neovim hea
 -- Cut, Yank & Paste
 vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]], { desc = "Yank to clipboard" })
 vim.keymap.set("n", "<leader>Y", [["+Y]], { desc = "Yank line to clipboard" })
-vim.keymap.set({ "n", "v" }, "<leader>d", [["+d]], { desc = "Delete without saving to clipboard" })
+vim.keymap.set({ "n", "v" }, "<leader>d", [["+d]], { desc = "Delete and yank to clipboard" })
 vim.keymap.set("n", "<leader>D", [["+D]], { desc = "Delete line without saving to clipboard" })
 vim.keymap.set("x", "<leader>p", [["_dP]], { desc = "Paste over and preserve clipboard" })
 
@@ -161,7 +161,7 @@ vim.api.nvim_set_keymap(
 )
 
 -- Source
-vim.keymap.set("n", "<leader><leader>", function()
+vim.keymap.set("n", "<leader>.", function()
 	vim.cmd("so")
 end, { desc = "Source current file" })
 

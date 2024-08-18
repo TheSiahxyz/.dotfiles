@@ -79,6 +79,7 @@ return {
 			svelte = { "eslint_d" },
 			python = { "pylint" },
 			lua = { "luacheck" },
+			sh = { "shellcheck" },
 		}
 
 		local lint_augroup = vim.api.nvim_create_augroup("lint", { clear = true })
@@ -96,11 +97,13 @@ return {
 				"debugpy", -- python debuger
 				"eslint_d", -- eslint linter
 				"isort", -- python formatter
+				"luacheck", -- lua lint
 				"prettier", -- prettier formatter
 				"pylint", -- python linter
+				"ruff", -- python formatter
+				"shellcheck", -- bash lint
 				"shfmt", -- sh formatter
 				"stylua", -- lua formatter
-				"luacheck", -- lua lint
 			},
 		})
 
@@ -173,7 +176,7 @@ return {
 				liquid = { "prettier" },
 				lua = { "stylua" },
 				markdown = { "prettier" },
-				python = { "isort", "black" },
+				python = { "ruff", "isort", "black" },
 				sh = { "shfmt" },
 				svelte = { "prettier" },
 				typescript = { "prettier" },
@@ -181,11 +184,11 @@ return {
 				yaml = { "prettier" },
 				zsh = { "beautysh" },
 			},
-			format_on_save = {
-				lsp_fallback = true,
-				async = false,
-				timeout_ms = 500,
-			},
+			-- format_on_save = {
+			-- 	lsp_fallback = true,
+			-- 	async = false,
+			-- 	timeout_ms = 500,
+			-- },
 		})
 	end,
 	keys = {

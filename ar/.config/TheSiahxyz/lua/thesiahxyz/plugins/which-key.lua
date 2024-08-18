@@ -26,6 +26,7 @@ return {
 			{ "<leader>f", desc = "+Find" },
 			{ "<leader>fp", desc = "+Private/Public" },
 			{ "<leader>g", desc = "+Git" },
+			{ "<leader>G", desc = "+GPT" },
 			{ "<leader>j", desc = "+Molten (Jupyter)" },
 			{ "<leader>o", desc = "+Open" },
 			{ "<leader>r", desc = "+Refactoring" },

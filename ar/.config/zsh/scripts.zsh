@@ -3,7 +3,7 @@
 ###########################################################################################
 ###########################################################################################
 ### --- Stow --- ###
-dstw() {
+function dstw() {
     "${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/$(whereami)/.local/bin/stw"   
 }
 
@@ -11,7 +11,7 @@ dstw() {
 ###########################################################################################
 ### --- Paste --- ###
 # init
-pasteinit() {
+function pasteinit() {
     OLD_SELF_INSERT=${${(s.:.)widgets[self-insert]}[2,3]}
     zle -N self-insert url-quote-magic
 }
@@ -20,7 +20,7 @@ pasteinit() {
 ###########################################################################################
 ###########################################################################################
 ### --- Last Command Output --- ###
-insert-last-command-output() {
+function insert-last-command-output() {
     LBUFFER+="$(eval $history[$((HISTCMD-1))])"
 }
 
@@ -28,7 +28,7 @@ insert-last-command-output() {
 ###########################################################################################
 ###########################################################################################
 ### --- Mount ecryptfs --- ###
-emt() {
+function emt() {
     ! mount | grep -q " $1 " && echo "$(pass show encryption/ecryptfs)" | sudo mount -t ecryptfs "$1" "$2" \
         -o ecryptfs_cipher=aes,ecryptfs_key_bytes=32,ecryptfs_passthrough=no,ecryptfs_enable_filename_crypto=yes,ecryptfs_sig="$(sudo cat /root/.ecryptfs/sig-cache.txt)",ecryptfs_fnek_sig="$(sudo cat /root/.ecryptfs/sig-cache.txt)",passwd="$(pass show encryption/ecryptfs)" >/dev/null 2>&1 &&
         echo "'$2' folder is mounted!" 
@@ -38,12 +38,12 @@ emt() {
 ###########################################################################################
 ###########################################################################################
 ### --- Git --- ###
-gcgts() {
+function gcgts() {
     choice=$(ssh "$THESIAH_GIT" "ls -a | grep -i \".*\\.git$\"" | fzf --cycle --prompt="  " --height=50% --layout=reverse --border --exit-0)
     [ -n "$choice" ] && [ -n "$1" ] && git clone "${THESIAH_GIT:-git@${THESIAH:-thesiah.xyz}}":"$choice" "$1" || [ -n "$choice" ] && git clone "${THESIAH_GIT:-git@${THESIAH:-thesiah.xyz}}":"$choice"
 }
 
-gp() {
+function gp() {
     branch="$(git rev-parse --abbrev-ref HEAD)"
     [[ -z "$1" ]] && { 
         git push home "$branch" && echo "Pushed to home on branch $branch successfully.\n" ||
@@ -60,7 +60,7 @@ gp() {
 ###########################################################################################
 ###########################################################################################
 ### --- Setxkbmap --- ###
-gkey() {
+function gkey() {
     grep --color -E "$1" /usr/share/X11/xkb/rules/base.lst
 }
 
@@ -68,7 +68,7 @@ gkey() {
 ###########################################################################################
 ###########################################################################################
 ### --- Change Target Nvim --- ###
-ctn() {
+function ctn() {
     if [ $# -ne 2 ]; then
         echo "Usage: cnt <old_suffix> <new_suffix>"
         return 1
@@ -104,10 +104,10 @@ ctn() {
 ###########################################################################################
 ###########################################################################################
 ### --- Color --- ###
-pcol() {
+function pcol() {
     awk 'BEGIN{
 s="/\\/\\/\\/\\/\\"; s=s s s s s s s s;
-for (colnum = 0; colnum<77; colnum++) {
+function for (colnum = 0; colnum<77; colnum++) {
     r = 255-(colnum*255/76);
     g = (colnum*510/76);
     b = (colnum*255/76);
@@ -124,7 +124,7 @@ printf "\n";
 ###########################################################################################
 ###########################################################################################
 ### --- Config --- ###
-fcf() {
+function fcf() {
     [ $# -gt 0 ] && zoxide query -i "$1" | xargs "${EDITOR}" && return
     local file
     file="$(zoxide query -l | fzf --cycle -1 -0 --no-sort +m)" && nvim "${file}" || return 1
@@ -135,7 +135,7 @@ fcf() {
 ###########################################################################################
 ### --- Copy --- ###
 # file
-cpf() {
+function cpf() {
     local clipboard_cmd=()
     local file
     clipboard_cmd=("xclip" "-selection" "clipboard")
@@ -152,7 +152,7 @@ cpf() {
 ###########################################################################################
 ### --- Docker --- ###
 # Select a docker container to start and attach to
-doca() {
+function doca() {
     local cid
     cid=$(docker ps -a | sed 1d | fzf --cycle -1 -q "$1" | awk '{print $1}')
 
@@ -160,7 +160,7 @@ doca() {
 }
 
 # Select a running docker container to stop
-docs() {
+function docs() {
     local cid
     cid=$(docker ps | sed 1d | fzf --cycle -q "$1" | awk '{print $1}')
 
@@ -168,12 +168,12 @@ docs() {
 }
 
 # Same as above, but allows multi selection:
-docrm() {
+function docrm() {
     docker ps -a | sed 1d | fzf --cycle -q "$1" --no-sort -m --tac | awk '{ print $1 }' | xargs -r docker rm
 }
 
 # Select a docker image or images to remove
-docrmi() {
+function docrmi() {
     docker images | sed 1d | fzf --cycle -q "$1" --no-sort -m --tac | awk '{ print $3 }' | xargs -r docker rmi
 }
 
@@ -181,7 +181,7 @@ docrmi() {
 ###########################################################################################
 ###########################################################################################
 ### --- Firefox --- ###
-bh() {
+function bh() {
     local cols sep history_path open
     cols=$(( COLUMNS / 3 ))
     sep='{|}'
@@ -203,7 +203,7 @@ bh() {
     fzf --cycle --ansi --multi | sed 's#.*\(https*://\)#\1#' | xargs -r $open > /dev/null 2> /dev/null
 }
 
-bm() {
+function bm() {
     profile_dir=$(find ~/.mozilla/firefox -type d -name "*.default-release*" | head -n 1)
     bookmarks_path="$profile_dir/places.sqlite"
     tmp_bookmark_dir="${XDG_CACHE_HOME:-$HOME/.cache}/firefox_tmp"
@@ -230,30 +230,30 @@ bm() {
 ###########################################################################################
 ### --- Goto --- ###
 # files in root
-ff() {
+function ff() {
     local file
     file=$(find "$HOME" -type f 2>/dev/null | fzf) && nvim "$file"
 }
 
 # files in sub
-fF() {
+function fF() {
     local file
     file=$(find . -type f | fzf --cycle) && nvim "$file"
 }
 
 # directory
-fD() {
+function fD() {
     cd $(find "$HOME" -type d 2>/dev/null | fzf)
 }
 
 # search bin
-sscs() {
+function sscs() {
     choice="$(find ~/.local/bin -mindepth 1 \( -type f -o -type l \) -not -name '*.md' -printf '%P\n' | fzf --cycle)"
     ([ -n "$choice" ] && [ -f "$HOME/.local/bin/$choice" ]) && $EDITOR "$HOME/.local/bin/$choice"
 }
 
 # check git directories
-fdot() {
+function fdot() {
     local search_dirs=()
     local initial_dirs=("$HOME/.dotfiles" "$HOME/.local/share/.password-store" "$HOME/.local/src/suckless")
     local git_dirs=("$HOME/Private/git" "$HOME/Public/git")
@@ -305,7 +305,7 @@ fdot() {
 ###########################################################################################
 ### --- help --- ###
 alias bathelp='bat --plain --language=help'
-help() {
+function help() {
     # "$@" help 2>&1 | bathelp
     "$@" --help 2>&1 | bathelp
 }
@@ -314,7 +314,7 @@ help() {
 ###########################################################################################
 ###########################################################################################
 ### --- lf --- ###
-lfcd () {
+function lfcd () {
     tmp="$(mktemp -uq)"
     trap 'rm -f $tmp >/dev/null 2>&1 && trap - HUP INT QUIT TERM PWR EXIT' HUP INT QUIT TERM PWR EXIT
     lf -last-dir-path="$tmp" "$@"
@@ -328,14 +328,14 @@ lfcd () {
 ###########################################################################################
 ###########################################################################################
 ### --- mkcd --- ###
-mkcd() { mkdir -p "$@" && cd "$_"; }
+function mkcd() { mkdir -p "$@" && cd "$_"; }
 
 
 ###########################################################################################
 ###########################################################################################
 ### --- neovim --- ###
 # folder
-cnf() {
+function cnf() {
 	local base_dir="${XDG_DOTFILES_DIR:-$HOME/.dotfiles}/$(whereami)/.config"     # Base directory for Neovim configs
     local target_dir="${XDG_CONFIG_HOME:-$HOME/.config}/nvim"             # Target directory for active Neovim config
     local target_share="${XDG_DATA_HOME:-$HOME/.local/share}/nvim"        # Neovim"s share directory
@@ -389,7 +389,7 @@ cnf() {
 }
 
 # switch
-nvs() {
+function nvs() {
     items=("Default" "TheSiahxyz" "LazyVim" "NvChad")
     config=$(printf "%s\n" "${items[@]}" | fzf --cycle --prompt=" Neovim Config  " --height=~50% --layout=reverse --border --exit-0)
     [[ -z $config ]] && return 0
@@ -400,23 +400,23 @@ nvs() {
 ###########################################################################################
 ###########################################################################################
 ### --- Password --- ###
-pqr() {
+function pqr() {
     pass otp uri -q $1
 }
 
-pqri() {
+function pqri() {
     pass otp insert $1
 }
 
-pss() {
+function pss() {
     pass show $(find $PASSWORD_STORE_DIR -type f -name '*.gpg' | sed 's|^''$PASSWORD_STORE_DIR/||; s/\.gpg$//' | fzf --cycle)
 }
 
-psc() {
+function psc() {
     pass show -c $(find $PASSWORD_STORE_DIR -type f -name '*.gpg' | sed 's|^''$PASSWORD_STORE_DIR/||; s/\.gpg$//' | fzf --cycle)
 }
 
-gpgqr() {
+function gpgqr() {
     qrencode -o "$1".png -t png -Sv 40 < "$1".pgp
 }
 
@@ -424,7 +424,7 @@ gpgqr() {
 ###########################################################################################
 ###########################################################################################
 ### --- Sudo --- ###
-__command_replace_buffer() {
+function __command_replace_buffer() {
     local old=$1 new=$2 space=${2:+ }
     if [[ $CURSOR -le ${#old} ]]; then
         BUFFER="${new}${space}${BUFFER#$old }"
@@ -434,7 +434,7 @@ __command_replace_buffer() {
     fi
 }
 # Main function to manipulate the command line to prepend a given command, handling special cases including editor preferences
-command_line() {
+function command_line() {
     local prepend_command=$1
     local EDITOR=${SUDO_EDITOR:-${VISUAL:-$EDITOR}}
     [[ -z $BUFFER ]] && LBUFFER="$(fc -ln -1)"
@@ -474,7 +474,7 @@ command_line() {
 ###########################################################################################
 ### --- Tmux --- ###
 # kill
-tmk() {
+function tmk() {
     local sessions
     sessions="$(tmux ls|fzf --cycle --exit-0 --multi)"  || return $?
     local i
@@ -488,7 +488,7 @@ tmk() {
 }
 
 # new or switch
-tmn() {
+function tmn() {
     [[ -n "$TMUX" ]] && change="switch-client" || change="attach-session"
     if [ $1 ]; then
         tmux $change -t "$1" 2>/dev/null || (tmux new-session -d -s $1 && tmux $change -t "$1"); return
@@ -497,7 +497,7 @@ tmn() {
 }
 
 # select
-tms() {
+function tms() {
     local session
     session=$(tmux list-sessions -F "#{session_name}" \
         | fzf --cycle --query="$1" --select-1 --exit-0) &&
@@ -509,11 +509,11 @@ tms() {
 ###########################################################################################
 ### --- Virtual Env --- ###
 # Create
-createv() { python -m venv $XDG_DATA_HOME/venvs/"$1" }
+function createv() { python -m venv $XDG_DATA_HOME/venvs/"$1" }
 # Activate
-activev() { source $XDG_DATA_HOME/venvs/"$1"/bin/activate }
+function activev() { source $XDG_DATA_HOME/venvs/"$1"/bin/activate }
 # List
-listv() {
+function listv() {
     local venvs_dir="$XDG_DATA_HOME/venvs"
     local venvs=("$venvs_dir"/*)
 
@@ -530,7 +530,7 @@ listv() {
     done
 }
 # Delete
-deletev() {
+function deletev() {
     local env_dir="$XDG_DATA_HOME/venvs"
     local options=($(find "$env_dir" -maxdepth 1 -mindepth 1 -type d -exec basename {} \;))
     options+=("Delete All")
@@ -549,4 +549,3 @@ deletev() {
         echo "$selected_env deleted"
     fi
 }
-

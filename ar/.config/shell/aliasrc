@@ -38,7 +38,7 @@ alias .....='../../../..'
 
 # bat
 alias bath='bat cache --build'
-alias c='bat -n'
+alias can='bat -n'
 ialias -g cat='bat --plain --wrap character'
 alias -g -- -h='-h 2>&1 | bat --language=help --style=plain'
 alias -g -- --help='--help 2>&1 | bat --language=help --style=plain'
@@ -72,7 +72,7 @@ alias 777='chmod -R 777'
 
 # copy
 alias CC='$(fc -l -n -1) | xclip -selection clipboard'
-alias cp='cp -iv'
+ialias cp='cp -iv'
 alias pwdc='pwd | xclip -selection clipboard'
 
 # curl
@@ -226,7 +226,7 @@ alias hss='hugo server --noHTTPCache'
 alias hcl='hugo --cleanDestinationDir'
 
 # ip
-alias ip='ip -color=auto'
+ialias ip='ip -color=auto'
 alias whatsmyip='curl -s ifconfig.me | xargs'
 
 # jupyter
@@ -239,7 +239,7 @@ alias k9='kill -9'
 alias k15='kill -15'
 
 # lf
-alias lf='lfub'
+ialias lf='lfub'
 
 # mkcd
 alias mc='mkcd'
@@ -248,7 +248,7 @@ alias mc='mkcd'
 alias mkdir='mkdir -pv'
 
 # move
-alias mv='mv -iv'
+ialias mv='mv -iv'
 
 # mysql
 alias msr='mysql -u si -p'
@@ -297,7 +297,7 @@ alias open='xdg-open'
 alias potp='pass otp totp-secret'
 
 # ps
-alias ps='ps auxf'
+ialias ps='ps auxf'
 alias psj='ps aux | grep "[j]ava"'
 balias psg='ps auxf | grep'
 alias topcpu='/bin/ps -eo pcpu,pid,user,args | sort -k 1 -r | head -10'
@@ -309,7 +309,7 @@ alias py='python3'
 alias rp='realpath'
 
 # remove
-alias rm='rm -vI'
+ialias rm='rm -vI'
 
 # rsync
 alias rsc='rsync -vrazPlu'
@@ -324,7 +324,7 @@ alias win10="sudo mount -t cifs //192.168.0.3/Share /media/$USER/win10 -o userna
 alias scim='sc-im'
 
 # scp
-alias scp='scp -r'
+ialias scp='scp -r'
 
 # scripts
 alias cs='createscript'
@@ -440,7 +440,7 @@ alias vi.='vim .'
 alias w1='watch -n 1'
 
 # wget
-alias wget=wget --hsts-file="${XDG_CACHE_HOME:-${HOME}/.cache}/wget-hsts"
+ialias wget=wget --hsts-file="${XDG_CACHE_HOME:-${HOME}/.cache}/wget-hsts"
 
 # xev
 alias keys='xev -event keyboard | awk '\''/^KeyPress/,/^KeyRelease/ { if ($0 ~ /keysym/) print $0 }'\'''
