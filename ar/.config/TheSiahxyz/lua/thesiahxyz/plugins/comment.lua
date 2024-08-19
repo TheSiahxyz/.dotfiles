@@ -13,7 +13,7 @@ return {
 		opts = {},
 		cmd = { "TodoTrouble", "TodoTelescope" },
 		config = function()
-			require("todo-comments.nvim").setup()
+			require("todo-comments").setup()
 		end,
 		keys = {
 			{

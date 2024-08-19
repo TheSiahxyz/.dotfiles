@@ -205,7 +205,9 @@ vim.api.nvim_set_keymap(
 )
 
 -- Ascii
-vim.keymap.set("n", "<leader>7", ":.!toilet -w 200 -f bfraktur<CR>", { desc = "Ascii art standard" })
-vim.keymap.set("n", "<leader>8", ":.!toilet -w 200 -f future<CR>", { desc = "Ascii art small" })
-vim.keymap.set("n", "<leader>9", ":.!toilet -w 200 -f pagga<CR>", { desc = "Ascii art small" })
-vim.keymap.set("n", "<leader>0", ":.!toilet -w 200 -f emboss<CR>", { desc = "Ascii art small" })
+vim.keymap.set("n", "<leader>c1", ":.!toilet -w 200 -f bfraktur<CR>", { desc = "Ascii art bfraktur" })
+vim.keymap.set("n", "<leader>c2", ":.!toilet -w 200 -f emboss<CR>", { desc = "Ascii art emboss" })
+vim.keymap.set("n", "<leader>c3", ":.!toilet -w 200 -f emboss2<CR>", { desc = "Ascii art emboss2" })
+vim.keymap.set("n", "<leader>c4", ":.!toilet -w 200 -f future<CR>", { desc = "Ascii art future" })
+vim.keymap.set("n", "<leader>c5", ":.!toilet -w 200 -f pagga<CR>", { desc = "Ascii art pagga" })
+vim.keymap.set("n", "<leader>c6", ":.!toilet -w 200 -f wideterm<CR>", { desc = "Ascii art wideterm" })

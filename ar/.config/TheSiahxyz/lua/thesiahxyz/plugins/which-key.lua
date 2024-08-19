@@ -27,6 +27,8 @@ return {
 			{ "<leader>fp", desc = "+Private/Public" },
 			{ "<leader>g", desc = "+Git" },
 			{ "<leader>G", desc = "+GPT" },
+			{ "<leader>Gg", desc = "+Gp" },
+			{ "<leader>GW", desc = "+Whisper" },
 			{ "<leader>j", desc = "+Molten (Jupyter)" },
 			{ "<leader>l", desc = "+Lazy" },
 			{ "<leader>m", desc = "+Mason" },
