@@ -245,7 +245,7 @@ ialias lf='lfub'
 alias mc='mkcd'
 
 # mkdir
-alias mkdir='mkdir -pv'
+ialias mkdir='mkdir -pv'
 
 # move
 ialias mv='mv -iv'
@@ -382,17 +382,18 @@ alias tm='tmux'
 alias tmc="tmux new -s $(basename $PWD)"
 
 # tmuxinator
+alias ti='tmuxinator'
+alias tic='tmuxinator config'
 alias tid='tmuxinator delete'
 alias til='tmuxinator list'
-alias tis='tmuxinator start'
-alias tic='tmuxinator config'
+alias tin='tmuxinator new'
 alias tio='tmuxinator obsidian'
 alias tipv='tmuxinator private'
 alias tipb='tmuxinator public'
-alias tiw='tmuxinator work'
-alias tin='tmuxinator new'
-alias ti='tmuxinator'
 alias tir="tic && tipv && tipb && tiw"
+alias tis='tmuxinator start'
+alias tit='tmuxinator start terminal'
+alias tiw='tmuxinator work'
 
 # transmission-remote
 alias trem='transmission-remote'

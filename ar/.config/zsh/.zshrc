@@ -104,3 +104,6 @@ for zsh_config in ${ZDOTDIR:-${HOME}/.config/zsh}/*.zsh; do source "$zsh_config"
 [ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutrc" ] && source "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutrc"
 [ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutenvrc" ] && source "${XDG_CONFIG_HOME:-$HOME/.config}/shell/shortcutenvrc"
 [ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/zshnameddirrc" ] && source "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/zshnameddirrc"
+
+# ### --- Tmux --- ###
+[ -z "$TMUX" ] && [ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/tmuxinator/terminal.yml" ] && tmuxinator start terminal

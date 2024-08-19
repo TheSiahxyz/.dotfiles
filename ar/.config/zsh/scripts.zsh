@@ -473,6 +473,12 @@ function command_line() {
 ###########################################################################################
 ###########################################################################################
 ### --- Tmux --- ###
+# cd session
+function cds() {
+    session="$(tmux display-message -p '#{session_path}')"
+    cd "$session"
+}
+
 # kill
 function tmk() {
     local sessions

@@ -1,0 +1,8 @@
+#!/bin/sh
+
+status="$(tmux show-option -gqv status)"
+if [ "$status" = "on" ]; then
+    tmux set-option -g status off
+elif [ "$status" = "off" ]; then
+    tmux set-option -g status on
+fi
