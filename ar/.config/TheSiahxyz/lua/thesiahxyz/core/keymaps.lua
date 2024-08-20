@@ -6,16 +6,55 @@ vim.g.maplocalleader = "\\"
 vim.keymap.set("n", "<S-h>", "<cmd>bprevious<cr>", { desc = "Previous buffer" })
 vim.keymap.set("n", "<S-l>", "<cmd>bnext<cr>", { desc = "Next buffer" })
 vim.keymap.set("n", "<leader>bb", "<cmd>e #<cr>", { desc = "Switch to last buffer" })
-vim.keymap.set("n", "<leader>`", "<cmd>e #<cr>", { desc = "Switch to last buffer" })
+vim.keymap.set("n", "<leader>bd", "<cmd>e #<cr>", { desc = "Close buffer" })
+vim.keymap.set("n", "<leader>bn", "<cmd>enew<cr>", { desc = "New buffer" })
+vim.keymap.set("n", "[b", "<cmd>e #<cr>", { desc = "Switch to last buffer" })
 
 -- Clear search with <esc>
 vim.keymap.set({ "i", "n" }, "<esc>", "<cmd>noh<cr><esc>", { desc = "Clear search highlights" })
+
+-- Copy
+vim.keymap.set({ "i", "n" }, "<leader>cp", function()
+	local filename = vim.fn.expand("%") -- Get the current filename
+	local file_root = vim.fn.expand("%:r") -- Get the file root (without extension)
+	local file_ext = vim.fn.expand("%:e") -- Get the file extension
+	local new_filename = file_root .. "_copied" -- Start with the base for new filename
+	local num = 1
+	while vim.fn.filereadable(new_filename .. "." .. file_ext) == 1 do
+		new_filename = file_root .. "_copied_" .. num
+		num = num + 1
+	end
+	new_filename = new_filename .. "." .. file_ext
+	local cmd = "cp " .. filename .. " " .. new_filename
+	local confirm = vim.fn.input("Are you sure you want to copy " .. filename .. "? (y/n): ")
+	if confirm:lower() == "y" then
+		vim.cmd("!" .. cmd)
+		vim.cmd("edit " .. new_filename)
+	end
+end, { desc = "Copy current file" })
+
+-- Remove
+vim.keymap.set("n", "<leader>rm", function()
+	local filename = vim.fn.expand("%")
+	if vim.fn.filereadable(filename) == 1 then
+		local confirm = vim.fn.input("Are you sure you want to delete " .. filename .. "? (y/n): ")
+		if confirm:lower() == "y" then
+			vim.cmd("!rm " .. filename)
+			vim.cmd("bd!")
+		end
+	end
+end, { desc = "Remove current file" })
 
 -- Disable
 vim.keymap.set("n", "Q", "<nop>", { desc = "Disable q command" })
 
 -- Explore
 vim.keymap.set("n", "<leader>e", vim.cmd.Ex, { desc = "Open file explorer" })
+vim.keymap.set("n", "<leader>q", function()
+	if vim.bo.filetype == "netrw" then
+		vim.cmd("bd")
+	end
+end, { desc = "Close netrw buffer" })
 
 -- Highlights under cursor
 vim.keymap.set("n", "<leader>h", vim.show_pos, { desc = "Inspect position" })

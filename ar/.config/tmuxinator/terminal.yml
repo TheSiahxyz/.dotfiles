@@ -1,6 +1,6 @@
-# /home/si/.config/tmuxinator//terminal.yml
+# /Users/si/.config/tmuxinator/school.yml
 
-name: terminal
+name: code
 root: ~/
 
 # Optional tmux socket
@@ -27,12 +27,12 @@ root: ~/
 # on_project_stop: command
 
 # Runs in each window and pane before window/pane specific commands. Useful for setting up interpreter versions.
-# pre_window: rbenv shell 2.0.0-p247
+pre_window: clear
 
 # Pass command line options to tmux. Useful for specifying a different tmux.conf.
-# tmux_options: -f ~/.tmux.mac.conf
+# tmux_options: -f ~/.config/tmux/tmux.conf
 
-# Change the command to call tmux. This can be used by derivatives/wrappers like byobu.
+# Change the command to call tmux.  This can be used by derivatives/wrappers like byobu.
 # tmux_command: byobu
 
 # Specifies (by name or index) which window will be selected on project startup. If not set, the first window is used.
@@ -46,7 +46,4 @@ root: ~/
 
 windows:
   - code:
-      layout: main-vertical
-      # Synchronize all panes of this window, can be enabled before or after the pane commands run.
-      # 'before' represents legacy functionality and will be deprecated in a future release, in favour of 'after'
-      # synchronize: after
+    layout: main-vertical

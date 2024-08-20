@@ -391,7 +391,7 @@ alias tipv='tmuxinator private'
 alias tipb='tmuxinator public'
 alias tir="tic && tipv && tipb && tiw"
 alias tis='tmuxinator start'
-alias tit='tmuxinator start terminal'
+alias tit='tmuxinator terminal'
 alias tiw='tmuxinator work'
 
 # transmission-remote

@@ -51,13 +51,38 @@ return {
 			pickers = {
 				find_files = {
 					mappings = {
-						n = {
-							["cd"] = function(prompt_bufnr)
+						i = {
+							["<C-g>"] = function(prompt_bufnr)
 								local selection = require("telescope.actions.state").get_selected_entry()
 								local dir = vim.fn.fnamemodify(selection.path, ":p:h")
 								require("telescope.actions").close(prompt_bufnr)
 								-- Depending on what you want put `cd`, `lcd`, `tcd`
 								vim.cmd(string.format("silent lcd %s", dir))
+							end,
+						},
+					},
+				},
+				buffers = {
+					mappings = {
+						i = {
+							["<C-x>"] = function(prompt_bufnr)
+								local actions = require("telescope.actions")
+								local action_state = require("telescope.actions.state")
+								local current_picker = action_state.get_current_picker(prompt_bufnr)
+								local multi_selections = current_picker:get_multi_selection()
+
+								if next(multi_selections) == nil then
+									current_picker:delete_selection(function(selection)
+										vim.api.nvim_buf_delete(selection.bufnr, { force = true })
+									end)
+								else
+									actions.close(prompt_bufnr)
+									for _, selection in ipairs(multi_selections) do
+										current_picker:delete_selection(function(selection)
+											vim.api.nvim_buf_delete(selection.bufnr, { force = true })
+										end)
+									end
+								end
 							end,
 						},
 					},

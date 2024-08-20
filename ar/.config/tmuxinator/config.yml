@@ -46,11 +46,16 @@ startup_window: nvim
 
 windows:
   - config:
+      layout: main-vertical
       root: ~/.config
   - Vim:
       root: ~/.config/vim
       panes:
         - vi
+  - nvim:
+      root: ~/.config/nvim
+      panes:
+        - nv
   - LazyVim:
       root: ~/.config/LazyVim/
       panes:
@@ -63,6 +68,3 @@ windows:
       root: ~/.config/TheSiahxyz/
       panes:
         - nts
-  - nvim:
-      layout: main-vertical
-      root: ~/.config
