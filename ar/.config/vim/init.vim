@@ -121,6 +121,21 @@ nnoremap <leader>ch :CheckHealth<CR>
 let g:which_key_map.c       = { 'name' : 'Check' }
 let g:which_key_map.c.h     = 'Check-health'
 
+" Bookmarks
+let g:bookmark_no_default_key_mappings = 1
+let g:bookmark_save_per_working_dir = 1
+let g:bookmark_auto_save = 1
+nmap <leader>mm <Plug>BookmarkToggle
+nmap <leader>mi <Plug>BookmarkAnnotate
+nmap <leader>ma <Plug>BookmarkShowAll
+nmap <leader>m] <Plug>BookmarkNext
+nmap <leader>m[ <Plug>BookmarkPrev
+nmap <leader>mc <Plug>BookmarkClear
+nmap <leader>mx <Plug>BookmarkClearAll
+nmap <leader>mk <Plug>BookmarkMoveUp
+nmap <leader>mj <Plug>BookmarkMoveDown
+nmap <leader>mg <Plug>BookmarkMoveToLine
+
 " Fugitive
 nnoremap <leader>gs :Git<CR>
 let g:which_key_map.g       = { 'name' : 'Git/Goyo' }

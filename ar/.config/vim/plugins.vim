@@ -18,6 +18,7 @@ Plug 'junegunn/seoul256.vim'
 Plug 'kshenoy/vim-signature'
 Plug 'LutfiLokman/supertab'
 Plug 'liuchengxu/vim-which-key', { 'on': ['WhichKey', 'WhichKey!'] }
+Plug 'MattesGroeger/vim-bookmarks'
 Plug 'mattn/vim-lsp-settings'
 Plug 'mbbill/undotree', { 'on': 'UndotreeToggle' }
 Plug 'morhetz/gruvbox'

@@ -6,6 +6,9 @@ credentials
 *~
 *.swp
 
+# Bookmakrs
+.vim-bookmarks
+
 # Compiled files
 *.class
 *.com
