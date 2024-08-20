@@ -281,15 +281,13 @@ alias open='xdg-open'
 # pacman
 [ -x "$(command -v pacman)" ] && {
     alias -g pcy='pacman -Syu'
+    alias -g pcyr='pacman -Syu && remaps'
     alias -g pcs='pacman -S'
     alias -g pcss='pacman -Ss'
     alias -g pcqs='pacman -Qs'
     alias -g pcr='pacman -R'
     alias -g pcrs='pacman -Rs'
     alias -g pcclean='pacman -Rsn $(pacman -Qqdt)'
-    alias -g pry='pacaur -Syu'
-    alias -g prs='pacaur -S'
-    alias -g prss='pacaur -Ss'
 }
 
 # pass
