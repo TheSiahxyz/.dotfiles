@@ -1,6 +1,6 @@
 # /Users/si/.config/tmuxinator/school.yml
 
-name: code
+name: terminal
 root: ~/
 
 # Optional tmux socket
