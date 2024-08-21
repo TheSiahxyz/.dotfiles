@@ -3,15 +3,15 @@ vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 
 -- Buffers
-vim.keymap.set("n", "<S-h>", "<cmd>bprevious<cr>", { desc = "Previous buffer" })
-vim.keymap.set("n", "<S-l>", "<cmd>bnext<cr>", { desc = "Next buffer" })
-vim.keymap.set("n", "<leader>bb", "<cmd>e #<cr>", { desc = "Switch to last buffer" })
-vim.keymap.set("n", "<leader>bd", "<cmd>e #<cr>", { desc = "Close buffer" })
-vim.keymap.set("n", "<leader>bn", "<cmd>enew<cr>", { desc = "New buffer" })
-vim.keymap.set("n", "[b", "<cmd>e #<cr>", { desc = "Switch to last buffer" })
+vim.keymap.set("n", "<S-h>", "<CMD>bprevious<CR>", { desc = "Previous buffer" })
+vim.keymap.set("n", "<S-l>", "<CMD>bnext<CR>", { desc = "Next buffer" })
+vim.keymap.set("n", "<leader>bb", "<CMD>e #<CR>", { desc = "Switch to last buffer" })
+vim.keymap.set("n", "<leader>bd", "<CMD>bd!<CR>", { desc = "Close buffer" })
+vim.keymap.set("n", "<leader>bn", "<CMD>enew<CR>", { desc = "New buffer" })
+vim.keymap.set("n", "[b", "<CMD>e #<CR>", { desc = "Switch to last buffer" })
 
--- Clear search with <esc>
-vim.keymap.set({ "i", "n" }, "<esc>", "<cmd>noh<cr><esc>", { desc = "Clear search highlights" })
+-- Clear search with <ESC>
+vim.keymap.set({ "i", "n" }, "<ESC>", "<CMD>noh<CR><ESC>", { desc = "Clear search highlights" })
 
 -- Copy
 vim.keymap.set({ "i", "n" }, "<leader>cp", function()
@@ -32,6 +32,12 @@ vim.keymap.set({ "i", "n" }, "<leader>cp", function()
 		vim.cmd("edit " .. new_filename)
 	end
 end, { desc = "Copy current file" })
+vim.keymap.set(
+	"n",
+	"<leader>cP",
+	':let @+ = expand("%:p")<CR>:lua print("Copied path to: " .. vim.fn.expand("%:p"))<CR>',
+	{ desc = "Copy current file name and path", silent = false }
+)
 
 -- Remove
 vim.keymap.set("n", "<leader>rm", function()
@@ -60,8 +66,8 @@ end, { desc = "Close netrw buffer" })
 vim.keymap.set("n", "<leader>h", vim.show_pos, { desc = "Inspect position" })
 
 -- Remap Default
-vim.keymap.set("i", "jk", "<Esc>", { desc = "Escape to normal mode" })
-vim.keymap.set("i", "<C-c>", "<Esc>", { desc = "Escape to normal mode" })
+vim.keymap.set("i", "jk", "<ESC>", { desc = "Escape to normal mode" })
+vim.keymap.set("i", "<C-c>", "<ESC>", { desc = "Escape to normal mode" })
 vim.keymap.set("i", "<C-i>", "<ESC>I", { desc = "Insert at beginning of line" })
 vim.keymap.set("i", "<C-a>", "<End>", { desc = "Move to end of line" })
 vim.keymap.set("i", "<C-h>", "<Left>", { desc = "Move left" })
@@ -114,16 +120,26 @@ vim.keymap.set("v", "<", "<gv", { desc = "Indent left and stay in visual mode" }
 vim.keymap.set("v", ">", ">gv", { desc = "Indent right and stay in visual mode" })
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move line down in visual mode" })
 vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move line up in visual mode" })
+vim.keymap.set("n", "sl", "vg_", { desc = "Select to end of line" })
+vim.keymap.set("n", "sp", "ggVGp", { desc = "Select all and paste" })
+vim.keymap.set("n", "sv", "ggVG", { desc = "Select all" })
+vim.keymap.set("n", "gp", "`[v`]", { desc = "Select pasted text" })
+vim.keymap.set("n", "ss", ":s/\\v", { desc = "Search and replace on line" })
+vim.keymap.set("n", "SS", ":%s/\\v", { desc = "Search and replace in file" })
+vim.keymap.set("v", "<leader><C-s>", ":s/\\%V", { desc = "Search only in visual selection using %V atom" })
+vim.keymap.set("v", "<C-r>", '"hy:%s/\\v<C-r>h//g<left><left>', { desc = "Change selection" })
 
 -- Check Health
-vim.keymap.set("n", "<leader>ch", ":checkhealth<cr>", { desc = "Check neovim health" })
+vim.keymap.set("n", "<leader>ch", ":checkhealth<CR>", { desc = "Check neovim health" })
 
 -- Cut, Yank & Paste
 vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]], { desc = "Yank to clipboard" })
 vim.keymap.set("n", "<leader>Y", [["+Y]], { desc = "Yank line to clipboard" })
+vim.keymap.set({ "n", "v" }, "<leader><C-y>", ":%y<CR>", { desc = "Yank current file to clipboard" })
+vim.keymap.set("x", "<leader>p", [["_dP]], { desc = "Paste over and preserve clipboard" })
 vim.keymap.set({ "n", "v" }, "<leader>d", [["+d]], { desc = "Delete and yank to clipboard" })
 vim.keymap.set("n", "<leader>D", [["+D]], { desc = "Delete line without saving to clipboard" })
-vim.keymap.set("x", "<leader>p", [["_dP]], { desc = "Paste over and preserve clipboard" })
+vim.keymap.set("n", "<leader><C-d>", ":%d_<CR>", { desc = "Delete all to black hole register" })
 
 -- Diagnostic
 local diagnostic_goto = function(next, severity)
@@ -143,47 +159,47 @@ vim.keymap.set("n", "<leader>de", vim.diagnostic.open_float, { desc = "Open diag
 vim.keymap.set("n", "<leader>dq", vim.diagnostic.setloclist, { desc = "Add diagnostics to location list" })
 
 -- Files
-vim.keymap.set("n", "<leader>fn", "<cmd>enew<cr>", { desc = "Open new buffer" })
+vim.keymap.set("n", "<leader>fn", "<CMD>enew<CR>", { desc = "Open new buffer" })
 
 -- Fix List & Trouble
-vim.keymap.set("n", "[l", "<cmd>lprev<CR>zz", { desc = "Previous location list item" })
-vim.keymap.set("n", "]l", "<cmd>lnext<CR>zz", { desc = "Next location list item" })
-vim.keymap.set("n", "[q", "<cmd>cprev<CR>zz", { desc = "Previous quickfix item" })
-vim.keymap.set("n", "]q", "<cmd>cnext<CR>zz", { desc = "Next quickfix item" })
+vim.keymap.set("n", "[l", "<CMD>lprev<CR>zz", { desc = "Previous location list item" })
+vim.keymap.set("n", "]l", "<CMD>lnext<CR>zz", { desc = "Next location list item" })
+vim.keymap.set("n", "[q", "<CMD>cprev<CR>zz", { desc = "Previous quickfix item" })
+vim.keymap.set("n", "]q", "<CMD>cnext<CR>zz", { desc = "Next quickfix item" })
 vim.keymap.set(
 	"n",
 	"<leader>/",
 	[[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
 	{ desc = "Search and replace word under cursor" }
 )
-vim.keymap.set("n", "<leader>ol", "<cmd>lopen<cr>", { desc = "Open location list" })
-vim.keymap.set("n", "<leader>oq", "<cmd>copen<cr>", { desc = "Open quickfix list" })
+vim.keymap.set("n", "<leader>ol", "<CMD>lopen<CR>", { desc = "Open location list" })
+vim.keymap.set("n", "<leader>oq", "<CMD>copen<CR>", { desc = "Open quickfix list" })
 
 -- Formats
 vim.keymap.set("n", "<leader>cF", vim.lsp.buf.format, { desc = "Format buffer by default lsp" })
 
 -- Health
-vim.keymap.set("n", "<leader>ch", ":checkhealth<cr>", { desc = "Check neovim health" })
+vim.keymap.set("n", "<leader>ch", ":checkhealth<CR>", { desc = "Check neovim health" })
 
 -- Keywordprg
-vim.keymap.set("n", "<leader>K", "<cmd>norm! K<cr>", { desc = "Look up keyword" })
+vim.keymap.set("n", "<leader>K", "<CMD>norm! K<CR>", { desc = "Look up keyword" })
 
 -- Lines
-vim.keymap.set("n", "<A-,>", "<cmd>m .-2<cr>==", { desc = "Move line up" })
-vim.keymap.set("n", "<A-.>", "<cmd>m .+1<cr>==", { desc = "Move line down" })
-vim.keymap.set("i", "<A-,>", "<esc><cmd>m .-2<cr>==gi", { desc = "Move line up in insert mode" })
-vim.keymap.set("i", "<A-.>", "<esc><cmd>m .+1<cr>==gi", { desc = "Move line down in insert mode" })
-vim.keymap.set("v", "<A-,>", ":m '<-2<cr>gv=gv", { desc = "Move selected lines up" })
-vim.keymap.set("v", "<A-.>", ":m '>+1<cr>gv=gv", { desc = "Move selected lines down" })
+vim.keymap.set("n", "<A-,>", "<CMD>m .-2<CR>==", { desc = "Move line up" })
+vim.keymap.set("n", "<A-.>", "<CMD>m .+1<CR>==", { desc = "Move line down" })
+vim.keymap.set("i", "<A-,>", "<ESC><CMD>m .-2<CR>==gi", { desc = "Move line up in insert mode" })
+vim.keymap.set("i", "<A-.>", "<ESC><CMD>m .+1<CR>==gi", { desc = "Move line down in insert mode" })
+vim.keymap.set("v", "<A-,>", ":m '<-2<CR>gv=gv", { desc = "Move selected lines up" })
+vim.keymap.set("v", "<A-.>", ":m '>+1<CR>gv=gv", { desc = "Move selected lines down" })
 
 -- Ownerships
-vim.keymap.set("n", "<leader>cx", "<cmd>!chmod +x %<CR>", { silent = true, desc = "Make file executable" })
+vim.keymap.set("n", "<leader>cx", "<CMD>!chmod +x %<CR>", { silent = true, desc = "Make file executable" })
 
 -- Resize window using <ctrl> arrow keys
-vim.keymap.set("n", "<C-Up>", "<cmd>resize +2<cr>", { desc = "Increase window height" })
-vim.keymap.set("n", "<C-Down>", "<cmd>resize -2<cr>", { desc = "Decrease window height" })
-vim.keymap.set("n", "<C-Left>", "<cmd>vertical resize -2<cr>", { desc = "Decrease window width" })
-vim.keymap.set("n", "<C-Right>", "<cmd>vertical resize +2<cr>", { desc = "Increase window width" })
+vim.keymap.set("n", "<C-Up>", "<CMD>resize +2<CR>", { desc = "Increase window height" })
+vim.keymap.set("n", "<C-Down>", "<CMD>resize -2<CR>", { desc = "Decrease window height" })
+vim.keymap.set("n", "<C-Left>", "<CMD>vertical resize -2<CR>", { desc = "Decrease window width" })
+vim.keymap.set("n", "<C-Right>", "<CMD>vertical resize +2<CR>", { desc = "Increase window width" })
 
 -- Scripts
 vim.api.nvim_set_keymap(
@@ -205,17 +221,18 @@ vim.keymap.set("n", "<leader>.", function()
 end, { desc = "Source current file" })
 
 -- Sudo
-vim.keymap.set("n", "<leader>ww", "<cmd>SudoWrite<cr><cr>", { silent = true, desc = "Save file with sudo" })
-vim.keymap.set("n", "<leader>wq", "<cmd>SudoWritequit<cr>", { silent = true, desc = "Save and quit with sudo" })
+vim.keymap.set("n", "<leader>ww", "<CMD>SudoWrite<CR><CR>", { silent = true, desc = "Save file with sudo" })
+vim.keymap.set("n", "<leader>wq", "<CMD>SudoWritequit<CR>", { silent = true, desc = "Save and quit with sudo" })
 
 -- Terminal
-vim.keymap.set("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Escape terminal mode" })
-vim.keymap.set("t", "<C-h>", "<cmd>wincmd h<cr>", { desc = "Move to left window" })
-vim.keymap.set("t", "<C-j>", "<cmd>wincmd j<cr>", { desc = "Move to window below" })
-vim.keymap.set("t", "<C-k>", "<cmd>wincmd k<cr>", { desc = "Move to window above" })
-vim.keymap.set("t", "<C-l>", "<cmd>wincmd l<cr>", { desc = "Move to right window" })
-vim.keymap.set("t", "<C-/>", "<cmd>close<cr>", { desc = "Close terminal" })
-vim.keymap.set("t", "<c-_>", "<cmd>close<cr>", { desc = "Close terminal" })
+vim.keymap.set("n", "<leader>s|", "<CMD>vsplit | term<CR>i", { desc = "Open vertical terminal split" })
+vim.keymap.set("n", "<leader>s-", "<CMD>split | term<CR>i", { desc = "Open horizontal terminal split" })
+vim.keymap.set("t", "<ESC><ESC>", "<C-\\><C-n>", { desc = "Escape terminal mode" })
+vim.keymap.set("t", "<C-h>", "<CMD>wincmd h<CR>", { desc = "Move to left window" })
+vim.keymap.set("t", "<C-j>", "<CMD>wincmd j<CR>", { desc = "Move to window below" })
+vim.keymap.set("t", "<C-k>", "<CMD>wincmd k<CR>", { desc = "Move to window above" })
+vim.keymap.set("t", "<C-l>", "<CMD>wincmd l<CR>", { desc = "Move to right window" })
+vim.keymap.set("t", "<C-/>", "<CMD>close<CR>", { desc = "Close terminal" })
 
 -- Tmux
 vim.keymap.set("n", "<C-h>", "<C-w><C-h>", { desc = "Move to left window" })
@@ -225,15 +242,15 @@ vim.keymap.set("n", "<C-l>", "<C-w><C-l>", { desc = "Move to right window" })
 vim.keymap.set(
 	"n",
 	"<leader>tm",
-	"<cmd>silent !~/.config/tmux/plugins/tmux-fzf/scripts/session.sh<CR>",
+	"<CMD>silent !~/.config/tmux/plugins/tmux-fzf/scripts/session.sh<CR>",
 	{ desc = "Find tmux session" }
 )
 
 -- Lazy
-vim.keymap.set("n", "<leader>lz", "<cmd>Lazy<cr>", { desc = "Open lazy plugin manager" })
+vim.keymap.set("n", "<leader>lz", "<CMD>Lazy<CR>", { desc = "Open lazy plugin manager" })
 
 -- Mason
-vim.keymap.set("n", "<leader>ms", "<cmd>Mason<cr>", { desc = "Open mason" })
+vim.keymap.set("n", "<leader>ms", "<CMD>Mason<CR>", { desc = "Open mason" })
 
 -- Word Definition
 vim.api.nvim_set_keymap(

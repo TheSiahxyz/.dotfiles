@@ -76,123 +76,123 @@ return {
 		end,
 		keys = {
 			{
-				"<leader>dB",
+				"<localleader>dB",
 				function()
 					require("dap").set_breakpoint(vim.fn.input("Breakpoint condition: "))
 				end,
-				desc = "Breakpoint condition",
+				desc = "Dap breakpoint condition",
 			},
 			{
-				"<leader>db",
+				"<localleader>db",
 				function()
 					require("dap").toggle_breakpoint()
 				end,
-				desc = "Toggle breakpoint",
+				desc = "Dap toggle breakpoint",
 			},
 			{
-				"<leader>dc",
+				"<localleader>dc",
 				function()
 					require("dap").continue()
 				end,
-				desc = "Continue",
+				desc = "Dap continue",
 			},
 			{
-				"<leader>da",
+				"<localleader>da",
 				function()
 					require("dap").continue({ before = get_args })
 				end,
-				desc = "Run with args",
+				desc = "Dap run with args",
 			},
 			{
-				"<leader>dC",
+				"<localleader>dC",
 				function()
 					require("dap").run_to_cursor()
 				end,
-				desc = "Run to cursor",
+				desc = "Dap run to cursor",
 			},
 			{
-				"<leader>dg",
+				"<localleader>dg",
 				function()
 					require("dap").goto_()
 				end,
-				desc = "Go to line (no execute)",
+				desc = "Dap go to line (no execute)",
 			},
 			{
-				"<leader>di",
+				"<localleader>di",
 				function()
 					require("dap").step_into()
 				end,
-				desc = "Step into",
+				desc = "Dap step into",
 			},
 			{
-				"<leader>dj",
+				"<localleader>dj",
 				function()
 					require("dap").down()
 				end,
-				desc = "Down",
+				desc = "Dap down",
 			},
 			{
-				"<leader>dk",
+				"<localleader>dk",
 				function()
 					require("dap").up()
 				end,
-				desc = "Up",
+				desc = "Dap up",
 			},
 			{
-				"<leader>dl",
+				"<localleader>dl",
 				function()
 					require("dap").run_last()
 				end,
-				desc = "Run last",
+				desc = "Dap run last",
 			},
 			{
-				"<leader>do",
+				"<localleader>do",
 				function()
 					require("dap").step_out()
 				end,
-				desc = "Step out",
+				desc = "Dap step out",
 			},
 			{
-				"<leader>dO",
+				"<localleader>dO",
 				function()
 					require("dap").step_over()
 				end,
-				desc = "Step over",
+				desc = "Dap step over",
 			},
 			{
-				"<leader>dp",
+				"<localleader>dp",
 				function()
 					require("dap").pause()
 				end,
-				desc = "Pause",
+				desc = "Dap pause",
 			},
 			{
-				"<leader>dr",
+				"<localleader>dr",
 				function()
 					require("dap").repl.toggle()
 				end,
-				desc = "Toggle repl",
+				desc = "Dap toggle repl",
 			},
 			{
-				"<leader>ds",
+				"<localleader>ds",
 				function()
 					require("dap").session()
 				end,
-				desc = "Session",
+				desc = "Dap session",
 			},
 			{
-				"<leader>dt",
+				"<localleader>dt",
 				function()
 					require("dap").terminate()
 				end,
-				desc = "Terminate",
+				desc = "Dap terminate",
 			},
 			{
-				"<leader>dw",
+				"<localleader>dw",
 				function()
 					require("dap.ui.widgets").hover()
 				end,
-				desc = "Widgets",
+				desc = "Dap widgets",
 			},
 		},
 	},
@@ -206,19 +206,19 @@ return {
 		end,
 		keys = {
 			{
-				"<leader>dPt",
+				"<localleader>dPt",
 				function()
 					require("dap-python").test_method()
 				end,
-				desc = "Debug method",
+				desc = "Dap debug method",
 				ft = "python",
 			},
 			{
-				"<leader>dPc",
+				"<localleader>dPc",
 				function()
 					require("dap-python").test_class()
 				end,
-				desc = "Debug class",
+				desc = "Dap debug class",
 				ft = "python",
 			},
 		},
@@ -242,18 +242,18 @@ return {
 		end,
 		keys = {
 			{
-				"<leader>du",
+				"<localleader>du",
 				function()
 					require("dapui").toggle({})
 				end,
 				desc = "Dap UI",
 			},
 			{
-				"<leader>de",
+				"<localleader>de",
 				function()
 					require("dapui").eval()
 				end,
-				desc = "Eval",
+				desc = "Dap eval",
 			},
 		},
 	},
@@ -270,7 +270,7 @@ return {
 		},
 		--  Call config for python files and load the cached venv automatically
 		ft = "python",
-		keys = { { "<leader>cv", "<cmd>:venvselect<cr>", desc = "Select virtualenv", ft = "python" } },
+		keys = { { "<localleader>cv", "<cmd>:venvselect<cr>", desc = "Select virtual env", ft = "python" } },
 	},
 	{
 		"jay-babu/mason-nvim-dap.nvim",

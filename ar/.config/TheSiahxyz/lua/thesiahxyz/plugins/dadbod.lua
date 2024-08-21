@@ -15,11 +15,11 @@ return {
 		vim.g.db_ui_use_nerd_fonts = 1
 	end,
 	keys = {
-		{ "<localleader>db", "<cmd>DBUI<cr>", desc = "DB UI" },
-		{ "<localleader>du", "<cmd>DBUIToggle<cr>", desc = "Toggle DB UI" },
-		{ "<localleader>da", "<cmd>DBUIAddConnection<cr>", desc = "Add connection" },
-		{ "<localleader>df", "<cmd>DBUIFindBuffer<cr>", desc = "Find buffer" },
-		{ "<localleader>dr", "<cmd>DBUIRenameBuffer<cr>", desc = "Rename buffer" },
-		{ "<localleader>dl", "<cmd>DBUILastQueryInfo<cr>", desc = "Last query info" },
+		{ "<localleader>bu", "<cmd>DBUI<cr>", desc = "DB UI" },
+		{ "<localleader>bt", "<cmd>DBUIToggle<cr>", desc = "Toggle DB UI" },
+		{ "<localleader>ba", "<cmd>DBUIAddConnection<cr>", desc = "Add connection" },
+		{ "<localleader>bf", "<cmd>DBUIFindBuffer<cr>", desc = "Find buffer" },
+		{ "<localleader>br", "<cmd>DBUIRenameBuffer<cr>", desc = "Rename buffer" },
+		{ "<localleader>bi", "<cmd>DBUILastQueryInfo<cr>", desc = "Last query info" },
 	},
 }
