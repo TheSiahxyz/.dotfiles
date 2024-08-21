@@ -279,7 +279,7 @@ alias vo="cd $HOME/Obsidian/SI && nvim Dashboard.md"
 alias open='xdg-open'
 
 # pacman
-[ -x "$(command -v pacman)" ] && {
+command -v pacman > /dev/null 2>&1 && {
     alias -g pcy='pacman -Syu'
     alias -g pcyr='pacman -Syu && remaps'
     alias -g pcs='pacman -S'

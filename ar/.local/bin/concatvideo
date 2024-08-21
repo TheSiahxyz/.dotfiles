@@ -1,0 +1,45 @@
+#!/bin/sh
+
+usage() {
+    echo "Usage: $0 <filename>"
+    echo "Example: $0 'video_cut.mp4'"
+    exit 1
+}
+
+# Check if the correct number of arguments are provided
+if [ $# -ne 1 ]; then
+    usage
+fi
+
+# Extract the pattern and extension from the input filename
+input_file="$1"
+pattern="${input_file%.*}"    # This removes the extension
+extension="${input_file##*.}" # This extracts the extension
+
+# Find all video files matching the generated pattern and extension
+video_files=$(ls "${pattern}"*.${extension} 2>/dev/null)
+
+# Check if any files are found
+if [ -z "$video_files" ]; then
+    echo "No video files found with the pattern '${pattern}*.${extension}'."
+    exit 1
+fi
+
+# Create a temporary file list for ffmpeg
+file_list=$(mktemp)
+
+# Populate the file list with the found video files, properly quoting each full path
+for video in "${pattern}"*.${extension}; do
+    full_path=$(realpath "$video")
+    echo "file '$full_path'" >>"$file_list"
+done
+
+# Combine the videos into a single file using ffmpeg
+output_file="${pattern}_combine.${extension}"
+ffmpeg -f concat -safe 0 -i "$file_list" -c copy "$output_file"
+
+# Clean up the temporary file
+cat "$file_list"
+rm -f "$file_list"
+
+echo "All videos combined into '$output_file'."

@@ -27,9 +27,15 @@ return {
 			vim.lsp.protocol.make_client_capabilities(),
 			cmp_lsp.default_capabilities()
 		)
-
 		local lspconfig = require("lspconfig")
+
 		require("fidget").setup({
+			progress = {
+				poll_rate = 0, -- How and when to poll for progress messages
+				suppress_on_insert = true, -- Suppress new messages while in insert mode
+				ignore_done_already = true, -- Ignore new tasks that are already complete
+				ignore_empty_message = true, -- Ignore new tasks that don't contain a message
+			},
 			notification = {
 				window = {
 					normal_hl = "Comment", -- Base highlight group in the notification window
@@ -65,7 +71,7 @@ return {
 							Lua = {
 								runtime = { version = "Lua 5.4" },
 								diagnostics = {
-									globals = { "vim", "it", "describe", "before_each", "after_each" },
+									globals = { "bit", "vim", "it", "describe", "before_each", "after_each" },
 								},
 							},
 						},

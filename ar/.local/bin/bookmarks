@@ -1,0 +1,17 @@
+#!/bin/sh
+
+if [ -f ~/.local/share/thesiah/urls ]; then
+    URL=$(cat ~/.local/share/thesiah/snippets ~/.local/share/thesiah/urls | grep -v -e '^#' -e '^$' | dmenu -i -l 50 | cut -d' ' -f1)
+else
+    URL=$(grep -v -e '^#' -e '^$' ~/.local/share/thesiah/snippets | dmenu -i -l 50 | cut -d' ' -f1)
+fi
+[ -n "$URL" ] && {
+    while getopts "cnp" opt; do
+        case $opt in
+        c) xdotool type "$URL" ;;
+        n) "$BROWSER" --new-window "$URL" ;;
+        p) "$BROWSER" --private-window "$URL" ;;
+        *) ;;
+        esac
+    done
+} || exit

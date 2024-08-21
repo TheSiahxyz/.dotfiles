@@ -46,8 +46,8 @@ return {
 		-- Note that not all refactor support both normal and visual mode
 		-- load refactoring Telescope extension
 		require("telescope").load_extension("refactoring")
-		vim.keymap.set({ "n", "x" }, "<leader>rt", function()
+		vim.keymap.set({ "n", "x" }, "<leader>rf", function()
 			require("telescope").extensions.refactoring.refactors()
-		end, { desc = "Telescope refactor" })
+		end, { desc = "Open refactor" })
 	end,
 }

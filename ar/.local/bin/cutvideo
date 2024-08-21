@@ -1,0 +1,33 @@
+#!/bin/sh
+
+usage() {
+    printf "cutvideo [file_name] [position] [duration]\n"
+    printf "    file_name: \"video\"\n"
+    printf "    position: \"00:00:00\"\n"
+    printf "    duration: \"10\"\n"
+    exit 1
+}
+
+[ -z "$1" ] && echo "Target file missing" && usage
+[ -z "$2" ] && echo "Target position missing" && usage
+[ -z "$3" ] && echo "Target duration missing" && usage
+
+file="$1"
+filename="${file%%.*}"
+ext="${file##*.}"
+num=0
+
+# Find a unique filename by incrementing num
+if [ -f "${filename}_cut.${ext}" ]; then
+    while [ -f "${filename}_cut_$(printf "%02d" "$num").${ext}" ]; do
+        num=$((num + 1))
+    done
+    new_filename="${filename}_cut_$(printf "%02d" "$num").${ext}"
+else
+    new_filename="${filename}_cut.${ext}"
+fi
+
+# Perform the cut using ffmpeg
+ffmpeg -hide_banner -i "$file" -c copy -ss "$2" -t "$3" "$new_filename"
+
+echo "Created file: $new_filename"
