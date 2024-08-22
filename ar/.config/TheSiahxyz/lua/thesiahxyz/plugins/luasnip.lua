@@ -45,5 +45,16 @@ return {
 				end
 			end, { silent = true, desc = "Previous snippet choice" })
 		end,
+		keys = {
+			vim.keymap.set("i", "<tab>", function()
+				return require("luasnip").jumpable(1) and "<Plug>luasnip-jump-next" or "<tab>"
+			end, { expr = true, silent = true, desc = "Jump to next snippet" }),
+			vim.keymap.set("s", "<tab>", function()
+				require("luasnip").jump(1)
+			end, { desc = "Jump to next snippet" }),
+			vim.keymap.set({ "i", "s" }, "<s-tab>", function()
+				require("luasnip").jump(-1)
+			end, { desc = "Jump to Previous Snippet" }),
+		},
 	},
 }

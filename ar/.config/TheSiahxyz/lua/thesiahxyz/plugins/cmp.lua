@@ -1,19 +1,5 @@
 return {
 	{
-		"L3MON4D3/LuaSnip",
-		keys = {
-			vim.keymap.set("i", "<tab>", function()
-				return require("luasnip").jumpable(1) and "<Plug>luasnip-jump-next" or "<tab>"
-			end, { expr = true, silent = true, desc = "Jump to next snippet" }),
-			vim.keymap.set("s", "<tab>", function()
-				require("luasnip").jump(1)
-			end, { desc = "Jump to next snippet" }),
-			vim.keymap.set({ "i", "s" }, "<s-tab>", function()
-				require("luasnip").jump(-1)
-			end, { desc = "Jump to Previous Snippet" }),
-		},
-	},
-	{
 		"hrsh7th/nvim-cmp",
 		event = "InsertEnter",
 		dependencies = {
@@ -43,31 +29,73 @@ return {
 					end,
 				},
 				mapping = cmp.mapping.preset.insert({
-					["<C-k>"] = cmp.mapping.select_prev_item(), -- previous suggestion
-					["<C-j>"] = cmp.mapping.select_next_item(), -- next suggestion
-					["<C-u>"] = cmp.mapping.scroll_docs(-4),
-					["<C-d>"] = cmp.mapping.scroll_docs(4),
+					["<C-p>"] = cmp.mapping.select_prev_item(), -- previous suggestion
+					["<C-n>"] = cmp.mapping.select_next_item(), -- next suggestion
+					["<C-d>"] = cmp.mapping.scroll_docs(-4),
+					["<C-u>"] = cmp.mapping.scroll_docs(4),
 					["<C-Space>"] = cmp.mapping.complete(), -- show completion suggestions
 					["<C-x>"] = cmp.mapping.abort(), -- close completion window
-					["<CR>"] = cmp.mapping.confirm({ select = false }),
+					["<C-c>"] = cmp.mapping.close(),
+					["<CR>"] = cmp.mapping.confirm({
+						behavior = cmp.ConfirmBehavior.Replace,
+						select = true,
+					}),
 				}),
 				-- sources for autocompletion
 				sources = cmp.config.sources({
-					{ name = "nvim_lsp" },
 					{ name = "luasnip" }, -- snippets
 					{ name = "buffer" }, -- text within current buffer
 					{ name = "path" }, -- file system paths
+					{ name = "nvim_lsp" },
+					{ name = "nvim_lua", priority = 100 },
+					{ name = "vsnip" },
+					{ name = "emoji" },
+					{ name = "crates" },
+					{ name = "snippets" },
+					{ name = "projects", priority = 100 },
 				}),
 
 				-- configure lspkind for vs-code like pictograms in completion menu
 				formatting = {
+					expandable_indicator = true,
+					fields = {
+						"abbr",
+						"kind",
+						"menu",
+					},
 					format = require("lspkind").cmp_format({
+						mode = "symbol_text",
 						maxwidth = 50,
 						ellipsis_char = "...",
+						menu = {
+							buffer = "[Buffer]",
+							nvim_lsp = "[LSP]",
+							nvim_lua = "[Lua]",
+							projects = "[Projects]",
+							emoji = "[Emoji]",
+							vsnip = "[Snippet]",
+						},
 					}),
 				},
 			})
 
+			-- Use buffer source for `/`
+			cmp.setup.cmdline("/", {
+				sources = {
+					{ name = "buffer" },
+				},
+			})
+
+			-- Use cmdline & path source for ':'
+			cmp.setup.cmdline(":", {
+				sources = cmp.config.sources({
+					{ name = "path" },
+				}, {
+					{ name = "cmdline" },
+				}),
+			})
+
+			-- sql
 			cmp.setup.filetype({ "sql" }, {
 				sources = {
 					{ name = "vim-dadbod-completion" },
