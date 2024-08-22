@@ -55,7 +55,7 @@ return {
 					gitsigns = true,
 					headlines = true,
 					illuminate = true,
-					indent_blankline = { enabled = true },
+					indent_blankline = { enabled = true, scope_color = "peach", colored_indent_levels = true },
 					leap = true,
 					lsp_trouble = true,
 					mason = true,
@@ -80,6 +80,14 @@ return {
 					treesitter = true,
 					treesitter_context = true,
 					which_key = true,
+				},
+				highlight_overrides = {
+					mocha = function(mocha)
+						return {
+							LineNr = { fg = mocha.overlay2 },
+							CursorLineNr = { fg = mocha.sky },
+						}
+					end,
 				},
 			})
 			vim.cmd("colorscheme catppuccin")

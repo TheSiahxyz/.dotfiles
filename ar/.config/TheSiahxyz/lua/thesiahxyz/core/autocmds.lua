@@ -284,11 +284,8 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 	callback = function()
 		-- Execute the 'shortcuts' shell command
 		local result = vim.fn.system("shortcuts")
-		-- Check if the 'shortcuts' command was successful
-		if vim.v.shell_error == 0 then
-			-- Display a success message in Neovim
-			vim.api.nvim_echo({ { "shortcuts updated", "None" } }, true, {})
-		else
+		-- Display an error message only if the 'shortcuts' command fails
+		if vim.v.shell_error ~= 0 then
 			-- Display an error message if the 'shortcuts' command fails
 			vim.api.nvim_echo({ { "failed to update shortcuts: " .. result, "ErrorMsg" } }, true, {})
 		end
@@ -307,7 +304,7 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 	pattern = { "Xresources", "Xdefaults", "xresources", "xdefaults" },
 	group = config_group,
 	callback = function()
-		vim.cmd("!xrdb %")
+		vim.cmd("silent !xrdb %")
 	end,
 })
 
@@ -319,7 +316,7 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 	pattern = home .. "/.local/src/suckless/dmenu/config.h",
 	group = "SucklessConfigGroup",
 	callback = function()
-		vim.cmd("!cd " .. home .. "/.local/src/suckless/dmenu/ && sudo make install")
+		vim.cmd("silent !cd " .. home .. "/.local/src/suckless/dmenu/ && sudo make install")
 	end,
 })
 
@@ -328,7 +325,7 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 	group = "SucklessConfigGroup",
 	callback = function()
 		vim.cmd(
-			"!cd "
+			"silent !cd "
 				.. home
 				.. "/.local/src/suckless/dwmblocks/ && sudo make install && { killall -q dwmblocks; setsid -f dwmblocks; }"
 		)
@@ -339,7 +336,7 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 	pattern = home .. "/.local/src/suckless/slock/config.h",
 	group = "SucklessConfigGroup",
 	callback = function()
-		vim.cmd("!cd " .. home .. "/.local/src/suckless/slock/ && sudo make install")
+		vim.cmd("silent !cd " .. home .. "/.local/src/suckless/slock/ && sudo make install")
 	end,
 })
 
@@ -347,7 +344,7 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 	pattern = home .. "/.local/src/suckless/dwm/config.h",
 	group = "SucklessConfigGroup",
 	callback = function()
-		vim.cmd("!extractkeys")
+		vim.cmd("silent !extractkeys")
 	end,
 })
 
@@ -355,7 +352,7 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 	pattern = home .. "/.local/src/suckless/st/config.h",
 	group = "SucklessConfigGroup",
 	callback = function()
-		vim.cmd("!extractkeys")
+		vim.cmd("silent !extractkeys")
 	end,
 })
 
@@ -372,5 +369,5 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufEnter" }, {
 
 vim.api.nvim_create_user_command("CdRealpath", function()
 	local realpath = vim.fn.systemlist("readlink -f " .. vim.fn.shellescape(vim.fn.expand("%:p")))[1]
-	vim.cmd("cd " .. vim.fn.fnameescape(vim.fn.fnamemodify(realpath, ":h")))
+	vim.cmd("silent cd " .. vim.fn.fnameescape(vim.fn.fnamemodify(realpath, ":h")))
 end, {})

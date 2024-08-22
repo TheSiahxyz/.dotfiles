@@ -14,7 +14,7 @@
     "bind-address-ipv6": "::",
     "blocklist-enabled": true,
     "blocklist-url": "http://list.iblocklist.com/humantest?list=ydxerpxkpcfqjaybcssw&fileformat=p2p&archieveformat=gz",
-    "cache-size-mb": 4,
+    "cache-size-mb": 16,
     "default-trackers": "",
     "dht-enabled": true,
     "download-dir": "/home/si/Torrents/complete",

@@ -9,6 +9,9 @@ require("lazy").setup({
 	spec = {
 		{ import = "thesiahxyz.plugins" },
 	},
+	install = {
+		colorscheme = { "catppuccin" },
+	},
 	change_detection = { notify = false },
 	checker = { enabled = false },
 })
