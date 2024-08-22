@@ -2,7 +2,7 @@
 
 usage() {
     echo "Usage: $0 <filename>"
-    echo "Example: $0 'video_cut.mp4'"
+    echo "Example: $0 'video.mp4'"
     exit 1
 }
 
