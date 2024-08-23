@@ -24,11 +24,11 @@ Question
 
 class Solution:
     """
-    A class to solve {filename} from {2}
+    A class to solve {file_name} from {2}
     """
     def {3}(self, {4}) -> {5}:
         """
-        {} from the input {parameters_type} using a {fn} approach.
+        {} from the input {parameters_type} using a {func_name} approach.
 
         Args:
             {parameters_type}: {6}
@@ -45,9 +45,9 @@ case2 = {10}
 case3 = {11}
 
 solution = Solution()
-print(f" {fn} case1: {{solution.{fn}(case1{12})}}")
-print(f" {fn} case2: {{solution.{fn}(case2{args})}}")
-print(f" {fn} case3: {{solution.{fn}(case3{args})}}")
+print(f" {func_name} case1: {{solution.{func_name}(case1{12})}}")
+print(f" {func_name} case2: {{solution.{func_name}(case2{args})}}")
+print(f" {func_name} case3: {{solution.{func_name}(case3{args})}}")
 
 
 """
@@ -63,10 +63,10 @@ code:
 ]],
 		{
 			i(1, '"Describe the question here"'),
-			filename = f(get_filename), -- Insert the filename dynamicall
+			file_name = f(get_filename), -- Insert the filename dynamicall
 			i(2, '"Describe the class here"'),
-			i(3, '"fn_name"'), -- Primary insert node for method name
-			fn = rep(3), -- Repeat the method name
+			i(3, '"Function name"'), -- Primary insert node for method name
+			func_name = rep(3), -- Repeat the method name
 			i(4, '"parameters"'),
 			parameters_type = rep(4),
 			i(5, '"return_type"'),
