@@ -57,9 +57,9 @@ url: {13}
 video: {14}
 code:
 
-class Solution:
-    {15}
-
+```python
+{15}
+```
 """
 ]],
 		{
