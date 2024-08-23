@@ -56,8 +56,9 @@ Solution
 url: {13}
 video: {14}
 code:
-```{fn}
-{15}
+
+class Solution:
+    {15}
 
 """
 ]],

@@ -66,7 +66,7 @@ end, { desc = "Close netrw buffer" })
 vim.keymap.set("n", "<leader>h", vim.show_pos, { desc = "Inspect position" })
 
 -- Remap Default
-vim.keymap.set("i", "jk", "<esc>", { desc = "Escape to normal mode" })
+vim.keymap.set("i", "jk", "<Esc>", { desc = "Escape to normal mode" })
 vim.keymap.set("i", "<C-c>", "<esc>", { desc = "Escape to normal mode" })
 vim.keymap.set("i", "<C-a>", "<esc>I", { desc = "Insert at beginning of line" })
 vim.keymap.set("i", "<C-e>", "<end>", { desc = "Move to end of line" })
