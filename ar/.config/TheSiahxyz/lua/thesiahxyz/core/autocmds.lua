@@ -366,8 +366,3 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufEnter" }, {
 		end
 	end,
 })
-
-vim.api.nvim_create_user_command("CdRealpath", function()
-	local realpath = vim.fn.systemlist("readlink -f " .. vim.fn.shellescape(vim.fn.expand("%:p")))[1]
-	vim.cmd("silent cd " .. vim.fn.fnameescape(vim.fn.fnamemodify(realpath, ":h")))
-end, {})

@@ -28,8 +28,8 @@ vim.keymap.set({ "i", "n" }, "<leader>cp", function()
 	local cmd = "cp " .. filename .. " " .. new_filename
 	local confirm = vim.fn.input("Are you sure you want to copy " .. filename .. "? (y/n): ")
 	if confirm:lower() == "y" then
-		vim.cmd("!" .. cmd)
-		vim.cmd("edit " .. new_filename)
+		vim.cmd("silent !" .. cmd)
+		vim.cmd("silent edit " .. new_filename)
 	end
 end, { desc = "Copy current file" })
 vim.keymap.set(
@@ -45,7 +45,7 @@ vim.keymap.set("n", "<leader>rm", function()
 	if vim.fn.filereadable(filename) == 1 then
 		local confirm = vim.fn.input("Are you sure you want to delete " .. filename .. "? (y/n): ")
 		if confirm:lower() == "y" then
-			vim.cmd("!rm " .. filename)
+			vim.cmd("silent !rm " .. filename)
 			vim.cmd("bd!")
 		end
 	end
@@ -130,8 +130,13 @@ vim.keymap.set("v", "<leader><C-s>", ":s/\\%V", { desc = "Search only in visual 
 vim.keymap.set("v", "<C-r>", '"hy:%s/\\v<C-r>h//g<left><left>', { desc = "Change selection" })
 
 -- Cd
-vim.keymap.set("n", "<leader>cd", ":cd %:p:h<cr>", { desc = "Go to current file path" })
-vim.keymap.set("n", "<leader>cD", "<cmd>CdRealpath<cr>", { desc = "Go to real path of current file" })
+vim.keymap.set("n", "<leader>cd", ":cd %:p:h<cr>:pwd<cr>", { desc = "Go to current file path" })
+vim.keymap.set("n", "<leader>cD", function()
+	local realpath = vim.fn.systemlist("readlink -f " .. vim.fn.shellescape(vim.fn.expand("%:p")))[1]
+	vim.cmd("silent cd " .. vim.fn.fnameescape(vim.fn.fnamemodify(realpath, ":h")))
+	vim.cmd("pwd")
+end, { desc = "Go to real path of current file" })
+vim.keymap.set("n", "<leader>..", ":cd ..<cr>:pwd<cr>", { desc = "Go to current file path" })
 
 -- Check Health
 vim.keymap.set("n", "<leader>ch", ":checkhealth<cr>", { desc = "Check neovim health" })
@@ -220,7 +225,7 @@ vim.api.nvim_set_keymap(
 )
 
 -- Source
-vim.keymap.set("n", "<leader>.", function()
+vim.keymap.set("n", "<leader>S", function()
 	vim.cmd("so")
 end, { desc = "Source current file" })
 
