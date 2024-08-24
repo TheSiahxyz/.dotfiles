@@ -55,10 +55,13 @@ Solution
 
 url: {13}
 video: {14}
-code:
 
+1. {func_name}
+time: {15}
+space: {16}
+code:
 ```python
-{15}
+{17}
 ```
 """
 ]],
@@ -82,7 +85,9 @@ code:
 			args = rep(12),
 			i(13, '"url"'),
 			i(14, '"video"'),
-			i(15, '"code"'),
+			i(15, '"time_complexity"'),
+			i(16, '"space_complexity"'),
+			i(17, '"code"'),
 		}
 	)
 )
