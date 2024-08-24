@@ -2,7 +2,7 @@
 
 usage() {
     echo "Usage: $0 <filename>"
-    echo "Example: $0 'video.mp4'"
+    echo "Example: $0 'video_cut.mp4'"
     exit 1
 }
 
@@ -17,7 +17,7 @@ pattern="${input_file%.*}"    # This removes the extension
 extension="${input_file##*.}" # This extracts the extension
 
 # Find all video files matching the generated pattern and extension
-video_files=$(ls "${pattern}"*.${extension} 2>/dev/null)
+video_files=$(ls "${pattern}"*."${extension}" 2>/dev/null)
 
 # Check if any files are found
 if [ -z "$video_files" ]; then
@@ -29,7 +29,7 @@ fi
 file_list=$(mktemp)
 
 # Populate the file list with the found video files, properly quoting each full path
-for video in "${pattern}"*.${extension}; do
+for video in "${pattern}"*."${extension}"; do
     full_path=$(realpath "$video")
     echo "file '$full_path'" >>"$file_list"
 done
