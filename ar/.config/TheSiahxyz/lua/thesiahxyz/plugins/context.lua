@@ -21,6 +21,6 @@ return {
 		vim.keymap.set("n", "[C", function()
 			require("treesitter-context").go_to_context(vim.v.count1)
 		end, { silent = true, desc = "Go to context" }),
-		vim.keymap.set({ "n", "v" }, "<leader>tc", "TSContextToggle", { desc = "Toggle context" }),
+		vim.keymap.set({ "n", "v" }, "<leader>tc", "<cmd>TSContextToggle<cr>", { desc = "Toggle context" }),
 	},
 }
