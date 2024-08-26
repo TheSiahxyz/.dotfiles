@@ -32,6 +32,6 @@ return {
 		},
 		--  Call config for python files and load the cached venv automatically
 		ft = "python",
-		keys = { { "<localleader>cv", "<cmd>:venvselect<cr>", desc = "Select virtual env", ft = "python" } },
+		keys = { { "<localleader>v", "<cmd>VenvSelect<cr>", desc = "Select virtual env", ft = "python" } },
 	},
 }
