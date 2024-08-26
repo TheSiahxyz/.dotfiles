@@ -8,7 +8,8 @@ local f = ls.function_node -- Import function_node for dynamic content
 -- Function to get the filename without the path
 local function get_filename()
 	local filepath = vim.api.nvim_buf_get_name(0)
-	return vim.fn.fnamemodify(filepath, ":t:r") -- ":t" extracts the filename, ":r" trim extension
+	local filename = vim.fn.fnamemodify(filepath, ":t:r") -- Get filename without path and extension
+	return filename:gsub("_", " ") -- Replace underscores with spaces
 end
 
 local neetcode_snippet = s(
