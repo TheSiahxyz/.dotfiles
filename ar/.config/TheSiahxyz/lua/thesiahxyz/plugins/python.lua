@@ -1,8 +1,8 @@
 return {
-	{
-		"bps/vim-textobj-python",
-		dependencies = { "kana/vim-textobj-user" },
-	},
+	-- {
+	-- 	"bps/vim-textobj-python",
+	-- 	dependencies = { "kana/vim-textobj-user" },
+	-- },
 	{
 		"nvim-neotest/neotest",
 		optional = true,

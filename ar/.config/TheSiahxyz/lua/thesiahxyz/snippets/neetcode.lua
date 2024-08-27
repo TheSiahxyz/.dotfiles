@@ -29,7 +29,7 @@ class Solution:
     """
     def {3}(self, {4}) -> {5}:
         """
-        {} from the input {parameters_type} using a {func_name} approach.
+        {file_name} from the input {parameters_type} using a {func_name} approach.
 
         Args:
             {parameters_type}: {6}

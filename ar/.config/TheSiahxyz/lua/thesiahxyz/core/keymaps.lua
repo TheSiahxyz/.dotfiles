@@ -145,9 +145,11 @@ vim.keymap.set("n", "<leader>ch", ":checkhealth<cr>", { desc = "Check neovim hea
 vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]], { desc = "Yank to clipboard" })
 vim.keymap.set("n", "<leader>Y", [["+Y]], { desc = "Yank line to clipboard" })
 vim.keymap.set({ "n", "v" }, "<leader><C-y>", ":%y<cr>", { desc = "Yank current file to clipboard" })
+vim.keymap.set("n", "<leader>p", [["+p]], { desc = "Paste over clipboard" })
+vim.keymap.set("n", "<leader>P", [["+P]], { desc = "Paste over clipboard" })
 vim.keymap.set("x", "<leader>p", [["_dP]], { desc = "Paste over and preserve clipboard" })
-vim.keymap.set({ "n", "v" }, "<leader>d", [["+d]], { desc = "Delete and yank to clipboard" })
-vim.keymap.set("n", "<leader>D", [["+D]], { desc = "Delete line without saving to clipboard" })
+vim.keymap.set({ "n", "v" }, "<leader>d", [["+d]], { desc = "Delete without store to clipboard" })
+vim.keymap.set({ "n", "v" }, "<leader>D", [["_d]], { desc = "Delete and yank to clipboard" })
 vim.keymap.set("n", "<leader><C-d>", ":%d_<cr>", { desc = "Delete all to black hole register" })
 
 -- Diagnostic
