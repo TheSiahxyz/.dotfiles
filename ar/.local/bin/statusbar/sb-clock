@@ -3,31 +3,30 @@
 clock=$(date '+%I')
 calendar="🗓️"
 case "$clock" in
-    "00") icon="🕛" ;;
-    "01") icon="🕐" ;;
-    "02") icon="🕑" ;;
-    "03") icon="🕒" ;;
-    "04") icon="🕓" ;;
-    "05") icon="🕔" ;;
-    "06") icon="🕕" ;;
-    "07") icon="🕖" ;;
-    "08") icon="🕗" ;;
-    "09") icon="🕘" ;;
-    "10") icon="🕙" ;;
-    "11") icon="🕚" ;;
-    "12") icon="🕛" ;;
+"00" | "12") icon="🕛" ;;
+"01" | "13") icon="🕐" ;;
+"02" | "14") icon="🕑" ;;
+"03" | "15") icon="🕒" ;;
+"04" | "16") icon="🕓" ;;
+"05" | "17") icon="🕔" ;;
+"06" | "18") icon="🕕" ;;
+"07" | "19") icon="🕖" ;;
+"08" | "20") icon="🕗" ;;
+"09" | "21") icon="🕘" ;;
+"10" | "22") icon="🕙" ;;
+"11" | "23") icon="🕚" ;;
 esac
 
 case $BLOCK_BUTTON in
-    1)
-        notify-send "This Month" "$(cal | sed "s/\<$(date +'%B'|tr -d ' ')\>/<b><span color='blue'>&<\/span><\/b>/;s/\<$(date +'%Y'|sed 's/ //g')\>/<b><span color='blue'>&<\/span><\/b>/;s/\<$(date +'%B'|sed 's/ //g')\>/<b><span color='blue'>&<\/span><\/b>/;s/\<$(date +'%e'|sed 's/ //g')\>/<b><span color='red'>&<\/span><\/b>/")" && notify-send "Appointments" "$(calcurse -d3)"
-        timezones
-        ;;
-    2) setsid -f "$TERMINAL" -e calcurse ;;
-    3) notify-send "📅 Time/date module" "\- Left click to show upcoming appointments for the next three days via \`calcurse -d3\` and show the month via \`cal\`
-- Left click also displays the current time in Seoul, Korea
+1)
+    notify-send "This Month" "$(cal | sed "s/\<$(date +'%B' | tr -d ' ')\>/<b><span color='blue'>&<\/span><\/b>/;s/\<$(date +'%Y' | sed 's/ //g')\>/<b><span color='blue'>&<\/span><\/b>/;s/\<$(date +'%B' | sed 's/ //g')\>/<b><span color='blue'>&<\/span><\/b>/;s/\<$(date +'%e' | sed 's/ //g')\>/<b><span color='red'>&<\/span><\/b>/")" && notify-send "Appointments" "$(calcurse -d3)"
+    timezones
+    ;;
+2) setsid -f "$TERMINAL" -e calcurse ;;
+3) notify-send "📅 Time/date module" "\- Left click to show upcoming appointments for the next three days via \`calcurse -d3\` and show the month via \`cal\`
+- Left click also displays the current time in other cities.
 - Middle click opens calcurse if installed" ;;
-    6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
+6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
-date "+$calendar%a,%d $icon%I:%M%p"
+date "+$calendar%a,%d $icon%H:%M"

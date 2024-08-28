@@ -72,7 +72,7 @@ pbg             ${XDG_PUBLICSHARE_DIR:-${HOME}/Public}/git
 pvg             $HOME/Private/git
 pvn             $HOME/Private/git/neetcode
 pvo             $HOME/Private/git/Obsidian/SI
-pvp             $HOME/Private/photo
+pww             $HOME/Private/photo
 shm             ${XDG_DATA_HOME:-${HOME}/.local/share}/mail
 shr             ${XDG_DATA_HOME:-${HOME}/.local/share}
 shz             ${XDG_DATA_HOME:-${HOME}/.local/share}/zsh
@@ -84,6 +84,7 @@ ts              ${XDG_DATA_HOME:-${HOME}/.local/share}/thesiah
 tsk             ${XDG_DATA_HOME:-${HOME}/.local/share}/thesiah/keys
 tt              ${XDG_STATE_HOME:-${HOME}/.local/state}
 vwk             ${XDG_DATA_HOME:-${HOME}/.local/share}/vimwiki
+vww             $HOME/.wallpapers/video
 web             ${THESIAH_WWW:-${HOME}/Private/git/THESIAH}
 wep             ${THESIAH_WWW:-${HOME}/Private/git/THESIAH}/public
 wes             ${THESIAH_WWW:-${HOME}/Private/git/THESIAH}/static
