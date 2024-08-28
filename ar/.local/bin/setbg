@@ -26,6 +26,7 @@ shift $((OPTIND - 1))
 
 [ "$(ls ~/.wallpapers/video 2>/dev/null)" ] && {
     wallset -q 2>/dev/null
+    sleep 1
     rm -rf ~/.wallpapers
 }
 
