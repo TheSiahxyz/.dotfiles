@@ -82,6 +82,13 @@ Thumbs.db
 shortcutrc
 zshnameddirrc
 
+# Suckless
+dmenu
+dwm
+dwmblock
+slock
+st
+
 # Tmux
 */tmux/plugins/
 
