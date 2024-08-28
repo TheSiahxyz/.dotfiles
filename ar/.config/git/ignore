@@ -84,8 +84,9 @@ zshnameddirrc
 
 # Suckless
 dmenu
+stest
 dwm
-dwmblock
+dwmblocks
 slock
 st
 
