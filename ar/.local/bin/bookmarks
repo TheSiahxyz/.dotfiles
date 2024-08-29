@@ -1,17 +1,26 @@
 #!/bin/sh
 
 if [ -f ~/.local/share/thesiah/urls ]; then
-    URL=$(cat ~/.local/share/thesiah/snippets ~/.local/share/thesiah/urls | grep -v -e '^#' -e '^$' | dmenu -i -l 50 -p "Choose an URL to open:" | cut -d' ' -f1)
+    URLS=$(cat ~/.local/share/thesiah/snippets ~/.local/share/thesiah/urls)
 else
-    URL=$(grep -v -e '^#' -e '^$' ~/.local/share/thesiah/snippets | dmenu -i -l 50 -p "Choose an URL to open:" | cut -d' ' -f1)
+    URLS=$(cat ~/.local/share/thesiah/snippets)
 fi
-[ -n "$URL" ] && {
-    while getopts "cnp" opt; do
-        case $opt in
-        c) xdotool type "$URL" ;;
-        n) "$BROWSER" --new-window "$URL" ;;
-        p) "$BROWSER" --private-window "$URL" ;;
-        *) ;;
-        esac
-    done
-} || exit
+
+# Extract names in quotes for dmenu display
+CHOICE=$(echo "$URLS" | grep -v -e '^#' -e '^$' | awk -F'"' '{print $2}' | dmenu -i -l 50 -p "Choose a URL to open:")
+
+# Exit if no choice is made
+[ -z "$CHOICE" ] && exit
+
+# Find the matching URL for the chosen name
+URL=$(echo "$URLS" | grep -v -e '^#' -e '^$' | grep "\"$CHOICE\"" | awk '{print $1}')
+
+# Open URL in the desired manner based on user options
+while getopts "cnp" opt; do
+    case $opt in
+    c) xdotool type "$URL" ;;
+    n) "$BROWSER" --new-window "$URL" ;;
+    p) "$BROWSER" --private-window "$URL" ;;
+    *) ;;
+    esac
+done
