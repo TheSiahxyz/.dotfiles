@@ -28,6 +28,6 @@ else
 fi
 
 # Perform the cut using ffmpeg
-ffmpeg -hide_banner -i "$file" -c copy -ss "$2" -t "$3" "$new_filename"
+ffmpeg -hide_banner -ss "$2" -to "$3" -i "$file" -c copy "$new_filename"
 
 echo "Created file: $new_filename"
