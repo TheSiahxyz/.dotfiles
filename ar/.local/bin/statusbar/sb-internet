@@ -2,7 +2,7 @@
 
 # Show wifi 🛜 and percent strength or 📡 if none.
 # Show 🌐 if connected to ethernet or ❎ if none.
-# Show 🔒 if a vpn connection is active
+# Show 🛰️ if a vpn connection is active
 
 case $BLOCK_BUTTON in
 1)
@@ -15,7 +15,7 @@ case $BLOCK_BUTTON in
 🛜: wifi connection with quality
 ❎: no ethernet
 🌐: ethernet working
-✈️: vpn is active
+🛰️: vpn is active
 " ;;
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
@@ -31,7 +31,7 @@ fi
 [ "$(cat /sys/class/net/e*/operstate 2>/dev/null)" = 'up' ] && ethericon="🌐" || ethericon="❎"
 
 # TUN
-[ -n "$(cat /sys/class/net/tun*/operstate 2>/dev/null)" ] && tunicon=" ✈️"
+[ -n "$(cat /sys/class/net/tun*/operstate 2>/dev/null)" ] && tunicon=" 🛰️"
 
 if [ "$(cat /sys/class/net/w*/operstate 2>/dev/null)" = 'up' ] && [ ! "$(cat /sys/class/net/e*/operstate 2>/dev/null)" = 'up' ]; then
     printf "%s%s\n" "$wifiicon" "$tunicon"

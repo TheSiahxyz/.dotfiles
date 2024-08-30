@@ -1,21 +1,42 @@
 #!/bin/sh
 
-clock=$(date '+%I')
+# Get current hour and minute
+hour=$(date '+%I')
+minute=$(date '+%M')
 calendar="🗓️"
-case "$clock" in
-"00" | "12") icon="🕛" ;;
-"01" | "13") icon="🕐" ;;
-"02" | "14") icon="🕑" ;;
-"03" | "15") icon="🕒" ;;
-"04" | "16") icon="🕓" ;;
-"05" | "17") icon="🕔" ;;
-"06" | "18") icon="🕕" ;;
-"07" | "19") icon="🕖" ;;
-"08" | "20") icon="🕗" ;;
-"09" | "21") icon="🕘" ;;
-"10" | "22") icon="🕙" ;;
-"11" | "23") icon="🕚" ;;
-esac
+
+# Determine the icon based on hour and minute
+if [ "$minute" -ge 30 ]; then
+    case "$hour" in
+    "00" | "12") icon="🕧" ;; # 12:30
+    "01" | "13") icon="🕜" ;; # 1:30
+    "02" | "14") icon="🕝" ;; # 2:30
+    "03" | "15") icon="🕞" ;; # 3:30
+    "04" | "16") icon="🕟" ;; # 4:30
+    "05" | "17") icon="🕠" ;; # 5:30
+    "06" | "18") icon="🕡" ;; # 6:30
+    "07" | "19") icon="🕢" ;; # 7:30
+    "08" | "20") icon="🕣" ;; # 8:30
+    "09" | "21") icon="🕤" ;; # 9:30
+    "10" | "22") icon="🕥" ;; # 10:30
+    "11" | "23") icon="🕦" ;; # 11:30
+    esac
+else
+    case "$hour" in
+    "00" | "12") icon="🕛" ;; # 12:00
+    "01" | "13") icon="🕐" ;; # 1:00
+    "02" | "14") icon="🕑" ;; # 2:00
+    "03" | "15") icon="🕒" ;; # 3:00
+    "04" | "16") icon="🕓" ;; # 4:00
+    "05" | "17") icon="🕔" ;; # 5:00
+    "06" | "18") icon="🕕" ;; # 6:00
+    "07" | "19") icon="🕖" ;; # 7:00
+    "08" | "20") icon="🕗" ;; # 8:00
+    "09" | "21") icon="🕘" ;; # 9:00
+    "10" | "22") icon="🕙" ;; # 10:00
+    "11" | "23") icon="🕚" ;; # 11:00
+    esac
+fi
 
 case $BLOCK_BUTTON in
 1)
@@ -29,4 +50,5 @@ case $BLOCK_BUTTON in
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
+# Output the formatted date and time
 date "+$calendar%a,%d $icon%H:%M"
