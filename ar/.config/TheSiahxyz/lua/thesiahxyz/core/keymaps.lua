@@ -8,7 +8,6 @@ vim.keymap.set("n", "<S-l>", "<cmd>bnext<cr>", { desc = "Next buffer" })
 vim.keymap.set("n", "<leader>bb", "<cmd>e #<cr>", { desc = "Switch to last buffer" })
 vim.keymap.set("n", "<leader>bd", "<cmd>bd!<cr>", { desc = "Close buffer" })
 vim.keymap.set("n", "<leader>bn", "<cmd>enew<cr>", { desc = "New buffer" })
-vim.keymap.set("n", "[b", "<cmd>e #<cr>", { desc = "Switch to last buffer" })
 
 -- Clear search with <esc>
 vim.keymap.set({ "i", "n" }, "<esc>", "<cmd>noh<cr><esc>", { desc = "Clear search highlights" })
@@ -160,23 +159,23 @@ local diagnostic_goto = function(next, severity)
 		go({ severity = severity })
 	end
 end
-vim.keymap.set("n", "[d", diagnostic_goto(false), { desc = "Previous diagnostic" })
-vim.keymap.set("n", "]d", diagnostic_goto(true), { desc = "Next diagnostic" })
-vim.keymap.set("n", "[e", diagnostic_goto(false, "ERROR"), { desc = "Previous error" })
-vim.keymap.set("n", "]e", diagnostic_goto(true, "ERROR"), { desc = "Next error" })
-vim.keymap.set("n", "[w", diagnostic_goto(false, "WARN"), { desc = "Previous warning" })
-vim.keymap.set("n", "]w", diagnostic_goto(true, "WARN"), { desc = "Next warning" })
-vim.keymap.set("n", "<leader>de", vim.diagnostic.open_float, { desc = "Open diagnostic message" })
-vim.keymap.set("n", "<leader>dq", vim.diagnostic.setloclist, { desc = "Add diagnostics to location list" })
+-- vim.keymap.set("n", "[d", diagnostic_goto(false), { desc = "Previous diagnostic" })
+-- vim.keymap.set("n", "]d", diagnostic_goto(true), { desc = "Next diagnostic" })
+vim.keymap.set("n", "<leader>[e", diagnostic_goto(false, "ERROR"), { desc = "Previous error" })
+vim.keymap.set("n", "<leader>]e", diagnostic_goto(true, "ERROR"), { desc = "Next error" })
+vim.keymap.set("n", "<leader>[w", diagnostic_goto(false, "WARN"), { desc = "Previous warning" })
+vim.keymap.set("n", "<leader>]w", diagnostic_goto(true, "WARN"), { desc = "Next warning" })
+vim.keymap.set("n", "<leader>od", vim.diagnostic.open_float, { desc = "Open diagnostic message" })
+vim.keymap.set("n", "<leader>la", vim.diagnostic.setloclist, { desc = "Add diagnostics to location list" })
 
 -- Files
 vim.keymap.set("n", "<leader>fn", "<cmd>enew<cr>", { desc = "Open new buffer" })
 
 -- Fix List & Trouble
-vim.keymap.set("n", "[l", "<cmd>lprev<cr>zz", { desc = "Previous location list item" })
-vim.keymap.set("n", "]l", "<cmd>lnext<cr>zz", { desc = "Next location list item" })
-vim.keymap.set("n", "[q", "<cmd>cprev<cr>zz", { desc = "Previous quickfix item" })
-vim.keymap.set("n", "]q", "<cmd>cnext<cr>zz", { desc = "Next quickfix item" })
+-- vim.keymap.set("n", "[l", "<cmd>lprev<cr>zz", { desc = "Previous location list item" })
+-- vim.keymap.set("n", "]l", "<cmd>lnext<cr>zz", { desc = "Next location list item" })
+-- vim.keymap.set("n", "[q", "<cmd>cprev<cr>zz", { desc = "Previous quickfix item" })
+-- vim.keymap.set("n", "]q", "<cmd>cnext<cr>zz", { desc = "Next quickfix item" })
 vim.keymap.set(
 	"n",
 	"<leader>/",

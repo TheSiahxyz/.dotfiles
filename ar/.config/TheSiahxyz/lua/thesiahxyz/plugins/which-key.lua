@@ -4,8 +4,7 @@ return {
 	cmd = "WhichKey",
 	opts = {},
 	config = function()
-		local wk = require("which-key")
-		wk.add({
+		require("which-key").add({
 			{ mode = { "n", "v", "x" }, { "m", desc = "+Marks" } },
 			{ mode = { "n", "v", "x" }, { "g", desc = "+Goto" } },
 			{ mode = { "n", "v", "x" }, { "s", desc = "+Surround" } },

@@ -2,21 +2,21 @@
 
 turnonoffvpn() {
     case "$1" in
-        *on*)
-            nmcli connection up "$THESIAH_VPN" >/dev/null 2>&1
-            notify-send "📡 THESIAH_VPN: ON" 
-            ;;
-        *off*)
-            nmcli connection down "$THESIAH_VPN" >/dev/null 2>&1
-            notify-send "📡 THESIAH_VPN: OFF"
-            ;;
+    *on*)
+        nmcli connection up "$THESIAH_VPN" >/dev/null 2>&1
+        notify-send "✈️ THESIAH_VPN: ON"
+        ;;
+    *off*)
+        nmcli connection down "$THESIAH_VPN" >/dev/null 2>&1
+        notify-send "✈️ THESIAH_VPN: OFF"
+        ;;
     esac
 }
 
 [ -n "$(cat /sys/class/net/tun*/operstate 2>/dev/null)" ] && {
     turnonoffvpn off
 } || {
-    nmcli connection show | grep "$THESIAH_VPN" >/dev/null 2>&1 && turnonoffvpn on || { 
+    nmcli connection show | grep "$THESIAH_VPN" >/dev/null 2>&1 && turnonoffvpn on || {
         nmcli connection import type openvpn file ~/.config/openvpn/thesiah.ovpn >/dev/null 2>&1
         turnonoffvpn on
     }

@@ -4,18 +4,18 @@ MOUNT_POINT="$HOME/Private"
 MOUNT_SCRIPT="${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/ecrypt"
 
 is_mounted() {
-	mount | grep -q " $MOUNT_POINT "
+    mount | grep -q " $MOUNT_POINT "
 }
 
 toggle_mount() {
-	$MOUNT_SCRIPT
+    $MOUNT_SCRIPT
 }
 
 case $BLOCK_BUTTON in
-    1) toggle_mount ;;
-    3) notify-send "📁 Encrypted Media Folder " "\- Shows mount status of Media
+1) toggle_mount ;;
+3) notify-send "🔒 Encrypted Media Folder " "\- Shows mount status of Media
 - Left click to toggle mount" ;;
-    6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
+6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
-is_mounted && echo "📂" || echo "📁"
+is_mounted && echo "🔑" || echo "🔒"

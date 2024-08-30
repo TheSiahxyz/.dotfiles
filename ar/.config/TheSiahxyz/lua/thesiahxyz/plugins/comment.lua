@@ -17,14 +17,14 @@ return {
 		end,
 		keys = {
 			{
-				"]t",
+				"<leader>]td",
 				function()
 					require("todo-comments").jump_next()
 				end,
 				desc = "Next Todo Comment",
 			},
 			{
-				"[t",
+				"<leader>[td",
 				function()
 					require("todo-comments").jump_prev()
 				end,

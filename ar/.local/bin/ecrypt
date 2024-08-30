@@ -22,7 +22,7 @@ mount_luks() {
             done && continue 1
             echo " $drive"
         done | filter)"
-       
+
         # Add all to one variable. If no mountable drives found, exit.
         luks="$(echo "$unopenedluks" | sed "/^$/d;s/ *$//")"
         # Quit the script if a sequential command fails.
@@ -44,27 +44,30 @@ mount_encrypted() {
 
 attempt_mount() {
     if mount | grep -q " $2 "; then
-        sudo umount "$2" && notify-send "📁 Locked: $3" || notify-send "❗ Unable to lock" "Mounted: $3"
+        sudo umount "$2" && notify-send "🔒 Locked: $3" || notify-send "❗ Unable to lock" "Mounted: $3"
     elif mount | grep -q " $2 " && mount | grep -q " $(dirname $2) "; then
-        sudo umount "$2" && notify-send "📁 Locked: $3" || notify-send "❗ Unable to lock" "Mounted: $3"
+        sudo umount "$2" && notify-send "🔒 Locked: $3" || notify-send "❗ Unable to lock" "Mounted: $3"
     else
         ECRYPTFS_SIG=$(sudo cat /root/.ecryptfs/sig-cache.txt)
         FNEK_SIG=$ECRYPTFS_SIG
         PASSPHRASE=$(pass show encryption/ecryptfs)
-        [ -z "$PASSPHRASE" ] && { notify-send "❌ Failed to retrieve passphrase."; exit 1; }
-        mount_luks && mount_encrypted "$1" "$2" && notify-send "📂 Unlocked: $3"
+        [ -z "$PASSPHRASE" ] && {
+            notify-send "❌ Failed to retrieve passphrase."
+            exit 1
+        }
+        mount_luks && mount_encrypted "$1" "$2" && notify-send "🔑 Unlocked: $3"
     fi
 }
 
 targets="$HOME/.secret /mnt/second/videos"
 mounts="$HOME/Private /mnt/second/videos"
 
-set -- $mounts  # Set positional parameters to mounts
+set -- $mounts # Set positional parameters to mounts
 i=1
 for target in $targets; do
-    mp=$(eval echo "\$$i")  # Get the mount point using indirect expansion
-    path=$(basename "$mp")  # Extract last directory component
+    mp=$(eval echo "\$$i") # Get the mount point using indirect expansion
+    path=$(basename "$mp") # Extract last directory component
 
     attempt_mount "$target" "$mp" "$path"
-    i=$((i+1))
+    i=$((i + 1))
 done
