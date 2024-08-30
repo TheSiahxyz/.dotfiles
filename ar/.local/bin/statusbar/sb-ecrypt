@@ -1,10 +1,11 @@
 #!/bin/sh
 
 MOUNT_POINT="$HOME/Private"
+MOUNT_POINT2="/mnt/second/video"
 MOUNT_SCRIPT="${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/ecrypt"
 
 is_mounted() {
-    mount | grep -q " $MOUNT_POINT "
+    mount | grep -q " $1 "
 }
 
 toggle_mount() {
@@ -18,4 +19,14 @@ case $BLOCK_BUTTON in
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
-is_mounted && echo "🔑" || echo "🔒"
+if [ -d /mnt/second ]; then
+    if is_mounted "$MOUNT_POINT" && is_mounted "$MOUNT_POINT2"; then
+        echo "🔑" # Both mount points are mounted
+    elif ! is_mounted "$MOUNT_POINT" && ! is_mounted "$MOUNT_POINT2"; then
+        echo "🔒" # Neither mount point is mounted
+    else
+        echo "⚠️" # One mount point is mounted, the other is not
+    fi
+else
+    is_mounted "$MOUNT_POINT" && echo "🔑" || echo "🔒"
+fi
