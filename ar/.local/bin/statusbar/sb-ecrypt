@@ -1,7 +1,7 @@
 #!/bin/sh
 
 MOUNT_POINT="$HOME/Private"
-MOUNT_POINT2="/mnt/second"
+MOUNT_POINT2="/mnt/second/videos"
 MOUNT_SCRIPT="${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/ecrypt"
 
 is_mounted() {
