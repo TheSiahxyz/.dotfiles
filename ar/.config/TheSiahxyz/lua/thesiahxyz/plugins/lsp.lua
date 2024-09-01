@@ -247,11 +247,11 @@ return {
 			desc = "Organize imports",
 		},
 		{
-			"<leader>cl",
+			"<leader>bl",
 			function()
 				require("lint").try_lint()
 			end,
-			desc = "Lint buffer",
+			desc = "Buffer lint",
 		},
 		{
 			"<leader>tfe",

@@ -1,6 +1,14 @@
 return {
 	"nvim-treesitter/nvim-treesitter-textobjects",
-	dependencies = { { "nvim-treesitter", build = ":TSUpdate" }, "nvim-treesitter/nvim-treesitter" },
+	dependencies = {
+		{ "nvim-treesitter", build = ":TSUpdate" },
+		{ "nvim-treesitter/nvim-treesitter" },
+		{
+			"chrisgrieser/nvim-various-textobjs",
+			event = "UIEnter",
+			opts = { useDefaultKeymaps = true },
+		},
+	},
 	config = function()
 		require("nvim-treesitter.configs").setup({
 			textobjects = {
