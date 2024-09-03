@@ -1,6 +1,7 @@
 #!/bin/sh
 
 progs="$HOME/Private/git/THESIAH/public/progs.csv"
+aurhelper="yay"
 
 if [ ! -f "$progs" ]; then
     echo "Default file $progs not found."
@@ -17,15 +18,15 @@ if [ ! -f "$progs" ]; then
     fi
 fi
 
-while IFS=',' read -r helper package; do
+while IFS=',' read -r helper package comment; do
     case "$helper" in
     \#*) continue ;;
     esac
     if [ -z "$helper" ]; then
-        pacman -S "$package"
+        sudo pacman --noconfirm --needed -S "$package"
     elif [ "$helper" = "A" ]; then
-        yay -S "$package"
+        sudo -u "$USER" $aurhelper -S --noconfirm "$package" >/dev/null 2>&1
     elif [ "$helper" = "P" ]; then
-        pip install "$package"
+        yes | pip install "$package" >/dev/null 2>&1 || yes | pipx install "$package" >/dev/null 2>&1
     fi
 done <"$progs"
