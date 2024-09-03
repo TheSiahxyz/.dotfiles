@@ -1,0 +1,31 @@
+#!/bin/sh
+
+progs="$HOME/Private/git/THESIAH/public/progs.csv"
+
+if [ ! -f "$progs" ]; then
+    echo "Default file $progs not found."
+    echo "Please enter the path to your CSV file:"
+    read -r progs
+
+    case "$progs" in
+    ~/*) progs="$HOME${progs#~/}" ;;
+    esac
+
+    if [ ! -f "$progs" ]; then
+        echo "File $progs not found. Exiting."
+        exit 1
+    fi
+fi
+
+while IFS=',' read -r helper package; do
+    case "$helper" in
+    \#*) continue ;;
+    esac
+    if [ -z "$helper" ]; then
+        pacman -S "$package"
+    elif [ "$helper" = "A" ]; then
+        yay -S "$package"
+    elif [ "$helper" = "P" ]; then
+        pip install "$package"
+    fi
+done <"$progs"
