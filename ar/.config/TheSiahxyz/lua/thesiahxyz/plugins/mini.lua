@@ -7,7 +7,7 @@ return {
 		end,
 		keys = {
 			{
-				"<leader>E",
+				"<leader>em",
 				"<cmd>lua MiniFiles.open()<cr>",
 				desc = "Open mini files",
 			},
