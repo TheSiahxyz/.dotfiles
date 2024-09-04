@@ -204,6 +204,9 @@ cmd create-ipynb ${{
     vipy $ans
 }}
 
+# Lock screen
+cmd setlock "$1"
+
 # Move
 cmd moveto ${{
     clear; tput cup $(($(tput lines)/3)); tput bold
@@ -363,7 +366,6 @@ cmd follow_link %{{
 # Wallpaper
 cmd setbg "$1"
 
-
 # load selection on startup
 ### --- Bindings --- ###
 # Unbinding
@@ -426,6 +428,9 @@ map E extract; clear
 
 # iPython
 map Mi create-ipynb
+
+# Lock screen
+map <backspace2> $setlock "$f"
 
 # Move
 map Mt moveto; clear
