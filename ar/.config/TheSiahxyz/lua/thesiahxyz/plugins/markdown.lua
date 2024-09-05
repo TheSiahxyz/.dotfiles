@@ -54,10 +54,10 @@ local function select_cell()
 	local end_line = nil
 	local line_count = vim.api.nvim_buf_line_count(bufnr)
 
-	-- Find the start of the cell
+	-- Find the start of the cell (looking for opening markers or headers)
 	for line = current_row, 1, -1 do
 		local line_content = vim.api.nvim_buf_get_lines(bufnr, line - 1, line, false)[1]
-		if line_content:match("^```%s*[%w_%-]*") or line_content:match("^%s*#+%s") then
+		if line_content:match("^```%s*[%w_%-]+") or line_content:match("^%s*#+%s") then
 			start_line = line
 			break
 		end
@@ -66,23 +66,12 @@ local function select_cell()
 	-- If no start line is found, assume start of the file
 	if not start_line then
 		start_line = 1
-	else
-		-- Include the previous empty line if it exists
-		if start_line > 1 then
-			local prev_line_content = vim.api.nvim_buf_get_lines(bufnr, start_line - 2, start_line - 1, false)[1]
-			if prev_line_content:match("^%s*$") then
-				start_line = start_line - 1
-			end
-		end
 	end
 
-	-- Find the end of the cell
+	-- Find the end of the cell (looking for the next opening marker or header)
 	for line = start_line + 1, line_count do
 		local line_content = vim.api.nvim_buf_get_lines(bufnr, line - 1, line, false)[1]
-		if line_content:match("^```%s*$") then -- Match the closing marker of a code block
-			end_line = line
-			break
-		elseif line_content:match("^%s*#+%s") and line > start_line then -- Match the next markdown header
+		if line_content:match("^```%s*[%w_%-]+") or line_content:match("^%s*#+%s") then
 			end_line = line - 1
 			break
 		end
@@ -91,14 +80,6 @@ local function select_cell()
 	-- If no end line is found, assume end of the file
 	if not end_line then
 		end_line = line_count
-	else
-		-- Only include the next empty line if there was no previous empty line included
-		if end_line < line_count then
-			local next_line_content = vim.api.nvim_buf_get_lines(bufnr, end_line, end_line + 1, false)[1]
-			if next_line_content:match("^%s*$") and not (start_line < current_row and current_row < end_line) then
-				end_line = end_line + 1
-			end
-		end
 	end
 
 	return current_row, current_col, start_line, end_line
@@ -127,37 +108,45 @@ local function navigate_cell(up)
 	local bufnr = vim.api.nvim_get_current_buf()
 	local current_row = vim.api.nvim_win_get_cursor(0)[1]
 	local line_count = vim.api.nvim_buf_line_count(bufnr)
-	local step = up and -1 or 1
-	local found = false
+	local _, _, start_line, end_line = select_cell() -- Get the start and end lines of the current cell
 
-	-- Function to check if a line is a code block start or a markdown header
-	local function is_cell_marker(line_content)
-		-- Match code block start (e.g., ```python, ```javascript, etc.)
-		if line_content:match("^```%s*[%w_%-]+") then
-			return true
-		end
-		-- Match Markdown headers (#, ##, ###, etc.)
-		if line_content:match("^%s*#+%s") then
-			return true
-		end
-		return false
-	end
+	local target_line = nil
 
-	-- Start searching from the current line and move in the specified direction
-	for line = current_row + step, (up and 1 or line_count), step do
-		local line_content = vim.api.nvim_buf_get_lines(bufnr, line - 1, line, false)[1]
-		if is_cell_marker(line_content) then
-			vim.api.nvim_win_set_cursor(0, { line, 0 })
-			found = true
-			break
+	if up then
+		-- Find the previous cell start, skipping any closing markers
+		for line = start_line - 1, 1, -1 do
+			local line_content = vim.api.nvim_buf_get_lines(bufnr, line - 1, line, false)[1]
+			if line_content:match("^```%s*[%w_%-]+") or line_content:match("^%s*#+%s") then
+				target_line = line
+				break
+			end
+		end
+	else
+		-- Find the next cell start, skipping any closing markers
+		for line = end_line + 1, line_count do
+			local line_content = vim.api.nvim_buf_get_lines(bufnr, line - 1, line, false)[1]
+			if line_content:match("^```%s*[%w_%-]+") or line_content:match("^%s*#+%s") then
+				target_line = line
+				break
+			end
 		end
 	end
 
-	-- If no block is found, go to the end or start of the file depending on direction
-	if not found and not up then
-		vim.api.nvim_win_set_cursor(0, { line_count, 0 })
-	elseif not found and up then
-		vim.api.nvim_win_set_cursor(0, { 1, 0 })
+	-- Navigate to the target line if found, otherwise stay at the current position
+	if target_line then
+		-- If the target is a code block, move cursor to the line right after the opening marker
+		local target_line_content = vim.api.nvim_buf_get_lines(bufnr, target_line - 1, target_line, false)[1]
+		if target_line_content:match("^```%s*[%w_%-]+") then
+			vim.api.nvim_win_set_cursor(0, { target_line + 1, 0 }) -- Move inside the code block
+		else
+			vim.api.nvim_win_set_cursor(0, { target_line, 0 }) -- Move to the markdown header line
+		end
+	else
+		if up then
+			vim.api.nvim_win_set_cursor(0, { 1, 0 }) -- Move to start of file if no previous cell found
+		else
+			vim.api.nvim_win_set_cursor(0, { line_count, 0 }) -- Move to end of file if no next cell found
+		end
 	end
 end
 
