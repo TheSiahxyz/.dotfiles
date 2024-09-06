@@ -6,7 +6,7 @@ return {
 	config = function()
 		local wk = require("which-key")
 		wk.add({
-			mode = { "n", "v", "x" },
+			mode = { "n" },
 			{ "g", desc = "+Goto" },
 			{ "s", desc = "+Search and replace on line" },
 			{ "S", desc = "+Search and replace in file" },

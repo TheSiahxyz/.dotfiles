@@ -12,7 +12,7 @@ return {
 	init = function()
 		local wk = require("which-key")
 		wk.add({
-			mode = { "n", "v", "x" },
+			mode = { "n" },
 			{ "<M-x>", group = "Harpoon list delete" },
 		})
 	end,

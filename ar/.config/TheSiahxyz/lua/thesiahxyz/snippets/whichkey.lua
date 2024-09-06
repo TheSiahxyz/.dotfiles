@@ -7,7 +7,7 @@ local whichkey_snippet = ls.parser.parse_snippet(
 init = function()
     local wk = require("which-key")
     wk.add({
-        mode = { "n", "v", "x" },
+        mode = { "n" },
         { "${1:Key}", group = "${2:Name}" },
     })
 end,

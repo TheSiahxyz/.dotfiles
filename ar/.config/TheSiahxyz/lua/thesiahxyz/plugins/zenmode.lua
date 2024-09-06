@@ -4,8 +4,9 @@ return {
 	init = function()
 		local wk = require("which-key")
 		wk.add({
-			mode = { "n", "v", "x" },
+			mode = { "n" },
 			{ "<leader>z", group = "Zenmode" },
+			{ "<leader>Z", group = "Zenmode" },
 		})
 	end,
 	config = function()
@@ -27,7 +28,7 @@ return {
 			})
 		end, { desc = "Zenmode with default" })
 
-		vim.keymap.set("n", "<leader>zZ", function()
+		vim.keymap.set("n", "<leader>ZZ", function()
 			require("zen-mode").toggle({
 				window = {
 					width = 90,
