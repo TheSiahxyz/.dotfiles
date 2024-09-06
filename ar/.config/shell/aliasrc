@@ -438,7 +438,7 @@ alias vi.='vim .'
 alias w1='watch -n 1'
 
 # wget
-ialias wget=wget --hsts-file="${XDG_CACHE_HOME:-${HOME}/.cache}/wget-hsts"
+ialias wget --hsts-file="${XDG_CACHE_HOME:-${HOME}/.cache}/wget-hsts"
 
 # xev
 alias keys='xev -event keyboard | awk '\''/^KeyPress/,/^KeyRelease/ { if ($0 ~ /keysym/) print $0 }'\'''
