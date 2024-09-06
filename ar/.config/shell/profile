@@ -170,6 +170,13 @@ export QT_QPA_PLATFORMTHEME="gtk2" # Have QT use gtk2 theme.
 ### --- RUST --- ###
 export RUSTUP_HOME="$XDG_DATA_HOME/rustup"
 
+### --- SERVER --- ###
+export THESIAH="thesiah.xyz"
+export THESIAH_GIT="git@$THESIAH"
+export THESIAH_SERVER="root@$THESIAH"
+export THESIAH_VPN="${THESIAH%%.*}"
+export THESIAH_WWW="$HOME/Private/git/THESIAH"
+
 ### --- SQLITE --- ###
 export SQLITE_HISTORY="$XDG_DATA_HOME/sqlite_history"
 
@@ -187,18 +194,14 @@ export UNISON="$XDG_DATA_HOME/unison"
 # export GVIMINIT='let $MYGVIMRC = !has("nvim") ? "$XDG_CONFIG_HOME/vim/gvimrc" : "$XDG_CONFIG_HOME/nvim/init.lua" | so $MYGVIMRC'
 # export VIMINIT='let $MYVIMRC = !has("nvim") ? "$XDG_CONFIG_HOME/vim/vimrc" : "$XDG_CONFIG_HOME/nvim/init.lua" | so $MYVIMRC'
 
+### --- VIRTUAL ENVIRONMENT --- ###
+export WORKON_HOME="$XDG_DATA_HOME/virtualenvs" 
+
 ### --- VISUAL STUDIO CODE --- ###
 export VSCODE_PORTABLE="$XDG_DATA_HOME"/vscode
 
 ### --- WINE --- ###
 export WINEPREFIX="$XDG_DATA_HOME/wine"
-
-### --- SERVER --- ###
-export THESIAH="thesiah.xyz"
-export THESIAH_GIT="git@$THESIAH"
-export THESIAH_SERVER="root@$THESIAH"
-export THESIAH_VPN="${THESIAH%%.*}"
-export THESIAH_WWW="$HOME/Private/git/THESIAH"
 
 ### --- WGET --- ###
 export WGETRC="$XDG_CONFIG_HOME/wget/wgetrc"

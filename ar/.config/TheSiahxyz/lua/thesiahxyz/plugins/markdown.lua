@@ -444,9 +444,8 @@ return {
 			vim.keymap.set("n", "<leader>ji", ":MoltenImagePopup<CR>", { silent = true, desc = "Pop-up image" })
 			vim.keymap.set("n", "<leader>jw", ":MoltenOpenInBrowser<CR>", { silent = true, desc = "Open in browser" })
 			vim.keymap.set("n", "<leader>jj", function()
-				local venv = os.getenv("VIRTUAL_ENV")
+				local venv = os.getenv("WORKON_HOME")
 				if venv ~= nil then
-					-- in the form of /home/benlubas/.virtualenvs/VENV_NAME
 					venv = string.match(venv, "/.+/(.+)")
 					vim.cmd(("MoltenInit %s"):format(venv))
 				else

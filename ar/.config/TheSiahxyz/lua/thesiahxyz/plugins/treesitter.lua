@@ -54,4 +54,7 @@ return {
 
 		vim.treesitter.language.register("templ", "templ")
 	end,
+	keys = {
+		{ "<leader>tu", ":TSUpdate<cr>", desc = "Tree sitter update" },
+	},
 }
