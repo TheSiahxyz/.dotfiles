@@ -198,7 +198,7 @@ export UNISON="$XDG_DATA_HOME/unison"
 export WORKON_HOME="$XDG_DATA_HOME/virtualenvs" 
 
 ### --- VISUAL STUDIO CODE --- ###
-export VSCODE_PORTABLE="$XDG_DATA_HOME"/vscode
+export VSCODE_PORTABLE="$XDG_DATA_HOME/vscode"
 
 ### --- WINE --- ###
 export WINEPREFIX="$XDG_DATA_HOME/wine"
@@ -208,6 +208,7 @@ export WGETRC="$XDG_CONFIG_HOME/wget/wgetrc"
 
 ### --- X11 --- ###
 export XINITRC="$XDG_CONFIG_HOME/x11/xinitrc"
+export XSERVERRC="$XDG_CONFIG_HOME/X11/xserverrc"
 
 ### --- XAUTH --- ###
 export XAUTHORITY="$XDG_RUNTIME_DIR/Xauthority" # This line will break some DMs.
