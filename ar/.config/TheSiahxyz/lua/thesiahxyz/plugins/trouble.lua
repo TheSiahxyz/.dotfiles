@@ -11,7 +11,7 @@ return {
 	init = function()
 		local wk = require("which-key")
 		wk.add({
-			mode = { "n" },
+			mode = { "n", "v", "x" },
 			{ "<leader>t", group = "Toggle" },
 		})
 	end,

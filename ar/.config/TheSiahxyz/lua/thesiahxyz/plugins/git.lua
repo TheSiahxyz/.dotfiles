@@ -60,7 +60,7 @@ return {
 		init = function()
 			local wk = require("which-key")
 			wk.add({
-				mode = { "n" },
+				mode = { "n", "v", "x" },
 				{ "<leader>g", group = "Git" },
 			})
 		end,

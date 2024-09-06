@@ -12,7 +12,7 @@ return {
 	init = function()
 		local wk = require("which-key")
 		wk.add({
-			mode = { "n" },
+			mode = { "n", "v", "x" },
 			{ "<leader>]", group = "Next" },
 			{ "<leader>[", group = "Prev" },
 		})

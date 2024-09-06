@@ -21,7 +21,7 @@ return {
 	init = function()
 		local wk = require("which-key")
 		wk.add({
-			mode = { "n" },
+			mode = { "n", "v", "x" },
 			{ "<leader>c", group = "Format/Ascii" },
 			{ "<leader>tf", group = "Format" },
 		})

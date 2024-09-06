@@ -5,6 +5,7 @@ return {
 		wk.add({
 			mode = { "n", "v", "x" },
 			{ "<leader>G", group = "GPT" },
+			{ "<leader>Gg", group = "Gp" },
 			{ "<leader>Gp", group = "Gp" },
 			{ "<leader>GW", group = "Whisper" },
 		})

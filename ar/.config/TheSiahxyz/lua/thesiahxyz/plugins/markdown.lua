@@ -412,7 +412,7 @@ return {
 
 			local wk = require("which-key")
 			wk.add({
-				mode = { "n" },
+				mode = { "n", "v", "x" },
 				{ "<leader>j", group = "Molten (Jupyter)" },
 			})
 		end,

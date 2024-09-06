@@ -29,8 +29,11 @@ return {
 			{ "<leader>L", desc = "+Lazy" },
 			{ "<leader>M", desc = "+Mason" },
 			{ "<leader>o", desc = "+Open" },
-			{ "<leader>Q", desc = "+Quit" },
 			{ "<leader>w", desc = "+Which Key" },
+		})
+		wk.add({
+			mode = { "n", "v", "x" },
+			{ "<leader>Q", desc = "+Quit" },
 		})
 	end,
 	keys = {
