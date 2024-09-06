@@ -8,6 +8,13 @@ return {
 			},
 		},
 	},
+	init = function()
+		local wk = require("which-key")
+		wk.add({
+			mode = { "n", "v", "x" },
+			{ "<leader>t", group = "Toggle" },
+		})
+	end,
 	keys = {
 		{ "<leader>td", "<cmd>Trouble diagnostics toggle<cr>", desc = "Toggle diagnostics (Trouble)" },
 		{

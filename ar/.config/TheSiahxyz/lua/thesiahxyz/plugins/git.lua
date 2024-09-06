@@ -57,6 +57,13 @@ return {
             map("n", "<leader>tD", gs.toggle_deleted, "Toggle delete")
 			end,
 		},
+		init = function()
+			local wk = require("which-key")
+			wk.add({
+				mode = { "n", "v", "x" },
+				{ "<leader>g", group = "Git" },
+			})
+		end,
 	},
 	{
 		"tpope/vim-fugitive",

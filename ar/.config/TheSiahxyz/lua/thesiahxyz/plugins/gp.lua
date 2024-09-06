@@ -1,5 +1,14 @@
 return {
 	"robitx/gp.nvim",
+	init = function()
+		local wk = require("which-key")
+		wk.add({
+			mode = { "n", "v", "x" },
+			{ "<leader>G", group = "GPT" },
+			{ "<leader>Gp", group = "Gp" },
+			{ "<leader>GW", group = "Whisper" },
+		})
+	end,
 	config = function()
 		local function keymapOptions(desc)
 			return {

@@ -409,6 +409,12 @@ return {
 			-- optional, works for virt text and the output window
 			vim.g.molten_wrap_output = true
 			vim.g.molten_virt_text_max_lines = 20
+
+			local wk = require("which-key")
+			wk.add({
+				mode = { "n", "v", "x" },
+				{ "<leader>j", group = "Molten (Jupyter)" },
+			})
 		end,
 		config = function()
 			-- image nvim options table. Pass to `require('image').setup`

@@ -13,6 +13,13 @@ return {
 		"VimwikiColorize",
 		"VimwikiDiaryGenerateLinks",
 	},
+	init = function()
+		local wk = require("which-key")
+		wk.add({
+			mode = { "n", "v", "x" },
+			{ "<leader>v", group = "View/Vimwiki" },
+		})
+	end,
 	keys = {
 		{
 			"<leader>v|",

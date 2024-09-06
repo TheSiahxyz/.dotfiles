@@ -9,6 +9,13 @@ return {
 			save_on_toggle = true,
 		},
 	},
+	init = function()
+		local wk = require("which-key")
+		wk.add({
+			mode = { "n", "v", "x" },
+			{ "<M-x>", group = "Harpoon list delete" },
+		})
+	end,
 	keys = function()
 		local keys = {
 			{

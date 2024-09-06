@@ -1,6 +1,16 @@
 -- markdown link text objects for i and a
-vim.keymap.set({ "o", "x" }, "il", "<cmd>lua require('various-textobjs').mdlink('inner')<CR>", { buffer = true })
-vim.keymap.set({ "o", "x" }, "al", "<cmd>lua require('various-textobjs').mdlink('outer')<CR>", { buffer = true })
+vim.keymap.set(
+	{ "o", "x" },
+	"il",
+	"<cmd>lua require('various-textobjs').mdlink('inner')<CR>",
+	{ buffer = true, desc = "Link" }
+)
+vim.keymap.set(
+	{ "o", "x" },
+	"al",
+	"<cmd>lua require('various-textobjs').mdlink('outer')<CR>",
+	{ buffer = true, desc = "Link" }
+)
 
 -- Function to check if the current file is in the Obsidian repository
 local function is_in_obsidian_repo()
@@ -56,8 +66,8 @@ vim.keymap.set("n", "Tab", "<Plug>Markdown_Fold", { desc = "Fold headers/lists" 
 vim.keymap.set("n", "Return", "<Plug>Markdown_FollowLink", { desc = "Follow links" })
 vim.keymap.set("i", "Tab", "<Plug>Markdown_Jump", { desc = "Indent new bullets, jump through empty fields in links" })
 vim.keymap.set({ "i", "v" }, "<C-\\>", "<Plug>Markdown_CreateLink", { desc = "Create new links" })
--- vim.keymap.set("i", "O", "<Plug>Markdown_NewLineAbove", { desc = "New line above, overrides default" })
--- vim.keymap.set("i", "o", "<Plug>Markdown_NewLineBelow", { desc = "New line below, overrides default" })
+vim.keymap.set("i", "<C-o>", "<Plug>Markdown_NewLineAbove", { desc = "New line above, overrides default" })
+vim.keymap.set("i", "<C-b>", "<Plug>Markdown_NewLineBelow", { desc = "New line below, overrides default" })
 vim.keymap.set("i", "Return", "<Plug>Markdown_NewLineBelow", { desc = "New line below, overrides default" })
 
 -- Makrdown.nvim settings
@@ -117,3 +127,12 @@ vim.api.nvim_buf_set_keymap(
 	":<C-u>lua BoldMe()<CR>",
 	{ noremap = true, silent = true, desc = "Bold selection" }
 )
+
+local wk = require("which-key")
+wk.add({
+	mode = { "n", "v", "x" },
+	{ "<leader>ct", group = "Copy" },
+	{ "<leader>h", group = "Header" },
+	{ "<leader>i", group = "Image" },
+	{ "<leader>m", group = "Markdown" },
+})

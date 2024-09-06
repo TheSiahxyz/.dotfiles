@@ -4,6 +4,13 @@ return {
 		"nvim-lua/plenary.nvim",
 		"nvim-treesitter/nvim-treesitter",
 	},
+	init = function()
+		local wk = require("which-key")
+		wk.add({
+			mode = { "n", "v", "x" },
+			{ "<leader>r", group = "Refactoring" },
+		})
+	end,
 	config = function()
 		require("refactoring").setup({
 			prompt_func_return_type = {

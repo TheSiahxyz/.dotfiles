@@ -1,6 +1,13 @@
 return {
 	"folke/zen-mode.nvim",
 	opts = {},
+	init = function()
+		local wk = require("which-key")
+		wk.add({
+			mode = { "n", "v", "x" },
+			{ "<leader>z", group = "Zenmode" },
+		})
+	end,
 	config = function()
 		vim.keymap.set("n", "<leader>zz", function()
 			require("zen-mode").toggle({

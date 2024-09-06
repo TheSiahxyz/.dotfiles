@@ -56,7 +56,7 @@ end, { desc = "Remove current file" })
 vim.keymap.set("n", "Q", "<nop>", { desc = "Disable q command" })
 
 -- Explore
-vim.keymap.set("n", "<leader>ee", vim.cmd.Ex, { desc = "Open file explorer" })
+vim.keymap.set("n", "<leader>e", vim.cmd.Ex, { desc = "Open file explorer" })
 vim.keymap.set("n", "<leader>es", vim.cmd.Sex, { desc = "Open file explorer in a horizontal split" })
 vim.keymap.set("n", "<leader>ev", vim.cmd.Vex, { desc = "Open file explorer in a vertical split" })
 vim.keymap.set("n", "<leader>q", function()

@@ -9,6 +9,14 @@ return {
 			opts = { useDefaultKeymaps = true },
 		},
 	},
+	init = function()
+		local wk = require("which-key")
+		wk.add({
+			mode = { "n", "v", "x" },
+			{ "<leader>]", group = "Next" },
+			{ "<leader>[", group = "Prev" },
+		})
+	end,
 	config = function()
 		require("nvim-treesitter.configs").setup({
 			textobjects = {

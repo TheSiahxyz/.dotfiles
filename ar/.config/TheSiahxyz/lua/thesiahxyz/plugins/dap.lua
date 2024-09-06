@@ -22,6 +22,14 @@ return {
 				opts = {},
 			},
 		},
+		init = function()
+			local wk = require("which-key")
+			wk.add({
+				mode = { "n", "v", "x" },
+				{ "<localleader>d", group = "Dap/Python" },
+				{ "<localleader>dp", group = "Python" },
+			})
+		end,
 		config = function()
 			-- load mason-nvim-dap here, after all adapters have been setup
 			vim.api.nvim_set_hl(0, "DapStoppedLine", { default = true, link = "Visual" })

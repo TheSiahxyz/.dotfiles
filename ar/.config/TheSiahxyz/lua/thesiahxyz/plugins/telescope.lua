@@ -40,6 +40,16 @@ return {
 				},
 			},
 		},
+		init = function()
+			local wk = require("which-key")
+			wk.add({
+				mode = { "n", "v", "x" },
+				{ "<leader>f", group = "Find" },
+				{ "<leader>fp", group = "Private/Public" },
+				{ "<leader>s", group = "Search" },
+				{ "<leader>sb", group = "Buffer" },
+			})
+		end,
 		config = function()
 			require("telescope").setup({
 				defaults = {
