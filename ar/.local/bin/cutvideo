@@ -15,7 +15,7 @@ usage() {
 file="$1"
 filename="${file%%.*}"
 ext="${file##*.}"
-num=0
+num=1
 
 # Find a unique filename by incrementing num
 if [ -f "${filename}_cut.${ext}" ]; then
