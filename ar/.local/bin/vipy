@@ -33,8 +33,10 @@ NOTEBOOK='{
  "nbformat_minor": 5
 }'
 
+[ -z "$1" ] && echo "Enter a file name!" && exit
+
 # Write the JSON to a new .ipynb file
 echo "$NOTEBOOK" >"$1.ipynb"
 
 # Check if the file was created successfully
-[ -f "$1.ipynb" ] && echo "$1 created successfully." || echo "Failed to create Jupyter Notebook."
+[ -f "$1.ipynb" ] && echo "$1.ipynb created successfully." || echo "Failed to create a Jupyter Notebook."
