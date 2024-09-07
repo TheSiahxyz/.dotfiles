@@ -211,7 +211,10 @@ nnoremap <leader>bn :tabedit<space>
 map <C-S> :w<CR>
 
 " Quitting and saving a file using CTRL+S
-map <C-q> :wq<CR>
+map <leader>bd :bd<CR>
+map <leader>BD :bd!<CR>
+map <leader>wq :wq<CR>
+nnoremap <leader>q :q!<CR>
 nnoremap <leader>Q :qa!<CR>
 
 " Surround word with a wanted character

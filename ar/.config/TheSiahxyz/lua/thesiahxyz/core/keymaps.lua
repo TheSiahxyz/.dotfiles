@@ -8,8 +8,11 @@ vim.keymap.set("n", "<S-l>", "<cmd>bnext<cr>", { desc = "Next buffer" })
 vim.keymap.set("n", "<leader>bb", "<cmd>e #<cr>", { desc = "Switch to last buffer" })
 vim.keymap.set("n", "<leader>bd", "<cmd>bd!<cr>", { desc = "Close buffer" })
 vim.keymap.set("n", "<leader>bn", "<cmd>enew<cr>", { desc = "New buffer" })
-vim.keymap.set({ "n", "v" }, "<leader>QA", "<cmd>qa!<cr>", { desc = "Force quit all" })
-vim.keymap.set({ "n", "v" }, "<leader>QQ", "<cmd>q!<cr>", { desc = "Force quit" })
+vim.keymap.set("n", "<C-s>", ":w<cr>", { desc = "Save current buffer" })
+vim.keymap.set({ "n", "v" }, "<leader>wq", "<cmd>wq<cr>", { desc = "Save current buffer and quit" })
+vim.keymap.set({ "n", "v" }, "<leader>WQ", "<cmd>wqa<cr>", { desc = "Save all buffers and quit" })
+vim.keymap.set({ "n", "v" }, "<leader>qq", "<cmd>q!<cr>", { desc = "Force quit" })
+vim.keymap.set({ "n", "v" }, "<leader>QQ", "<cmd>qa!<cr>", { desc = "Force quit all" })
 
 -- Clear search with <esc>
 vim.keymap.set({ "i", "n" }, "<esc>", "<cmd>noh<cr><esc>", { desc = "Clear search highlights" })
