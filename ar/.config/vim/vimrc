@@ -20,6 +20,7 @@ else
     set runtimepath^=/root/.config/vim
     set runtimepath+=/root/.local/share/vim
     set runtimepath+=/root/.cofig/vim/after
+    set viminfofile=/root/.local/share/vim
 
     set packpath^=/root/.local/share/vim,/root/.config/vim
     set packpath+=/root/.config/vim/after,/root/.local/share/vim/after
@@ -32,8 +33,6 @@ else
     set undodir=/root/.config/vim/undo     | call mkdir(&undodir,   'p')
     set viewdir=/root/.config/vim/view     | call mkdir(&viewdir,   'p')
 endif
-
-if !has('nvim') | set viminfofile=/root/.local/state/vim/viminfo | endif
 
 " }}}
 
