@@ -65,7 +65,6 @@ zsh_add_plugins() {
 
 # Function to update plugins
 zsh_update_plugins() {
-    ZPLUGINDIR="$HOME/.local/share/zsh"
     ACTIVE_PLUGINS=$(grep '^[[:space:]]*"[^"]\+"' ~/.config/zsh/plugins.zsh | sed 's|.*/\([^/"]*\)".*|\1|')
 
     for PLUGIN_DIR in "$ZPLUGINDIR"/*; do
