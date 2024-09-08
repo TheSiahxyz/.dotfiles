@@ -62,11 +62,11 @@ vim.keymap.set("n", "Q", "<nop>", { desc = "Disable q command" })
 vim.keymap.set("n", "<leader>e", vim.cmd.Ex, { desc = "Open file explorer" })
 vim.keymap.set("n", "<leader>es", vim.cmd.Sex, { desc = "Open file explorer in a horizontal split" })
 vim.keymap.set("n", "<leader>ev", vim.cmd.Vex, { desc = "Open file explorer in a vertical split" })
-vim.keymap.set("n", "<leader>q", function()
+vim.keymap.set("n", "<leader>qe", function()
 	if vim.bo.filetype == "netrw" then
 		vim.cmd("bd")
 	end
-end, { desc = "Close netrw buffer" })
+end, { desc = "Close explorer (netrw)" })
 
 -- Highlights under cursor
 vim.keymap.set("n", "<leader>ip", vim.show_pos, { desc = "Inspect position" })

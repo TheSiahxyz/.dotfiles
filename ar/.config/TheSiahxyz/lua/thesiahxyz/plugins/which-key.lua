@@ -29,7 +29,10 @@ return {
 			{ "<leader>L", desc = "+Lazy" },
 			{ "<leader>M", desc = "+Mason" },
 			{ "<leader>o", desc = "+Open" },
-			{ "<leader>w", desc = "+Which Key" },
+			{ "<leader>q", desc = "+Quit" },
+			{ "<leader>Q", desc = "+Quit all" },
+			{ "<leader>w", desc = "+Save/Which Key" },
+			{ "<leader>W", desc = "+Save all" },
 		})
 		wk.add({
 			mode = { "n", "v", "x" },
@@ -52,6 +55,7 @@ return {
 			desc = "Which-key query lookup",
 		},
 		{
+			mode = { "n", "v", "x" },
 			"<leader>wK",
 			"<cmd>WhichKey <CR>",
 			desc = "Which-key all key",
