@@ -13,29 +13,27 @@ escape() { echo "$@" | iconv -cf UTF-8 -t ASCII//TRANSLIT | tr -d '[:punct:]' | 
 
 # Function for prompting user for a mountpoint.
 getmount() {
-	[ -z "$1" ] && mp="$(find /media/$USER /mnt -mindepth 1 -maxdepth 1 -type d 2>/dev/null | dmenu -i -p "Mount this drive where?")" || mp="$1"
-	test -n "$mp"
-	if [ ! -d "$mp" ]; then
-		mkdiryn=$(printf "No\\nYes" | dmenu -i -p "$mp does not exist. Create it?")
-		[ "$mkdiryn" = "Yes" ] && (mkdir -p "$mp" 2>/dev/null || sudo -A mkdir -p "$mp")
-	fi
+    [ -z "$1" ] && mp="$(find /media/$USER /mnt -mindepth 1 -maxdepth 1 -type d 2>/dev/null | dmenu -i -p "Mount this drive where?")" || mp="$1"
+    test -n "$mp"
+    if [ ! -d "$mp" ]; then
+        mkdiryn=$(printf "No\\nYes" | dmenu -i -p "$mp does not exist. Create it?")
+        [ "$mkdiryn" = "Yes" ] && (mkdir -p "$mp" 2>/dev/null || sudo -A mkdir -p "$mp")
+    fi
 }
 
 attemptmount() {
-	# Attempt to mount without a mountpoint, to see if drive is in fstab.
+    # Attempt to mount without a mountpoint, to see if drive is in fstab.
     mplabel=$(sudo lsblk -no "label" $chosen)
     [ -n "$mplabel" ] || return
     if [ ! -d "/media/$USER/$mplabel" ] && [ ! -d "/mnt/$mplabel" ]; then
         getmount "/media/$USER/$mplabel" && sudo -A mount "$chosen" "/media/$USER/$mplabel" || return 1
     elif [ -d "/media/$USER/$mplabel" ] && [ ! -d "/mnt/$mplabel" ]; then
         sudo -A mount "$chosen" /media/$USER/$mplabel || return 1
-    elif [ -d "/mnt/$mplabel" ]; then 
+    elif [ -d "/mnt/$mplabel" ]; then
         getmount "/mnt/$mplabel" && sudo -A mount "$chosen" "/mnt/$mplabel" || return 1
     else
         sudo -A mount "$chosen" || return 1
     fi
-	notify-send "💾 Drive Mounted." "$chosen mounted."
-	exit
 }
 
 # Check for phones.
@@ -43,11 +41,11 @@ phones="$(simple-mtpfs -l 2>/dev/null | sed "s/^/📱/")"
 mountedphones="$(grep "simple-mtpfs" /etc/mtab)"
 # If there are already mounted phones, remove them from the list of mountables.
 [ -n "$mountedphones" ] && phones="$(for phone in $phones; do
-	for mounted in $mountedphones; do
-		escphone="$(escape "$phone")"
-		[[ "$mounted" =~ "$escphone" ]] && break 1
-	done && continue 1
-	echo "$phone"
+    for mounted in $mountedphones; do
+        escphone="$(escape "$phone")"
+        [[ "$mounted" =~ "$escphone" ]] && break 1
+    done && continue 1
+    echo "$phone"
 done)"
 
 # Check for drives.
@@ -61,12 +59,12 @@ filter() { sed "s/ /:/g" | awk -F':' '$7==""{printf "%s%s (%s) %s\n",$1,$3,$5,$6
 
 # Get only LUKS drives that are not decrypted.
 unopenedluks="$(for drive in $allluks; do
-	uuid="${drive%% *}"
-	uuid="${uuid//-/}" # This is a bashism.
-	[ -n "$decrypted" ] && for open in $decrypted; do
-		[ "$uuid" = "$open" ] && break 1
-	done && continue 1
-	echo "🔒 $drive"
+    uuid="${drive%% *}"
+    uuid="${uuid//-/}" # This is a bashism.
+    [ -n "$decrypted" ] && for open in $decrypted; do
+        [ "$uuid" = "$open" ] && break 1
+    done && continue 1
+    echo "🔒 $drive"
 done | filter)"
 
 echo "$unopenedluks"
@@ -87,41 +85,45 @@ test -n "$alldrives"
 chosen="$(echo "$alldrives" | dmenu -p "Mount which drive?" -i)"
 
 case "$chosen" in
-    💾*)
-        chosen="${chosen%% *}"
-        chosen="${chosen:1}" # This is a bashism.
-        parttype="$(echo "$lsblkoutput" | grep "$chosen")"
-        attemptmount || getmount
-        case "${parttype##* }" in
-			vfat) sudo -A mount -t vfat "$chosen" "$mp" -o rw,umask=0000 ;;
-			btrfs) sudo -A mount "$chosen" "$mp" ;;
-			*) sudo -A mount "$chosen" "$mp" -o uid="$(id -u)",gid="$(id -g)" ;;
-		esac
-        notify-send "💾 Drive Mounted." "$chosen mounted to $mp."
-        ;;
-
-    🔒*)
-        chosen="${chosen%% *}"
-        chosen="${chosen:1}" # This is a bashism.
-        # Number the drive.
-        while [ -e "/dev/mapper/usb$num" ]; do
-            num=$((num + 1))
-        done
-        ${TERMINAL:-st} -n floatterm -g 60x1 -e sudo cryptsetup open "$chosen" "usb$num"
-        # Check if now decrypted.
-        test -b "/dev/mapper/usb$num"
-        chosen="/dev/mapper/usb$num"
-        attemptmount || getmount
-        sudo -A mount "/dev/mapper/usb$num" "$mp" -o uid="$(id -u)",gid="$(id -g)" || sudo -A mount "/dev/mapper/usb$num" "$mp"
-        notify-send "🔓 Decrypted drive Mounted." "$chosen decrypted and mounted to $mp."
-        ;;
-
-    📱*)
-        notify-send "❗ Note" "Remember to allow file access on your phone now."
+💾*)
+    chosen="${chosen%% *}"
+    chosen="${chosen:1}" # This is a bashism.
+    parttype="$(echo "$lsblkoutput" | grep "$chosen")"
+    attemptmount || {
         getmount
-        number="${chosen%%:*}"
-        number="${chosen:1}" # This is a bashism.
-        sudo -A simple-mtpfs -o allow_other -o fsname="simple-mtpfs-$(escape "$chosen")" --device "$number" "$mp"
-        notify-send "🤖 Android Mounted." "Android device mounted to $mp."
-        ;;
+        case "${parttype##* }" in
+        vfat) sudo -A mount -t vfat "$chosen" "$mp" -o rw,umask=0000 ;;
+        btrfs) sudo -A mount "$chosen" "$mp" ;;
+        *) sudo -A mount "$chosen" "$mp" -o uid="$(id -u)",gid="$(id -g)" ;;
+        esac
+    }
+    notify-send "💾 Drive Mounted." "$chosen mounted to $mp."
+    ;;
+
+🔒*)
+    chosen="${chosen%% *}"
+    chosen="${chosen:1}" # This is a bashism.
+    # Number the drive.
+    while [ -e "/dev/mapper/usb$num" ]; do
+        num=$((num + 1))
+    done
+    ${TERMINAL:-st} -n floatterm -g 60x1 -e sudo cryptsetup open "$chosen" "usb$num"
+    # Check if now decrypted.
+    test -b "/dev/mapper/usb$num"
+    chosen="/dev/mapper/usb$num"
+    attemptmount || {
+        getmount
+        sudo -A mount "/dev/mapper/usb$num" "$mp" -o uid="$(id -u)",gid="$(id -g)" || sudo -A mount "/dev/mapper/usb$num" "$mp"
+    }
+    notify-send "🔓 Decrypted drive Mounted." "$chosen decrypted and mounted to $mp."
+    ;;
+
+📱*)
+    notify-send "❗ Note" "Remember to allow file access on your phone now."
+    getmount
+    number="${chosen%%:*}"
+    number="${chosen:1}" # This is a bashism.
+    sudo -A simple-mtpfs -o allow_other -o fsname="simple-mtpfs-$(escape "$chosen")" --device "$number" "$mp"
+    notify-send "🤖 Android Mounted." "Android device mounted to $mp."
+    ;;
 esac
