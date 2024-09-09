@@ -185,7 +185,7 @@ function bh() {
     local cols sep history_path open
     cols=$(( COLUMNS / 3 ))
     sep='{|}'
-    profile_dir=$(find ~/.mozilla/firefox -type d -name "*.default-release*" | head -n 1)
+    profile_dir=$(find ~/.mozilla/firefox -type d -name "*.default*" | head -n 1)
     history_path="$profile_dir/places.sqlite"
     open=xdg-open
     tmp_history_dir="${XDG_CACHE_HOME:-$HOME/.cache}/tmp/history"
@@ -204,19 +204,19 @@ function bh() {
 }
 
 function bm() {
-    profile_dir=$(find ~/.mozilla/firefox -type d -name "*.default-release*" | head -n 1)
+    profile_dir=$(find ~/.mozilla/firefox -type d -name "*.default*" | head -n 1)
     bookmarks_path="$profile_dir/places.sqlite"
     tmp_bookmark_dir="${XDG_CACHE_HOME:-$HOME/.cache}/firefox_tmp"
     tmp_bookmark_file="$tmp_bookmark_dir/bookmark.sqlite"
     mkdir -p "$tmp_bookmark_dir"
     command cp -f "$bookmarks_path" "$tmp_bookmark_file"
-    # sqlite_query="
-    # SELECT b.title || ' | ' || p.url AS bookmark
-    # FROM moz_bookmarks b
-    # JOIN moz_places p ON b.fk = p.id
-    # WHERE b.type = 1 AND p.url LIKE 'http%' AND b.title NOT NULL
-    # ORDER BY b.dateAdded DESC;
-    # "
+    sqlite_query="
+    SELECT b.title || ' | ' || p.url AS bookmark
+    FROM moz_bookmarks b
+    JOIN moz_places p ON b.fk = p.id
+    WHERE b.type = 1 AND p.url LIKE 'http%' AND b.title NOT NULL
+    ORDER BY b.dateAdded DESC;
+    "
     choice=$(sqlite3 "$tmp_bookmark_file" "$sqlite_query" \
             | fzf --cycle --ansi --delimiter='|' --with-nth=1..-2 \
         | cut -d'|' -f2)
