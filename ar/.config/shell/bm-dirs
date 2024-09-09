@@ -51,7 +51,7 @@ gvy             ${XDG_VIDEOS_DIR:-${HOME}/Videos}/Youtube
 gwo             ${XDG_DESKTOP_DIR:-${HOME}/Desktop}/Work
 gww             ${XDG_PICTURES_DIR:-${HOME}/Pictures}/wallpaper
 Hbk             /mnt/second/backup
-Hdd             /media/$USER/hdd
+Hdd             /media/$USER/HDD
 Hfl             /media/$USER/flash
 Hme             /media/$USER
 Hmt             /mnt
