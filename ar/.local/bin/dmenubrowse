@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Use dmenu to choose a search option
-SEARCH_TOOL=$(printf "DuckDuckGo\nSearx\nWebsite\nYouTube" | dmenu -p "Which option?")
+SEARCH_TOOL=$(printf "DuckDuckGo\nSearx\nWebsite\nYouTube" | dmenu -i -p "Which option?")
 
 # Exit if no option is selected
 [ -z "$SEARCH_TOOL" ] && exit 1
@@ -18,7 +18,7 @@ case "$SEARCH_TOOL" in
     ;;
 "Website")
     # Ask the user for the website
-    SITE=$(dmenu -p "Which site?")
+    SITE=$(dmenu -i -p "Which site?")
 
     # Exit if no site is provided
     [ -z "$SITE" ] && exit 1
@@ -35,7 +35,7 @@ case "$SEARCH_TOOL" in
 esac
 
 # Get the search query from the user
-SEARCH_QUERY=$(dmenu -p "Search: ")
+SEARCH_QUERY=$(echo | dmenu -i -p "Search: ")
 
 # Exit if no search query is provided
 [ -z "$SEARCH_QUERY" ] && exit 1
