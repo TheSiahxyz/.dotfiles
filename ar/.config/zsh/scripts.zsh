@@ -181,49 +181,67 @@ function docrmi() {
 ###########################################################################################
 ###########################################################################################
 ### --- Firefox --- ###
-function bh() {
-    local cols sep history_path open
-    cols=$(( COLUMNS / 3 ))
-    sep='{|}'
-    profile_dir=$(find ~/.mozilla/firefox -type d -name "*.default-*" | head -n 1)
-    history_path="$profile_dir/places.sqlite"
-    open=xdg-open
-    tmp_history_dir="${XDG_CACHE_HOME:-$HOME/.cache}/tmp/history"
-    tmp_history_file="$tmp_history_dir/history.sqlite"
-
-    mkdir -p "$tmp_history_dir"
-    command cp -f "$history_path" "$tmp_history_file"
-
-    sqlite3 -separator "$sep" "$tmp_history_file" \
-        "SELECT substr(p.title, 1, $cols) || '$sep' || p.url
-    FROM moz_places p
-    JOIN moz_historyvisits hv ON hv.place_id = p.id
-    ORDER BY hv.visit_date DESC LIMIT 100" |
-    awk -F "$sep" '{printf "%-'$cols's  \x1b[36m%s\x1b[m\n", $1, $2}' |
-    fzf --cycle --ansi --multi | sed 's#.*\(https*://\)#\1#' | xargs -r $open > /dev/null 2> /dev/null
-}
-
-function bm() {
-    profile_dir=$(find ~/.mozilla/firefox -type d -name "*.default*" | head -n 1)
-    bookmarks_path="$profile_dir/places.sqlite"
-    tmp_bookmark_dir="${XDG_CACHE_HOME:-$HOME/.cache}/firefox_tmp"
-    tmp_bookmark_file="$tmp_bookmark_dir/bookmark.sqlite"
-    mkdir -p "$tmp_bookmark_dir"
-    command cp -f "$bookmarks_path" "$tmp_bookmark_file"
-    sqlite_query="
-    SELECT b.title || ' | ' || p.url AS bookmark
-    FROM moz_bookmarks b
-    JOIN moz_places p ON b.fk = p.id
-    WHERE b.type = 1 AND p.url LIKE 'http%' AND b.title NOT NULL
-    ORDER BY b.dateAdded DESC;
-    "
-    choice=$(sqlite3 "$tmp_bookmark_file" "$sqlite_query" \
-            | fzf --cycle --ansi --delimiter='|' --with-nth=1..-2 \
-        | cut -d'|' -f2 | xargs)  # xargs trims any extra whitespace
-    if [ -n "$choice" ]; then
-        xdg-open "$choice"
-    fi
-}
+# function bh() {
+#     local cols sep history_path open selection_tool
+#     cols=$(( COLUMNS / 3 ))
+#     sep='{|}'
+#     profile_dir=$(find ~/.mozilla/firefox -type d -name "*.default*" | head -n 1)
+#     history_path="$profile_dir/places.sqlite"
+#     open=xdg-open
+#     tmp_history_dir="${XDG_CACHE_HOME:-$HOME/.cache}/tmp/history"
+#     tmp_history_file="$tmp_history_dir/history.sqlite"
+#
+#     mkdir -p "$tmp_history_dir"
+#     command cp -f "$history_path" "$tmp_history_file"
+#
+#     # Determine whether to use dmenu or fzf
+#     if command -v dmenu > /dev/null; then
+#         selection_tool="dmenu -i -l 20"
+#     else
+#         selection_tool="fzf --cycle --ansi --multi"
+#     fi
+#
+#     sqlite3 -separator "$sep" "$tmp_history_file" \
+#         "SELECT substr(p.title, 1, $cols) || '$sep' || p.url
+#     FROM moz_places p
+#     JOIN moz_historyvisits hv ON hv.place_id = p.id
+#     ORDER BY hv.visit_date DESC LIMIT 100" |
+#     awk -F "$sep" '{printf "%-'$cols's  \x1b[36m%s\x1b[m\n", $1, $2}' |
+#     eval $selection_tool | sed 's#.*\(https*://\)#\1#' | xargs -r $open > /dev/null 2> /dev/null
+# }
+#
+# function bm() {
+#     local selection_tool
+#     profile_dir=$(find ~/.mozilla/firefox -type d -name "*.default*" | head -n 1)
+#     bookmarks_path="$profile_dir/places.sqlite"
+#     tmp_bookmark_dir="${XDG_CACHE_HOME:-$HOME/.cache}/firefox_tmp"
+#     tmp_bookmark_file="$tmp_bookmark_dir/bookmark.sqlite"
+#     mkdir -p "$tmp_bookmark_dir"
+#     command cp -f "$bookmarks_path" "$tmp_bookmark_file"
+#
+#     # Determine whether to use dmenu or fzf
+#     if command -v dmenu > /dev/null; then
+#         selection_tool="dmenu -i -l 20"
+#     else
+#         selection_tool="fzf --cycle --ansi --delimiter='|' --with-nth=1..-2"
+#     fi
+#
+#     sqlite_query="
+#     SELECT b.title || ' | ' || p.url AS bookmark
+#     FROM moz_bookmarks b
+#     JOIN moz_places p ON b.fk = p.id
+#     WHERE b.type = 1 AND p.url LIKE 'http%' AND b.title NOT NULL
+#     ORDER BY b.dateAdded DESC;
+#     "
+#
+#     choice=$(sqlite3 "$tmp_bookmark_file" "$sqlite_query" \
+#         | eval $selection_tool \
+#         | cut -d'|' -f2 | xargs)  # xargs trims any extra whitespace
+#
+#     if [ -n "$choice" ]; then
+#         xdg-open "$choice"
+#     fi
+# }
 
 
 ###########################################################################################
