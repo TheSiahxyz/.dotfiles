@@ -185,7 +185,7 @@ function bh() {
     local cols sep history_path open
     cols=$(( COLUMNS / 3 ))
     sep='{|}'
-    profile_dir=$(find ~/.mozilla/firefox -type d -name "*.default*" | head -n 1)
+    profile_dir=$(find ~/.mozilla/firefox -type d -name "*.default-*" | head -n 1)
     history_path="$profile_dir/places.sqlite"
     open=xdg-open
     tmp_history_dir="${XDG_CACHE_HOME:-$HOME/.cache}/tmp/history"
@@ -196,8 +196,8 @@ function bh() {
 
     sqlite3 -separator "$sep" "$tmp_history_file" \
         "SELECT substr(p.title, 1, $cols) || '$sep' || p.url
-     FROM moz_places p
-     JOIN moz_historyvisits hv ON hv.place_id = p.id
+    FROM moz_places p
+    JOIN moz_historyvisits hv ON hv.place_id = p.id
     ORDER BY hv.visit_date DESC LIMIT 100" |
     awk -F "$sep" '{printf "%-'$cols's  \x1b[36m%s\x1b[m\n", $1, $2}' |
     fzf --cycle --ansi --multi | sed 's#.*\(https*://\)#\1#' | xargs -r $open > /dev/null 2> /dev/null
@@ -219,7 +219,7 @@ function bm() {
     "
     choice=$(sqlite3 "$tmp_bookmark_file" "$sqlite_query" \
             | fzf --cycle --ansi --delimiter='|' --with-nth=1..-2 \
-        | cut -d'|' -f2)
+        | cut -d'|' -f2 | xargs)  # xargs trims any extra whitespace
     if [ -n "$choice" ]; then
         xdg-open "$choice"
     fi
