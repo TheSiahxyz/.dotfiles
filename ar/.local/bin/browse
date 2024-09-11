@@ -1,0 +1,84 @@
+#!/bin/sh
+
+# Define the default Searx instance URL
+SEARX_URL="https://www.searx.thesiah.xyz/searxng/search?q="
+
+# Check if ddgr is installed (only needed for ddgr options)
+if ! command -v ddgr >/dev/null 2>&1; then
+    echo "Error: ddgr is not installed." >&2
+    exit 1
+fi
+
+# Usage message
+usage() {
+    echo "Usage: $0 [-d] [-s <website>] [-w <site>] <search_query>"
+    echo "    -d             : Use DuckDuckGo to search and open the result in a terminal"
+    echo "    -w <website>   : Use a specific website to search (e.g., Google)"
+    echo "    -y             : Search on YouTube"
+    echo "    <search_query> : The search term or query to use"
+    exit 1
+}
+
+# Set the default search tool to Searx
+SEARCH_TOOL="default"
+
+# Parse the command-line options
+while getopts "dw:y" opt; do
+    case $opt in
+    d)
+        SEARCH_TOOL="ddgr"
+        ;;
+    w)
+        SEARCH_TOOL="website"
+        SITE="$OPTARG"
+        ;;
+    y)
+        SEARCH_TOOL="youtube"
+        ;;
+    *)
+        usage
+        ;;
+    esac
+done
+
+# Shift off all the options to leave only the search query
+shift $((OPTIND - 1))
+
+# Check if there's a search query left
+if [ -z "$*" ]; then
+    usage
+fi
+
+# Store the search query
+SEARCH_QUERY="$*"
+
+# Execute the corresponding search tool
+case $SEARCH_TOOL in
+default)
+    # Default: Perform Searx search
+    SEARCH_QUERY_ENCODED=$(echo "$SEARCH_QUERY" | sed 's/ /+/g')
+    xdg-open "${SEARX_URL}${SEARCH_QUERY_ENCODED}"
+    ;;
+ddgr)
+    # Run DuckDuckGo search in terminal
+    ddgr "$SEARCH_QUERY"
+    ;;
+website)
+    # Perform site-specific search using ddgr
+    ddgr -w "$SITE" "$SEARCH_QUERY"
+    ;;
+youtube)
+    # Encode the search query and append it to YouTube's search URL
+    SEARCH_QUERY_ENCODED=$(echo "$SEARCH_QUERY" | sed 's/ /+/g')
+
+    # Use the YouTube URL and append the search query
+    SEARCH_URL="https://www.youtube.com/results?search_query=${SEARCH_QUERY_ENCODED}"
+
+    # Open the search URL in the default browser
+    xdg-open "$SEARCH_URL"
+    ;;
+*)
+    # Fallback to usage if something goes wrong
+    usage
+    ;;
+esac
