@@ -43,16 +43,17 @@ return {
 				}),
 				-- sources for autocompletion
 				sources = cmp.config.sources({
-					{ name = "luasnip" }, -- snippets
 					{ name = "buffer" }, -- text within current buffer
-					{ name = "path" }, -- file system paths
+					{ name = "crates" },
+					{ name = "emoji" },
+					{ name = "luasnip" }, -- snippets
 					{ name = "nvim_lsp" },
 					{ name = "nvim_lua", priority = 100 },
-					{ name = "vsnip" },
-					{ name = "emoji" },
-					{ name = "crates" },
-					{ name = "snippets" },
+					{ name = "path" }, -- file system paths
 					{ name = "projects", priority = 100 },
+					{ name = "snippets" },
+					{ name = "vim-dadbod-completion" }, -- Enable dadbod completion source
+					{ name = "vsnip" },
 				}),
 
 				-- configure lspkind for vs-code like pictograms in completion menu

@@ -13,11 +13,31 @@ return {
 	init = function()
 		-- Your DBUI configuration
 		vim.g.db_ui_use_nerd_fonts = 1
-
+		vim.g.dbs = {
+			ms = "mariadb://user:password@localhost/mysql",
+			ps = "postgresql://postgres:mypassword@localhost:5432/postgresql",
+			sqlite = "sqlite://~/.local/share/db/sqlite.db",
+			firefox = "sqlite://~/.mozilla/firefox/si.default/places.sqlite",
+		}
 		local wk = require("which-key")
 		wk.add({
 			mode = { "n" },
 			{ "<localleader>b", group = "DB" },
+		})
+	end,
+	config = function()
+		local function db_completion()
+			require("cmp").setup.buffer({ sources = { { name = "vim-dadbod-completion" } } })
+		end
+		vim.api.nvim_create_autocmd("FileType", {
+			pattern = {
+				"sql",
+				"mysql",
+				"plsql",
+			},
+			callback = function()
+				vim.schedule(db_completion)
+			end,
 		})
 	end,
 	keys = {

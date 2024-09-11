@@ -48,7 +48,7 @@ bindkey -s '^P' '^upd\n'
 bindkey -s '^T' '^utm\n'
 bindkey -s '^Y' '^ulfcd\n'
 bindkey -s '^Z' '^ucdo\n'
-bindkey -s '^_' '^usscs\n'
+bindkey -s '^\' '^usscs\n'
 bindkey -s '^X^B' '^urbackup\n'
 bindkey -s '^X^D' '^ufD\n'
 bindkey -s '^X^F' '^ufF\n'
@@ -74,7 +74,7 @@ bindkey -M viins '^S' sudo-command-line
 
 # last command output
 zle -N insert-last-command-output
-bindkey -M viins '^\' insert-last-command-output
+bindkey -M viins '^]' insert-last-command-output
 
 # bind y/Y to yank until end of line/yank whole line
 # bindkey -M vicmd y zsh-system-clipboard-vicmd-vi-yank-eol
@@ -112,7 +112,7 @@ bindkey '^X^H' clear-tree-3
 
 # prints the current date in ISO 8601
 print-current-date() {
-  LBUFFER+=$(date -I)
+    LBUFFER+=$(date -I)
 }
 zle -N print-current-date
 
