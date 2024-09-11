@@ -13,11 +13,12 @@ return {
 	init = function()
 		-- Your DBUI configuration
 		vim.g.db_ui_use_nerd_fonts = 1
+		local home = vim.fn.expand("~")
 		vim.g.dbs = {
 			ms = "mariadb://user:password@localhost/mysql",
 			ps = "postgresql://postgres:mypassword@localhost:5432/postgresql",
-			sqlite = "sqlite://~/.local/share/db/sqlite.db",
-			firefox = "sqlite://~/.mozilla/firefox/si.default/places.sqlite",
+			sqlite = "sqlite://" .. home .. "/.local/share/db/sqlite.db",
+			firefox = "sqlite://" .. home .. "/.mozilla/firefox/si.default/places.sqlite",
 		}
 		local wk = require("which-key")
 		wk.add({
