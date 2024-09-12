@@ -12,17 +12,13 @@ return {
 	init = function()
 		local wk = require("which-key")
 		wk.add({
-			mode = { "n", "v", "x" },
-			{ "g>", group = "Swap next" },
-			{ "g<", group = "Swap prev" },
-			{ "<leader>]", group = "Next" },
-			{ "<leader>[", group = "Prev" },
-		})
-		wk.add({
-			mode = { "v" },
-			{ "gw", desc = "Visible in window" },
-			{ "g%", desc = "Match backward" },
-			{ "g;", desc = "Last change" },
+			{
+				mode = { "n", "v", "x" },
+				{ "g>", group = "Swap next" },
+				{ "g<", group = "Swap prev" },
+				{ "<leader>]", group = "Next" },
+				{ "<leader>[", group = "Prev" },
+			},
 		})
 	end,
 	config = function()

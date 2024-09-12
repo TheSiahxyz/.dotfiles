@@ -60,6 +60,9 @@ return {
 			},
 			{
 				mode = { "n", "v", "x" },
+				{ "gw", desc = "Visible in window" },
+				{ "g%", desc = "Match backward" },
+				{ "g;", desc = "Last change" },
 				{ "<leader>Q", group = "Quit all" },
 			},
 		})
