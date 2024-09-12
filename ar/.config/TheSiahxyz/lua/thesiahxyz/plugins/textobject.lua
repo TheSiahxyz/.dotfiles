@@ -13,8 +13,16 @@ return {
 		local wk = require("which-key")
 		wk.add({
 			mode = { "n", "v", "x" },
+			{ "g>", group = "Swap next" },
+			{ "g<", group = "Swap prev" },
 			{ "<leader>]", group = "Next" },
 			{ "<leader>[", group = "Prev" },
+		})
+		wk.add({
+			mode = { "v" },
+			{ "gw", desc = "Visible in window" },
+			{ "g%", desc = "Match backward" },
+			{ "g;", desc = "Last change" },
 		})
 	end,
 	config = function()
@@ -67,14 +75,14 @@ return {
 				swap = {
 					enable = true,
 					swap_next = {
-						["g>a"] = "@parameter.inner", -- swap parameters/argument with next
-						["g>:"] = "@property.outer", -- swap object property with next
-						["g>m"] = "@function.outer", -- swap function with next
+						["g>a"] = { query = "@parameter.inner", desc = "swap parameters/argument with next" },
+						["g>:"] = { query = "@property.outer", desc = "swap object property with next" },
+						["g>m"] = { query = "@function.outer", desc = "swap function with next" },
 					},
 					swap_previous = {
-						["g<a"] = "@parameter.inner", -- swap parameters/argument with prev
-						["g<:"] = "@property.outer", -- swap object property with prev
-						["g<m"] = "@function.outer", -- swap function with previous
+						["g<a"] = { query = "@parameter.inner", desc = "swap parameters/argument with prev" },
+						["g<:"] = { query = "@property.outer", desc = "swap object property with prev" },
+						["g<m"] = { query = "@function.outer", desc = "swap function with previous" },
 					},
 				},
 				move = {

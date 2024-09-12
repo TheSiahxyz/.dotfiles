@@ -6,8 +6,11 @@ return {
 	init = function()
 		local wk = require("which-key")
 		wk.add({
-			mode = { "n" },
-			{ "m", group = "Marks" },
+			{
+				mode = { "n", "v" },
+				{ "m", group = "Marks" },
+				{ "dm", desc = "Delete marks" },
+			},
 		})
 	end,
 }

@@ -204,6 +204,16 @@ return {
 	},
 	{
 		"dhruvasagar/vim-open-url",
+		init = function()
+			local wk = require("which-key")
+			wk.add({
+				mode = { "n", "v" },
+				{ "g<CR>", group = "Search word under curosr" },
+				{ "gB", group = "Open url in browser" },
+				{ "gG", group = "Google search word under cursor" },
+				{ "gW", group = "Wikipedia search word under cursor" },
+			})
+		end,
 	},
 	{
 		"AckslD/nvim-FeMaco.lua",

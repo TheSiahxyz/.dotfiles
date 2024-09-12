@@ -19,14 +19,14 @@ return {
 	keys = function()
 		local keys = {
 			{
-				"<leader>a",
+				"<C-q>",
 				function()
 					require("harpoon"):list():add()
 				end,
 				desc = "Add buffer to harpoon list",
 			},
 			{
-				"<C-q>",
+				"<C-g>",
 				function()
 					local harpoon = require("harpoon")
 					harpoon.ui:toggle_quick_menu(harpoon:list())

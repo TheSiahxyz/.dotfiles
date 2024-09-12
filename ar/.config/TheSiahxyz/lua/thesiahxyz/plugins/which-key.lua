@@ -5,38 +5,63 @@ return {
 	opts = {},
 	config = function()
 		local wk = require("which-key")
-		wk.add({
-			mode = { "n" },
-			{ "g", desc = "+Goto" },
-			{ "s", desc = "+Search and replace on line" },
-			{ "S", desc = "+Search and replace in file" },
-			{ "z", desc = "+Fold" },
-			{ "`", desc = "+Marks" },
-			{ "'", desc = "+Marks" },
-			{ '"', desc = "+Registers" },
-			{ "]", desc = "+Next" },
-			{ "[", desc = "+Prev" },
-			{ "=", desc = "+Line paste" },
-			{ "\\", desc = "+Local Leader (bookmarks)" },
-			{ "\\\\", desc = "+Bookmarks" },
-			{ "<C-w>", desc = "+Windows" },
-			{ "<leader>", desc = "+Leader" },
-			{ "<leader>.", desc = "+cd .." },
-			{ "<leader>b", desc = "+Buffer" },
-			{ "<leader>e", desc = "+Explorer" },
-			{ "<leader>i", desc = "+Inspect" },
-			{ "<leader>l", desc = "+Location" },
-			{ "<leader>L", desc = "+Lazy" },
-			{ "<leader>M", desc = "+Mason" },
-			{ "<leader>o", desc = "+Open" },
-			{ "<leader>q", desc = "+Quit" },
-			{ "<leader>Q", desc = "+Quit all" },
-			{ "<leader>w", desc = "+Save/Which Key" },
-			{ "<leader>W", desc = "+Save all" },
+		wk.setup({
+			keys = {
+				scroll_down = "<c-e>",
+				scroll_up = "<c-y>",
+			},
 		})
 		wk.add({
-			mode = { "n", "v", "x" },
-			{ "<leader>Q", desc = "+Quit" },
+			{
+				mode = { "n", "v" },
+				{ "g", group = "Goto" },
+				{ "g`", group = "Marks" },
+				{ "g'", group = "Marks" },
+				{ "gs", group = "Search/Surround" },
+				{ "s", group = "Search and replace on line" },
+				{ "S", group = "Search and replace in file" },
+				{ "z", group = "Fold" },
+				{ "`", group = "Marks" },
+				{ "'", group = "Marks" },
+				{ '"', group = "Registers" },
+				{ "]", group = "Next" },
+				{ "[", group = "Prev" },
+				{ "=", group = "Line paste" },
+				{ "\\", group = "Local Leader (bookmarks)" },
+				{ "\\\\", group = "Bookmarks" },
+				{ "gx", desc = "Open with system app" },
+				{ "<C-w>", group = "Windows" },
+				{ "<leader>", group = "Leader" },
+				{ "<leader>.", group = "cd .." },
+				{
+					"<leader>b",
+					group = "Buffer",
+					expand = function()
+						return require("which-key.extras").expand.buf()
+					end,
+				},
+				{ "<leader>e", group = "Explorer" },
+				{ "<leader>i", group = "Inspect" },
+				{ "<leader>l", group = "Location" },
+				{ "<leader>L", group = "Lazy" },
+				{ "<leader>M", group = "Mason" },
+				{ "<leader>o", group = "Open" },
+				{ "<leader>q", group = "Quit" },
+				{ "<leader>sk", group = "Keys" },
+				{
+					"<leader>w",
+					group = "Save/Windows/Which-key",
+					proxy = "<c-w>",
+					expand = function()
+						return require("which-key.extras").expand.win()
+					end,
+				},
+				{ "<leader>W", group = "Save all" },
+			},
+			{
+				mode = { "n", "v", "x" },
+				{ "<leader>Q", group = "Quit all" },
+			},
 		})
 	end,
 	keys = {
