@@ -3,22 +3,22 @@
 MOUNT_SCRIPT="${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/ecrypt"
 
 check_mount() {
-    mount | grep -q " $HOME/Private " && mount | grep -q " /mnt/second" || $MOUNT_SCRIPT
+    findmnt "$HOME/Private" >/dev/null && findmnt "/mnt/second" >/dev/null || $MOUNT_SCRIPT
 }
 
 check_unmount() {
-    if lsof +D "$HOME/Private" || lsof +D "/mnt/second/videos"; then
+    if findmnt "$HOME/Private" >/dev/null || findmnt "/mnt/second/videos" >/dev/null; then
         return
     else
-        mount | grep -q " $HOME/Private " && mount | grep -q " /mnt/second" && $MOUNT_SCRIPT
+        findmnt "$HOME/Private" >/dev/null && findmnt "/mnt/second" >/dev/null && $MOUNT_SCRIPT
     fi
 }
 
 play_url() {
-	url=$(xclip -selection clipboard -o)
-    echo "$url" | grep -E '^https?://' > /dev/null || return 1
-	notify-send "📽️ Playing video from URL:" "$url"
-	play_media "$url"
+    url=$(xclip -selection clipboard -o)
+    echo "$url" | grep -E '^https?://' >/dev/null || return 1
+    notify-send "📽️ Playing video from URL:" "$url"
+    play_media "$url"
 }
 
 play_media() {
@@ -30,47 +30,51 @@ play_media() {
 }
 
 play_playlist() {
-	mpv --playlist="$1"
+    if echo "$1" | grep -q "/home/$USER/Private" || echo "$1" | grep -q "/mnt/second"; then
+        mpv --playlist="$1" && check_unmount || exit
+    else
+        check_unmount && mpv --playlist="$1" || exit
+    fi
 }
 
 tmp_playlist() {
     playlistdir="$HOME/.config/mpv/playlists"
     [ -d "$playlistdir" ] || mkdir -p "$playlistdir"
-    tmplist="$playlistdir/tmplist.m3u" 
+    tmplist="$playlistdir/tmplist.m3u"
     [ -f "$tmplist" ] && rm -rf "$tmplist"
     find "$1" -maxdepth 1 -type f \( -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.mov" -o -iname "*.flv" -o -iname "*.wmv" -o -iname "*.webm" -o -iname "*.mpeg" -o -iname "*.mpg" \) \
-        -exec echo {} >> "$tmplist" \;
+        -exec echo {} \; >>"$tmplist"
     play_playlist "$tmplist"
     rm -rf "$tmplist"
 }
 
 list_and_play() {
-	directory=$1
-	CHOICE=$(printf "List files\nEnter filenames" | dmenu -i -p "Choose an option:")
-	case "$CHOICE" in
-        "Enter filenames")
-            search_term=$(echo | dmenu -i -p "File names:")
-            [ -z "$search_term" ] && exit
-            files=$(find "$directory" -type f \( -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.mov" -o -iname "*.flv" -o -iname "*.wmv" -o -iname "*.webm" -o -iname "*.mpeg" -o -iname "*.mpg" \) -iname "*$search_term*")
-            [ -z "$files" ] && exit
-            tmpplaylist=$(mktemp /tmp/mpv_playlist_XXXXXX.m3u)
-            echo "$files" | while read -r file; do
-                echo "$file"
-            done >"$tmpplaylist"
-            cat "$tmpplaylist" # For debugging: output the contents of the playlist to verify.
-            play_playlist "$tmpplaylist"
-            rm -rf "$tmpplaylist"
-            ;;
-        "List files")
-            files_with_paths=$(find "$directory" -mindepth 1 -maxdepth 1 -type f \( -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.webm" -o -iname "*.avi" -o -iname "*.flv" -o -iname "*.wmv" -o -iname "*.ts" \) | sort)
-            SELECTED_FILE=$(printf "All files\n%s" "$files_with_paths" | sed 's!.*/!!' | dmenu -i -l 21 -p "Select a file:")
-            [ -z "$SELECTED_FILE" ] && exit
-            [ "$SELECTED_FILE" = "All files" ] && tmp_playlist "$directory" && return
-            FULL_PATH="$(echo "$files_with_paths" | grep -F "$SELECTED_FILE")"
-            [ -f "$FULL_PATH" ] && play_media "$FULL_PATH" && return
-            ;;
-        *) return ;;
-	esac
+    directory=$1
+    CHOICE=$(printf "List files\nEnter filenames" | dmenu -i -p "Choose an option:")
+    case "$CHOICE" in
+    "Enter filenames")
+        search_term=$(echo | dmenu -i -p "File names:")
+        [ -z "$search_term" ] && exit
+        files=$(find "$directory" -type f \( -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.mov" -o -iname "*.flv" -o -iname "*.wmv" -o -iname "*.webm" -o -iname "*.mpeg" -o -iname "*.mpg" \) -iname "*$search_term*")
+        [ -z "$files" ] && exit
+        tmpplaylist=$(mktemp /tmp/mpv_playlist_XXXXXX.m3u)
+        echo "$files" | while read -r file; do
+            echo "$file"
+        done >"$tmpplaylist"
+        cat "$tmpplaylist" # For debugging: output the contents of the playlist to verify.
+        play_playlist "$tmpplaylist"
+        rm -rf "$tmpplaylist"
+        ;;
+    "List files")
+        files_with_paths=$(find "$directory" -mindepth 1 -maxdepth 1 -type f \( -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.webm" -o -iname "*.avi" -o -iname "*.flv" -o -iname "*.wmv" -o -iname "*.ts" \) | sort)
+        SELECTED_FILE=$(printf "All files\n%s" "$files_with_paths" | sed 's!.*/!!' | dmenu -i -l 21 -p "Select a file:")
+        [ -z "$SELECTED_FILE" ] && exit
+        [ "$SELECTED_FILE" = "All files" ] && tmp_playlist "$directory" && return
+        FULL_PATH="$(echo "$files_with_paths" | grep -F "$SELECTED_FILE")"
+        [ -f "$FULL_PATH" ] && play_media "$FULL_PATH" && return
+        ;;
+    *) return ;;
+    esac
 }
 
 CONTENT_CHOICE=$(printf "URL\nLocal Files\nPlaylist" | dmenu -i -p "Choose media source:")
@@ -78,26 +82,26 @@ case "$CONTENT_CHOICE" in
 "URL") play_url ;;
 "Playlist")
     PLAYLISTS=$(find "$HOME/.config/mpv/playlists" -maxdepth 1 -type f -name "*.m3u" -exec basename {} .m3u \; | dmenu -i -p "Select a playlist:")
-	[ -z "$PLAYLISTS" ] && exit
-	play_playlist "$PLAYLISTS"
-	;;
+    [ -z "$PLAYLISTS" ] && exit
+    play_playlist "$PLAYLISTS"
+    ;;
 "Local Files")
-	check_mount
+    check_mount
     printf "%s\n%s\n%s\n%s\n%s\n%s\n" "$HOME/Downloads" "$HOME/Private" "$HOME/Torrents/complete" "$HOME/Videos" "/media/$USER" "/mnt/second" | dmenu -i -p "Choose your initial directory:" | {
-		read -r initial_directory
-		[ -z "$initial_directory" ] && exit
-		SELECTED_FOLDER="$initial_directory"
-		while true; do
-			SUBFOLDER_OPTIONS="$(find "$SELECTED_FOLDER" -mindepth 1 -maxdepth 1 -type d ! -name ".*" -printf "%P\n" | sort)"
-			[ -z "$SUBFOLDER_OPTIONS" ] && list_and_play "$SELECTED_FOLDER" && break
-			OPTIONS="All files\n$SUBFOLDER_OPTIONS"
+        read -r initial_directory
+        [ -z "$initial_directory" ] && exit
+        SELECTED_FOLDER="$initial_directory"
+        while true; do
+            SUBFOLDER_OPTIONS="$(find "$SELECTED_FOLDER" -mindepth 1 -maxdepth 1 -type d ! -name ".*" -printf "%P\n" | sort)"
+            [ -z "$SUBFOLDER_OPTIONS" ] && list_and_play "$SELECTED_FOLDER" && break
+            OPTIONS="All files\n$SUBFOLDER_OPTIONS"
             SELECTED_RELATIVE_FOLDER="$(printf "%b" "$OPTIONS" | dmenu -i -p "Select a folder or 'All files':")"
-			[ -z "$SELECTED_RELATIVE_FOLDER" ] && exit
-			[ "$SELECTED_RELATIVE_FOLDER" = "All files" ] && list_and_play "$SELECTED_FOLDER" && break
-			SELECTED_FOLDER="$SELECTED_FOLDER/$SELECTED_RELATIVE_FOLDER"
-		done
-	}
-	;;
+            [ -z "$SELECTED_RELATIVE_FOLDER" ] && exit
+            [ "$SELECTED_RELATIVE_FOLDER" = "All files" ] && list_and_play "$SELECTED_FOLDER" && break
+            SELECTED_FOLDER="$SELECTED_FOLDER/$SELECTED_RELATIVE_FOLDER"
+        done
+    }
+    ;;
 *) exit ;;
 esac
 

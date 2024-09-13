@@ -1,5 +1,9 @@
 #!/bin/sh
 
+browsercheck() {
+    pidof $BROWSER >/dev/null && echo "$BROWSER is locked. Check if $BROWSER is running." && exit
+}
+
 checkopen() {
     case "$(command -v xdg-open || command -v open || command -v links || command -v lynx)" in
     *xdg-open) open=xdg-open ;;
@@ -30,6 +34,7 @@ openinbrowser() {
 }
 
 bm() {
+    browsercheck
     sqlite_query="
     SELECT b.title || ' | ' || p.url AS bookmark
     FROM moz_bookmarks b
@@ -41,6 +46,7 @@ bm() {
 }
 
 his() {
+    browsercheck
     cols=$((${COLUMNS:-90} / 3))
     sqlite_query="
     SELECT substr(p.title, 1, $cols) || ' | ' || p.url
@@ -59,8 +65,6 @@ geturls() {
     [ -z "$CHOICE" ] && exit
     URL=$(echo "$URLS" | grep -v -e '^#' -e '^$' | grep "\"$CHOICE\"" | awk '{print $1}')
 }
-
-pidof $BROWSER >/dev/null && echo "$BROWSER is locked. Check if $BROWSER is running." && exit
 
 while getopts "bchop" opt; do
     case $opt in
