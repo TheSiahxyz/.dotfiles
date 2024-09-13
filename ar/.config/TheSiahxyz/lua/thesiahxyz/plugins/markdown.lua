@@ -280,7 +280,7 @@ return {
 	{ "benlubas/image-save.nvim", dev = true, cmd = "SaveImage" },
 	{
 		"3rd/image.nvim",
-		dependencies = { "leafo/magick" },
+		dependencies = { "leafo/magick", "luarocks.nvim" },
 		config = function()
 			require("image").setup({
 				backend = "ueberzug", -- whatever backend you would like to use
