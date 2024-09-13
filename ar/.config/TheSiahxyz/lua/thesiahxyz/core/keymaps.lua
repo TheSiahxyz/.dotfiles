@@ -18,7 +18,7 @@ vim.keymap.set({ "n", "v" }, "<leader>QQ", "<cmd>qa!<cr>", { desc = "Force quit 
 vim.keymap.set({ "i", "n" }, "<esc>", "<cmd>noh<cr><esc>", { desc = "Clear search highlights" })
 
 -- Copy
-vim.keymap.set({ "i", "n" }, "<leader>cp", function()
+vim.keymap.set("n", "<leader>cp", function()
 	local filename = vim.fn.expand("%") -- Get the current filename
 	local file_root = vim.fn.expand("%:r") -- Get the file root (without extension)
 	local file_ext = vim.fn.expand("%:e") -- Get the file extension
@@ -73,16 +73,16 @@ vim.keymap.set("n", "<leader>ip", vim.show_pos, { desc = "Inspect position" })
 
 -- Remap Default
 vim.keymap.set("n", "ㅑ", "i", { desc = "Insert mode" })
-vim.keymap.set("i", "jk", "<Esc>", { desc = "Escape to normal mode" })
-vim.keymap.set("i", "<C-c>", "<esc>", { desc = "Escape to normal mode" })
-vim.keymap.set("i", "<C-a>", "<esc>I", { desc = "Insert at beginning of line" })
-vim.keymap.set("i", "<C-e>", "<end>", { desc = "Move to end of line" })
-vim.keymap.set("i", "<C-h>", "<left>", { desc = "Move left" })
-vim.keymap.set("i", "<C-l>", "<right>", { desc = "Move right" })
-vim.keymap.set("i", "<C-j>", "<down>", { desc = "Move down" })
-vim.keymap.set("i", "<C-k>", "<up>", { desc = "Move up" })
-vim.keymap.set("n", "<C-c>", ":", { desc = "Enter command mode" })
-vim.keymap.set("n", "J", "mzJ`z", { desc = "Join lines and keep cursor position" })
+vim.keymap.set("i", "jk", "<esc>", { noremap = true, silent = true, desc = "Escape to normal mode" })
+vim.keymap.set("i", "<C-c>", "<esc>", { noremap = true, silent = true, desc = "Escape to normal mode" })
+vim.keymap.set("i", "<C-a>", "<esc>I", { noremap = true, silent = true, desc = "Insert at beginning of line" })
+vim.keymap.set("i", "<C-e>", "<end>", { noremap = true, silent = true, desc = "Move to end of line" })
+vim.keymap.set("i", "<C-h>", "<left>", { noremap = true, silent = true, desc = "Move left" })
+vim.keymap.set("i", "<C-l>", "<right>", { noremap = true, silent = true, desc = "Move right" })
+vim.keymap.set("i", "<C-j>", "<down>", { noremap = true, silent = true, desc = "Move down" })
+vim.keymap.set("i", "<C-k>", "<up>", { noremap = true, silent = true, desc = "Move up" })
+vim.keymap.set("n", "<C-c>", ":", { noremap = true, desc = "Enter command mode" })
+vim.keymap.set("n", "J", "mzJ`z", { noremap = true, desc = "Join lines and keep cursor position" })
 vim.keymap.set("n", "n", "'Nn'[v:searchforward].'zv'", { expr = true, desc = "Next search result and center" })
 vim.keymap.set("x", "n", "'Nn'[v:searchforward]", { expr = true, desc = "Next search result in visual mode" })
 vim.keymap.set("o", "n", "'Nn'[v:searchforward]", { expr = true, desc = "Next search result in operator-pending mode" })
@@ -95,10 +95,11 @@ vim.keymap.set(
 	{ expr = true, desc = "Previous search result in operator-pending mode" }
 )
 vim.keymap.set("n", "x", '"_x', { desc = "Delete character without yanking" })
-vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = "Scroll down and center" })
-vim.keymap.set("n", "<C-u>", "<C-u>zz", { desc = "Scroll up and center" })
-vim.keymap.set("n", "<C-b>", "<C-b>zz", { desc = "Page up and center" })
-vim.keymap.set("n", "<C-f>", "<C-f>zz", { desc = "Page down and center" })
+vim.keymap.set("n", "<C-d>", "<C-d>zz", { noremap = true, silent = true, desc = "Scroll down and center" })
+vim.keymap.set("n", "<C-u>", "<C-u>zz", { noremap = true, silent = true, desc = "Scroll up and center" })
+vim.keymap.set("n", "<C-b>", "<C-b>zz", { noremap = true, silent = true, desc = "Page up and center" })
+vim.keymap.set("n", "<C-f>", "<C-f>zz", { noremap = true, silent = true, desc = "Page down and center" })
+
 vim.keymap.set(
 	{ "n", "x" },
 	"j",
@@ -205,8 +206,18 @@ vim.keymap.set("n", "<leader>K", "<cmd>norm! K<cr>", { desc = "Look up keyword" 
 -- Lines
 vim.keymap.set("n", "<A-,>", "<cmd>m .-2<cr>==", { desc = "Move line up" })
 vim.keymap.set("n", "<A-.>", "<cmd>m .+1<cr>==", { desc = "Move line down" })
-vim.keymap.set("i", "<A-,>", "<esc><cmd>m .-2<cr>==gi", { desc = "Move line up in insert mode" })
-vim.keymap.set("i", "<A-.>", "<esc><cmd>m .+1<cr>==gi", { desc = "Move line down in insert mode" })
+vim.keymap.set(
+	"i",
+	"<A-,>",
+	"<esc><cmd>m .-2<cr>==gi",
+	{ noremap = true, silent = true, desc = "Move line up in insert mode" }
+)
+vim.keymap.set(
+	"i",
+	"<A-.>",
+	"<esc><cmd>m .+1<cr>==gi",
+	{ noremap = true, silent = true, desc = "Move line down in insert mode" }
+)
 vim.keymap.set("v", "<A-,>", ":m '<-2<cr>gv=gv", { desc = "Move selected lines up" })
 vim.keymap.set("v", "<A-.>", ":m '>+1<cr>gv=gv", { desc = "Move selected lines down" })
 
