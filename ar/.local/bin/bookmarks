@@ -60,6 +60,8 @@ geturls() {
     URL=$(echo "$URLS" | grep -v -e '^#' -e '^$' | grep "\"$CHOICE\"" | awk '{print $1}')
 }
 
+pidof $BROWSER >/dev/null && echo "$BROWSER is locked. Check if $BROWSER is running." && exit
+
 while getopts "bchop" opt; do
     case $opt in
     b) bm ;;
