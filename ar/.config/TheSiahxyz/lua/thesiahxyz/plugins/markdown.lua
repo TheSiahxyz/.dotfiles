@@ -1,5 +1,4 @@
 -- Configuration for handling markdown format with Jupytext in Neovim
-
 local CELL_MARKER_COLOR = "#999999"
 local CELL_MARKER = "^```"
 local CELL_MARKER_SIGN = "cell_marker_sign"
