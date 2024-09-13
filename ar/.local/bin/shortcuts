@@ -33,8 +33,10 @@ eval "echo \"$(cat "$bmdirs")\"" |
 	printf(\"config.bind(';%s', \42set downloads.location.directory %s ;; hint links download\42) \n\",\$1,\$2) >> \"$qute_shortcuts\" ;
 	printf(\"map g%s cd %s\nmap t%s tab_new %s\nmap m%s shell mv -v %%s %s\nmap Y%s shell cp -rv %%s %s \n\",\$1,\$2,\$1,\$2, \$1, \$2, \$1, \$2) >> \"$ranger_shortcuts\" ;
 	printf(\"map %s cd \42%s\42 \n\",\$1,\$2)           >> \"$lf_shortcuts\" ;
+    printf(\"cmap ;%s %s\n\",\$1,\$2)      >> \"$vim_shortcuts\" ;
     printf(\"nmap <localleader><localleader>%s :Explore %s<cr>\n\",\$1,\$2)      >> \"$vim_shortcuts\" ;
-    printf(\"vim.api.nvim_set_keymap('n', '<localleader><localleader>%s', '<cmd>Explore %s<cr>', { noremap = true, silent = true, desc = '%s' })\", \$1, \$2, gensub(\"^/home/si/\",\"~/\",\"g\",\$2)) >> \"$nvim_shortcuts\"}"
+    printf(\"vim.keymap.set('c', ';%s', '%s<cr>', { noremap = true, silent = true, desc = '%s' })\n\", \$1, \$2, gensub(\"^/home/si/\",\"~/\",\"g\",\$2)) >> \"$nvim_shortcuts\" ;
+    printf(\"vim.keymap.set('n', '<localleader><localleader>%s', '<cmd>Explore %s<cr>', { noremap = true, silent = true, desc = '%s' })\n\", \$1, \$2, gensub(\"^/home/si/\",\"~/\",\"g\",\$2)) >> \"$nvim_shortcuts\"}"
 
 # Format the `files` file in the correct syntax and sent it to both configs.
 eval "echo \"$(cat "$bmfiles")\"" |
@@ -50,8 +52,10 @@ eval "echo \"$(cat "$bmfiles")\"" |
 	printf(\"map v%s shell \$EDITOR2 %s \n\",\$1,\$2)  >> \"$ranger_shortcuts\" ;
 	printf(\"map %s \$\$EDITOR \42%s\42 \n\",\$1,\$2)   >> \"$lf_shortcuts\" ;
 	printf(\"map v%s \$\$EDITOR2 \42%s\42 \n\",\$1,\$2)   >> \"$lf_shortcuts\" ;
+    printf(\"cmap ;%s %s\n\",\$1,\$2)        >> \"$vim_shortcuts\" ;
     printf(\"nmap <localleader><localleader>%s :e %s<cr>\n\",\$1,\$2)        >> \"$vim_shortcuts\" ;
-    printf(\"vim.api.nvim_set_keymap('n', '<localleader><localleader>%s', '<cmd>e %s<cr>', { noremap = true, silent = true, desc = '%s' })\", \$1, \$2, gensub(\"^/home/si/\",\"~/\",\"g\",\$2)) >> \"$nvim_shortcuts\"}"
+    printf(\"vim.keymap.set('c', ';%s', '%s<cr>', { noremap = true, silent = true, desc = '%s' })\n\", \$1, \$2, gensub(\"^/home/si/\",\"~/\",\"g\",\$2)) >> \"$nvim_shortcuts\" ;
+    printf(\"vim.keymap.set('n', '<localleader><localleader>%s', '<cmd>e %s<cr>', { noremap = true, silent = true, desc = '%s' })\n\", \$1, \$2, gensub(\"^/home/si/\",\"~/\",\"g\",\$2)) >> \"$nvim_shortcuts\"}"
 
 # root
 root_shell_shortcuts="/root/.config/shell/rootshortcutrc"
