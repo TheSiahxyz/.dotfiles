@@ -38,6 +38,11 @@ for file_path in "${config_files[@]}"; do
     project_name=${project_name^^}
 
     echo ".HEADING 3 \"$project_name\"" >>"$temp_file_before"
+    if [ "$project_name" == "DWM" ]; then
+        printf ".PP\nTheSiah's window manager. I do not use a desktop environment.\n" >>"$temp_file_before"
+    elif [ "$project_name" == "ST" ]; then
+        printf ".PP\nTheSiah's default terminal in C. It is light, configurable, and fast.\n" >>"$temp_file_before"
+    fi
     echo ".LI" >>"$temp_file_before"
 
     awk 'BEGIN {flag=0} /static[[:space:]]+(const[[:space:]]+)?(Key|Shortcut|Command|Button)[[:space:]]+(keys|cmdkeys|shortcuts|commands|buttons)[[:space:]]*\[\][[:space:]]*=[[:space:]]*{/ {flag=1} /\};/ {flag=0} flag' "$file_path" | while read -r line; do
