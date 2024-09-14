@@ -56,7 +56,7 @@ list_and_play() {
         search_term=$(echo | dmenu -i -p "File names:")
         [ -z "$search_term" ] && exit
         files=$(find "$directory" -type f \( -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.mov" -o -iname "*.flv" -o -iname "*.wmv" -o -iname "*.webm" -o -iname "*.mpeg" -o -iname "*.mpg" \) -iname "*$search_term*")
-        [ -z "$files" ] && exit
+        [ -z "$files" ] && echo "No files named with \"$search_term\"." && exit
         tmpplaylist=$(mktemp /tmp/mpv_playlist_XXXXXX.m3u)
         echo "$files" | while read -r file; do
             echo "$file"
