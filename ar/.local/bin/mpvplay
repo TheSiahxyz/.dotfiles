@@ -2,19 +2,13 @@
 
 MOUNT_SCRIPT="${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/ecrypt"
 
-check_mount() {
-    if findmnt "$HOME/Private" >/dev/null; then
-        findmnt "/mnt/second" >/dev/null
-    else
-        $MOUNT_SCRIPT
-    fi
-}
+check_mount() { findmnt "$HOME/Private" >/dev/null && findmnt "/mnt/second" >/dev/null && findmnt "/mnt/second/videos" >/dev/null || $MOUNT_SCRIPT; }
 
 check_unmount() {
     if findmnt "$HOME/Private" >/dev/null || findmnt "/mnt/second/videos" >/dev/null; then
         return
     else
-        findmnt "$HOME/Private" >/dev/null && findmnt "/mnt/second" >/dev/null && $MOUNT_SCRIPT
+        findmnt "$HOME/Private" >/dev/null && findmnt "/mnt/second/videos" >/dev/null && $MOUNT_SCRIPT
     fi
 }
 
@@ -26,16 +20,21 @@ play_url() {
 }
 
 play_media() {
-    if echo "$1" | grep -q "/home/$USER/Private" || echo "$1" | grep -q "/mnt/second"; then
+    if echo "$1" | grep -q ".*\.m3u$"; then
+        playlist_file="${1#--playlist=}"
+        if grep -q "/home/$USER/Private" "$playlist_file" || grep -q "/mnt/second/videos" "$playlist_file"; then
+            mpv "$@" && check_unmount || exit
+        else
+            $MOUNT_SCRIPT && mpv "$@" || exit
+        fi
+    elif echo "$1" | grep -q "/home/$USER/Private" || echo "$1" | grep -q "/mnt/second/videos"; then
         mpv "$@" && check_unmount || exit
     else
-        check_unmount && mpv "$@" || exit
+        $MOUNT_SCRIPT && mpv "$@" || exit
     fi
 }
 
-play_playlist() {
-    play_media "--playlist=$1"
-}
+play_playlist() { play_media "--playlist=$1"; }
 
 tmp_playlist() {
     playlistdir="$HOME/.config/mpv/playlists"
