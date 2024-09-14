@@ -143,5 +143,14 @@ return {
 			inactive_winbar = {},
 			extensions = {},
 		})
+
+		local lualine_hidden = true
+		vim.keymap.set({ "n", "v" }, "<leader>tL", function()
+			lualine_hidden = not lualine_hidden
+			require("lualine").hide({
+				place = { "statusline", "tabline", "winbar" },
+				unhide = lualine_hidden,
+			})
+		end, { desc = "Toggle lualine" })
 	end,
 }
