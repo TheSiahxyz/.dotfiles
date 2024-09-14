@@ -330,6 +330,7 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 -- Recompile dwmblocks on config edit.
 local home = os.getenv("HOME") -- Gets the home directory
 vim.api.nvim_create_augroup("SucklessConfigGroup", { clear = true })
+vim.api.nvim_create_augroup("SucklessDocGroup", { clear = true })
 
 vim.api.nvim_create_autocmd("BufWritePost", {
 	pattern = home .. "/.local/src/suckless/dmenu/config.h",
@@ -372,6 +373,14 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 	group = "SucklessConfigGroup",
 	callback = function()
 		vim.cmd("silent !extractkeys")
+	end,
+})
+
+vim.api.nvim_create_autocmd("BufWritePost", {
+	pattern = home .. "/.local/src/suckless/dwm/thesiah-default.mom",
+	group = "SucklessDocGroup",
+	callback = function()
+		vim.cmd("silent !cd " .. home .. "/.local/src/suckless/dwm/ && rm -f thesiah.mom")
 	end,
 })
 
