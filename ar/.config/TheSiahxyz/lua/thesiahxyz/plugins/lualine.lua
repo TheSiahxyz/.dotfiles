@@ -2,6 +2,7 @@ return {
 	"nvim-lualine/lualine.nvim",
 	dependencies = { "nvim-tree/nvim-web-devicons" },
 	config = function()
+		local navic = require("nvim-navic")
 		require("lualine").setup({
 			options = {
 				icons_enabled = true,
@@ -40,8 +41,8 @@ return {
 					{
 						"filename",
 						file_status = true, -- Displays file status (readonly status, modified status)
-						newfile_status = false, -- Display new file status (new file means no write after created)
-						path = 3, -- 0: Just the filename
+						newfile_status = true, -- Display new file status (new file means no write after created)
+						path = 2, -- 0: Just the filename
 						-- 1: Relative path
 						-- 2: Absolute path
 						-- 3: Absolute path, with tilde as the home directory
@@ -52,8 +53,8 @@ return {
 						symbols = {
 							modified = "[+]", -- Text to show when the file is modified.
 							readonly = "[-]", -- Text to show when the file is non-modifiable or readonly.
-							unnamed = "[No Name]", -- Text to show for unnamed buffers.
-							newfile = "[New]", -- Text to show for newly created file before first write
+							unnamed = "[?]", -- Text to show for unnamed buffers.
+							newfile = "[*]", -- Text to show for newly created file before first write
 						},
 					},
 				},
@@ -69,7 +70,7 @@ return {
 						-- Icon string ^ in table is ignored in filetype component
 					},
 				},
-				lualine_y = { "progress", "location" },
+				lualine_y = { "progress" },
 				lualine_z = {
 					{
 						"datetime",
@@ -77,20 +78,67 @@ return {
 					},
 				},
 			},
-			inactive_sections = {
-				lualine_a = {},
-				lualine_b = {},
-				lualine_c = { "filename", "location" },
-				lualine_x = {
+			inactive_sections = {},
+			tabline = {
+				lualine_a = {
 					{
-						"datetime",
-						style = "%H:%M",
+						"buffers",
+						icons_enabled = false, -- Enables the display of icons alongside the component.
+						separator = nil, -- Determines what separator to use for the component.
+						draw_empty = false, -- Whether to draw component even if it's empty.
+						padding = { left = 1, right = 0 },
+						show_filename_only = true, -- Shows shortened relative path when set to false.
+						hide_filename_extension = false, -- Hide filename extension when set to true.
+						show_modified_status = true, -- Shows indicator when the buffer is modified.
+
+						mode = 1, -- 0: Shows buffer name
+						-- 1: Shows buffer index
+						-- 2: Shows buffer name + buffer index
+						-- 3: Shows buffer number
+						-- 4: Shows buffer name + buffer number
+
+						max_length = vim.o.columns * 2 / 3, -- Maximum width of buffers component,
+						-- it can also be a function that returns
+						-- the value of `max_length` dynamically.
+						filetype_names = {
+							TelescopePrompt = "Telescope",
+							dashboard = "Dashboard",
+							packer = "Packer",
+							fzf = "FZF",
+							alpha = "Alpha",
+						}, -- Shows specific buffer name for that filetype ( { `filetype` = `buffer_name`, ... } )
+
+						-- Automatically updates active buffer color to match color of other components (will be overidden if buffers_color is set)
+						use_mode_colors = false,
+
+						buffers_color = {
+							-- Same values as the general color option can be used here.
+							-- active = "lualine_{section}_normal", -- Color for active buffer.
+							-- inactive = "lualine_{section}_inactive", -- Color for inactive buffer.
+						},
+
+						symbols = {
+							modified = "●", -- Text to show when the buffer is modified
+							alternate_file = "", -- Text to show to identify the alternate file
+							directory = "", -- Text to show when the buffer is a directory
+						},
 					},
 				},
+				lualine_b = {
+					{
+						function()
+							return navic.get_location()
+						end,
+						cond = function()
+							return navic.is_available()
+						end,
+					},
+				},
+				lualine_c = {},
+				lualine_x = {},
 				lualine_y = {},
 				lualine_z = {},
 			},
-			tabline = {},
 			winbar = {},
 			inactive_winbar = {},
 			extensions = {},

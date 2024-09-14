@@ -1,12 +1,9 @@
 return {
-	"LunarVim/breadcrumbs.nvim",
+	"SmiteshP/nvim-navic",
 	dependencies = {
-		{
-			"SmiteshP/nvim-navic",
-		},
+		"neovim/nvim-lspconfig",
 	},
 	config = function()
-		require("breadcrumbs").setup()
 		require("nvim-navic").setup({
 			icons = {
 				File = "󰈙 ",
@@ -42,7 +39,7 @@ return {
 			},
 			highlight = true,
 			separator = " > ",
-			depth_limit = 0,
+			depth_limit = 5,
 			depth_limit_indicator = "..",
 			safe_output = true,
 			lazy_update_context = false,

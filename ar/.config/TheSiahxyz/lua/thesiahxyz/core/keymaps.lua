@@ -35,12 +35,12 @@ vim.keymap.set("n", "<leader>cp", function()
 		vim.cmd("silent !" .. cmd)
 		vim.cmd("silent edit " .. new_filename)
 	end
-end, { desc = "Copy current file" })
+end, { silent = true, desc = "Copy current file" })
 vim.keymap.set(
 	"n",
 	"<leader>cP",
 	':let @+ = expand("%:p")<cr>:lua print("Copied path to: " .. vim.fn.expand("%:p"))<cr>',
-	{ desc = "Copy current file name and path", silent = false }
+	{ desc = "Copy current file name and path" }
 )
 
 -- Remove
@@ -139,9 +139,9 @@ vim.keymap.set("v", "<C-r>", '"hy:%s/\\v<C-r>h//g<left><left>', { desc = "Change
 
 -- Cd
 vim.keymap.set("n", "<leader>cd", ":cd %:p:h<cr>:pwd<cr>", { desc = "Go to current file path" })
-vim.keymap.set("n", "<leader>cD", function()
+vim.keymap.set("n", "<leader>CD", function()
 	local realpath = vim.fn.systemlist("readlink -f " .. vim.fn.shellescape(vim.fn.expand("%:p")))[1]
-	vim.cmd("silent cd " .. vim.fn.fnameescape(vim.fn.fnamemodify(realpath, ":h")))
+	vim.cmd("cd " .. vim.fn.fnameescape(vim.fn.fnamemodify(realpath, ":h")))
 	vim.cmd("pwd")
 end, { desc = "Go to real path of current file" })
 vim.keymap.set("n", "<leader>..", ":cd ..<cr>:pwd<cr>", { desc = "Go to current file path" })
