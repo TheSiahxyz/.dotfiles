@@ -6,7 +6,7 @@ readme_file="${XDG_DATA_HOME:-${HOME}/.local/share}/thesiah/thesiah.mom"
 output_file="$path.mom"
 temp_file_before="$path.tmp.before"
 temp_file_after="$path.tmp.after"
-start_phrase=".HEADING 2 \"Suckless Programs\""
+start_phrase='When config.h in dwm and st is saved, key bindings will be extracted and updated below.'
 end_phrase=".HEADING 2 \"Other buttons\""
 
 [ -f "$path.mom" ] && source_file="$path.mom" || source_file="$path-default.mom"
@@ -34,41 +34,41 @@ EOF
 
 # Process each configuration file and append content
 for file_path in "${config_files[@]}"; do
-	project_name=$(basename "$(dirname "$file_path")")
-	project_name=${project_name^^}
+    project_name=$(basename "$(dirname "$file_path")")
+    project_name=${project_name^^}
 
-	echo ".HEADING 3 \"$project_name\"" >>"$temp_file_before"
-	echo ".LI" >>"$temp_file_before"
+    echo ".HEADING 3 \"$project_name\"" >>"$temp_file_before"
+    echo ".LI" >>"$temp_file_before"
 
-	awk 'BEGIN {flag=0} /static[[:space:]]+(const[[:space:]]+)?(Key|Shortcut|Command|Button)[[:space:]]+(keys|cmdkeys|shortcuts|commands|buttons)[[:space:]]*\[\][[:space:]]*=[[:space:]]*{/ {flag=1} /\};/ {flag=0} flag' "$file_path" | while read -r line; do
-		if [[ "$line" =~ \/\*.*\*\/ || "$line" =~ .*\"\\.* || "$line" =~ ^$ || "$line" =~ STACKKEYS || "$line" =~ TAGKEYS || "$line" =~ static\ Key\ cmdkeys || "$line" =~ ^\#.* ]]; then
-			continue
-		fi
+    awk 'BEGIN {flag=0} /static[[:space:]]+(const[[:space:]]+)?(Key|Shortcut|Command|Button)[[:space:]]+(keys|cmdkeys|shortcuts|commands|buttons)[[:space:]]*\[\][[:space:]]*=[[:space:]]*{/ {flag=1} /\};/ {flag=0} flag' "$file_path" | while read -r line; do
+        if [[ "$line" =~ \/\*.*\*\/ || "$line" =~ .*\"\\.* || "$line" =~ ^$ || "$line" =~ STACKKEYS || "$line" =~ TAGKEYS || "$line" =~ static\ Key\ cmdkeys || "$line" =~ ^\#.* ]]; then
+            continue
+        fi
 
-		if [[ "$line" =~ ^\/\/.* ]]; then
-			echo ".LIST OFF" >>"$temp_file_before"
-			line=$(echo "$line" | sed -e 's/\/\/\s*//g' | awk '{for (i=1; i<=NF; i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2)); print}')
-			output_line=".HEADING 5 \"$line\""
-			echo "$output_line" >>"$temp_file_before"
-			echo ".LI" >>"$temp_file_before"
-			continue
-		fi
+        if [[ "$line" =~ ^\/\/.* ]]; then
+            echo ".LIST OFF" >>"$temp_file_before"
+            line=$(echo "$line" | sed -e 's/\/\/\s*//g' | awk '{for (i=1; i<=NF; i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2)); print}')
+            output_line=".HEADING 5 \"$line\""
+            echo "$output_line" >>"$temp_file_before"
+            echo ".LI" >>"$temp_file_before"
+            continue
+        fi
 
-		if [[ "$line" =~ static\ const|static\ Shortcut ]]; then
-			echo ".LIST OFF" >>"$temp_file_before"
-			output_line=".HEADING 4 \"INSERT MODE\""
-			echo "$output_line" >>"$temp_file_before"
-			echo ".LI" >>"$temp_file_before"
-			continue
-		fi
+        if [[ "$line" =~ static\ const|static\ Shortcut ]]; then
+            echo ".LIST OFF" >>"$temp_file_before"
+            output_line=".HEADING 4 \"INSERT MODE\""
+            echo "$output_line" >>"$temp_file_before"
+            echo ".LI" >>"$temp_file_before"
+            continue
+        fi
 
-		if [[ "$line" =~ static\ Command ]]; then
-			echo ".LIST OFF" >>"$temp_file_before"
-			output_line=".HEADING 4 \"COMMAND MODE\""
-			echo "$output_line" >>"$temp_file_before"
-			echo ".LI" >>"$temp_file_before"
-			continue
-		fi
+        if [[ "$line" =~ static\ Command ]]; then
+            echo ".LIST OFF" >>"$temp_file_before"
+            output_line=".HEADING 4 \"COMMAND MODE\""
+            echo "$output_line" >>"$temp_file_before"
+            echo ".LI" >>"$temp_file_before"
+            continue
+        fi
 
         line=$(echo $line | sed -e "s/^{ \(.*\) },/\1/g;s/{ \([^,]*\), \([^,]*\), \([^,]*\), \([^}]*\) }/\1 \2 \3 \4/g")
         modkey=$(echo "$line" | awk -F',' '{print $1}' | sed "s/\b0//g;s/MODKEY\(\d*\)/MOD\1/g;s/\([Shift|Contrl]\)Mask/\1/g;s/Control/Ctrl/g;s/|/+/g;s/ //g")
@@ -100,29 +100,28 @@ for file_path in "${config_files[@]}"; do
                                                        s/^\s*//g;
                                                        /^\s*0\s*$/d
                                                        ')
-                                                        
 
         # args=$(echo "$line" | cut -d',' -f4- | sed "s/\.v = (const char \*\[\])//g;s/{\s*\.v = (int \[\])//g;s/SHCMD(\(.*\))/\1/g;s/\.. = //g")
 
-		if [[ -z "$modkey" ]]; then
+        if [[ -z "$modkey" ]]; then
             if [[ -z $func ]]; then
                 output_line="\\f(CW${key}\\fP \\(en ${args}"
             else
                 output_line="\\f(CW${key}\\fP \\(en ${func} ${args}"
             fi
-		else
+        else
             if [[ -z $func ]]; then
                 output_line="\\f(CW${modkey}+${key}\\fP \\(en ${args}"
             else
                 output_line="\\f(CW${modkey}+${key}\\fP \\(en ${func} ${args}"
             fi
-		fi
+        fi
 
-		echo ".ITEM" >>"$temp_file_before"
-		echo "$output_line" >>"$temp_file_before"
-	done
+        echo ".ITEM" >>"$temp_file_before"
+        echo "$output_line" >>"$temp_file_before"
+    done
 
-	echo ".LIST OFF" >>"$temp_file_before"
+    echo ".LIST OFF" >>"$temp_file_before"
 done
 
 # Append the latter part of the document that follows the end marker
