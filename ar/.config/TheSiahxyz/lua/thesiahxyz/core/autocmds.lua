@@ -207,13 +207,17 @@ autocmd("LspAttach", {
 
 -- Save file as sudo on files that require root permission
 vim.api.nvim_create_user_command("SudoWrite", function()
-	vim.cmd("write !sudo tee % >/dev/null")
-	vim.cmd("edit!")
+	vim.cmd([[
+        write !sudo tee % >/dev/null
+        edit!
+    ]])
 end, {})
 vim.api.nvim_create_user_command("SudoWritequit", function()
-	vim.cmd("write !sudo tee % >/dev/null")
-	vim.cmd("edit!")
-	vim.cmd("quit!")
+	vim.cmd([[
+        write !sudo tee % >/dev/null
+        edit!
+        quit!
+    ]])
 end, {})
 
 -- Enable Goyo by default for mutt writing
@@ -223,13 +227,15 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
 	group = goyo_group,
 	callback = function()
 		vim.g.goyo_width = 80
-		vim.cmd("Goyo")
-		vim.cmd("set bg=light")
-		vim.cmd("set linebreak")
-		vim.cmd("set wrap")
-		vim.cmd("set textwidth=0")
-		vim.cmd("set wrapmargin=0")
-		vim.cmd("colorscheme seoul256")
+		vim.cmd([[
+            Goyo
+            set bg=light
+            set linebreak
+            set wrap
+            set textwidth=0
+            set wrapmargin=0
+            colorscheme seoul256
+        ]])
 		vim.api.nvim_buf_set_keymap(
 			0,
 			"n",
@@ -271,7 +277,16 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
 -- Groff for specific file extensions
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
 	pattern = { "*.ms", "*.me", "*.mom", "*.man" },
-	command = "set filetype=groff",
+	callback = function()
+		vim.cmd([[
+            set columns=90
+			set filetype=groff
+			set linebreak
+			set textwidth=0
+			set wrap
+			set wrapmargin=0
+		]])
+	end,
 })
 
 -- TeX for .tex files
