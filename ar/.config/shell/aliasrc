@@ -379,18 +379,13 @@ alias tm='tmux'
 alias tmc="tmux new -s $(basename $PWD)"
 
 # tmuxinator
-alias ti='tmuxinator'
-alias tic='tmuxinator config'
 alias tid='tmuxinator delete'
+alias tiD='tmuxinator implode'
 alias til='tmuxinator list'
 alias tin='tmuxinator new'
-alias tio='tmuxinator obsidian'
-alias tipv='tmuxinator private'
-alias tipb='tmuxinator public'
-alias tir='tit && tic && tio && tipv && tipb && tiw'
 alias tis='tmuxinator start'
+alias tio='tmuxinator stop'
 alias tit='tmuxinator terminal'
-alias tiw='tmuxinator work'
 
 # transmission-remote
 alias trem='transmission-remote'
