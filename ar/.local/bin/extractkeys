@@ -39,9 +39,9 @@ for file_path in "${config_files[@]}"; do
 
     echo ".HEADING 3 \"$project_name\"" >>"$temp_file_before"
     if [ "$project_name" == "DWM" ]; then
-        printf ".PP\nTheSiah's window manager. I do not use a desktop environment.\n" >>"$temp_file_before"
+        printf ".PP\nTHESIAH's window manager. I do not use a desktop environment.\n" >>"$temp_file_before"
     elif [ "$project_name" == "ST" ]; then
-        printf ".PP\nTheSiah's default terminal in C. It is light, configurable, and fast.\n" >>"$temp_file_before"
+        printf ".PP\nTHESIAH's default terminal in C. It is light, configurable, and fast.\n" >>"$temp_file_before"
     fi
     echo ".LI" >>"$temp_file_before"
 
