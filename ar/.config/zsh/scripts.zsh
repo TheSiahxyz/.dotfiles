@@ -462,6 +462,14 @@ function tms() {
     tmux switch-client -t "$session"
 }
 
+function tit() {
+    command -v gem >/dev/null || { echo "gem is not installed." && exit; }
+    command -v tmuxinator >/dev/null && tmuxinator terminal || {
+        gem install tmuxinator >/dev/null
+        command -v erb >/dev/null || gem install erb >/dev/null
+    }
+}
+
 
 ###########################################################################################
 ###########################################################################################

@@ -385,7 +385,6 @@ alias til='tmuxinator list'
 alias tin='tmuxinator new'
 alias tis='tmuxinator start'
 alias tio='tmuxinator stop'
-alias tit='tmuxinator terminal'
 
 # transmission-remote
 alias trem='transmission-remote'
