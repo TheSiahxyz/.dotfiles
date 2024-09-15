@@ -221,10 +221,9 @@ vim.api.nvim_create_user_command("SudoWritequit", function()
 end, {})
 
 -- Enable Goyo by default for mutt writing
-local goyo_group = vim.api.nvim_create_augroup("GoyoForMutt", { clear = true })
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
 	pattern = "/tmp/neomutt*",
-	group = goyo_group,
+	group = augroup("goyo_setting"),
 	callback = function()
 		vim.g.goyo_width = 80
 		vim.cmd([[
@@ -296,10 +295,9 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
 })
 
 -- When shortcut files are updated, renew bash and lf configs with new material:
-local config_group = vim.api.nvim_create_augroup("ConfigUpdate", { clear = true })
 vim.api.nvim_create_autocmd("BufWritePost", {
 	pattern = { "bm-files", "bm-dirs" },
-	group = config_group,
+	group = augroup("config_group"),
 	callback = function()
 		-- Execute the 'shortcuts' shell command
 		local result = vim.fn.system("shortcuts")
@@ -314,14 +312,14 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 -- Run xrdb whenever Xdefaults or Xresources are updated.
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
 	pattern = { "Xresources", "Xdefaults", "xresources", "xdefaults" },
-	group = config_group,
+	group = augroup("config_group"),
 	callback = function()
 		vim.bo.filetype = "xdefaults"
 	end,
 })
 vim.api.nvim_create_autocmd("BufWritePost", {
 	pattern = { "Xresources", "Xdefaults", "xresources", "xdefaults" },
-	group = config_group,
+	group = augroup("config_group"),
 	callback = function()
 		vim.cmd("silent !xrdb %")
 	end,
@@ -329,12 +327,9 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 
 -- Recompile dwmblocks on config edit.
 local home = os.getenv("HOME") -- Gets the home directory
-vim.api.nvim_create_augroup("SucklessConfigGroup", { clear = true })
-vim.api.nvim_create_augroup("SucklessDocGroup", { clear = true })
-
 vim.api.nvim_create_autocmd("BufWritePost", {
 	pattern = home .. "/.local/src/suckless/dmenu/config.h",
-	group = "SucklessConfigGroup",
+	group = augroup("suckless_config"),
 	callback = function()
 		vim.cmd("silent !cd " .. home .. "/.local/src/suckless/dmenu/ && sudo make install")
 	end,
@@ -342,7 +337,7 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 
 vim.api.nvim_create_autocmd("BufWritePost", {
 	pattern = home .. "/.local/src/suckless/dwmblocks/config.h",
-	group = "SucklessConfigGroup",
+	group = augroup("suckless_config"),
 	callback = function()
 		vim.cmd(
 			"silent !cd "
@@ -354,7 +349,7 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 
 vim.api.nvim_create_autocmd("BufWritePost", {
 	pattern = home .. "/.local/src/suckless/slock/config.h",
-	group = "SucklessConfigGroup",
+	group = augroup("suckless_config"),
 	callback = function()
 		vim.cmd("silent !cd " .. home .. "/.local/src/suckless/slock/ && sudo make install")
 	end,
@@ -362,7 +357,7 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 
 vim.api.nvim_create_autocmd("BufWritePost", {
 	pattern = home .. "/.local/src/suckless/dwm/config.h",
-	group = "SucklessConfigGroup",
+	group = augroup("suckless_config"),
 	callback = function()
 		vim.cmd("silent !extractkeys")
 	end,
@@ -370,7 +365,7 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 
 vim.api.nvim_create_autocmd("BufWritePost", {
 	pattern = home .. "/.local/src/suckless/st/config.h",
-	group = "SucklessConfigGroup",
+	group = augroup("suckless_config"),
 	callback = function()
 		vim.cmd("silent !extractkeys")
 	end,
@@ -378,7 +373,7 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 
 vim.api.nvim_create_autocmd("BufWritePost", {
 	pattern = home .. "/.local/src/suckless/dwm/thesiah-default.mom",
-	group = "SucklessDocGroup",
+	group = augroup("suckless_doc"),
 	callback = function()
 		vim.cmd("silent !cd " .. home .. "/.local/src/suckless/dwm/ && rm -f thesiah.mom")
 	end,
