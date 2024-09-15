@@ -19,7 +19,8 @@ vim.keymap.set({ "i", "n" }, "<esc>", "<cmd>noh<cr><esc>", { desc = "Clear searc
 
 -- Copy
 vim.keymap.set("n", "<leader>cp", function()
-	local filename = vim.fn.expand("%") -- Get the current filename
+	local filepath = vim.fn.expand("%") -- Get the current filepath
+	local filename = vim.fn.expand("%:t") -- Get the current filename
 	local file_root = vim.fn.expand("%:r") -- Get the file root (without extension)
 	local file_ext = vim.fn.expand("%:e") -- Get the file extension
 	local new_filename = file_root .. "_copied" -- Start with the base for new filename
@@ -29,8 +30,8 @@ vim.keymap.set("n", "<leader>cp", function()
 		num = num + 1
 	end
 	new_filename = new_filename .. "." .. file_ext
-	local cmd = "cp " .. filename .. " " .. new_filename
-	local confirm = vim.fn.input("Are you sure you want to copy " .. filename .. "? (y/n): ")
+	local cmd = "cp " .. filepath .. " " .. new_filename
+	local confirm = vim.fn.input('Do you want to copy "' .. filename .. '"? (y/n): ')
 	if confirm:lower() == "y" then
 		vim.cmd("silent !" .. cmd)
 		vim.cmd("silent edit " .. new_filename)
@@ -45,11 +46,12 @@ vim.keymap.set(
 
 -- Remove
 vim.keymap.set("n", "<leader>rm", function()
-	local filename = vim.fn.expand("%")
-	if vim.fn.filereadable(filename) == 1 then
-		local confirm = vim.fn.input("Are you sure you want to delete " .. filename .. "? (y/n): ")
+	local filepath = vim.fn.expand("%")
+	local filename = vim.fn.expand("%:t")
+	if vim.fn.filereadable(filepath) == 1 then
+		local confirm = vim.fn.input('Do you want to delete "' .. filename .. '"? (y/n): ')
 		if confirm:lower() == "y" then
-			vim.cmd("silent !rm " .. filename)
+			vim.cmd("silent !rm " .. filepath)
 			vim.cmd("bd!")
 		end
 	end
