@@ -88,7 +88,7 @@ return {
 						draw_empty = false, -- Whether to draw component even if it's empty.
 						padding = { left = 1, right = 0 },
 						show_filename_only = true, -- Shows shortened relative path when set to false.
-						hide_filename_extension = false, -- Hide filename extension when set to true.
+						hide_filename_extension = true, -- Hide filename extension when set to true.
 						show_modified_status = true, -- Shows indicator when the buffer is modified.
 
 						mode = 1, -- 0: Shows buffer name
@@ -118,7 +118,7 @@ return {
 						},
 
 						symbols = {
-							modified = "●", -- Text to show when the buffer is modified
+							modified = "● ", -- Text to show when the buffer is modified
 							alternate_file = "", -- Text to show to identify the alternate file
 							directory = "", -- Text to show when the buffer is a directory
 						},
