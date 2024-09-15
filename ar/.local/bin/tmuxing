@@ -1,0 +1,15 @@
+#!/bin/sh
+
+create_new_session() {
+    printf "Enter a name for the new session: "
+    read -r session_name
+    tmux new -s "$session_name"
+}
+
+! tmux ls >/dev/null 2>&1 && create_new_session && exit 0
+session=$( (
+    tmux ls
+    echo "[new session]"
+) | fzf | cut -d: -f1)
+[ -z "$session" ] && exit 0
+[ "$session" = "[new session]" ] && create_new_session || tmux attach -t "$session"

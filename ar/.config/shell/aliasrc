@@ -371,12 +371,12 @@ alias ttf='tar -tf'
 
 # tmux
 alias sts="tmux source $XDG_CONFIG_HOME/tmux/tmux.conf"
-alias tm='tmux'
+alias tm="tmuxing"
 alias tma='tmux a'
-alias tmc="tmux new -s $(basename $PWD)"
 alias tmka='tmux kill-session -a'
 alias tmls='tmux ls'
 alias tmpk='pkill tmux'
+alias tm.="tmux new -s $(basename $PWD)"
 
 # transmission-remote
 alias trem='transmission-remote'
