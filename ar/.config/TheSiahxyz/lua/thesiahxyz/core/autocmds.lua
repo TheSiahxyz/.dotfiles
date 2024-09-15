@@ -1,5 +1,5 @@
 local function augroup(name)
-	return vim.api.nvim_create_augroup("thesiahxyz_" .. name, { clear = true })
+	return vim.api.nvim_create_augroup("TheSiahxyz_" .. name, { clear = true })
 end
 
 local autocmd = vim.api.nvim_create_autocmd
@@ -355,19 +355,20 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 	end,
 })
 
+local suckless_keys = augroup("suckless_keys")
 vim.api.nvim_create_autocmd("BufWritePost", {
 	pattern = home .. "/.local/src/suckless/dwm/config.h",
-	group = augroup("suckless_config"),
+	group = suckless_keys,
 	callback = function()
-		vim.cmd("silent !extractkeys")
+		vim.cmd("silent !" .. home .. "/.local/bin/extractkeys")
 	end,
 })
 
 vim.api.nvim_create_autocmd("BufWritePost", {
 	pattern = home .. "/.local/src/suckless/st/config.h",
-	group = augroup("suckless_config"),
+	group = suckless_keys,
 	callback = function()
-		vim.cmd("silent !extractkeys")
+		vim.cmd("silent !" .. home .. "/.local/bin/extractkeys")
 	end,
 })
 
