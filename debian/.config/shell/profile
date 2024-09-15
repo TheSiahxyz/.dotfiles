@@ -176,7 +176,6 @@ export STARSHIP_CONFIG="$XDG_CONFIG_HOME/starship/starship.toml"
 
 ### --- TMUX --- ###
 export TMUX_TMPDIR="$XDG_RUNTIME_DIR"
-export TMUXINATOR_CONFIG="$XDG_CONFIG_HOME/tmuxinator/"
 
 ### --- UNISON --- ###
 export UNISON="$XDG_DATA_HOME/unison"

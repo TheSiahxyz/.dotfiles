@@ -21,7 +21,6 @@ cnp             ${XDG_CONFIG_HOME:-${HOME}/.config}/ncmpcpp
 cns             ${XDG_CONFIG_HOME:-${HOME}/.config}/newsboat
 cnv             ${XDG_CONFIG_HOME:-${HOME}/.config}/nvim
 csh             ${XDG_CONFIG_HOME:-${HOME}/.config}/shell
-cti             ${XDG_CONFIG_HOME:-${HOME}/.config}/tmuxinator
 ctp             ${XDG_CONFIG_HOME:-${HOME}/.config}/tmux/plugins
 cts             ${XDG_CONFIG_HOME:-${HOME}/.config}/TheSiahxyz/lua/thesiahxyz
 ctt             ${XDG_CONFIG_HOME:-${HOME}/.config}/transmission-daemon

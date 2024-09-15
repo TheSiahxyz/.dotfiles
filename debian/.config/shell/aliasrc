@@ -16,16 +16,16 @@ done
 unset command
 
 case "$(readlink -f /sbin/init)" in
-    *systemd*)
-        # journal
-        alias j="journalctl -xe"
-        # pipewire
-        alias rpi="systemctl --user restart wireplumber pipewire pipewire-pulse pipewire-jack"
-        # systemctl
-        alias s="systemctl"
-        # timedatectl
-        alias t="timedatectl"
-        ;;
+*systemd*)
+    # journal
+    alias j="journalctl -xe"
+    # pipewire
+    alias rpi="systemctl --user restart wireplumber pipewire pipewire-pulse pipewire-jack"
+    # systemctl
+    alias s="systemctl"
+    # timedatectl
+    alias t="timedatectl"
+    ;;
 esac
 
 # Go back
@@ -95,7 +95,7 @@ alias du='du -sh'
 #     passwd="$(printf '%s' "$(pass show encryption/ecryptfs)")""
 
 # eza
-[ -x "$(command -v eza)" ] && { 
+[ -x "$(command -v eza)" ] && {
     alias l="eza --icons --group-directories-first"
     alias la="eza --icons -aa --group-directories-first"
     alias lh="eza --icons -aa --group-directories-first"
@@ -128,7 +128,7 @@ alias du='du -sh'
     alias ltd="eza --icons -TD -L"
     alias ltdr="eza --icons -TDr -L"
     alias ltr="eza --icons -Tr -L"
-} || { 
+} || {
     alias l="/usr/bin/ls -h --color=always --group-directories-first"
     alias la="/usr/bin/ls -alh --color=always --group-directories-first"
     alias ll="/usr/bin/ls -Fls --color=always --group-directories-first"
@@ -240,7 +240,7 @@ alias scim="sc-im"
 # scp
 alias scp="scp -r"
 
-# setxkbmap 
+# setxkbmap
 alias RM="setxkbmap -option"
 
 # sha1
@@ -275,19 +275,6 @@ alias tmka="tmux kill-session -a"
 alias tml="tmux ls"
 alias tm="tmux"
 alias tmc="tmux new -s (pwd | sed 's/.*\///g')"
-
-# tmuxinator
-alias tid="tmuxinator delete"
-alias til="tmuxinator list"
-alias tis="tmuxinator start"
-alias tic="tmuxinator config"
-alias tio="tmuxinator obsidian"
-alias tipv="tmuxinator private"
-alias tipb="tmuxinator public"
-alias tiw="tmuxinator work"
-alias tin="tmuxinator new"
-alias ti="tmuxinator"
-alias tir="txo && txp && txw"
 
 # transmission-remote
 alias trem="transmission-remote"
