@@ -184,7 +184,7 @@ function docrmi() {
 # files in root
 function ff() {
     local file
-    file=$(find "$HOME" -type f 2>/dev/null | fzf) && nvim "$file"
+    file=$(find "$HOME" -type f >/dev/null 2>&1 | fzf) && nvim "$file"
 }
 
 # files in sub
@@ -195,7 +195,7 @@ function fF() {
 
 # directory
 function fD() {
-    cd $(find "$HOME" -type d 2>/dev/null | fzf)
+    cd $(find "$HOME" -type d >/dev/null 2>&1 | fzf)
 }
 
 # search bin
@@ -213,7 +213,7 @@ function fdot() {
     process_and_append() {
         local dir="$1"
         git -C "$dir" fetch --quiet
-        if [ -n "$(git -C "$dir" status --porcelain 2>/dev/null)" ]; then
+        if [ -n "$(git -C "$dir" status --porcelain >/dev/null 2>&1)" ]; then
             search_dirs+=("+ $dir")
         elif [ "$(git -C "$dir" rev-parse @)" != "$(git -C "$dir" rev-parse @{u})" ] && [ "$(git -C "$dir" rev-parse @)" = "$(git -C "$dir" merge-base @ @{u})" ]; then
             search_dirs+=("! $dir")
@@ -232,7 +232,7 @@ function fdot() {
         if [ -d "$git_dir" ]; then
             find "$git_dir" -mindepth 1 -maxdepth 1 -type d -print0 | xargs -0 -I{} -P 8 zsh -c '
                 git -C "$0" fetch --quiet
-                if [ -n "$(git -C "$0" status --porcelain 2>/dev/null)" ]; then
+                if [ -n "$(git -C "$0" status --porcelain >/dev/null 2>&1)" ]; then
                     echo "+ $0"
                 elif [ "$(git -C "$0" rev-parse @)" != "$(git -C "$0" rev-parse @{u})" ] && [ "$(git -C "$0" rev-parse @)" = "$(git -C "$0" merge-base @ @{u})" ]; then
                     echo "! $0"
@@ -241,7 +241,7 @@ function fdot() {
                 fi
             ' {} | while IFS= read -r selected_git; do
                 search_dirs+=("$selected_git")
-            done 2>/dev/null
+            done >/dev/null 2>&1
         fi
     done
 
@@ -448,9 +448,9 @@ function tmk() {
 function tmn() {
     [[ -n "$TMUX" ]] && change="switch-client" || change="attach-session"
     if [ $1 ]; then
-        tmux $change -t "$1" 2>/dev/null || (tmux new-session -d -s $1 && tmux $change -t "$1"); return
+        tmux $change -t "$1" >/dev/null 2>&1 || (tmux new-session -d -s $1 && tmux $change -t "$1"); return
     fi
-    session=$(tmux list-sessions -F "#{session_name}" 2>/dev/null | fzf --cycle --exit-0) &&  tmux $change -t "$session" || echo "No sessions found."
+    session=$(tmux list-sessions -F "#{session_name}" >/dev/null 2>&1 | fzf --cycle --exit-0) &&  tmux $change -t "$session" || echo "No sessions found."
 }
 
 # select
