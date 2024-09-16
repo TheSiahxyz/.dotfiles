@@ -4,3 +4,5 @@
 # Stores disabled crontabs in ~/.config/crons until restored.
 
 ([ -f "${XDG_CONFIG_HOME:-$HOME/.config}"/crons ] && crontab - <"${XDG_CONFIG_HOME:-$HOME/.config}"/crons && rm "${XDG_CONFIG_HOME:-$HOME/.config}"/crons && notify-send "🕓 Cronjobs re-enabled.") || (crontab -l >"${XDG_CONFIG_HOME:-$HOME/.config}"/crons && crontab -r && notify-send "🕓 Cronjobs saved and disabled.")
+
+pkill -RTMIN+1 "${STATUSBAR:-dwmblocks}"
