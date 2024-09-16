@@ -263,7 +263,7 @@ vim.keymap.set("t", "<C-h>", "<cmd>wincmd h<cr>", { desc = "Move to left window"
 vim.keymap.set("t", "<C-j>", "<cmd>wincmd j<cr>", { desc = "Move to window below" })
 vim.keymap.set("t", "<C-k>", "<cmd>wincmd k<cr>", { desc = "Move to window above" })
 vim.keymap.set("t", "<C-l>", "<cmd>wincmd l<cr>", { desc = "Move to right window" })
-vim.keymap.set("t", "<C-_>", "<cmd>close<cr>", { desc = "Close terminal" })
+vim.keymap.set("t", "<C-\\>", "<cmd>close<cr>", { desc = "Close terminal" })
 
 -- Tmux
 vim.keymap.set("n", "<C-h>", "<C-w><C-h>", { desc = "Move to left window" })
