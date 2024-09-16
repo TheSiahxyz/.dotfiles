@@ -132,7 +132,6 @@ local wk = require("which-key")
 wk.add({
 	mode = { "n", "v", "x" },
 	{ "<leader>ct", group = "Copy" },
-	{ "<leader>h", group = "Header" },
 	{ "<leader>i", group = "Image" },
 	{ "<leader>m", group = "Markdown" },
 })

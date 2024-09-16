@@ -13,13 +13,14 @@ return {
 		local wk = require("which-key")
 		wk.add({
 			mode = { "n" },
+			{ "<leader>h", group = "Harpoon" },
 			{ "<M-x>", group = "Harpoon list delete" },
 		})
 	end,
 	keys = function()
 		local keys = {
 			{
-				"<C-q>",
+				"<leader>a",
 				function()
 					require("harpoon"):list():add()
 				end,
@@ -57,9 +58,15 @@ return {
 				end,
 				desc = "Harpoon list " .. i,
 			})
-
 			table.insert(keys, {
-				"<leader>" .. i,
+				"<leader>h" .. i,
+				function()
+					require("harpoon"):list():select(i)
+				end,
+				desc = "Harpoon list " .. i,
+			})
+			table.insert(keys, {
+				"<leader>hr" .. i,
 				function()
 					require("harpoon"):list():replace_at(i)
 				end,

@@ -101,6 +101,36 @@ vim.keymap.set("n", "<C-d>", "<C-d>zz", { noremap = true, silent = true, desc = 
 vim.keymap.set("n", "<C-u>", "<C-u>zz", { noremap = true, silent = true, desc = "Scroll up and center" })
 vim.keymap.set("n", "<C-b>", "<C-b>zz", { noremap = true, silent = true, desc = "Page up and center" })
 vim.keymap.set("n", "<C-f>", "<C-f>zz", { noremap = true, silent = true, desc = "Page down and center" })
+vim.keymap.set("n", "{", "{zz", { noremap = true, silent = true, desc = "Move to previous paragraph and center" })
+vim.keymap.set("n", "}", "}zz", { noremap = true, silent = true, desc = "Move to next paragraph and center" })
+vim.keymap.set("n", "G", "Gzz", { noremap = true, silent = true, desc = "Go to bottom of file and center" })
+vim.keymap.set("n", "gg", "ggzz", { noremap = true, silent = true, desc = "Go to top of file and center" })
+vim.keymap.set("n", "gd", "gdzz", { noremap = true, silent = true, desc = "Go to definition and center" })
+vim.keymap.set("n", "<C-i>", "<C-i>zz", { noremap = true, silent = true, desc = "Jump forward in jumplist and center" })
+vim.keymap.set(
+	"n",
+	"<C-o>",
+	"<C-o>zz",
+	{ noremap = true, silent = true, desc = "Jump backward in jumplist and center" }
+)
+vim.keymap.set(
+	"n",
+	"%",
+	"%zz",
+	{ noremap = true, silent = true, desc = "Jump to matching pair (e.g. brackets) and center" }
+)
+vim.keymap.set(
+	"n",
+	"*",
+	"*zz",
+	{ noremap = true, silent = true, desc = "Search for next occurrence of word under cursor and center" }
+)
+vim.keymap.set(
+	"n",
+	"#",
+	"#zz",
+	{ noremap = true, silent = true, desc = "Search for previous occurrence of word under cursor and center" }
+)
 
 vim.keymap.set(
 	{ "n", "x" },
