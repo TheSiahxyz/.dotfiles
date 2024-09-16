@@ -3,10 +3,12 @@
 create_new_session() {
     printf "New session name: "
     read -r session_name
-    tmux new -s "$session_name" || {
+    if [ -n "$TMUX" ]; then
         tmux new-session -d -s "$session_name"
         tmux switch-client -t "$session_name"
-    }
+    else
+        tmux new -s "$session_name"
+    fi
 }
 
 ! tmux ls >/dev/null 2>&1 && create_new_session && exit 0
