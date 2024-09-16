@@ -425,6 +425,9 @@ function command_line() {
 ###########################################################################################
 ###########################################################################################
 ### --- Tmux --- ###
+# init
+function tit() { tmux new -s "$(echo $TERMINAL)"; }
+
 # cd session
 function cds() {
     cd "$(tmux display-message -p '#{session_path}')"
