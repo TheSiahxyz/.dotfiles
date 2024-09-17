@@ -194,7 +194,7 @@ autocmd("LspAttach", {
 		vim.keymap.set("n", "<leader>ln", function()
 			vim.lsp.buf.rename()
 		end, { buffer = e.buf, desc = "Rename (lsp)" })
-		vim.keymap.set("i", "<leader>lh", function()
+		vim.keymap.set("n", "<leader>lh", function()
 			vim.lsp.buf.signature_help()
 		end, { buffer = e.buf, desc = "Signature help (lsp)" })
 		vim.keymap.set("n", "]d", function()
