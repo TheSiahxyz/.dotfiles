@@ -35,6 +35,10 @@ getprecipchance() {
     get_nearest_hourly | jq -r '.chanceofrain'
 }
 
+getsnow() {
+    get_nearest_hourly | jq -r '.chanceofsnow'
+}
+
 # Extract wind speed for the nearest hourly forecast
 getwind() {
     get_nearest_hourly | jq -r '.windspeedKmph'
@@ -66,8 +70,11 @@ getdesc() {
 }
 
 showweather() {
-    getforecast
-    printf "%s:☔%s %s 🎐%sm/s 🌞%s°(%s°)\n" "$(getdesc)" "$(getprecipchance)" "$(gethumidity)" "$(getwind)" "$(gettemp)" "$(getfeelslike)"
+    if [ "$(getsnow)" -eq 0 ]; then
+        printf "%s:☔%s %s 🎐%sm/s 🌞%s°(%s°)\n" "$(getdesc)" "$(getprecipchance)" "$(gethumidity)" "$(getwind)" "$(gettemp)" "$(getfeelslike)"
+    else
+        printf "%s:🏂%s ☔%s %s 🎐%sm/s 🌞%s°(%s°)\n" "$(getdesc)" "$(getsnow)" "$(getprecipchance)" "$(gethumidity)" "$(getwind)" "$(gettemp)" "$(getfeelslike)"
+    fi
 }
 
 case $BLOCK_BUTTON in
