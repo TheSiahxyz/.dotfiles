@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Displays today's precipication chance (☔), daily high (🎐), and daily low (🥶) and high (🌞).
+# Displays today's snow chance (🏂), precipication chance (☔), humidity (💧), wind speed (🎐), and current/feel like (🌞).
 # Usually intended for the statusbar.
 
 LOCATION=$(curl -s http://ip-api.com/json | jq -r '[.regionName, .countryCode] | join(",")')
@@ -14,23 +14,16 @@ getforecast() { timeout --signal=1 2s curl -sf "$url/$LOCATION?format=j1" >"$wea
 # Forecast should be updated every 3 hours.
 checkforecast() { [ -s "$weatherreportjson" ] && [ "$(find "$weatherreportjson" -mmin -179 2>/dev/null)" ]; }
 
-# Get the current hour to determine which hourly block to use
 get_current_hour() {
     date +%H
 }
 
-# Extract data from the hourly forecast closest to the current time
 get_nearest_hourly() {
     current_hour=$(get_current_hour)
-
-    # Calculate the nearest hourly index (each index represents a 3-hour window)
     hour_index=$((current_hour / 3))
-
-    # Extract the correct hourly forecast using jq
     jq ".weather[0].hourly[$hour_index]" "$weatherreportjson"
 }
 
-# Extract precipitation chance for the nearest hourly forecast
 getprecipchance() {
     get_nearest_hourly | jq -r '.chanceofrain'
 }
@@ -39,17 +32,14 @@ getsnow() {
     get_nearest_hourly | jq -r '.chanceofsnow'
 }
 
-# Extract wind speed for the nearest hourly forecast
 getwind() {
     get_nearest_hourly | jq -r '.windspeedKmph'
 }
 
-# Extract temperature for the nearest hourly forecast
 gettemp() {
     get_nearest_hourly | jq -r '.tempC'
 }
 
-# Extract the feels-like temperature for the nearest hourly forecast
 getfeelslike() {
     get_nearest_hourly | jq -r '.FeelsLikeC'
 }
@@ -58,10 +48,10 @@ gethumidity() {
     humidity=$(get_nearest_hourly | jq -r '.humidity')
     case "$humidity" in
     [0-9] | [1-2][0-9]) echo "🏜️$humidity%" ;;
-    [3-4][0-9]) echo "🌲 $humidity%" ;;
-    [5-6][0-9]) echo "💧 $humidity%" ;;
-    [7-8][0-9]) echo "💦 $humidity%" ;;
-    9[0-9] | 100) echo "🌊 $humidity%" ;;
+    [3-4][0-9]) echo "🌲$humidity%" ;;
+    [5-6][0-9]) echo "💧$humidity%" ;;
+    [7-8][0-9]) echo "💦$humidity%" ;;
+    9[0-9] | 100) echo "🌊$humidity%" ;;
     esac
 }
 
@@ -71,9 +61,9 @@ getdesc() {
 
 showweather() {
     if [ "$(getsnow)" -eq 0 ]; then
-        printf "%s:☔%s %s 🎐%sm/s 🌞%s°(%s°)\n" "$(getdesc)" "$(getprecipchance)" "$(gethumidity)" "$(getwind)" "$(gettemp)" "$(getfeelslike)"
+        printf "🌈%s:☔%s %s 🎐%sm/s 🌞%s°(%s°)\n" "$(getdesc)" "$(getprecipchance)" "$(gethumidity)" "$(getwind)" "$(gettemp)" "$(getfeelslike)"
     else
-        printf "%s:🏂%s ☔%s %s 🎐%sm/s 🌞%s°(%s°)\n" "$(getdesc)" "$(getsnow)" "$(getprecipchance)" "$(gethumidity)" "$(getwind)" "$(gettemp)" "$(getfeelslike)"
+        printf "🌈%s:🏂%s ☔%s %s 🎐%sm/s 🌞%s°(%s°)\n" "$(getdesc)" "$(getsnow)" "$(getprecipchance)" "$(gethumidity)" "$(getwind)" "$(gettemp)" "$(getfeelslike)"
     fi
 }
 
@@ -101,9 +91,11 @@ case $BLOCK_BUTTON in
 2) getforecast && showweather ;;
 3) notify-send "🌈 Weather module" "\- Left click for full forecast
 - Middle click to update forecast
-☔: Chance of rain/snow
-🥶: Daily low
-🌞: Daily high" ;;
+🏂: Chance of snow
+☔: Chance of rain
+💧: Humidity
+🎐: Wind speed
+🌞: Current and feel like temperature" ;;
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
