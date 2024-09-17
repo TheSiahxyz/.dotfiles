@@ -5,9 +5,8 @@ end
 local autocmd = vim.api.nvim_create_autocmd
 
 -- Change the color of symlink files to distinguish between directory and symlink files
-local highlight_linked_files = augroup("suckless_keys")
 autocmd("FileType", {
-	group = highlight_linked_files,
+	group = augroup("highlight_linked_files"),
 	pattern = "netrw",
 	callback = function()
 		vim.cmd("highlight NetrwSymlink guifg=#689D6A ctermfg=214")
@@ -15,9 +14,8 @@ autocmd("FileType", {
 })
 
 -- Check if we need to reload the file when it changed
-local check_time = augroup("suckless_keys")
 autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
-	group = check_time,
+	group = augroup("check_time"),
 	callback = function()
 		if vim.o.buftype ~= "nofile" then
 			vim.cmd("checktime")
@@ -26,18 +24,16 @@ autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
 })
 
 -- Highlight on yank
-local highlight_yank = augroup("suckless_keys")
 autocmd("TextYankPost", {
-	group = highlight_yank,
+	group = augroup("highlight_yank"),
 	callback = function()
 		vim.highlight.on_yank()
 	end,
 })
 
 -- resize splits if window got resized
-local window_config = augroup("suckless_keys")
 autocmd({ "VimResized" }, {
-	group = window_config,
+	group = augroup("window_config"),
 	callback = function()
 		local current_tab = vim.fn.tabpagenr()
 		vim.cmd("tabdo wincmd =")
@@ -46,9 +42,8 @@ autocmd({ "VimResized" }, {
 })
 
 -- go to last loc when opening a buffer
-local last_loc = augroup("suckless_keys")
 autocmd("BufReadPost", {
-	group = last_loc,
+	group = augroup("last_loc"),
 	callback = function(event)
 		local exclude = { "gitcommit" }
 		local buf = event.buf
@@ -65,9 +60,8 @@ autocmd("BufReadPost", {
 })
 
 -- close some filetypes with <q>
-local close_with_q = augroup("suckless_keys")
 autocmd("FileType", {
-	group = close_with_q,
+	group = augroup("close_with_q"),
 	pattern = {
 		"PlenaryTestPopup",
 		"help",
@@ -90,9 +84,8 @@ autocmd("FileType", {
 })
 
 -- Make it easier to close man-files when opened inline
-local man_close = augroup("suckless_keys")
 autocmd("FileType", {
-	group = man_close,
+	group = augroup("man_close"),
 	pattern = { "man" },
 	callback = function(event)
 		vim.bo[event.buf].buflisted = false
@@ -100,9 +93,8 @@ autocmd("FileType", {
 })
 
 -- Wrap and check for spell in text filetypes
-local wrap_ft = augroup("suckless_keys")
 autocmd("FileType", {
-	group = wrap_ft,
+	group = augroup("wrap_ft"),
 	pattern = { "gitcommit", "markdown" },
 	callback = function()
 		vim.opt_local.wrap = true
@@ -111,9 +103,8 @@ autocmd("FileType", {
 })
 
 -- Fix conceallevel for json files
-local json_config = augroup("suckless_keys")
 autocmd({ "FileType" }, {
-	group = json_config,
+	group = augroup("json_config"),
 	pattern = { "json", "jsonc", "json5" },
 	callback = function()
 		vim.opt_local.conceallevel = 0
@@ -121,9 +112,8 @@ autocmd({ "FileType" }, {
 })
 
 -- Auto create dir when saving a file, in case some intermediate directory does not exist
-local create_dir = augroup("suckless_keys")
 autocmd({ "BufWritePre" }, {
-	group = create_dir,
+	group = augroup("create_dir"),
 	callback = function(event)
 		if event.match:match("^%w%w+:[\\/][\\/]") then
 			return
@@ -134,7 +124,7 @@ autocmd({ "BufWritePre" }, {
 })
 
 -- Automatically delete all trailing whitespace and newlines at end of file on save
-local file_save = augroup("suckless_keys")
+local file_save = augroup("file_save")
 autocmd("BufWritePre", {
 	group = file_save,
 	pattern = "*",
@@ -232,9 +222,8 @@ vim.api.nvim_create_user_command("SudoWritequit", function()
 end, {})
 
 -- Enable Goyo by default for mutt writing
-local goyo_config = augroup("suckless_keys")
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
-	group = goyo_config,
+	group = augroup("goyo_config"),
 	pattern = "/tmp/neomutt*",
 	callback = function()
 		vim.g.goyo_width = 80
@@ -308,9 +297,8 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
 })
 
 -- When shortcut files are updated, renew bash and lf configs with new material:
-local bookmarks = augroup("suckless_keys")
 vim.api.nvim_create_autocmd("BufWritePost", {
-	group = bookmarks,
+	group = augroup("bookmarks"),
 	pattern = { "bm-files", "bm-dirs" },
 	callback = function()
 		-- Execute the 'shortcuts' shell command
@@ -324,7 +312,7 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 })
 
 -- Run xrdb whenever Xdefaults or Xresources are updated.
-local x_config = augroup("suckless_keys")
+local x_config = augroup("x_config")
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
 	group = x_config,
 	pattern = { "Xresources", "Xdefaults", "xresources", "xdefaults" },
@@ -340,9 +328,10 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 	end,
 })
 
--- Recompile dwmblocks on config edit.
-local home = os.getenv("HOME") -- Gets the home directory
-local suckless_config = augroup("suckless_keys")
+-- Recompile suckless programs on config edit.
+local home = os.getenv("HOME")
+local suckless_config = vim.api.nvim_create_augroup("suckless_config", { clear = true })
+
 vim.api.nvim_create_autocmd("BufWritePost", {
 	group = suckless_config,
 	pattern = home .. "/.local/src/suckless/dmenu/config.h",
@@ -388,9 +377,8 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 	end,
 })
 
-local suckless_doc = augroup("suckless_keys")
 vim.api.nvim_create_autocmd("BufWritePost", {
-	group = suckless_doc,
+	group = augroup("suckless_doc"),
 	pattern = home .. "/.local/src/suckless/dwm/thesiah-default.mom",
 	callback = function()
 		vim.cmd("silent !cd " .. home .. "/.local/src/suckless/dwm/ && rm -f thesiah.mom")
