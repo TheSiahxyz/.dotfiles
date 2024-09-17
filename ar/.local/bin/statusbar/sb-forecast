@@ -14,9 +14,7 @@ getforecast() { curl -sf "$url/$LOCATION?format=j1" >"$weatherreportjson" || exi
 # Forecast should be updated every 3 hours.
 checkforecast() { [ -s "$weatherreportjson" ] && [ "$(find "$weatherreportjson" -mmin -179 2>/dev/null)" ]; }
 
-get_current_hour() {
-    date +%H
-}
+get_current_hour() { date +%H; }
 
 get_nearest_hourly() {
     current_hour=$(get_current_hour)
@@ -24,29 +22,17 @@ get_nearest_hourly() {
     jq ".weather[0].hourly[$hour_index]" "$weatherreportjson"
 }
 
-getcurrentprecip() {
-    get_nearest_hourly | jq -r '.chanceofrain'
-}
+getcurrentprecip() { get_nearest_hourly | jq -r '.chanceofrain'; }
 
-gethighprecip() {
-    jq -r '.weather[0].hourly[].chanceofrain' "$weatherreportjson" | sort -rn | head -1
-}
+gethighprecip() { jq -r '.weather[0].hourly[].chanceofrain' "$weatherreportjson" | sort -rn | head -1; }
 
-getsnow() {
-    get_nearest_hourly | jq -r '.chanceofsnow'
-}
+getsnow() { get_nearest_hourly | jq -r '.chanceofsnow'; }
 
-getwind() {
-    get_nearest_hourly | jq -r '.windspeedKmph'
-}
+getwind() { get_nearest_hourly | jq -r '.windspeedKmph'; }
 
-gettemp() {
-    get_nearest_hourly | jq -r '.tempC'
-}
+gettemp() { get_nearest_hourly | jq -r '.tempC'; }
 
-getfeelslike() {
-    get_nearest_hourly | jq -r '.FeelsLikeC'
-}
+getfeelslike() { get_nearest_hourly | jq -r '.FeelsLikeC'; }
 
 gethumidity() {
     humidity=$(get_nearest_hourly | jq -r '.humidity')
@@ -59,15 +45,17 @@ gethumidity() {
     esac
 }
 
-getdesc() {
-    get_nearest_hourly | jq -r '.weatherDesc[0].value' | sed 's/ $//'
-}
+getdesc() { get_nearest_hourly | jq -r '.weatherDesc[0].value' | sed 's/ $//'; }
 
 showweather() {
-    if [ "$(getsnow)" -eq 0 ]; then
-        printf "🌈%s: ☔%s(%s) %s 🎐%sm/s 🌞%s°(%s°)\n" "$(getdesc)" "$(getcurrentprecip)" "$(gethighprecip)" "$(gethumidity)" "$(getwind)" "$(gettemp)" "$(getfeelslike)"
+    if [ "$(xrandr | grep '\*' | awk '{print $1}')" = "1024x768" ]; then
+        [ "$(getsnow)" -eq 0 ] && printf "🌈%s\n" "$(getdesc)"
     else
-        printf "🌈%s: 🏂%s ☔%s(%s) %s 🎐%sm/s 🌞%s°(%s°)\n" "$(getdesc)" "$(getsnow)" "$(getcurrentprecip)" "$(gethighprecip)" "$(gethumidity)" "$(getwind)" "$(gettemp)" "$(getfeelslike)"
+        if [ "$(getsnow)" -eq 0 ]; then
+            printf "🌈%s: ☔%s(%s) %s 🎐%sm/s 🌞%s°(%s°)\n" "$(getdesc)" "$(getcurrentprecip)" "$(gethighprecip)" "$(gethumidity)" "$(getwind)" "$(gettemp)" "$(getfeelslike)"
+        else
+            printf "🌈%s: 🏂%s ☔%s(%s) %s 🎐%sm/s 🌞%s°(%s°)\n" "$(getdesc)" "$(getsnow)" "$(getcurrentprecip)" "$(gethighprecip)" "$(gethumidity)" "$(getwind)" "$(gettemp)" "$(getfeelslike)"
+        fi
     fi
 }
 

@@ -2,8 +2,8 @@
 
 filter() {
     if ps -C mpd >/dev/null 2>&1; then
-        [ "$(printf "%s" "$artist" | wc -m)" -gt 30 ] && artist="$(printf "%s" "$artist" | cut -c 1-15)..." || artist="$(mpc current -f %artist%)"
-        [ "$(printf "%s" "$title" | wc -m)" -gt 30 ] && title="$(printf "%s" "$title" | cut -c 1-15)..." || title="$(mpc current -f %title%)"
+        [ "$(xrandr | grep '\*' | awk '{print $1}')" = "1024x768" ] && artist="$(printf "%s" "$artist" | cut -c 1-15)..." || artist="$(mpc current -f %artist%)"
+        [ "$(xrandr | grep '\*' | awk '{print $1}')" = "1024x768" ] && title="$(printf "%s" "$title" | cut -c 1-15)..." || title="$(mpc current -f %title%)"
 
         prefix=""
         [ "$(mpc status %state%)" = "playing" ] && prefix="🎵"
@@ -17,6 +17,7 @@ filter() {
         [ "$(mpc status %single%)" = "on" ] && indicators="${indicators}🔀"
         [ "$(mpc status %random%)" = "on" ] && indicators="${indicators}🔂"
         [ "$(mpc status %repeat%)" = "on" ] && indicators="${indicators}🔁"
+
         echo "$prefix$artist - $title $(mpc status %currenttime%)/$(mpc status %totaltime%)$([ -n "$indicators" ] && echo "$indicators")"
     fi
 }
