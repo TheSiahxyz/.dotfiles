@@ -2,8 +2,13 @@
 
 filter() {
     if ps -C mpd >/dev/null 2>&1; then
-        [ "$(xrandr | grep '\*' | awk '{print $1}' | cut -d'x' -f1)" -le "1024" ] && artist="$(printf "%s" "$(mpc current -f %artist%)" | cut -c 1-15).." || artist="$(mpc current -f %artist%)"
-        [ "$(xrandr | grep '\*' | awk '{print $1}' | cut -d'x' -f1)" -le "1024" ] && title="$(printf "%s" "$(mpc current -f %title%)" | cut -c 1-15).." || title="$(mpc current -f %title%)"
+        if [ "$(xrandr | grep '\*' | awk '{print $1}' | cut -d'x' -f1)" -le "1024" ]; then
+            artist="$(printf "%s" "$(mpc current -f %artist%)" | cut -c 1-15).."
+            title="$(printf "%s" "$(mpc current -f %title%)" | cut -c 1-15).."
+        else
+            artist="$(mpc current -f %artist%)"
+            title="$(mpc current -f %title%)"
+        fi
 
         prefix=""
         [ "$(mpc status %state%)" = "playing" ] && prefix="🎵"
