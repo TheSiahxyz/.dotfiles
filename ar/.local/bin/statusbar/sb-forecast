@@ -48,7 +48,7 @@ gethumidity() {
 getdesc() { get_nearest_hourly | jq -r '.weatherDesc[0].value' | sed 's/ $//'; }
 
 showweather() {
-    if [ "$(xrandr | grep '\*' | awk '{print $1}')" = "1024x768" ]; then
+    if [ "$(xrandr | grep '\*' | awk '{print $1}' | cut -d'x' -f1)" -le "1024" ]; then
         [ "$(getsnow)" -eq 0 ] && printf "🌈%s\n" "$(getdesc)"
     else
         if [ "$(getsnow)" -eq 0 ]; then
