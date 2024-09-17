@@ -24,11 +24,12 @@ getmount() {
 attemptmount() {
     # Attempt to mount without a mountpoint, to see if drive is in fstab.
     mplabel=$(sudo lsblk -no "label" $chosen)
+    mp="/media/$USER/$mplabel"
     [ -n "$mplabel" ] || return
-    if [ ! -d "/media/$USER/$mplabel" ] && [ ! -d "/mnt/$mplabel" ]; then
-        getmount "/media/$USER/$mplabel" && sudo -A mount "$chosen" "/media/$USER/$mplabel" || return 1
-    elif [ -d "/media/$USER/$mplabel" ] && [ ! -d "/mnt/$mplabel" ]; then
-        sudo -A mount "$chosen" /media/$USER/$mplabel || return 1
+    if [ ! -d "$mp" ] && [ ! -d "/mnt/$mplabel" ]; then
+        getmount "$mp" && sudo -A mount "$chosen" "$mp" || return 1
+    elif [ -d "$mp" ] && [ ! -d "/mnt/$mplabel" ]; then
+        sudo -A mount "$chosen" "$mp" || return 1
     elif [ -d "/mnt/$mplabel" ]; then
         getmount "/mnt/$mplabel" && sudo -A mount "$chosen" "/mnt/$mplabel" || return 1
     else
