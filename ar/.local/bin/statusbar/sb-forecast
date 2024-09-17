@@ -56,7 +56,7 @@ getdesc() {
 
 showweather() {
     getforecast
-    printf "%s: ☔%s 🎐%sm/s 🌞%s°(%s°)\n" "$(getdesc)" "$(getprecipchance)" "$(getwind)" "$(gettemp)" "$(getfeelslike)"
+    printf "%s:☔%s 🎐%sm/s 🌞%s°(%s°)\n" "$(getdesc)" "$(getprecipchance)" "$(getwind)" "$(gettemp)" "$(getfeelslike)"
 }
 
 case $BLOCK_BUTTON in
