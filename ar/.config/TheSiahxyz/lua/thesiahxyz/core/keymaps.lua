@@ -51,7 +51,14 @@ vim.keymap.set("n", "<leader>rm", function()
 	if vim.fn.filereadable(filepath) == 1 then
 		local confirm = vim.fn.input('Do you want to delete "' .. filename .. '"? (y/n): ')
 		if confirm:lower() == "y" then
-			vim.cmd("silent !rm " .. filepath)
+			local trash_put = vim.fn.executable("trash-put") == 1
+			if trash_put then
+				-- If trash-put exists, move the file to trash
+				vim.cmd("silent !trash-put " .. filepath)
+			else
+				-- If trash-put doesn't exist, use the rm command to delete the file
+				vim.cmd("silent !rm " .. filepath)
+			end
 			vim.cmd("bd!")
 		end
 	end
