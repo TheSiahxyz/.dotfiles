@@ -50,13 +50,24 @@ getfeelslike() {
     get_nearest_hourly | jq -r '.FeelsLikeC'
 }
 
+gethumidity() {
+    humidity=$(get_nearest_hourly | jq -r '.humidity')
+    case "$humidity" in
+    [0-9] | [1-2][0-9]) echo "🏜️$humidity%" ;;
+    [3-4][0-9]) echo "🌲 $humidity%" ;;
+    [5-6][0-9]) echo "💧 $humidity%" ;;
+    [7-8][0-9]) echo "💦 $humidity%" ;;
+    9[0-9] | 100) echo "🌊 $humidity%" ;;
+    esac
+}
+
 getdesc() {
     get_nearest_hourly | jq -r '.weatherDesc[0].value'
 }
 
 showweather() {
     getforecast
-    printf "%s:☔%s 🎐%sm/s 🌞%s°(%s°)\n" "$(getdesc)" "$(getprecipchance)" "$(getwind)" "$(gettemp)" "$(getfeelslike)"
+    printf "%s:☔%s %s 🎐%sm/s 🌞%s°(%s°)\n" "$(getdesc)" "$(getprecipchance)" "$(gethumidity)" "$(getwind)" "$(gettemp)" "$(getfeelslike)"
 }
 
 case $BLOCK_BUTTON in
