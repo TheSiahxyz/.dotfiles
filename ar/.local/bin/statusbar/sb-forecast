@@ -52,9 +52,13 @@ getfeelslike() {
     get_nearest_hourly | jq -r '.FeelsLikeC'
 }
 
+getdesc() {
+    get_nearest_hourly | jq -r '.weatherDesc[0].value'
+}
+
 showweather() {
     getforecast
-    printf "☔%s 🎐%sm/s 🌞%s°(%s°)\n" "$(getprecipchance)" "$(getwind)" "$(gettemp)" "$(getfeelslike)"
+    printf "%s: ☔%s 🎐%sm/s 🌞%s°(%s°)\n" "$(getdesc)" "$(getprecipchance)" "$(getwind)" "$(gettemp)" "$(getfeelslike)"
 }
 
 case $BLOCK_BUTTON in
