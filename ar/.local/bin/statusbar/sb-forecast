@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Displays today's snow chance (🏂), precipication chance (☔), humidity (💧), wind speed (🎐), and current/feel like (🌞).
+# Displays today's snow chance (🏂), precipication chance (☔), humidity (💧), wind speed (🎐), and current (feel like) temperature (🌞).
 # Usually intended for the statusbar.
 
 LOCATION=$(curl -s http://ip-api.com/json | jq -r '[.regionName, .countryCode] | join(",")')
@@ -61,9 +61,9 @@ getdesc() {
 
 showweather() {
     if [ "$(getsnow)" -eq 0 ]; then
-        printf "🌈%s:☔%s %s 🎐%sm/s 🌞%s°(%s°)\n" "$(getdesc)" "$(getprecipchance)" "$(gethumidity)" "$(getwind)" "$(gettemp)" "$(getfeelslike)"
+        printf "🌈%s: ☔%s %s 🎐%sm/s 🌞%s°(%s°)\n" "$(getdesc)" "$(getprecipchance)" "$(gethumidity)" "$(getwind)" "$(gettemp)" "$(getfeelslike)"
     else
-        printf "🌈%s:🏂%s ☔%s %s 🎐%sm/s 🌞%s°(%s°)\n" "$(getdesc)" "$(getsnow)" "$(getprecipchance)" "$(gethumidity)" "$(getwind)" "$(gettemp)" "$(getfeelslike)"
+        printf "🌈%s: 🏂%s ☔%s %s 🎐%sm/s 🌞%s°(%s°)\n" "$(getdesc)" "$(getsnow)" "$(getprecipchance)" "$(gethumidity)" "$(getwind)" "$(gettemp)" "$(getfeelslike)"
     fi
 }
 
@@ -89,13 +89,13 @@ case $BLOCK_BUTTON in
     }
     ;;
 2) getforecast && showweather ;;
-3) notify-send "🌈 Weather module" "\- Left click for full forecast
+3) notify-send "🌈 Weather module (updates every 3 hours)" "\- Left click for full forecast
 - Middle click to update forecast
-🏂: Chance of snow
+🏂: Chance of snow (hidden if it's 0)
 ☔: Chance of rain
-💧: Humidity
+💧: Humidity (icon changes depending on the level)
 🎐: Wind speed
-🌞: Current and feel like temperature" ;;
+🌞: Current (feel like) temperature" ;;
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
