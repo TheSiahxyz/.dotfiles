@@ -49,7 +49,7 @@ getdesc() { get_nearest_hourly | jq -r '.weatherDesc[0].value' | sed 's/ $//'; }
 
 showweather() {
     if [ "$(xrandr | grep '\*' | awk '{print $1}' | cut -d'x' -f1)" -le "1024" ]; then
-        [ "$(getsnow)" -eq 0 ] && printf "🌈%s\n" "$(getdesc)"
+        [ "$(getsnow)" -eq 0 ] && printf "☔%s 🌞%s°\n" "$(getcurrentprecip)" "$(gettemp)"
     else
         if [ "$(getsnow)" -eq 0 ]; then
             printf "🌈%s: ☔%s(%s) %s 🎐%sm/s 🌞%s°(%s°)\n" "$(getdesc)" "$(getcurrentprecip)" "$(gethighprecip)" "$(gethumidity)" "$(getwind)" "$(gettemp)" "$(getfeelslike)"
