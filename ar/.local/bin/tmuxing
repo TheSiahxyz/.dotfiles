@@ -2,20 +2,29 @@
 
 create_new_session() {
     session_name=$1
+    session_path=${2:-"$PWD"} # Default to current directory if no path is provided
+
     if [ -z "$session_name" ]; then
         printf "New session name: "
         read -r session_name
     fi
 
     if [ -n "$TMUX" ]; then
-        tmux new-session -d -s "$session_name"
+        tmux new-session -d -s "$session_name" -c "$session_path"
         tmux switch-client -t "$session_name"
     else
-        tmux new -s "$session_name"
+        tmux new -s "$session_name" -c "$session_path"
     fi
 }
 
-[ $# -gt 0 ] && { create_new_session "$1" && exit 0; }
+[ $# -gt 0 ] && {
+    # Check if the argument is a valid path, and if so, use the directory name as the session name
+    if [ -d "$1" ]; then
+        create_new_session "$(basename "$1")" "$1" && exit 0
+    else
+        create_new_session "$1" && exit 0
+    fi
+}
 
 ! tmux ls >/dev/null 2>&1 && create_new_session && exit 0
 
