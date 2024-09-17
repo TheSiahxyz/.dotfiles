@@ -7,41 +7,54 @@ LOCATION=$(curl -s http://ip-api.com/json | jq -r '[.regionName, .countryCode] |
 
 url="${WTTRURL:-wttr.in}"
 weatherreport="${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport"
+weatherreportjson="${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport.json"
 
 # Get a weather report from 'wttr.in' and save it locally.
-getforecast() { timeout --signal=1 2s curl -sf "$url/$LOCATION" >"$weatherreport" || exit 1; }
+saveweath() { timeout --signal=1 2s curl -sf "$url/$LOCATION" >"$weatherreport" || exit 1; }
+getforecast() { timeout --signal=1 2s curl -sf "$url/$LOCATION?format=j1" >"$weatherreportjson" || exit 1; }
 
 # Forecast should be updated every 3 hours.
-checkforecast() { [ -s "$weatherreport" ] && [ "$(find "$weatherreport" -mmin -179 2>/dev/null)" ]; }
+checkforecast() { [ -s "$weatherreportjson" ] && [ "$(find "$weatherreportjson" -mmin -179 2>/dev/null)" ]; }
 
+# Get the current hour to determine which hourly block to use
+get_current_hour() {
+    date +%H
+}
+
+# Extract data from the hourly forecast closest to the current time
+get_nearest_hourly() {
+    current_hour=$(get_current_hour)
+
+    # Calculate the nearest hourly index (each index represents a 3-hour window)
+    hour_index=$((current_hour / 3))
+
+    # Extract the correct hourly forecast using jq
+    jq ".weather[0].hourly[$hour_index]" "$weatherreportjson"
+}
+
+# Extract precipitation chance for the nearest hourly forecast
 getprecipchance() {
-    echo "$weatherdata" | sed '16q;d' | # Extract line 16 from file
-        grep -wo "[0-9]*%" |            # Find a sequence of digits followed by '%'
-        sort -rn |                      # Sort in descending order
-        head -1q                        # Extract first line
+    get_nearest_hourly | jq -r '.chanceofrain'
 }
 
-getdailyhighlow() {
-    echo "$weatherdata" | sed '13q;d' |  # Extract line 13 from file
-        grep -o "m\\([-+]\\)*[0-9]\\+" | # Find temperatures in the format "m<signed number>"
-        sed 's/[+m]//g' |                # Remove '+' and 'm'
-        sort -g |                        # Sort in ascending order
-        sed -e 1b -e '$!d'               # Extract the first and last lines
-}
-
+# Extract wind speed for the nearest hourly forecast
 getwind() {
-    echo "$weatherdata" | sed '14q;d' |
-        grep -o "m\\([0-9]\\)*[0-9]\\+" |
-        sed 's/[+m]//g' |
-        sort -rn |
-        head -1q
+    get_nearest_hourly | jq -r '.windspeedKmph'
 }
 
-readfile() { weatherdata="$(cat "$weatherreport")"; }
+# Extract temperature for the nearest hourly forecast
+gettemp() {
+    get_nearest_hourly | jq -r '.tempC'
+}
+
+# Extract the feels-like temperature for the nearest hourly forecast
+getfeelslike() {
+    get_nearest_hourly | jq -r '.FeelsLikeC'
+}
 
 showweather() {
-    readfile
-    printf "☔%s 🎐%sm/s 🥶%s° 🌞%s°\n" "$(getprecipchance)" $(getwind) $(getdailyhighlow)
+    getforecast
+    printf "☔%s 🎐%sm/s 🌞%s°(%s°)\n" "$(getprecipchance)" "$(getwind)" "$(gettemp)" "$(getfeelslike)"
 }
 
 case $BLOCK_BUTTON in
@@ -74,6 +87,6 @@ case $BLOCK_BUTTON in
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
-checkforecast || getforecast
+checkforecast || { saveweath && getforecast; }
 
 showweather
