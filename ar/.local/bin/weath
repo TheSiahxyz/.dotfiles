@@ -8,6 +8,13 @@ LOCATION=$(curl -s http://ip-api.com/json | jq -r '[.regionName, .countryCode] |
 url="${WTTRURL:-wttr.in}"
 weatherreport="${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport"
 
+getforecast() { timeout --signal=1 2s curl -sf "$url/$LOCATION" >"$weatherreport" || exit 1; }
+
+checkforecast() {
+    [ -s "$weatherreport" ] && [ "$(stat -c %y "$weatherreport" 2>/dev/null |
+        cut -d' ' -f1)" = "$(date '+%Y-%m-%d')" ]
+}
+
 formats() {
     [ "$MANPAGER" = "less -s" ] && pager=true || pager=false
     [ "$pager" = "false" ] && {
@@ -29,7 +36,7 @@ formats() {
     }
 }
 
-timeout --signal=1 2s curl -sf "$url/$LOCATION" >"$weatherreport" || exit 1
+checkforecast || getforecast
 
 if [ "$1" = 'cp' ]; then
     # shellcheck disable=SC2015
