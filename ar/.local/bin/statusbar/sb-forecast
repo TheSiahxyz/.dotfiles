@@ -60,7 +60,7 @@ gethumidity() {
 }
 
 getdesc() {
-    get_nearest_hourly | jq -r '.weatherDesc[0].value'
+    get_nearest_hourly | jq -r '.weatherDesc[0].value' | sed 's/ $//'
 }
 
 showweather() {
