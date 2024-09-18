@@ -98,7 +98,7 @@ esac
 
 while getopts "f" opt; do
     case $opt in
-    f) getforecast ;;
+    f) getforecast && pkill -RTMIN+5 "${STATUSBAR:-dwmblocks}" ;;
     *) checkforecast || getforecast ;;
     esac
 done
