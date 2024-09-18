@@ -280,7 +280,7 @@ vim.api.nvim_set_keymap(
 	"n",
 	"<leader>op",
 	":!output <C-r>%<cr><cr>",
-	{ noremap = true, silent = true, desc = "Run compiler" }
+	{ noremap = true, silent = true, desc = "Viewer" }
 )
 
 -- Source

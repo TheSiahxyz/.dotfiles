@@ -13,9 +13,6 @@ filter() {
         prefix=""
         [ "$(mpc status %state%)" = "playing" ] && prefix="🎵"
         [ "$(mpc status %state%)" = "paused" ] && prefix="⏸"
-        vol="$(wpctl get-volume @DEFAULT_AUDIO_SINK@)"
-        [ "$vol" != "${vol%\[MUTED\]}" ] && prefix="🔇"
-
         [ -z "$prefix" ] && return
 
         indicators=""
