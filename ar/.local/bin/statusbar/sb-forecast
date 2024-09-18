@@ -96,6 +96,11 @@ case $BLOCK_BUTTON in
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
-checkforecast || getforecast
+while getopts "f" opt; do
+    case $opt in
+    f) getforecast ;;
+    *) checkforecast || getforecast ;;
+    esac
+done
 
 showweather
