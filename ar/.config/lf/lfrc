@@ -146,7 +146,7 @@ cmd delete ${{
     printf "%s\n\t" "$fx"
     printf "delete?[y/N]"
     read ans
-    [ $ans = "y" ] && { 
+    [ $ans = "y" ] && {
         rm -rf -- $fx 2>/dev/null || {
             printf "sudo delete?[y/N]"
             read ans
@@ -290,12 +290,12 @@ cmd bulkrename ${{
 }}
 
 # Samba
-cmd share-samba ${{ 
+cmd share-samba ${{
     printf "%s\n\t" "$fx"
     printf "Share this folder?[y/N]"
     read ans
     [ $ans = "y" ] && {
-        dmenusamba "$f" 
+        dmenusamba "$f"
     }
 }}
 
