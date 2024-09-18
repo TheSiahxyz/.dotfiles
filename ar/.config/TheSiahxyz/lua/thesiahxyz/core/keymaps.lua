@@ -276,12 +276,7 @@ vim.api.nvim_set_keymap(
 	':w!<cr>:!compiler "%:p"<cr>',
 	{ noremap = true, silent = true, desc = "Run compiler" }
 )
-vim.api.nvim_set_keymap(
-	"n",
-	"<leader>op",
-	":!output <C-r>%<cr><cr>",
-	{ noremap = true, silent = true, desc = "Viewer" }
-)
+vim.api.nvim_set_keymap("n", "<leader>op", ":!opout <C-r>%<cr><cr>", { noremap = true, silent = true, desc = "Viewer" })
 
 -- Source
 vim.keymap.set("n", "<leader>S", function()

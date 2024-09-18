@@ -1,2 +1,3 @@
 # arch
-dotfiles for arch linux
+
+TheSiahxyz's dotfiles for Arch/Artix, Debian, and Mac.
