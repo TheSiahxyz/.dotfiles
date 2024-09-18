@@ -3,18 +3,6 @@
 # Get the weather on the terminal. You can pass an alternative location as a parameter,
 # and/or use the 'cp' option to copy the forecast as plaintext to the clipboard.
 
-LOCATION=$(curl -s http://ip-api.com/json | jq -r '[.regionName, .countryCode] | join(",")')
-
-url="${WTTRURL:-wttr.in}"
-weatherreport="${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport"
-
-getforecast() { timeout --signal=1 2s curl -sf "$url/$LOCATION" >"$weatherreport" || exit 1; }
-
-checkforecast() {
-    [ -s "$weatherreport" ] && [ "$(stat -c %y "$weatherreport" 2>/dev/null |
-        cut -d' ' -f1)" = "$(date '+%Y-%m-%d')" ]
-}
-
 formats() {
     [ "$MANPAGER" = "less -s" ] && pager=true || pager=false
     [ "$pager" = "false" ] && {
@@ -35,8 +23,6 @@ formats() {
         export MANROFFOPT="-c"
     }
 }
-
-checkforecast || getforecast
 
 if [ "$1" = 'cp' ]; then
     # shellcheck disable=SC2015

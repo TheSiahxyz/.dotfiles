@@ -6,13 +6,14 @@
 LOCATION=$(curl -s http://ip-api.com/json | jq -r '[.regionName, .countryCode] | join(",")')
 
 url="${WTTRURL:-wttr.in}"
+weatherreport="${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport"
 weatherreportjson="${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport.json"
 
 # Get a weather report from 'wttr.in' and save it locally.
-getforecast() { curl -sf "$url/$LOCATION?format=j1" >"$weatherreportjson" || exit 1; }
+getforecast() { curl -sf "$url/$LOCATION" >"$weatherreport" && curl -sf "$url/$LOCATION?format=j1" >"$weatherreportjson" || exit 1; }
 
 # Forecast should be updated every 3 hours.
-checkforecast() { [ -s "$weatherreportjson" ] && [ "$(find "$weatherreportjson" -mmin -179 2>/dev/null)" ]; }
+checkforecast() { [ -s "$weatherreport" ] && [ "$(find "$weatherreport" -mmin -179 2>/dev/null)" ] && [ -s "$weatherreportjson" ] && [ "$(find "$weatherreportjson" -mmin -179 2>/dev/null)" ]; }
 
 get_current_hour() { date +%H; }
 
@@ -22,7 +23,7 @@ get_nearest_hourly() {
     jq ".weather[0].hourly[$hour_index]" "$weatherreportjson"
 }
 
-getcurrentprecip() { get_nearest_hourly | jq -r '.chanceofrain'; }
+getprecip() { get_nearest_hourly | jq -r '.chanceofrain'; }
 
 gethighprecip() { jq -r '.weather[0].hourly[].chanceofrain' "$weatherreportjson" | sort -rn | head -1; }
 
@@ -34,29 +35,28 @@ gettemp() { get_nearest_hourly | jq -r '.tempC'; }
 
 getfeelslike() { get_nearest_hourly | jq -r '.FeelsLikeC'; }
 
+getlowtemp() { jq -r '.weather[0].hourly[].tempC' "$weatherreportjson" | sort -n | head -1; }
+
+gethightemp() { jq -r '.weather[0].hourly[].tempC' "$weatherreportjson" | sort -rn | head -1; }
+
 gethumidity() {
     humidity=$(get_nearest_hourly | jq -r '.humidity')
     case "$humidity" in
-    [0-9] | [1-2][0-9]) echo "🏜️$humidity%" ;;
-    [3-4][0-9]) echo "🌲$humidity%" ;;
-    [5-6][0-9]) echo "💧$humidity%" ;;
-    [7-8][0-9]) echo "💦$humidity%" ;;
-    9[0-9] | 100) echo "🌊$humidity%" ;;
+    [0-9] | [1-2][0-9]) echo "🏜️: $humidity%" ;;
+    [3-4][0-9]) echo "🌲: $humidity%" ;;
+    [5-6][0-9]) echo "💧: $humidity%" ;;
+    [7-8][0-9]) echo "💦: $humidity%" ;;
+    9[0-9] | 100) echo "🌊: $humidity%" ;;
     esac
 }
 
 getdesc() { get_nearest_hourly | jq -r '.weatherDesc[0].value' | sed 's/ $//'; }
 
-showweather() {
-    if [ "$(xrandr | grep '\*' | awk '{print $1}' | cut -d'x' -f1)" -le "1024" ]; then
-        [ "$(getsnow)" -eq 0 ] && printf "☔%s%% 🌞%s°\n" "$(getcurrentprecip)" "$(gettemp)"
-    else
-        if [ "$(getsnow)" -eq 0 ]; then
-            printf "🌈%s: ☔%s(%s)%% %s 🎐%sm/s 🌞%s°(%s°)\n" "$(getdesc)" "$(getcurrentprecip)" "$(gethighprecip)" "$(gethumidity)" "$(getwind)" "$(gettemp)" "$(getfeelslike)"
-        else
-            printf "🌈%s: 🏂%s%% ☔%s(%s)%% %s 🎐%sm/s 🌞%s°(%s°)\n" "$(getdesc)" "$(getsnow)" "$(getcurrentprecip)" "$(gethighprecip)" "$(gethumidity)" "$(getwind)" "$(gettemp)" "$(getfeelslike)"
-        fi
-    fi
+showweather() { [ "$(getsnow)" -eq 0 ] && printf "☔%s%% 🌞%s°\n" "$(getprecip)" "$(gettemp)" || printf "🏂%s%% ☔%s%% 🌞%s°\n" "$(getsnow)" "$(getcurrentprecip)" "$(gettemp)"; }
+
+todayweather() {
+    printf "🌈 Today's weather: %s\n🏂: %s%%\n☔: %s(%s)%%\n%s\n🎐: %sm/s\n🌞: %s°(%s°)\n🥶: %s°\n🥵: %s°\n" \
+        "$(getdesc)" "$(getsnow)" "$(getprecip)" "$(gethighprecip)" "$(gethumidity)" "$(getwind)" "$(gettemp)" "$(getfeelslike)" "$(getlowtemp)" "$(gethightemp)"
 }
 
 case $BLOCK_BUTTON in
@@ -81,13 +81,18 @@ case $BLOCK_BUTTON in
     }
     ;;
 2) getforecast && showweather ;;
-3) notify-send "🌈 Weather module (updates every 3 hours)" "\- Left click for full forecast
+3)
+    notify-send "🌈 Weather module (updates every 3 hours)" "\- Left click for full forecast
 - Middle click to update forecast
 🏂: Chance of snow (hidden if it's 0)
 ☔: Chance of rain
 💧: Humidity (icon changes depending on the level)
 🎐: Wind speed
-🌞: Current (feel like) temperature" ;;
+🌞: Current (feel like) temperature
+🥶: Daily lowest temperature
+🥵: Daily highest temperature"
+    notify-send "$(todayweather)"
+    ;;
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
