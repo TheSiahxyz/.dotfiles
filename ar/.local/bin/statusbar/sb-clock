@@ -6,7 +6,7 @@ minute=$(date '+%M')
 calendar="🗓️"
 
 # Determine the icon based on hour and minute
-[ -f "${XDG_CONFIG_HOME:-$HOME/.config}"/crons ] && icon="" || {
+if crontab -l 2>/dev/null | grep -q '^[^#[:space:]]'; then
     if [ "$minute" -ge 30 ]; then
         case "$hour" in
         "00" | "12") icon="🕧" ;; # 12:30
@@ -38,7 +38,9 @@ calendar="🗓️"
         "11" | "23") icon="🕚" ;; # 11:00
         esac
     fi
-}
+else
+    icon=""
+fi
 
 case $BLOCK_BUTTON in
 1)
