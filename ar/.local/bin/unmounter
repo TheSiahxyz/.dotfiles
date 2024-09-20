@@ -19,9 +19,9 @@ chosen="$(echo "$allunmountable" | dmenu -i -p "Unmount which drive?")"
 chosen="${chosen%% *}"
 test -n "$chosen"
 
-if grep -q "${chosen#*/}" /etc/mtab | grep -q "cifs"; then
-    sudo -A umount "${chosen#*/}"
-    notify-send "⏏️ SMB Drive unmounted." "${chosen#*/} has been unmounted."
+if grep -q "/${chosen#*/}" /etc/mtab | grep -q "cifs" /etc/mtab; then
+    sudo -A umount "/${chosen#*/}"
+    notify-send "⏏️ SMB Drive unmounted." "/${chosen#*/} has been unmounted."
     exit 0
 fi
 
