@@ -10,10 +10,10 @@ weatherreport="${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport"
 weatherreportjson="${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport.json"
 
 # Get a weather report from 'wttr.in' and save it locally.
-getforecast() { curl -sf "$url/$LOCATION" >"$weatherreport" && curl -sf "$url/$LOCATION?format=j1" >"$weatherreportjson" || exit 1; }
+getforecast() { (curl -sf "$url/$LOCATION" >"$weatherreport" && curl -sf "$url/$LOCATION?format=j1" >"$weatherreportjson") || exit 1; }
 
 # Forecast should be updated every 3 hours.
-checkforecast() { [ -s "$weatherreport" ] && [ "$(find "$weatherreport" -mmin -179 2>/dev/null)" ] && [ -s "$weatherreportjson" ] && [ "$(find "$weatherreportjson" -mmin -179 2>/dev/null)" ]; }
+checkforecast() { [ -s "$weatherreport" ] && [ "$(find "$weatherreport" -mmin -179 2>/dev/null)" ] && [ -s "$weatherreportjson" ] && [ "$(find "$weatherreportjson" -mmin -179 2>/dev/null)" ] || notify-send "🌈 Weather is up-to-date."; }
 
 get_current_hour() { date +%H; }
 
@@ -98,9 +98,10 @@ esac
 
 while getopts "f" opt; do
     case $opt in
-    f) getforecast && pkill -RTMIN+5 "${STATUSBAR:-dwmblocks}" ;;
-    *) checkforecast || getforecast ;;
+    f) getforecast && notify-send "🌈 Weather is updated." && pkill -RTMIN+5 "${STATUSBAR:-dwmblocks}" && exit ;;
+    *) ;;
     esac
 done
 
+checkforecast || getforecast
 showweather
