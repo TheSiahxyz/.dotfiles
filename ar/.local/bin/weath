@@ -3,6 +3,8 @@
 # Get the weather on the terminal. You can pass an alternative location as a parameter,
 # and/or use the 'cp' option to copy the forecast as plaintext to the clipboard.
 
+weatherreport="${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport"
+
 formats() {
     [ "$MANPAGER" = "less -s" ] && pager=true || pager=false
     [ "$pager" = "false" ] && {
@@ -17,7 +19,7 @@ formats() {
         export LESS_TERMCAP_ue="$(printf '%b' '[0m')"
         export LESSOPEN="| /usr/bin/highlight -O ansi %s 2>/dev/null"
     }
-    less -S "$1"
+    setsid -f "$TERMINAL" less -S "$1"
     [ "$pager" = "false" ] && {
         export MANPAGER="sh -c 'col -bx | bat -l man -p'"
         export MANROFFOPT="-c"
