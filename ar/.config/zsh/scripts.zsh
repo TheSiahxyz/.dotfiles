@@ -3,9 +3,7 @@
 ###########################################################################################
 ###########################################################################################
 ### --- Stow --- ###
-function dstw() {
-    "${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/$(whereami)/.local/bin/stw"   
-}
+function dstw() { "${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/$(whereami)/.local/bin/stw"; }
 
 ###########################################################################################
 ###########################################################################################
@@ -20,9 +18,7 @@ function pasteinit() {
 ###########################################################################################
 ###########################################################################################
 ### --- Last Command Output --- ###
-function insert-last-command-output() {
-    LBUFFER+="$(eval $history[$((HISTCMD-1))])"
-}
+function insert-last-command-output() { LBUFFER+="$(eval $history[$((HISTCMD-1))])"; }
 
 
 ###########################################################################################
@@ -31,7 +27,7 @@ function insert-last-command-output() {
 function emt() {
     ! mount | grep -q " $1 " && echo "$(pass show encryption/ecryptfs)" | sudo mount -t ecryptfs "$1" "$2" \
         -o ecryptfs_cipher=aes,ecryptfs_key_bytes=32,ecryptfs_passthrough=no,ecryptfs_enable_filename_crypto=yes,ecryptfs_sig="$(sudo cat /root/.ecryptfs/sig-cache.txt)",ecryptfs_fnek_sig="$(sudo cat /root/.ecryptfs/sig-cache.txt)",passwd="$(pass show encryption/ecryptfs)" >/dev/null 2>&1 &&
-        echo "'$2' folder is mounted!" 
+        echo "'$2' folder is mounted!"
 }
 
 
@@ -45,7 +41,7 @@ function gcggg() {
 
 function gp() {
     branch="$(git rev-parse --abbrev-ref HEAD)"
-    [[ -z "$1" ]] && { 
+    [[ -z "$1" ]] && {
         git push home "$branch" && echo "Pushed to home on branch $branch successfully.\n" ||
         { echo "Failed to push to home on branch $branch.\n"; return 1; }
     } || {
@@ -60,9 +56,7 @@ function gp() {
 ###########################################################################################
 ###########################################################################################
 ### --- Setxkbmap --- ###
-function gkey() {
-    grep --color -E "$1" /usr/share/X11/xkb/rules/base.lst
-}
+function gkey() { grep --color -E "$1" /usr/share/X11/xkb/rules/base.lst; }
 
 
 ###########################################################################################
@@ -168,35 +162,23 @@ function docs() {
 }
 
 # Same as above, but allows multi selection:
-function docrm() {
-    docker ps -a | sed 1d | fzf --cycle -q "$1" --no-sort -m --tac | awk '{ print $1 }' | xargs -r docker rm
-}
+function docrm() { docker ps -a | sed 1d | fzf --cycle -q "$1" --no-sort -m --tac | awk '{ print $1 }' | xargs -r docker rm; }
 
 # Select a docker image or images to remove
-function docrmi() {
-    docker images | sed 1d | fzf --cycle -q "$1" --no-sort -m --tac | awk '{ print $3 }' | xargs -r docker rmi
-}
+function docrmi() { docker images | sed 1d | fzf --cycle -q "$1" --no-sort -m --tac | awk '{ print $3 }' | xargs -r docker rmi; }
 
 
 ###########################################################################################
 ###########################################################################################
 ### --- Goto --- ###
 # files in root
-function ff() {
-    local file
-    file=$(find "$HOME" -type f >/dev/null 2>&1 | fzf) && nvim "$file"
-}
+function ff() { file=$(find "$HOME" -type f >/dev/null 2>&1 | fzf) && nvim "$file"; }
 
 # files in sub
-function fF() {
-    local file
-    file=$(find . -type f | fzf --cycle) && nvim "$file"
-}
+function fF() { file=$(find . -type f | fzf --cycle) && nvim "$file"; }
 
 # directory
-function fD() {
-    cd $(find "$HOME" -type d >/dev/null 2>&1 | fzf)
-}
+function fD() { cd $(find "$HOME" -type d >/dev/null 2>&1 | fzf); }
 
 # search bin
 function sscs() {
@@ -257,10 +239,7 @@ function fdot() {
 ###########################################################################################
 ### --- help --- ###
 alias bathelp='bat --plain --language=help'
-function help() {
-    # "$@" help 2>&1 | bathelp
-    "$@" --help 2>&1 | bathelp
-}
+function help() { "$@" --help 2>&1 | bathelp; }
 
 
 ###########################################################################################
@@ -352,25 +331,15 @@ function nvs() {
 ###########################################################################################
 ###########################################################################################
 ### --- Password --- ###
-function pqr() {
-    pass otp uri -q $1
-}
+function pqr() { pass otp uri -q $1; }
 
-function pqri() {
-    pass otp insert $1
-}
+function pqri() { pass otp insert $1; }
 
-function pss() {
-    pass show $(find $PASSWORD_STORE_DIR -type f -name '*.gpg' | sed 's|^''$PASSWORD_STORE_DIR/||; s/\.gpg$//' | fzf --cycle)
-}
+function pss() { pass show $(find $PASSWORD_STORE_DIR -type f -name '*.gpg' | sed 's|^''$PASSWORD_STORE_DIR/||; s/\.gpg$//' | fzf --cycle); }
 
-function psc() {
-    pass show -c $(find $PASSWORD_STORE_DIR -type f -name '*.gpg' | sed 's|^''$PASSWORD_STORE_DIR/||; s/\.gpg$//' | fzf --cycle)
-}
+function psc() { pass show -c $(find $PASSWORD_STORE_DIR -type f -name '*.gpg' | sed 's|^''$PASSWORD_STORE_DIR/||; s/\.gpg$//' | fzf --cycle); }
 
-function gpgqr() {
-    qrencode -o "$1".png -t png -Sv 40 < "$1".pgp
-}
+function gpgqr() { qrencode -o "$1".png -t png -Sv 40 < "$1".pgp; }
 
 
 ###########################################################################################
@@ -429,9 +398,7 @@ function command_line() {
 function tit() { tmux new -s "$(echo $TERMINAL)"; }
 
 # cd session
-function cds() {
-    cd "$(tmux display-message -p '#{session_path}')"
-}
+function cds() { cd "$(tmux display-message -p '#{session_path}')"; }
 
 # kill
 function tmk() {
