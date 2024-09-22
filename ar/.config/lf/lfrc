@@ -245,7 +245,7 @@ cmd open ${{
         image/x-xcf) setsid -f gimp $f >/dev/null 2>&1 ;;
         image/svg+xml) display -- $f ;;
         image/*) rotdir $f | grep -i "\.\(png\|jpg\|jpeg\|gif\|webp\|avif\|tif\|ico\)\(_large\)*$" |
-            setsid -f nsxiv -aioc 2>/dev/null | while read -r file; do
+            setsid -f nsxiv -aiop 2>/dev/null | while read -r file; do
                 [ -z "$file" ] && continue
                 lf -remote "send select \"$file\""
                 lf -remote "send toggle"
@@ -439,7 +439,7 @@ map Mt moveto; clear
 map Mpv :mpvdir; unselect
 
 # Nsxiv
-map th $nsxiv -tc "$(pwd)" # opens thumbnail mode
+map th $nsxiv -apt "$(pwd)"
 
 # Open
 map O $mimeopen "$f"
