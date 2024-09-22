@@ -41,10 +41,10 @@
 *.tiff     binary
 *.ico      binary
 # SVG treated as text by default.
-*.svg      text eol=lf
+# *.svg      text eol=lf
 # If you want to treat it as binary,
 # use the following line instead.
-# *.svg    binary
+*.svg      binary
 *.eps      binary
 
 # Scripts
