@@ -57,10 +57,10 @@ Hmt             /mnt
 Hmw             /usr/share/mutt-wizard
 Hrr             /run/runit/service
 Hsc             /mnt/second
+Hsg             /media/$USER/storage/G
 Hsm             /media/$USER/samba
 Hss             /media/$USER/ssd
 Hst             /media/$USER/storage
-Hvg             /media/$USER/storage/G
 Hvt             /media/$USER/Ventoy
 Hvv             /mnt/second/videos
 Hwv             /media/$USER/win10/Videos
