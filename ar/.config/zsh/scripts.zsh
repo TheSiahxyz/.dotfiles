@@ -396,8 +396,8 @@ function command_line() {
 ### --- Tmux --- ###
 # init
 function tit() {
-    tmux new-session -d -s "$(echo $TERMINAL)" -c "$HOME"
-    tmux attach -t "$(echo $TERMINAL)"
+    ! tmux has-session -t "$TERMINAL" 2>/dev/null && tmux new-session -d -s "$TERMINAL" -c "$HOME"
+    [[ -n "$TMUX" ]] && tmux switch-client -t "$TERMINAL" || tmux attach-session -t "$TERMINAL"
 }
 
 # cd session
