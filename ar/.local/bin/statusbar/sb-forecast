@@ -16,8 +16,8 @@ getforecast() {
 
 # Forecast should be updated every 3 hours.
 checkforecast() {
-    [ -s "$weatherreport" ] && [ "$(find "$weatherreport" -mmin -179 2>/dev/null)" ]
-    [ -s "$weatherreportjson" ] && [ "$(find "$weatherreportjson" -mmin -179 2>/dev/null)" ]
+    [ -s "$weatherreport" ] && [ "$(find "$weatherreport" -mmin -60 2>/dev/null)" ]
+    [ -s "$weatherreportjson" ] && [ "$(find "$weatherreportjson" -mmin -60 2>/dev/null)" ]
 }
 
 get_current_hour() { date +%H; }

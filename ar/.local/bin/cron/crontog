@@ -10,7 +10,7 @@ if crontab -l 2>/dev/null | grep -q '^[^#[:space:]]'; then
     # If active cronjobs are found, save and disable them
     crontab -l >"$CRON_FILE"
     crontab -r
-    notify-send "🕓 Cronjobs saved and disabled."
+    notify-send "⏰ Cronjobs saved and disabled."
 else
     # If no active cronjobs are found, try re-enabling from saved file
     if [ -f "$CRON_FILE" ]; then
@@ -18,7 +18,7 @@ else
         rm "$CRON_FILE"
         notify-send "🕓 Cronjobs re-enabled."
     else
-        notify-send "🕓 No saved cronjobs to re-enable."
+        notify-send "🕰️ No saved cronjobs to re-enable."
     fi
 fi
 
