@@ -39,7 +39,7 @@ if crontab -l 2>/dev/null | grep -q '^[^#[:space:]]'; then
         esac
     fi
 else
-    icon=""
+    icon="⏰"
 fi
 
 case $BLOCK_BUTTON in
