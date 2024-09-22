@@ -11,8 +11,7 @@ weatherreportjson="${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport.json"
 
 # Get a weather report from 'wttr.in' and save it locally.
 getforecast() {
-    (timeout --signal=1 2s curl -sf "$url/$LOCATION" >"$weatherreport" && curl -sf "$url/$LOCATION?format=j1" >"$weatherreportjson" && notify-send "🌈 Weather is updated.") ||
-        exit 1
+    (timeout --signal=1 2s curl -sf "$url/$LOCATION" >"$weatherreport" && curl -sf "$url/$LOCATION?format=j1" >"$weatherreportjson" && notify-send "🌈 Weather is updated." && pkill -RTMIN+5 "${STATUSBAR:-dwmblocks}") || exit 1
 }
 
 # Forecast should be updated every 3 hours.
@@ -101,13 +100,6 @@ case $BLOCK_BUTTON in
     ;;
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
-
-while getopts "f" opt; do
-    case $opt in
-    f) getforecast && pkill -RTMIN+5 "${STATUSBAR:-dwmblocks}" && exit ;;
-    *) ;;
-    esac
-done
 
 (checkforecast && notify-send "🌈 Weather is up-to-date.") || getforecast
 showweather
