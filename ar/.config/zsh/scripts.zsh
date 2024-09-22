@@ -395,7 +395,10 @@ function command_line() {
 ###########################################################################################
 ### --- Tmux --- ###
 # init
-function tit() { tmux new -s "$(echo $TERMINAL)"; }
+function tit() {
+    tmux new-session -d -s "$(echo $TERMINAL)" -c "$HOME"
+    tmux attach -t "$(echo $TERMINAL)"
+}
 
 # cd session
 function cds() { cd "$(tmux display-message -p '#{session_path}')"; }
