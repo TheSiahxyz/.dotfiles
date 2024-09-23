@@ -95,7 +95,7 @@ vim.keymap.set("n", "<leader>ip", vim.show_pos, { desc = "Inspect position" })
 vim.keymap.set("n", "ㅑ", "i", { desc = "Insert mode" })
 vim.keymap.set("i", "jk", "<esc>", { noremap = true, silent = true, desc = "Escape to normal mode" })
 vim.keymap.set("i", "<C-c>", "<esc>", { noremap = true, silent = true, desc = "Escape to normal mode" })
-vim.keymap.set("i", "<C-a>", "<esc>I", { noremap = true, silent = true, desc = "Insert at beginning of line" })
+vim.keymap.set("i", "<C-a>", "<home>", { noremap = true, silent = true, desc = "Insert at beginning of line" })
 vim.keymap.set("i", "<C-e>", "<end>", { noremap = true, silent = true, desc = "Move to end of line" })
 vim.keymap.set("i", "<C-h>", "<left>", { noremap = true, silent = true, desc = "Move left" })
 vim.keymap.set("i", "<C-l>", "<right>", { noremap = true, silent = true, desc = "Move right" })
@@ -125,6 +125,7 @@ vim.keymap.set("n", "G", "Gzz", { noremap = true, silent = true, desc = "Go to b
 vim.keymap.set("n", "gg", "ggzz", { noremap = true, silent = true, desc = "Go to top of file and center" })
 vim.keymap.set("n", "gd", "gdzz", { noremap = true, silent = true, desc = "Go to definition and center" })
 vim.keymap.set("n", "<C-i>", "<C-i>zz", { noremap = true, silent = true, desc = "Jump forward in jumplist and center" })
+vim.keymap.set("i", "<C-o>", "<end><cr>", { noremap = true, silent = true, desc = "Go to next line and insert mode" })
 vim.keymap.set(
 	"n",
 	"<C-o>",
