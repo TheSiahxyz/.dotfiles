@@ -36,7 +36,7 @@ done
 
 # Combine the videos into a single file using ffmpeg
 output_file="${pattern}_combine.${extension}"
-ffmpeg -f concat -safe 0 -i "$file_list" -c copy "$output_file"
+ffmpeg -f concat -safe 0 -i "$file_list" -c copy "$output_file" 2>/dev/null
 
 # Clean up the temporary file
 cat "$file_list"
