@@ -23,7 +23,7 @@ bind-key U show-urls
 bind-key x pb-delete
 
 browser linkhandler
-macro , open-in-browser ; -- "Open url based on types"
+macro o open-in-browser ; -- "Open url based on types"
 macro a set browser "tsp yt-dlp --embed-metadata -xic -f bestvideo*+bestaudio/best --restrict-filenames" ; open-in-browser ; set browser linkhandler ; -- "Add queue to download a file via yt-dlp"
 macro d set browser "dmenuhandler" ; open-in-browser ; set browser linkhandler ; -- "dmenu handler"
 macro e set browser "nvim ~/.config/newsboat/config" ; open-in-browser ; set browser linkhandler ; -- "newsboat config"
