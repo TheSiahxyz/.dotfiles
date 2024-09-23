@@ -8,7 +8,7 @@ CRON_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/crons"
 # Check if there are any active cronjobs
 if crontab -l 2>/dev/null | grep -q '^[^#[:space:]]'; then
     # If active cronjobs are found, save and disable them
-    crontab -l >"$CRON_FILE"
+    ln -sf "${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/$(whereami)/.config/crons" "${XDG_CONFIG_HOME:-${HOME}/.config}/crons"
     crontab -r
     notify-send "⏰ Cronjobs saved and disabled."
 else
