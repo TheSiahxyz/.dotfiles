@@ -125,7 +125,8 @@ vim.keymap.set("n", "G", "Gzz", { noremap = true, silent = true, desc = "Go to b
 vim.keymap.set("n", "gg", "ggzz", { noremap = true, silent = true, desc = "Go to top of file and center" })
 vim.keymap.set("n", "gd", "gdzz", { noremap = true, silent = true, desc = "Go to definition and center" })
 vim.keymap.set("n", "<C-i>", "<C-i>zz", { noremap = true, silent = true, desc = "Jump forward in jumplist and center" })
-vim.keymap.set("i", "<C-o>", "<end><cr>", { noremap = true, silent = true, desc = "Go to next line and insert mode" })
+vim.keymap.set("i", "<C-b>", "<up><end><cr>", { noremap = true, silent = true, desc = "New line above" })
+vim.keymap.set("i", "<C-f>", "<end><cr>", { noremap = true, silent = true, desc = "New line below" })
 vim.keymap.set(
 	"n",
 	"<C-o>",
