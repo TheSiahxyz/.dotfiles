@@ -328,7 +328,7 @@ alias cs='createscript'
 alias tmzs='timezones'
 
 # setxkbmap
-alias RM='setxkbmap -option'
+alias RM='setxkbmap -option && remaps'
 
 # sha1
 alias sha1='openssl sha1'
