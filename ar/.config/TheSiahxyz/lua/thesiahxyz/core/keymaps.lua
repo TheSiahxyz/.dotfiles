@@ -3,8 +3,8 @@ vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 
 -- Buffers
-vim.keymap.set("i", "<C-p>", "<cmd>bprevious<cr>", { desc = "Previous buffer" })
-vim.keymap.set("i", "<C-n>", "<cmd>bnext<cr>", { desc = "Next buffer" })
+vim.keymap.set("i", "<C-z>", "<cmd>bprevious<cr>", { desc = "Previous buffer" })
+vim.keymap.set("i", "<C-x>", "<cmd>bnext<cr>", { desc = "Next buffer" })
 vim.keymap.set("n", "<S-h>", "<cmd>bprevious<cr>", { desc = "Previous buffer" })
 vim.keymap.set("n", "<S-l>", "<cmd>bnext<cr>", { desc = "Next buffer" })
 vim.keymap.set("n", "<leader>bb", "<cmd>e #<cr>", { desc = "Switch to last buffer" })
