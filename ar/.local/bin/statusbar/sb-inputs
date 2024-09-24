@@ -1,18 +1,18 @@
 #!/bin/sh
 
 case $BLOCK_BUTTON in
-    1) fcitx5-remote -t ;;
-    2) setsid -w -f "$TERMINAL" -e fcitx5-configtool ;;
-    3) notify-send "⌨️ Input Method module" "\- Shows current input method (defalt US)
+1) fcitx5-remote -t ;;
+2) setsid -w -f "$TERMINAL" -e fcitx5-configtool ;;
+3) notify-send "⌨️ Input Method module" "\- Shows current input method (defalt US)
 - Left click to open fcitx5 configuration
 - Middle click to switch input method" ;;
-    6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
+6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
 if [ "$(fcitx5-remote)" -eq 2 ]; then
     case "$(fcitx5-remote -n)" in
-        *ko* | *Korean* | *hangul*) echo "⌨️KO" ;;
-        *) echo "⌨️$(setxkbmap -query | grep 'layout:' | sed 's/layout:\s*\(\S*\)/\1/g')" ;;
+    *ko* | *Korean* | *hangul*) echo "⌨️KO" ;;
+    *) echo "⌨️$(setxkbmap -query | grep 'layout:' | sed 's/layout:\s*\(\S*\)/\1/g')" ;;
     esac
 else
     echo "⌨️US"

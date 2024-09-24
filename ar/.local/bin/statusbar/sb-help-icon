@@ -4,15 +4,15 @@
 
 # If dwm is running, use dwm's readme and restart.
 pidof dwm >/dev/null &&
-	READMEFILE=/usr/local/share/dwm/thesiah.mom
+    READMEFILE=/usr/local/share/dwm/thesiah.mom
 restartwm() { pkill -HUP dwm; } ||
-	restartwm() { i3 restart; }
+    restartwm() { i3 restart; }
 
 case $BLOCK_BUTTON in
-    1) groff -mom "${READMEFILE:-${XDG_DATA_HOME:-${HOME}/.local/share}/thesiah/thesiah.mom}" -Tpdf | zathura - ;;
-    2) restartwm ;;
-    3) notify-send "❓ Help module" "\- Left click to open THESIAH guide
+1) groff -mom "${READMEFILE:-${XDG_DATA_HOME:-${HOME}/.local/share}/thesiah/thesiah.mom}" -Tpdf | zathura - ;;
+2) restartwm ;;
+3) notify-send "❓ Help module" "\- Left click to open THESIAH guide
 - Middle click to refresh window manager" ;;
-    6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
+6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 echo "❓"
