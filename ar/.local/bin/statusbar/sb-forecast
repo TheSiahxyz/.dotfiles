@@ -23,7 +23,7 @@ checkforecast() {
     [ -s "$1" ] && [ "$(($(date +%s) - $(stat -c %Y "$1")))" -le 3600 ]
 }
 
-get_current_hour() { date +%H; }
+get_current_hour() { date +%H | sed 's/^0*//'; }
 
 get_nearest_hourly() {
     current_hour=$(get_current_hour)
