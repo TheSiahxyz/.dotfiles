@@ -23,20 +23,20 @@ while getopts "s" opt; do
         sesh connect "$(
             sesh list | fzf-tmux -p 70%,60% \
                 --no-sort --ansi --border-label ' sesh ' --prompt '⚡  ' \
-                --header '  ^a all ^t tmux ^c configs ^d .dotfiles ^g git ^v private ^b public ^r scripts ^s suckless ^f zoxide ^x tmux kill ^h home' \
+                --header '^a all ^t tmux ^c configs ^d .dotfiles ^g git ^v private ^b public ^r scripts ^s suckless ^f zoxide ^x tmux kill ^h home' \
                 --bind 'tab:down,btab:up' \
                 --bind 'ctrl-a:change-prompt(⚡  )+reload(sesh list)' \
                 --bind 'ctrl-t:change-prompt(🪟  )+reload(sesh list -t)' \
                 --bind 'ctrl-c:change-prompt(⚙️  )+reload(sesh list -c)' \
                 --bind 'ctrl-f:change-prompt(🔎  )+reload(sesh list -z)' \
-                --bind 'ctrl-h:change-prompt(🏠  )+reload(fd -H -d 2 -t d -E .Trash . ~)' \
-                --bind 'ctrl-g:change-prompt(  )+reload(fd -H -d 2 -t d -E .Trash . ~/Private/git)' \
-                --bind 'ctrl-x:execute(tmux kill-session -t {})+change-prompt(⚡  )+reload(sesh list)' \
-                --bind 'ctrl-d:change-prompt(🔯  )+reload(fd -H -d 2 -t d -E .Trash . ~/.dotfiles)' \
-                --bind 'ctrl-v:change-prompt(🧑  )+reload(fd -H -d 2 -t d -E .Trash . ~/Private)' \
-                --bind 'ctrl-b:change-prompt(👯  )+reload(fd -H -d 2 -t d -E .Trash . ~/Public)' \
-                --bind 'ctrl-r:change-prompt(👟  )+reload(fd -H -d 2 -t d -E .Trash . ~/.local/bin)' \
-                --bind 'ctrl-s:change-prompt(🦴  )+reload(fd -H -d 2 -t d -E .Trash . ~/.local/src/suckless)'
+                --bind 'ctrl-h:change-prompt(🏠  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ~)' \
+                --bind 'ctrl-g:change-prompt(  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ~/Private/git)' \
+                --bind 'ctrl-d:change-prompt(🔯  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ~/.dotfiles)' \
+                --bind 'ctrl-v:change-prompt(🧑  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ~/Private)' \
+                --bind 'ctrl-b:change-prompt(👯  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ~/Public)' \
+                --bind 'ctrl-r:change-prompt(👟  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ~/.local/bin)' \
+                --bind 'ctrl-s:change-prompt(🦴  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ~/.local/src/suckless)' \
+                --bind 'ctrl-x:execute(tmux kill-session -t {})+change-prompt(⚡  )+reload(sesh list)'
         )"
         exit 0
         ;;
