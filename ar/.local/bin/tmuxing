@@ -15,7 +15,7 @@ while getopts "s" opt; do
         sesh connect "$(
             sesh list | fzf-tmux -p 70%,60% \
                 --no-sort --cycle --ignore-case --ansi --border=sharp --border-label '╢ TheSiahxyz  ╟' --prompt '⚡  ' \
-                --header '^a all ^t tmux ^c configs ^d .dotfiles ^g git ^v private ^b public ^r scripts ^s suckless ^f zoxide ^x tmux kill ^h home' \
+                --header '^a all ^t tmux ^c configs ^d .dotfiles ^g git ^v private ^b public ^r scripts ^s suckless ^f zoxide ^x tmux kill ^h home ^/ help' \
                 --bind 'tab:down,btab:up' \
                 --bind 'ctrl-a:change-prompt(⚡  )+reload(sesh list)' \
                 --bind 'ctrl-t:change-prompt(🪟  )+reload(sesh list -t)' \
@@ -29,7 +29,18 @@ while getopts "s" opt; do
                 --bind 'ctrl-r:change-prompt(👟  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ~/.local/bin)' \
                 --bind 'ctrl-s:change-prompt(🦴  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ~/.local/src/suckless)' \
                 --bind 'ctrl-x:execute(tmux kill-session -t {})+change-prompt(⚡  )+reload(sesh list)' \
-                --bind 'ctrl-c:abort'
+                --bind 'ctrl-/:change-prompt(❓  )+reload(echo "^a all
+^b public
+^c configs
+^d .dotfiles
+^f zoxide
+^g git
+^h home
+^r scripts
+^s suckless
+^t tmux
+^v private
+^x tmux kill")'
         )" 2>/dev/null
         exit
         ;;
