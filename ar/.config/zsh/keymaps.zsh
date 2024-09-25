@@ -52,6 +52,7 @@ bindkey -s '^_' '^usscs\n'
 bindkey -s '^X^B' '^urbackup\n'
 bindkey -s '^X^D' '^ufD\n'
 bindkey -s '^X^F' '^ufF\n'
+bindkey -s '^X^L' '^usesh last\n'
 bindkey -s '^X^S' '^usshadd\n'
 
 # man
