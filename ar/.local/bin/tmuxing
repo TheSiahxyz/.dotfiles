@@ -4,17 +4,10 @@ create_new_session() {
     session_name=$1
     session_path=${2:-"$PWD"} # Default to current directory if no path is provided
 
-    if [ -z "$session_name" ]; then
-        printf "New session name: "
-        read -r session_name
-    fi
+    [ -z "$session_name" ] && { printf "New session name: " && read -r session_name; }
 
-    if [ -n "$TMUX" ]; then
-        tmux new-session -d -s "$session_name" -c "$session_path"
-        tmux switch-client -t "$session_name"
-    else
+    [ -n "$TMUX" ] && (tmux new-session -d -s "$session_name" -c "$session_path" && tmux switch-client -t "$session_name") ||
         tmux new -s "$session_name" -c "$session_path"
-    fi
 
     exit
 }
@@ -40,7 +33,7 @@ while getopts "s" opt; do
                 --bind 'ctrl-s:change-prompt(🦴  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ~/.local/src/suckless)' \
                 --bind 'ctrl-x:execute(tmux kill-session -t {})+change-prompt(⚡  )+reload(sesh list)' \
                 --bind 'ctrl-c:abort'
-        )"
+        )" 2>/dev/null
         exit
         ;;
     *) ;;
