@@ -18,18 +18,18 @@ while getopts "s" opt; do
                 --header "^a all ^t tmux ^e sesh ^h home ^c configs ^d .dotfiles ^g git ^k desktop ^v private ^b public ^r scripts ^s suckless ^f zoxide ^x tmux kill ^/ help" \
                 --bind "tab:down,btab:up" \
                 --bind "ctrl-a:change-prompt(⚡  )+reload(sesh list)" \
-                --bind "ctrl-b:change-prompt(👯  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ${XDG_PUBLICSHARE_DIR:-${HOME}/Public})" \
-                --bind "ctrl-c:change-prompt(🗂️  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ${XDG_CONFIG_DIR:-${HOME}/.config})" \
-                --bind "ctrl-d:change-prompt(🔯  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ${XDG_DOTFILES_DIR:-${HOME}/.dotfiles})" \
+                --bind "ctrl-b:change-prompt(👯  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ${XDG_PUBLICSHARE_DIR:-${HOME}/Public} | sed 's|$HOME|~|g')" \
+                --bind "ctrl-c:change-prompt(🗂️  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ${XDG_CONFIG_DIR:-${HOME}/.config} | sed 's|$HOME|~|g')" \
+                --bind "ctrl-d:change-prompt(🔯  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ${XDG_DOTFILES_DIR:-${HOME}/.dotfiles} | sed 's|$HOME|~|g')" \
                 --bind "ctrl-e:change-prompt(⚙️  )+reload(sesh list -c)" \
                 --bind "ctrl-f:change-prompt(🔎  )+reload(sesh list -z)" \
-                --bind "ctrl-g:change-prompt(  )+reload(fd -H -d 2 -t d -E .Trash -E .git . $HOME/Private/git)" \
-                --bind "ctrl-h:change-prompt(🏠  )+reload(fd -H -d 2 -t d -E .Trash -E .git . $HOME)" \
-                --bind "ctrl-k:change-prompt(🖥️  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ${XDG_DESKTOP_DIR:-${HOME}/Desktop})" \
-                --bind "ctrl-r:change-prompt(👟  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ${XDG_SCRIPTS_HOME:-${HOME}/.local/bin})" \
-                --bind "ctrl-s:change-prompt(🦴  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless)" \
+                --bind "ctrl-g:change-prompt(  )+reload(fd -H -d 2 -t d -E .Trash -E .git . $HOME/Private/git | sed 's|$HOME|~|g')" \
+                --bind "ctrl-h:change-prompt(🏠  )+reload(fd -H -d 2 -t d -E .Trash -E .git . $HOME | sed 's|$HOME|~|g')" \
+                --bind "ctrl-k:change-prompt(🖥️  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ${XDG_DESKTOP_DIR:-${HOME}/Desktop} | sed 's|$HOME|~|g')" \
+                --bind "ctrl-r:change-prompt(👟  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ${XDG_SCRIPTS_HOME:-${HOME}/.local/bin} | sed 's|$HOME|~|g')" \
+                --bind "ctrl-s:change-prompt(🦴  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless | sed 's|$HOME|~|g')" \
                 --bind "ctrl-t:change-prompt(🪟  )+reload(sesh list -t)" \
-                --bind "ctrl-v:change-prompt(🧑  )+reload(fd -H -d 2 -t d -E .Trash -E .git . $HOME/Private)" \
+                --bind "ctrl-v:change-prompt(🧑  )+reload(fd -H -d 2 -t d -E .Trash -E .git . $HOME/Private | sed 's|$HOME|~|g')" \
                 --bind "ctrl-x:execute(tmux kill-session -t {})+change-prompt(⚡  )+reload(sesh list)" \
                 --bind 'ctrl-/:change-prompt(❓  )+reload(echo "^a all
 ^b public
