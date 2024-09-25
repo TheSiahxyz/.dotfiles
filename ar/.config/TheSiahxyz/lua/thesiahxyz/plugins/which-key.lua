@@ -85,7 +85,7 @@ return {
 		{
 			mode = { "n", "v", "x" },
 			"<leader>wK",
-			"<cmd>WhichKey <CR>",
+			"<cmd>WhichKey<CR>",
 			desc = "Which-key all key",
 		},
 	},
