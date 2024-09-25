@@ -2,6 +2,7 @@ return {
 	"folke/which-key.nvim",
 	event = "VeryLazy",
 	cmd = "WhichKey",
+	dependencies = { "echasnovski/mini.icons", "nvim-tree/nvim-web-devicons" },
 	opts = {},
 	config = function()
 		local wk = require("which-key")
