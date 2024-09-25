@@ -1,2 +1,2 @@
 [default_session]
-startup_command = "clear && ls"
+startup_command = "clear && ls -I .git"
