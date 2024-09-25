@@ -15,6 +15,8 @@ create_new_session() {
     else
         tmux new -s "$session_name" -c "$session_path"
     fi
+
+    exit
 }
 
 while getopts "s" opt; do
@@ -38,26 +40,20 @@ while getopts "s" opt; do
                 --bind 'ctrl-s:change-prompt(🦴  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ~/.local/src/suckless)' \
                 --bind 'ctrl-x:execute(tmux kill-session -t {})+change-prompt(⚡  )+reload(sesh list)'
         )"
-        exit 0
+        exit
         ;;
     *) ;;
     esac
-done
+done || exit
 
 [ $# -gt 0 ] && {
-    # Check if the argument is a valid path, and if so, use the directory name as the session name
-    if [ -d "$1" ]; then
-        create_new_session "$(basename "$1")" "$1" && exit 0
-    else
-        create_new_session "$1" && exit 0
-    fi
+    [ -d "$1" ] && create_new_session "$(basename "$1")" "$1" || create_new_session "$1"
+} || {
+    ! tmux ls >/dev/null 2>&1 && create_new_session || {
+        session=$( (
+            tmux ls
+            echo "[new session]"
+        ) | fzf | cut -d: -f1)
+        [ -z "$session" ] && exit || ([ "$session" = "[new session]" ] && create_new_session || tmux attach -t "$session")
+    }
 }
-
-! tmux ls >/dev/null 2>&1 && create_new_session && exit 0
-
-session=$( (
-    tmux ls
-    echo "[new session]"
-) | fzf | cut -d: -f1)
-[ -z "$session" ] && exit 0
-[ "$session" = "[new session]" ] && create_new_session || tmux attach -t "$session"
