@@ -11,7 +11,7 @@ weatherreportjson="${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport.json"
 
 # Get a weather report from 'wttr.in' and save it locally.
 getforecast() {
-    (timeout --signal=1 2s curl -sf "$url/$LOCATION" >"$weatherreport" &&
+    (timeout --signal=1 5s curl -sf "$url/$LOCATION" >"$weatherreport" &&
         sleep 3 &&
         printf "\nUpdated: %s\n" "$(date '+%Y-%m-%d %H:%M:%S')" >>"$weatherreport" &&
         curl -sf "$url/$LOCATION?format=j1" >"$weatherreportjson" &&
