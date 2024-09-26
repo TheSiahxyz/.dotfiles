@@ -1,6 +1,7 @@
 */3 * * * * /usr/bin/mailsync
-*/15 * * * * /home/si/.local/bin/cron/newsup
+*/15 * * * * $HOME/.local/bin/cron/newsup
 0 */3 * * * sudo /usr/bin/pacman -Sy
+0 */3 * * * $HOME/.local/bin/statusbar/sb-forecast
 0 0 * * * NVIM_APPNAME=Starter nvim --headless "+Lazy! sync" +qa
 0 * * * * NVIM_APPNAME=LazyVim nvim --headless "+Lazy! sync" +qa
 0 0 * * * NVIM_APPNAME=NvChad nvim --headless "+Lazy! sync" +qa
