@@ -27,7 +27,7 @@ return {
 			wk.add({
 				mode = { "n" },
 				{ "<localleader>d", group = "Dap/Python" },
-				{ "<localleader>dp", group = "Python" },
+				{ "<localleader>dP", group = "Python" },
 			})
 		end,
 		config = function()
