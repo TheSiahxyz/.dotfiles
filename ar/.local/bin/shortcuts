@@ -73,11 +73,13 @@ eval "echo \"$(cat "$bmdirs")\"" |
 	printf(\",%s=\42cd %s && ls -A\42 \\\\\n\",\$1,\$2)   >> \"$root_shell_shortcuts\" ;
 	printf(\"hash -d ,%s=%s \n\",\$1,\$2)                 >> \"$root_zsh_named_dirs\"  ;
 	printf(\"map ,%s cd \42%s\42 \n\",\$1,\$2)           >> \"$root_lf_shortcuts\" ;
-    printf(\"nnoremap <localleader>%s :Explore %s<cr>\n\",\$1,\$2)      >> \"$root_vim_shortcuts\"}"
+    printf(\"cmap ;%s %s\n\",\$1,\$2)      >> \"$root_vim_shortcuts\" ;
+    printf(\"nmap <localleader><localleader>%s :Explore %s<cr>\n\",\$1,\$2)      >> \"$root_vim_shortcuts\"}"
 
 eval "echo \"$(cat "$bmfiles")\"" |
     sudo awk "!/^\s*#/ && !/^\s*\$/ && /config\/(bash|lf|vim)\/.*rc |inputrc|\$EDITOR / {gsub(\"\\\s*#.*$\",\"\"); gsub(\"home/si\", \"root\");
 	printf(\",%s=\42\$EDITOR %s\42 \\\\\n\",\$1,\$2)  >> \"$root_shell_shortcuts\" ;
 	printf(\"hash -d ,%s=%s \n\",\$1,\$2)             >> \"$root_zsh_named_dirs\"  ;
 	printf(\"map ,%s \$\$EDITOR \42%s\42 \n\",\$1,\$2)   >> \"$root_lf_shortcuts\" ;
-    printf(\"nnoremap <localleader>%s :e %s<cr>\n\",\$1,\$2)        >> \"$root_vim_shortcuts\"}"
+    printf(\"cmap ;%s %s\n\",\$1,\$2)        >> \"$root_vim_shortcuts\" ;
+    printf(\"nmap <localleader><localleader>%s :e %s<cr>\n\",\$1,\$2)        >> \"$root_vim_shortcuts\"}"
