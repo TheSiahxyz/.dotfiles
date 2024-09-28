@@ -14,7 +14,7 @@ getforecast() {
     (timeout --signal=1 5s curl -sf "$url/$LOCATION" >"$weatherreport" &&
         sleep 3 &&
         printf "\nUpdated: %s\n" "$(date '+%Y-%m-%d %H:%M:%S')" >>"$weatherreport" &&
-        timeout --signal=1 5s curl -sf "$url/$LOCATION?format=j1" >"$weatherreportjson" &&
+        curl -sf "$url/$LOCATION?format=j1" >"$weatherreportjson" &&
         pkill -RTMIN+5 "${STATUSBAR:-dwmblocks}") ||
         exit 1
 }
