@@ -71,7 +71,7 @@ done | filter)"
 # Get all normal, non-encrypted or decrypted partitions that are not mounted.
 normalparts="$(echo "$lsblkoutput" | grep -v crypto_LUKS | grep 'part\|rom\|crypt' | sed "s/^/💾 /" | filter)"
 
-server="192.168.0.2"
+server="192.168.0.5"
 password=$(dmenu -fn Monospace-18 -P -p "Enter Samba Password:" <&-)
 sambas=$(
     smbclient -L "$server" -U% -A /dev/stdin <<EOF 2>/dev/null | awk '/Disk/ {print $1}' | sed 's/Disk|\(.*\)|/\1/g'
@@ -80,7 +80,7 @@ password=$password
 EOF
 )
 mountedsambas="$(grep "cifs" /etc/mtab)"
-ip=$(ip addr show eth0 | grep "inet " | awk '{print $2}' | sed 's/\/.*//g')
+ip=$(ip -4 addr show wlan0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
 sambas="$(for samba in $sambas; do
     [[ "$server" =~ $ip ]] && for mounted in $mountedsambas; do
         [[ "$mounted" =~ $samba ]] && break 1
