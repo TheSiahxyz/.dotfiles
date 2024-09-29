@@ -9,15 +9,16 @@ url="${WTTRURL:-wttr.in}"
 weatherreport="${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport"
 weatherreportjson="${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport.json"
 
+error() {
+    notify-send "⛔ Failed to update $1"
+    exit 1
+}
+
 # Get a weather report from 'wttr.in' and save it locally.
 getforecast() {
-    (timeout --signal=1 5s curl -sf "$url/$LOCATION" >"$weatherreport" &&
-        sleep 1 &&
-        printf "\nUpdated: %s\n" "$(date '+%Y-%m-%d %H:%M:%S')" >>"$weatherreport" &&
-        curl -sf "$url/$LOCATION?format=j1" >"$weatherreportjson" &&
-        sleep 1 &&
-        pkill -RTMIN+5 "${STATUSBAR:-dwmblocks}") ||
-        exit 1
+    (timeout --signal=1 5s curl -sf "$url/$LOCATION" >"$weatherreport" && sleep 1 && printf "\nUpdated: %s\n" "$(date '+%Y-%m-%d %H:%M:%S')" >>"$weatherreport") || error "report"
+    (curl -sf "$url/$LOCATION?format=j1" >"$weatherreportjson" && sleep 1) || error "reportjson"
+    pkill -RTMIN+5 "${STATUSBAR:-dwmblocks}"
 }
 
 # Forecast should be updated every 3 hours, but set 3600 to check for reliability.
