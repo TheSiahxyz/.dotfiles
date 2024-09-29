@@ -86,7 +86,7 @@ sambas="$(for samba in $sambas; do
         [[ "$mounted" =~ $samba ]] && break 1
     done && continue 1
     echo "📡 $samba"
-done)"
+done | sed "s/ //g")"
 
 # Add all to one variable. If no mountable drives found, exit.
 alldrives="$(echo "$phones
