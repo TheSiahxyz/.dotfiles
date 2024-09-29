@@ -16,27 +16,30 @@ get_status_icon() {
 }
 
 # Function to print battery status
-print_battery_status() {
+battery_status() {
     battery_path=$1
     capacity=$(cat "$battery_path/capacity" 2>/dev/null)
     status=$(cat "$battery_path/status" 2>/dev/null)
-    status_icon=$(get_status_icon "$status")
-    [ -z "$status_icon" ] && return
-    [ "$status_icon" = "🔋" ] && [ "$capacity" -le 25 ] && warn="❗"
-    printf "%s%s%d%%" "$status_icon" "$warn" "$capacity"
+    icon=$(get_status_icon "$status")
+    [ -z "$icon" ] && return
+    case $(basename "$battery_path") in
+    BAT?*)
+        [ "$icon" = "🔋" ] && [ "$capacity" -le 25 ] && warn="❗"
+        printf "%s%s%d%%" "$icon" "$warn" "$capacity"
+        ;;
+    hid*)
+        bluedevice=$(basename "$bluebattery")
+        bluedevice="${bluedevice%:*}"
+        notify-send "$icon $bluedevice" "$capacity%"
+        ;;
+    esac
     unset warn
 }
 
 # Check Bluetooth batteries (only on middle-click)
 bluetooth() {
     for bluebattery in /sys/class/power_supply/hid*; do
-        capacity=$(cat "$bluebattery/capacity" 2>/dev/null)
-        status=$(cat "$bluebattery/status" 2>/dev/null)
-        status_icon=$(get_status_icon "$status")
-        [ -z "$status_icon" ] && continue
-        bluebattery_name=$(basename "$bluebattery")
-        bluebattery_name="${bluebattery_name%:*}"
-        notify-send "$status_icon $bluebattery_name" "$capacity%"
+        battery_status "$bluebattery"
     done
 }
 
@@ -47,13 +50,13 @@ case "$BLOCK_BUTTON" in
 - 🛑: not charging
 - ♻️: stagnant charge
 - 🔌: charging
-- ⚡: charged
+- ⚡: fully charged
 - ❗: battery very low!
 - Middle click: bluetooth battery levels" ;;
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
-# Loop through all internal batteries
+# Loop through all internal/extra batteries
 for battery in /sys/class/power_supply/BAT?*; do
-    print_battery_status "$battery"
+    battery_status "$battery"
 done && printf "\\n"
