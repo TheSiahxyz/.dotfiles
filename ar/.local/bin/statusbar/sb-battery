@@ -3,33 +3,57 @@
 # Prints all batteries, their percentage remaining and an emoji corresponding
 # to charge status (🔌 for plugged up, 🔋 for discharging on battery, etc.).
 
-case $BLOCK_BUTTON in
-3) notify-send "🔋 Battery module" "🔋: discharging
-🛑: not charging
-♻: stagnant charge
-🔌: charging
-⚡: charged
-❗: battery very low!" ;;
+# Function to get the battery status icon
+get_status_icon() {
+    case "$1" in
+    Full) echo "⚡" ;;
+    Discharging) echo "🔋" ;;
+    Charging) echo "🔌" ;;
+    "Not charging") echo "🛑" ;;
+    Unknown) echo "♻️" ;;
+    *) echo "" ;;
+    esac
+}
+
+# Function to print battery status
+print_battery_status() {
+    battery_path=$1
+    capacity=$(cat "$battery_path/capacity" 2>/dev/null)
+    status=$(cat "$battery_path/status" 2>/dev/null)
+    status_icon=$(get_status_icon "$status")
+    [ -z "$status_icon" ] && return
+    [ "$status_icon" = "🔋" ] && [ "$capacity" -le 25 ] && warn="❗"
+    printf "%s%s%d%%" "$status_icon" "$warn" "$capacity"
+    unset warn
+}
+
+# Check Bluetooth batteries (only on middle-click)
+bluetooth() {
+    for bluebattery in /sys/class/power_supply/hid*; do
+        capacity=$(cat "$bluebattery/capacity" 2>/dev/null)
+        status=$(cat "$bluebattery/status" 2>/dev/null)
+        status_icon=$(get_status_icon "$status")
+        [ -z "$status_icon" ] && continue
+        bluebattery_name=$(basename "$bluebattery")
+        bluebattery_name="${bluebattery_name%:*}"
+        notify-send "$status_icon $bluebattery_name" "$capacity%"
+    done
+}
+
+# Handle mouse click actions
+case "$BLOCK_BUTTON" in
+2) bluetooth ;; # Middle click for Bluetooth battery levels
+3) notify-send "🔋 Battery module" "\- 🔋: discharging
+- 🛑: not charging
+- ♻️: stagnant charge
+- 🔌: charging
+- ⚡: charged
+- ❗: battery very low!
+- Middle click: bluetooth battery levels" ;;
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
-# Loop through all attached batteries and format the info
+# Loop through all internal batteries
 for battery in /sys/class/power_supply/BAT?*; do
-    # If non-first battery, print a space separator.
-    [ -n "${capacity+x}" ] && printf " "
-    # Sets up the status and capacity
-    case "$(cat "$battery/status" 2>&1)" in
-    "Full") status="⚡" ;;
-    "Discharging") status="🔋" ;;
-    "Charging") status="🔌" ;;
-    "Not charging") status="🛑" ;;
-    "Unknown") status="♻️" ;;
-    *) exit 1 ;;
-    esac
-    capacity="$(cat "$battery/capacity" 2>&1)"
-    # Will make a warn variable if discharging and low
-    [ "$status" = "🔋" ] && [ "$capacity" -le 25 ] && warn="❗"
-    # Prints the info
-    printf "%s%s%d%%" "$status" "$warn" "$capacity"
-    unset warn
+    print_battery_status "$battery"
 done && printf "\\n"
