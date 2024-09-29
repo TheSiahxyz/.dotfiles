@@ -352,7 +352,7 @@ alias gts="ssh $THESIAH_SERVER"
 
 # sudo
 alias su='sudo su -l root'
-alias smi='noglob rm -rf *.rej *.orig; sudo make clean install'
+alias smi='setopt no_nomatch && rm -rf *.rej *.orig >/dev/null 2>&1 && unsetopt no_nomatch; sudo make clean install'
 
 # suffix
 alias -s {pdf,PDF}='background mupdf'
