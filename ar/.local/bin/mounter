@@ -144,6 +144,7 @@ case "$chosen" in
     notify-send "🤖 Android Mounted." "Android device mounted to $mp."
     ;;
 📡*)
+    chosen="${chosen%% *}"
     chosen="${chosen:1}" # This is a bashism.
     getmount "/media/$USER/$chosen" && echo "$password" | sudo -A mount -t cifs -o username="$(whoami)",password="$password" "//$server/$chosen" "$mp"
     [ $? -eq 0 ] && notify-send "📡 Samba successfully mounted" "//$server/$chosen to $mp/$chosen" || notify-send "❌ Failed chosen samba mount" "//$server/$chosen"
