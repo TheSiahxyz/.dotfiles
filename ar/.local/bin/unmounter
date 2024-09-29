@@ -20,7 +20,7 @@ chosen="${chosen%% *}"
 test -n "$chosen"
 
 if grep -q "/${chosen#*/}" /etc/mtab | grep -q "cifs" /etc/mtab; then
-    sudo -A umount "/${chosen#*/}"
+    sudo -A umount "/${chosen#*/}" && sudo -A rm -r "/${chosen#*/}"
     notify-send "⏏️ SMB Drive unmounted." "/${chosen#*/} has been unmounted."
     exit 0
 fi

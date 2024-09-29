@@ -17,10 +17,7 @@ export SUDO_ASKPASS="$HOME/.local/bin/dmenupass"
 
 # Prompt for password using dmenupass
 PASSWORD=$(dmenu -fn Monospace-18 -P -p "Enter Samba Password:" <&-)
-[ -z "$PASSWORD" ] && {
-    echo "No password entered. Exiting."
-    exit 1
-}
+[ -z "$PASSWORD" ] && exit 1
 
 # Get list of shares
 SHARES=$(
@@ -29,21 +26,14 @@ username=$(whoami)
 password=$PASSWORD
 EOF
 )
-[ -z "$SHARES" ] && {
-    echo "No shares available. Exiting."
-    exit 1
-}
+[ -z "$SHARES" ] && notify-send "⛔ No samba shares available." && exit 1
 
 # Select share using dmenu
 SHARE=$(echo "$SHARES" | dmenu -i -p "Select a share to mount:")
-echo "$SHARE"
-[ -z "$SHARE" ] && {
-    echo "No share selected. Exiting."
-    exit 1
-}
+[ -z "$SHARE" ] && exit 1
 
 # Mount the selected share using sudo with SUDO_ASKPASS
 getmount "/media/$USER/$SHARE" && echo "$PASSWORD" | sudo -A mount -t cifs -o username="$(whoami)",password="$PASSWORD" "//$SERVER/$SHARE" "$mp"
 
 # Notify the user
-[ $? -eq 0 ] && notify-send "Samba Mount" "Successfully mounted //$SERVER/$SHARE to $mp/$SHARE" || notify-send "Samba Mount" "Failed to mount //$SERVER/$SHARE"
+[ $? -eq 0 ] && notify-send "📡 Successfully mounted" "//$SERVER/$SHARE to $mp/$SHARE" || notify-send "❌ Failed samba mount" "//$SERVER/$SHARE"
