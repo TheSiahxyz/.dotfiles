@@ -2,15 +2,14 @@
 
 # Define variables
 SERVER="192.168.0.5"
-MOUNT_POINT="/media/$USER/samba"
 
 getmount() {
-	[ -z "$1" ] && mp="$(find /media/$USER /mnt -mindepth 1 -maxdepth 1 -type d 2>/dev/null | dmenu -i -p "Mount this drive where?")" || mp="$1"
-	test -n "$mp"
-	if [ ! -d "$mp" ]; then
-		mkdiryn=$(printf "No\\nYes" | dmenu -i -p "$mp does not exist. Create it?")
-		[ "$mkdiryn" = "Yes" ] && (mkdir -p "$mp" 2>/dev/null || sudo -A mkdir -p "$mp")
-	fi
+    [ -z "$1" ] && mp="$(find "/media/$USER" /mnt -mindepth 1 -maxdepth 1 -type d 2>/dev/null | dmenu -i -p "Mount this drive where?")" || mp="$1"
+    test -n "$mp"
+    if [ ! -d "$mp" ]; then
+        mkdiryn=$(printf "No\\nYes" | dmenu -i -p "$mp does not exist. Create it?")
+        [ "$mkdiryn" = "Yes" ] && (mkdir -p "$mp" 2>/dev/null || sudo -A mkdir -p "$mp")
+    fi
 }
 
 # Set SUDO_ASKPASS to use the dmenupass script
@@ -18,23 +17,33 @@ export SUDO_ASKPASS="$HOME/.local/bin/dmenupass"
 
 # Prompt for password using dmenupass
 PASSWORD=$(dmenu -fn Monospace-18 -P -p "Enter Samba Password:" <&-)
-[ -z "$PASSWORD" ] && { echo "No password entered. Exiting." ; exit 1 ; }
+[ -z "$PASSWORD" ] && {
+    echo "No password entered. Exiting."
+    exit 1
+}
 
 # Get list of shares
-SHARES=$(smbclient -L "$SERVER" -U% -A /dev/stdin <<EOF 2>/dev/null | awk '/Disk/ {print $1}'
+SHARES=$(
+    smbclient -L "$SERVER" -U% -A /dev/stdin <<EOF 2>/dev/null | awk '/Disk/ {print $1}'
 username=$(whoami)
 password=$PASSWORD
 EOF
 )
-[ -z "$SHARES" ] && { echo "No shares available. Exiting." ; exit 1 ; }
+[ -z "$SHARES" ] && {
+    echo "No shares available. Exiting."
+    exit 1
+}
 
 # Select share using dmenu
 SHARE=$(echo "$SHARES" | dmenu -i -p "Select a share to mount:")
 echo "$SHARE"
-[ -z "$SHARE" ] && { echo "No share selected. Exiting." ; exit 1 ; }
+[ -z "$SHARE" ] && {
+    echo "No share selected. Exiting."
+    exit 1
+}
 
 # Mount the selected share using sudo with SUDO_ASKPASS
-getmount && echo "$PASSWORD" | sudo -A mount -t cifs -o username=$(whoami),password="$PASSWORD" //$SERVER/$SHARE "$mp"
+getmount "/media/$USER/$SHARE" && echo "$PASSWORD" | sudo -A mount -t cifs -o username="$(whoami)",password="$PASSWORD" "//$SERVER/$SHARE" "$mp"
 
 # Notify the user
-[ $? -eq 0 ] && notify-send "Samba Mount" "Successfully mounted //$SERVER/$SHARE to $MOUNT_POINT" || notify-send "Samba Mount" "Failed to mount //$SERVER/$SHARE"
+[ $? -eq 0 ] && notify-send "Samba Mount" "Successfully mounted //$SERVER/$SHARE to $mp/$SHARE" || notify-send "Samba Mount" "Failed to mount //$SERVER/$SHARE"

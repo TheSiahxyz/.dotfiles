@@ -13,7 +13,7 @@ escape() { echo "$@" | iconv -cf UTF-8 -t ASCII//TRANSLIT | tr -d '[:punct:]' | 
 
 # Function for prompting user for a mountpoint.
 getmount() {
-    [ -z "$1" ] && mp="$(find /media/$USER /mnt -mindepth 1 -maxdepth 1 -type d 2>/dev/null | dmenu -i -p "Mount this drive where?")" || mp="$1"
+    [ -z "$1" ] && mp="$(find "/media/$USER" /mnt -mindepth 1 -maxdepth 1 -type d 2>/dev/null | dmenu -i -p "Mount this drive where?")" || mp="$1"
     test -n "$mp"
     if [ ! -d "$mp" ]; then
         mkdiryn=$(printf "No\\nYes" | dmenu -i -p "$mp does not exist. Create it?")
@@ -23,7 +23,7 @@ getmount() {
 
 attemptmount() {
     # Attempt to mount without a mountpoint, to see if drive is in fstab.
-    mplabel=$(sudo lsblk -no "label" $chosen)
+    mplabel=$(sudo lsblk -no "label" "$chosen")
     mp="/media/$USER/$mplabel"
     [ -n "$mplabel" ] || return
     if [ ! -d "$mp" ] && [ ! -d "/mnt/$mplabel" ]; then
