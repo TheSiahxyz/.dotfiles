@@ -182,7 +182,7 @@ function fD() { cd $(find "$HOME" -type d >/dev/null 2>&1 | fzf); }
 
 # search bin
 function sscs() {
-    choice="$(find ~/.local/bin -mindepth 1 \( -type f -o -type l \) -not -name '*.md' -printf '%P\n' | fzf --cycle)"
+    choice="$(find ~/.local/bin -mindepth 1 \( -type f -o -type l \) -not -name '*.md' -not -path '*/zsh/*' -printf '%P\n' | fzf --cycle)"
     ([ -n "$choice" ] && [ -f "$HOME/.local/bin/$choice" ]) && $EDITOR "$HOME/.local/bin/$choice"
 }
 
