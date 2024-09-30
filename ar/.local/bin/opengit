@@ -1,0 +1,52 @@
+#!/bin/sh
+
+# The set -e option instructs the shell to immediately exit if any command has a non-zero exit status
+set -e
+
+# Get the repository root path and change to the repo root directory
+repo_root=$(git rev-parse --show-toplevel 2>/dev/null)
+cd "$repo_root" || {
+    echo "Failed to change to repository root directory"
+    exit 1
+}
+
+# Generate the file list and verify each file path
+existing_files=$(git ls-tree -r HEAD --name-only | while IFS= read -r file; do
+    if [ -f "$file" ]; then
+        echo "$repo_root/$file"
+    fi
+done)
+
+# Sort and list files
+sorted_files=$(echo "$existing_files" | xargs ls -lt 2>/dev/null)
+
+# Use fzf-tmux to select from the sorted list
+selected_files=$(echo "$sorted_files" | awk '{print $9}' | awk '!seen[$0]++' | grep -v '^$' | fzf-tmux --preview "bat --color=always {}" --reverse --multi --select-1 --exit-0)
+
+# Check if any files were selected, and exit if not
+[ -z "$selected_files" ] && {
+    echo "No files were selected. Exiting."
+    exit 0
+}
+
+# Read selected files into positional parameters
+set -- "$selected_files"
+
+# Get the number of selected files
+count=$#
+
+# Directly use the full paths in the case statement
+case "$count" in
+2)
+    ${EDITOR:-nvim} -O +'normal g;' "$@"
+    ;;
+3)
+    ${EDITOR:-nvim} -O "$1" -c 'wincmd j' -c "vsplit $2" -c "split $3"
+    ;;
+4)
+    ${EDITOR:-nvim} -O "$1" -c "vsplit $2" -c "split $3" -c 'wincmd h' -c "split $4"
+    ;;
+*)
+    ${EDITOR:-nvim} "$@"
+    ;;
+esac

@@ -1,0 +1,41 @@
+#!/bin/sh
+
+# The set -e option instructs sh to immediately exit if any command has a non-zero exit status
+set -e
+
+# Set new line and tab for word splitting
+IFS='
+'
+
+# Get the list of selected files
+files=$(fzf-tmux --preview 'if [ -d {} ]; then exa --color=always --long --all --header --icons --git {}; else bat --color=always {}; fi' --reverse --query="$1" --multi --select-1 --exit-0)
+
+# Check if any files were selected, and exit if not
+[ -z "$files" ] && exit 0
+
+# Convert relative paths to absolute paths
+files_list=""
+for file in $files; do
+    files_list="$files_list $(realpath "$file")"
+done
+
+# Split files into positional parameters
+set -- "$files_list"
+
+# Count the number of files
+count=$#
+
+case "$count" in
+2)
+    ${EDITOR:-nvim} -O +'silent! normal g;' "$@"
+    ;;
+3)
+    ${EDITOR:-nvim} -O "$1" -c 'wincmd j' -c "silent! vsplit $2" -c "silent! split $3"
+    ;;
+4)
+    ${EDITOR:-nvim} -O "$1" -c "silent! vsplit $2" -c "silent! split $3" -c 'wincmd h' -c "silent! split $4"
+    ;;
+*)
+    ${EDITOR:-nvim} "$@"
+    ;;
+esac

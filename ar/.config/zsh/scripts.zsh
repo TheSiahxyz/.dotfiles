@@ -174,9 +174,6 @@ function docrmi() { docker images | sed 1d | fzf --cycle -q "$1" --no-sort -m --
 # files in root
 function ff() { file=$(find "$HOME" -type f >/dev/null 2>&1 | fzf) && nvim "$file"; }
 
-# files in sub
-function fF() { file=$(find . -type f | fzf --cycle) && nvim "$file"; }
-
 # directory
 function fD() { cd $(find "$HOME" -type d >/dev/null 2>&1 | fzf); }
 

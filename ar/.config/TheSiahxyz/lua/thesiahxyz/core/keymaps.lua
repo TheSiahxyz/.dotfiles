@@ -16,6 +16,17 @@ vim.keymap.set({ "n", "v" }, "<leader>wq", "<cmd>wq<cr>", { desc = "Save current
 vim.keymap.set({ "n", "v" }, "<leader>WQ", "<cmd>wqa<cr>", { desc = "Save all buffers and quit" })
 vim.keymap.set({ "n", "v" }, "<leader>qq", "<cmd>q!<cr>", { desc = "Force quit" })
 vim.keymap.set({ "n", "v" }, "<leader>QQ", "<cmd>qa!<cr>", { desc = "Force quit all" })
+vim.keymap.set("n", "<leader>rn", function()
+	local current_name = vim.fn.expand("%:p") -- Get the full path of the current file
+	local directory = vim.fn.expand("%:p:h") -- Get the directory of the current file
+	local new_name = vim.fn.input("New filename: ", directory .. "/") -- Prompt for the new name
+	if new_name == "" or new_name == current_name then
+		return -- Do nothing if no input or name hasn't changed
+	end
+	vim.cmd("silent !mv " .. vim.fn.shellescape(current_name) .. " " .. vim.fn.shellescape(new_name))
+	vim.cmd("edit " .. vim.fn.fnameescape(new_name))
+	vim.cmd("bdelete " .. vim.fn.bufnr(current_name))
+end, { noremap = true, silent = true, desc = "Rename file" })
 
 -- Clear search with <esc>
 vim.keymap.set({ "i", "n" }, "<esc>", "<cmd>noh<cr><esc>", { desc = "Clear search highlights" })
