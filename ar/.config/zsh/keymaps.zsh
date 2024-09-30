@@ -36,7 +36,7 @@ bindkey -M vicmd '^e' edit-command-line # ctrl-e
 bindkey -M visual '^[[P' vi-delete      # delete
 bindkey -M viins 'jk' vi-cmd-mode       # normal mode
 
-# programs
+# programs & scripts
 bindkey -s '^B' '^ubc -lq\n'
 bindkey -s '^D' '^ucdi\n'
 bindkey -s '^F' '^uff\n'
@@ -54,6 +54,7 @@ bindkey -s '^X^D' '^ufD\n'
 bindkey -s '^X^F' '^ufF\n'
 bindkey -s '^X^L' '^usesh last\n'
 bindkey -s '^X^S' '^usshadd\n'
+bindkey -s '^X^T' '^utmuxgo\n'
 
 # man
 man-command-line() {
@@ -117,7 +118,7 @@ print-current-date() {
 }
 zle -N print-current-date
 
-bindkey '^X^T' print-current-date
+bindkey '^X^C' print-current-date
 
 # prints the current Unix timestamp
 print-unix-timestamp() {
