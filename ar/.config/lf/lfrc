@@ -26,9 +26,11 @@ set truncatepct 50
 ### --- Custom Functions --- ###
 # Chmod
 cmd chmods ${{
-    options=$(printf "a+x\n000\n644\n666\n755\n777")
+    options=$(printf "x\nu+x\na+x\n000\n644\n666\n755\n777")
     choice=$(printf "%s" "$options" | fzf)
     case "$choice" in
+        "x") mod="+x";;
+        "u+x") mod="u+x";;
         "a+x") mod="a+x";;
         "000") mod="000";;
         "644") mod="644";;
