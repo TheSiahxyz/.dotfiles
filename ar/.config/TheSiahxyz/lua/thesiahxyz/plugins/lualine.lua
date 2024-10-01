@@ -82,46 +82,22 @@ return {
 			tabline = {
 				lualine_a = {
 					{
-						"buffers",
-						icons_enabled = false, -- Enables the display of icons alongside the component.
-						separator = nil, -- Determines what separator to use for the component.
-						draw_empty = false, -- Whether to draw component even if it's empty.
-						padding = { left = 1, right = 0 },
-						show_filename_only = true, -- Shows shortened relative path when set to false.
-						hide_filename_extension = true, -- Hide filename extension when set to true.
-						show_modified_status = true, -- Shows indicator when the buffer is modified.
-
-						mode = 1, -- 0: Shows buffer name
-						-- 1: Shows buffer index
-						-- 2: Shows buffer name + buffer index
-						-- 3: Shows buffer number
-						-- 4: Shows buffer name + buffer number
-
-						max_length = vim.o.columns * 2 / 3, -- Maximum width of buffers component,
-						-- it can also be a function that returns
-						-- the value of `max_length` dynamically.
-						filetype_names = {
-							TelescopePrompt = "Telescope",
-							dashboard = "Dashboard",
-							packer = "Packer",
-							fzf = "FZF",
-							alpha = "Alpha",
-						}, -- Shows specific buffer name for that filetype ( { `filetype` = `buffer_name`, ... } )
-
-						-- Automatically updates active buffer color to match color of other components (will be overidden if buffers_color is set)
-						use_mode_colors = false,
-
-						buffers_color = {
-							-- Same values as the general color option can be used here.
-							-- active = "lualine_{section}_normal", -- Color for active buffer.
-							-- inactive = "lualine_{section}_inactive", -- Color for inactive buffer.
-						},
-
-						symbols = {
-							modified = "● ", -- Text to show when the buffer is modified
-							alternate_file = "", -- Text to show to identify the alternate file
-							directory = "", -- Text to show when the buffer is a directory
-						},
+						function()
+							local function buffer_status()
+								local buffers = vim.fn.getbufinfo({ buflisted = true })
+								local current_buf = vim.fn.bufnr()
+								local current_index = 0
+								local modified_symbol = vim.bo.modified and "●" or ""
+								for i, buf in ipairs(buffers) do
+									if buf.bufnr == current_buf then
+										current_index = i
+										break
+									end
+								end
+								return string.format("%s%d/%d", modified_symbol, current_index, #buffers)
+							end
+							return buffer_status()
+						end,
 					},
 				},
 				lualine_b = {
