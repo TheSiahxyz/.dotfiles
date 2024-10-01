@@ -18,3 +18,4 @@ gtk-xft-hinting=1
 gtk-xft-hintstyle="hintfull"
 gtk-xft-rgba="rgb"
 gtk-im-module="fcitx"
+gtk-recent-files-max-age=0
