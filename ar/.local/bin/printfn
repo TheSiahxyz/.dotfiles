@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# Set the filename of the script containing the functions
+FILE="${ZDOTDIR:-${XDG_CONFIG_HOME:-${HOME}/.config}/zsh}/scripts.zsh"
+
+# Parse the file for function names and comments
+declare -a functions=()
+while IFS= read -r line; do
+    # Check for lines that start with a single "#" followed by a space or text (exclude ##, ###, etc. and shebangs like #!)
+    if [[ $line =~ ^#[^#!] ]]; then
+        # Remove the '#' from the comment line
+        comment="${line#\# }"
+
+        # Read the next line to get the function definition
+        IFS= read -r next_line
+        # Extract the function name
+        f_name="${next_line#function }"
+        f_name="${f_name%%()*}"
+
+        # Add the function name and comment to the array
+        functions+=("$f_name|$comment")
+    fi
+done <"$FILE"
+
+# Sort the functions alphabetically by name
+IFS=$'\n' sorted=($(sort <<<"${functions[*]}"))
+unset IFS
+
+# Print out the sorted functions
+for f in "${sorted[@]}"; do
+    f_name="${f%|*}"
+    comment="${f#*|}"
+    printf "fn: %-15s - %s\n" "$f_name" "$comment"
+done

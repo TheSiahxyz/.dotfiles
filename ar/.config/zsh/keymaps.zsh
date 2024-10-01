@@ -58,7 +58,7 @@ bindkey -s '^X^T' '^utmuxgo\n'
 
 # man
 man-command-line() {
-    command_line "man"
+    pcmd "man"
 }
 zle -N man-command-line
 bindkey -M emacs '^X^M' man-command-line
@@ -67,7 +67,7 @@ bindkey -M viins '^X^M' man-command-line
 
 # sudo
 sudo-command-line() {
-    command_line "sudo"
+    pcmd "sudo"
 }
 zle -N sudo-command-line
 bindkey -M emacs '^S' sudo-command-line
@@ -75,8 +75,8 @@ bindkey -M vicmd '^S' sudo-command-line
 bindkey -M viins '^S' sudo-command-line
 
 # last command output
-zle -N insert-last-command-output
-bindkey -M viins '^]' insert-last-command-output
+zle -N ilco
+bindkey -M viins '^]' ilco
 
 # bind y/Y to yank until end of line/yank whole line
 # bindkey -M vicmd y zsh-system-clipboard-vicmd-vi-yank-eol

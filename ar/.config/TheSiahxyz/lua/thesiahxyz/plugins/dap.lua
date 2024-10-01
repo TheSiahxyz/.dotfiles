@@ -251,7 +251,7 @@ return {
 			{
 				"<localleader>du",
 				function()
-					require("dapui").toggle({})
+					require("dapui").toggle()
 				end,
 				desc = "Dap UI",
 			},

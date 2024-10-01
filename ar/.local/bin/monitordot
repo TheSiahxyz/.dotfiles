@@ -1,0 +1,20 @@
+#!/bin/sh
+
+cd "${XDG_DOTFILES_DIR:-${HOME}}/.dotfiles" || exit
+
+while true; do
+    # Monitor changes (modify, create, delete) in the current directory recursively
+    inotifywait -e modify,create,delete -r .
+
+    # Add changes to the staging area
+    git add .
+
+    # Commit with a message if there are changes
+    git diff-index --quiet HEAD || git commit -m 'Sync dotfiles'
+
+    # Push to the remote repository
+    git push origin master
+
+    # Optional: Add a small delay to avoid rapid successive commits
+    sleep 2
+done

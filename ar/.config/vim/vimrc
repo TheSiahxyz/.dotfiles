@@ -14,7 +14,7 @@ if $USER != "root"
 
     set backupdir=$XDG_CONFIG_HOME/vim/backup | call mkdir(&backupdir, 'p')
     set directory=$XDG_CONFIG_HOME/vim/swap   | call mkdir(&directory, 'p')
-    set undodir=$XDG_CONFIG_HOME/vim/undo     | call mkdir(&undodir,   'p')
+    set undodir=$XDG_DATA_HOME/history/vim_history     | call mkdir(&undodir,   'p')
     set viewdir=$XDG_CONFIG_HOME/vim/view     | call mkdir(&viewdir,   'p')
 else
     set runtimepath^=/root/.config/vim
@@ -30,7 +30,7 @@ else
 
     set backupdir=/root/.config/vim/backup | call mkdir(&backupdir, 'p')
     set directory=/root/.config/vim/swap   | call mkdir(&directory, 'p')
-    set undodir=/root/.config/vim/undo     | call mkdir(&undodir,   'p')
+    set undodir=/root/.local/share/history/vim_history     | call mkdir(&undodir,   'p')
     set viewdir=/root/.config/vim/view     | call mkdir(&viewdir,   'p')
 endif
 

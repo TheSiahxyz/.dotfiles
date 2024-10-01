@@ -4,9 +4,41 @@ create_new_session() {
     session_name=$1
     session_path=${2:-"$PWD"} # Default to current directory if no path is provided
     [ -z "$session_name" ] && { printf "New session name: " && read -r session_name; }
-    [ -n "$TMUX" ] && (tmux new-session -d -s "$session_name" -c "$session_path" && tmux switch-client -t "$session_name") ||
-        tmux new -s "$session_name" -c "$session_path"
-    exit
+    if tmux has-session -t "$session_name" 2>/dev/null; then
+        tmux switch-client -t "$session_name"
+    else
+        [ -n "$TMUX" ] && (tmux new-session -d -s "$session_name" -c "$session_path" && tmux switch-client -t "$session_name") ||
+            tmux new -s "$session_name" -c "$session_path"
+    fi
+}
+
+open_staged_files() {
+    # If files are provided as arguments, use them; otherwise, use fzf to select files
+    if [ "$#" -gt 0 ]; then
+        resolved_files="$@"
+    else
+        # Get the repository root path
+        repo_root=$(git rev-parse --show-toplevel)
+
+        # Use fzf to select files and store them in a string with newline as a separator
+        IFS='
+'
+        files=$(git status -s | awk '{print $2}' | grep -v '^$' | fzf-tmux --preview "bat --color=always {}" --reverse --multi --select-1 --exit-0)
+
+        # Check if any files were selected, and exit if not
+        [ -z "$files" ] && return 0
+
+        # Resolve each file to its absolute path
+        resolved_files=""
+        for file in $files; do
+            resolved_files="$resolved_files $(realpath "$repo_root/$file")"
+        done
+    fi
+
+    # Remove leading/trailing whitespace and split resolved_files into positional parameters
+    set -- $(echo "$resolved_files" | xargs -n1 echo)
+
+    eval "${EDITOR:-nvim} $@"
 }
 
 while getopts "s" opt; do
@@ -28,7 +60,7 @@ while getopts "s" opt; do
                 --bind "ctrl-r:change-prompt(👟  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ${XDG_SCRIPTS_HOME:-${HOME}/.local/bin} | sed 's|$HOME|~|g')" \
                 --bind "ctrl-s:change-prompt(🦴  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless | sed 's|$HOME|~|g')" \
                 --bind "ctrl-t:change-prompt(🪟  )+reload(sesh list -t)" \
-                --bind "ctrl-u:change-prompt(📝  )+reload(git -C $(git rev-parse --show-toplevel) status -s | awk '{print \$2}' | grep -v '^$' || echo \"Not a git repo.\")" \
+                --bind "ctrl-u:change-prompt(📝  )+reload(git -C $(git rev-parse --show-toplevel) status -s | awk -v pwd=\"$PWD\" '{print pwd \"\/\" \$2}' | grep -v '^$' | sed 's|$HOME|~|g' || echo \"Not a git repo.\")" \
                 --bind "ctrl-v:change-prompt(🧑  )+reload(fd -H -d 2 -t d -E .Trash -E .git . $HOME/Private | sed 's|$HOME|~|g')" \
                 --bind "ctrl-x:execute(tmux kill-session -t {})+change-prompt(⚡  )+reload(sesh list)" \
                 --bind "alt-enter:execute(nvim {})+abort" \
@@ -49,10 +81,8 @@ while getopts "s" opt; do
 ^x tmux kill
 M-CR open in nvim
 ^/ help")'
-        )" 2>/dev/null || exit
-        path="$(eval echo "$path" | sed 's/\/*$//')"
-        [ -d "$path" ] && dir="$path" || dir=$(dirname "$path")
-        sesh connect "$dir"
+        )" 2>/dev/null || exit 0
+        sesh connect "$path" >/dev/null 2>&1 || open_staged_files "$path"
         exit
         ;;
     *) ;;
@@ -61,12 +91,13 @@ done || exit
 
 [ $# -gt 0 ] && {
     [ -d "$1" ] && create_new_session "$(basename "$1")" "$1" || create_new_session "$1"
+    exit
 } || {
-    ! tmux ls >/dev/null 2>&1 && create_new_session || {
+    ! tmux ls >/dev/null 2>&1 && create_new_session && exit || {
         session=$( (
             tmux ls
             echo "[new session]"
         ) | fzf | cut -d: -f1)
-        [ -z "$session" ] && exit || ([ "$session" = "[new session]" ] && create_new_session || tmux attach -t "$session")
+        [ -z "$session" ] && exit || ([ "$session" = "[new session]" ] && create_new_session && exit || tmux attach -t "$session")
     }
 }

@@ -210,7 +210,8 @@ ialias -g grep='grep --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn}'
 alias grepi='grep -i'
 alias grepr='grep -r'
 alias grepri='grep -ri'
-alias grepw='grep -R -i --include="*" --exclude-dir="zsh"'
+alias grepw='grep -R -i --include="*"'
+alias grepb='grep -R -i --include="*" --exclude-dir="zsh"'
 alias -g G='| grep'
 alias -g Gi='| grep -i'
 alias -g GH='| grep HTTP'
@@ -328,7 +329,7 @@ alias cs='createscript'
 alias tmzs='timezones'
 
 # setxkbmap
-alias RM='setxkbmap -option && remaps'
+alias RM='setxkbmap -option'
 
 # sha1
 alias sha1='openssl sha1'

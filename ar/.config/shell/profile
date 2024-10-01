@@ -98,7 +98,7 @@ export GOPATH="$XDG_SCRIPTS_HOME/go"
 export GTK2_RC_FILES="$XDG_CONFIG_HOME/gtk-2.0/gtkrc-2.0"
 
 ### --- HISTORY --- ###
-export HISTFILE="$XDG_DATA_HOME/history"
+export HISTFILE="$XDG_DATA_HOME/history/sh_history"
 
 ### --- INPUTRC --- ###
 export INPUTRC="$XDG_CONFIG_HOME/shell/inputrc"
@@ -194,7 +194,7 @@ export UNISON="$XDG_DATA_HOME/unison"
 # export VIMINIT='let $MYVIMRC = !has("nvim") ? "$XDG_CONFIG_HOME/vim/vimrc" : "$XDG_CONFIG_HOME/nvim/init.lua" | so $MYVIMRC'
 
 ### --- VIRTUAL ENVIRONMENT --- ###
-export WORKON_HOME="$XDG_DATA_HOME/virtualenvs" 
+export WORKON_HOME="$XDG_DATA_HOME/venvs"
 
 ### --- VISUAL STUDIO CODE --- ###
 export VSCODE_PORTABLE="$XDG_DATA_HOME/vscode"

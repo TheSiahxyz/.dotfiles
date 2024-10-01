@@ -354,3 +354,8 @@ vim.keymap.set("n", "<leader>c3", ":.!toilet -w 200 -f emboss2<cr>", { desc = "A
 vim.keymap.set("n", "<leader>c4", ":.!toilet -w 200 -f future<cr>", { desc = "Ascii art future" })
 vim.keymap.set("n", "<leader>c5", ":.!toilet -w 200 -f pagga<cr>", { desc = "Ascii art pagga" })
 vim.keymap.set("n", "<leader>c6", ":.!toilet -w 200 -f wideterm<cr>", { desc = "Ascii art wideterm" })
+
+-- Restart
+vim.keymap.set("n", "<leader>-", function()
+	vim.fn.system("bash __restart_nvim.sh")
+end, { noremap = true, silent = true, desc = "Restart nvim" })
