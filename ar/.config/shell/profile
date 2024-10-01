@@ -201,6 +201,7 @@ export VSCODE_PORTABLE="$XDG_DATA_HOME/vscode"
 
 ### --- WINE --- ###
 export WINEPREFIX="$XDG_DATA_HOME/wine"
+export WINEDLLOVERRIDES="winemenubuilder.exe=d"
 
 ### --- WGET --- ###
 export WGETRC="$XDG_CONFIG_HOME/wget/wgetrc"
