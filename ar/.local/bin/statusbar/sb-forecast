@@ -15,10 +15,14 @@ error() {
 }
 
 # Get a weather report from 'wttr.in' and save it locally.
-getforecast() {
-    (timeout --signal=1 5s curl -sf "$url/$LOCATION" >"$weatherreport" && sleep 1 && printf "\nUpdated: %s\n" "$(date '+%Y-%m-%d %H:%M:%S')" >>"$weatherreport") || error "report"
-    (curl -sf "$url/$LOCATION?format=j1" >"$weatherreportjson" && sleep 1) || error "reportjson"
-    pkill -RTMIN+5 "${STATUSBAR:-dwmblocks}"
+getweatherreport() {
+    (timeout --signal=1 5s curl -sf "$url/$LOCATION" >"$weatherreport" &&
+        printf "\nUpdated: %s\n" "$(date '+%Y-%m-%d %H:%M:%S')" >>"$weatherreport") ||
+        error "report"
+}
+
+getweatherreportjson() {
+    curl -sf "$url/$LOCATION?format=j1" >"$weatherreportjson" || error "reportjson"
 }
 
 # Forecast should be updated every 3 hours, but set 3600 to check for reliability.
@@ -91,7 +95,7 @@ case $BLOCK_BUTTON in
         export MANROFFOPT="-c"
     }
     ;;
-2) getforecast && showweather ;;
+2) getweatherreport && getweatherreportjson && showweather ;;
 3)
     notify-send "🌈 Weather module (updates every 3 hours)" "\- Left click for full forecast
 - Middle click to update forecast
@@ -107,5 +111,7 @@ case $BLOCK_BUTTON in
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
-(checkforecast "$weatherreport" && checkforecast "$weatherreportjson") || getforecast
+checkforecast "$weatherreport" || getweatherreport
+checkforecast "$weatherreportjson" || getweatherreportjson
 showweather
+pkill -RTMIN+5 "${STATUSBAR:-dwmblocks}"
