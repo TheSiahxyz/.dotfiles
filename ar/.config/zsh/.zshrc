@@ -54,7 +54,7 @@ unsetopt bad_pattern
 # History in cache directory
 HISTSIZE=10000000
 SAVEHIST=10000000
-HISTFILE="${XDG_CACHE_HOME:-${HOME}/.cache}/zsh/history"
+HISTFILE="${XDG_DATA_HOME:-${HOME}/.local/share}/history/sh_history"
 setopt inc_append_history
 setopt appendhistory
 setopt share_history
