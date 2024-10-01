@@ -33,7 +33,7 @@ openinbrowser() {
     [ -n "$choice" ] && "$open" "$choice" || exit
 }
 
-bm() {
+browserbookmark() {
     browsercheck
     sqlite_query="
     SELECT b.title || ' | ' || p.url AS bookmark
@@ -45,7 +45,7 @@ bm() {
     openinbrowser "bookmark"
 }
 
-his() {
+browserhistory() {
     browsercheck
     cols=$((${COLUMNS:-90} / 3))
     sqlite_query="
@@ -66,13 +66,13 @@ geturls() {
     URL=$(echo "$URLS" | grep -v -e '^#' -e '^$' | grep "\"$CHOICE\"" | awk '{print $1}')
 }
 
-while getopts "bchop" opt; do
+while getopts "bchopt" opt; do
     case $opt in
-    b) bm ;;
+    b) browserbookmark ;;
     c) geturls && xdotool type "$URL" ;;
-    h) his ;;
     o) geturls && "$BROWSER" --new-window "$URL" ;;
     p) geturls && "$BROWSER" --private-window "$URL" ;;
+    t) browserhistory ;;
     *) ;;
     esac
 done

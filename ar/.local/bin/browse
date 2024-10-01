@@ -11,7 +11,9 @@ fi
 
 # Usage message
 usage() {
-    echo "Usage: $0 [-d] [-s <website>] [-w <site>] <search_query>"
+    echo "${0##*/} - searches query in a terminal"
+    echo ""
+    echo "Usage: ${0##*/} [-d] [-w <website>] [-y] <search_query>"
     echo "    -d             : Use DuckDuckGo to search and open the result in a terminal"
     echo "    -w <website>   : Use a specific website to search (e.g., Google)"
     echo "    -y             : Search on YouTube"
