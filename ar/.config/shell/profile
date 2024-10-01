@@ -178,7 +178,7 @@ export THESIAH_VPN="${THESIAH%%.*}"
 export THESIAH_WWW="$HOME/Private/git/THESIAH"
 
 ### --- SQLITE --- ###
-export SQLITE_HISTORY="$XDG_DATA_HOME/sqlite_history"
+export SQLITE_HISTORY="$XDG_DATA_HOME/history/sqlite_history"
 
 ### --- STARSHIP --- ###
 export STARSHIP_CONFIG="$XDG_CONFIG_HOME/starship/starship.toml"
