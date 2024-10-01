@@ -95,7 +95,7 @@ case $BLOCK_BUTTON in
         export MANROFFOPT="-c"
     }
     ;;
-2) getweatherreport && getweatherreportjson && showweather ;;
+2) getweatherreport && getweatherreportjson && notify-send "🌈 Updated forecast" ;;
 3)
     notify-send "🌈 Weather module (updates every 3 hours)" "\- Left click for full forecast
 - Middle click to update forecast
