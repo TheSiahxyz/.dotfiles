@@ -1,0 +1,53 @@
+#!/bin/sh
+
+usage() {
+    echo "${0##*/} - clone a git repo in \$XDG_PUBLICSHARE_DIR if it's set or ~/Public"
+    echo ""
+    echo "Usage: ${0##*/} [-b <branch>] [-d <destination>] [-n <name>] <url>"
+    echo "      -b <branch>         : specify the branch to clone"
+    echo "      -d <destination>    : specify the destination of directory for cloning"
+    echo "      -n <name>           : specify the directory name to clone into"
+    exit 1
+}
+
+# Default values
+path="${XDG_PUBLICSHARE_DIR:-$HOME/Public}"
+
+# Parse options
+while getopts ":b:d:n:" opt; do
+    case $opt in
+    b) branch="$OPTARG" ;;
+    d) path="$OPTARG" ;;
+    n) dirname="$OPTARG" ;;
+    *) usage ;;
+    esac
+done
+
+shift $((OPTIND - 1))
+
+[ -z "$1" ] && usage && exit 1
+
+repo="$1"
+
+# Validate the URL (supports HTTPS and SSH Git URLs)
+if ! echo "$repo" | grep -Eq '^(https://github\.com/[^/]+/[^/]+(\.git)?|git@github\.com:[^/]+/[^/]+(\.git)?)$'; then
+    echo "Error: Invalid Git URL."
+    exit 1
+fi
+
+# Extract the base URL for the repository (removes any trailing .git)
+url="$(echo "$repo" | grep -Eo 'https://github.com/[^/]+/[^/]+' | sed 's/\.git$//')"
+
+# Determine the directory name for cloning
+if [ -n "$dirname" ]; then
+    dest="$path/$dirname"
+else
+    dest="$path/$(basename "$url")"
+fi
+
+# Determine the clone command
+if [ -n "$branch" ]; then
+    git clone --branch "$branch" "$url" "$dest"
+else
+    git clone "$url" "$dest"
+fi
