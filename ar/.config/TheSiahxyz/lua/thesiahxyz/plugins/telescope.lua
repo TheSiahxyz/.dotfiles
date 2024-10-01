@@ -162,7 +162,7 @@ return {
 			vim.keymap.set("n", "<leader>fr", function()
 				require("telescope.builtin").find_files({
 					cwd = vim.fn.expand("~/.local/bin"),
-					find_command = { "rg", "--files", "--follow", "--glob", "!**/.git/*" },
+					find_command = { "rg", "--files", "--follow", "--glob", "!**/.git/*", "--glob", "!**/zsh/*" },
 				})
 			end, { desc = "Find script files" })
 			vim.keymap.set("n", "<leader>fs", function()
