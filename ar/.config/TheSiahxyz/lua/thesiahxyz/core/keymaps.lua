@@ -354,6 +354,10 @@ vim.keymap.set("n", "<leader>c3", ":.!toilet -w 200 -f emboss2<cr>", { desc = "A
 vim.keymap.set("n", "<leader>c4", ":.!toilet -w 200 -f future<cr>", { desc = "Ascii art future" })
 vim.keymap.set("n", "<leader>c5", ":.!toilet -w 200 -f pagga<cr>", { desc = "Ascii art pagga" })
 vim.keymap.set("n", "<leader>c6", ":.!toilet -w 200 -f wideterm<cr>", { desc = "Ascii art wideterm" })
+vim.keymap.set("n", "<leader>c7", ":.!figlet -w 200 -f standard<cr>", { desc = "Ascii art standard" })
+vim.keymap.set("n", "<leader>c8", ":.!figlet -w 200 -f slant<cr>", { desc = "Ascii art slant" })
+vim.keymap.set("n", "<leader>c9", ":.!figlet -w 200 -f big<cr>", { desc = "Ascii art big" })
+vim.keymap.set("n", "<leader>c0", ":.!figlet -w 200 -f shadow<cr>", { desc = "Ascii art shadow" })
 
 -- Restart
 vim.keymap.set("n", "<leader>-", function()
