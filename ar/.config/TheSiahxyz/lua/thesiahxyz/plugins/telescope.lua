@@ -111,53 +111,56 @@ return {
 						"filename_first",
 					},
 				},
+				pickers = {
+					find_files = {
+						-- `hidden = true` will still show the inside of `.git/` as it's not `.gitignore`d.
+						find_command = { "rg", "--files", "--hidden", "--glob", "!**/.git/*" },
+					},
+				},
 			})
 
 			-- find
 			vim.keymap.set("n", "<leader>fb", function()
-				require("telescope.builtin").buffers({})
+				require("telescope.builtin").buffers()
 			end, { desc = "Find buffer files" })
 			vim.keymap.set("n", "<leader>fc", function()
 				require("telescope.builtin").find_files({
 					cwd = vim.fn.expand("~/.config"),
-					find_command = { "rg", "--files", "--follow", "--hidden", "--glob", "!**/.git/*" },
+					find_command = { "rg", "--files", "--follow", "--hidden", "--glob", "!**/.git/*", "--glob", "**/*" },
 				})
 			end, { desc = "Find config files" })
 			vim.keymap.set("n", "<leader>fd", function()
 				require("telescope.builtin").find_files({
 					cwd = vim.fn.expand("~/.dotfiles"),
-					find_command = { "rg", "--files", "--hidden", "--glob", "!**/.git/*" },
+					find_command = { "rg", "--files", "--follow", "--hidden", "--glob", "!**/.git/*", "--glob", "**/*" },
 				})
 			end, { desc = "Find dotfiles files" })
 			vim.keymap.set("n", "<leader>ff", function()
-				require("telescope.builtin").find_files({
-					find_command = { "rg", "--files", "--follow", "--hidden", "--glob", "!**/.git/*" },
-				})
+				require("telescope.builtin").find_files()
 			end, { desc = "Find files" })
 			vim.keymap.set("n", "<leader>fF", function()
 				require("telescope.builtin").find_files({ cwd = vim.fn.expand("~") })
 			end, { desc = "Find root files" })
 			vim.keymap.set("n", "<leader>fg", function()
-				require("telescope.builtin").git_files({
-					find_command = { "rg", "--files", "--follow", "--hidden", "--glob", "!**/.git/*" },
-				})
+				require("telescope.builtin").git_files()
 			end, { desc = "Find git files" })
 			vim.keymap.set("n", "<leader>fn", function()
-				require("telescope.builtin").find_files({
-					cwd = vim.fn.stdpath("config"),
-					find_command = { "rg", "--files", "--follow", "--hidden", "--glob", "!**/.git/*" },
-				})
+				require("telescope.builtin").find_files({ cwd = vim.fn.stdpath("config") })
 			end, { desc = "Find neovim config files" })
 			vim.keymap.set("n", "<leader>fo", function()
-				require("telescope.builtin").oldfiles({
-					find_command = { "rg", "--files", "--follow", "--hidden", "--glob", "!**/.git/*" },
-				})
+				require("telescope.builtin").oldfiles({})
 			end, { desc = "Find old files" })
 			vim.keymap.set("n", "<leader>fpv", function()
-				require("telescope.builtin").find_files({ cwd = vim.fn.expand("~/Private") })
+				require("telescope.builtin").find_files({
+					cwd = vim.fn.expand("~/Private"),
+					find_command = { "rg", "--files", "--follow", "--glob", "!**/.git/*", "--glob", "**/*" },
+				})
 			end, { desc = "Find private files" })
 			vim.keymap.set("n", "<leader>fpb", function()
-				require("telescope.builtin").find_files({ cwd = vim.fn.expand("~/Public") })
+				require("telescope.builtin").find_files({
+					cwd = vim.fn.expand("~/Public"),
+					find_command = { "rg", "--files", "--follow", "--glob", "!**/.git/*", "--glob", "**/*" },
+				})
 			end, { desc = "Find public files" })
 			vim.keymap.set("n", "<leader>fr", function()
 				require("telescope.builtin").find_files({
@@ -166,14 +169,17 @@ return {
 				})
 			end, { desc = "Find script files" })
 			vim.keymap.set("n", "<leader>fs", function()
-				require("telescope.builtin").find_files({ cwd = vim.fn.expand("~/.local/src/suckless") })
+				require("telescope.builtin").find_files({
+					cwd = vim.fn.expand("~/.local/src/suckless/"),
+					find_command = { "rg", "--files", "--follow", "--glob", "!**/.git/*", "--glob", "**/*" },
+				})
 			end, { desc = "Find suckless files" })
 			-- git
 			vim.keymap.set("n", "<leader>gc", function()
-				require("telescope.builtin").git_commits({})
+				require("telescope.builtin").git_commits()
 			end, { desc = "Find git commits" })
 			vim.keymap.set("n", "<leader>gs", function()
-				require("telescope.builtin").git_status({})
+				require("telescope.builtin").git_status()
 			end, { desc = "Find git status" })
 			-- lsp
 			vim.keymap.set("n", "gR", function()
