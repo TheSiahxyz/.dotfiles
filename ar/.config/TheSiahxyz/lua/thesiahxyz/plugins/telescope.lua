@@ -120,6 +120,7 @@ return {
 						find_command = {
 							"rg",
 							"--files",
+							"--follow",
 							"--hidden",
 							"--glob",
 							"!**/.git/*",
@@ -154,6 +155,7 @@ return {
 					find_command = {
 						"rg",
 						"--files",
+						"--follow",
 						"--hidden",
 						"--glob",
 						"!**/.git/*",
@@ -215,6 +217,7 @@ return {
 						"rg",
 						"--files",
 						"--follow",
+						"--hidden",
 						"--glob",
 						"!**/.git/*",
 						"--glob",
