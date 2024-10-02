@@ -45,30 +45,28 @@ open_staged_files() {
     eval "${EDITOR:-nvim} $@"
 }
 
-while getopts "s" opt; do
-    case $opt in
-    s)
-        path="$(
-            sesh list | fzf-tmux -p 85%,70% \
-                --no-sort --cycle --ignore-case --ansi --border=sharp --multi --border-label "╢ TheSiahxyz ╟" --prompt "⚡  " \
-                --header "^a all ^t tmux ^e sesh ^f zoxide ^h home ^c configs ^d .dotfiles ^g git ^u staged files ^k desktop ^v private ^b public ^r scripts ^s suckless ^x tmux kill M-CR open ^/ help" \
-                --bind "ctrl-a:change-prompt(⚡  )+reload(sesh list)" \
-                --bind "ctrl-b:change-prompt(👯  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ${XDG_PUBLICSHARE_DIR:-${HOME}/Public} | sed 's|$HOME|~|g')" \
-                --bind "ctrl-c:change-prompt(🗂️  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ${XDG_CONFIG_DIR:-${HOME}/.config} | sed 's|$HOME|~|g')" \
-                --bind "ctrl-d:change-prompt(⚙️  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ${XDG_DOTFILES_DIR:-${HOME}/.dotfiles} | sed 's|$HOME|~|g')" \
-                --bind "ctrl-e:change-prompt(📑  )+reload(sesh list -c)" \
-                --bind "ctrl-f:change-prompt(🔎  )+reload(sesh list -z)" \
-                --bind "ctrl-g:change-prompt(  )+reload(fd -H -d 2 -t d -E .Trash -E .git . $HOME/Private/git | sed 's|$HOME|~|g')" \
-                --bind "ctrl-h:change-prompt(🏠  )+reload(fd -H -d 2 -t d -E .Trash -E .git . $HOME | sed 's|$HOME|~|g')" \
-                --bind "ctrl-k:change-prompt(🖥️  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ${XDG_DESKTOP_DIR:-${HOME}/Desktop} | sed 's|$HOME|~|g')" \
-                --bind "ctrl-r:change-prompt(👟  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ${XDG_SCRIPTS_HOME:-${HOME}/.local/bin} | sed 's|$HOME|~|g')" \
-                --bind "ctrl-s:change-prompt(🦴  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless | sed 's|$HOME|~|g')" \
-                --bind "ctrl-t:change-prompt(🪟  )+reload(sesh list -t)" \
-                --bind "ctrl-u:change-prompt(📝  )+reload(git -C $(git rev-parse --show-toplevel) status -s | awk -v pwd=\"$PWD\" '{print pwd \"\/\" \$2}' | grep -v '^$' | sed 's|$HOME|~|g')" \
-                --bind "ctrl-v:change-prompt(🧑  )+reload(fd -H -d 2 -t d -E .Trash -E .git . $HOME/Private | sed 's|$HOME|~|g')" \
-                --bind "ctrl-x:execute(tmux kill-session -t {})+change-prompt(⚡  )+reload(sesh list)" \
-                --bind "alt-enter:execute(nvim {})+abort" \
-                --bind 'ctrl-/:change-prompt(❓  )+reload(echo "^a all
+sessionizer() {
+    path="$(
+        sesh list | fzf-tmux -p 85%,70% \
+            --no-sort --cycle --ignore-case --ansi --border=sharp --multi --border-label "╢ TheSiahxyz ╟" --prompt "⚡  " \
+            --header "^a all ^t tmux ^e sesh ^f zoxide ^h home ^c configs ^d .dotfiles ^g git ^u staged files ^k desktop ^v private ^b public ^r scripts ^s suckless ^x tmux kill M-CR open ^/ help" \
+            --bind "ctrl-a:change-prompt(⚡  )+reload(sesh list)" \
+            --bind "ctrl-b:change-prompt(👯  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ${XDG_PUBLICSHARE_DIR:-${HOME}/Public} | sed 's|$HOME|~|g')" \
+            --bind "ctrl-c:change-prompt(🗂️  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ${XDG_CONFIG_DIR:-${HOME}/.config} | sed 's|$HOME|~|g')" \
+            --bind "ctrl-d:change-prompt(⚙️  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ${XDG_DOTFILES_DIR:-${HOME}/.dotfiles} | sed 's|$HOME|~|g')" \
+            --bind "ctrl-e:change-prompt(📑  )+reload(sesh list -c)" \
+            --bind "ctrl-f:change-prompt(🔎  )+reload(sesh list -z)" \
+            --bind "ctrl-g:change-prompt(  )+reload(fd -H -d 2 -t d -E .Trash -E .git . $HOME/Private/git | sed 's|$HOME|~|g')" \
+            --bind "ctrl-h:change-prompt(🏠  )+reload(fd -H -d 2 -t d -E .Trash -E .git . $HOME | sed 's|$HOME|~|g')" \
+            --bind "ctrl-k:change-prompt(🖥️  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ${XDG_DESKTOP_DIR:-${HOME}/Desktop} | sed 's|$HOME|~|g')" \
+            --bind "ctrl-r:change-prompt(👟  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ${XDG_SCRIPTS_HOME:-${HOME}/.local/bin} | sed 's|$HOME|~|g')" \
+            --bind "ctrl-s:change-prompt(🦴  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless | sed 's|$HOME|~|g')" \
+            --bind "ctrl-t:change-prompt(🪟  )+reload(sesh list -t)" \
+            --bind "ctrl-u:change-prompt(📝  )+reload(git -C $(git rev-parse --show-toplevel) status -s | awk -v pwd=\"$PWD\" '{print pwd \"\/\" \$2}' | grep -v '^$' | sed 's|$HOME|~|g')" \
+            --bind "ctrl-v:change-prompt(🧑  )+reload(fd -H -d 2 -t d -E .Trash -E .git . $HOME/Private | sed 's|$HOME|~|g')" \
+            --bind "ctrl-x:execute(tmux kill-session -t {})+change-prompt(⚡  )+reload(sesh list)" \
+            --bind "alt-enter:execute(nvim {})+abort" \
+            --bind 'ctrl-/:change-prompt(❓  )+reload(echo "^a all
 ^b public
 ^c configs
 ^d .dotfiles
@@ -85,9 +83,21 @@ while getopts "s" opt; do
 ^x tmux kill
 M-CR open in nvim
 ^/ help")'
-        )" 2>/dev/null || exit 0
+    )" 2>/dev/null
+
+    case "$path" in
+    ^*) sessionizer ;;
+    *)
         sesh connect "$path" >/dev/null 2>&1 || open_staged_files "$path"
         exit
+        ;;
+    esac
+}
+
+while getopts "s" opt; do
+    case $opt in
+    s)
+        sessionizer
         ;;
     *) ;;
     esac
