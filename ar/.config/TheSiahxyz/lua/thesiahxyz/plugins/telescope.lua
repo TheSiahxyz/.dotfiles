@@ -140,6 +140,13 @@ return {
 					initial_mode = "normal",
 				})
 			end, { desc = "Find buffer files" })
+			vim.keymap.set("n", "<C-g>", function()
+				require("telescope.builtin").buffers({
+					sort_mru = true,
+					sort_lastused = true,
+					initial_mode = "normal",
+				})
+			end, { desc = "Find buffer files" })
 			vim.keymap.set("n", "<leader>fc", function()
 				require("telescope.builtin").find_files({ cwd = vim.fn.expand("~/.config") })
 			end, { desc = "Find config files" })

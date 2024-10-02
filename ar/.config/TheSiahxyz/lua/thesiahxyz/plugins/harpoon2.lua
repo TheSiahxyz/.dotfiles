@@ -27,7 +27,7 @@ return {
 				desc = "Add buffer to harpoon list",
 			},
 			{
-				"<C-g>",
+				"<C-q>",
 				function()
 					local harpoon = require("harpoon")
 					harpoon.ui:toggle_quick_menu(harpoon:list())
