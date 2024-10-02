@@ -83,24 +83,43 @@ return {
 				lualine_a = {
 					{
 						function()
-							local function buffer_status()
-								local buffers = vim.fn.getbufinfo({ buflisted = true })
-								local current_buf = vim.fn.bufnr()
-								local current_index = 0
-								local modified_symbol = vim.bo.modified and "●" or ""
-								for i, buf in ipairs(buffers) do
-									if buf.bufnr == current_buf then
-										current_index = i
+							local function tab_status()
+								local tabs = vim.api.nvim_list_tabpages()
+								local current_tab = vim.api.nvim_get_current_tabpage()
+								local current_tab_index = 0
+								for i, tab in ipairs(tabs) do
+									if tab == current_tab then
+										current_tab_index = i
 										break
 									end
 								end
-								return string.format("%s%d/%d", modified_symbol, current_index, #buffers)
+								return string.format("%d", current_tab_index)
+							end
+							return tab_status()
+						end,
+					},
+				},
+				lualine_b = {
+					{
+						function()
+							local function buffer_status()
+								local buffers = vim.fn.getbufinfo({ buflisted = true })
+								local current_buf = vim.fn.bufnr()
+								local current_buffer_index = 0
+								local modified_symbol = vim.bo.modified and "●" or ""
+								for i, buf in ipairs(buffers) do
+									if buf.bufnr == current_buf then
+										current_buffer_index = i
+										break
+									end
+								end
+								return string.format("%s%d/%d", modified_symbol, current_buffer_index, #buffers)
 							end
 							return buffer_status()
 						end,
 					},
 				},
-				lualine_b = {
+				lualine_c = {
 					{
 						function()
 							return navic.get_location()
@@ -110,7 +129,6 @@ return {
 						end,
 					},
 				},
-				lualine_c = {},
 				lualine_x = {},
 				lualine_y = {},
 				lualine_z = {},

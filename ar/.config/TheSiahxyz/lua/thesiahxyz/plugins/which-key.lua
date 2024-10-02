@@ -41,6 +41,9 @@ return {
 						return require("which-key.extras").expand.buf()
 					end,
 				},
+				{ "<leader>B", group = "Force buffer" },
+				{ "<leader>c", group = "Ascii/Goto" },
+				{ "<leader>C", group = "Goto realpath" },
 				{ "<leader>e", group = "Explorer" },
 				{ "<leader>i", group = "Inspect" },
 				{ "<leader>l", group = "Location" },
@@ -48,6 +51,7 @@ return {
 				{ "<leader>M", group = "Mason" },
 				{ "<leader>o", group = "Open" },
 				{ "<leader>q", group = "Quit" },
+				{ "<leader>R", group = "Refresh" },
 				{ "<leader>sk", group = "Keys" },
 				{
 					"<leader>w",
@@ -58,6 +62,7 @@ return {
 					end,
 				},
 				{ "<leader>W", group = "Save all" },
+				{ "<leader><tab>", group = "Tabs" },
 			},
 			{
 				mode = { "n", "v", "x" },

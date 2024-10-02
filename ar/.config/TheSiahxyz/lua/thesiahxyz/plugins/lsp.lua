@@ -22,7 +22,7 @@ return {
 		local wk = require("which-key")
 		wk.add({
 			mode = { "n", "v", "x" },
-			{ "<leader>c", group = "Format/Ascii" },
+			{ "<leader>c", group = "Format" },
 			{ "<leader>tf", group = "Format" },
 		})
 	end,
