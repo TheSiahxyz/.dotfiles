@@ -111,6 +111,6 @@ case $BLOCK_BUTTON in
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
-checkforecast "$weatherreport" || { getweatherreport && pkill -RTMIN+5 "${STATUSBAR:-dwmblocks}"; }
-checkforecast "$weatherreportjson" || { getweatherreportjson && pkill -RTMIN+5 "${STATUSBAR:-dwmblocks}"; }
+checkforecast "$weatherreport" || { getweatherreport && pkill -RTMIN+5 "${STATUSBAR:-dwmblocks}" && sleep 1; }
+checkforecast "$weatherreportjson" || { getweatherreportjson && pkill -RTMIN+5 "${STATUSBAR:-dwmblocks}" && sleep 1; }
 showweather
