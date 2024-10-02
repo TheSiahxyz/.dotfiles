@@ -36,7 +36,8 @@ eval "echo \"$(cat "$bmdirs")\"" |
     printf(\"cmap ;%s %s\n\",\$1,\$2)      >> \"$vim_shortcuts\" ;
     printf(\"nmap <localleader><localleader>%s :Explore %s<cr>\n\",\$1,\$2)      >> \"$vim_shortcuts\" ;
     printf(\"vim.keymap.set('c', ';%s', '%s<cr>', { noremap = true, silent = true, desc = '%s' })\n\", \$1, \$2, gensub(\"^/home/si/\",\"~/\",\"g\",\$2)) >> \"$nvim_shortcuts\" ;
-    printf(\"vim.keymap.set('n', '<localleader><localleader>%s', '<cmd>Explore %s<cr>', { noremap = true, silent = true, desc = '%s' })\n\", \$1, \$2, gensub(\"^/home/si/\",\"~/\",\"g\",\$2)) >> \"$nvim_shortcuts\"}"
+    printf(\"vim.keymap.set('n', '<localleader><leader>%s', '<cmd>Explore %s<cr>', { noremap = true, silent = true, desc = '%s' })\n\", \$1, \$2, gensub(\"^/home/si/\",\"~/\",\"g\",\$2)) >> \"$nvim_shortcuts\" ;
+    printf(\"vim.keymap.set('n', '<localleader><localleader>%s', function() require('mini.files').open('%s') end, { noremap = true, silent = true, desc = '%s' })\n\", \$1, \$2, gensub(\"^/home/si/\",\"~/\",\"g\",\$2)) >> \"$nvim_shortcuts\"}"
 
 # Format the `files` file in the correct syntax and sent it to both configs.
 eval "echo \"$(cat "$bmfiles")\"" |
