@@ -7,15 +7,19 @@ create_new_session() {
     if tmux has-session -t "$session_name" 2>/dev/null; then
         tmux switch-client -t "$session_name"
     else
-        [ -n "$TMUX" ] && (tmux new-session -d -s "$session_name" -c "$session_path" && tmux switch-client -t "$session_name") ||
+        if [ -n "$TMUX" ]; then
+            tmux new-session -d -s "$session_name" -c "$session_path"
+            tmux switch-client -t "$session_name"
+        else
             tmux new -s "$session_name" -c "$session_path"
+        fi
     fi
 }
 
 open_staged_files() {
     # If files are provided as arguments, use them; otherwise, use fzf to select files
     if [ "$#" -gt 0 ]; then
-        resolved_files="$@"
+        resolved_files="$*"
     else
         # Get the repository root path
         repo_root=$(git rev-parse --show-toplevel)
@@ -36,7 +40,7 @@ open_staged_files() {
     fi
 
     # Remove leading/trailing whitespace and split resolved_files into positional parameters
-    set -- $(echo "$resolved_files" | xargs -n1 echo)
+    set -- "$(echo "$resolved_files" | xargs -n1 echo)"
 
     eval "${EDITOR:-nvim} $@"
 }
@@ -60,7 +64,7 @@ while getopts "s" opt; do
                 --bind "ctrl-r:change-prompt(👟  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ${XDG_SCRIPTS_HOME:-${HOME}/.local/bin} | sed 's|$HOME|~|g')" \
                 --bind "ctrl-s:change-prompt(🦴  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless | sed 's|$HOME|~|g')" \
                 --bind "ctrl-t:change-prompt(🪟  )+reload(sesh list -t)" \
-                --bind "ctrl-u:change-prompt(📝  )+reload(git -C $(git rev-parse --show-toplevel) status -s | awk -v pwd=\"$PWD\" '{print pwd \"\/\" \$2}' | grep -v '^$' | sed 's|$HOME|~|g' || echo \"Not a git repo.\")" \
+                --bind "ctrl-u:change-prompt(📝  )+reload(git -C $(git rev-parse --show-toplevel) status -s | awk -v pwd=\"$PWD\" '{print pwd \"\/\" \$2}' | grep -v '^$' | sed 's|$HOME|~|g')" \
                 --bind "ctrl-v:change-prompt(🧑  )+reload(fd -H -d 2 -t d -E .Trash -E .git . $HOME/Private | sed 's|$HOME|~|g')" \
                 --bind "ctrl-x:execute(tmux kill-session -t {})+change-prompt(⚡  )+reload(sesh list)" \
                 --bind "alt-enter:execute(nvim {})+abort" \
@@ -87,17 +91,24 @@ M-CR open in nvim
         ;;
     *) ;;
     esac
-done || exit
+done
 
-[ $# -gt 0 ] && {
-    [ -d "$1" ] && create_new_session "$(basename "$1")" "$1" || create_new_session "$1"
-    exit
-} || {
-    ! tmux ls >/dev/null 2>&1 && create_new_session && exit || {
-        session=$( (
-            tmux ls
-            echo "[new session]"
-        ) | fzf | cut -d: -f1)
-        [ -z "$session" ] && exit || ([ "$session" = "[new session]" ] && create_new_session && exit || tmux attach -t "$session")
-    }
-}
+if [ $# -gt 0 ]; then
+    if [ -d "$1" ]; then
+        create_new_session "$(basename "$1")" "$1"
+    else
+        create_new_session "$1"
+    fi
+else
+    if ! tmux ls >/dev/null 2>&1; then
+        create_new_session
+    else
+        session=$(tmux ls echo "[new session]" | fzf | cut -d: -f1)
+        [ -z "$session" ] && exit
+        if [ "$session" = "[new session]" ]; then
+            create_new_session
+        else
+            tmux attach -t "$session"
+        fi
+    fi
+fi
