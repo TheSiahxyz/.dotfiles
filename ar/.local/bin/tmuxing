@@ -32,7 +32,7 @@ open_staged_files() {
         # Resolve each file to its absolute path
         resolved_files=""
         for file in $files; do
-            resolved_files="$resolved_files $(realpath "$repo_root/$file")"
+            resolved_files="$resolved_files $(realpath "$(git rev-parse --show-toplevel)/$file")"
         done
     fi
 
@@ -43,7 +43,6 @@ open_staged_files() {
 }
 
 sessionizer() {
-    repo_root=$(git rev-parse --show-toplevel)
     path="$(
         sesh list | fzf-tmux -p 85%,70% \
             --no-sort --cycle --ignore-case --ansi --border=sharp --multi --border-label "╢ TheSiahxyz ╟" --prompt "⚡  " \
@@ -60,7 +59,7 @@ sessionizer() {
             --bind "ctrl-r:change-prompt(👟  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ${XDG_SCRIPTS_HOME:-${HOME}/.local/bin} | sed 's|$HOME|~|g')" \
             --bind "ctrl-s:change-prompt(🦴  )+reload(fd -H -d 2 -t d -E .Trash -E .git . ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless | sed 's|$HOME|~|g')" \
             --bind "ctrl-t:change-prompt(🪟  )+reload(sesh list -t)" \
-            --bind "ctrl-u:change-prompt(📝  )+reload(git -C $repo_root status -s | awk -v pwd=\"$PWD\" '{print pwd \"\/\" \$2}' | grep -v '^$' | sed 's|$HOME|~|g')" \
+            --bind "ctrl-u:change-prompt(📝  )+reload(git -C $(git rev-parse --show-toplevel) status -s | awk -v pwd=\"$PWD\" '{print pwd \"\/\" \$2}' | grep -v '^$' | sed 's|$HOME|~|g')" \
             --bind "ctrl-v:change-prompt(🧑  )+reload(fd -H -d 2 -t d -E .Trash -E .git . $HOME/Private | sed 's|$HOME|~|g')" \
             --bind "ctrl-x:execute(tmux kill-session -t {})+change-prompt(⚡  )+reload(sesh list)" \
             --bind "alt-enter:execute(nvim {})+abort" \
