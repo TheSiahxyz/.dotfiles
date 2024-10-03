@@ -1,6 +1,8 @@
 -- Leader Keys
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
+vim.keymap.set("n", "<C-,>", ':echo "Control Dot Pressed!"<CR>', { noremap = true, silent = true })
+vim.keymap.set("n", "<C-.>", ':echo "Control Dot Pressed!"<CR>', { noremap = true, silent = true })
 
 -- Buffers
 vim.keymap.set("i", "<C-z>", "<cmd>bprevious<cr>", { desc = "Previous buffer" })

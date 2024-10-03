@@ -196,7 +196,7 @@ function sscs() {
 function fdot() {
     local search_dirs=()
     local initial_dirs=("$HOME/.dotfiles" "$HOME/.local/share/.password-store" "$HOME/.local/src/suckless")
-    local git_dirs=("$HOME/Private/git" "$HOME/Public/git")
+    local git_dirs=("$HOME/Private/repos" "$HOME/Public/repos")
 
     process_and_append() {
         local dir="$1"

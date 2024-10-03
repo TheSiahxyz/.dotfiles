@@ -175,7 +175,7 @@ export THESIAH="thesiah.xyz"
 export THESIAH_GIT="git@$THESIAH"
 export THESIAH_SERVER="root@$THESIAH"
 export THESIAH_VPN="${THESIAH%%.*}"
-export THESIAH_WWW="$HOME/Private/git/THESIAH"
+export THESIAH_WWW="$HOME/Private/repos/THESIAH"
 
 ### --- SQLITE --- ###
 export SQLITE_HISTORY="$XDG_DATA_HOME/history/sqlite_history"

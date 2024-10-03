@@ -16,7 +16,7 @@ vim.keymap.set(
 local function is_in_obsidian_repo()
 	local current_file_path = vim.fn.expand("%:p:h")
 	local user = os.getenv("USER") -- Get the current user's name from the environment variable
-	local obsidian_path = "/home/" .. user .. "/Private/git/Obsidian/"
+	local obsidian_path = "/home/" .. user .. "/Private/repos/Obsidian/"
 
 	return string.find(current_file_path, obsidian_path) ~= nil
 end

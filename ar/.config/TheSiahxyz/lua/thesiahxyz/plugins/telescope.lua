@@ -17,6 +17,120 @@ end
 
 return {
 	{
+		"nvim-telescope/telescope-file-browser.nvim",
+		dependencies = { "nvim-telescope/telescope.nvim", "nvim-lua/plenary.nvim" },
+		init = function()
+			vim.api.nvim_create_autocmd("VimEnter", {
+				group = vim.api.nvim_create_augroup("TelescopeFileBrowserStartDirectory", { clear = true }),
+				desc = "Start telescope-file-browser with directory",
+				once = true,
+				callback = function()
+					if package.loaded["telescope-file-browser.nvim"] then
+						return
+					else
+						local stats = vim.uv.fs_stat(vim.fn.argv(0))
+						if stats and stats.type == "directory" then
+							require("telescope").extensions.file_browser.file_browser()
+						end
+					end
+				end,
+			})
+		end,
+		config = function()
+			local fb_actions = require("telescope._extensions.file_browser.actions")
+
+			require("telescope").setup({
+				extensions = {
+					file_browser = {
+						path = vim.uv.cwd(),
+						cwd = vim.uv.cwd(),
+						cwd_to_path = false,
+						grouped = true,
+						files = true,
+						add_dirs = true,
+						depth = 1,
+						auto_depth = true,
+						select_buffer = true,
+						hidden = { file_browser = false, folder_browser = false },
+						respect_gitignore = vim.fn.executable("fd") == 1,
+						no_ignore = true,
+						follow_symlinks = true,
+						browse_files = require("telescope._extensions.file_browser.finders").browse_files,
+						browse_folders = require("telescope._extensions.file_browser.finders").browse_folders,
+						hide_parent_dir = false,
+						collapse_dirs = true,
+						prompt_path = true,
+						quiet = true,
+						dir_icon = "",
+						dir_icon_hl = "Default",
+						display_stat = { date = true, size = true, mode = true },
+						hijack_netrw = false,
+						use_fd = true,
+						git_status = true,
+						mappings = {
+							["i"] = {
+								["<C-a>"] = fb_actions.create,
+								["<C-i>"] = fb_actions.create_from_prompt,
+								["<C-r>"] = fb_actions.rename,
+								["<C-d>"] = fb_actions.move,
+								["<C-y>"] = fb_actions.copy,
+								["<Del>"] = fb_actions.remove,
+								["<C-o>"] = fb_actions.open,
+								["<C-h>"] = fb_actions.goto_parent_dir,
+								["<C-Space>"] = fb_actions.goto_home_dir,
+								["<C-w>"] = fb_actions.goto_cwd,
+								["<C-g>"] = fb_actions.change_cwd,
+								["<C-f>"] = fb_actions.toggle_browser,
+								["<C-_>"] = fb_actions.toggle_hidden,
+								["<C-t>"] = fb_actions.toggle_all,
+								["<bs>"] = fb_actions.backspace,
+							},
+							["n"] = {
+								["a"] = fb_actions.create,
+								["n"] = fb_actions.create_from_prompt,
+								["r"] = fb_actions.rename,
+								["d"] = fb_actions.move,
+								["y"] = fb_actions.copy,
+								["Del"] = fb_actions.remove,
+								["o"] = fb_actions.open,
+								["h"] = fb_actions.goto_parent_dir,
+								["gh"] = fb_actions.goto_home_dir,
+								["<C-w>"] = fb_actions.goto_cwd,
+								["<C-g>"] = fb_actions.change_cwd,
+								["f"] = fb_actions.toggle_browser,
+								["/"] = fb_actions.toggle_hidden,
+								["t"] = fb_actions.toggle_all,
+							},
+						},
+						file_ignore_patterns = {
+							"node_modules",
+							"yarn.lock",
+							".git",
+							".sl",
+							"_build",
+							".next",
+						},
+						path_display = {
+							"filename_first",
+						},
+						results_title = vim.fn.fnamemodify(vim.uv.cwd(), ":~"),
+					},
+				},
+			})
+
+			vim.keymap.set("n", "<leader>et", ":Telescope file_browser<CR>")
+
+			-- open file_browser with the path of the current buffer
+			vim.keymap.set("n", "<leader>eT", ":Telescope file_browser path=%:p:h select_buffer=true<CR>")
+
+			-- Alternatively, using lua API
+			vim.keymap.set("n", "<leader>ea", function()
+				require("telescope").extensions.file_browser.file_browser()
+			end)
+			require("telescope").load_extension("file_browser")
+		end,
+	},
+	{
 		"nvim-telescope/telescope.nvim",
 		version = false,
 		dependencies = {
@@ -113,6 +227,7 @@ return {
 					path_display = {
 						"filename_first",
 					},
+					results_title = vim.fn.fnamemodify(vim.uv.cwd(), ":~"),
 				},
 				pickers = {
 					find_files = {
@@ -219,7 +334,7 @@ return {
 			end, { desc = "Find suckless files" })
 			vim.keymap.set("n", "<leader>fts", function()
 				require("telescope.builtin").find_files({
-					cwd = vim.fn.expand("~/Private/git"),
+					cwd = vim.fn.expand("~/Private/repos"),
 					find_command = {
 						"rg",
 						"--files",
