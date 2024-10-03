@@ -32,7 +32,7 @@ return {
 			},
 			windows = {
 				preview = true,
-				width_focus = 30,
+				width_focus = 25,
 				width_preview = 40,
 			},
 		},
