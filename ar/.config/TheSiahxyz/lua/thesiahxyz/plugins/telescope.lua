@@ -19,23 +19,23 @@ return {
 	{
 		"nvim-telescope/telescope-file-browser.nvim",
 		dependencies = { "nvim-telescope/telescope.nvim", "nvim-lua/plenary.nvim" },
-		init = function()
-			vim.api.nvim_create_autocmd("VimEnter", {
-				group = vim.api.nvim_create_augroup("TelescopeFileBrowserStartDirectory", { clear = true }),
-				desc = "Start telescope-file-browser with directory",
-				once = true,
-				callback = function()
-					if package.loaded["telescope-file-browser.nvim"] then
-						return
-					else
-						local stats = vim.uv.fs_stat(vim.fn.argv(0))
-						if stats and stats.type == "directory" then
-							require("telescope").extensions.file_browser.file_browser()
-						end
-					end
-				end,
-			})
-		end,
+		-- init = function()
+		-- 	vim.api.nvim_create_autocmd("VimEnter", {
+		-- 		group = vim.api.nvim_create_augroup("TelescopeFileBrowserStartDirectory", { clear = true }),
+		-- 		desc = "Start telescope-file-browser with directory",
+		-- 		once = true,
+		-- 		callback = function()
+		-- 			if package.loaded["telescope-file-browser.nvim"] then
+		-- 				return
+		-- 			else
+		-- 				local stats = vim.uv.fs_stat(vim.fn.argv(0))
+		-- 				if stats and stats.type == "directory" then
+		-- 					require("telescope").extensions.file_browser.file_browser()
+		-- 				end
+		-- 			end
+		-- 		end,
+		-- 	})
+		-- end,
 		config = function()
 			local fb_actions = require("telescope._extensions.file_browser.actions")
 
@@ -64,7 +64,7 @@ return {
 						dir_icon = "",
 						dir_icon_hl = "Default",
 						display_stat = { date = true, size = true, mode = true },
-						hijack_netrw = false,
+						hijack_netrw = true,
 						use_fd = true,
 						git_status = true,
 						mappings = {
@@ -113,20 +113,26 @@ return {
 						path_display = {
 							"filename_first",
 						},
+						find_command = {
+							"rg",
+							"--files",
+							"--follow",
+							"--hidden",
+							"--glob",
+							"**/*",
+							"--glob",
+							"!**/.git/*",
+							"--no-ignore",
+							"--sortr=modified",
+						},
 						results_title = vim.fn.fnamemodify(vim.uv.cwd(), ":~"),
 					},
 				},
 			})
 
-			vim.keymap.set("n", "<leader>et", ":Telescope file_browser<CR>")
+			vim.keymap.set("n", "<leader>et", ":Telescope file_browser path=%:p:h select_buffer=true<CR>")
+			vim.keymap.set("n", "<leader>eT", ":Telescope file_browser<CR>")
 
-			-- open file_browser with the path of the current buffer
-			vim.keymap.set("n", "<leader>eT", ":Telescope file_browser path=%:p:h select_buffer=true<CR>")
-
-			-- Alternatively, using lua API
-			vim.keymap.set("n", "<leader>ea", function()
-				require("telescope").extensions.file_browser.file_browser()
-			end)
 			require("telescope").load_extension("file_browser")
 		end,
 	},
@@ -227,6 +233,13 @@ return {
 					path_display = {
 						"filename_first",
 					},
+					git_worktrees = {
+						{
+							toplevel = vim.env.HOME,
+							private = vim.env.HOME .. "/Private/git",
+							public = vim.env.HOME .. "/Public/git",
+						},
+					},
 					results_title = vim.fn.fnamemodify(vim.uv.cwd(), ":~"),
 				},
 				pickers = {
@@ -238,9 +251,10 @@ return {
 							"--follow",
 							"--hidden",
 							"--glob",
-							"!**/.git/*",
-							"--glob",
 							"**/*",
+							"--glob",
+							"!**/.git/*",
+							"--no-ignore",
 							"--sortr=modified",
 						},
 					},
