@@ -3,8 +3,13 @@
 0 */3 * * * $HOME/.local/bin/cron/checkup
 0 */3 * * * $HOME/.local/bin/statusbar/sb-forecast
 0 0 * * * NVIM_APPNAME=Starter nvim --headless "+Lazy! sync" +qa
+0 0 * * * NVIM_APPNAME=Starter nvim --headless "+MasonUpdate" +qa
 0 * * * * NVIM_APPNAME=LazyVim nvim --headless "+Lazy! sync" +qa
+0 * * * * NVIM_APPNAME=LazyVim nvim --headless "+MasonUpdate" +qa
 0 0 * * * NVIM_APPNAME=NvChad nvim --headless "+Lazy! sync" +qa
+0 0 * * * NVIM_APPNAME=NvChad nvim --headless "+MasonUpdate" +qa
 0 0 * * * NVIM_APPNAME=TheSiahxyz nvim --headless "+Lazy! sync" +qa
+0 0 * * * NVIM_APPNAME=TheSiahxyz nvim --headless "+MasonUpdate" +qa
 0 * * * * /usr/bin/nvim --headless "+Lazy! sync" +qa
+0 * * * * /usr/bin/nvim --headless "+MasonUpdate" +qa
 @daily /usr/bin/trash-empty 30
