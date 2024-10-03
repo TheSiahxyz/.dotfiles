@@ -18,6 +18,7 @@ cnc             ${XDG_CONFIG_HOME:-${HOME}/.config}/NvChad
 cnp             ${XDG_CONFIG_HOME:-${HOME}/.config}/ncmpcpp
 cns             ${XDG_CONFIG_HOME:-${HOME}/.config}/newsboat
 cnv             ${XDG_CONFIG_HOME:-${HOME}/.config}/nvim/lua/thesiahxyz
+cr              ${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/cron
 csh             ${XDG_CONFIG_HOME:-${HOME}/.config}/shell
 csl             ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/slock
 cst             ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/st
@@ -74,13 +75,12 @@ pvo             $HOME/Private/repos/Obsidian/SI
 pww             $HOME/Private/photo
 shm             ${XDG_DATA_HOME:-${HOME}/.local/share}/mail
 shr             ${XDG_DATA_HOME:-${HOME}/.local/share}
-shz             ${XDG_DATA_HOME:-${HOME}/.local/share}/zsh
 sk              ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless
 slr             ${XDG_DATA_HOME:-${HOME}/.local/share}/lyrics
 sr              ${XDG_SOURCES_HOME:-${HOME}/.local/src}
+tk              ${XDG_DATA_HOME:-${HOME}/.local/share}/thesiah/keys
 tr              ${XDG_DATA_HOME:-${HOME}/.local/share}/Trash/files
 ts              ${XDG_DATA_HOME:-${HOME}/.local/share}/thesiah
-tsk             ${XDG_DATA_HOME:-${HOME}/.local/share}/thesiah/keys
 tt              ${XDG_STATE_HOME:-${HOME}/.local/state}
 vwk             ${XDG_DATA_HOME:-${HOME}/.local/share}/vimwiki
 vww             $HOME/.wallpapers/video
