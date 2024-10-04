@@ -254,7 +254,7 @@ function git_push_origin_home() {
 ###########################################################################################
 ### --- GOTO --- ###
 # go to the path stored in the clipboard
-alias cdc=cd_clipboard_path
+alias cdp=cd_clipboard_path
 function cd_clipboard_path() {
     if command -v xclip > /dev/null; then
         local target_dir
