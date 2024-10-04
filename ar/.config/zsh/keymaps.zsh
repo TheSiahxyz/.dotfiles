@@ -55,10 +55,11 @@ bindkey -s '^X^F' '^ufF\n'
 bindkey -s '^X^G' '^utmuxgo\n'
 bindkey -s '^X^S' '^usshadd\n'
 bindkey -s '^X^T' '^usesh last\n'
+bindkey -s '^X^_' '^uprintfn\n'
 
 # man
 man-command-line() {
-    precmd "man"
+    pre_cmd "man"
 }
 zle -N man-command-line
 bindkey -M emacs '^X^M' man-command-line
@@ -67,7 +68,7 @@ bindkey -M viins '^X^M' man-command-line
 
 # sudo
 sudo-command-line() {
-    precmd "sudo"
+    pre_cmd "sudo"
 }
 zle -N sudo-command-line
 bindkey -M emacs '^S' sudo-command-line

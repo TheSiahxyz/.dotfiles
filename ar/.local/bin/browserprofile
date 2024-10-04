@@ -1,0 +1,78 @@
+#!/bin/sh
+
+# Define the profile paths
+WORK_PROFILE="si.work"
+HOME_PROFILE="si.default"
+
+update_profiles_ini() {
+    case "$1" in
+    -f | --firefo | firefox) profiles_ini_path="$HOME/.mozilla/firefox/profiles.ini" ;;
+    -l | --librewolf | librewolf) profiles_ini_path="$HOME/.librewolf/profiles.ini" ;;
+    *)
+        echo "Invalid browser type. Please use 'firefox' or 'librewolf'."
+        return 1
+        ;;
+    esac
+
+    profile_to_set=$2
+
+    # Backup current profiles.ini
+    cp "$profiles_ini_path" "$profiles_ini_path.bak"
+
+    # Update the profiles.ini
+    awk -v profile="$profile_to_set" '
+    /^\[Install/ {
+        print
+        found=1
+        next
+    }
+    found && /^Default=/ {
+        sub(/=.*/, "=" profile)
+        print
+        next
+    }
+    {
+        print
+    }' "$profiles_ini_path" >"$profiles_ini_path.tmp" && mv "$profiles_ini_path.tmp" "$profiles_ini_path"
+
+    echo "Updated profiles.ini to use profile: $profile_to_set"
+}
+
+# Main function
+update_profile() {
+    browser=$1
+    profile_type=$2
+
+    # Check if a browser is provided
+    if [ -z "$browser" ]; then
+        echo "Usage: update_profile <browser> [<profile_type>]"
+        echo "Accepted browsers: firefox, librewolf"
+        echo "Accepted profile types: work, default"
+        return 1
+    fi
+
+    # Convert profile_type to lowercase for case-insensitive comparison
+    if [ -n "$profile_type" ]; then
+        profile_type=$(echo "$profile_type" | tr '[:upper:]' '[:lower:]')
+    else
+        # Set to "default" if profile_type is not given
+        profile_type="default"
+    fi
+
+    # Set the profile based on the input
+    case "$profile_type" in
+    -w | --work | work)
+        update_profiles_ini "$browser" "$WORK_PROFILE"
+        ;;
+    -d | --default | default)
+        update_profiles_ini "$browser" "$HOME_PROFILE"
+        ;;
+    *)
+        echo "Invalid profile type. Please use 'work' or 'default'."
+        return 1
+        ;;
+    esac
+}
+
+# Execute the main function with arguments passed to the script
+update_profile "$1" "$2"

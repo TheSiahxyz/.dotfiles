@@ -4,7 +4,8 @@
 ###########################################################################################
 ### --- Stow --- ###
 # run stow script from dotfiles repo
-function dstw() { "${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/$(whereami)/.local/bin/stw"; }
+alias dstw=dotfeils_stw
+function dotfiles_stw() { "${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/$(whereami)/.local/bin/stw"; }
 
 ###########################################################################################
 ###########################################################################################
@@ -20,14 +21,16 @@ function pasteinit() {
 ###########################################################################################
 ### --- Last Command Output --- ###
 # print last command output
-function ilco() { LBUFFER+="$(eval $history[$((HISTCMD-1))])"; }
+alias ilco=insert_last_command_output
+function insert_last_command_output() { LBUFFER+="$(eval $history[$((HISTCMD-1))])"; }
 
 
 ###########################################################################################
 ###########################################################################################
 ### --- Ecryptfs --- ###
 # mount ecryptfs
-function emt() {
+alias emt=ecryptfs_mount
+function ecryptfs_mount() {
     ! mount | grep -q " $1 " && echo "$(pass show encryption/ecryptfs)" | sudo mount -t ecryptfs "$1" "$2" \
         -o ecryptfs_cipher=aes,ecryptfs_key_bytes=32,ecryptfs_passthrough=no,ecryptfs_enable_filename_crypto=yes,ecryptfs_sig="$(sudo cat /root/.ecryptfs/sig-cache.txt)",ecryptfs_fnek_sig="$(sudo cat /root/.ecryptfs/sig-cache.txt)",passwd="$(pass show encryption/ecryptfs)" >/dev/null 2>&1 &&
     echo "'$2' folder is mounted!"
@@ -38,13 +41,15 @@ function emt() {
 ###########################################################################################
 ### --- Git --- ###
 # TheSiahxyz's git repos
-function gcggg() {
+alias gcggg=thesiahxyz_git
+function thesiahxyz_git() {
     choice=$(ssh "$THESIAH_GIT" "ls -a | grep -i \".*\\.git$\"" | fzf --cycle --prompt="  " --height=50% --layout=reverse --border --exit-0)
     [ -n "$choice" ] && [ -n "$1" ] && git clone "${THESIAH_GIT:-git@${THESIAH:-thesiah.xyz}}":"$choice" "$1" || [ -n "$choice" ] && git clone "${THESIAH_GIT:-git@${THESIAH:-thesiah.xyz}}":"$choice"
 }
 
 # git push origin/home master
-function gp() {
+alias gp=git_push_origin_home
+function git_push_origin_home() {
     branch="$(git rev-parse --abbrev-ref HEAD)"
     [[ -z "$1" ]] && {
         git push home "$branch" && echo "Pushed to home on branch $branch successfully.\n" ||
@@ -62,14 +67,16 @@ function gp() {
 ###########################################################################################
 ### --- Setxkbmap --- ###
 # list setxkbmap options
-function gkey() { grep --color -E "$1" /usr/share/X11/xkb/rules/base.lst; }
+alias xkey=xset_options
+function xset_options() { grep --color -E "$1" /usr/share/X11/xkb/rules/base.lst; }
 
 
 ###########################################################################################
 ###########################################################################################
 ### --- Change Target Nvim --- ###
 # rename nvim directory
-function ctn() {
+alias ctn=rename_nvim_dir
+function rename_nvim_dir() {
     if [ $# -ne 2 ]; then
         echo "Usage: ctn <old_suffix> <new_suffix>"
         return 1
@@ -106,7 +113,8 @@ function ctn() {
 ###########################################################################################
 ### --- Color --- ###
 # print color
-function pcol() {
+alias pcol=print_col
+function print_col() {
     awk 'BEGIN{
 s="/\\/\\/\\/\\/\\"; s=s s s s s s s s;
 function for (colnum = 0; colnum<77; colnum++) {
@@ -127,7 +135,8 @@ printf "\n";
 ###########################################################################################
 ### --- Config --- ###
 # fzf config
-function fcf() {
+alias fcfg=fzf_config
+function fzf_config() {
     [ $# -gt 0 ] && zoxide query -i "$1" | xargs "${EDITOR}" && return
     local file
     file="$(zoxide query -l | fzf --cycle -1 -0 --no-sort +m)" && nvim "${file}" || return 1
@@ -138,15 +147,62 @@ function fcf() {
 ###########################################################################################
 ### --- Copy --- ###
 # copy file contents
-function cpf() {
-    local clipboard_cmd=()
-    local file
-    clipboard_cmd=("xclip" "-selection" "clipboard")
+alias cpfc=copy_contents
+function copy_contents() {
+    if ! command -v xclip >/dev/null 2>&1; then
+        echo "Error: 'xclip' is not installed." >&2
+        return 1
+    fi
 
-    file=$(fzf --cycle --preview "cat {}")
+    if ! command -v fzf >/dev/null 2>&1; then
+        echo "Error: 'fzf' is not installed." >&2
+        return 1
+    fi
+
+    local file="$1"
+
+    # If no argument is provided, use fzf to select a file
+    if [ -z "$file" ]; then
+        file=$(fzf --cycle --preview "cat {}")
+    fi
+
+    # Check if a file was found or selected
     if [ -n "$file" ]; then
         # Use `sed` to delete only the last newline character
-        cat "$file" | sed ':a;N;$!ba;s/\n$//' | "${clipboard_cmd[@]}"
+        cat "$file" | sed ':a;N;$!ba;s/\n$//' | xclip -selection clipboard
+        echo "Contents of '$file' copied to clipboard."
+    else
+        echo "No file selected."
+    fi
+}
+
+# copy file real path
+alias cprp=copy_real_path
+function copy_real_path() {
+    if ! command -v xclip >/dev/null 2>&1; then
+        echo "Error: 'xclip' is not installed." >&2
+        return 1
+    fi
+
+    if ! command -v fzf >/dev/null 2>&1; then
+        echo "Error: 'fzf' is not installed." >&2
+        return 1
+    fi
+
+    local file="$1"
+
+    # If no argument is provided, use fzf to select a file
+    if [ -z "$file" ]; then
+        file=$(fzf --cycle --preview "cat {}")
+    fi
+
+    # Check if a file was found or selected
+    if [ -n "$file" ]; then
+        local full_path=$(realpath "$file")
+        echo -n "$full_path" | xclip -selection clipboard
+        echo "File path copied to clipboard: $full_path"
+    else
+        echo "No file selected."
     fi
 }
 
@@ -155,7 +211,8 @@ function cpf() {
 ###########################################################################################
 ### --- Docker --- ###
 # select a docker container to start and attach to
-function doca() {
+alias doca=docker_container_init
+function docker_container_init() {
     local cid
     cid=$(docker ps -a | sed 1d | fzf --cycle -1 -q "$1" | awk '{print $1}')
 
@@ -163,37 +220,44 @@ function doca() {
 }
 
 # select a running docker container to stop
-function docs() {
+alias docs=docker_stop
+function docker_stop() {
     local cid
     cid=$(docker ps | sed 1d | fzf --cycle -q "$1" | awk '{print $1}')
 
     [ -n "$cid" ] && docker stop "$cid"
 }
 
-# multi docker selection:
-function docrm() { docker ps -a | sed 1d | fzf --cycle -q "$1" --no-sort -m --tac | awk '{ print $1 }' | xargs -r docker rm; }
+# select a docker container or containers to remove
+alias docrmc=docker_remove_containers
+function docker_remove_containers() { docker ps -a | sed 1d | fzf --cycle -q "$1" --no-sort -m --tac | awk '{ print $1 }' | xargs -r docker rm; }
 
 # select a docker image or images to remove
-function docrmi() { docker images | sed 1d | fzf --cycle -q "$1" --no-sort -m --tac | awk '{ print $3 }' | xargs -r docker rmi; }
+alias docrmi=docker_remove_images
+function docker_remove_images() { docker images | sed 1d | fzf --cycle -q "$1" --no-sort -m --tac | awk '{ print $3 }' | xargs -r docker rmi; }
 
 
 ###########################################################################################
 ###########################################################################################
 ### --- Goto --- ###
 # fzf files in root
-function ff() { file=$(find "$HOME" -type f >/dev/null 2>&1 | fzf) && nvim "$file"; }
+alias ff=fzf_file
+function fzf_file() { file=$(find "$HOME" -type f >/dev/null 2>&1 | fzf) && nvim "$file"; }
 
 # fzf directory
-function fD() { cd $(find "$HOME" -type d >/dev/null 2>&1 | fzf); }
+alias fD=fzf_directory
+function fzf_directory() { cd $(find "$HOME" -type d >/dev/null 2>&1 | fzf); }
 
-# search bin
-function sscs() {
+# search scripts in ~/.local/bin
+alias sscs=search_scripts
+function search_scripts() {
     choice="$(find ~/.local/bin -mindepth 1 \( -type f -o -type l \) -not -name '*.md' -not -path '*/zsh/*' -printf '%P\n' | fzf --cycle)"
     ([ -n "$choice" ] && [ -f "$HOME/.local/bin/$choice" ]) && $EDITOR "$HOME/.local/bin/$choice"
 }
 
-# check git directories
-function fdot() {
+# check git status by directories in specific path
+alias fdot=check_git_status
+function check_git_status() {
     local search_dirs=()
     local initial_dirs=("$HOME/.dotfiles" "$HOME/.local/share/.password-store" "$HOME/.local/src/suckless")
     local git_dirs=("$HOME/Private/repos" "$HOME/Public/repos")
@@ -244,15 +308,15 @@ function fdot() {
 ###########################################################################################
 ###########################################################################################
 ### --- help --- ###
+# help opt colored by bat
 alias bathelp='bat --plain --language=help'
-# help colored by bat
 function help() { "$@" --help 2>&1 | bathelp; }
 
 
 ###########################################################################################
 ###########################################################################################
 ### --- lf --- ###
-# lfcd
+# open lf and cd to the file path
 function lfcd () {
     tmp="$(mktemp -uq)"
     trap 'rm -f $tmp >/dev/null 2>&1 && trap - HUP INT QUIT TERM PWR EXIT' HUP INT QUIT TERM PWR EXIT
@@ -268,6 +332,7 @@ function lfcd () {
 ###########################################################################################
 ### --- mkcd --- ###
 # mkdir && cd
+alias mc=mkcd
 function mkcd() { mkdir -p "$@" && cd "$_"; }
 
 
@@ -275,7 +340,8 @@ function mkcd() { mkdir -p "$@" && cd "$_"; }
 ###########################################################################################
 ### --- neovim --- ###
 # change nvim config
-function cnf() {
+alias cnf=change_nvim_config_dir
+function change_nvim_config_dir() {
     local base_dir="${XDG_DOTFILES_DIR:-$HOME/.dotfiles}/$(whereami)/.config"     # Base directory for Neovim configs
     local target_dir="${XDG_CONFIG_HOME:-$HOME/.config}/nvim"             # Target directory for active Neovim config
     local target_share="${XDG_DATA_HOME:-$HOME/.local/share}/nvim"        # Neovim"s share directory
@@ -329,7 +395,8 @@ function cnf() {
 }
 
 # run nvim with target config
-function nvs() {
+alias vtc=nvim_target_config
+function nvim_target_config() {
     items=("Default" "TheSiahxyz" "LazyVim" "NvChad")
     config=$(printf "%s\n" "${items[@]}" | fzf --cycle --prompt=" Neovim Config  " --height=~50% --layout=reverse --border --exit-0)
     [[ -z $config ]] && return 0
@@ -340,25 +407,29 @@ function nvs() {
 ###########################################################################################
 ###########################################################################################
 ### --- Password --- ###
-# opt
-function pqr() { pass otp uri -q $1; }
+# otp
+function pass_otp() { pass otp uri -q $1; }
 
-# opt insert
-function pqri() { pass otp insert $1; }
+# otp insert
+function pass_otp_insert() { pass otp insert $1; }
 
 # fzf pass
-function pss() { pass show $(find $PASSWORD_STORE_DIR -type f -name '*.gpg' | sed 's|^''$PASSWORD_STORE_DIR/||; s/\.gpg$//' | fzf --cycle); }
+alias pss=cd_pass
+function cd_pass() { pass show $(find $PASSWORD_STORE_DIR -type f -name '*.gpg' | sed 's|^''$PASSWORD_STORE_DIR/||; s/\.gpg$//' | fzf --cycle); }
 
 # fzf pass and copy
-function psc() { pass show -c $(find $PASSWORD_STORE_DIR -type f -name '*.gpg' | sed 's|^''$PASSWORD_STORE_DIR/||; s/\.gpg$//' | fzf --cycle); }
+alias psc=fzf_pass_copy
+function fzf_pass_copy() { pass show -c $(find $PASSWORD_STORE_DIR -type f -name '*.gpg' | sed 's|^''$PASSWORD_STORE_DIR/||; s/\.gpg$//' | fzf --cycle); }
 
-# qr code pass
-function gpgqr() { qrencode -o "$1".png -t png -Sv 40 < "$1".pgp; }
+# copy pass qr code
+alias cpqr=pass_qr
+function pass_qr() { qrencode -o "$1".png -t png -Sv 40 < "$1".pgp; }
 
 
 ###########################################################################################
 ###########################################################################################
 ### --- Sudo --- ###
+# insert prefix at the beginning of the previous command
 function __command_replace_buffer() {
     local old=$1 new=$2 space=${2:+ }
     if [[ $CURSOR -le ${#old} ]]; then
@@ -370,7 +441,7 @@ function __command_replace_buffer() {
 }
 
 # manipulate the previous command line
-function precmd() {
+function pre_cmd() {
     local prepend_command=$1
     local EDITOR=${SUDO_EDITOR:-${VISUAL:-$EDITOR}}
     [[ -z $BUFFER ]] && LBUFFER="$(fc -ln -1)"
@@ -423,51 +494,23 @@ function precmd() {
 ###########################################################################################
 ### --- Tmux --- ###
 # tmux init
-function tit() {
+alias tit=tmux_init
+function tmux_init() {
     ! tmux has-session -t "$TERMINAL" 2>/dev/null && tmux new-session -d -s "$TERMINAL" -c "$HOME"
     [[ -n "$TMUX" ]] && tmux switch-client -t "$TERMINAL" || tmux attach-session -t "$TERMINAL"
 }
 
 # cd tmux session
-function cds() { cd "$(tmux display-message -p '#{session_path}')"; }
-
-# kill tmux session
-function tmk() {
-    local sessions
-    sessions="$(tmux ls|fzf --cycle --exit-0 --multi)"  || return $?
-    local i
-    for i in "${(f@)sessions}"
-    do
-        [[ $i =~ '([^:]*):.*' ]] && {
-            echo "Killing $match[1]"
-            tmux kill-session -t "$match[1]"
-        }
-    done
-}
-
-# new or switch tmux
-function tmn() {
-    [[ -n "$TMUX" ]] && change="switch-client" || change="attach-session"
-    if [ $1 ]; then
-        tmux $change -t "$1" >/dev/null 2>&1 || (tmux new-session -d -s $1 && tmux $change -t "$1"); return
-    fi
-    session=$(tmux list-sessions -F "#{session_name}" >/dev/null 2>&1 | fzf --cycle --exit-0) &&  tmux $change -t "$session" || echo "No sessions found."
-}
-
-# select tmux session
-function tms() {
-    local session
-    session=$(tmux list-sessions -F "#{session_name}" \
-        | fzf --cycle --query="$1" --select-1 --exit-0) &&
-    tmux switch-client -t "$session"
-}
+alias cds=cd_session_path
+function cd_session_path() { cd "$(tmux display-message -p '#{session_path}')"; }
 
 
 ###########################################################################################
 ###########################################################################################
 ### --- Virtual Env --- ###
 # create venvs
-function createv() {
+alias createv=create_venv
+function create_venv() {
     local env_dir="${XDG_DATA_HOME:-${HOME}/.local/share}/venvs/${1:-venv}"
     local requirements_path="${XDG_DATA_HOME:-${HOME}/.local/share}/venvs/captured-requirements.txt"
     # Check if the environment already exists
@@ -491,7 +534,8 @@ function createv() {
 }
 
 # activate or switch venvs
-function actv() {
+alias actv=active_venv
+function active_venv() {
     local venv="$1"
     if [[ -z "$venv" ]]; then
         venv=$(find "$XDG_DATA_HOME/venvs" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | fzf)
@@ -500,7 +544,8 @@ function actv() {
 }
 
 # list venvs
-function listv() {
+alias listv=list_venv
+function list_venv() {
     local venvs_dir="${XDG_DATA_HOME:-${HOME}/.local/share}/venvs"
     local venvs=("$venvs_dir"/*)
 
@@ -518,7 +563,8 @@ function listv() {
 }
 
 # deactivate venv
-function deactv() {
+alias deactv=deactive_venv
+function deactive_venv() {
     if [[ "$VIRTUAL_ENV" != "" ]]; then
         if [[ ! -f "${XDG_DATA_HOME:-${HOME}/.local/share}/venvs/requirements.txt" ]]; then
             pip3 freeze > "${XDG_DATA_HOME:-${HOME}/.local/share}/venvs/captured-requirements.txt}"
@@ -531,7 +577,8 @@ function deactv() {
 }
 
 # delete venv
-function delv() {
+alias delv=delete_venv
+function delete_venv() {
     local env_dir="${XDG_DATA_HOME:-${HOME}/.local/share}/venvs"
     local options=($(find "$env_dir" -maxdepth 1 -mindepth 1 -type d -exec basename {} \;))
     options+=("Delete All")

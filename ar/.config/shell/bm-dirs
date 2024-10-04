@@ -48,6 +48,7 @@ gti             $HOME/Torrents/incomplete
 gtt             $HOME/Torrents
 gvv             ${XDG_VIDEOS_DIR:-${HOME}/Videos}
 gvy             ${XDG_VIDEOS_DIR:-${HOME}/Videos}/Youtube
+gwf             $HOME/.librewolf/si.default
 gwo             ${XDG_DESKTOP_DIR:-${HOME}/Desktop}/Work
 gww             ${XDG_PICTURES_DIR:-${HOME}/Pictures}/wallpaper
 Hbk             /mnt/second/backup

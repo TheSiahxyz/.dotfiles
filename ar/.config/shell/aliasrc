@@ -242,9 +242,6 @@ alias k15='kill -15'
 # lf
 ialias lf='lfub'
 
-# mkcd
-alias mc='mkcd'
-
 # mkdir
 ialias mkdir='mkdir -pv'
 
