@@ -1,0 +1,139 @@
+#!/bin/sh
+
+# Usage function to display script options
+usage() {
+    cat <<EOF
+Usage: ${0##*/} [-s] [-i] [-l] [-p] [<tag>] <query>
+
+Options:
+    -h                  Show this message
+    -i                  Perform a case-insensitive search (default)
+    -l                  List files associated with the given tag
+    -p                  Search for files in the specified project directories using the specified tag (default: PROJECT)
+    -s                  Perform a case-sensitive search
+    [<tag>] <query>     Optional tag for project mode, followed by the search query
+
+Examples:
+    ${0##*/} -p TODO KEYWORD      Search for 'KEYWORD' in files tagged with 'TODO' in the project directories
+    ${0##*/} -l -p KEYWORD        List files associated with the default 'PROJECT' tag and 'KEYWORD'
+    ${0##*/} KEYWORD              Open files containing 'KEYWORD' in nvim
+EOF
+    exit 0
+}
+
+search_term() {
+    ignore_case_flag="$1"
+    shift
+
+    if ! command -v rga >/dev/null 2>&1; then
+        echo "Error: 'rga' is not installed." >&2
+        exit 1
+    fi
+    if ! command -v xclip >/dev/null 2>&1; then
+        echo "Error: 'xclip' is not installed." >&2
+        exit 1
+    fi
+
+    # Construct the preview command
+    preview_cmd=$(printf "rga %s --pretty --context 10 '%s' {}" "$ignore_case_flag" "$*")
+    rga_output=$(rga --follow --no-ignore --hidden --text --max-count=1 "$ignore_case_flag" --files-with-matches --no-messages --glob '!**/.git/*' "$*")
+
+    # Copy the file names to the clipboard
+    echo "$rga_output" | xclip -selection clipboard 2>/dev/null
+
+    # Use fzf to select files
+    files=$(echo "$rga_output" | fzf-tmux +m --preview="$preview_cmd" --multi --select-1 --exit-0) || return 1
+
+    # Check if files are selected
+    if [ -z "$files" ]; then
+        echo "No files selected."
+        return 0
+    fi
+
+    open_file "$files"
+}
+
+# Common function to open files with nvim
+open_file() {
+    if ! command -v nvim >/dev/null 2>&1; then
+        echo "Error: 'nvim' is not installed." >&2
+        exit 1
+    fi
+
+    nvim_cmd="${EDITOR:-nvim}"
+    count=0
+    IFS='
+'
+
+    for file in "$@"; do
+        count=$((count + 1))
+        file_path=$(realpath "$file")
+        nvim_cmd="$nvim_cmd \"$file_path\""
+    done
+
+    # Execute the nvim command
+    eval "$nvim_cmd"
+}
+
+# Function to list and/or open all files associated with a given project tag
+list_or_open_project_files() {
+    # Use the provided tag or default to "PROJECT"
+    project_tag="${1:-PROJECT}: $2"
+
+    # Define the project paths as a space-separated string
+    project_paths="$HOME/.dotfiles $HOME/.local/src/suckless $HOME/Public/repos"
+
+    # Use rga to find files containing the project tag across all project paths
+    rga_output=""
+    for path in $project_paths; do
+        if [ -d "$path" ]; then
+            rga_result=$(rga --follow --no-ignore --hidden --text --max-count=1 --files-with-matches --no-messages --glob '!**/.git/*' "$project_tag" "$path")
+            rga_output="$rga_output $rga_result"
+        fi
+    done
+
+    # Remove leading/trailing whitespace
+    rga_output=$(echo "$rga_output" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+
+    # Check if any files were found
+    if [ -z "$rga_output" ]; then
+        echo "No files found for tag $project_tag."
+        return 0
+    fi
+
+    # If the script was called in list mode, simply print the files
+    if [ "$list_mode" -eq 1 ]; then
+        echo "$rga_output"
+    else
+        # Otherwise, open the files with nvim
+        set -- $(printf "%s\n" "$rga_output")
+        open_file "$@"
+    fi
+}
+
+# Main function to handle options
+ignore_case_flag="--ignore-case" # Default to case-insensitive
+list_mode=0
+project_mode=0
+
+# Parse the options
+while getopts "silph" opt; do
+    case $opt in
+    s) ignore_case_flag="" ;;              # Case-sensitive
+    i) ignore_case_flag="--ignore-case" ;; # Case-insensitive
+    l) list_mode=1 ;;                      # List mode
+    p) project_mode=1 ;;                   # Project mode
+    h) usage ;;
+    *) ;;
+    esac
+done
+
+shift $((OPTIND - 1))
+
+# Handle project mode search
+if [ "$project_mode" -eq 1 ]; then
+    list_or_open_project_files "$1" "$2"
+else
+    # Otherwise, call the common search function
+    search_term "$ignore_case_flag" "$@"
+fi

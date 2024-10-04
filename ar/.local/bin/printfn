@@ -53,3 +53,6 @@ printf '%b' "$sorted" | while IFS='|' read -r f_name alias_name comment; do
         printf 'fn: %-30s - %s\n' "$f_name" "$comment"
     fi
 done
+
+# RTMIN: pkill
+# PROJECT: pkill

@@ -9,6 +9,7 @@ set hiddenfiles ".*:*.aux:*.log:*.bbl:*.bcf:*.blg:*.run.xml"
 set history false
 set icons true
 set ifs "\n"
+
 set ignorecase true
 set incsearch true
 set incfilter true

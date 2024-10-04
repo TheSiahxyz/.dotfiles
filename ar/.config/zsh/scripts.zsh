@@ -4,9 +4,9 @@
 ###########################################################################################
 ### --- ALIAS --- ###
 # find aliases
-alias pal=fzf_alias
+alias ali=fzf_alias
 function fzf_alias() {
-    local aliases=$(env)
+    local aliases=$(alias)
     local max_length=$(echo "$aliases" | cut -d'=' -f1 | awk '{print length}' | sort -nr | head -n 1)
     [ "$max_length" -gt 20 ] && max_length=20
     format_aliases() {
@@ -69,6 +69,36 @@ function fzf_config() {
 ###########################################################################################
 ###########################################################################################
 ### --- COPY --- ###
+# copy file name to clipboard
+alias cpfn=copy_filename
+function copy_filename() {
+    if ! command -v xclip >/dev/null 2>&1; then
+        echo "Error: 'xclip' is not installed." >&2
+        return 1
+    fi
+
+    if ! command -v fzf >/dev/null 2>&1; then
+        echo "Error: 'fzf' is not installed." >&2
+        return 1
+    fi
+
+    local file="$1"
+
+    # If no argument is provided, use fzf to select a file
+    if [ -z "$file" ]; then
+        file=$(fzf --cycle --preview "cat {}")
+    fi
+
+    # Check if a file was found or selected
+    if [ -n "$file" ]; then
+        local filename=$(basename "$file")
+        echo -n "$filename" | xclip -selection clipboard
+        echo "Filename copied to clipboard: $filename"
+    else
+        echo "No file selected."
+    fi
+}
+
 # copy file contents
 alias cpfc=copy_contents
 function copy_contents() {
@@ -96,6 +126,17 @@ function copy_contents() {
         echo "Contents of '$file' copied to clipboard."
     else
         echo "No file selected."
+    fi
+}
+
+# copy the current working directory path to the clipboard
+alias cpcp=copy_current_path
+function copy_current_path() {
+    if command -v xclip > /dev/null; then
+        printf "%s" "$PWD" | xclip -selection clipboard
+        printf "%s\n" "Current working directory '$(basename "$PWD")' path copied to clipboard."
+    else
+        printf "%s\n" "Error: 'xclip' command not found. Please install 'xclip' to use this function."
     fi
 }
 
@@ -136,6 +177,9 @@ function copy_real_path() {
 # mkdir && cd
 alias mc=mkcd
 function mkcd() { mkdir -p "$@" && cd "$_"; }
+
+# create dir with current date
+function mkdt () { mkdir -p ${1:+$1$prefix_separator}"$(date +%F)"; }
 
 
 ###########################################################################################
@@ -209,11 +253,27 @@ function git_push_origin_home() {
 ###########################################################################################
 ###########################################################################################
 ### --- GOTO --- ###
-# fzf files in root
+# go to the path stored in the clipboard
+alias cdc=cd_clipboard_path
+function cd_clipboard_path() {
+    if command -v xclip > /dev/null; then
+        local target_dir
+        target_dir="$(xclip -o -sel clipboard)"
+        if [[ -d "${target_dir}" ]]; then
+            cd "${target_dir}" && printf "%s\n" "Changed directory to: ${target_dir}"
+        else
+            printf "%s\n" "Error: Invalid directory path or directory does not exist."
+        fi
+    else
+        printf "%s\n" "Error: 'xclip' command not found. Please install 'xclip' to use this function."
+    fi
+}
+
+# fzf files in root and open in default editor
 alias ff=fzf_file
 function fzf_file() { file=$(find "$HOME" -type f >/dev/null 2>&1 | fzf) && nvim "$file"; }
 
-# fzf directory
+# fzf directory and go to the parent directory
 alias fD=fzf_directory
 function fzf_directory() { cd $(find "$HOME" -type d >/dev/null 2>&1 | fzf); }
 
@@ -570,6 +630,37 @@ function tmux_init() {
 # cd tmux session
 alias cds=cd_session_path
 function cd_session_path() { cd "$(tmux display-message -p '#{session_path}')"; }
+
+# kill tmux session
+function kill_tmux_sessions() {
+    local sessions
+    sessions="$(tmux ls|fzf --cycle --exit-0 --multi)"  || return $?
+    local i
+    for i in "${(f@)sessions}"
+    do
+        [[ $i =~ '([^:]*):.*' ]] && {
+            echo "Killing $match[1]"
+            tmux kill-session -t "$match[1]"
+        }
+    done
+}
+
+# new or switch tmux
+function new_tmux_session() {
+    [[ -n "$TMUX" ]] && change="switch-client" || change="attach-session"
+    if [ $1 ]; then
+        tmux $change -t "$1" >/dev/null 2>&1 || (tmux new-session -d -s $1 && tmux $change -t "$1"); return
+    fi
+    session=$(tmux list-sessions -F "#{session_name}" >/dev/null 2>&1 | fzf --cycle --exit-0) &&  tmux $change -t "$session" || echo "No sessions found."
+}
+
+# select tmux session
+function fzf_tmux_session() {
+    local session
+    session=$(tmux list-sessions -F "#{session_name}" \
+        | fzf --cycle --query="$1" --select-1 --exit-0) &&
+    tmux switch-client -t "$session"
+}
 
 
 ###########################################################################################
