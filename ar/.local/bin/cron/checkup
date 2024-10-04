@@ -10,7 +10,7 @@ Check your internet connection, if pacman is already running, or run update manu
 pkill -RTMIN+8 "${STATUSBAR:-dwmblocks}"
 
 if pacman -Qu | grep -v "\[ignored\]"; then
-    notify-send "🎁 Repository Sync" "Updates available. Click statusbar icon (📦) or run sb-popupgrade for update."
+    notify-send "🎁 Repository Sync" "Updates available. Click statusbar icon (📦) or run sb-popupgrade in terminal for update."
 else
     notify-send "📦 Repository Sync" "Sync complete. No new packages for update."
 fi
