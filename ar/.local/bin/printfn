@@ -1,34 +1,38 @@
-#!/bin/bash
+#!/bin/sh
 
 # Set the filename of the script containing the functions
 FILE="${ZDOTDIR:-${XDG_CONFIG_HOME:-${HOME}/.config}/zsh}/scripts.zsh"
 
+# Initialize an empty variable to hold functions and comments
+functions=""
+
 # Parse the file for function names and comments
-declare -a functions=()
-while IFS= read -r line; do
-    # Check for lines that start with a single "#" followed by a space or text (exclude ##, ###, etc. and shebangs like #!)
-    if [[ $line =~ ^#[^#!] ]]; then
-        # Remove the '#' from the comment line
-        comment="${line#\# }"
+while IFS= read line || [ -n "$line" ]; do
+    # Check for lines that start with a single "#" followed by a space or text (exclude ##, ###, etc.)
+    case "$line" in
+    \#*)
+        if [ "$(printf '%s' "$line" | cut -c 2)" != "#" ] && [ "$(printf '%s' "$line" | cut -c 2)" != "!" ]; then
+            # Remove the '#' from the comment line
+            comment=$(printf '%s' "$line" | sed 's/^# //')
 
-        # Read the next line to get the function definition
-        IFS= read -r next_line
-        # Extract the function name
-        f_name="${next_line#function }"
-        f_name="${f_name%%()*}"
+            # Read the next line to get the function definition
+            IFS= read next_line || break
+            # Extract the function name
+            f_name=$(printf '%s' "$next_line" | sed -n 's/^function \([^(]*\)().*$/\1/p')
 
-        # Add the function name and comment to the array
-        functions+=("$f_name|$comment")
-    fi
+            # Append the function name and comment to the functions variable
+            if [ -n "$f_name" ]; then
+                functions="$functions$f_name|$comment\n"
+            fi
+        fi
+        ;;
+    esac
 done <"$FILE"
 
 # Sort the functions alphabetically by name
-IFS=$'\n' sorted=($(sort <<<"${functions[*]}"))
-unset IFS
+sorted=$(printf '%b' "$functions" | sort)
 
 # Print out the sorted functions
-for f in "${sorted[@]}"; do
-    f_name="${f%|*}"
-    comment="${f#*|}"
-    printf "fn: %-15s - %s\n" "$f_name" "$comment"
+printf '%b' "$sorted" | while IFS='|' read f_name comment; do
+    printf 'fn: %-15s - %s\n' "$f_name" "$comment"
 done

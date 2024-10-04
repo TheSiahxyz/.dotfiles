@@ -1,86 +1,84 @@
 #!/bin/sh
 
-# Define the default Searx instance URL
-SEARX_URL="https://www.searx.thesiah.xyz/searxng/search?q="
-
-# Check if ddgr is installed (only needed for ddgr options)
-if ! command -v ddgr >/dev/null 2>&1; then
-    echo "Error: ddgr is not installed." >&2
-    exit 1
-fi
-
 # Usage message
 usage() {
-    echo "${0##*/} - searches query in a terminal"
+    echo "${0##*/} - searches query in a terminal or browser"
     echo ""
-    echo "Usage: ${0##*/} [-d] [-w <website>] [-y] <search_query>"
-    echo "    -d             : Use DuckDuckGo to search and open the result in a terminal"
-    echo "    -w <website>   : Use a specific website to search (e.g., Google)"
-    echo "    -y             : Search on YouTube"
-    echo "    <search_query> : The search term or query to use"
+    echo "Usage: ${0##*/} [-d | --ddgr | ddgr] [-h | --help | help] [<search_engine>] <search_query>"
+    echo "    -d, --ddgr, ddgr  : Use ddgr to search and open the result in a terminal"
+    echo "    -h, --help, help  : Display this help message"
+    echo "    <search_engine>   : (Optional) Search engine to use (google, bing, yahoo, duckduckgo, youtube)"
+    echo "    <search_query>    : The search term or query to use"
     exit 1
 }
 
-# Set the default search tool to Searx
-SEARCH_TOOL="default"
+# Set default values
+SEARCH_TOOL="web"
+SEARCH_ENGINE="searx"
 
-# Parse the command-line options
-while getopts "dw:y" opt; do
-    case $opt in
-    d)
-        SEARCH_TOOL="ddgr"
-        ;;
-    w)
-        SEARCH_TOOL="website"
-        SITE="$OPTARG"
-        ;;
-    y)
-        SEARCH_TOOL="youtube"
-        ;;
-    *)
-        usage
-        ;;
-    esac
-done
-
-# Shift off all the options to leave only the search query
-shift $((OPTIND - 1))
-
-# Check if there's a search query left
-if [ -z "$*" ]; then
-    usage
-fi
-
-# Store the search query
-SEARCH_QUERY="$*"
-
-# Execute the corresponding search tool
-case $SEARCH_TOOL in
-default)
-    # Default: Perform Searx search
-    SEARCH_QUERY_ENCODED=$(echo "$SEARCH_QUERY" | sed 's/ /+/g')
-    xdg-open "${SEARX_URL}${SEARCH_QUERY_ENCODED}"
-    ;;
-ddgr)
-    # Run DuckDuckGo search in terminal
-    ddgr "$SEARCH_QUERY"
-    ;;
-website)
-    # Perform site-specific search using ddgr
-    ddgr -w "$SITE" "$SEARCH_QUERY"
-    ;;
-youtube)
-    # Encode the search query and append it to YouTube's search URL
-    SEARCH_QUERY_ENCODED=$(echo "$SEARCH_QUERY" | sed 's/ /+/g')
-
-    # Use the YouTube URL and append the search query
-    SEARCH_URL="https://www.youtube.com/results?search_query=${SEARCH_QUERY_ENCODED}"
-
-    # Open the search URL in the default browser
-    xdg-open "$SEARCH_URL"
+# Determine the open command based on the operating system
+case "$(uname -s)" in
+Darwin)
+    open_cmd='open'
     ;;
 *)
-    # Fallback to usage if something goes wrong
+    open_cmd='xdg-open'
+    ;;
+esac
+
+# Check the first argument for flags or help using case
+case "$1" in
+-d | --ddgr | ddgr)
+    # Check if ddgr is installed (only needed for ddgr options)
+    if ! command -v ddgr >/dev/null 2>&1; then
+        echo "Error: ddgr is not installed." >&2
+        exit 1
+    fi
+    SEARCH_TOOL="ddgr"
+    shift # Remove this argument from the list
+    ;;
+-h | --help | help)
+    usage
+    ;;
+bing | duckduckgo | google | yahoo | youtube)
+    SEARCH_ENGINE="$1"
+    shift # Remove the search engine from the list
+    ;;
+esac
+
+# Store the remaining arguments as the search query
+SEARCH_QUERY="$*"
+
+# Ensure a search query is provided; if not, show usage
+[ -z "$SEARCH_QUERY" ] && usage
+
+# Execute the corresponding search tool using case
+case $SEARCH_TOOL in
+ddgr)
+    # Run DuckDuckGo search in the terminal
+    ddgr "$SEARCH_QUERY"
+    ;;
+web)
+    # Construct the URL based on the search engine
+    case "$SEARCH_ENGINE" in
+    bing | google | yahoo | youtube)
+        base_url="https://www.${SEARCH_ENGINE}.com/search?q="
+        ;;
+    duckduckgo)
+        base_url="https://duckduckgo.com/?q="
+        ;;
+    searx | *)
+        base_url="https://www.searx.thesiah.xyz/search?q="
+        ;;
+    esac
+
+    # Encode the search query
+    SEARCH_QUERY_ENCODED=$(echo "$SEARCH_QUERY" | sed 's/ /+/g')
+
+    # Open the search URL in the default browser
+    $open_cmd "${base_url}${SEARCH_QUERY_ENCODED}"
+    ;;
+*)
     usage
     ;;
 esac

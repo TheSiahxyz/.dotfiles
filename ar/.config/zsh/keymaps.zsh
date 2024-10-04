@@ -52,13 +52,13 @@ bindkey -s '^_' '^usscs\n'
 bindkey -s '^X^B' '^urbackup\n'
 bindkey -s '^X^D' '^ufD\n'
 bindkey -s '^X^F' '^ufF\n'
-bindkey -s '^X^L' '^usesh last\n'
+bindkey -s '^X^G' '^utmuxgo\n'
 bindkey -s '^X^S' '^usshadd\n'
-bindkey -s '^X^T' '^utmuxgo\n'
+bindkey -s '^X^T' '^usesh last\n'
 
 # man
 man-command-line() {
-    pcmd "man"
+    precmd "man"
 }
 zle -N man-command-line
 bindkey -M emacs '^X^M' man-command-line
@@ -67,7 +67,7 @@ bindkey -M viins '^X^M' man-command-line
 
 # sudo
 sudo-command-line() {
-    pcmd "sudo"
+    precmd "sudo"
 }
 zle -N sudo-command-line
 bindkey -M emacs '^S' sudo-command-line
@@ -90,7 +90,7 @@ clear-ls-all() {
 }
 zle -N clear-ls-all
 
-bindkey '^X^K' clear-ls-all
+bindkey '^X^L' clear-ls-all
 
 # clears the shell and displays the dir tree with level 2
 clear-tree-2() {

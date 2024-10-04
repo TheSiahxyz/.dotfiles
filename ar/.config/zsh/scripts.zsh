@@ -30,7 +30,7 @@ function ilco() { LBUFFER+="$(eval $history[$((HISTCMD-1))])"; }
 function emt() {
     ! mount | grep -q " $1 " && echo "$(pass show encryption/ecryptfs)" | sudo mount -t ecryptfs "$1" "$2" \
         -o ecryptfs_cipher=aes,ecryptfs_key_bytes=32,ecryptfs_passthrough=no,ecryptfs_enable_filename_crypto=yes,ecryptfs_sig="$(sudo cat /root/.ecryptfs/sig-cache.txt)",ecryptfs_fnek_sig="$(sudo cat /root/.ecryptfs/sig-cache.txt)",passwd="$(pass show encryption/ecryptfs)" >/dev/null 2>&1 &&
-        echo "'$2' folder is mounted!"
+    echo "'$2' folder is mounted!"
 }
 
 
@@ -49,7 +49,7 @@ function gp() {
     [[ -z "$1" ]] && {
         git push home "$branch" && echo "Pushed to home on branch $branch successfully.\n" ||
         { echo "Failed to push to home on branch $branch.\n"; return 1; }
-    } || {
+        } || {
         git push "$1" "$branch" && echo "Pushed to $1 on branch $branch successfully.\n" ||
         { echo "Failed to push to $1 on branch $branch.\n"; return 1; }
     }
@@ -119,7 +119,7 @@ function for (colnum = 0; colnum<77; colnum++) {
     printf "%s\033[0m", substr(s,colnum+1,1);
 }
 printf "\n";
-}'
+    }'
 }
 
 
@@ -276,7 +276,7 @@ function mkcd() { mkdir -p "$@" && cd "$_"; }
 ### --- neovim --- ###
 # change nvim config
 function cnf() {
-	local base_dir="${XDG_DOTFILES_DIR:-$HOME/.dotfiles}/$(whereami)/.config"     # Base directory for Neovim configs
+    local base_dir="${XDG_DOTFILES_DIR:-$HOME/.dotfiles}/$(whereami)/.config"     # Base directory for Neovim configs
     local target_dir="${XDG_CONFIG_HOME:-$HOME/.config}/nvim"             # Target directory for active Neovim config
     local target_share="${XDG_DATA_HOME:-$HOME/.local/share}/nvim"        # Neovim"s share directory
     local target_state="${XDG_STATE_HOME:-$HOME/.local/state}/nvim"       # Neovim"s state directory
@@ -369,40 +369,52 @@ function __command_replace_buffer() {
     fi
 }
 
-# manipulates the previous command line
-function pcmd() {
+# manipulate the previous command line
+function precmd() {
     local prepend_command=$1
     local EDITOR=${SUDO_EDITOR:-${VISUAL:-$EDITOR}}
     [[ -z $BUFFER ]] && LBUFFER="$(fc -ln -1)"
     local WHITESPACE=""
+
+    # Remove leading whitespace and store it for later restoration
     if [[ ${LBUFFER:0:1} = " " ]]; then
         WHITESPACE=" "
         LBUFFER="${LBUFFER:1}"
     fi
+
+    # Main logic block
     {
         local cmd="${${(Az)BUFFER}[1]}"
         local realcmd="${${(Az)aliases[$cmd]}[1]:-$cmd}"
         local editorcmd="${${(Az)EDITOR}[1]}"
+        # Check if EDITOR is set, otherwise prepend the command and return
         if [[ -z "$EDITOR" ]]; then
             LBUFFER="$prepend_command $LBUFFER"
             return
         fi
-        if [[ "$realcmd" = (\$EDITOR|$editorcmd|${editorcmd:c}) \
-                      || "${realcmd:c}" = ($editorcmd|${editorcmd:c}) ]] \
-                      || builtin which -a "$realcmd" | command grep -Fx -q "$editorcmd"; then
+        # Check if the command is an editor command
+        is_editor_cmd=false
+        # Check if realcmd matches EDITOR, editorcmd, or their case variations
+        [[ "$realcmd" = (\$EDITOR|$editorcmd|${editorcmd:c}) || "${realcmd:c}" = ($editorcmd|${editorcmd:c}) ]] && is_editor_cmd=true
+        # Check if the real command's executable path matches the editor command
+        builtin which -a "$realcmd" | command grep -Fx -q "$editorcmd" && is_editor_cmd=true
+        # Execute the command replacement if it's an editor command
+        if $is_editor_cmd; then
             __command_replace_buffer "$cmd" "$prepend_command -e"
             return
         fi
+        # Handle various command patterns in BUFFER
         case "$BUFFER" in
-        $editorcmd\ *) __command_replace_buffer "$editorcmd" "$prepend_command -e" ;;
-        \$EDITOR\ *) __command_replace_buffer '$EDITOR' "$prepend_command -e" ;;
-        ${prepend_command}\ -e\ *) __command_replace_buffer "${prepend_command} -e" "$EDITOR" ;;
-        ${prepend_command}\ *) __command_replace_buffer "${prepend_command}" "" ;;
-        *) LBUFFER="$prepend_command $LBUFFER" ;;
+            $editorcmd\ *) __command_replace_buffer "$editorcmd" "$prepend_command -e" ;;
+            \$EDITOR\ *) __command_replace_buffer '$EDITOR' "$prepend_command -e" ;;
+            ${prepend_command}\ -e\ *) __command_replace_buffer "${prepend_command} -e" "$EDITOR" ;;
+            ${prepend_command}\ *) __command_replace_buffer "${prepend_command}" "" ;;
+            *) LBUFFER="$prepend_command $LBUFFER" ;;
         esac
-    } always {
+        } always {
+        # Cleanup code: restore leading whitespace and update the command line
         LBUFFER="${WHITESPACE}${LBUFFER}"
-        zle && zle redisplay # only run redisplay if zle is enabled
+        zle && zle redisplay # Only run redisplay if zle is enabled
     }
 }
 
