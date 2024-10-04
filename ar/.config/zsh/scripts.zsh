@@ -271,7 +271,9 @@ function cd_clipboard_path() {
 
 # fzf files in root and open in default editor
 alias ff=fzf_file
-function fzf_file() { file=$(find "$HOME" -type f >/dev/null 2>&1 | fzf) && nvim "$file"; }
+function fzf_file() {
+    file=$(find "$HOME" -type d \( -name ".git" -o -path "${ZPLUGINDIR:-${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/zsh}" -o -path "$HOME/Private/repos/THESIAH/public" -o -name ".cache" \) -prune -o -type f -not -name "*lock*" -print 2>/dev/null | fzf) && nvim "$file"
+}
 
 # fzf directory and go to the parent directory
 alias fD=fzf_directory

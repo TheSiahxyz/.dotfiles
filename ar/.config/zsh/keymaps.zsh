@@ -77,8 +77,8 @@ bindkey -M vicmd '^S' sudo-command-line
 bindkey -M viins '^S' sudo-command-line
 
 # last command output
-zle -N ilco
-bindkey -M viins '^]' ilco
+zle -N insert_last_command_output
+bindkey -M viins '^]' insert_last_command_output
 
 # bind y/Y to yank until end of line/yank whole line
 # bindkey -M vicmd y zsh-system-clipboard-vicmd-vi-yank-eol
