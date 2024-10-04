@@ -4,7 +4,7 @@
 plugins=(
     "Aloxaf/fzf-tab"
     "kutsan/zsh-system-clipboard"
-    "MichaelAquilina/zsh-you-should-use"
+    # "MichaelAquilina/zsh-you-should-use"
     # "marlonrichert/zsh-autocomplete"
     "ohmyzsh/command-not-found"
     #"ohmyzsh/sudo"
@@ -64,7 +64,7 @@ zsh_add_plugins() {
 }
 
 # Function to update plugins
-zsh_update_plugins() {
+zsh_sync_plugins() {
     ACTIVE_PLUGINS=$(grep '^[[:space:]]*"[^"]\+"' ~/.config/zsh/plugins.zsh | sed 's|.*/\([^/"]*\)".*|\1|')
 
     for PLUGIN_DIR in "$ZPLUGINDIR"/*; do
@@ -80,4 +80,4 @@ zsh_update_plugins() {
 }
 
 zsh_check_plugins "${plugins[@]}"
-zsh_update_plugins
+zsh_sync_plugins

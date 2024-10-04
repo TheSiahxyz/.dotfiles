@@ -358,7 +358,7 @@ function xev_raw_key_event() {
     }'
 }
 
-# print xev key events and format the output
+# print aligned xev key events
 alias key=xev_aligned_key_event
 function xev_aligned_key_event() {
     xev -event keyboard | awk '
@@ -538,11 +538,18 @@ function pass_qr() { qrencode -o "$1".png -t png -Sv 40 < "$1".pgp; }
 ###########################################################################################
 ###########################################################################################
 ### --- PASTE --- ###
-# paste init
-function pasteinit() {
-    OLD_SELF_INSERT=${${(s.:.)widgets[self-insert]}[2,3]}
-    zle -N self-insert url-quote-magic
-}
+if ls "${ZPLUGINDIR:-${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/zsh}/zsh-autosuggestions" >/dev/null 2>&1; then
+    autoload -Uz url-quote-magic
+    function pasteinit() {
+        OLD_SELF_INSERT=${${(s.:.)widgets[self-insert]}[2,3]}
+        zle -N self-insert url-quote-magic
+    }
+    function pastefinish() {
+        zle -N self-insert $OLD_SELF_INSERT
+    }
+    zstyle :bracketed-paste-magic paste-init pasteinit
+    zstyle :bracketed-paste-magic paste-finish pastefinish
+fi
 
 
 ###########################################################################################
