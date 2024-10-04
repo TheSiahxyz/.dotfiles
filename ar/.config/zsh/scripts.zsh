@@ -2,116 +2,31 @@
 
 ###########################################################################################
 ###########################################################################################
-### --- Stow --- ###
-# run stow script from dotfiles repo
-alias dstw=dotfeils_stw
-function dotfiles_stw() { "${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/$(whereami)/.local/bin/stw"; }
-
-###########################################################################################
-###########################################################################################
-### --- Paste --- ###
-# paste init
-function pasteinit() {
-    OLD_SELF_INSERT=${${(s.:.)widgets[self-insert]}[2,3]}
-    zle -N self-insert url-quote-magic
-}
-
-
-###########################################################################################
-###########################################################################################
-### --- Last Command Output --- ###
-# print last command output
-alias ilco=insert_last_command_output
-function insert_last_command_output() { LBUFFER+="$(eval $history[$((HISTCMD-1))])"; }
-
-
-###########################################################################################
-###########################################################################################
-### --- Ecryptfs --- ###
-# mount ecryptfs
-alias emt=ecryptfs_mount
-function ecryptfs_mount() {
-    ! mount | grep -q " $1 " && echo "$(pass show encryption/ecryptfs)" | sudo mount -t ecryptfs "$1" "$2" \
-        -o ecryptfs_cipher=aes,ecryptfs_key_bytes=32,ecryptfs_passthrough=no,ecryptfs_enable_filename_crypto=yes,ecryptfs_sig="$(sudo cat /root/.ecryptfs/sig-cache.txt)",ecryptfs_fnek_sig="$(sudo cat /root/.ecryptfs/sig-cache.txt)",passwd="$(pass show encryption/ecryptfs)" >/dev/null 2>&1 &&
-    echo "'$2' folder is mounted!"
-}
-
-
-###########################################################################################
-###########################################################################################
-### --- Git --- ###
-# TheSiahxyz's git repos
-alias gcggg=thesiahxyz_git
-function thesiahxyz_git() {
-    choice=$(ssh "$THESIAH_GIT" "ls -a | grep -i \".*\\.git$\"" | fzf --cycle --prompt="  " --height=50% --layout=reverse --border --exit-0)
-    [ -n "$choice" ] && [ -n "$1" ] && git clone "${THESIAH_GIT:-git@${THESIAH:-thesiah.xyz}}":"$choice" "$1" || [ -n "$choice" ] && git clone "${THESIAH_GIT:-git@${THESIAH:-thesiah.xyz}}":"$choice"
-}
-
-# git push origin/home master
-alias gp=git_push_origin_home
-function git_push_origin_home() {
-    branch="$(git rev-parse --abbrev-ref HEAD)"
-    [[ -z "$1" ]] && {
-        git push home "$branch" && echo "Pushed to home on branch $branch successfully.\n" ||
-        { echo "Failed to push to home on branch $branch.\n"; return 1; }
-        } || {
-        git push "$1" "$branch" && echo "Pushed to $1 on branch $branch successfully.\n" ||
-        { echo "Failed to push to $1 on branch $branch.\n"; return 1; }
+### --- ALIAS --- ###
+# find aliases
+alias pal=fzf_alias
+function fzf_alias() {
+    local aliases=$(env)
+    local max_length=$(echo "$aliases" | cut -d'=' -f1 | awk '{print length}' | sort -nr | head -n 1)
+    [ "$max_length" -gt 20 ] && max_length=20
+    format_aliases() {
+        echo "$aliases" | while IFS= read -r line; do
+            alias_name=$(echo "$line" | cut -d'=' -f1)
+            alias_command=$(echo "$line" | cut -d'=' -f2- | sed "s/^'//;s/'$//")
+            printf "%-${max_length}s = %s\n" "$alias_name" "$alias_command"
+        done
     }
-    git push && echo "Pushed to default remote successfully." ||
-    { echo "Failed to push to default remote."; return 1; }
-}
-
-
-###########################################################################################
-###########################################################################################
-### --- Setxkbmap --- ###
-# list setxkbmap options
-alias xkey=xset_options
-function xset_options() { grep --color -E "$1" /usr/share/X11/xkb/rules/base.lst; }
-
-
-###########################################################################################
-###########################################################################################
-### --- Change Target Nvim --- ###
-# rename nvim directory
-alias ctn=rename_nvim_dir
-function rename_nvim_dir() {
-    if [ $# -ne 2 ]; then
-        echo "Usage: ctn <old_suffix> <new_suffix>"
-        return 1
+    if [ -z "$1" ]; then
+        format_aliases | fzf
+    else
+        format_aliases | grep --color=auto "$1"
     fi
-
-    local old_suffix="$1"
-    local new_suffix="$2"
-    local base_name="nvim"
-
-    # Handle the case where the old suffix is '.'
-    [ "$old_suffix" = "." ] && old_suffix=""
-    [ "$new_suffix" = "." ] && new_suffix=""
-
-    # Directories to be renamed
-    local directories=(
-        "$HOME/.config/$base_name"
-        "$HOME/.local/share/$base_name"
-        "$HOME/.local/state/$base_name"
-        "$HOME/.cache/$base_name"
-    )
-
-    for dir in "${directories[@]}"; do
-        if [ -d "$dir$old_suffix" ]; then
-            mv "$dir$old_suffix" "$dir$new_suffix"
-            echo "Renamed $dir$old_suffix to $dir$new_suffix"
-        else
-            echo "Directory $dir$old_suffix does not exist"
-        fi
-    done
 }
 
 
 ###########################################################################################
 ###########################################################################################
-### --- Color --- ###
+### --- COLOR --- ###
 # print color
 alias pcol=print_col
 function print_col() {
@@ -133,7 +48,15 @@ printf "\n";
 
 ###########################################################################################
 ###########################################################################################
-### --- Config --- ###
+### --- COMMAND OUTPUT --- ###
+# print last command output
+alias ilco=insert_last_command_output
+function insert_last_command_output() { LBUFFER+="$(eval $history[$((HISTCMD-1))])"; }
+
+
+###########################################################################################
+###########################################################################################
+### --- CONFIG --- ###
 # fzf config
 alias fcfg=fzf_config
 function fzf_config() {
@@ -145,7 +68,7 @@ function fzf_config() {
 
 ###########################################################################################
 ###########################################################################################
-### --- Copy --- ###
+### --- COPY --- ###
 # copy file contents
 alias cpfc=copy_contents
 function copy_contents() {
@@ -209,7 +132,15 @@ function copy_real_path() {
 
 ###########################################################################################
 ###########################################################################################
-### --- Docker --- ###
+### --- CREATE --- ###
+# mkdir && cd
+alias mc=mkcd
+function mkcd() { mkdir -p "$@" && cd "$_"; }
+
+
+###########################################################################################
+###########################################################################################
+### --- DOCKER --- ###
 # select a docker container to start and attach to
 alias doca=docker_container_init
 function docker_container_init() {
@@ -239,7 +170,45 @@ function docker_remove_images() { docker images | sed 1d | fzf --cycle -q "$1" -
 
 ###########################################################################################
 ###########################################################################################
-### --- Goto --- ###
+### --- ECRYPTFS --- ###
+# mount ecryptfs
+alias emt=ecryptfs_mount
+function ecryptfs_mount() {
+    ! mount | grep -q " $1 " && echo "$(pass show encryption/ecryptfs)" | sudo mount -t ecryptfs "$1" "$2" \
+        -o ecryptfs_cipher=aes,ecryptfs_key_bytes=32,ecryptfs_passthrough=no,ecryptfs_enable_filename_crypto=yes,ecryptfs_sig="$(sudo cat /root/.ecryptfs/sig-cache.txt)",ecryptfs_fnek_sig="$(sudo cat /root/.ecryptfs/sig-cache.txt)",passwd="$(pass show encryption/ecryptfs)" >/dev/null 2>&1 &&
+    echo "'$2' folder is mounted!"
+}
+
+
+###########################################################################################
+###########################################################################################
+### --- GIT --- ###
+# TheSiahxyz's git repos
+alias gcggg=thesiahxyz_git
+function thesiahxyz_git() {
+    choice=$(ssh "$THESIAH_GIT" "ls -a | grep -i \".*\\.git$\"" | fzf --cycle --prompt="  " --height=50% --layout=reverse --border --exit-0)
+    [ -n "$choice" ] && [ -n "$1" ] && git clone "${THESIAH_GIT:-git@${THESIAH:-thesiah.xyz}}":"$choice" "$1" || [ -n "$choice" ] && git clone "${THESIAH_GIT:-git@${THESIAH:-thesiah.xyz}}":"$choice"
+}
+
+# git push origin/home master
+alias gp=git_push_origin_home
+function git_push_origin_home() {
+    branch="$(git rev-parse --abbrev-ref HEAD)"
+    [[ -z "$1" ]] && {
+        git push home "$branch" && echo "Pushed to home on branch $branch successfully.\n" ||
+        { echo "Failed to push to home on branch $branch.\n"; return 1; }
+        } || {
+        git push "$1" "$branch" && echo "Pushed to $1 on branch $branch successfully.\n" ||
+        { echo "Failed to push to $1 on branch $branch.\n"; return 1; }
+    }
+    git push && echo "Pushed to default remote successfully." ||
+    { echo "Failed to push to default remote."; return 1; }
+}
+
+
+###########################################################################################
+###########################################################################################
+### --- GOTO --- ###
 # fzf files in root
 alias ff=fzf_file
 function fzf_file() { file=$(find "$HOME" -type f >/dev/null 2>&1 | fzf) && nvim "$file"; }
@@ -307,7 +276,7 @@ function check_git_status() {
 
 ###########################################################################################
 ###########################################################################################
-### --- help --- ###
+### --- HELP --- ###
 # help opt colored by bat
 alias bathelp='bat --plain --language=help'
 function help() { "$@" --help 2>&1 | bathelp; }
@@ -315,7 +284,61 @@ function help() { "$@" --help 2>&1 | bathelp; }
 
 ###########################################################################################
 ###########################################################################################
-### --- lf --- ###
+### --- KEYS --- ###
+# list setxkbmap options
+alias xkey=xset_options
+function xset_options() { grep --color -E "$1" /usr/share/X11/xkb/rules/base.lst; }
+
+# print raw xev key events
+alias keys=xev_raw_key_event
+function xev_raw_key_event() {
+    xev -event keyboard | awk '
+    /^KeyPress/,/^KeyRelease/ {
+        if ($0 ~ /keysym/) print $0
+    }'
+}
+
+# print xev key events and format the output
+alias key=xev_aligned_key_event
+function xev_aligned_key_event() {
+    xev -event keyboard | awk '
+    /^(KeyPress|KeyRelease)/ {
+        event_type = $1
+    }
+    /keysym/ {
+        gsub(/\),$/, "", $7)
+        printf "%-12s %-3s %s\n", event_type, $4, $7
+    }'
+}
+
+
+###########################################################################################
+###########################################################################################
+### --- KILL --- ###
+# kill process
+alias pkill=fzf_kill_process
+function fzf_kill_process() {
+    ps aux |
+    fzf --height 40% \
+        --layout=reverse \
+        --header-lines=1 \
+        --prompt="Select process to kill: " \
+        --preview 'echo {}' \
+        --preview-window up:3:hidden:wrap \
+        --bind 'F2:toggle-preview' |
+    awk '{print $2}' |
+    xargs -r bash -c '
+        if ! kill "$1" 2>/dev/null; then
+            echo "Regular kill failed. Attempting with sudo..."
+            sudo kill "$1" || echo "Failed to kill process $1" >&2
+        fi
+    ' --
+}
+
+
+###########################################################################################
+###########################################################################################
+### --- LF --- ###
 # open lf and cd to the file path
 function lfcd () {
     tmp="$(mktemp -uq)"
@@ -330,15 +353,41 @@ function lfcd () {
 
 ###########################################################################################
 ###########################################################################################
-### --- mkcd --- ###
-# mkdir && cd
-alias mc=mkcd
-function mkcd() { mkdir -p "$@" && cd "$_"; }
+### --- NVIM --- ###
+# rename nvim directory
+alias ctn=rename_nvim_dir
+function rename_nvim_dir() {
+    if [ $# -ne 2 ]; then
+        echo "Usage: ctn <old_suffix> <new_suffix>"
+        return 1
+    fi
 
+    local old_suffix="$1"
+    local new_suffix="$2"
+    local base_name="nvim"
 
-###########################################################################################
-###########################################################################################
-### --- neovim --- ###
+    # Handle the case where the old suffix is '.'
+    [ "$old_suffix" = "." ] && old_suffix=""
+    [ "$new_suffix" = "." ] && new_suffix=""
+
+    # Directories to be renamed
+    local directories=(
+        "$HOME/.config/$base_name"
+        "$HOME/.local/share/$base_name"
+        "$HOME/.local/state/$base_name"
+        "$HOME/.cache/$base_name"
+    )
+
+    for dir in "${directories[@]}"; do
+        if [ -d "$dir$old_suffix" ]; then
+            mv "$dir$old_suffix" "$dir$new_suffix"
+            echo "Renamed $dir$old_suffix to $dir$new_suffix"
+        else
+            echo "Directory $dir$old_suffix does not exist"
+        fi
+    done
+}
+
 # change nvim config
 alias cnf=change_nvim_config_dir
 function change_nvim_config_dir() {
@@ -406,7 +455,7 @@ function nvim_target_config() {
 
 ###########################################################################################
 ###########################################################################################
-### --- Password --- ###
+### --- PASS --- ###
 # otp
 function pass_otp() { pass otp uri -q $1; }
 
@@ -428,7 +477,25 @@ function pass_qr() { qrencode -o "$1".png -t png -Sv 40 < "$1".pgp; }
 
 ###########################################################################################
 ###########################################################################################
-### --- Sudo --- ###
+### --- PASTE --- ###
+# paste init
+function pasteinit() {
+    OLD_SELF_INSERT=${${(s.:.)widgets[self-insert]}[2,3]}
+    zle -N self-insert url-quote-magic
+}
+
+
+###########################################################################################
+###########################################################################################
+### --- STOW --- ###
+# run stow script from dotfiles repo
+alias dstw=dotfeils_stw
+function dotfiles_stw() { "${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/$(whereami)/.local/bin/stw"; }
+
+
+###########################################################################################
+###########################################################################################
+### --- SUDO --- ###
 # insert prefix at the beginning of the previous command
 function __command_replace_buffer() {
     local old=$1 new=$2 space=${2:+ }
@@ -492,7 +559,7 @@ function pre_cmd() {
 
 ###########################################################################################
 ###########################################################################################
-### --- Tmux --- ###
+### --- TMUX --- ###
 # tmux init
 alias tit=tmux_init
 function tmux_init() {
@@ -507,7 +574,7 @@ function cd_session_path() { cd "$(tmux display-message -p '#{session_path}')"; 
 
 ###########################################################################################
 ###########################################################################################
-### --- Virtual Env --- ###
+### --- VIRTUAL ENV --- ###
 # create venvs
 alias createv=create_venv
 function create_venv() {
