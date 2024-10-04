@@ -1,7 +1,6 @@
 */3 * * * * /usr/bin/mailsync
 */15 * * * * $HOME/.local/bin/cron/newsup
 0 */3 * * * $HOME/.local/bin/cron/checkup
-0 */3 * * * $HOME/.local/bin/statusbar/sb-forecast
 0 0 * * * NVIM_APPNAME=Starter nvim --headless "+Lazy! sync" +qa
 0 0 * * * NVIM_APPNAME=Starter nvim --headless "+MasonUpdate" +qa
 0 * * * * NVIM_APPNAME=LazyVim nvim --headless "+Lazy! sync" +qa
