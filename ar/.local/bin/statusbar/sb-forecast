@@ -16,7 +16,7 @@ error() {
 
 # Get a weather report from 'wttr.in' and save it locally.
 getweatherreport() {
-    (timeout --signal=1 5s curl -sf "$url/$LOCATION" >"$weatherreport" &&
+    (timeout --signal=1 10s curl -sf "$url/$LOCATION" >"$weatherreport" &&
         printf "\nUpdated: %s\n" "$(date '+%Y-%m-%d %H:%M:%S')" >>"$weatherreport") ||
         error "report"
 }
