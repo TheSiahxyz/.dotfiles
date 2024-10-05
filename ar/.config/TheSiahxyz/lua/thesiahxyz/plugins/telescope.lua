@@ -372,10 +372,10 @@ return {
 			-- lsp
 			vim.keymap.set("n", "gR", function()
 				require("telescope.builtin").lsp_references({})
-			end, { desc = "Find lsp references" })
+			end, { desc = "Find references" })
 			vim.keymap.set("n", "gd", function()
 				require("telescope.builtin").lsp_definitions({})
-			end, { desc = "Find lsp definitions" })
+			end, { desc = "Find definitions" })
 			-- search
 			vim.keymap.set("n", "<leader>sa", function()
 				require("telescope.builtin").autocommands({})

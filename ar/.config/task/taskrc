@@ -1,0 +1,120 @@
+# [Created by task 3.1.0 10/5/2024 17:27:41]
+news.version=3.1.0
+
+# To use the default location of the XDG directories,
+# move this configuration file from ~/.taskrc to ~/.config/task/taskrc and update location config as follows:
+
+data.location=~/.local/share/task
+hooks.location=~/.config/task/hooks
+
+# Color theme (uncomment one to use)
+#include light-16.theme
+#include light-256.theme
+#include dark-16.theme
+#include dark-256.theme
+#include dark-red-256.theme
+#include dark-green-256.theme
+#include dark-blue-256.theme
+#include dark-violets-256.theme
+include dark-yellow-green.theme
+#include dark-gray-256.theme
+#include dark-gray-blue-256.theme
+#include solarized-dark-256.theme
+#include solarized-light-256.theme
+#include no-color.theme
+
+# Custom color
+color.blocked = yellow on black
+color.blocking = yellow on black
+color.tag.epic = bold green
+color.tag.review = bold blue
+color.tag.bug = magenta on black
+
+# Custom reports
+report.workdone.description=List of completed tasks in the work context
+report.workdone.columns=project,description.desc,end
+report.workdone.labels=Proj,Desc,Done
+report.workdone.sort=end-\/,project+
+report.workdone.filter=status:completed description!="fill standup forms"
+
+report.currentall.description=List of current tasks in the work context
+report.currentall.columns=id,entry.age,manual_priority,project,tags,description.desc,entry,due.relative,follow
+report.currentall.labels=ID,Age,P,Proj,Tag,Desc,Created,Due,Follow
+report.currentall.sort=manual_priority-,project+
+report.currentall.filter=status:pending
+
+report.current.description=List of current tasks in the work context
+report.current.columns=id,entry.age,manual_priority,priority,project,tags,description.desc,entry,due.relative,follow,depends,urgency
+report.current.labels=ID,Age,MP,P,Proj,Tag,Desc,Created,Due,Follow,Depends,Urg
+report.current.sort=manual_priority-,priority-,project+
+report.current.filter=status:pending
+
+report.current-projects.description=List of current projects in work context
+report.current-projects.columns=project
+report.current-projects.labels=
+report.current-projects.sort=project+
+report.current-projects.filter=status:pending
+
+report.tmark.description=List of tasks to report
+report.tmark.columns=project,description.desc
+report.tmark.labels=Proj,Desc
+report.tmark.sort=project+
+report.tmark.filter=status:pending -idea
+
+report.tmark-done.description=List of tasks to report done
+report.tmark-done.columns=project,description.desc
+report.tmark-done.labels=Proj,Desc
+report.tmark-done.sort=project+
+report.tmark-done.filter=status:completed -idea
+
+report.tmark-next.description=List of tasks to report next
+report.tmark-next.columns=project,description.desc
+report.tmark-next.labels=Proj,Desc
+report.tmark-next.sort=project+\/
+report.tmark-next.filter=status:pending -idea +next
+
+report.tmark-yesterday.description=List of tasks completed yesterday
+report.tmark-yesterday.columns=project,description.desc
+report.tmark-yesterday.labels=Proj,Desc
+report.tmark-yesterday.sort=project+\/
+report.tmark-yesterday.filter=status:completed end:yesterday
+
+report._reviewed.description=Tasksh review report.  Adjust the filter to your needs.
+report._reviewed.columns=uuid
+report._reviewed.sort=reviewed+,modified+
+report._reviewed.filter=( reviewed.none: or reviewed.before:now-1week ) and ( +PENDING or +WAITING )
+
+# User defined attributes
+uda.follow.type=string
+uda.follow.label=follow
+uda.follow.values=Y,N
+uda.manual_priority.type=numeric
+uda.manual_priority.label=Manual Priority
+uda.reviewed.type=date
+uda.reviewed.label=Reviewed
+
+# User defiend scripts
+uda.taskwarrior-tui.task-report.next.filter=status:pending
+uda.taskwarrior-tui.shortcuts.1=~/.config/taskwarrior-tui/shortcut-scripts/taskopen-annotation
+uda.taskwarrior-tui.shortcuts.2=~/.config/taskwarrior-tui/shortcut-scripts/cycle-tmux-projects
+uda.taskwarrior-tui.shortcuts.3=~/.config/taskwarrior-tui/shortcut-scripts/cycle-tmux-projects.sh
+# uda.taskwarrior-tui.shortcuts.3=~/.local/bin/github_issue_sync
+uda.taskwarrior-tui.shortcuts.4=~/.config/taskwarrior-tui/shortcut-scripts/cycle-priority
+uda.taskwarrior-tui.shortcuts.5=~/.config/taskwarrior-tui/shortcut-scripts/decrease-task-priority
+uda.taskwarrior-tui.shortcuts.6=~/.config/taskwarrior-tui/shortcut-scripts/increase-task-priority
+uda.taskwarrior-tui.shortcuts.7=~/.config/taskwarrior-tui/shortcut-scripts/annotate-with-note
+uda.taskwarrior-tui.shortcuts.8=~/.config/taskwarrior-tui/shortcut-scripts/annotate-with-new-note
+uda.taskwarrior-tui.shortcuts.9=~/.local/bin/taskswitchcontext
+
+# User defined context
+context.archive.read=+archive
+context.archive.write=+archive
+context.home.read=+home
+context.home.write=+home
+context.integration.read=+integration
+context.integration.write=+integration
+context.temp.read=+temp
+context.temp.write=+temp
+context.work.read=+work
+context.work.write=+work
+context=home

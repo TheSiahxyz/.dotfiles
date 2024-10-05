@@ -4,8 +4,12 @@
 pacman_updates=$(pacman -Qu)
 yay_updates=$(yay -Qu)
 
-# Select upgrade option
-selection=$(printf "All\nPacman\nYay" | dmenu -i -p "Upgrade Option:")
+# Count the number of upgradable packages, filtering yay's output to count only AUR packages
+pacman_count=$(printf "%s" "$pacman_updates" | grep -c '^\S')
+aur_count=$(printf "%s" "$yay_updates" | grep -c '^\[AUR\]')
+
+# Display the upgrade options with package counts
+selection=$(printf "All\nPacman(%d)\nAUR(%d)" "$pacman_count" "$aur_count" | dmenu -i -p "Upgrade Option:")
 
 case "$selection" in
 "All")
@@ -19,7 +23,8 @@ case "$selection" in
         exit 0
     fi
     ;;
-"Pacman")
+"Pacman($pacman_count)")
+    # Show all upgradable pacman packages with "Upgrade All" option
     selection=$(printf "Upgrade All\n%s" "$pacman_updates" | dmenu -i -l 10 -p "Pacman: Upgrade or Open URL:")
     case "$selection" in
     "Upgrade All")
@@ -34,34 +39,70 @@ case "$selection" in
         fi
         ;;
     *)
-        if [ "$(printf "No\nYes" | dmenu -i -p 'Open URL?')" = "Yes" ]; then
-            xdg-open "https://archlinux.org/packages/?q=$(printf "%s" "$selection" | awk '{print $1}')" >/dev/null 2>&1 &
-        else
-            exit
-        fi
+        # Individual package selected: Prompt to upgrade or open URL
+        action=$(printf "Upgrade\nOpen URL" | dmenu -i -p "Package: $selection")
+        case "$action" in
+        "Upgrade")
+            if [ "$(printf "No\nYes" | dmenu -i -p 'Proceed with upgrade for this package?')" = "Yes" ]; then
+                notify-send "📦 Upgrading package: $selection..."
+                sudo pacman -S --noconfirm "$(printf "%s" "$selection" | awk '{print $1}')"
+                pkill -RTMIN+8 "${STATUSBAR:-dwmblocks}"
+                notify-send "✅ Upgrade completed for package: $selection."
+            else
+                notify-send "❌ Upgrade cancelled."
+                exit 0
+            fi
+            ;;
+        "Open URL")
+            if [ "$(printf "No\nYes" | dmenu -i -p 'Open URL?')" = "Yes" ]; then
+                xdg-open "https://archlinux.org/packages/?q=$(printf "%s" "$selection" | awk '{print $1}')" >/dev/null 2>&1 &
+            else
+                exit
+            fi
+            ;;
+        esac
         ;;
     esac
     ;;
-"Yay")
-    selection=$(printf "Upgrade All\n%s" "$yay_updates" | dmenu -i -l 10 -p "Yay: Upgrade or Open URL:")
+"AUR($aur_count)")
+    # Show all upgradable AUR packages with "Upgrade All" option
+    aur_updates=$(printf "%s" "$yay_updates" | grep '^\[AUR\]')
+    selection=$(printf "Upgrade All\n%s" "$aur_updates" | dmenu -i -l 10 -p "AUR: Upgrade or Open URL:")
     case "$selection" in
     "Upgrade All")
-        if [ "$(printf "No\nYes" | dmenu -i -p 'Proceed with yay upgrade?')" = "Yes" ]; then
-            notify-send "📦 Upgrading yay packages..."
-            yay -Syu --noconfirm
+        if [ "$(printf "No\nYes" | dmenu -i -p 'Proceed with AUR upgrade?')" = "Yes" ]; then
+            notify-send "📦 Upgrading AUR packages..."
+            yay -Syu --aur --noconfirm
             pkill -RTMIN+8 "${STATUSBAR:-dwmblocks}"
-            notify-send "✅ Yay packages upgrade completed."
+            notify-send "✅ AUR packages upgrade completed."
         else
             notify-send "❌ Upgrade cancelled."
             exit 0
         fi
         ;;
     *)
-        if [ "$(printf "No\nYes" | dmenu -i -p 'Open URL?')" = "Yes" ]; then
-            xdg-open "https://aur.archlinux.org/packages/?O=0&K=$(printf "%s" "$selection" | awk '{print $1}')" >/dev/null 2>&1 &
-        else
-            exit
-        fi
+        # Individual AUR package selected: Prompt to upgrade or open URL
+        action=$(printf "Upgrade\nOpen URL" | dmenu -i -p "Package: $selection")
+        case "$action" in
+        "Upgrade")
+            if [ "$(printf "No\nYes" | dmenu -i -p 'Proceed with upgrade for this package?')" = "Yes" ]; then
+                notify-send "📦 Upgrading AUR package: $selection..."
+                yay -S --noconfirm "$(printf "%s" "$selection" | awk '{print $2}')"
+                pkill -RTMIN+8 "${STATUSBAR:-dwmblocks}"
+                notify-send "✅ Upgrade completed for AUR package: $selection."
+            else
+                notify-send "❌ Upgrade cancelled."
+                exit 0
+            fi
+            ;;
+        "Open URL")
+            if [ "$(printf "No\nYes" | dmenu -i -p 'Open URL?')" = "Yes" ]; then
+                xdg-open "https://aur.archlinux.org/packages/?O=0&K=$(printf "%s" "$selection" | awk '{print $2}')" >/dev/null 2>&1 &
+            else
+                exit
+            fi
+            ;;
+        esac
         ;;
     esac
     ;;

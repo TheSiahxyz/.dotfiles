@@ -23,19 +23,10 @@ EOF
 }
 
 browsercheck() {
-    pidof "$BROWSER" >/dev/null
-    notify-send "❌ Failed to $1 from '$BROWSER'." "'$BROWSER' is locked. Check if '$BROWSER' is running."
-    exit
-}
-
-checkopen() {
-    case "$(command -v xdg-open || command -v open || command -v links || command -v lynx)" in
-    *xdg-open) open=xdg-open ;;
-    *open) open=open ;;
-    *links) open=links ;;
-    *lynx) open=lynx ;;
-    *) echo "No browser found" >&2 && exit 1 ;;
-    esac
+    if pidof "$BROWSER" >/dev/null; then
+        notify-send "❌ Failed to $1 from '$BROWSER'." "'$BROWSER' is locked. Check if '$BROWSER' is running."
+        exit 1
+    fi
 }
 
 openinbrowser() {
@@ -44,41 +35,45 @@ openinbrowser() {
     librewolf) profile_dir=$(find ~/.librewolf -type d -name "*.default-default*" | head -n 1) ;;
     *) echo "Default browser path is needed." && exit ;;
     esac
+
     db_path="$profile_dir/places.sqlite"
     tmp_dir="${XDG_CACHE_HOME:-$HOME/.cache}/mozilla/firefox/$USER.default-default"
     tmp_file="$tmp_dir/$1.sqlite"
     mkdir -p "$tmp_dir"
     cp -f "$db_path" "$tmp_file"
-    checkopen
+
+    case "$(command -v xdg-open || command -v open || command -v links || command -v lynx)" in
+    *xdg-open) open=xdg-open ;;
+    *open) open=open ;;
+    *links) open=links ;;
+    *lynx) open=lynx ;;
+    *) echo "No browser found" >&2 && exit 1 ;;
+    esac
+
     type dmenu >/dev/null 2>&1 &&
         selection="dmenu -i -l 20 -p \"Choose a $1 to open:\"" ||
         selection="fzf --cycle --ansi --delimiter='|' --with-nth=1..-2"
-    choice=$(sqlite3 "$tmp_file" "$sqlite_query" | eval "$selection" | cut -d'|' -f2 | sed 's|.*\(https://\)|\1|' | xargs)
-    [ -n "$choice" ] && "$open" "$choice" || exit
-}
 
-browserbookmark() {
-    browsercheck "open bookmark"
-    sqlite_query="
+    if [ "$1" = "bookmark" ]; then
+        sqlite_query="
     SELECT b.title || ' | ' || p.url AS bookmark
     FROM moz_bookmarks b
     JOIN moz_places p ON b.fk = p.id
     WHERE b.type = 1 AND p.url LIKE 'http%' AND b.title NOT NULL
     ORDER BY b.dateAdded DESC;
     "
-    openinbrowser "bookmark"
-}
-
-browserhistory() {
-    browsercheck "open history"
-    cols=$((${COLUMNS:-90} / 3))
-    sqlite_query="
+    elif [ "$1" = "history" ]; then
+        cols=$((${COLUMNS:-90} / 3))
+        sqlite_query="
     SELECT substr(p.title, 1, $cols) || ' | ' || p.url
     FROM moz_places p
     JOIN moz_historyvisits hv ON hv.place_id = p.id
     ORDER BY hv.visit_date DESC LIMIT 100;
     "
-    openinbrowser "history"
+    fi
+
+    choice=$(sqlite3 "$tmp_file" "$sqlite_query" | eval "$selection" | cut -d'|' -f2 | sed 's|.*\(https://\)|\1|' | xargs)
+    [ -n "$choice" ] && "$open" "$choice" || exit
 }
 
 geturls() {
@@ -99,17 +94,18 @@ copytoclipboard() {
         echo "Clipboard utility not found. Install xclip or xsel." >&2
         exit 1
     fi
+    notify-send "'$CHOICE' copied in clipbaord" "$URL"
 }
 
 [ $# -eq 0 ] && usage && exit 1
 
 while getopts "bcopsth" opt; do
     case $opt in
-    b) browserbookmark ;;
+    b) browsercheck "open bookmark" && openinbrowser "bookmark" ;;
     c) geturls "to copy" && copytoclipboard ;;
     o) geturls "to open in $BROWSER" && "$BROWSER" --new-window "$URL" ;;
     p) geturls "to open in private $BROWSER" && "$BROWSER" --private-window "$URL" ;;
-    s) browserhistory ;;
+    s) browsercheck "open history" && openinbrowser "history" ;;
     t) geturls "to type under cursor" && xdotool type "$URL" ;;
     h | *) usage && exit 1 ;;
     esac

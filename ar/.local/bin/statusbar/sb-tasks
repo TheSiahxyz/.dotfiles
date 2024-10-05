@@ -1,40 +1,50 @@
 #!/bin/sh
 
-notify_filenames() {
-    while IFS= read -r line; do
-        id=$(echo "$line" | awk '{print $1}')
-        url=$(tsp -l | awk -v id="$id" 'flag && /notify-send/ {print $0; flag=0} $1 == id {flag=1}' | grep -o 'https://[^\"]*')
-        if [ -n "$url" ]; then
-            decoded_url=$(echo "$url" | sed 's/&amp;/\&/g')
-            yt-dlp --no-playlist --simulate --get-filename "$decoded_url" 2>/dev/null | while IFS= read -r filename; do
-                notify-send "🔽 Downloading:" "$filename"
-            done
-        else
-            notify-send "🪹 No URL extracted for task $id"
-        fi
-    done <<EOF
-$(tsp -l | awk '/running/ && /yt-dlp/')
-EOF
-    if [ -z "$url" ]; then
-        notify-send "💤 No active yt-dlp downloads"
-    fi
-    pkill -RTMIN+26 "${STATUSBAR:-dwmblocks}"
-}
+# Get the current time and the time in one hour
+now=$(date +%s)
+in_one_hour=$(date -d "+1 hour" +%s)
 
-# This block displays the number of running and queued background tasks. Requires tsp.
-num=$(tsp -l | awk -v numr=0 -v numq=0 '{if (/running/)numr++; if (/queued/)numq++} END{print numr+numq"("numq")"}')
+# Check for tasks due in the next hour
+tasks_due_today=$(task due:today _ids)
+tasks_due_count=0
+tasks_due_list=""
+
+for task_id in $tasks_due_today; do
+    task_due_date=$(task _get "$task_id".due)
+    task_due_epoch=$(date -d "$task_due_date" +%s)
+    task_description=$(task _get "$task_id".description)
+
+    # Check if the task is due within the next hour
+    if [ "$task_due_epoch" -gt "$now" ] && [ "$task_due_epoch" -le "$in_one_hour" ]; then
+        tasks_due_list="$tasks_due_list- $task_description\n"
+        tasks_due_count=$((tasks_due_count + 1))
+    fi
+done
+
+# Check for follow-up tasks
+follow_up_tasks=$(task follow.is:Y _ids)
+follow_up_list=""
+follow_up_count=$(echo "$follow_up_tasks" | wc -w)
+
+for task_id in $follow_up_tasks; do
+    task_description=$(task _get "$task_id".description)
+    follow_up_list="$follow_up_list- $task_description\n"
+done
 
 # Handle mouse clicks
 case $BLOCK_BUTTON in
-1) setsid -f "$TERMINAL" -e sh -c 'tsp -l; echo "\nPress enter to close..." ; read REPLY' ;;
-2) setsid -f "$TERMINAL" -e sh -c 'tsp -t' ;;
-3)
-    notify_filenames
-    notify-send "📝 Tasks module" "🤖: number of running/queued background tasks
-- Left click to show all tasks
-- Middle click to show the current task progress"
-    ;;
-6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
+1) notify-send "📕Tasks due in the next hour" "$tasks_due_list" ;;
+2) notify-send "📙Follow-up task(s) to complete" "$follow_up_list" ;;
+3) notify-send "📝 Task Module" "Shows task counts.\n- Left click: Show tasks due soon.\n- Middle click: Show follow-up tasks." ;;
 esac
 
-[ "$num" != "0(0)" ] && echo "🤖$num"
+# Output task information to dwmblocks
+if [ "$follow_up_count" -gt 0 ]; then
+    if [ "$tasks_due_count" -gt 0 ]; then
+        printf "📕%d 📝%d\n" "$tasks_due_count" "$follow_up_count"
+    else
+        printf "📙%d\n" "$follow_up_count"
+    fi
+else
+    exit
+fi
