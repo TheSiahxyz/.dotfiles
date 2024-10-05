@@ -21,12 +21,15 @@ vnc     ${XDG_CONFIG_HOME:-${HOME}/.config}/newsboat/config                     
 vnu     ${XDG_CONFIG_HOME:-${HOME}/.config}/newsboat/urls                       # Newsboat url (RSS reader)
 vpf     ${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/passfzf                         # Passfzf
 Vsm     /etc/samba/smb.conf                                                     # Samba config
+vse     ${XDG_CONFIG_HOME:-${HOME}/.config}/sesh/sesh.toml                      # Sesh config
 vsl     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/slock/config.h         # Slock: lock screen
 vsp     ${XDG_DATA_HOME:-${HOME}/.local/share}/thesiah/snippets                 # Snippets
 vss     ${XDG_CONFIG_HOME:-${HOME}/.config}/starship/starship.toml              # Starship
 vst     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/st/config.h            # St: a simple terminal
 vsx     ${XDG_CONFIG_HOME:-${HOME}/.config}/nsxiv/exec/key-handler              # Nsxiv (image viewer) key/script handler
+vtc     ${XDG_CONFIG_HOME:-${HOME}/.config}/task/taskrc                         # Task config
 vtm     ${XDG_CONFIG_HOME:-${HOME}/.config}/tmux/tmux.conf                      # Tmux config
+vto     ${XDG_CONFIG_HOME:-${HOME}/.config}/taskopen/taskopenrc                 # Taskopen config
 vtt     ${XDG_CONFIG_HOME:-${HOME}/.config}/transmission-daemon/settings.json   # Transmission-daemon config
 vvc     ${XDG_CONFIG_HOME:-${HOME}/.config}/vim/vimrc                           # Vim config
 vvi     ${XDG_CONFIG_HOME:-${HOME}/.config}/vim/init.vim                        # Vim init
