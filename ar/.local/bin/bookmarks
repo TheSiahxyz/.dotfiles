@@ -1,7 +1,31 @@
 #!/bin/sh
 
+usage() {
+    cat <<EOF
+Usage: ${0##*/} [OPTIONS]
+
+Options:
+    -b          Open a browser bookmark
+    -c          Copy a URL from snippets/URLs to the clipboard
+    -h          Show this message
+    -o          Get a URL from snippets/URLs and open it in a new browser window
+    -p          Get a URL from snippets/URLs and open it in a private browser window
+    -s          Open browser history
+    -t          Get a URL from snippets/URLs and type it using xdotool
+
+Examples:
+    ${0##*/} -b         # Opens a browser bookmark
+    ${0##*/} -c         # Copies a URL from snippets/URLs to the clipboard
+    ${0##*/} -o         # Opens a URL from snippets/URLs in a new browser window
+    ${0##*/} -p         # Opens a URL in a private browser window
+    ${0##*/} -s         # Opens browser history
+EOF
+}
+
 browsercheck() {
-    pidof $BROWSER >/dev/null && echo "$BROWSER is locked. Check if $BROWSER is running." && exit
+    pidof "$BROWSER" >/dev/null
+    notify-send "❌ Failed to $1 from '$BROWSER'." "'$BROWSER' is locked. Check if '$BROWSER' is running."
+    exit
 }
 
 checkopen() {
@@ -34,7 +58,7 @@ openinbrowser() {
 }
 
 browserbookmark() {
-    browsercheck
+    browsercheck "open bookmark"
     sqlite_query="
     SELECT b.title || ' | ' || p.url AS bookmark
     FROM moz_bookmarks b
@@ -46,7 +70,7 @@ browserbookmark() {
 }
 
 browserhistory() {
-    browsercheck
+    browsercheck "open history"
     cols=$((${COLUMNS:-90} / 3))
     sqlite_query="
     SELECT substr(p.title, 1, $cols) || ' | ' || p.url
@@ -61,18 +85,32 @@ geturls() {
     [ -f ~/.local/share/thesiah/urls ] &&
         URLS=$(cat ~/.local/share/thesiah/snippets ~/.local/share/thesiah/urls) ||
         URLS=$(cat ~/.local/share/thesiah/snippets)
-    CHOICE=$(echo "$URLS" | grep -v -e '^#' -e '^$' | awk -F'"' '{print $2}' | dmenu -i -l 50 -p "Choose a URL to open:")
+    CHOICE=$(echo "$URLS" | grep -v -e '^#' -e '^$' | awk -F'"' '{print $2}' | dmenu -i -l 50 -p "Choose a URL $1:")
     [ -z "$CHOICE" ] && exit
     URL=$(echo "$URLS" | grep -v -e '^#' -e '^$' | grep "\"$CHOICE\"" | awk '{print $1}')
 }
 
-while getopts "bchopt" opt; do
+copytoclipboard() {
+    if command -v xclip >/dev/null 2>&1; then
+        printf "%s" "$URL" | xclip -selection clipboard
+    elif command -v xsel >/dev/null 2>&1; then
+        printf "%s" "$URL" | xsel --clipboard --input
+    else
+        echo "Clipboard utility not found. Install xclip or xsel." >&2
+        exit 1
+    fi
+}
+
+[ $# -eq 0 ] && usage && exit 1
+
+while getopts "bcopsth" opt; do
     case $opt in
     b) browserbookmark ;;
-    c) geturls && xdotool type "$URL" ;;
-    o) geturls && "$BROWSER" --new-window "$URL" ;;
-    p) geturls && "$BROWSER" --private-window "$URL" ;;
-    t) browserhistory ;;
-    *) ;;
+    c) geturls "to copy" && copytoclipboard ;;
+    o) geturls "to open in $BROWSER" && "$BROWSER" --new-window "$URL" ;;
+    p) geturls "to open in private $BROWSER" && "$BROWSER" --private-window "$URL" ;;
+    s) browserhistory ;;
+    t) geturls "to type under cursor" && xdotool type "$URL" ;;
+    h | *) usage && exit 1 ;;
     esac
 done
