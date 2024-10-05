@@ -5,6 +5,7 @@ vbd     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/bm-dirs                       
 vbf     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/bm-files                      # This file, a list of bookmarked files
 vbi     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/inputrc                       # This file is for gnu readline
 vbp     ${XDG_CONFIG_HOME:-${HOME}/.config}/bash/bash_profile                   # Bash profile
+vcr     ${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/$(whereami)/.config/crons        # Cron job list
 vdb     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwmblocks/config.h     # Dwmblocks: the status bar for dwm
 vdm     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dmenu/config.h         # Dmenu: a dynamic menu
 vdw     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwm/config.h           # Dwm: a dynamic window manager
