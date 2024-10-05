@@ -522,4 +522,4 @@ map bg $setbg "$f"
 map wi $wine "$f"
 
 # shortcuts
-source "~/.config/lf/shortcutrc"
+source ~/.config/lf/shortcutrc
