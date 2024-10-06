@@ -95,16 +95,15 @@ uda.reviewed.label=Reviewed
 
 # User defiend scripts
 uda.taskwarrior-tui.task-report.next.filter=status:pending
-uda.taskwarrior-tui.shortcuts.1=~/.config/taskwarrior-tui/shortcut-scripts/taskopen-annotation
-uda.taskwarrior-tui.shortcuts.2=~/.config/taskwarrior-tui/shortcut-scripts/cycle-tmux-projects
-uda.taskwarrior-tui.shortcuts.3=~/.config/taskwarrior-tui/shortcut-scripts/cycle-tmux-projects.sh
-# uda.taskwarrior-tui.shortcuts.3=~/.local/bin/github_issue_sync
-uda.taskwarrior-tui.shortcuts.4=~/.config/taskwarrior-tui/shortcut-scripts/cycle-priority
-uda.taskwarrior-tui.shortcuts.5=~/.config/taskwarrior-tui/shortcut-scripts/decrease-task-priority
-uda.taskwarrior-tui.shortcuts.6=~/.config/taskwarrior-tui/shortcut-scripts/increase-task-priority
-uda.taskwarrior-tui.shortcuts.7=~/.config/taskwarrior-tui/shortcut-scripts/annotate-with-note
-uda.taskwarrior-tui.shortcuts.8=~/.config/taskwarrior-tui/shortcut-scripts/annotate-with-new-note
-uda.taskwarrior-tui.shortcuts.9=~/.local/bin/taskswitchcontext
+uda.taskwarrior-tui.shortcuts.1=~/.local/bin/taskwarrior-tui/taskopen-annotation
+uda.taskwarrior-tui.shortcuts.2=~/.local/bin/taskwarrior-tui/cycle-tmux-projects
+uda.taskwarrior-tui.shortcuts.3=~/.local/bin/taskwarrior-tui/github-issue-sync
+uda.taskwarrior-tui.shortcuts.4=~/.local/bin/taskwarrior-tui/cycle-priority
+uda.taskwarrior-tui.shortcuts.5=~/.local/bin/taskwarrior-tui/decrease-task-priority
+uda.taskwarrior-tui.shortcuts.6=~/.local/bin/taskwarrior-tui/increase-task-priority
+uda.taskwarrior-tui.shortcuts.7=~/.local/bin/taskwarrior-tui/annotate-with-note
+uda.taskwarrior-tui.shortcuts.8=~/.local/bin/taskwarrior-tui/annotate-with-new-note
+uda.taskwarrior-tui.shortcuts.9=~/.local/bin/taskwarrior-tui/task-switch-context
 
 # User defined context
 context.archive.read=+archive
@@ -118,3 +117,7 @@ context.temp.write=+temp
 context.work.read=+work
 context.work.write=+work
 context=home
+sync.encryption_secret=VO,mr[Pg&[Y^m]hu=zL
+sync.server.url=https:\/\/thesiah.xyz
+sync.server.client_id=8bc45596-6189-486b-a86b-9f33163c7a82
+taskd.server=https:\/\/thesiah.xyz\/v1

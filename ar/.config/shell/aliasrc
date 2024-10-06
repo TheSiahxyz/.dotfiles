@@ -369,7 +369,7 @@ alias txf='tar -xf'
 alias ttf='tar -tf'
 
 # task
-alias tsc='taskswitchcontext'
+alias tsc='task-switch-context'
 alias twt='taskwarrior-tui'
 
 # tmux

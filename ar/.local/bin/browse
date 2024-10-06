@@ -56,7 +56,7 @@ SEARCH_QUERY="$*"
 case $SEARCH_TOOL in
 ddgr)
     # Run DuckDuckGo search in the terminal
-    ddgr "$SEARCH_QUERY"
+    setsid -f "$TERMINAL" -e ddgr "$SEARCH_QUERY"
     ;;
 web)
     # Construct the URL based on the search engine

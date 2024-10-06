@@ -293,21 +293,28 @@ function search_scripts() {
 }
 
 # check git status by directories in specific path
-alias fdot=check_git_status
-function check_git_status() {
+alias cgrs=check_git_repos_status
+function check_git_repos_status() {
     local search_dirs=()
     local initial_dirs=("$HOME/.dotfiles" "$HOME/.local/share/.password-store" "$HOME/.local/src/suckless")
     local git_dirs=("$HOME/Private/repos" "$HOME/Public/repos")
 
     process_and_append() {
         local dir="$1"
-        git -C "$dir" fetch --quiet
-        if [ -n "$(git -C "$dir" status --porcelain)" ]; then
-            search_dirs+=("+ $dir")
-        elif [ "$(git -C "$dir" rev-parse @)" != "$(git -C "$dir" rev-parse @{u})" ] && [ "$(git -C "$dir" rev-parse @)" = "$(git -C "$dir" merge-base @ @{u})" ]; then
-            search_dirs+=("! $dir")
+        if [[ "$dir" == "$HOME/.local/share/.password-store" ]]; then
+            pass git fetch --quiet
+            if [[ $(pass git rev-list origin/$(pass git rev-parse --abbrev-ref HEAD)..HEAD --count) -gt 0 ]]; then
+                search_dirs+=("= $dir")
+            fi
         else
-            search_dirs+=("$dir")
+            git -C "$dir" fetch --quiet
+            if [ -n "$(git -C "$dir" status --porcelain)" ]; then
+                search_dirs+=("+ $dir")
+            elif [ "$(git -C "$dir" rev-parse @)" != "$(git -C "$dir" rev-parse @{u})" ] && [ "$(git -C "$dir" rev-parse @)" = "$(git -C "$dir" merge-base @ @{u})" ]; then
+                search_dirs+=("! $dir")
+            else
+                search_dirs+=("$dir")
+            fi
         fi
     }
 

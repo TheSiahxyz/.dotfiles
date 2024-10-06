@@ -40,7 +40,7 @@ bindkey -M viins 'jk' vi-cmd-mode       # normal mode
 bindkey -s '^B' '^ubc -lq\n'
 bindkey -s '^D' '^ucdi\n'
 bindkey -s '^F' '^uff\n'
-bindkey -s '^G' '^ufdot\n'
+bindkey -s '^G' '^ucgrs\n'
 bindkey -s '^K' '^uhtop\n'
 bindkey -s '^N' '^unv .\n'
 bindkey -s '^O' '^ulf\n'

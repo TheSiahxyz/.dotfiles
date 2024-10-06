@@ -16,6 +16,8 @@ elif [ "$current_context" = "home" ]; then
     # If we're in home and the marker file exists, it means we want to switch back to work
     switch_context work
     # Remove the marker file after switching back to avoid repeated switches
+elif [ -z "$current_context" ]; then
+    switch_context home
 else
     echo "Current context is: $current_context. No action taken."
 fi

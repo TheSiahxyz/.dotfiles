@@ -3,8 +3,6 @@
 # github_issue_sync.sh
 # Synchronizes GitHub and Linear issues with Taskwarrior
 
-. "$HOME/.config/taskwarrior-tui/shortcut-scripts/libtaskinterop"
-
 # Set new line and tab for word splitting
 IFS='
 	'
