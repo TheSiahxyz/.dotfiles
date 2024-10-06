@@ -191,12 +191,16 @@ return {
 								-- Depending on what you want put `cd`, `lcd`, `tcd`
 								vim.cmd(string.format("silent lcd %s", dir))
 							end,
+							["<C-d>"] = actions.nop,
+							["<C-u>"] = actions.nop,
+							["<C-f>"] = actions.nop,
+							["<C-b>"] = actions.nop,
 							["<C-j>"] = actions.preview_scrolling_down,
 							["<C-k>"] = actions.preview_scrolling_up,
 							["<C-h>"] = actions.preview_scrolling_left,
 							["<C-l>"] = actions.preview_scrolling_right,
 							["<C-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
-							["<C-s>"] = actions.select_horizontal,
+							["<C-z>"] = actions.select_horizontal,
 							["<C-x>"] = actions.delete_buffer,
 							["<C-w>"] = { "<c-s-w>", type = "command" },
 							["<C-o><C-w>"] = actions.insert_original_cword,
@@ -208,8 +212,11 @@ return {
 							["dd"] = actions.delete_buffer,
 							["q"] = actions.close,
 							["<C-c>"] = actions.close,
-							["<C-e>"] = actions.complete_tag,
+							["<C-d>"] = actions.nop,
+							["<C-u>"] = actions.nop,
 							["<C-f>"] = actions.nop,
+							["<C-b>"] = actions.nop,
+							["<C-e>"] = actions.complete_tag,
 							["<C-g>"] = function(prompt_bufnr)
 								local selection = actions_state.get_selected_entry()
 								local dir = vim.fn.fnamemodify(selection.path, ":p:h")
@@ -222,7 +229,7 @@ return {
 							["<C-h>"] = actions.preview_scrolling_left,
 							["<C-l>"] = actions.preview_scrolling_right,
 							["<C-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
-							["<C-s>"] = actions.select_horizontal,
+							["<C-z>"] = actions.select_horizontal,
 							["<C-x>"] = actions.delete_buffer,
 						},
 					},
@@ -240,12 +247,13 @@ return {
 					},
 					git_worktrees = {
 						{
-							toplevel = vim.env.HOME,
+							home = vim.env.HOME,
 							private = vim.env.HOME .. "/Private/git",
 							public = vim.env.HOME .. "/Public/git",
 						},
 					},
 					results_title = vim.fn.fnamemodify(vim.uv.cwd(), ":~"),
+					scroll_strategy = "limit",
 				},
 				pickers = {
 					find_files = {
