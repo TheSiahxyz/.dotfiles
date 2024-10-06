@@ -23,9 +23,10 @@ cse             ${XDG_CONFIG_HOME:-${HOME}/.config}/sesh
 csh             ${XDG_CONFIG_HOME:-${HOME}/.config}/shell
 csl             ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/slock
 cst             ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/st
+ctd             ${XDG_CONFIG_HOME:-${HOME}/.config}/transmission-daemon
 ctp             ${XDG_CONFIG_HOME:-${HOME}/.config}/tmux/plugins
 cts             ${XDG_CONFIG_HOME:-${HOME}/.config}/TheSiahxyz/lua/thesiahxyz
-ctt             ${XDG_CONFIG_HOME:-${HOME}/.config}/transmission-daemon
+ctt             ${XDG_CONFIG_HOME:-${HOME}/.config}/taskwarrior-tui/shortcut-scripts
 cvc             ${XDG_CONFIG_HOME:-${HOME}/.config}/vim
 cvp             ${XDG_CONFIG_HOME:-${HOME}/.config}/openvpn
 cxc             ${XDG_CONFIG_HOME:-${HOME}/.config}/x11

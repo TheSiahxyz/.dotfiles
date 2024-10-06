@@ -22,6 +22,30 @@ Examples:
 EOF
 }
 
+opens() {
+    available_tools=""
+    command -v xdg-open 2>/dev/null | grep -v "alias" -q && available_tools="$available_tools xdg-open"
+    command -v open 2>/dev/null | grep -v "alias" -q && available_tools="$available_tools open"
+    command -v links 2>/dev/null | grep -v "alias" -q && available_tools="$available_tools links"
+    command -v lynx 2>/dev/null | grep -v "alias" -q && available_tools="$available_tools lynx"
+    available_tools=$(printf "%s" "$available_tools" | awk '{$1=$1; print}' | tr ' ' '\n')
+    if [ -z "$available_tools" ]; then
+        printf "No browser found\n" >&2
+        exit 1
+    fi
+
+    opentool=$(printf "%s\n" "$available_tools" | dmenu -i -p "Choose an open tool:")
+
+    # Set the selected tool to the variable 'open'
+    case "$opentool" in
+    xdg-open) open=xdg-open ;;
+    open) open=open ;;
+    links) open=links ;;
+    lynx) open=lynx ;;
+    *) echo "Invalid selection" >&2 && exit 1 ;;
+    esac
+}
+
 browsercheck() {
     if pidof "$BROWSER" >/dev/null; then
         notify-send "❌ Failed to $1 from '$BROWSER'." "'$BROWSER' is locked. Check if '$BROWSER' is running."
@@ -42,19 +66,12 @@ openinbrowser() {
     mkdir -p "$tmp_dir"
     cp -f "$db_path" "$tmp_file"
 
-    case "$(command -v xdg-open || command -v open || command -v links || command -v lynx)" in
-    *xdg-open) open=xdg-open ;;
-    *open) open=open ;;
-    *links) open=links ;;
-    *lynx) open=lynx ;;
-    *) echo "No browser found" >&2 && exit 1 ;;
-    esac
-
     type dmenu >/dev/null 2>&1 &&
         selection="dmenu -i -l 20 -p \"Choose a $1 to open:\"" ||
         selection="fzf --cycle --ansi --delimiter='|' --with-nth=1..-2"
 
-    if [ "$1" = "bookmark" ]; then
+    case "$1" in
+    *bookmark*)
         sqlite_query="
     SELECT b.title || ' | ' || p.url AS bookmark
     FROM moz_bookmarks b
@@ -62,7 +79,8 @@ openinbrowser() {
     WHERE b.type = 1 AND p.url LIKE 'http%' AND b.title NOT NULL
     ORDER BY b.dateAdded DESC;
     "
-    elif [ "$1" = "history" ]; then
+        ;;
+    *history*)
         cols=$((${COLUMNS:-90} / 3))
         sqlite_query="
     SELECT substr(p.title, 1, $cols) || ' | ' || p.url
@@ -70,10 +88,18 @@ openinbrowser() {
     JOIN moz_historyvisits hv ON hv.place_id = p.id
     ORDER BY hv.visit_date DESC LIMIT 100;
     "
-    fi
-
+        ;;
+    esac
     choice=$(sqlite3 "$tmp_file" "$sqlite_query" | eval "$selection" | cut -d'|' -f2 | sed 's|.*\(https://\)|\1|' | xargs)
-    [ -n "$choice" ] && "$open" "$choice" || exit
+    if [ -n "$choice" ]; then
+        if echo "$1" | grep -q "private"; then
+            "$BROWSER" --private-window "$choice"
+        else
+            opens && setsid -f "$TERMINAL" -e "$open" "$choice"
+        fi
+    else
+        exit
+    fi
 }
 
 geturls() {
@@ -99,7 +125,7 @@ copytoclipboard() {
 
 [ $# -eq 0 ] && usage && exit 1
 
-while getopts "bcopsth" opt; do
+while getopts "bchopstv" opt; do
     case $opt in
     b) browsercheck "open bookmark" && openinbrowser "bookmark" ;;
     c) geturls "to copy" && copytoclipboard ;;
@@ -107,6 +133,7 @@ while getopts "bcopsth" opt; do
     p) geturls "to open in private $BROWSER" && "$BROWSER" --private-window "$URL" ;;
     s) browsercheck "open history" && openinbrowser "history" ;;
     t) geturls "to type under cursor" && xdotool type "$URL" ;;
+    v) browsercheck "open bookmark" && openinbrowser "private bookmark" ;;
     h | *) usage && exit 1 ;;
     esac
 done
