@@ -31,8 +31,8 @@ browsercheck() {
 
 openinbrowser() {
     case $BROWSER in
-    firefox) profile_dir=$(find ~/.mozilla/firefox -type d -name "*.default-default*" | head -n 1) ;;
-    librewolf) profile_dir=$(find ~/.librewolf -type d -name "*.default-default*" | head -n 1) ;;
+    firefox) profile_dir=$(find ~/.mozilla/firefox -type d -name "*.default*" | head -n 1) ;;
+    librewolf) profile_dir=$(find ~/.librewolf -type d -name "*.default*" | head -n 1) ;;
     *) echo "Default browser path is needed." && exit ;;
     esac
 
