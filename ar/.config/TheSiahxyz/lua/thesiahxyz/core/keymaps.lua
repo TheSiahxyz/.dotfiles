@@ -385,3 +385,11 @@ vim.keymap.set("n", "<leader>c0", ":.!figlet -w 200 -f shadow<cr>", { desc = "As
 vim.keymap.set("n", "<leader>-", function()
 	vim.fn.system("bash __restart_nvim.sh")
 end, { noremap = true, silent = true, desc = "Restart nvim" })
+
+-- Source shortcuts from bm-files and bm-folders
+local shortcuts_file = vim.fn.expand("~/.config/nvim/shortcuts.lua")
+local file = io.open(shortcuts_file, "r")
+if file then
+	file:close()
+	vim.cmd("silent! source " .. shortcuts_file)
+end
