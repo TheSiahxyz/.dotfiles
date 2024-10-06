@@ -9,16 +9,6 @@ function R(name)
 	require("plenary.reload").reload_module(name)
 end
 
--- Word Definition
-function WordDefinition(input)
-	local escaped_input = vim.fn.shellescape(input)
-	local output = vim.fn.system("dict " .. escaped_input)
-	local bufnr = vim.api.nvim_create_buf(false, true)
-
-	vim.api.nvim_set_current_buf(bufnr)
-	vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, vim.split(output, "\n"))
-end
-
 -- Source shortcuts from bm-files and bm-folders
 local shortcuts_file = vim.fn.expand("~/.config/nvim/shortcuts.lua")
 local file = io.open(shortcuts_file, "r")

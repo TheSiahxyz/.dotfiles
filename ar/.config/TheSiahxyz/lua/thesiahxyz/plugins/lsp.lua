@@ -107,7 +107,6 @@ return {
 			typescriptreact = { "eslint_d" },
 			svelte = { "eslint_d" },
 			python = { "pylint" },
-			lua = { "luacheck" },
 			sh = { "shellcheck" },
 		}
 
@@ -126,7 +125,6 @@ return {
 				"debugpy", -- python debuger
 				"eslint_d", -- eslint linter
 				"isort", -- python formatter
-				"luacheck", -- lua lint
 				"prettier", -- prettier formatter
 				"pylint", -- python linter
 				"ruff", -- python formatter

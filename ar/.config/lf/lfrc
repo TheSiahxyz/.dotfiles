@@ -433,7 +433,7 @@ map E extract; clear
 map Mi create-ipynb
 
 # Lock screen
-map <backspace2> $setlock "$f"
+map <a-backspace2> $setlock "$f"
 
 # Move
 map Mt moveto; clear

@@ -354,6 +354,14 @@ vim.keymap.set("n", "<leader>L", "<cmd>Lazy<cr>", { desc = "Open lazy plugin man
 vim.keymap.set("n", "<leader>M", "<cmd>Mason<cr>", { desc = "Open mason" })
 
 -- Word Definition
+function WordDefinition(input)
+	local escaped_input = vim.fn.shellescape(input)
+	local output = vim.fn.system("dict " .. escaped_input)
+	local bufnr = vim.api.nvim_create_buf(false, true)
+
+	vim.api.nvim_set_current_buf(bufnr)
+	vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, vim.split(output, "\n"))
+end
 vim.api.nvim_set_keymap(
 	"n",
 	"<leader>k",
