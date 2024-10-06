@@ -198,6 +198,11 @@ return {
 							["<C-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
 							["<C-s>"] = actions.select_horizontal,
 							["<C-x>"] = actions.delete_buffer,
+							["<C-w>"] = { "<c-s-w>", type = "command" },
+							["<C-o><C-w>"] = actions.insert_original_cword,
+							["<C-o><C-a>"] = actions.insert_original_cWORD,
+							["<C-o><C-f>"] = actions.insert_original_cfile,
+							["<C-o><C-l>"] = actions.insert_original_cline,
 						},
 						n = {
 							["dd"] = actions.delete_buffer,
