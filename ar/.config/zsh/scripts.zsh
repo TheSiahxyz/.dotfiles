@@ -341,7 +341,7 @@ function check_git_repos_status() {
         selected_git=($(printf "%s\n" "${search_dirs[@]}" | fzf --cycle --multi --prompt="  " --height=50% --layout=reverse --border --exit-0))
 
         # Iterate over the selected directories to create sessions
-        OLDIFS=$IFS
+        OLDIFS="$IFS"
         IFS="\n"
         for dir in "${selected_git[@]}"; do
             # Clean up symbols and spaces
@@ -389,7 +389,7 @@ function check_git_repos_status() {
         selected_git=${selected_git# }
         [ -d "$selected_git" ] && cd "$selected_git"
     fi
-    IFS=$OLDIFS
+    IFS="$OLDIFS"
 }
 
 
