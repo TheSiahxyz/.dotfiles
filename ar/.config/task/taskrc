@@ -23,6 +23,11 @@ include dark-yellow-green.theme
 #include solarized-light-256.theme
 #include no-color.theme
 
+# Server sync
+sync.encryption_secret=VO,mr[Pg&[Y^m]hu=zL
+sync.server.url=https:\/\/thesiah.xyz
+sync.server.client_id=8bc45596-6189-486b-a86b-9f33163c7a82
+
 # Custom color
 color.blocked = yellow on black
 color.blocking = yellow on black
@@ -117,7 +122,3 @@ context.temp.write=+temp
 context.work.read=+work
 context.work.write=+work
 context=home
-sync.encryption_secret=VO,mr[Pg&[Y^m]hu=zL
-sync.server.url=https:\/\/thesiah.xyz
-sync.server.client_id=8bc45596-6189-486b-a86b-9f33163c7a82
-taskd.server=https:\/\/thesiah.xyz\/v1

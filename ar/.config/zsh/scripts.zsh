@@ -282,14 +282,8 @@ function fzf_directory() { cd $(find "$HOME" -type d >/dev/null 2>&1 | fzf); }
 # search scripts in ~/.local/bin
 alias sscs=search_scripts
 function search_scripts() {
-    choice="$(find $HOME/.local/bin $HOME/.config/taskwarrior-tui/shortcut-scripts -mindepth 1 \( -type f -o -type l \) -not -name '*.md' -not -path '*/zsh/*' -printf '%P\n' | fzf --cycle)"
-    if [ -n "$choice" ]; then
-        if [ -f "$HOME/.local/bin/$choice" ]; then
-            $EDITOR "$HOME/.local/bin/$choice"
-        elif [ -f "$HOME/.config/taskwarrior-tui/shortcut-scripts/$choice" ]; then
-            $EDITOR "$HOME/.config/taskwarrior-tui/shortcut-scripts/$choice"
-        fi
-    fi
+    choice="$(find ~/.local/bin -mindepth 1 \( -type f -o -type l \) -not -name '*.md' -not -path '*/zsh/*' -printf '%P\n' | fzf --cycle)"
+    ([ -n "$choice" ] && [ -f "$HOME/.local/bin/$choice" ]) && $EDITOR "$HOME/.local/bin/$choice"
 }
 
 # check git status by directories in specific path

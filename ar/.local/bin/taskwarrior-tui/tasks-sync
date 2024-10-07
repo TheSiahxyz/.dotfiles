@@ -1,0 +1,11 @@
+#!/bin/sh
+
+if [ "$(task _get tw.syncneeded)" -eq 1 ]; then
+    if ! task sync 2>/dev/null; then
+        task config sync.server.url "https://thesiah.xyz"
+        task config sync.encryption_secret "$(pass show server/task_secret)"
+        task config sync.server.client_id "$(pass show server/task_uuid)"
+
+        task sync
+    fi
+fi
