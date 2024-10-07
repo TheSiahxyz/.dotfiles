@@ -18,7 +18,10 @@ end
 return {
 	{
 		"nvim-telescope/telescope-file-browser.nvim",
-		dependencies = { "nvim-telescope/telescope.nvim", "nvim-lua/plenary.nvim" },
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+			"nvim-telescope/telescope.nvim",
+		},
 		-- init = function()
 		-- 	vim.api.nvim_create_autocmd("VimEnter", {
 		-- 		group = vim.api.nvim_create_augroup("TelescopeFileBrowserStartDirectory", { clear = true }),
@@ -130,10 +133,15 @@ return {
 				},
 			})
 
-			vim.keymap.set("n", "<leader>et", ":Telescope file_browser path=%:p:h select_buffer=true<CR>")
-			vim.keymap.set("n", "<leader>eT", ":Telescope file_browser<CR>")
-
 			require("telescope").load_extension("file_browser")
+
+			vim.keymap.set(
+				"n",
+				"<leader>et",
+				":Telescope file_browser path=%:p:h select_buffer=true<CR>",
+				{ desc = "File browser (cwd)" }
+			)
+			vim.keymap.set("n", "<leader>eT", ":Telescope file_browser<CR>", { desc = "File browser" })
 		end,
 	},
 	{
@@ -151,8 +159,223 @@ return {
 				end,
 			},
 			{
+				"nvim-telescope/telescope-github.nvim",
+				config = function()
+					require("telescope").load_extension("gh")
+					vim.keymap.set({ "n", "v" }, "<leader>gi", ":Telescope gh issues ", { desc = "Find gh issues" })
+					vim.keymap.set(
+						{ "n", "v" },
+						"<leader>gp",
+						":Telescope gh pull_request ",
+						{ desc = "Find gh pull request" }
+					)
+					vim.keymap.set({ "n", "v" }, "<leader>gt", ":Telescope gh gist ", { desc = "Find gh gist" })
+					vim.keymap.set({ "n", "v" }, "<leader>gr", ":Telescope gh run ", { desc = "Find gh run" })
+				end,
+			},
+			{
+				"jvgrootveld/telescope-zoxide",
+				dependencies = { "nvim-lua/popup.nvim" },
+				config = function()
+					require("telescope").setup({
+						extensions = {
+							zoxide = {
+								prompt_title = "[ TheSiahxyz ]",
+								mappings = {
+									default = {
+										action = function(selection)
+											vim.cmd.cd(selection.path)
+										end,
+										after_action = function(selection)
+											print("Update to (" .. selection.z_score .. ") " .. selection.path)
+										end,
+									},
+									["<C-b>"] = {
+										keepinsert = true,
+										action = function(selection)
+											require("telescope").extensions.file_browser.file_browser({
+												cwd = selection.path,
+											})
+										end,
+									},
+								},
+							},
+						},
+					})
+					require("telescope").load_extension("zoxide")
+
+					vim.keymap.set("n", "<leader>cd", function()
+						require("telescope").extensions.zoxide.list()
+					end, { desc = "Find files (zoxide)" })
+				end,
+			},
+			{
+				"nvim-telescope/telescope-live-grep-args.nvim",
+				-- This will not install any breaking changes.
+				-- For major updates, this must be adjusted manually.
+				version = "^1.0.0",
+				config = function()
+					local lga_actions = require("telescope-live-grep-args.actions")
+					local actions = require("telescope.actions")
+
+					require("telescope").setup({
+						extensions = {
+							live_grep_args = {
+								auto_quoting = true, -- enable/disable auto-quoting
+								-- define mappings, e.g.
+								mappings = { -- extend mappings
+									i = {
+										["<C-k>"] = lga_actions.quote_prompt(),
+										["<C-i>"] = lga_actions.quote_prompt({ postfix = " --iglob " }),
+										-- freeze the current list and start a fuzzy search in the frozen list
+										["<C-space>"] = actions.to_fuzzy_refine,
+									},
+								},
+								-- ... also accepts theme settings, for example:
+								-- theme = "dropdown", -- use dropdown theme
+								-- theme = { }, -- use own theme spec
+								-- layout_config = { mirror=true }, -- mirror preview pane
+							},
+						},
+					})
+					require("telescope").load_extension("live_grep_args")
+					vim.keymap.set(
+						"n",
+						"<leader>flf",
+						":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>",
+						{ desc = "Find live grep args" }
+					)
+
+					local function search_git(visual)
+						-- Retrieve the git root path
+						local handle = io.popen("git rev-parse --show-toplevel")
+						if not handle then
+							print("Error: Unable to open git handle")
+							return
+						end
+
+						local git_root_path = handle:read("*a"):gsub("%s+", "")
+						handle:close()
+
+						if not git_root_path or git_root_path == "" then
+							print("Error: Unable to retrieve git root path")
+							return
+						end
+
+						local opts = {
+							prompt_title = visual and ("Visual-Grep in " .. git_root_path)
+								or ("Live-Grep in " .. git_root_path),
+							shorten_path = false,
+							cwd = git_root_path,
+							file_ignore_patterns = { ".git", ".png", "tags" },
+							initial_mode = "insert",
+							selection_strategy = "reset",
+							theme = require("telescope.themes").get_dropdown({}),
+						}
+
+						if visual then
+							-- Capture the selected text in visual mode
+							vim.cmd('normal! "vy')
+							local visual_selection = vim.fn.getreg("v")
+							opts.search = visual_selection
+							require("telescope.builtin").grep_string(opts)
+						else
+							require("telescope.builtin").live_grep(opts)
+						end
+					end
+
+					vim.keymap.set("n", "<leader>flg", function()
+						search_git(false)
+					end, { remap = true, silent = false, desc = "Live grep in the git root folder" })
+
+					vim.keymap.set("v", "<leader>flg", function()
+						search_git(true)
+					end, { remap = true, silent = false, desc = "Grep in the git root folder" })
+					-- Retrieve the current tmux session path
+					-- This will not change when we navigate to a different pane
+					local function search_tmux(visual)
+						local handle = io.popen("tmux display-message -p '#{session_path}'")
+						if not handle then
+							print("Error: Unable to open tmux handle")
+							return
+						end
+
+						local tmux_session_path = handle:read("*a"):gsub("%s+", "")
+						handle:close()
+
+						if not tmux_session_path or tmux_session_path == "" then
+							print("Error: Unable to retrieve tmux session path")
+							return
+						end
+
+						local opts = {
+							prompt_title = visual and ("Visual-Grep in " .. tmux_session_path)
+								or ("Live-Grep in " .. tmux_session_path),
+							shorten_path = false,
+							cwd = tmux_session_path,
+							file_ignore_patterns = { ".git", ".png", "tags" },
+							initial_mode = "insert",
+							selection_strategy = "reset",
+							theme = require("telescope.themes").get_dropdown({}),
+						}
+
+						if visual then
+							require("telescope.builtin").grep_string(opts)
+						else
+							require("telescope.builtin").live_grep(opts)
+						end
+					end
+
+					local default_opts = { noremap = true, silent = true }
+					vim.keymap.set("n", "<leader>flt", function()
+						search_tmux(false)
+					end, { remap = true, silent = false, desc = "Live grep in the current tmux session folder" })
+
+					vim.keymap.set("v", "<leader>flt", function()
+						search_tmux(true)
+					end, { remap = true, silent = false, desc = "Grep string in the current tmux session folder" })
+					vim.api.nvim_set_keymap(
+						"v",
+						"<leader>ls",
+						'y<ESC>:Telescope live_grep default_text=<c-r>0<CR> search_dirs={"$PWD"}',
+						default_opts
+					)
+					vim.api.nvim_set_keymap(
+						"n",
+						"<leader>tm",
+						":lua require('telescope').extensions.tmuxinator.projects{}<CR>",
+						default_opts
+					)
+					vim.keymap.set("n", "<leader>f/", function()
+						require("telescope.builtin").current_buffer_fuzzy_find(
+							require("telescope.themes").get_dropdown({
+								winblend = 10,
+								previewer = false,
+								relative = "editor",
+							})
+						)
+					end, { desc = "Find in current buffer" })
+				end,
+			},
+			{
 				"xiyaowong/telescope-emoji.nvim",
 				config = function()
+					require("telescope").setup({
+						extensions = {
+							emoji = {
+								action = function(emoji)
+									-- argument emoji is a table.
+									-- {name="", value="", cagegory="", description=""}
+
+									vim.fn.setreg("*", emoji.value)
+									print([[Press p or "*p to paste this emoji]] .. emoji.value)
+
+									-- insert emoji when picked
+									-- vim.api.nvim_put({ emoji.value }, 'c', false, true)
+								end,
+							},
+						},
+					})
 					require("telescope").load_extension("emoji")
 				end,
 				keys = {

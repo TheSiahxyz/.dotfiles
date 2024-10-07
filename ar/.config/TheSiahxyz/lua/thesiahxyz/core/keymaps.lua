@@ -203,8 +203,8 @@ vim.keymap.set("v", "<leader><C-s>", ":s/\\%V", { desc = "Search only in visual 
 vim.keymap.set("v", "<C-r>", '"hy:%s/\\v<C-r>h//g<left><left>', { desc = "Change selection" })
 
 -- Cd
-vim.keymap.set("n", "<leader>cd", ":cd %:p:h<cr>:pwd<cr>", { desc = "Go to current file path" })
-vim.keymap.set("n", "<leader>CD", function()
+vim.keymap.set("n", "gcd", ":cd %:p:h<cr>:pwd<cr>", { desc = "Go to current file path" })
+vim.keymap.set("n", "gcD", function()
 	local realpath = vim.fn.systemlist("readlink -f " .. vim.fn.shellescape(vim.fn.expand("%:p")))[1]
 	vim.cmd("cd " .. vim.fn.fnameescape(vim.fn.fnamemodify(realpath, ":h")))
 	vim.cmd("pwd")
@@ -252,7 +252,7 @@ vim.keymap.set("n", "<leader>fn", "<cmd>enew<cr>", { desc = "Open new buffer" })
 -- vim.keymap.set("n", "]q", "<cmd>cnext<cr>zz", { desc = "Next quickfix item" })
 vim.keymap.set(
 	"n",
-	"<leader>/",
+	"<leader>rw",
 	[[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
 	{ desc = "Search and replace word under cursor" }
 )
