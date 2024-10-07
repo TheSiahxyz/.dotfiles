@@ -450,6 +450,9 @@ function check_git_repos_status() {
         if [ -n "$first_dir_session" ]; then
             # Attach to the session if it exists
             if tmux has-session -t "$first_dir_session" 2>/dev/null; then
+                # Send "git status" command to the tmux session
+                tmux send-keys -t "$first_dir_session" "git status" C-m
+
                 if [ -n "$TMUX" ]; then
                     # If already inside a tmux session, switch to the target session
                     tmux switch-client -t "$first_dir_session"
@@ -471,7 +474,7 @@ function check_git_repos_status() {
         selected_git=${selected_git#? }
         selected_git=${selected_git# }
 
-        [ -d "$selected_git" ] && cd "$selected_git"
+        [ -d "$selected_git" ] && cd "$selected_git" && git status
     fi
 }
 
