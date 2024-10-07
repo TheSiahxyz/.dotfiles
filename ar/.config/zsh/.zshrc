@@ -30,6 +30,7 @@ zstyle ':vcs_info:git*+set-message:*' hooks git-untracked git-incoming-commits g
     if [[ $(git rev-list origin/$(git rev-parse --abbrev-ref HEAD)..HEAD --count) -gt 0 ]]; then
         hook_com[misc]+="%{$fg[green]%}="
     fi
+
 }
 
 ### --- ZSH --- ###

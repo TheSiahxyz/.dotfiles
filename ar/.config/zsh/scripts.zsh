@@ -295,49 +295,117 @@ function check_git_repos_status() {
 
     process_and_append() {
         local dir="$1"
+        local prefix=""
+        local git_cmd=("git")
+
+        # Use `pass git` for the password-store directory
         if [[ "$dir" == "$HOME/.local/share/.password-store" ]]; then
-            pass git fetch --quiet
-            if [ -n "$(git -C "$dir" status --porcelain)" ]; then
-                search_dirs+=("+ $dir")
-            elif [ "$(git -C "$dir" rev-parse @)" != "$(git -C "$dir" rev-parse @{u})" ] && [ "$(git -C "$dir" rev-parse @)" = "$(git -C "$dir" merge-base @ @{u})" ]; then
-                search_dirs+=("! $dir")
-            elif [[ $(pass git rev-list origin/$(pass git rev-parse --abbrev-ref HEAD)..HEAD --count) -gt 0 ]]; then
-                search_dirs+=("= $dir")
-            else
-                search_dirs+=("$dir")
-            fi
+            git_cmd=("pass" "git")
+        fi
+
+        # Fetch updates
+        "${git_cmd[@]}" -C "$dir" fetch --quiet
+
+        # Check for different statuses
+        local git_status_output
+        git_status_output=$("${git_cmd[@]}" -C "$dir" status --porcelain)
+        local has_unstaged=false
+        local has_staged=false
+        local has_untracked=false
+
+        while IFS= read -r line; do
+            case "${line:0:2}" in
+                " M") has_unstaged=true ;;   # Unstaged changes
+                "M " | "MM" | "A " | "AM" | "UU") has_staged=true ;;  # Staged changes
+                "??") has_untracked=true ;;  # Untracked files
+                *) ;;
+            esac
+        done <<< "$git_status_output"
+
+        # Set prefix based on status
+        if $has_unstaged; then
+            prefix+="*"
+        fi
+        if $has_staged; then
+            prefix+="+"
+        fi
+        if $has_untracked; then
+            prefix+="?"
+        fi
+
+        # Check for diverged branches
+        if [ "$("${git_cmd[@]}" -C "$dir" rev-parse @)" != "$("${git_cmd[@]}" -C "$dir" rev-parse @{u})" ] && [ "$("${git_cmd[@]}" -C "$dir" rev-parse @)" = "$("${git_cmd[@]}" -C "$dir" merge-base @ @{u})" ]; then
+            prefix+="!"
+        fi
+
+        # Check for commits ahead of remote
+        if [[ "$("${git_cmd[@]}" -C "$dir" rev-list origin/$("${git_cmd[@]}" -C "$dir" rev-parse --abbrev-ref HEAD)..HEAD --count)" -gt 0 ]]; then
+            prefix+="="
+        fi
+
+        # Add the directory with its prefix to the search_dirs array
+        if [ -n "$prefix" ]; then
+            search_dirs+=("$prefix $dir")
         else
-            git -C "$dir" fetch --quiet
-            if [ -n "$(git -C "$dir" status --porcelain)" ]; then
-                search_dirs+=("+ $dir")
-            elif [ "$(git -C "$dir" rev-parse @)" != "$(git -C "$dir" rev-parse @{u})" ] && [ "$(git -C "$dir" rev-parse @)" = "$(git -C "$dir" merge-base @ @{u})" ]; then
-                search_dirs+=("! $dir")
-            elif [[ "$(git -C "$dir" rev-list origin/$(git -C "$dir" rev-parse --abbrev-ref HEAD)..HEAD --count)" -gt 0 ]]; then
-                search_dirs+=("= $dir")
-            else
-                search_dirs+=("$dir")
-            fi
+            search_dirs+=("$dir")
         fi
     }
 
-    # process initial directories
+    # Process initial directories
     for dir in "${initial_dirs[@]}"; do
         [ -d "$dir" ] && process_and_append "$dir"
     done
 
-    # process git directories in parallel
+    # Process git directories in parallel
     for git_dir in "${git_dirs[@]}"; do
         if [ -d "$git_dir" ]; then
             find "$git_dir" -mindepth 1 -maxdepth 1 -type d -print0 | xargs -0 -I{} -P 8 zsh -c '
-                git -C "$0" fetch --quiet
-                if [ -n "$(git -C "$0" status --porcelain)" ]; then
-                    echo "+ $0"
-                elif [ "$(git -C "$0" rev-parse @)" != "$(git -C "$0" rev-parse @{u})" ] && [ "$(git -C "$0" rev-parse @)" = "$(git -C "$0" merge-base @ @{u})" ]; then
-                    echo "! $0"
-                elif [ "$(git -C "$0" rev-list origin/$(git -C "$0" rev-parse --abbrev-ref HEAD)..HEAD --count)" -gt 0 ]; then
-                    echo "= $0"
+                dir="$0"
+                prefix=""
+                git_cmd=("git")
+
+                if [[ "$dir" == "$HOME/.local/share/.password-store" ]]; then
+                    git_cmd=("pass" "git")
+                fi
+
+                "${git_cmd[@]}" -C "$dir" fetch --quiet
+
+                git_status_output=$("${git_cmd[@]}" -C "$dir" status --porcelain)
+                has_unstaged=false
+                has_staged=false
+                has_untracked=false
+
+                while IFS= read -r line; do
+                    case "${line:0:2}" in
+                        " M") has_unstaged=true ;;
+                        "M " | "MM" | "A " | "AM" | "UU") echo "Detected staged changes" && has_staged=true ;;  # Staged changes
+                        "??") has_untracked=true ;;
+                        *) ;;
+                    esac
+                done <<< "$git_status_output"
+
+                if $has_unstaged; then
+                    prefix+="*"
+                fi
+                if $has_staged; then
+                    prefix+="+"
+                fi
+                if $has_untracked; then
+                    prefix+="?"
+                fi
+
+                if [ "$("${git_cmd[@]}" -C "$dir" rev-parse @)" != "$("${git_cmd[@]}" -C "$dir" rev-parse @{u})" ] && [ "$("${git_cmd[@]}" -C "$dir" rev-parse @)" = "$("${git_cmd[@]}" -C "$dir" merge-base @ @{u})" ]; then
+                    prefix+="!"
+                fi
+
+                if [ "$("${git_cmd[@]}" -C "$dir" rev-list origin/$("${git_cmd[@]}" -C "$dir" rev-parse --abbrev-ref HEAD)..HEAD --count)" -gt 0 ]; then
+                    prefix+="="
+                fi
+
+                if [ -n "$prefix" ]; then
+                    echo "$prefix $dir"
                 else
-                    echo "$0"
+                    echo "$dir"
                 fi
             ' {} | while IFS= read -r selected_git; do
                 search_dirs+=("$selected_git")
@@ -356,9 +424,11 @@ function check_git_repos_status() {
         local first_dir_session
         for dir in "${selected_git[@]}"; do
             # Clean up symbols and spaces
+            dir=${dir#* }
             dir=${dir#+ }
             dir=${dir#! }
             dir=${dir#= }
+            dir=${dir#? }
             dir=${dir# }
 
             if [ -d "$dir" ]; then
@@ -394,10 +464,13 @@ function check_git_repos_status() {
         IFS="$OLDIFS"
     else
         selected_git=$(printf "%s\n" "${search_dirs[@]}" | fzf --cycle --multi --prompt="  " --height=50% --layout=reverse --border --exit-0)
+        selected_git=${selected_git#* }
         selected_git=${selected_git#+ }
         selected_git=${selected_git#! }
         selected_git=${selected_git#= }
+        selected_git=${selected_git#? }
         selected_git=${selected_git# }
+
         [ -d "$selected_git" ] && cd "$selected_git"
     fi
 }
