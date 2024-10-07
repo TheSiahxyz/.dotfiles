@@ -297,8 +297,14 @@ function check_git_repos_status() {
         local dir="$1"
         if [[ "$dir" == "$HOME/.local/share/.password-store" ]]; then
             pass git fetch --quiet
-            if [[ $(pass git rev-list origin/$(pass git rev-parse --abbrev-ref HEAD)..HEAD --count) -gt 0 ]]; then
+            if [ -n "$(git -C "$dir" status --porcelain)" ]; then
+                search_dirs+=("+ $dir")
+            elif [ "$(git -C "$dir" rev-parse @)" != "$(git -C "$dir" rev-parse @{u})" ] && [ "$(git -C "$dir" rev-parse @)" = "$(git -C "$dir" merge-base @ @{u})" ]; then
+                search_dirs+=("! $dir")
+            elif [[ $(pass git rev-list origin/$(pass git rev-parse --abbrev-ref HEAD)..HEAD --count) -gt 0 ]]; then
                 search_dirs+=("= $dir")
+            else
+                search_dirs+=("$dir")
             fi
         else
             git -C "$dir" fetch --quiet
@@ -306,6 +312,8 @@ function check_git_repos_status() {
                 search_dirs+=("+ $dir")
             elif [ "$(git -C "$dir" rev-parse @)" != "$(git -C "$dir" rev-parse @{u})" ] && [ "$(git -C "$dir" rev-parse @)" = "$(git -C "$dir" merge-base @ @{u})" ]; then
                 search_dirs+=("! $dir")
+            elif [[ $(git rev-list origin/$(git rev-parse --abbrev-ref HEAD)..HEAD --count) -gt 0 ]]; then
+                search_dirs+=("= $dir")
             else
                 search_dirs+=("$dir")
             fi
@@ -326,6 +334,8 @@ function check_git_repos_status() {
                     echo "+ $0"
                 elif [ "$(git -C "$0" rev-parse @)" != "$(git -C "$0" rev-parse @{u})" ] && [ "$(git -C "$0" rev-parse @)" = "$(git -C "$0" merge-base @ @{u})" ]; then
                     echo "! $0"
+                elif [[ $(pass git rev-list origin/$(pass git rev-parse --abbrev-ref HEAD)..HEAD --count) -gt 0 ]]; then
+                    echo "= $0"
                 else
                     echo "$0"
                 fi
@@ -348,6 +358,7 @@ function check_git_repos_status() {
             # Clean up symbols and spaces
             dir=${dir#+ }
             dir=${dir#! }
+            dir=${dir#= }
             dir=${dir# }
 
             if [ -d "$dir" ]; then
@@ -385,6 +396,7 @@ function check_git_repos_status() {
         selected_git=$(printf "%s\n" "${search_dirs[@]}" | fzf --cycle --multi --prompt="  " --height=50% --layout=reverse --border --exit-0)
         selected_git=${selected_git#+ }
         selected_git=${selected_git#! }
+        selected_git=${selected_git#= }
         selected_git=${selected_git# }
         [ -d "$selected_git" ] && cd "$selected_git"
     fi
