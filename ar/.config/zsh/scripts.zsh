@@ -343,6 +343,7 @@ function check_git_repos_status() {
         # Iterate over the selected directories to create sessions
         OLDIFS="$IFS"
         IFS="\n"
+        local first_dir_session
         for dir in "${selected_git[@]}"; do
             # Clean up symbols and spaces
             dir=${dir#+ }
@@ -357,31 +358,29 @@ function check_git_repos_status() {
                 if ! tmux has-session -t "$session_name" 2>/dev/null; then
                     tmux new-session -d -s "$session_name" -c "$dir"
                 fi
+
+                if [ -n "$first_dir_session" ]; then
+                    first_dir_session="$session_name"
+                fi
             fi
         done
 
         # Attach to the first selected session
-        if [ -n "${selected_git[1]}" ]; then
-            first_dir=${selected_git[1]#+ }
-            first_dir=${first_dir#! }
-            first_dir=${first_dir# }
-
-            # Generate the session name based on the cleaned-up directory
-            session_name=$(basename "$first_dir" | sed 's/[^a-zA-Z0-9]/_/g')
-
+        if [ -n "$first_dir_session" ]; then
             # Attach to the session if it exists
-            if tmux has-session -t "$session_name" 2>/dev/null; then
+            if tmux has-session -t "$first_dir_session" 2>/dev/null; then
                 if [ -n "$TMUX" ]; then
                     # If already inside a tmux session, switch to the target session
-                    tmux switch-client -t "$session_name"
+                    tmux switch-client -t "$first_dir_session"
                 else
                     # If not inside a tmux session, attach to the session
-                    tmux attach-session -t "$session_name"
+                    tmux attach-session -t "$first_dir_session"
                 fi
             else
-                echo "Error: Can't find session for $first_dir"
+                echo "Error: Can't find session for $first_dir_session"
             fi
         fi
+        IFS="$OLDIFS"
     else
         selected_git=$(printf "%s\n" "${search_dirs[@]}" | fzf --cycle --multi --prompt="  " --height=50% --layout=reverse --border --exit-0)
         selected_git=${selected_git#+ }
@@ -389,7 +388,6 @@ function check_git_repos_status() {
         selected_git=${selected_git# }
         [ -d "$selected_git" ] && cd "$selected_git"
     fi
-    IFS="$OLDIFS"
 }
 
 
