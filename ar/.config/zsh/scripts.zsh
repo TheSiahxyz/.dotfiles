@@ -335,11 +335,58 @@ function check_git_repos_status() {
         fi
     done
 
-    selected_git=$(printf "%s\n" "${search_dirs[@]}" | fzf --cycle --prompt="  " --height=50% --layout=reverse --border --exit-0)
-    selected_git=${selected_git#+ }
-    selected_git=${selected_git#! }
-    selected_git=${selected_git# }
-    [ -d "$selected_git" ] && cd "$selected_git"
+    local selected_git
+    if command -v tmux; then
+        # Select directories using fzf with multi option
+        selected_git=($(printf "%s\n" "${search_dirs[@]}" | fzf --cycle --multi --prompt="  " --height=50% --layout=reverse --border --exit-0))
+
+        # Iterate over the selected directories to create sessions
+        for dir in "${selected_git[@]}"; do
+            # Clean up symbols and spaces
+            dir=${dir#+ }
+            dir=${dir#! }
+            dir=${dir# }
+
+            if [ -d "$dir" ]; then
+                # Create a unique tmux session name
+                session_name=$(basename "$dir" | sed 's/[^a-zA-Z0-9]/_/g')
+
+                # Create the tmux session if it doesn't already exist
+                if ! tmux has-session -t "$session_name" 2>/dev/null; then
+                    tmux new-session -d -s "$session_name" -c "$dir"
+                fi
+            fi
+        done
+
+        # Attach to the first selected session
+        if [ -n "${selected_git[1]}" ]; then
+            first_dir=${selected_git[1]#+ }
+            first_dir=${first_dir#! }
+            first_dir=${first_dir# }
+
+            # Generate the session name based on the cleaned-up directory
+            session_name=$(basename "$first_dir" | sed 's/[^a-zA-Z0-9]/_/g')
+
+            # Attach to the session if it exists
+            if tmux has-session -t "$session_name" 2>/dev/null; then
+                if [ -n "$TMUX" ]; then
+                    # If already inside a tmux session, switch to the target session
+                    tmux switch-client -t "$session_name"
+                else
+                    # If not inside a tmux session, attach to the session
+                    tmux attach-session -t "$session_name"
+                fi
+            else
+                echo "Error: Can't find session for $first_dir"
+            fi
+        fi
+    else
+        selected_git=$(printf "%s\n" "${search_dirs[@]}" | fzf --cycle --multi --prompt="  " --height=50% --layout=reverse --border --exit-0)
+        selected_git=${selected_git#+ }
+        selected_git=${selected_git#! }
+        selected_git=${selected_git# }
+        [ -d "$selected_git" ] && cd "$selected_git"
+    fi
 }
 
 
