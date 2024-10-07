@@ -72,12 +72,12 @@ function fzf_config() {
 # copy file name to clipboard
 alias cpfn=copy_filename
 function copy_filename() {
-    if ! command -v xclip >/dev/null 2>&1; then
+    if ! command -v xclip >/dev/null; then
         echo "Error: 'xclip' is not installed." >&2
         return 1
     fi
 
-    if ! command -v fzf >/dev/null 2>&1; then
+    if ! command -v fzf >/dev/null; then
         echo "Error: 'fzf' is not installed." >&2
         return 1
     fi
@@ -102,12 +102,12 @@ function copy_filename() {
 # copy file contents
 alias cpfc=copy_contents
 function copy_contents() {
-    if ! command -v xclip >/dev/null 2>&1; then
+    if ! command -v xclip >/dev/null; then
         echo "Error: 'xclip' is not installed." >&2
         return 1
     fi
 
-    if ! command -v fzf >/dev/null 2>&1; then
+    if ! command -v fzf >/dev/null; then
         echo "Error: 'fzf' is not installed." >&2
         return 1
     fi
@@ -132,7 +132,7 @@ function copy_contents() {
 # copy the current working directory path to the clipboard
 alias cpcp=copy_current_path
 function copy_current_path() {
-    if command -v xclip > /dev/null; then
+    if command -v xclip >/dev/null; then
         printf "%s" "$PWD" | xclip -selection clipboard
         printf "%s\n" "Current working directory '$(basename "$PWD")' path copied to clipboard."
     else
@@ -143,12 +143,12 @@ function copy_current_path() {
 # copy file real path
 alias cprp=copy_real_path
 function copy_real_path() {
-    if ! command -v xclip >/dev/null 2>&1; then
+    if ! command -v xclip >/dev/null; then
         echo "Error: 'xclip' is not installed." >&2
         return 1
     fi
 
-    if ! command -v fzf >/dev/null 2>&1; then
+    if ! command -v fzf >/dev/null; then
         echo "Error: 'fzf' is not installed." >&2
         return 1
     fi
@@ -256,7 +256,7 @@ function git_push_origin_home() {
 # go to the path stored in the clipboard
 alias cdp=cd_clipboard_path
 function cd_clipboard_path() {
-    if command -v xclip > /dev/null; then
+    if command -v xclip >/dev/null; then
         local target_dir
         target_dir="$(xclip -o -sel clipboard)"
         if [[ -d "${target_dir}" ]]; then
@@ -336,11 +336,13 @@ function check_git_repos_status() {
     done
 
     local selected_git
-    if command -v tmux; then
+    if command -v tmux >/dev/null; then
         # Select directories using fzf with multi option
         selected_git=($(printf "%s\n" "${search_dirs[@]}" | fzf --cycle --multi --prompt="  " --height=50% --layout=reverse --border --exit-0))
 
         # Iterate over the selected directories to create sessions
+        OLDIFS=$IFS
+        IFS="\n"
         for dir in "${selected_git[@]}"; do
             # Clean up symbols and spaces
             dir=${dir#+ }
@@ -387,6 +389,7 @@ function check_git_repos_status() {
         selected_git=${selected_git# }
         [ -d "$selected_git" ] && cd "$selected_git"
     fi
+    IFS=$OLDIFS
 }
 
 
