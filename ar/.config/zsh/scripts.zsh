@@ -312,7 +312,7 @@ function check_git_repos_status() {
                 search_dirs+=("+ $dir")
             elif [ "$(git -C "$dir" rev-parse @)" != "$(git -C "$dir" rev-parse @{u})" ] && [ "$(git -C "$dir" rev-parse @)" = "$(git -C "$dir" merge-base @ @{u})" ]; then
                 search_dirs+=("! $dir")
-            elif [[ $(git rev-list origin/$(git rev-parse --abbrev-ref HEAD)..HEAD --count) -gt 0 ]]; then
+            elif [[ "$(git -C "$dir" rev-list origin/$(git -C "$dir" rev-parse --abbrev-ref HEAD)..HEAD --count)" -gt 0 ]]; then
                 search_dirs+=("= $dir")
             else
                 search_dirs+=("$dir")
@@ -334,7 +334,7 @@ function check_git_repos_status() {
                     echo "+ $0"
                 elif [ "$(git -C "$0" rev-parse @)" != "$(git -C "$0" rev-parse @{u})" ] && [ "$(git -C "$0" rev-parse @)" = "$(git -C "$0" merge-base @ @{u})" ]; then
                     echo "! $0"
-                elif [[ $(pass git rev-list origin/$(pass git rev-parse --abbrev-ref HEAD)..HEAD --count) -gt 0 ]]; then
+                elif [ "$(git -C "$0" rev-list origin/$(git -C "$0" rev-parse --abbrev-ref HEAD)..HEAD --count)" -gt 0 ]; then
                     echo "= $0"
                 else
                     echo "$0"
@@ -370,7 +370,7 @@ function check_git_repos_status() {
                     tmux new-session -d -s "$session_name" -c "$dir"
                 fi
 
-                if [ -n "$first_dir_session" ]; then
+                if [ -z "$first_dir_session" ]; then
                     first_dir_session="$session_name"
                 fi
             fi
