@@ -60,19 +60,33 @@ open_file() {
         exit 1
     fi
 
-    nvim_cmd="${EDITOR:-nvim}"
-    count=0
     IFS='
 '
 
-    for file in "$@"; do
+    files=$*
+    for file in $files; do
         count=$((count + 1))
-        file_path=$(realpath "$file")
-        nvim_cmd="$nvim_cmd \"$file_path\""
+        files_list="$files_list \"$(realpath "$file")\""
     done
 
-    # Execute the nvim command
-    eval "$nvim_cmd"
+    eval "set -- $files_list"
+    count=$#
+
+    case "$count" in
+    2)
+        ${EDITOR:-nvim} -O +'silent! normal g;' "$@"
+        ;;
+    3)
+        ${EDITOR:-nvim} -O "$1" -c 'wincmd j' -c "silent! vsplit $2" -c "silent! split $3"
+        ;;
+    4)
+        ${EDITOR:-nvim} -O "$1" -c "silent! vsplit $2" -c "silent! split $3" -c 'wincmd h' -c "silent! split $4"
+        ;;
+    *)
+        ${EDITOR:-nvim} "$@"
+        ;;
+    esac
+
 }
 
 # Function to list and/or open all files associated with a given project tag
@@ -106,7 +120,7 @@ list_or_open_project_files() {
         echo "$rga_output"
     else
         # Otherwise, open the files with nvim
-        set -- $(printf "%s\n" "$rga_output")
+        set -- "$(printf "%s\n" "$rga_output")"
         open_file "$@"
     fi
 }
