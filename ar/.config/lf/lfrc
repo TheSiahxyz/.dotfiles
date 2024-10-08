@@ -201,6 +201,7 @@ cmd extract ${{
 
 # Git
 cmd on-cd &{{
+    zoxide add "$PWD"
     bash -c '
     # display git repository status in your prompt
     source /usr/share/git/completion/git-prompt.sh
@@ -373,9 +374,6 @@ cmd z %{{
 cmd zi ${{
 	result="$(zoxide query -i | sed 's/\\/\\\\/g;s/"/\\"/g')"
 	lf -remote "send $id cd \"$result\""
-}}
-cmd on-cd &{{
-        zoxide add "$PWD"
 }}
 cmd follow_link %{{
     lf -remote "send ${id} select '$(readlink $f)'"
