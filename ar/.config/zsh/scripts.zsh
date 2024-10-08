@@ -340,7 +340,7 @@ function check_git_repos_status() {
 
         # Check for commits ahead of remote
         if [[ "$("${git_cmd[@]}" -C "$dir" rev-list origin/$("${git_cmd[@]}" -C "$dir" rev-parse --abbrev-ref HEAD)..HEAD --count)" -gt 0 ]]; then
-            prefix+="="
+            prefix+=">"
         fi
 
         # Add the directory with its prefix to the search_dirs array
@@ -399,7 +399,7 @@ function check_git_repos_status() {
                 fi
 
                 if [ "$("${git_cmd[@]}" -C "$dir" rev-list origin/$("${git_cmd[@]}" -C "$dir" rev-parse --abbrev-ref HEAD)..HEAD --count)" -gt 0 ]; then
-                    prefix+="="
+                    prefix+=">"
                 fi
 
                 if [ -n "$prefix" ]; then
@@ -426,9 +426,9 @@ function check_git_repos_status() {
             # Clean up symbols and spaces
             dir=${dir#* }
             dir=${dir#+ }
-            dir=${dir#! }
-            dir=${dir#= }
             dir=${dir#? }
+            dir=${dir#! }
+            dir=${dir#> }
             dir=${dir# }
 
             if [ -d "$dir" ]; then
@@ -469,9 +469,9 @@ function check_git_repos_status() {
         selected_git=$(printf "%s\n" "${search_dirs[@]}" | fzf --cycle --multi --prompt="  " --height=50% --layout=reverse --border --exit-0)
         selected_git=${selected_git#* }
         selected_git=${selected_git#+ }
-        selected_git=${selected_git#! }
-        selected_git=${selected_git#= }
         selected_git=${selected_git#? }
+        selected_git=${selected_git#! }
+        selected_git=${selected_git#> }
         selected_git=${selected_git# }
 
         [ -d "$selected_git" ] && cd "$selected_git" && git status
