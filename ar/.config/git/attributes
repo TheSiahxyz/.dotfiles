@@ -29,7 +29,7 @@
 *.tab      text
 *.tsv      text
 *.txt      text
-*.sql      text
+*.sql      text eol=lf
 *.epub     diff=astextplain
 
 # Graphics

@@ -289,192 +289,94 @@ function search_scripts() {
 # check git status by directories in specific path
 alias cgrs=check_git_repos_status
 function check_git_repos_status() {
-    local search_dirs=()
-    local initial_dirs=("$HOME/.dotfiles" "$HOME/.local/share/.password-store" "$HOME/.local/src/suckless")
-    local git_dirs=("$HOME/Private/repos" "$HOME/Public/repos")
+    # Run the bash logic in a subshell to use __git_ps1
+    SELECTED_DIRS=$(bash << 'EOF'
+        # Source the Git prompt script to get access to __git_ps1
+        source /usr/share/git/completion/git-prompt.sh
 
-    process_and_append() {
-        local dir="$1"
-        local prefix=""
-        local git_cmd=("git")
+        # Enable symbols for dirty state, untracked files, and branch ahead/behind
+        export GIT_PS1_SHOWDIRTYSTATE="auto"
+        export GIT_PS1_SHOWUNTRACKEDFILES="auto"
+        export GIT_PS1_SHOWUPSTREAM="auto"
 
-        # Use `pass git` for the password-store directory
-        if [[ "$dir" == "$HOME/.local/share/.password-store" ]]; then
-            git_cmd=("pass" "git")
-        fi
+        # Define an array of target directories
+        TARGET_DIRECTORIES=(
+            "$HOME/.dotfiles"
+            "$HOME/.local/share/.password-store"
+            "$HOME/.local/src/suckless"
+        )
 
-        # Fetch updates
-        "${git_cmd[@]}" -C "$dir" fetch --quiet
+        # Check the directories under the paths. eg. ../repos/*
+        GIT_DIRS=("$HOME/Private/repos" "$HOME/Public/repos")
 
-        # Check for different statuses
-        local git_status_output
-        git_status_output=$("${git_cmd[@]}" -C "$dir" status --porcelain)
-        local has_unstaged=false
-        local has_staged=false
-        local has_untracked=false
-
-        while IFS= read -r line; do
-            case "${line:0:2}" in
-                " M") has_unstaged=true ;;   # Unstaged changes
-                "M " | "MM" | "A " | "AM" | "UU") has_staged=true ;;  # Staged changes
-                "??") has_untracked=true ;;  # Untracked files
-                *) ;;
-            esac
-        done <<< "$git_status_output"
-
-        # Set prefix based on status
-        if $has_unstaged; then
-            prefix+="*"
-        fi
-        if $has_staged; then
-            prefix+="+"
-        fi
-        if $has_untracked; then
-            prefix+="?"
-        fi
-
-        # Check for diverged branches
-        if [ "$("${git_cmd[@]}" -C "$dir" rev-parse @)" != "$("${git_cmd[@]}" -C "$dir" rev-parse @{u})" ] && [ "$("${git_cmd[@]}" -C "$dir" rev-parse @)" = "$("${git_cmd[@]}" -C "$dir" merge-base @ @{u})" ]; then
-            prefix+="!"
-        fi
-
-        # Check for commits ahead of remote
-        if [[ "$("${git_cmd[@]}" -C "$dir" rev-list origin/$("${git_cmd[@]}" -C "$dir" rev-parse --abbrev-ref HEAD)..HEAD --count)" -gt 0 ]]; then
-            prefix+=">"
-        fi
-
-        # Add the directory with its prefix to the search_dirs array
-        if [ -n "$prefix" ]; then
-            search_dirs+=("$prefix $dir")
-        else
-            search_dirs+=("$dir")
-        fi
-    }
-
-    # Process initial directories
-    for dir in "${initial_dirs[@]}"; do
-        [ -d "$dir" ] && process_and_append "$dir"
-    done
-
-    # Process git directories in parallel
-    for git_dir in "${git_dirs[@]}"; do
-        if [ -d "$git_dir" ]; then
-            find "$git_dir" -mindepth 1 -maxdepth 1 -type d -print0 | xargs -0 -I{} -P 8 zsh -c '
-                dir="$0"
-                prefix=""
-                git_cmd=("git")
-
-                if [[ "$dir" == "$HOME/.local/share/.password-store" ]]; then
-                    git_cmd=("pass" "git")
-                fi
-
-                "${git_cmd[@]}" -C "$dir" fetch --quiet
-
-                git_status_output=$("${git_cmd[@]}" -C "$dir" status --porcelain)
-                has_unstaged=false
-                has_staged=false
-                has_untracked=false
-
-                while IFS= read -r line; do
-                    case "${line:0:2}" in
-                        " M") has_unstaged=true ;;
-                        "M " | "MM" | "A " | "AM" | "UU") echo "Detected staged changes" && has_staged=true ;;  # Staged changes
-                        "??") has_untracked=true ;;
-                        *) ;;
-                    esac
-                done <<< "$git_status_output"
-
-                if $has_unstaged; then
-                    prefix+="*"
-                fi
-                if $has_staged; then
-                    prefix+="+"
-                fi
-                if $has_untracked; then
-                    prefix+="?"
-                fi
-
-                if [ "$("${git_cmd[@]}" -C "$dir" rev-parse @)" != "$("${git_cmd[@]}" -C "$dir" rev-parse @{u})" ] && [ "$("${git_cmd[@]}" -C "$dir" rev-parse @)" = "$("${git_cmd[@]}" -C "$dir" merge-base @ @{u})" ]; then
-                    prefix+="!"
-                fi
-
-                if [ "$("${git_cmd[@]}" -C "$dir" rev-list origin/$("${git_cmd[@]}" -C "$dir" rev-parse --abbrev-ref HEAD)..HEAD --count)" -gt 0 ]; then
-                    prefix+=">"
-                fi
-
-                if [ -n "$prefix" ]; then
-                    echo "$prefix $dir"
-                else
-                    echo "$dir"
-                fi
-            ' {} | while IFS= read -r selected_git; do
-                search_dirs+=("$selected_git")
-            done >/dev/null 2>&1
-        fi
-    done
-
-    local selected_git
-    if command -v tmux >/dev/null; then
-        # Select directories using fzf with multi option
-        selected_git=($(printf "%s\n" "${search_dirs[@]}" | fzf --cycle --multi --prompt="  " --height=50% --layout=reverse --border --exit-0))
-
-        # Iterate over the selected directories to create sessions
-        OLDIFS="$IFS"
-        IFS="\n"
-        local first_dir_session
-        for dir in "${selected_git[@]}"; do
-            # Clean up symbols and spaces
-            dir=${dir#* }
-            dir=${dir#+ }
-            dir=${dir#? }
-            dir=${dir#! }
-            dir=${dir#> }
-            dir=${dir# }
-
-            if [ -d "$dir" ]; then
-                # Create a unique tmux session name
-                session_name=$(basename "$dir" | sed 's/[^a-zA-Z0-9]/_/g')
-
-                # Create the tmux session if it doesn't already exist
-                if ! tmux has-session -t "$session_name" 2>/dev/null; then
-                    tmux new-session -d -s "$session_name" -c "$dir"
-                fi
-
-                if [ -z "$first_dir_session" ]; then
-                    first_dir_session="$session_name"
-                fi
+        # Append all subdirectories under GIT_DIRS that are Git repositories
+        for GIT_DIR in "${GIT_DIRS[@]}"; do
+            if [ -d "$GIT_DIR" ]; then  # Only proceed if directory exists
+                for SUBDIR in "$GIT_DIR"/*; do
+                    if [ -d "$SUBDIR/.git" ]; then
+                        TARGET_DIRECTORIES+=("$SUBDIR")
+                    fi
+                done
             fi
         done
 
-        # Attach to the first selected session
-        if [ -n "$first_dir_session" ]; then
-            # Attach to the session if it exists
-            if tmux has-session -t "$first_dir_session" 2>/dev/null; then
-                # Send "git status" command to the tmux session
-                tmux send-keys -t "$first_dir_session" "git status" C-m
+        # Create an array to store the output
+        OUTPUT=()
 
-                if [ -n "$TMUX" ]; then
-                    # If already inside a tmux session, switch to the target session
-                    tmux switch-client -t "$first_dir_session"
-                else
-                    # If not inside a tmux session, attach to the session
-                    tmux attach-session -t "$first_dir_session"
-                fi
+        # Loop through each directory and get the Git status
+        for DIR in "${TARGET_DIRECTORIES[@]}"; do
+            if [ -d "$DIR/.git" ]; then
+                # Change to the directory
+                cd "$DIR" || continue
+
+                # Get Git branch and status using __git_ps1
+                GIT_STATUS=$(__git_ps1 "%s")
+
+                # Add formatted output with Git status and directory
+                OUTPUT+=("$(printf "%-10s - %s" "$GIT_STATUS" "$DIR")")
             else
-                echo "Error: Can't find session for $first_dir_session"
+                OUTPUT+=("No Git repository - $DIR")
             fi
-        fi
-        IFS="$OLDIFS"
-    else
-        selected_git=$(printf "%s\n" "${search_dirs[@]}" | fzf --cycle --multi --prompt="  " --height=50% --layout=reverse --border --exit-0)
-        selected_git=${selected_git#* }
-        selected_git=${selected_git#+ }
-        selected_git=${selected_git#? }
-        selected_git=${selected_git#! }
-        selected_git=${selected_git#> }
-        selected_git=${selected_git# }
+        done
 
-        [ -d "$selected_git" ] && cd "$selected_git" && git status
+        # Pass the output to fzf with multi-select enabled (-m)
+        SELECTED=$(printf "%s\n" "${OUTPUT[@]}" | fzf -m)
+
+        # Extract the directory paths by using the last field as the path
+        echo "$SELECTED" | awk -F' - ' '{print $2}'
+EOF
+    )
+
+    # Split the selected directories into an array
+    SELECTED_DIRS_ARRAY=(${=SELECTED_DIRS})
+
+    # Function to clean and create a valid session name
+    clean_session_name() { echo $(basename "$1" | sed 's/[^a-zA-Z0-9]/_/g'); }
+
+    # Handle the case where only one directory is selected
+    if [[ ${#SELECTED_DIRS_ARRAY[@]} -eq 1 ]]; then
+        if [ -d "${SELECTED_DIRS_ARRAY[1]}" ]; then
+            cd "${SELECTED_DIRS_ARRAY[1]}"
+        else
+            echo "Invalid selection or not a directory."
+        fi
+    else
+        # If multiple selections, handle tmux sessions
+        for DIR in "${SELECTED_DIRS_ARRAY[@]}"; do
+            SESSION_NAME=$(clean_session_name "$DIR")
+            # Check if the tmux session already exists
+            if ! tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
+                tmux new-session -d -s "$SESSION_NAME" -c "$DIR"
+            fi
+        done
+
+        # Now attach to the first selected session, or switch to it if already in tmux
+        FIRST_SESSION=$(clean_session_name "${SELECTED_DIRS_ARRAY[1]}")
+        if [[ -n "$TMUX" ]]; then
+            tmux switch-client -t "$FIRST_SESSION"
+        else
+            tmux attach-session -t "$FIRST_SESSION"
+        fi
     fi
 }
 

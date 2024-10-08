@@ -12,7 +12,7 @@ zstyle ':vcs_info:*' unstagedstr '*'
 zstyle ':vcs_info:*' stagedstr '+'
 zstyle ':vcs_info:git:*' formats       "%{$fg[blue]%}(%{$fg[black]%}%b%{$fg[blue]%}:%r%{$fg[yellow]%}%u%m%{$fg[magenta]%}%c%{$fg[blue]%})"
 zstyle ':vcs_info:git:*' actionformats "%{$fg[blue]%}(%{$fg[black]%}%b%{$fg[blue]%}:%r%{$reset_color%}|%{$fg[red]%}%a%u%c%{$fg[blue]%})"
-zstyle ':vcs_info:git*+set-message:*' hooks git-untracked git-incoming-commits git-unpushed-commits
+zstyle ':vcs_info:git*+set-message:*' hooks git-untracked git-behind-upstream git-ahead-upstream git-diverged-upstream
 +vi-git-untracked() {
     if [[ $(git rev-parse --is-inside-work-tree 2> /dev/null) == "true" ]] && \
         git status --porcelain | grep -m 1 "^??" &>/dev/null
@@ -20,17 +20,22 @@ zstyle ':vcs_info:git*+set-message:*' hooks git-untracked git-incoming-commits g
         hook_com[misc]+="%{$fg[yellow]%}?"
     fi
 }
-+vi-git-incoming-commits() {
-    # git fetch > /dev/null 2>&1
-    if [[ $(git rev-list HEAD..origin/$(git rev-parse --abbrev-ref HEAD) --count) -gt 0 ]]; then
-        hook_com[misc]+="%{$fg[red]%}!"
++vi-git-behind-upstream() {
+    if [[ $(git rev-list HEAD..$(git rev-parse --abbrev-ref @{upstream}) --count) -gt 0 ]]; then
+        hook_com[misc]+="%{$fg[red]%}<"
     fi
 }
-+vi-git-unpushed-commits() {
-    if [[ $(git rev-list origin/$(git rev-parse --abbrev-ref HEAD)..HEAD --count) -gt 0 ]]; then
++vi-git-ahead-upstream() {
+    if [[ $(git rev-list $(git rev-parse --abbrev-ref @{upstream})..HEAD --count) -gt 0 ]]; then
         hook_com[misc]+="%{$fg[green]%}>"
     fi
-
+}
++vi-git-diverged-upstream() {
+    local ahead_count=$(git rev-list --count $(git rev-parse --abbrev-ref @{upstream})..HEAD 2>/dev/null)
+    local behind_count=$(git rev-list --count HEAD..$(git rev-parse --abbrev-ref @{upstream}) 2>/dev/null)
+    if [[ "$ahead_count" -gt 0 && "$behind_count" -gt 0 ]]; then
+        hook_com[misc]+="%{$fg[magenta]%}<>"
+    fi
 }
 
 ### --- ZSH --- ###
