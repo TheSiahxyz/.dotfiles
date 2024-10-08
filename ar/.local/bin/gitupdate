@@ -1,22 +1,30 @@
 #!/bin/sh
-#
+
 set -eu
 
 # Default message if no argument is passed
 message="${1:-updated}"
 
 # Get the current Git branch name
-branch=`git symbolic-ref -q HEAD | sed -e 's|^refs/heads/||'`
+branch=$(git symbolic-ref -q HEAD | sed -e 's|^refs/heads/||')
 
 # Save current directory and change to the Git repo root
-repo_root=`git rev-parse --show-toplevel || echo "."`
+repo_root=$(git rev-parse --show-toplevel || echo ".")
 cd "$repo_root"
 
 # Perform Git commands
 git add --all .
 git commit -m "$message" || true
 git pull --rebase origin "$branch" || true
-git push origin "$branch"
+
+# Check if the 'home' remote exists
+if git remote | grep -q "^home$"; then
+    # Push to both 'home' and 'origin'
+    git push home "$branch" && git push origin "$branch"
+else
+    # Push only to 'origin'
+    git push origin "$branch"
+fi
 
 # Return to the original directory
 cd -
