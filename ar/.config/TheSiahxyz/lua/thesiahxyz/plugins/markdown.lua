@@ -176,12 +176,12 @@ local function insert_code_cell()
 end
 
 return {
-	{
-		"ixru/nvim-markdown",
-		config = function()
-			vim.g.vim_markdown_no_default_key_mappings = 1
-		end,
-	},
+	-- {
+	-- 	"ixru/nvim-markdown",
+	-- 	config = function()
+	-- 		vim.g.vim_markdown_no_default_key_mappings = 1
+	-- 	end,
+	-- },
 	{
 		-- Install markdown preview, use npx if available.
 		"iamcco/markdown-preview.nvim",

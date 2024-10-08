@@ -18,49 +18,15 @@ return {
 			local wk = require("which-key")
 			wk.add({
 				mode = { "n" },
-				{ "<leader>v", group = "Vimwiki" },
+				{ "<leader>w", group = "Vimwiki" },
+				{ "<leader>w<leader>", group = "Diary" },
 			})
 		end,
+		config = function()
+			vim.g.vimwiki_list = { { syntax = "markdown", ext = "md" } }
+		end,
 		keys = {
-			{
-				"<leader>v|",
-				":VimwikiSplitLink<CR>",
-				desc = "Horizontal split",
-			},
-			{ "<leader>v-", ":VimwikiVSplitLink<CR>", desc = "Vertical split" },
-			{
-				"<leader>va",
-				":VimwikiAll2HTML<CR>",
-				desc = "All vimwiki to html",
-			},
-			{
-				"<leader>vc",
-				":VimwikiColorize<CR>",
-				desc = "Colorize line or selection",
-			},
-			{
-				"<leader>vd",
-				":VimwikiDeleteFile<CR>",
-				desc = "Delete wiki page",
-			},
-			{ "<leader>vh", ":Vimwiki2HTML<CR>", desc = "Vimwiki to html" },
-			{
-				"<leader>vH",
-				":Vimwiki2HTMLBrowse<CR>",
-				desc = "Convert current wiki to html",
-			},
-			{ "<leader>vw", ":VimwikiIndex<CR>", desc = "Vimwiki index" },
-			{
-				"<leader>vn",
-				":VimwikiGoto<CR>",
-				desc = "Goto or create new wiki page",
-			},
-			{
-				"<leader>vr",
-				":VimwikiRenameFile<CR>",
-				desc = "Rename wiki page",
-			},
-			{ "<leader>vu", ":VimwikiDiaryGenerateLinks<CR>", desc = "Update diary" },
+			{ "<leader>ww", ":VimwikiIndex<CR>", desc = "Vimwiki index" },
 		},
 	},
 	{

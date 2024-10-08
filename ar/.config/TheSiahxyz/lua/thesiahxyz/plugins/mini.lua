@@ -570,20 +570,20 @@ return {
 			vim.keymap.set("n", "<leader>[u", "<Cmd>lua MiniBracketed.undo('backward')<cr>", { desc = "Undo backward" })
 			vim.keymap.set("n", "<leader>]u", "<Cmd>lua MiniBracketed.undo('forward')<cr>", { desc = "Undo forward" })
 			vim.keymap.set("n", "<leader>]U", "<Cmd>lua MiniBracketed.undo('last')<cr>", { desc = "Undo last" })
-			vim.keymap.set("n", "<leader>wH", "<Cmd>lua MiniBracketed.window('first')<cr>", { desc = "Window first" })
+			vim.keymap.set("n", "<leader>w0", "<Cmd>lua MiniBracketed.window('first')<cr>", { desc = "Window first" })
 			vim.keymap.set(
 				"n",
-				"<leader>wh",
+				"<leader>w[",
 				"<Cmd>lua MiniBracketed.window('backward')<cr>",
 				{ desc = "Window backward" }
 			)
 			vim.keymap.set(
 				"n",
-				"<leader>wl",
+				"<leader>w]",
 				"<Cmd>lua MiniBracketed.window('forward')<cr>",
 				{ desc = "Window forward" }
 			)
-			vim.keymap.set("n", "<leader>wL", "<Cmd>lua MiniBracketed.window('last')<cr>", { desc = "Window last" })
+			vim.keymap.set("n", "<leader>w$", "<Cmd>lua MiniBracketed.window('last')<cr>", { desc = "Window last" })
 			vim.keymap.set("n", "<leader>[Y", "<Cmd>lua MiniBracketed.yank('first')<cr>", { desc = "Yank first" })
 			vim.keymap.set("n", "<leader>[y", "<Cmd>lua MiniBracketed.yank('backward')<cr>", { desc = "Yank backward" })
 			vim.keymap.set("n", "<leader>]y", "<Cmd>lua MiniBracketed.yank('forward')<cr>", { desc = "Yank forward" })

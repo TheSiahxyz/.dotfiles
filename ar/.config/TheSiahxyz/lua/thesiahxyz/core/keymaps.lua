@@ -221,8 +221,8 @@ vim.keymap.set({ "n", "v" }, "<leader><C-y>", ":%y<cr>", { desc = "Yank current 
 vim.keymap.set("n", "<leader>p", [["+p]], { desc = "Paste over clipboard" })
 vim.keymap.set("n", "<leader>P", [["+P]], { desc = "Paste over clipboard" })
 vim.keymap.set("x", "<leader>p", [["_dP]], { desc = "Paste over and preserve clipboard" })
-vim.keymap.set({ "n", "v" }, "<leader>d", [["+d]], { desc = "Delete without store to clipboard" })
-vim.keymap.set({ "n", "v" }, "<leader>D", [["_d]], { desc = "Delete and yank to clipboard" })
+vim.keymap.set("v", "<leader>d", [["+d]], { desc = "Delete without store to clipboard" })
+vim.keymap.set("v", "<leader>D", [["_d]], { desc = "Delete and yank to clipboard" })
 vim.keymap.set("n", "<leader><C-d>", ":%d_<cr>", { desc = "Delete all to black hole register" })
 
 -- Diagnostic
@@ -305,13 +305,13 @@ vim.api.nvim_set_keymap(
 vim.api.nvim_set_keymap("n", "<leader>op", ":!opout <C-r>%<cr><cr>", { noremap = true, silent = true, desc = "Viewer" })
 
 -- Source
-vim.keymap.set("n", "<leader>S", function()
+vim.keymap.set("n", "<leader>SO", function()
 	vim.cmd("so")
 end, { desc = "Source current file" })
 
 -- Sudo
-vim.keymap.set("n", "<leader>ww", "<cmd>SudoWrite<cr><cr>", { silent = true, desc = "Save file with sudo" })
-vim.keymap.set("n", "<leader>wq", "<cmd>SudoWritequit<cr>", { silent = true, desc = "Save and quit with sudo" })
+vim.keymap.set("n", "<leader>SW", "<cmd>SudoWrite<cr><cr>", { silent = true, desc = "Save file with sudo" })
+vim.keymap.set("n", "<leader>SWQ", "<cmd>SudoWritequit<cr>", { silent = true, desc = "Save and quit with sudo" })
 
 -- Tab
 vim.keymap.set("n", "<leader><tab>l", "<cmd>tablast<cr>", { desc = "Last Tab" })

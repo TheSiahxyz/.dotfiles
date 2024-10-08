@@ -219,14 +219,6 @@ return {
 				{ "<leader>q", group = "Quit" },
 				{ "<leader>R", group = "Refresh" },
 				{ "<leader>sk", group = "Keys" },
-				{
-					"<leader>w",
-					group = "Save/Windows/Which-key",
-					proxy = "<c-w>",
-					expand = function()
-						return require("which-key.extras").expand.win()
-					end,
-				},
 				{ "<leader>W", group = "Save all" },
 				{ "<leader><tab>", group = "Tabs" },
 			},
