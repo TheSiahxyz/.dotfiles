@@ -23,6 +23,9 @@ include dark-yellow-green.theme
 #include solarized-light-256.theme
 #include no-color.theme
 
+# Options
+search.case.sensitive=no
+
 # Sync
 sync.encryption_secret=VO,mr[Pg&[Y^m]hu=zL
 sync.server.url=https:\/\/thesiah.xyz:8080
@@ -34,6 +37,8 @@ color.blocking = yellow on black
 color.tag.epic = bold green
 color.tag.review = bold blue
 color.tag.bug = magenta on black
+color.project.Supertype=black on blue
+color.project.Algoritma=black on blue
 
 # Custom reports
 report.workdone.description=List of completed tasks in the work context
@@ -59,6 +64,9 @@ report.current-projects.columns=project
 report.current-projects.labels=
 report.current-projects.sort=project+
 report.current-projects.filter=status:pending
+
+report.next.labels=ID,Active,Age,Deps,P,💪,Project,Tag,Recur,Sche,Due,Until,Description,Urg,🏆
+report.next.columns=id,start.age,entry.age,depends,priority,effort,project,tags,recur,scheduled.countdown,due.relative,until.remaining,description,urgency,score
 
 report.tmark.description=List of tasks to report
 report.tmark.columns=project,description.desc
@@ -90,6 +98,22 @@ report._reviewed.sort=reviewed+,modified+
 report._reviewed.filter=( reviewed.none: or reviewed.before:now-1week ) and ( +PENDING or +WAITING )
 
 # User defined attributes
+uda.effort.type=string
+uda.effort.label=Effort
+uda.effort.values=s,m,l,xl,xxl
+urgency.uda.effort.s.coefficient=1.5
+urgency.uda.effort.m.coefficient=1.1
+urgency.uda.effort.l.coefficient=1
+urgency.uda.effort.xl.coefficient=0
+urgency.uda.effort.xxl.coefficient=-0.2
+uda.score.type=numeric
+uda.score.label=Score 🏆
+urgency.uda.score.coefficient=2
+color.uda.effort.s=color180
+color.uda.effort.m=color210
+color.uda.effort.l=color255
+color.uda.effort.xl=color255
+color.uda.effort.xxl=color255
 uda.follow.type=string
 uda.follow.label=follow
 uda.follow.values=Y,N
@@ -111,8 +135,6 @@ uda.taskwarrior-tui.shortcuts.8=~/.local/bin/taskwarrior-tui/annotate-with-new-n
 uda.taskwarrior-tui.shortcuts.9=~/.local/bin/taskwarrior-tui/task-switch-context
 
 # User defined context
-context.archive.read=+archive
-context.archive.write=+archive
 context.home.read=+home
 context.home.write=+home
 context.integration.read=+integration
