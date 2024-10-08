@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# The set -e option instructs the shell to immediately exit if any command has a non-zero exit status
+# Exit immediately if any command fails
 set -e
 
 # Get the repository root path and change to the repo root directory
@@ -29,22 +29,30 @@ selected_files=$(echo "$sorted_files" | awk '{print $9}' | awk '!seen[$0]++' | g
     exit 0
 }
 
-# Read selected files into positional parameters
-set -- "$selected_files"
+# Initialize files_list
+IFS='
+'
+
+for file in $selected_files; do
+    files_list="$files_list \"$(realpath "$file")\""
+done
+
+# Set positional parameters using eval to handle spaces correctly
+eval "set -- $files_list"
 
 # Get the number of selected files
 count=$#
 
-# Directly use the full paths in the case statement
+# Open files in nvim based on the number of selected files
 case "$count" in
 2)
-    ${EDITOR:-nvim} -O +'normal g;' "$@"
+    ${EDITOR:-nvim} -O +'silent! normal g;' "$@"
     ;;
 3)
-    ${EDITOR:-nvim} -O "$1" -c 'wincmd j' -c "vsplit $2" -c "split $3"
+    ${EDITOR:-nvim} -O "$1" -c 'wincmd j' -c "silent! vsplit $2" -c "silent! split $3"
     ;;
 4)
-    ${EDITOR:-nvim} -O "$1" -c "vsplit $2" -c "split $3" -c 'wincmd h' -c "split $4"
+    ${EDITOR:-nvim} -O "$1" -c "silent! vsplit $2" -c "silent! split $3" -c 'wincmd h' -c "silent! split $4"
     ;;
 *)
     ${EDITOR:-nvim} "$@"

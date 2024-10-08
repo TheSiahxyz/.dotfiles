@@ -65,11 +65,11 @@ open_file() {
 
     files=$*
     for file in $files; do
-        count=$((count + 1))
         files_list="$files_list \"$(realpath "$file")\""
     done
 
     eval "set -- $files_list"
+
     count=$#
 
     case "$count" in
