@@ -34,7 +34,7 @@ zstyle ':vcs_info:git*+set-message:*' hooks git-untracked git-behind-upstream gi
     local ahead_count=$(git rev-list --count $(git rev-parse --abbrev-ref @{upstream})..HEAD 2>/dev/null)
     local behind_count=$(git rev-list --count HEAD..$(git rev-parse --abbrev-ref @{upstream}) 2>/dev/null)
     if [[ "$ahead_count" -gt 0 && "$behind_count" -gt 0 ]]; then
-        hook_com[misc]+="%{$fg[magenta]%}<>"
+        hook_com[misc]+="%{$fg[white]%}<>"
     fi
 }
 
