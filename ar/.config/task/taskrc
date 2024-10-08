@@ -28,7 +28,7 @@ search.case.sensitive=no
 
 # Sync
 sync.encryption_secret=VO,mr[Pg&[Y^m]hu=zL
-sync.server.url=https:\/\/thesiah.xyz:8080
+sync.server.url=https:\/\/thesiah.xyz\/tasks:8080
 sync.server.client_id=8bc45596-6189-486b-a86b-9f33163c7a82
 
 # Custom color

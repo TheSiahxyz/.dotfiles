@@ -12,17 +12,24 @@ Options:
     -p          Get a URL from snippets/URLs and open it in a private browser window
     -s          Open browser history
     -t          Get a URL from snippets/URLs and type it using xdotool
+    -v          Open a browser bookmark in private browser window
+
+Programs:
+    browser         System default browser
+    links           A text WWW browser, similar to lynx
+    lynx            A text browser for World Wide Web
 
 Examples:
-    ${0##*/} -b         # Opens a browser bookmark
+    ${0##*/} -b         # Opens a browser bookmark in a program
     ${0##*/} -c         # Copies a URL from snippets/URLs to the clipboard
     ${0##*/} -o         # Opens a URL from snippets/URLs in a new browser window
     ${0##*/} -p         # Opens a URL in a private browser window
-    ${0##*/} -s         # Opens browser history
+    ${0##*/} -s         # Opens browser history in a program
+    ${0##*/} -v         # Opens browser boomark in private browser window
 EOF
 }
 
-opens() {
+open() {
     available_tools=""
     command -v xdg-open 2>/dev/null | grep -v "alias" -q && available_tools="$available_tools xdg-open"
     command -v open 2>/dev/null | grep -v "alias" -q && available_tools="$available_tools open"
@@ -38,10 +45,10 @@ opens() {
 
     # Set the selected tool to the variable 'open'
     case "$opentool" in
-    xdg-open) open=xdg-open ;;
-    open) open=open ;;
-    links) open=links ;;
-    lynx) open=lynx ;;
+    xdg-open) xdg-open "$1" ;;
+    open) open "$1" ;;
+    links) setsid -f "$TERMINAL" -e links "$1" ;;
+    lynx) setsid -f "$TERMINAL" -e lynx "$1" ;;
     *) echo "Invalid selection" >&2 && exit 1 ;;
     esac
 }
@@ -95,7 +102,7 @@ openinbrowser() {
         if echo "$1" | grep -q "private"; then
             "$BROWSER" --private-window "$choice"
         else
-            opens && setsid -f "$TERMINAL" -e "$open" "$choice"
+            open "$choice"
         fi
     else
         exit
