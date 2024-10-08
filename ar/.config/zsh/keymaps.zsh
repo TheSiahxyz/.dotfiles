@@ -37,27 +37,33 @@ bindkey -M visual '^[[P' vi-delete      # delete
 bindkey -M viins 'jk' vi-cmd-mode       # normal mode
 
 # programs & scripts
-bindkey -s '^B' '^ubc -lq\n'
+bindkey -s '^B' '^upd\n'
 bindkey -s '^D' '^ucdi\n'
 bindkey -s '^F' '^uff\n'
-bindkey -s '^G' '^ucgrs\n'
+bindkey -s '^G' '^ulf\n'
 bindkey -s '^K' '^uhtop\n'
-bindkey -s '^N' '^unv .\n'
-bindkey -s '^O' '^ulf\n'
-bindkey -s '^P' '^upd\n'
+bindkey -s '^N' '^utmc\n'
+bindkey -s '^O' '^utmo\n'
+bindkey -s '^P' '^upassfzf\n'
 bindkey -s '^T' '^utms\n'
 bindkey -s '^Y' '^ulfcd\n'
 bindkey -s '^Z' '^ucdo\n'
 bindkey -s '^_' '^usscs\n'
 bindkey -s '^X^A' '^uali\n'
-bindkey -s '^X^B' '^urbackup\n'
+bindkey -s '^X^B' '^ugitopenbranch\n'
 bindkey -s '^X^D' '^ufD\n'
 bindkey -s '^X^F' '^ufzffile\n'
-bindkey -s '^X^G' '^utmuxgo\n'
-bindkey -s '^X^S' '^usshadd\n'
-bindkey -s '^X^T' '^utmuxgo\n'
+bindkey -s '^X^G' '^ugitfiles\n'
+bindkey -s '^X^L' '^ugitlogs\n'
+bindkey -s '^X^R' '^ucgrs\n'
+bindkey -s '^X^T' '^ugitstagedfiles\n'
+bindkey -s '^X^U' '^ugitupdate\n'
+bindkey -s '^X^V' '^uv.\n'
 bindkey -s '^X^[' '^usesh last\n'
 bindkey -s '^X^_' '^uprintfn\n'
+bindkey -s '^X^X^B' '^ubc -lq\n'
+bindkey -s '^X^X^R' '^urbackup\n'
+bindkey -s '^X^X^S' '^usshadd\n'
 
 # man
 man-command-line() {
@@ -85,16 +91,6 @@ bindkey -M viins '^]' insert_last_command_output
 # bindkey -M vicmd y zsh-system-clipboard-vicmd-vi-yank-eol
 # bindkey -M vicmd Y zsh-system-clipboard-vicmd-vi-yank-whole-line
 
-# clears the shell and displays the current dir
-clear-ls-all() {
-    clear
-    exa -al
-    zle reset-prompt
-}
-zle -N clear-ls-all
-
-bindkey '^X^L' clear-ls-all
-
 # clears the shell and displays the dir tree with level 2
 clear-tree-2() {
     clear
@@ -121,7 +117,7 @@ print-current-date() {
 }
 zle -N print-current-date
 
-bindkey '^X^C' print-current-date
+bindkey '^X^X^T' print-current-date
 
 # prints the current Unix timestamp
 print-unix-timestamp() {
@@ -129,7 +125,7 @@ print-unix-timestamp() {
 }
 zle -N print-unix-timestamp
 
-bindkey '^X^U' print-unix-timestamp
+bindkey '^X^X^U' print-unix-timestamp
 
 # git status
 git-status() {
@@ -139,7 +135,7 @@ git-status() {
 }
 zle -N git-status
 
-bindkey '^X^G' git-status
+bindkey '^X^S' git-status
 
 # appends the clipboard contents to the buffer
 vi-append-clip-selection() {

@@ -1,12 +1,22 @@
-#!/bin/zsh
+#!/bin/sh
+#
 set -eu
 
-message=${1:-updated}
-branch=$(git symbolic-ref -q HEAD | sed -e 's|^refs/heads/||')
+# Default message if no argument is passed
+message="${1:-updated}"
 
-pushd $(git rev-parse --show-toplevel || echo ".")
-    git add --all .
-    git commit -m "${message}" || true
-    git pull --rebase origin ${branch} || true
-    git push origin ${branch}
-popd
+# Get the current Git branch name
+branch=`git symbolic-ref -q HEAD | sed -e 's|^refs/heads/||'`
+
+# Save current directory and change to the Git repo root
+repo_root=`git rev-parse --show-toplevel || echo "."`
+cd "$repo_root"
+
+# Perform Git commands
+git add --all .
+git commit -m "$message" || true
+git pull --rebase origin "$branch" || true
+git push origin "$branch"
+
+# Return to the original directory
+cd -

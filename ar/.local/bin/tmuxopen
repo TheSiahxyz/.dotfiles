@@ -38,7 +38,7 @@ get_fzf_output() {
         DIR_BIND="ctrl-d:change-prompt(directory> )+reload(cd \"$HOME\" && find \"$HOME\" -type d -name node_modules -prune -o -name .git -prune -o -type d -print)"
     fi
 
-    rg --line-number --no-heading --color=always --smart-case --glob '!**/.git/**' --glob '!node_modules/**' '' 2>/dev/null |
+    rg --line-number --no-heading --color=always --smart-case --glob '!**/.git/**' --glob '!LICENSE' '' 2>/dev/null |
         fzf --ansi --multi --delimiter : \
             --print-query \
             --preview 'bat --style=numbers --color=always --highlight-line {2} {1} 2>/dev/null || echo "Preview not available"' \
@@ -47,7 +47,7 @@ get_fzf_output() {
             --bind "$RG_BIND" \
             --bind "$DIR_BIND" \
             --bind 'ctrl-c:abort' \
-            --header "Press Ctrl+f to search filenames, Ctrl+g to search file contents, Ctrl+d to search directories"
+            --header "^f filenames, ^g contents, ^d directories"
 }
 
 set_nvim_search_variable() {
