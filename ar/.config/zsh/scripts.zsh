@@ -349,6 +349,7 @@ EOF
 
     # Split the selected directories into an array
     SELECTED_DIRS_ARRAY=(${=SELECTED_DIRS})
+    [ -z "$SELECTED_DIRS_ARRAY" ] && return
 
     # Function to clean and create a valid session name
     clean_session_name() { echo $(basename "$1" | sed 's/[^a-zA-Z0-9]/_/g'); }
