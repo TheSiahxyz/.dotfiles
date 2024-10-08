@@ -55,7 +55,8 @@ bindkey -s '^X^D' '^ufD\n'
 bindkey -s '^X^F' '^ufzffile\n'
 bindkey -s '^X^G' '^utmuxgo\n'
 bindkey -s '^X^S' '^usshadd\n'
-bindkey -s '^X^T' '^usesh last\n'
+bindkey -s '^X^T' '^utmuxgo\n'
+bindkey -s '^X^[' '^usesh last\n'
 bindkey -s '^X^_' '^uprintfn\n'
 
 # man

@@ -7,21 +7,21 @@ Usage: gif [OPTIONS]
 Search for files and open them in Neovim within tmux panes.
 
 Options:
-  -d, --debug     Enable debug output
-  -h, --help      Display this help message
+    -d, --debug     Enable debug output
+    -h, --help      Display this help message
 
 Controls:
-  Tab         Select files
-  Ctrl+f      Search filenames
-  Ctrl+g      Search file contents
-  Ctrl+d      Search directories
+    Tab         Select files
+    Ctrl+f      Search filenames
+    Ctrl+g      Search file contents
+    Ctrl+d      Search directories
 
 Environment Variables:
-  NVIM_SEARCH_REGISTRY    Set to the search query, allowing Neovim to highlight matches
+    NVIM_SEARCH_REGISTRY    Set to the search query, allowing Neovim to highlight matches
 
 Example:
-  gif             # Run the normal search and open
-  gif --debug     # Run with debug output
+    gif             # Run the normal search and open
+    gif --debug     # Run with debug output
 EOF
 }
 
