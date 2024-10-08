@@ -333,7 +333,7 @@ function check_git_repos_status() {
                 GIT_STATUS=$(__git_ps1 "%s")
 
                 # Add formatted output with Git status and directory
-                OUTPUT+=("$(printf "%-10s - %s" "$GIT_STATUS" "$DIR")")
+                OUTPUT+=("$(printf "%-10s %s" "$GIT_STATUS" "$DIR")")
             else
                 OUTPUT+=("No Git repository - $DIR")
             fi
@@ -343,7 +343,7 @@ function check_git_repos_status() {
         SELECTED=$(printf "%s\n" "${OUTPUT[@]}" | fzf -m)
 
         # Extract the directory paths by using the last field as the path
-        echo "$SELECTED" | awk -F' - ' '{print $2}'
+        echo "$SELECTED" | awk -F' ' '{print $3}'
 EOF
     )
 
