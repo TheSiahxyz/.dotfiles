@@ -28,9 +28,8 @@ battery_status() {
         printf "%s%s%d%%" "$icon" "$warn" "$capacity"
         ;;
     hid*)
-        bluedevice=$(basename "$bluebattery")
-        bluedevice="${bluedevice%:*}"
-        notify-send "$icon $bluedevice" "$capacity%"
+        model="$(cat "$bluebattery/model_name")"
+        notify-send "$icon $model" "$capacity%"
         ;;
     esac
     unset warn
@@ -38,8 +37,15 @@ battery_status() {
 
 # Check Bluetooth batteries (only on middle-click)
 bluetooth() {
-    for bluebattery in /sys/class/power_supply/hid*; do
-        battery_status "$bluebattery"
+    devices=$(upower -e | grep -iv 'line' | grep -iv 'display' | grep -v 'BAT[0-9]')
+
+    for device in $devices; do
+        device_name=$(upower -i "$device" | grep "model" | awk -F ': ' '{print $2}' | sed 's/ //g')
+        battery_level=$(upower -i "$device" | grep "percentage" | awk -F ': ' '{print $2}' | sed 's/ //g')
+
+        if [ -n "$battery_level" ]; then
+            notify-send "🔋 $device_name:" "$battery_level"
+        fi
     done
 }
 
@@ -52,7 +58,7 @@ case "$BLOCK_BUTTON" in
 - 🔌: charging
 - ⚡: fully charged
 - ❗: battery very low!
-- Middle click: bluetooth battery levels" ;;
+- Middle click: bluetooth battery levels via upower" ;;
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 

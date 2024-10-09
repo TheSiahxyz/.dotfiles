@@ -17,7 +17,7 @@ zstyle ':vcs_info:git*+set-message:*' hooks git-untracked git-behind-upstream gi
     if [[ $(git rev-parse --is-inside-work-tree 2> /dev/null) == "true" ]] && \
         git status --porcelain | grep -m 1 "^??" &>/dev/null
     then
-        hook_com[misc]+="%{$fg[yellow]%}?"
+        hook_com[misc]+="%{$fg[yellow]%}%"
     fi
 }
 +vi-git-behind-upstream() {
