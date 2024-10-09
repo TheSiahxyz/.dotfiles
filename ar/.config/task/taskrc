@@ -27,9 +27,8 @@ include dark-yellow-green.theme
 search.case.sensitive=no
 
 # Sync
-sync.encryption_secret=VO,mr[Pg&[Y^m]hu=zL
-sync.server.url=https:\/\/thesiah.xyz\/tasks:8080
-sync.server.client_id=8bc45596-6189-486b-a86b-9f33163c7a82
+sync.gcp.bucket=task.thesiah.xyz
+sync.gcp.credential_path=\/home\/si\/.local\/share\/.password-store\/server\/task-sync-server-affcb349f841.json
 
 # Custom color
 color.blocked = yellow on black
@@ -143,3 +142,11 @@ context.temp.read=+temp
 context.temp.write=+temp
 context.work.read=+work
 context.work.write=+work
+sync.key=
+sync.cert=
+sync.ca=
+taskd.server=
+taskd.credentials=
+sync.encryption=
+sync.encryption_secret=VO,mr[Pg&[Y^m]hu=zL
+context=home

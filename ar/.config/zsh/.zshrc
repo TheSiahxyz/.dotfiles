@@ -110,3 +110,9 @@ for zsh_config in ${ZDOTDIR:-${HOME}/.config/zsh}/*.zsh; do source "$zsh_config"
 [ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutrc" ] && source "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutrc"
 [ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutenvrc" ] && source "${XDG_CONFIG_HOME:-$HOME/.config}/shell/shortcutenvrc"
 [ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/zshnameddirrc" ] && source "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/zshnameddirrc"
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/home/si/Desktop/google-cloud-sdk/path.zsh.inc' ]; then . '/home/si/Desktop/google-cloud-sdk/path.zsh.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/home/si/Desktop/google-cloud-sdk/completion.zsh.inc' ]; then . '/home/si/Desktop/google-cloud-sdk/completion.zsh.inc'; fi
