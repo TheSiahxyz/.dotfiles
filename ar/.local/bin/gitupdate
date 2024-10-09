@@ -27,4 +27,4 @@ else
 fi
 
 # Return to the original directory
-cd -
+cd - >/dev/null
