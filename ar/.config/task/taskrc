@@ -28,7 +28,7 @@ search.case.sensitive=no
 
 # Sync
 sync.gcp.bucket=task.thesiah.xyz
-sync.gcp.credential_path=\/home\/si\/.local\/share\/.password-store\/server\/task-sync-server-affcb349f841.json
+sync.gcp.credential_path=\/home\/si\/.local\/share\/task\/task-sync-server.json
 
 # Custom color
 color.blocked = yellow on black
@@ -142,11 +142,6 @@ context.temp.read=+temp
 context.temp.write=+temp
 context.work.read=+work
 context.work.write=+work
-sync.key=
-sync.cert=
-sync.ca=
-taskd.server=
-taskd.credentials=
-sync.encryption=
-sync.encryption_secret=VO,mr[Pg&[Y^m]hu=zL
+
+# Current context
 context=home
