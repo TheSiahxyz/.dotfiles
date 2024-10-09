@@ -332,7 +332,7 @@ function check_git_repos_status() {
                 if [ "$(dirname $DIR)" = ".password-store" ]; then
                     pass git fetch
                 else
-                    git fetch
+                    git fetch --all --prune --jobs=10
                 fi
                 # Get Git branch and status using __git_ps1
                 GIT_STATUS=$(__git_ps1 "%s")
