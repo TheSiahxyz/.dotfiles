@@ -329,6 +329,11 @@ function check_git_repos_status() {
                 # Change to the directory
                 cd "$DIR" || continue
 
+                if [ "$(dirname $DIR)" = ".password-store" ]; then
+                    pass git fetch
+                else
+                    git fetch
+                fi
                 # Get Git branch and status using __git_ps1
                 GIT_STATUS=$(__git_ps1 "%s")
 
