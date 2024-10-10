@@ -107,7 +107,7 @@ sync_nextcloud() {
     base="$(basename $backup_path)"
     parent="$(dirname $backup_path)"
     tmpdir="$(mktemp -d)"
-    cd "$tmpdir"
+    cd "$tmpdir" || exit
     tar -C "$parent" -zcf "$base".tar.gz "$base" >/dev/null 2>&1
     rsync -vrazPlu --delete "$tmpdir/$base".tar.gz "$THESIAH_SERVER:/var/www/nextcloud/data/si@thesiah.xyz/files/backup/" >/dev/null 2>&1
     ssh "$THESIAH_SERVER" "chown -R www-data:www-data /var/www/nextcloud/data/si@thesiah.xyz/files/backup" >/dev/null 2>&1
