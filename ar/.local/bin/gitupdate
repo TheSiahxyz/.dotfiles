@@ -14,13 +14,13 @@ generate_message() {
     status=$1
     file=$2
     case "$status" in
-    "M") # Modified
+    " M" | "M ") # Modified
         echo "modified $(basename "$file")"
         ;;
     "??") # Untracked (new) files
         echo "created $(basename "$file")"
         ;;
-    "D") # Deleted from the index
+    "D ") # Deleted from the index
         echo "deleted $(basename "$file")"
         ;;
     *) # Catch-all for other statuses
