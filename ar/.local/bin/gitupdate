@@ -6,7 +6,9 @@ set -eu
 ! git rev-parse --is-inside-work-tree >/dev/null 2>&1 && echo "Not a git repository." && exit 1
 
 # Set default message based on git status --porcelain output
-changes=$(git status --porcelain | awk '!seen[$2]++')
+changes=$(git status --porcelain)
+[ -z "$changes" ] && exit
+
 num_changes=$(echo "$changes" | wc -l)
 
 # Function to generate message for each status line
