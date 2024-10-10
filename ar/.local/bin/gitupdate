@@ -60,5 +60,7 @@ else
     git push origin "$branch"
 fi
 
+echo "$message"
+
 # Return to the original directory
 cd - >/dev/null
