@@ -60,7 +60,7 @@ else
     git push origin "$branch"
 fi
 
-printf "\n%s(%s): %s" "$repo_root" "$branch" "$message"
+printf "\nGit %s(%s): %s" "$(basename "$repo_root")" "$branch" "$message"
 
 # Return to the original directory
 cd - >/dev/null
