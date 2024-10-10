@@ -6,7 +6,7 @@ set -eu
 ! git rev-parse --is-inside-work-tree >/dev/null 2>&1 && echo "Not a git repository." && exit 1
 
 # Set default message based on git status --porcelain output
-changes=$(git status --porcelain)
+changes=$(git status --porcelain | awk '!seen[$2]++')
 num_changes=$(echo "$changes" | wc -l)
 
 # Function to generate message for each status line
@@ -32,9 +32,12 @@ generate_message() {
 if [ "$num_changes" -gt 5 ]; then
     default="updates"
 else
-    default=$(echo "$changes" | while read -r status file; do
+    default=$(echo "$changes" | while IFS= read -r line; do
+        # Extract status and file name while preserving spaces
+        status=$(echo "$line" | cut -c1-2)
+        file=$(echo "$line" | cut -c4-)
         generate_message "$status" "$file"
-    done | awk '{printf "%s, ", $0} END {sub(/, $/, ""); print}')
+    done | tr '\n' ',' | sed 's/,$//;s/,/, /g')
 fi
 
 message="${1:-$default}"
