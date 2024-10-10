@@ -272,7 +272,7 @@ function cd_clipboard_path() {
 # fzf files in root and open in default editor
 alias ff=fzf_file
 function fzf_file() {
-    file=$(find "$HOME" -type d \( -name ".git" -o -path "${ZPLUGINDIR:-${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/zsh}" -o -path "$HOME/Private/repos/THESIAH/public" -o -name ".cache" \) -prune -o -type f -not -name "*lock*" -print 2>/dev/null | fzf) && nvim "$file"
+    file=$(find "$HOME" -type d \( -name ".git" -o -path "${ZPLUGINDIR:-${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/zsh}" -o -path "${XDG_SOURCE_HOME:-${HOME}/.local/src}/yay" -o -path "${XDG_DATA_HOME:-${HOME}/.local/share}" -o -path "$HOME/Private/repos/THESIAH/public" -o -path "$HOME/.local/lib" -o -name ".cache" -o -name "Trash" \) -prune -o \( -type f -not -name "*lock*" -not -name "*.o" -o -type l \) -print 2>/dev/null | fzf) && nvim "$file"
 }
 
 # fzf directory and go to the parent directory
@@ -372,6 +372,7 @@ EOF
     if [[ ${#SELECTED_DIRS_ARRAY[@]} -eq 1 ]]; then
         if [ -d "${SELECTED_DIRS_ARRAY[1]}" ]; then
             cd "${SELECTED_DIRS_ARRAY[1]}"
+            git status
         fi
     else
         # Handle session creation for multiple selected directories
@@ -587,14 +588,6 @@ function pass_otp() { pass otp uri -q $1; }
 # otp insert
 function pass_otp_insert() { pass otp insert $1; }
 
-# fzf pass
-alias pss=cd_pass
-function cd_pass() { pass show $(find $PASSWORD_STORE_DIR -type f -name '*.gpg' | sed 's|^''$PASSWORD_STORE_DIR/||; s/\.gpg$//' | fzf --cycle); }
-
-# fzf pass and copy
-alias psc=fzf_pass_copy
-function fzf_pass_copy() { pass show -c $(find $PASSWORD_STORE_DIR -type f -name '*.gpg' | sed 's|^''$PASSWORD_STORE_DIR/||; s/\.gpg$//' | fzf --cycle); }
-
 # copy pass qr code
 alias cpqr=pass_qr
 function pass_qr() { qrencode -o "$1".png -t png -Sv 40 < "$1".pgp; }
@@ -706,7 +699,7 @@ function cd_session_path() { cd "$(tmux display-message -p '#{session_path}')"; 
 # kill tmux session
 function kill_tmux_sessions() {
     local sessions
-    sessions="$(tmux ls|fzf --cycle --exit-0 --multi)"  || return $?
+    sessions="$(tmux ls | fzf --cycle --exit-0 --multi)"  || return $?
     local i
     for i in "${(f@)sessions}"
     do
