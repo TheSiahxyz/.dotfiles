@@ -287,9 +287,8 @@ function search_scripts() {
 }
 
 # check git status by directories in specific path
-alias cgrs=check_git_repos_status
-function check_git_repos_status() {
-    # Run the bash logic in a subshell to use __git_ps1
+alias fgst=fetch_git_repos_status
+function fetch_git_repos_status() {
     SELECTED_DIRS=$(bash << 'EOF'
         # Source the Git prompt script to get access to __git_ps1
         source /usr/share/git/completion/git-prompt.sh
@@ -311,7 +310,7 @@ function check_git_repos_status() {
 
         # Append all subdirectories under GIT_DIRS that are Git repositories
         for GIT_DIR in "${GIT_DIRS[@]}"; do
-            if [ -d "$GIT_DIR" ]; then  # Only proceed if directory exists
+            if [ -d "$GIT_DIR" ]; then
                 for SUBDIR in "$GIT_DIR"/*; do
                     if [ -d "$SUBDIR/.git" ]; then
                         TARGET_DIRECTORIES+=("$SUBDIR")
@@ -323,10 +322,16 @@ function check_git_repos_status() {
         # Create an array to store the output
         OUTPUT=()
 
+        # Function to colorize only the Git status symbols
+        colorize_git_status() {
+            local status="$1"
+            # Colorize the entire status with a single color
+            echo -e "\033[33m${status}\033[0m"  # Apply yellow color to the status
+        }
+
         # Loop through each directory and get the Git status
         for DIR in "${TARGET_DIRECTORIES[@]}"; do
             if [ -d "$DIR/.git" ]; then
-                # Change to the directory
                 cd "$DIR" || continue
 
                 if [ "$(dirname $DIR)" = ".password-store" ]; then
@@ -334,57 +339,66 @@ function check_git_repos_status() {
                 else
                     git fetch --all --prune --jobs=10 >/dev/null 2>&1
                 fi
+
                 # Get Git branch and status using __git_ps1
                 GIT_STATUS=$(__git_ps1 "%s")
 
-                # Add formatted output with Git status and directory
-                OUTPUT+=("$(printf "%-10s %s" "$GIT_STATUS" "$DIR")")
+                # Colorize the Git status
+                COLORED_GIT_STATUS=$(colorize_git_status "$GIT_STATUS")
+
+                # Add formatted output with colored Git status and directory
+                OUTPUT+=("${COLORED_GIT_STATUS} ${DIR}")
             else
                 OUTPUT+=("No Git repository - $DIR")
             fi
         done
 
         # Pass the output to fzf with multi-select enabled (-m)
-        SELECTED=$(printf "%s\n" "${OUTPUT[@]}" | fzf -m)
+        SELECTED=$(printf "%s\n" "${OUTPUT[@]}" | fzf -m --ansi)
 
-        # Extract the directory paths by using the last field as the path
-        echo "$SELECTED" | awk -F' ' '{print $3}'
+        # Filter out lines that do not end with a valid directory path and are not empty
+        echo "$SELECTED" | awk '{if (NF > 1 && system("[ -d \""$NF"\" ]") == 0) print $NF}'
 EOF
     )
 
     # Split the selected directories into an array
     SELECTED_DIRS_ARRAY=(${=SELECTED_DIRS})
+    # Filter out any empty selections
+    SELECTED_DIRS_ARRAY=(${SELECTED_DIRS_ARRAY[@]//#/})
     [ -z "$SELECTED_DIRS_ARRAY" ] && return
 
     # Function to clean and create a valid session name
     clean_session_name() { echo $(basename "$1" | sed 's/[^a-zA-Z0-9]/_/g'); }
 
-    # Handle the case where only one directory is selected
+    # If only one directory is selected, just change to that directory
     if [[ ${#SELECTED_DIRS_ARRAY[@]} -eq 1 ]]; then
         if [ -d "${SELECTED_DIRS_ARRAY[1]}" ]; then
             cd "${SELECTED_DIRS_ARRAY[1]}"
-        else
-            echo "Invalid selection or not a directory."
         fi
     else
-        # If multiple selections, handle tmux sessions
+        # Handle session creation for multiple selected directories
         for DIR in "${SELECTED_DIRS_ARRAY[@]}"; do
-            SESSION_NAME=$(clean_session_name "$DIR")
-            # Check if the tmux session already exists
-            if ! tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
-                tmux new-session -d -s "$SESSION_NAME" -c "$DIR"
+            if [ -d "$DIR" ]; then
+                SESSION_NAME=$(clean_session_name "$DIR")
+                if ! tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
+                    tmux new-session -d -s "$SESSION_NAME" -c "$DIR"
+                fi
             fi
         done
-
-        # Now attach to the first selected session, or switch to it if already in tmux
-        FIRST_SESSION=$(clean_session_name "${SELECTED_DIRS_ARRAY[1]}")
-        if [[ -n "$TMUX" ]]; then
-            tmux switch-client -t "$FIRST_SESSION"
-        else
-            tmux attach-session -t "$FIRST_SESSION"
+        if [[ ${#SELECTED_DIRS_ARRAY[@]} -gt 0 ]]; then
+            FIRST_SESSION=$(clean_session_name "${SELECTED_DIRS_ARRAY[1]}")
+            if [[ -n "$TMUX" ]]; then
+                tmux switch-client -t "$FIRST_SESSION"
+            else
+                tmux attach-session -t "$FIRST_SESSION"
+            fi
         fi
     fi
 }
+
+
+
+
 
 
 ###########################################################################################
