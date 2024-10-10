@@ -65,7 +65,7 @@ else
     git push origin "$branch"
 fi
 
-printf "\n%s(%s): %s\n" "$(basename "$repo_root")" "$branch" "$message"
+printf "\n[Repo] %s(%s): %s\n" "$(basename "$repo_root")" "$branch" "$message"
 
 # Return to the original directory
 cd - >/dev/null
