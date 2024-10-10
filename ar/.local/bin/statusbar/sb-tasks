@@ -24,7 +24,6 @@ done
 # Check for follow-up tasks
 follow_up_tasks=$(task follow.is:Y _ids -PARENT)
 follow_up_count=$(echo "$follow_up_tasks" | wc -w)
-follow_up_list=""
 
 for task_id in $follow_up_tasks; do
     task_description=$(task _get "$task_id".description)
