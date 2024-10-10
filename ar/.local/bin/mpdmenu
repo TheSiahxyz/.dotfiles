@@ -6,7 +6,7 @@ PLAYLIST_DIR="${XDG_CONFIG_HOME:-${HOME}/.config}/mpd/playlists"
 
 # Functions
 d_artist() {
-    mpc list artist | sort -f | dmenu -p artist "${dmenu_args[@]}"
+    mpc list artist | sort -f | dmenu -p artist "${dmenu_args[@]}" || exit
 }
 
 d_album() {
@@ -18,7 +18,7 @@ d_album() {
         {
             printf '%s\n' "$all_name"
             printf '%s\n' "${albums[@]}" | sort -f
-        } | dmenu -p album "${dmenu_args[@]}"
+        } | dmenu -p album "${dmenu_args[@]}" || exit
     else
         # We only have one album, so just use that.
         printf '%s\n' "${albums[0]}"
@@ -27,6 +27,7 @@ d_album() {
 
 d_title() {
     titles=$(mpc list title | sort -f)
+    [ -z "$titles" ] && exit
     echo "$titles" | dmenu -p "Select title:" "${dmenu_args[@]}"
 }
 
@@ -90,14 +91,16 @@ case "$mode" in
         mpc clear
         mpc find title "$title" | sort | mpc add
         ;;
+    *) exit ;;
     esac
     mpc play >/dev/null
     ;;
 "playlist") mpc play "$(d_playlist)" >/dev/null ;;
 "saved playlist")
-    mpc load "$(d_saved_playlist)" >/dev/null
+    mpc load "$(d_saved_playlist)" >/dev/null || exit
     mpc play >/dev/null
     ;;
+*) exit ;;
 esac
 
-sleep 1 && mpc volume 50
+sleep 0.5 && mpc volume 50
