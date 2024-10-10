@@ -72,11 +72,10 @@ done | filter)"
 normalparts="$(echo "$lsblkoutput" | grep -v crypto_LUKS | grep 'part\|rom\|crypt' | sed "s/^/💾 /" | filter)"
 
 server="192.168.0.5"
-password=$(dmenu -fn Monospace-18 -P -p "Enter Samba Password:" <&-)
 sambas=$(
     smbclient -L "$server" -U% -A /dev/stdin <<EOF 2>/dev/null | awk '/Disk/ {print $1}' | sed 's/Disk|\(.*\)|/\1/g'
 username=$(whoami)
-password=$password
+password=$(pass show default)
 EOF
 )
 mountedsambas="$(grep "cifs" /etc/mtab)"
