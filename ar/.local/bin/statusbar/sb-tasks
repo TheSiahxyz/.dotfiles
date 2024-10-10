@@ -22,9 +22,9 @@ for task_id in $tasks_due_today; do
 done
 
 # Check for follow-up tasks
-follow_up_tasks=$(task follow.is:Y _ids)
-follow_up_list=""
+follow_up_tasks=$(task follow.is:Y _ids -PARENT)
 follow_up_count=$(echo "$follow_up_tasks" | wc -w)
+follow_up_list=""
 
 for task_id in $follow_up_tasks; do
     task_description=$(task _get "$task_id".description)
@@ -33,9 +33,19 @@ done
 
 # Handle mouse clicks
 case $BLOCK_BUTTON in
-1) notify-send "📕Tasks due in the next hour" "$tasks_due_list" ;;
-2) notify-send "📙Follow-up task(s) to complete" "$follow_up_list" ;;
-3) notify-send "📝 Task Module" "Shows task counts.\n- Left click: Show tasks due soon.\n- Middle click: Show follow-up tasks." ;;
+1)
+    notify-send "📕Tasks due in the next hour:
+$(printf "%b" "$tasks_due_list")"
+    ;;
+2)
+    notify-send "📙Follow-up task(s) to complete:
+$(printf "%b" "$follow_up_list")"
+    ;;
+3)
+    notify-send "📝 Task Module" "Shows task counts.
+- Left click: Show tasks due soon.
+- Middle click: Show follow-up tasks."
+    ;;
 esac
 
 # Output task information to dwmblocks
