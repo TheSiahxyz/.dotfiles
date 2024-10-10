@@ -37,7 +37,7 @@ bindkey -M visual '^[[P' vi-delete      # delete
 bindkey -M viins 'jk' vi-cmd-mode       # normal mode
 
 # programs & scripts
-bindkey -s '^B' '^upd\n'
+bindkey -s '^B' '^ubc -lq\n'
 bindkey -s '^D' '^ucdi\n'
 bindkey -s '^F' '^ufzffile\n'
 bindkey -s '^G' '^ulf\n'
@@ -47,7 +47,7 @@ bindkey -s '^O' '^utmo\n'
 bindkey -s '^P' '^ufzfpass\n'
 bindkey -s '^T' '^utms\n'
 bindkey -s '^Y' '^ulfcd\n'
-bindkey -s '^Z' '^ucdo\n'
+bindkey -s '^Z' '^upd\n'
 bindkey -s '^_' '^usscs\n'
 bindkey -s '^X^A' '^uali\n'
 bindkey -s '^X^B' '^ugitopenbranch\n'
@@ -61,8 +61,8 @@ bindkey -s '^X^U' '^ugitupdate\n'
 bindkey -s '^X^V' '^uv.\n'
 bindkey -s '^X^[' '^usesh last\n'
 bindkey -s '^X^_' '^uprintfn\n'
-bindkey -s '^X^X^B' '^ubc -lq\n'
-bindkey -s '^X^X^R' '^urbackup\n'
+bindkey -s '^X^X^B' '^urbackup\n'
+bindkey -s '^X^X^R' '^urbackup -r\n'
 bindkey -s '^X^X^S' '^usshadd\n'
 
 # man

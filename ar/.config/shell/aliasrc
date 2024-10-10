@@ -56,7 +56,6 @@ alias bctl='bluetoothctl'
 ialias cal='cal -y --monday'
 
 # cd
-alias cdo="cd $OLDPWD"
 alias pd='cd -'
 
 # chmod
