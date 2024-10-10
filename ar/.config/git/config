@@ -1,5 +1,10 @@
 [advice]
     detachedHead = false
+[color "status"]
+	added = green
+	branch = bold magenta
+	changed = yellow
+	untracked = blue
 [core]
     excludesFile = ~/.config/git/ignore
     pager = delta
