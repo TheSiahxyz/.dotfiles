@@ -347,9 +347,7 @@ function fetch_git_repos_status() {
                 COLORED_GIT_STATUS=$(colorize_git_status "$GIT_STATUS")
 
                 # Add formatted output with colored Git status and directory
-                OUTPUT+=("${COLORED_GIT_STATUS} ${DIR}")
-            else
-                OUTPUT+=("No Git repository - $DIR")
+                OUTPUT+=("$(printf "%-20s %s" "$COLORED_GIT_STATUS" "$DIR")")
             fi
         done
 
