@@ -34,11 +34,11 @@ done
 # Handle mouse clicks
 case $BLOCK_BUTTON in
 1)
-    notify-send "📕Tasks due in the next hour:
+    notify-send "📕 Tasks due in the next hour:
 $(printf "%b" "$tasks_due_list")"
     ;;
 2)
-    notify-send "📙Follow-up task(s) to complete:
+    notify-send "📗 Follow-up task(s) to complete:
 $(printf "%b" "$follow_up_list")"
     ;;
 3)
@@ -53,7 +53,7 @@ if [ "$follow_up_count" -gt 0 ]; then
     if [ "$tasks_due_count" -gt 0 ]; then
         printf "📕%d 📝%d\n" "$tasks_due_count" "$follow_up_count"
     else
-        printf "📙%d\n" "$follow_up_count"
+        printf "📗%d\n" "$follow_up_count"
     fi
 else
     exit
