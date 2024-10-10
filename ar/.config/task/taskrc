@@ -5,7 +5,7 @@ news.version=3.1.0
 # move this configuration file from ~/.taskrc to ~/.config/task/taskrc and update location config as follows:
 
 data.location=~/.local/share/task
-hooks.location=~/.config/task/hooks
+hooks.location=~/.local/bin/task/hooks
 
 # Color theme (uncomment one to use)
 #include light-16.theme
@@ -115,7 +115,7 @@ color.uda.effort.l=color255
 color.uda.effort.xl=color255
 color.uda.effort.xxl=color255
 uda.follow.type=string
-uda.follow.label=follow
+uda.follow.label=Follow
 uda.follow.values=Y,N
 uda.manual_priority.type=numeric
 uda.manual_priority.label=Manual Priority
@@ -124,15 +124,15 @@ uda.reviewed.label=Reviewed
 
 # User defiend scripts
 uda.taskwarrior-tui.task-report.next.filter=status:pending
-uda.taskwarrior-tui.shortcuts.1=~/.local/bin/taskwarrior-tui/taskopen-annotation
-uda.taskwarrior-tui.shortcuts.2=~/.local/bin/taskwarrior-tui/cycle-tmux-projects
-uda.taskwarrior-tui.shortcuts.3=~/.local/bin/taskwarrior-tui/github-issue-sync
-uda.taskwarrior-tui.shortcuts.4=~/.local/bin/taskwarrior-tui/cycle-priority
-uda.taskwarrior-tui.shortcuts.5=~/.local/bin/taskwarrior-tui/decrease-task-priority
-uda.taskwarrior-tui.shortcuts.6=~/.local/bin/taskwarrior-tui/increase-task-priority
-uda.taskwarrior-tui.shortcuts.7=~/.local/bin/taskwarrior-tui/annotate-with-note
-uda.taskwarrior-tui.shortcuts.8=~/.local/bin/taskwarrior-tui/annotate-with-new-note
-uda.taskwarrior-tui.shortcuts.9=~/.local/bin/taskwarrior-tui/task-switch-context
+uda.taskwarrior-tui.shortcuts.1=~/.local/bin/task/taskwarrior-tui/taskopen-annotation
+uda.taskwarrior-tui.shortcuts.2=~/.local/bin/task/taskwarrior-tui/cycle-tmux-projects
+uda.taskwarrior-tui.shortcuts.3=~/.local/bin/task/taskwarrior-tui/github-issue-sync
+uda.taskwarrior-tui.shortcuts.4=~/.local/bin/task/taskwarrior-tui/cycle-priority
+uda.taskwarrior-tui.shortcuts.5=~/.local/bin/task/taskwarrior-tui/decrease-task-priority
+uda.taskwarrior-tui.shortcuts.6=~/.local/bin/task/taskwarrior-tui/increase-task-priority
+uda.taskwarrior-tui.shortcuts.7=~/.local/bin/task/taskwarrior-tui/annotate-with-note
+uda.taskwarrior-tui.shortcuts.8=~/.local/bin/task/taskwarrior-tui/annotate-with-new-note
+uda.taskwarrior-tui.shortcuts.9=~/.local/bin/task/taskwarrior-tui/task-switch-context
 
 # User defined context
 context.home.read=+home
