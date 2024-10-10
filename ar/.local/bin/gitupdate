@@ -2,10 +2,42 @@
 
 set -eu
 
-! git rev-parse --is-inside-work-tree >/dev/null 2>&1 && echo "Not a git repository." && exit
+# Check if inside a Git repository
+! git rev-parse --is-inside-work-tree >/dev/null 2>&1 && echo "Not a git repository." && exit 1
 
-# Default message if no argument is passed
-message="${1:-updated}"
+# Set default message based on git status --porcelain output
+changes=$(git status --porcelain)
+num_changes=$(echo "$changes" | wc -l)
+
+# Function to generate message for each status line
+generate_message() {
+    status=$1
+    file=$2
+    case "$status" in
+    "M") # Modified
+        echo "modified $(basename "$file")"
+        ;;
+    "??") # Untracked (new) files
+        echo "created $(basename "$file")"
+        ;;
+    "D") # Deleted from the index
+        echo "deleted $(basename "$file")"
+        ;;
+    *) # Catch-all for other statuses
+        echo "updated $(basename "$file")"
+        ;;
+    esac
+}
+
+if [ "$num_changes" -gt 5 ]; then
+    default="updates"
+else
+    default=$(echo "$changes" | while read -r status file; do
+        generate_message "$status" "$file"
+    done | awk '{printf "%s, ", $0} END {sub(/, $/, ""); print}')
+fi
+
+message="${1:-$default}"
 
 # Get the current Git branch name
 branch=$(git symbolic-ref -q HEAD | sed -e 's|^refs/heads/||')
