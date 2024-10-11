@@ -12,14 +12,13 @@ vdw     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwm/config.h           
 vgc     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/git-aliasrc                   # Git aliases
 vlf     ${XDG_CONFIG_HOME:-${HOME}/.config}/lf/lfrc                             # LF (file browser) config
 vls     ${XDG_CONFIG_HOME:-${HOME}/.config}/lf/scope                            # LF's scope/preview file
-vlx     $HOME/.lynxrc                                                           # Lynx config
-vmc     ${XDG_CONFIG_HOME:-${HOME}/.config}/ncmpcpp/config                      # Ncmpcpp (music player) config
+vly     $HOME/.lynxrc                                                           # Lynx config
 vmw     ${XDG_CONFIG_HOME:-${HOME}/.config}/mutt/muttrc                         # Mutt (email client) config
 Vmw     /usr/share/mutt-wizard/mutt-wizard.muttrc                               # Global mutt config
 vnb     ${XDG_CONFIG_HOME:-${HOME}/.config}/ncmpcpp/bindings                    # Ncmpcpp (music player) keybinds file
-vnc     ${XDG_CONFIG_HOME:-${HOME}/.config}/newsboat/config                     # Newsboat config (RSS reader)
+vnc     ${XDG_CONFIG_HOME:-${HOME}/.config}/ncmpcpp/config                      # Ncmpcpp (music player) config
+vns     ${XDG_CONFIG_HOME:-${HOME}/.config}/newsboat/config                     # Newsboat config (RSS reader)
 vnu     ${XDG_CONFIG_HOME:-${HOME}/.config}/newsboat/urls                       # Newsboat url (RSS reader)
-vpf     ${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/passfzf                         # Passfzf
 Vsm     /etc/samba/smb.conf                                                     # Samba config
 vse     ${XDG_CONFIG_HOME:-${HOME}/.config}/sesh/sesh.toml                      # Sesh config
 vsl     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/slock/config.h         # Slock: lock screen
@@ -42,5 +41,5 @@ vya     ${XDG_CONFIG_HOME:-${HOME}/.config}/youtube-viewer/api.json             
 vza     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/aliasrc                       # Aliases used by zsh (and potentially other shells)
 vzc     ${ZDOTDIR:-${XDG_CONFIG_HOME:-${HOME}/.config}/zsh}/.zshrc              # Zsh config
 vzk     ${ZDOTDIR:-${XDG_CONFIG_HOME:-${HOME}/.config}/zsh}/keymaps.zsh         # Zsh keymaps
-vzp     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/profile                       # System profile
+vzp     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/profile                       # Zsh profile used for system
 vzs     ${ZDOTDIR:-${XDG_CONFIG_HOME:-${HOME}/.config}/zsh}/scripts.zsh         # Zsh scripts
