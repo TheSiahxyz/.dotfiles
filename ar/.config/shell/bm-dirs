@@ -1,6 +1,7 @@
 # Keys                      Filename
 bb              ${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}
 bs              ${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/statusbar
+bt              ${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/task/taskwarrior-tui
 cab             ${XDG_CONFIG_HOME:-${HOME}/.config}/abook
 cac             ${XDG_CACHE_HOME:-${HOME}/.cache}
 cbc             ${XDG_CONFIG_HOME:-${HOME}/.config}/bash
@@ -26,7 +27,6 @@ cst             ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/st
 ctd             ${XDG_CONFIG_HOME:-${HOME}/.config}/transmission-daemon
 ctp             ${XDG_CONFIG_HOME:-${HOME}/.config}/tmux/plugins
 cts             ${XDG_CONFIG_HOME:-${HOME}/.config}/TheSiahxyz/lua/thesiahxyz
-ctt             ${XDG_CONFIG_HOME:-${HOME}/.config}/taskwarrior-tui/shortcut-scripts
 cvc             ${XDG_CONFIG_HOME:-${HOME}/.config}/vim
 cvp             ${XDG_CONFIG_HOME:-${HOME}/.config}/openvpn
 cxc             ${XDG_CONFIG_HOME:-${HOME}/.config}/x11

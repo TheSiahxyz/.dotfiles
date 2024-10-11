@@ -37,11 +37,11 @@ case $BLOCK_BUTTON in
 $(printf "%b" "$tasks_due_list")"
     ;;
 2)
-    notify-send "📑 Follow-up task(s) to complete:
+    notify-send "📚 Follow-up task(s) to complete:
 $(printf "%b" "$follow_up_list")"
     ;;
 3)
-    notify-send "📝 Task Module" "Shows task counts.
+    notify-send "🗂️ Task Module" "Shows task counts.
 - Left click: Show tasks due soon.
 - Middle click: Show follow-up tasks."
     ;;
@@ -52,7 +52,7 @@ if [ "$follow_up_count" -gt 0 ]; then
     if [ "$tasks_due_count" -gt 0 ]; then
         printf "📕%d 📝%d\n" "$tasks_due_count" "$follow_up_count"
     else
-        printf "📑%d\n" "$follow_up_count"
+        printf "📚%d\n" "$follow_up_count"
     fi
 else
     exit
