@@ -3,14 +3,13 @@ vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 
 -- Buffers
-vim.keymap.set({ "i", "n", "v", "x", "t" }, "<C-S-x>", "<cmd>bd!<cr>", { desc = "Delete buffer" })
 vim.keymap.set("n", "[b", "<cmd>bprevious<cr>", { desc = "Previous buffer" })
 vim.keymap.set("n", "]b", "<cmd>bnext<cr>", { desc = "Next buffer" })
-vim.keymap.set({ "i", "n", "t" }, "<C-S-h>", "<cmd>bprevious<cr>", { desc = "Previous buffer" })
-vim.keymap.set({ "i", "n", "t" }, "<C-S-l>", "<cmd>bnext<cr>", { desc = "Next buffer" })
+vim.keymap.set({ "i", "n", "t" }, "<S-h>", "<cmd>bprevious<cr>", { desc = "Previous buffer" })
+vim.keymap.set({ "i", "n", "t" }, "<S-l>", "<cmd>bnext<cr>", { desc = "Next buffer" })
 vim.keymap.set("n", "<leader>bb", "<cmd>e #<cr>", { desc = "Switch to last buffer" })
-vim.keymap.set("n", "<leader>bd", "<cmd>:bd<cr>", { desc = "Close buffer" })
-vim.keymap.set("n", "<leader>BD", "<cmd>:bd!<cr>", { desc = "Force close buffer" })
+vim.keymap.set({ "i", "n", "v", "x", "t" }, "<leader>bd", "<cmd>:bd<cr>", { desc = "Close buffer" })
+vim.keymap.set({ "i", "n", "v", "x", "t" }, "<leader>BD", "<cmd>:bd!<cr>", { desc = "Force close buffer" })
 vim.keymap.set("n", "<leader>bn", "<cmd>enew<cr>", { desc = "New buffer" })
 vim.keymap.set({ "i", "x", "n", "s" }, "<C-s>", "<cmd>w<cr><esc>", { desc = "Save current buffer" })
 vim.keymap.set({ "n", "v" }, "<leader>wq", "<cmd>wq<cr>", { desc = "Save current buffer and quit" })
@@ -326,7 +325,7 @@ vim.keymap.set("n", "[<tab>", "<cmd>tabprevious<cr>", { desc = "Previous Tab" })
 -- Terminal
 vim.keymap.set("n", "<leader>t|", "<cmd>vsp term://zsh | startinsert<cr>", { desc = "Open vertical terminal split" })
 vim.keymap.set("n", "<leader>t-", "<cmd>sp term://zsh | startinsert<cr>", { desc = "Open vertical terminal split" })
-vim.keymap.set("n", "<C-S-t>", "<cmd>term<cr>i", { desc = "Toggle float terminal" })
+vim.keymap.set("n", "<leader>te", "<cmd>term<cr>i", { desc = "Toggle float terminal" })
 vim.keymap.set("t", "<esc><esc>", "<C-\\><C-n>", { desc = "Escape terminal mode" })
 vim.keymap.set("t", "<C-h>", "<cmd>wincmd h<cr>", { desc = "Move to left window" })
 vim.keymap.set("t", "<C-j>", "<cmd>wincmd j<cr>", { desc = "Move to window below" })
