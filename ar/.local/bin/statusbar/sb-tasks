@@ -49,16 +49,22 @@ for task_id in $follow_up_tasks; do
     fi
 done
 
+check_task_sync() {
+    if [ "$(task _get tw.syncneeded)" -eq 1 ]; then
+        tasks-sync
+        notify-send "📚 Tasks synced"
+    fi
+}
+
 # Handle mouse clicks
 case $BLOCK_BUTTON in
-1)
-    notify-send "📕 Tasks due in the next hour:
+1) # Combine actions for button 1 and button 2
+    notify-send "📚 Follow-up task(s) to complete:
+$(printf "%b" "$follow_up_list")" "
+📕 Tasks due in the next hour:
 $(printf "%b" "$tasks_due_list")"
     ;;
-2)
-    notify-send "📚 Follow-up task(s) to complete:
-$(printf "%b" "$follow_up_list")"
-    ;;
+2) check_task_sync ;;
 3)
     notify-send "🗂️ Task Module" "Shows task counts.
 - Left click: Show tasks due soon.
@@ -94,7 +100,11 @@ if [ "$tasks_due_count" -gt 0 ]; then
 fi
 
 if [ -n "$output" ]; then
-    printf "%s\n" "$output"
+    if [ "$(task _get tw.syncneeded)" -eq 1 ]; then
+        printf "📑 %s\n" "$output"
+    else
+        printf "%s\n" "$output"
+    fi
 else
     exit
 fi
