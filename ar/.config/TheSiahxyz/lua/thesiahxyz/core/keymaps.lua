@@ -266,22 +266,22 @@ vim.keymap.set("n", "<leader>ch", ":checkhealth<cr>", { desc = "Check neovim hea
 vim.keymap.set("n", "<leader>K", "<cmd>norm! K<cr>", { desc = "Look up keyword" })
 
 -- Lines
-vim.keymap.set("n", "<C-,>", "<cmd>m .-2<cr>==", { desc = "Move line up" })
-vim.keymap.set("n", "<C-.>", "<cmd>m .+1<cr>==", { desc = "Move line down" })
+vim.keymap.set("n", "<A-,>", "<cmd>m .-2<cr>==", { desc = "Move line up" })
+vim.keymap.set("n", "<A-.>", "<cmd>m .+1<cr>==", { desc = "Move line down" })
 vim.keymap.set(
 	"i",
-	"<C-,>",
+	"<A-,>",
 	"<esc><cmd>m .-2<cr>==gi",
 	{ noremap = true, silent = true, desc = "Move line up in insert mode" }
 )
 vim.keymap.set(
 	"i",
-	"<C-.>",
+	"<A-.>",
 	"<esc><cmd>m .+1<cr>==gi",
 	{ noremap = true, silent = true, desc = "Move line down in insert mode" }
 )
-vim.keymap.set("v", "<C-,>", ":m '<-2<cr>gv=gv", { desc = "Move selected lines up" })
-vim.keymap.set("v", "<C-.>", ":m '>+1<cr>gv=gv", { desc = "Move selected lines down" })
+vim.keymap.set("v", "<A-,>", ":m '<-2<cr>gv=gv", { desc = "Move selected lines up" })
+vim.keymap.set("v", "<A-.>", ":m '>+1<cr>gv=gv", { desc = "Move selected lines down" })
 
 -- Ownerships
 vim.keymap.set("n", "<leader>cx", "<cmd>!chmod +x %<cr>", { silent = true, desc = "Make file executable" })
