@@ -21,13 +21,32 @@ for task_id in $tasks_due_today; do
     fi
 done
 
+# Check for overdue tasks (tasks with due date in the past)
+overdue_tasks=$(task +OVERDUE _ids)
+overdue_count=0
+overdue_list=""
+
+for task_id in $overdue_tasks; do
+    task_description=$(task _get "$task_id".description)
+    overdue_list="$overdue_list- $task_description\n"
+    overdue_count=$((overdue_count + 1))
+done
+
 # Check for follow-up tasks
 follow_up_tasks=$(task follow.is:Y _ids -PARENT)
-follow_up_count=$(echo "$follow_up_tasks" | wc -w)
+follow_up_count=0
+follow_up_list=""
 
 for task_id in $follow_up_tasks; do
+    task_due_date=$(task _get "$task_id".due)
+    task_due_epoch=$(date -d "$task_due_date" +%s)
     task_description=$(task _get "$task_id".description)
-    follow_up_list="$follow_up_list- $task_description\n"
+
+    # Ensure that follow-up tasks are only shown if they are not overdue
+    if [ "$task_due_epoch" -ge "$now" ]; then
+        follow_up_list="$follow_up_list- $task_description\n"
+        follow_up_count=$((follow_up_count + 1))
+    fi
 done
 
 # Handle mouse clicks
@@ -45,15 +64,37 @@ $(printf "%b" "$follow_up_list")"
 - Left click: Show tasks due soon.
 - Middle click: Show follow-up tasks."
     ;;
+4)
+    notify-send "⏰ Overdue Tasks:
+$(printf "%b" "$overdue_list")"
+    ;;
 esac
 
 # Output task information to dwmblocks
+output=""
+
+if [ "$overdue_count" -gt 0 ]; then
+    output="⏰$overdue_count"
+fi
+
 if [ "$follow_up_count" -gt 0 ]; then
-    if [ "$tasks_due_count" -gt 0 ]; then
-        printf "📕%d 📝%d\n" "$tasks_due_count" "$follow_up_count"
+    if [ -n "$output" ]; then
+        output="$output 📝$follow_up_count"
     else
-        printf "📚%d\n" "$follow_up_count"
+        output="📝$follow_up_count"
     fi
+fi
+
+if [ "$tasks_due_count" -gt 0 ]; then
+    if [ -n "$output" ]; then
+        output="$output 📕$tasks_due_count"
+    else
+        output="📕$tasks_due_count"
+    fi
+fi
+
+if [ -n "$output" ]; then
+    printf "%s\n" "$output"
 else
     exit
 fi
