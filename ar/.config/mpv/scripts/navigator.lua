@@ -33,8 +33,8 @@ local settings = {
 	--favorites in format { 'Path to directory, notice trailing /' }
 	--on windows use double backslash c:\\my\\directory\\
 	favorites = {
-        "/media/storage",
-        "/mnt/second/videos",
+		"/media/storage",
+		"/mnt/second/videos",
 		"/home/si/Downloads",
 		"/home/si/Torrents/complete",
 		"/home/si/Videos",
@@ -152,7 +152,7 @@ local settings = {
 
 	subtitleformats = {
 		"srt",
-        "smi",
+		"smi",
 		"ass",
 		"lrc",
 		"ssa",
@@ -162,7 +162,7 @@ local settings = {
 		"txt",
 	},
 
-	navigator_menu_favkey = "f", --this key will always be bound when the menu is open, and is the key you use to cycle your favorites list!
+	navigator_menu_favkey = "F", --this key will always be bound when the menu is open, and is the key you use to cycle your favorites list!
 	menu_timeout = false, --menu timeouts and closes itself after navigator_duration seconds, else will be toggled by keybind
 	navigator_duration = 13, --osd duration before the navigator closes, if timeout is set to true
 	visible_item_count = 20, --how many menu items to show per screen
