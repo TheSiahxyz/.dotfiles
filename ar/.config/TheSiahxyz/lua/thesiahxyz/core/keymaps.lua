@@ -1,14 +1,13 @@
 -- Leader Keys
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
-vim.keymap.set("n", "<C-,>", ':echo "Control Dot Pressed!"<CR>', { noremap = true, silent = true })
-vim.keymap.set("n", "<C-.>", ':echo "Control Dot Pressed!"<CR>', { noremap = true, silent = true })
 
 -- Buffers
-vim.keymap.set("i", "<C-z>", "<cmd>bprevious<cr>", { desc = "Previous buffer" })
-vim.keymap.set("i", "<C-x>", "<cmd>bnext<cr>", { desc = "Next buffer" })
-vim.keymap.set("n", "<S-h>", "<cmd>bprevious<cr>", { desc = "Previous buffer" })
-vim.keymap.set("n", "<S-l>", "<cmd>bnext<cr>", { desc = "Next buffer" })
+vim.keymap.set({ "i", "n", "v", "x", "t" }, "<C-S-x>", "<cmd>bd!<cr>", { desc = "Delete buffer" })
+vim.keymap.set("n", "[b", "<cmd>bprevious<cr>", { desc = "Previous buffer" })
+vim.keymap.set("n", "]b", "<cmd>bnext<cr>", { desc = "Next buffer" })
+vim.keymap.set({ "i", "n", "t" }, "<C-S-h>", "<cmd>bprevious<cr>", { desc = "Previous buffer" })
+vim.keymap.set({ "i", "n", "t" }, "<C-S-l>", "<cmd>bnext<cr>", { desc = "Next buffer" })
 vim.keymap.set("n", "<leader>bb", "<cmd>e #<cr>", { desc = "Switch to last buffer" })
 vim.keymap.set("n", "<leader>bd", "<cmd>:bd<cr>", { desc = "Close buffer" })
 vim.keymap.set("n", "<leader>BD", "<cmd>:bd!<cr>", { desc = "Force close buffer" })
@@ -105,7 +104,6 @@ end, { desc = "Close explorer (netrw)" })
 vim.keymap.set("n", "<leader>ip", vim.show_pos, { desc = "Inspect position" })
 
 -- Remap Default
-vim.keymap.set("n", "ㅑ", "i", { desc = "Insert mode" })
 vim.keymap.set("i", "jk", "<esc>", { noremap = true, silent = true, desc = "Escape to normal mode" })
 vim.keymap.set("i", "<C-c>", "<esc>", { noremap = true, silent = true, desc = "Escape to normal mode" })
 vim.keymap.set("i", "<C-a>", "<home>", { noremap = true, silent = true, desc = "Insert at beginning of line" })
@@ -246,17 +244,17 @@ vim.keymap.set("n", "<leader>la", vim.diagnostic.setloclist, { desc = "Add diagn
 vim.keymap.set("n", "<leader>fn", "<cmd>enew<cr>", { desc = "Open new buffer" })
 
 -- Fix List & Trouble
--- vim.keymap.set("n", "[l", "<cmd>lprev<cr>zz", { desc = "Previous location list item" })
--- vim.keymap.set("n", "]l", "<cmd>lnext<cr>zz", { desc = "Next location list item" })
--- vim.keymap.set("n", "[q", "<cmd>cprev<cr>zz", { desc = "Previous quickfix item" })
--- vim.keymap.set("n", "]q", "<cmd>cnext<cr>zz", { desc = "Next quickfix item" })
+vim.keymap.set("n", "[o", "<cmd>lprev<cr>zz", { desc = "Previous location list item" })
+vim.keymap.set("n", "]o", "<cmd>lnext<cr>zz", { desc = "Next location list item" })
+vim.keymap.set("n", "[q", "<cmd>cprev<cr>zz", { desc = "Previous quickfix item" })
+vim.keymap.set("n", "]q", "<cmd>cnext<cr>zz", { desc = "Next quickfix item" })
 vim.keymap.set(
 	"n",
 	"<leader>rw",
 	[[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
 	{ desc = "Search and replace word under cursor" }
 )
-vim.keymap.set("n", "<leader>ol", "<cmd>lopen<cr>", { desc = "Open location list" })
+vim.keymap.set("n", "<leader>oo", "<cmd>lopen<cr>", { desc = "Open location list" })
 vim.keymap.set("n", "<leader>oq", "<cmd>copen<cr>", { desc = "Open quickfix list" })
 
 -- Formats
@@ -269,22 +267,22 @@ vim.keymap.set("n", "<leader>ch", ":checkhealth<cr>", { desc = "Check neovim hea
 vim.keymap.set("n", "<leader>K", "<cmd>norm! K<cr>", { desc = "Look up keyword" })
 
 -- Lines
-vim.keymap.set("n", "<A-,>", "<cmd>m .-2<cr>==", { desc = "Move line up" })
-vim.keymap.set("n", "<A-.>", "<cmd>m .+1<cr>==", { desc = "Move line down" })
+vim.keymap.set("n", "<C-,>", "<cmd>m .-2<cr>==", { desc = "Move line up" })
+vim.keymap.set("n", "<C-.>", "<cmd>m .+1<cr>==", { desc = "Move line down" })
 vim.keymap.set(
 	"i",
-	"<A-,>",
+	"<C-,>",
 	"<esc><cmd>m .-2<cr>==gi",
 	{ noremap = true, silent = true, desc = "Move line up in insert mode" }
 )
 vim.keymap.set(
 	"i",
-	"<A-.>",
+	"<C-.>",
 	"<esc><cmd>m .+1<cr>==gi",
 	{ noremap = true, silent = true, desc = "Move line down in insert mode" }
 )
-vim.keymap.set("v", "<A-,>", ":m '<-2<cr>gv=gv", { desc = "Move selected lines up" })
-vim.keymap.set("v", "<A-.>", ":m '>+1<cr>gv=gv", { desc = "Move selected lines down" })
+vim.keymap.set("v", "<C-,>", ":m '<-2<cr>gv=gv", { desc = "Move selected lines up" })
+vim.keymap.set("v", "<C-.>", ":m '>+1<cr>gv=gv", { desc = "Move selected lines down" })
 
 -- Ownerships
 vim.keymap.set("n", "<leader>cx", "<cmd>!chmod +x %<cr>", { silent = true, desc = "Make file executable" })
@@ -326,13 +324,15 @@ vim.keymap.set("n", "<leader><tab>d", "<cmd>tabclose<cr>", { desc = "Close Tab" 
 vim.keymap.set("n", "[<tab>", "<cmd>tabprevious<cr>", { desc = "Previous Tab" })
 
 -- Terminal
-vim.keymap.set("n", "<leader>s|", "<cmd>vsplit | term<cr>i", { desc = "Open vertical terminal split" })
-vim.keymap.set("n", "<leader>s-", "<cmd>split | term<cr>i", { desc = "Open horizontal terminal split" })
+vim.keymap.set("n", "<leader>t|", "<cmd>vsplit | term<cr>i", { desc = "Open vertical terminal split" })
+vim.keymap.set("n", "<leader>t-", "<cmd>split | term<cr>i", { desc = "Open horizontal terminal split" })
+vim.keymap.set("n", "<C-S-t>", "<cmd>term<cr>i", { desc = "Toggle float terminal" })
 vim.keymap.set("t", "<esc><esc>", "<C-\\><C-n>", { desc = "Escape terminal mode" })
 vim.keymap.set("t", "<C-h>", "<cmd>wincmd h<cr>", { desc = "Move to left window" })
 vim.keymap.set("t", "<C-j>", "<cmd>wincmd j<cr>", { desc = "Move to window below" })
 vim.keymap.set("t", "<C-k>", "<cmd>wincmd k<cr>", { desc = "Move to window above" })
 vim.keymap.set("t", "<C-l>", "<cmd>wincmd l<cr>", { desc = "Move to right window" })
+vim.keymap.set("t", "<C-Space>l", "clear<cr>", { silent = true, desc = "Move to right window" })
 vim.keymap.set("t", "<C-\\>", "<cmd>close<cr>", { desc = "Close terminal" })
 
 -- Tmux
@@ -384,7 +384,7 @@ vim.keymap.set("n", "<leader>c0", ":.!figlet -w 200 -f shadow<cr>", { desc = "As
 -- Restart
 vim.keymap.set("n", "<leader>RT", function()
 	vim.fn.system("restartnvim")
-end, { noremap = true, silent = true, desc = "Restart nvim" })
+end, { noremap = true, silent = true, desc = "Restart nvim (tmux)" })
 vim.keymap.set("n", "<leader>RS", function()
 	local cmd = "exec 'nvim -c \"execute ''edit '' . v:oldfiles[0] | normal ''0''' &'"
 	vim.cmd("silent! wa") -- Save all files

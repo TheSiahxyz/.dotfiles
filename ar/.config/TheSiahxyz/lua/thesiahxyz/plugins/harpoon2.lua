@@ -20,7 +20,7 @@ return {
 	keys = function()
 		local keys = {
 			{
-				"<leader>ha",
+				"<C-S-a>",
 				function()
 					require("harpoon"):list():add()
 				end,
@@ -35,14 +35,14 @@ return {
 				desc = "Open harpoon list menu",
 			},
 			{
-				"<C-p>",
+				"<C-S-p>",
 				function()
 					require("harpoon"):list():prev()
 				end,
 				desc = "Previous harpoon list",
 			},
 			{
-				"<C-n>",
+				"<C-S-n>",
 				function()
 					require("harpoon"):list():next()
 				end,
