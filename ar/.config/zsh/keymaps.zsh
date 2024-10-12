@@ -1,27 +1,12 @@
 #!/bin/zsh
 
-### --- Vi Mode --- ###
-# Change cursor shape for different vi modes.
-zle-keymap-select() {
-    case $KEYMAP in
-        vicmd) echo -ne '\e[1 q' ;;      # block
-        viins|main) echo -ne '\e[5 q' ;; # beam
-    esac
-}
-zle-line-init() {
-    zle -K viins # initiate `vi insert` as keymap (can be removed if `bindkey -V` has been set elsewhere)
-    echo -ne "\e[5 q"
-}
-zle -N zle-line-init
-preexec() { echo -ne '\e[5 q' ;} # Use beam shape cursor for each new prompt.
-
 ### --- Key Bindings --- ###
 # emacs style
 bindkey '^a' beginning-of-line
 bindkey '^e' end-of-line
 
 # vi mode
-bindkey -v
+autoload edit-command-line; zle -N edit-command-line
 bindkey -M menuselect 'h' vi-backward-char
 bindkey -M menuselect 'l' vi-forward-char
 bindkey -M menuselect 'k' vi-up-line-or-history
