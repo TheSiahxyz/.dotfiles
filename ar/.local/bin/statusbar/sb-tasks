@@ -85,9 +85,9 @@ fi
 
 if [ "$follow_up_count" -gt 0 ]; then
     if [ -n "$output" ]; then
-        output="$output 📝$follow_up_count"
+        output="$output 📚$follow_up_count"
     else
-        output="📝$follow_up_count"
+        output="📚$follow_up_count"
     fi
 fi
 
