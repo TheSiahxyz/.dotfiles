@@ -41,7 +41,7 @@ sessionizer() {
             --bind "ctrl-h:change-prompt(🏠  )+reload(fd -d 4 -t d -E .cache . $HOME | sed 's|$HOME|~|g')" \
             --bind "ctrl-k:change-prompt(🖥️  )+reload(fd -H -d 2 -t d -E .Trash -E .git -E .cache . ${XDG_DESKTOP_DIR:-${HOME}/Desktop} | sed 's|$HOME|~|g')" \
             --bind "ctrl-r:change-prompt(👟  )+reload(fd -H -d 2 -t d -E .Trash -E .git -E zsh -E .cache . ${XDG_SCRIPTS_HOME:-${HOME}/.local/bin} | sed 's|$HOME|~|g')" \
-            --bind "ctrl-s:change-prompt(🦴  )+reload(fd -H -d 2 -t d -E .Trash -E .git -E .cache . ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless | sed 's|$HOME|~|g')" \
+            --bind "ctrl-s:change-prompt(🦴  )+reload(find ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless -maxdepth 2 -type d -name .git -prune -o -type d -print | sed 's|$HOME|~|g')" \
             --bind "ctrl-t:change-prompt(🪟  )+reload(sesh list -t)" \
             --bind "ctrl-u:change-prompt(📝  )+reload(git -C $(git rev-parse --show-toplevel) status -s | awk -v pwd=\"$PWD\" '{print pwd \"\/\" \$2}' | grep -v '^$' | sed 's|$HOME|~|g')" \
             --bind "ctrl-v:change-prompt(🧑  )+reload(fd -H -d 3 -t d -E .Trash -E .git -E .cache . $HOME/Private | sed 's|$HOME|~|g')" \

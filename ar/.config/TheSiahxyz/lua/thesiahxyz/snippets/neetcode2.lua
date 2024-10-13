@@ -40,18 +40,27 @@ class Solution:
         return {8}
 
     def print(self, examples: Dict) -> None:
+        """
+        funciton to print the result.
+
+        Args:
+            example: Dict, a dictionary of examples
+        """
         for name, (param1, param2) in examples.items():
             result = self.{3}(param1, param2)
             print(f"{{name}}: {{result}}")
 
     def main(self):
-        cases = {{
-            "case1" = ({9}),
-            "case2" = ({10}),
-            "case3" = ({11}),
+        """
+        main function to call print function to test examples
+        """
+        examples = {{
+            "ex1" = ({9}),
+            "ex2" = ({10}),
+            "ex3" = ({11}),
         }}
 
-        self.print(cases)
+        self.print(examples)
 
 
 
