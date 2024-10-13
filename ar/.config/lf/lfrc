@@ -3,6 +3,7 @@ set autoquit true
 set cleaner '~/.config/lf/cleaner'
 set dircache false
 set drawbox true
+
 set dupfilefmt '%f_%n'
 set hidden false
 set hiddenfiles ".*:*.aux:*.log:*.bbl:*.bcf:*.blg:*.run.xml"
