@@ -1,48 +1,3 @@
--- Configuration for handling markdown format with Jupytext in Neovim
-local CELL_MARKER_COLOR = "#999999"
-local CELL_MARKER = "^```"
-local CELL_MARKER_SIGN = "cell_marker_sign"
-
--- Set highlight for cell markers
-vim.api.nvim_set_hl(0, "cell_marker_hl", { bg = CELL_MARKER_COLOR })
-vim.fn.sign_define(CELL_MARKER_SIGN, { linehl = "cell_marker_hl" })
-
--- Highlight a cell marker in the buffer
-local function highlight_cell_marker(bufnr, line)
-	local sign_name = CELL_MARKER_SIGN
-	local sign_text = "%%"
-	vim.fn.sign_place(line, CELL_MARKER_SIGN, sign_name, bufnr, {
-		lnum = line,
-		priority = 10,
-		text = sign_text,
-	})
-end
-
--- Show all cell markers in the current buffer
-local function show_cell_markers()
-	local bufnr = vim.api.nvim_get_current_buf()
-	vim.fn.sign_unplace(CELL_MARKER_SIGN, { buffer = bufnr })
-	local total_lines = vim.api.nvim_buf_line_count(bufnr)
-	for line = 1, total_lines do
-		local line_content = vim.api.nvim_buf_get_lines(bufnr, line - 1, line, false)[1]
-		if line_content ~= "" and line_content:find(CELL_MARKER) then
-			highlight_cell_marker(bufnr, line)
-		end
-	end
-end
-
--- Check and show a specific cell marker based on cursor position
-local function check_and_show_cell_marker()
-	local bufnr = vim.api.nvim_get_current_buf()
-	local line = vim.api.nvim_win_get_cursor(0)[1]
-	local line_content = vim.api.nvim_buf_get_lines(bufnr, line - 1, line, false)[1]
-	if line_content ~= "" and line_content:find(CELL_MARKER) then
-		highlight_cell_marker(bufnr, line)
-	else
-		vim.fn.sign_unplace(CELL_MARKER_SIGN, { buffer = bufnr, id = line })
-	end
-end
-
 -- Select the current cell
 local function select_cell()
 	local bufnr = vim.api.nvim_get_current_buf()
@@ -88,7 +43,6 @@ end
 local function delete_cell()
 	local _, _, start_line, end_line = select_cell() -- Use select_cell to get start and end lines of the cell
 	if start_line and end_line then
-		local bufnr = vim.api.nvim_get_current_buf()
 		-- Move cursor to the start of the cell
 		vim.api.nvim_win_set_cursor(0, { start_line, 0 })
 
@@ -105,7 +59,6 @@ end
 -- Navigate to the next or previous cell
 local function navigate_cell(up)
 	local bufnr = vim.api.nvim_get_current_buf()
-	local current_row = vim.api.nvim_win_get_cursor(0)[1]
 	local line_count = vim.api.nvim_buf_line_count(bufnr)
 	local _, _, start_line, end_line = select_cell() -- Get the start and end lines of the current cell
 
@@ -164,8 +117,6 @@ local function insert_cell(content)
 
 	vim.cmd("normal!2o")
 	vim.api.nvim_buf_set_lines(bufnr, line, line + 1, false, { content })
-	local current_line = vim.api.nvim_win_get_cursor(0)[1]
-	highlight_cell_marker(bufnr, current_line - 1)
 	vim.cmd("normal!2o")
 	vim.cmd("normal!k")
 end
@@ -182,6 +133,32 @@ return {
 	-- 		vim.g.vim_markdown_no_default_key_mappings = 1
 	-- 	end,
 	-- },
+	{
+		"MeanderingProgrammer/render-markdown.nvim",
+		enabled = true,
+		-- dependencies = { "nvim-treesitter/nvim-treesitter", "echasnovski/mini.nvim" }, -- if you use the mini.nvim suite
+		dependencies = { "nvim-treesitter/nvim-treesitter", "echasnovski/mini.icons" }, -- if you use standalone mini plugins
+		-- dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' }, -- if you prefer nvim-web-devicons
+		---@module 'render-markdown'
+		---@type render.md.UserConfig
+		opts = {},
+		config = function()
+			-- require("obsidian").get_client().opts.ui.enable = false
+			-- vim.api.nvim_buf_clear_namespace(0, vim.api.nvim_get_namespaces()["ObsidianUI"], 0, -1)
+			require("render-markdown").setup({
+				bullet = {
+					-- Turn on / off list bullet rendering
+					enabled = true,
+				},
+				heading = {
+					sign = false,
+					icons = { "󰎤 ", "󰎧 ", "󰎪 ", "󰎭 ", "󰎱 ", "󰎳 " },
+				},
+				file_types = { "markdown", "vimwiki" },
+			})
+			vim.treesitter.language.register("markdown", "vimwiki")
+		end,
+	},
 	{
 		-- Install markdown preview, use npx if available.
 		"iamcco/markdown-preview.nvim",
@@ -234,39 +211,18 @@ return {
 			-- roundtrip. Use the --test and and --test-strict commands to test the roundtrip on your files. Read more about the available
 			-- formats at https://jupytext.readthedocs.io/en/latest/formats.html (default: None)
 			vim.g.jupytext_fmt = "markdown"
-
-			-- Autocommand group to ensure no duplication
-			vim.api.nvim_create_augroup("CellMarkerHighlighting", { clear = true })
-
-			-- Autocommand to show cell markers when reading, entering, or editing a buffer
-			vim.api.nvim_create_autocmd({ "BufReadPost", "BufWinEnter", "TextChanged", "TextChangedI" }, {
-				group = "CellMarkerHighlighting",
-				pattern = "*.py,*.ipynb,*.md,*.r,*.jl,*.scala", -- Adjust your file patterns as needed
-				callback = function()
-					vim.schedule(show_cell_markers)
-				end,
-			})
-
-			-- Autocommand to check and show a specific cell marker when cursor is idle
-			vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
-				group = "CellMarkerHighlighting",
-				pattern = "*.py,*.ipynb,*.md,*.r,*.jl,*.scala", -- Adjust your file patterns as needed
-				callback = function()
-					vim.schedule(check_and_show_cell_marker)
-				end,
-			})
 		end,
 		keys = {
 			{ "<A-i>", insert_code_cell, desc = "Insert Code Cell" },
 			{ "<A-x>", delete_cell, desc = "Delete Cell" },
-			{ "<A-=>", navigate_cell, desc = "Next Cell" },
 			{
-				"<A-->",
+				"<A-h>",
 				function()
 					navigate_cell(true)
 				end,
 				desc = "Previous Cell",
 			},
+			{ "<A-l>", navigate_cell, desc = "Next Cell" },
 		},
 	},
 	{
