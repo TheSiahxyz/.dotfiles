@@ -13,7 +13,6 @@ open_staged_files() {
         resolved_files=""
         for file in $files; do
             resolved_file=$(realpath "$(git rev-parse --show-toplevel)/$file")
-            echo "Resolved file path: $resolved_file"
             resolved_files="$resolved_files $resolved_file"
         done
     fi
@@ -28,7 +27,7 @@ open_staged_files() {
         nvim_commands="$nvim_commands +$first_changed_line $expanded_file"
     done
 
-    eval "nvim $nvim_commands"
+    eval "${EDITOR:-nvim} $nvim_commands"
 }
 
 sessionizer() {
