@@ -39,30 +39,36 @@ class Solution:
         """
         return {8}
 
+    def print(self, examples: Dict) -> None:
+        for name, example in examples.items():
+            result = self.{3}(example)
+            print(f"{{name}}: {{result}}")
 
+    def main(self):
+        cases = {{
+            "case1" = {9},
+            "case2" = {10},
+            "case3" = {11},
+        }}
 
-case1 = {9}
-case2 = {10}
-case3 = {11}
+        self.print(cases)
+
 
 solution = Solution()
-print(f" {func_name} case1: {{solution.{func_name}(case1{12})}}")
-print(f" {func_name} case2: {{solution.{func_name}(case2{args})}}")
-print(f" {func_name} case3: {{solution.{func_name}(case3{args})}}")
-
+solution.main()
 
 """
 Solution
 
-url: {13}
-video: {14}
+url: {12}
+video: {13}
 
 1. {func_name}
-time: {15}
-space: {16}
+time: {14}
+space: {15}
 code:
 ```python
-{17}
+{16}
 ```
 """
 ]],
@@ -82,13 +88,11 @@ code:
 			i(9, '"case1"'),
 			i(10, '"case2"'),
 			i(11, '"case3"'),
-			i(12, '"args"'),
-			args = rep(12),
-			i(13, '"url"'),
-			i(14, '"video"'),
-			i(15, '"time_complexity"'),
-			i(16, '"space_complexity"'),
-			i(17, '"code"'),
+			i(12, '"url"'),
+			i(13, '"video"'),
+			i(14, '"time_complexity"'),
+			i(15, '"space_complexity"'),
+			i(16, '"code"'),
 		}
 	)
 )
