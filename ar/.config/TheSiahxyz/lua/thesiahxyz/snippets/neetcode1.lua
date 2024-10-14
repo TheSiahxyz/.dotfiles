@@ -22,7 +22,8 @@ Question
 {1}
 """
 
-from type import
+
+from type import Dict
 
 class Solution:
     """

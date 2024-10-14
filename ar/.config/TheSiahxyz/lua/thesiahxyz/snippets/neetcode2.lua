@@ -22,7 +22,8 @@ Question
 {1}
 """
 
-from typing import
+
+from typing import Dict
 
 class Solution:
     """
