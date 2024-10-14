@@ -22,6 +22,7 @@ Question
 {1}
 """
 
+from type import
 
 class Solution:
     """
@@ -39,7 +40,7 @@ class Solution:
         """
         return {8}
 
-    def print(self, examples: Dict) -> None:
+    def print(self, examples: Dict[str, {parameters_type}]) -> None:
         """
         funciton to print the result.
 
@@ -55,9 +56,9 @@ class Solution:
         main function to call print function to test examples
         """
         examples = {{
-            "ex1" = {9},
-            "ex2" = {10},
-            "ex3" = {11},
+            "ex1" : {9},
+            "ex2" : {10},
+            "ex3" : {11},
         }}
 
         self.print(examples)
