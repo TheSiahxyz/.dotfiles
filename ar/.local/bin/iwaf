@@ -10,8 +10,6 @@ trap 'rm -f "$DST_FILE"' EXIT
 HOME_ORIGIN="$HOME"
 HOME_PATCH="$WINEPREFIX/tmp"
 export HOME="$HOME_PATCH"
-OLD_WINEARCH="$WINEARCH"
-export WINEARCH=win32
 
 echo 'Installing SOOP Streamer...'
 curl -s "$SRC_URL" -o "$DST_FILE" || {
@@ -21,22 +19,19 @@ curl -s "$SRC_URL" -o "$DST_FILE" || {
 
 wineboot
 
-if command -v winetricks >/dev/nulls; then
-    winetricks -q dlls mfc42
+if command -v winetricks >/dev/null; then
+    winetricks -q mfc42
 else
     sudo pacman --noconfirm --needed -S winetricks || {
         echo "Failed to install winetricks!"
         exit 1
     }
-    winetricks -q dlls mfc42
+    winetricks -q mfc42
 fi
 
 wine "$DST_FILE" /S
-rm "$DST_FILE"
 
-# Remove tmp home directory
+rm "$DST_FILE"
 rm -rf "$HOME_PATCH"
 
-# Restore home directory
 export HOME="$HOME_ORIGIN"
-export WINEARCH="$OLD_WINEARCH"
