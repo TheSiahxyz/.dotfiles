@@ -1,23 +1,36 @@
 #!/bin/sh
 
-rm -rf "${XDG_DATA_HOME:-${HOME}/.local/share}/afreecatv"
-export WINEPREFIX="$HOME/.local/share/afreecatv"
+rm -rf "${XDG_DATA_HOME:-${HOME}/.local/share}/soop"
+export WINEPREFIX="${XDG_DATA_HOME:-${HOME}/.local/share}/soop"
 
-SRC_URL='https://creatorup.afreecatv.com/afreecatvstreamer_installer.exe'
+SRC_URL='https://creatorup.sooplive.co.kr/SOOPStreamer_installer.exe'
 DST_FILE="$(mktemp)"
+trap 'rm -f "$DST_FILE"' EXIT
 
 HOME_ORIGIN="$HOME"
 HOME_PATCH="$WINEPREFIX/tmp"
 export HOME="$HOME_PATCH"
+OLD_WINEARCH="$WINEARCH"
+export WINEARCH=win32
 
-echo 'Installing AfreecaTV Streamer...'
-curl -s "$SRC_URL" -o "$DST_FILE"
+echo 'Installing SOOP Streamer...'
+curl -s "$SRC_URL" -o "$DST_FILE" || {
+    echo "Failed to download installer!"
+    exit 1
+}
 
 wineboot
-command -v winetricks >/dev/null && winetricks dlls mfc42 || {
-    sudo pacman --noconfirm --needed -S winetricks
-    winetricks dlls mfc42
-}
+
+if command -v winetricks >/dev/nulls; then
+    winetricks -q dlls mfc42
+else
+    sudo pacman --noconfirm --needed -S winetricks || {
+        echo "Failed to install winetricks!"
+        exit 1
+    }
+    winetricks -q dlls mfc42
+fi
+
 wine "$DST_FILE" /S
 rm "$DST_FILE"
 
@@ -26,3 +39,4 @@ rm -rf "$HOME_PATCH"
 
 # Restore home directory
 export HOME="$HOME_ORIGIN"
+export WINEARCH="$OLD_WINEARCH"

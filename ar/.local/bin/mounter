@@ -98,7 +98,7 @@ $sambas" | sed "/^$/d;s/ *$//")"
 
 # Quit the script if a sequential command fails.
 set -e
-test -n "$alldrives"
+test -n "$alldrives" || { echo "No mountable drives" && exit; }
 
 # Feed all found drives to dmenu and get user choice.
 chosen="$(echo "$alldrives" | dmenu -p "Mount which drive?" -i)"
