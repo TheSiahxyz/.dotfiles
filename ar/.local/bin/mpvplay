@@ -41,10 +41,9 @@ tmp_playlist() {
     [ -d "$playlistdir" ] || mkdir -p "$playlistdir"
     tmplist="$playlistdir/tmplist.m3u"
     [ -f "$tmplist" ] && rm -rf "$tmplist"
-    find "$1" -maxdepth 1 -type f \( -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.mov" -o -iname "*.flv" -o -iname "*.wmv" -o -iname "*.webm" -o -iname "*.mpeg" -o -iname "*.mpg" \) \
+    find "$1" -maxdepth 1 -type f \( -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.mov" -o -iname "*.flv" -o -iname "*.wmv" -o -iname "*.webm" -o -iname "*.mpeg" -o -iname "*.mpg" -o -iname "*.ts" \) \
         -exec echo {} \; >>"$tmplist"
     play_playlist "$tmplist"
-    rm -rf "$tmplist"
 }
 
 list_and_play() {
@@ -54,7 +53,7 @@ list_and_play() {
     "Enter filenames")
         search_term=$(echo | dmenu -i -p "File names:")
         [ -z "$search_term" ] && echo "Invalid search term \"$search_term\"" && exit
-        files=$(find "$dir" -type f \( -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.mov" -o -iname "*.flv" -o -iname "*.wmv" -o -iname "*.webm" -o -iname "*.mpeg" -o -iname "*.mpg" \) -iname "*$search_term*")
+        files=$(find "$dir" -type f \( -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.mov" -o -iname "*.flv" -o -iname "*.wmv" -o -iname "*.webm" -o -iname "*.mpeg" -o -iname "*.mpg" -o -iname "*.ts" \) -iname "*$search_term*")
         [ -z "$files" ] && echo "No files named with \"$search_term\"." && exit
         tmpplaylist=$(mktemp /tmp/mpv_playlist_XXXXXX.m3u)
         echo "$files" | while read -r file; do
