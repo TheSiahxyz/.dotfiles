@@ -1,7 +1,7 @@
 # Keys                      Filename
 bb              ${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}
 bs              ${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/statusbar
-bt              ${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/task/taskwarrior-tui
+btt             ${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/task/taskwarrior-tui
 cab             ${XDG_CONFIG_HOME:-${HOME}/.config}/abook
 cac             ${XDG_CACHE_HOME:-${HOME}/.cache}
 cbc             ${XDG_CONFIG_HOME:-${HOME}/.config}/bash
