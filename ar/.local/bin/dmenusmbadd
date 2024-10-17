@@ -6,25 +6,25 @@ os="$(whereami)"
 
 restartinit() {
     case "$(basename "$(readlink -f /sbin/init)" | sed 's/-init//g')" in
-        *systemd*)
-            sudo systemctl restart smb >/dev/null/ 2>&1 && sudo systemctl restart nmb >/dev/null/ 2>&1
-            ;;
-        *runit*)
-            sudo sv restart smbd >/dev/null 2>&1 && sudo sv restart nmbd >/dev/null 2>&1
-            ;;
+    *systemd*)
+        sudo systemctl restart smb >/dev/null/ 2>&1 && sudo systemctl restart nmb >/dev/null/ 2>&1
+        ;;
+    *runit*)
+        sudo sv restart smbd >/dev/null 2>&1 && sudo sv restart nmbd >/dev/null 2>&1
+        ;;
     esac
 }
 
-[ -f "$samba_conf" ] || { sudo touch "$samba_conf" && smbpasswd -a "$name" ;}
+[ -f "$samba_conf" ] || { sudo touch "$samba_conf" && smbpasswd -a "$USER"; }
 if [ "$#" -eq 1 ]; then
-	folder_path="$1"
-	folder_name=$(basename "$folder_path" | tr '[:upper:]' '[:lower:]')
+    folder_path="$1"
+    folder_name=$(basename "$folder_path" | tr '[:upper:]' '[:lower:]')
 else
-	folder_name=$(echo | dmenu -p "Enter the name of the folder to share:" | tr '[:upper:]' '[:lower:]') || exit 1
-	[ -z "$folder_name" ] && notify-send "No folder name provided." && exit 1
+    folder_name=$(echo | dmenu -p "Enter the name of the folder to share:" | tr '[:upper:]' '[:lower:]') || exit 1
+    [ -z "$folder_name" ] && notify-send "No folder name provided." && exit 1
 
-	folder_path=$(find "$base_path" -type d -iname "$folder_name" -print 2>/dev/null | dmenu -l 10 -p "Select the folder to share:")
-	[ -z "$folder_path" ] && notify-send "Folder not found." && exit 1
+    folder_path=$(find "$base_path" -type d -iname "$folder_name" -print 2>/dev/null | dmenu -l 10 -p "Select the folder to share:")
+    [ -z "$folder_path" ] && notify-send "Folder not found." && exit 1
 fi
 
 [ -d "$folder_path" ] || exit 1
