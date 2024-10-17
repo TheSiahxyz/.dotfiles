@@ -86,7 +86,9 @@ EOF
     )
     [ -z "$smb" ] && continue 1
     while IFS= read -r share; do
-        smbshares+="//$smbip/$share"$'\n'
+        if ! echo "$smbshares" | grep -q "$share"; then
+            smbshares+="//$smbip/$share"$'\n'
+        fi
     done <<<"$smb"
 done
 
@@ -96,7 +98,7 @@ smbs="$(echo "$smbshares" | while IFS= read -r smb; do
     [ -n "$mountedsmbs" ] && for mountedsmb in $mountedsmbs; do
         mountedsmb="${mountedsmb%% *}"
         mountedsmb="${mountedsmb##*/}"
-        [[ "$mountedsmb" == "${smb##*/}" ]] && break 1
+        [[ "$mountedsmb" =~ $smb ]] && break 1
     done && continue 1
     echo "📡 $smb"
 done)"
