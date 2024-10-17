@@ -161,6 +161,6 @@ Check if $(whoami) is added to samba user list."
         sudo rm -rf "$mp"
         exit
     }
-    notify-send "📡 Samba successfully mounted to" "$path"
+    notify-send "📡 Samba successfully mounted to" "$mp"
     ;;
 esac
