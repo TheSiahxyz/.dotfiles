@@ -1,7 +1,9 @@
 #!/bin/sh
 
-rm -rf "${XDG_DATA_HOME:-${HOME}/.local/share}/soop"
-export WINEPREFIX="${XDG_DATA_HOME:-${HOME}/.local/share}/soop"
+DEFAULT_WINEPREFIX="${XDG_DATA_HOME:-${HOME}/.local/share}/soop"
+rm -rf "$DEFAULT_WINEPREFIX"
+
+export WINEPREFIX="$DEFAULT_WINEPREFIX"
 
 SRC_URL='https://creatorup.sooplive.co.kr/SOOPStreamer_installer.exe'
 DST_FILE="$(mktemp)"
@@ -19,15 +21,14 @@ curl -s "$SRC_URL" -o "$DST_FILE" || {
 
 wineboot
 
-if command -v winetricks >/dev/null; then
-    winetricks -q mfc42
-else
+if ! command -v winetricks >/dev/null; then
     sudo pacman --noconfirm --needed -S winetricks || {
         echo "Failed to install winetricks!"
         exit 1
     }
-    winetricks -q mfc42
 fi
+
+winetricks -q mfc42
 
 wine "$DST_FILE" /S
 
