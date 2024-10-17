@@ -95,6 +95,7 @@ smbshares="$(echo "$smbshares" | sed '/^$/d')"
 smbs="$(echo "$smbshares" | while IFS= read -r smb; do
     [ -n "$mountedsmbs" ] && for mountedsmb in $mountedsmbs; do
         mountedsmb="${mountedsmb%% *}"
+        mountedsmb="${mountedsmb##*/}"
         [[ "$mountedsmb" == "$smb" ]] && break 1
     done && continue 1
     echo "📡 $smb"
