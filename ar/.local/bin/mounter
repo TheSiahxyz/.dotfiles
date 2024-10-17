@@ -72,31 +72,33 @@ done | filter)"
 normalparts="$(echo "$lsblkoutput" | grep -v crypto_LUKS | grep 'part\|rom\|crypt' | sed "s/^/💾 /" | filter)"
 
 # Get all available IP addresses with open Samba shares in the wlan0 subnet, excluding eth0 IP
-smbips="$(sudo arp-scan --localnet | grep -vEi '(EFM Networks|Unknown)' | awk '/^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/{print $1}')"
+smbips="$(arp-scan --localnet | grep -vEi '(EFM Networks|locally administered)' | awk '/^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/{print $1}')"
 
 # Get currently mounted CIFS shares
 mountedsmbs="$(grep 'cifs' /etc/mtab)"
 
-# Check for available SMB shares for each IP in ips
 for smbip in $smbips; do
-    smbshares=$(
-        smbclient -L "$smbip" -U% -A /dev/stdin <<EOF 2>/dev/null | awk '/Disk/ {print $1}' | grep -vEi '(ADMIN|\w)\$' | sed 's/Disk|\(.*\)|/\1/g'
+    smb=$(
+        smbclient -L "$smbip" -U% -A /dev/stdin <<EOF 2>/dev/null | awk '/Disk/ {print $1}' | grep -vEi '(ADMIN|\w)\$'
 username=$(whoami)
 password=$(pass show default)
 EOF
     )
+    [ -z "$smb" ] && continue 1
+    while IFS= read -r share; do
+        smbshares+="//$smbip/$share"$'\n'
+    done <<<"$smb"
 done
 
-# Check for each available share if it is already mounted
-smbs="$([ -n "$smbshares" ] && for smb in $smbshares; do
+smbshares="$(echo "$smbshares" | sed '/^$/d')"
+
+smbs="$(echo "$smbshares" | while IFS= read -r smb; do
     [ -n "$mountedsmbs" ] && for mountedsmb in $mountedsmbs; do
         mountedsmb="${mountedsmb%% *}"
-        mountedsmb="${mountedsmb##*/}"
         [[ "$mountedsmb" == "$smb" ]] && break 1
     done && continue 1
     echo "📡 $smb"
-    sleep 0.5
-done | sed "s/ //g")"
+done)"
 
 # Add all to one variable. If no mountable drives found, exit.
 alldrives="$(echo "$phones
@@ -151,9 +153,13 @@ case "$chosen" in
     notify-send "🤖 Android Mounted." "Android device mounted to $mp."
     ;;
 📡*)
-    chosen="${chosen%% *}"
-    chosen="${chosen:1}" # This is a bashism.
-    getmount "/media/$USER/$chosen" && sudo -A mount -t cifs -o username="$(whoami)",password="$(pass show default)" "$chosen" "$mp"
-    [ $? -eq 0 ] && notify-send "📡 Samba successfully mounted" "$chosen to $mp/$chosen" || notify-send "❌ Failed chosen samba mount" "$chosen"
+    chosen="${chosen##* }"
+    path="${chosen##*/}"
+    getmount "/media/$USER/$path" && sudo -A mount -t cifs -o username="$(whoami)",password="$(pass show default)" "$chosen" "$mp" || {
+        notify-send "❌ Failed to mount samba" "$chosen
+Check if $(whoami) is added to samba user list."
+        sudo rm -rf "$mp"
+        exit
+    }
     ;;
 esac
