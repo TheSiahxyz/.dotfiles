@@ -16,7 +16,7 @@ while getopts "mvr" opt; do
         DOWNLOAD_TYPE="video"
         OUTPUT_DIR="${XDG_VIDEOS_DIR:-${HOME}/Videos}"
         YTDL_OUTPUT_FORMAT="${OUTPUT_DIR}/%(title)s [%(id)s].%(ext)s"
-        VIDEO_EXT=$(printf "best\n60fps\n30fps\nmp4\nmkv" | dmenu -i -p "Choose an encoding for the video") || exit
+        VIDEO_EXT=$(printf "best\n60fps\n30fps\nmp4\nmkv" | dmenu -i -p "Choose an encoding (default: 1080p)") || exit
         case $VIDEO_EXT in
         best)
             VIDEO_FORMATS="--format bestvideo+bestaudio/best"
