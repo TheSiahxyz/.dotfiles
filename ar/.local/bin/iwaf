@@ -13,6 +13,9 @@ HOME_ORIGIN="$HOME"
 HOME_PATCH="$WINEPREFIX/tmp"
 export HOME="$HOME_PATCH"
 
+OLD_WINEARCH="$WINEARCH"
+export WINEARCH=win32
+
 echo 'Installing SOOP Streamer...'
 curl -s "$SRC_URL" -o "$DST_FILE" || {
     echo "Failed to download installer!"
@@ -28,7 +31,7 @@ if ! command -v winetricks >/dev/null; then
     }
 fi
 
-winetricks -q mfc42
+winetricks -q mfc42 vcrun2003
 
 wine "$DST_FILE" /S
 
@@ -36,3 +39,4 @@ rm "$DST_FILE"
 rm -rf "$HOME_PATCH"
 
 export HOME="$HOME_ORIGIN"
+export WINEARCH="$OLD_WINEARCH"
