@@ -24,7 +24,7 @@ bindkey -M viins 'jk' vi-cmd-mode       # normal mode
 # programs & scripts
 bindkey -s '^B' '^ubc -lq\n'
 bindkey -s '^D' '^ucdi\n'
-bindkey -s '^F' '^ufzffile\n'
+bindkey -s '^F' '^ufzffiles\n'
 bindkey -s '^G' '^ulf\n'
 bindkey -s '^K' '^uhtop\n'
 bindkey -s '^N' '^utmc\n'
@@ -40,6 +40,7 @@ bindkey -s '^X^D' '^ufD\n'
 bindkey -s '^X^F' '^uff\n'
 bindkey -s '^X^G' '^ugitfiles\n'
 bindkey -s '^X^L' '^ugitlogs\n'
+bindkey -s '^X^O' '^urgafiles '
 bindkey -s '^X^R' '^ufgst\n'
 bindkey -s '^X^T' '^ugitstagedfiles\n'
 bindkey -s '^X^U' '^ugitupdate\n'
@@ -200,6 +201,6 @@ copybuffer () {
 }
 zle -N copybuffer
 
-bindkey -M emacs "^X^O" copybuffer
-bindkey -M viins "^X^O" copybuffer
-bindkey -M vicmd "^X^O" copybuffer
+bindkey -M emacs "^X^Y" copybuffer
+bindkey -M viins "^X^Y" copybuffer
+bindkey -M vicmd "^X^Y" copybuffer

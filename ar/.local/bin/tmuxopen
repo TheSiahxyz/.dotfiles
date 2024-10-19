@@ -2,7 +2,7 @@
 
 print_help() {
     cat <<EOF
-Usage: gif [OPTIONS]
+Usage: tmuxopen [OPTIONS]
 
 Search for files and open them in Neovim within tmux panes.
 
