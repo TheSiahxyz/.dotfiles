@@ -20,8 +20,8 @@ Environment Variables:
     NVIM_SEARCH_REGISTRY    Set to the search query, allowing Neovim to highlight matches
 
 Example:
-    gif             # Run the normal search and open
-    gif --debug     # Run with debug output
+    tmuxopen             # Run the normal search and open
+    tmuxopen --debug     # Run with debug output
 EOF
 }
 
@@ -155,7 +155,7 @@ if [ "$count" -eq 1 ]; then
     open_files_in_nvim "$(tmux display-message -p '#P')" 1
 else
     debug "Opening multiple files"
-    window_name="gif-$(date +%s)"
+    window_name="TheSiahxyz-$(date +%s)"
     tmux new-window -n "$window_name"
     case "$count" in
     2)
