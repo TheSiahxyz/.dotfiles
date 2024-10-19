@@ -7,8 +7,35 @@ set -e
 IFS='
 '
 
-# Get the list of selected files
-files=$(fzf-tmux --preview 'if [ -d {} ]; then exa --color=always --long --all --header --icons --git {}; else bat --color=always {}; fi' --reverse --query="$1" --multi --select-1 --exit-0)
+# Get the list of selected files with key bindings for specific paths
+files=$(fzf-tmux --header "^a all ^b public ^c configs ^d .dotfiles ^g git ^k desktop ^r scripts ^s suckless ^u staged files ^v private ^/ help" \
+    --preview 'if [ -d {} ]; then exa --color=always --long --all --header --icons --git {}; elif [ -L {} ]; then file -h {}; else bat --color=always --style=header,grid --line-range=:500 {}; fi' \
+    --reverse \
+    --query="$1" \
+    --multi \
+    --select-1 \
+    --exit-0 \
+    --bind "ctrl-a:change-prompt(⚡  )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . $HOME)" \
+    --bind "ctrl-b:change-prompt(👯  )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . ${XDG_PUBLICSHARE_DIR:-${HOME}/Public})" \
+    --bind "ctrl-c:change-prompt(🗂️  )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . ${XDG_CONFIG_HOME:-${HOME}/.config})" \
+    --bind "ctrl-d:change-prompt(⚙️  )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . ${XDG_DOTFILES_DIR:-${HOME}/.dotfiles})" \
+    --bind "ctrl-g:change-prompt(  )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . $HOME/Private/repos $HOME/Public/repos)" \
+    --bind "ctrl-k:change-prompt(🖥️  )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . ${XDG_DESKTOP_DIR:-${HOME}/Desktop})" \
+    --bind "ctrl-r:change-prompt(👟  )+reload(fd -H -L -t f -E .Trash -E .git -E .cache -E zsh . ${XDG_BIN_HOME:-${HOME}/.local/bin})" \
+    --bind "ctrl-s:change-prompt(🦴  )+reload(find ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless -maxdepth 2 -type f -not -path '*/.git/*')" \
+    --bind "ctrl-u:change-prompt(📝  )+reload(if [ -d .git ]; then git -C $(git rev-parse --show-toplevel 2>/dev/null) status -s 2>/dev/null | awk -v pwd=\"$PWD\" '{print pwd \"\/\" \$2}' | grep -v '^$'; else echo 'This is not a git repository.'; fi)" \
+    --bind "ctrl-v:change-prompt(🧑  )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . $HOME/Private)" \
+    --bind 'ctrl-/:change-prompt(❓  )+reload(echo "^a all
+^b public
+^c configs
+^d .dotfiles
+^g git
+^k desktop
+^r scripts
+^s suckless
+^u staged files
+^v private
+^/ help")')
 
 # Check if any files were selected, and exit if not
 [ -z "$files" ] && exit 0

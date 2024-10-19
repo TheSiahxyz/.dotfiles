@@ -8,7 +8,6 @@ functions=""
 
 # Parse the file for function names, aliases, and comments
 while IFS= read -r line || [ -n "$line" ]; do
-    # Check for lines that start with a single "#" followed by a space or text (exclude ##, ###, etc.)
     case "$line" in
     \#*)
         if [ "$(printf '%s' "$line" | cut -c 2)" != "#" ] && [ "$(printf '%s' "$line" | cut -c 2)" != "!" ]; then
@@ -45,14 +44,32 @@ done <"$FILE"
 # Sort the functions alphabetically by name
 sorted=$(printf '%b' "$functions" | sort)
 
-# Print out the sorted functions with aliases and comments
-printf '%b' "$sorted" | while IFS='|' read -r f_name alias_name comment; do
+# Print out the sorted functions with aliases and comments in a readable format
+formatted=$(printf '%b' "$sorted" | while IFS='|' read -r f_name alias_name comment; do
     if [ -n "$alias_name" ]; then
         printf 'fn: %-30s - %s (alias: %s)\n' "$f_name" "$comment" "$alias_name"
     else
         printf 'fn: %-30s - %s\n' "$f_name" "$comment"
     fi
-done
+done)
 
-# RTMIN: pkill
-# PROJECT: pkill
+# Use fzf to select a function
+selected=$(printf '%b' "$formatted" | fzf --header "Select a function:")
+
+# Check if a function was selected
+if [ -n "$selected" ]; then
+    # Extract the function name
+    f_name=$(echo "$selected" | cut -d ' ' -f 2 | sed 's/[[:space:]]\+//g')
+
+    # Get the line number of the function definition
+    line_number=$(grep -n "^function $f_name(" "$FILE" | cut -d ':' -f 1)
+
+    # Open the function in nvim at the specific line number
+    if [ -n "$line_number" ]; then
+        nvim "+$line_number" "$FILE"
+    else
+        echo "Function '$f_name' not found in $FILE."
+    fi
+else
+    echo "No function selected."
+fi

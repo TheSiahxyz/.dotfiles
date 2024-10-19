@@ -16,10 +16,22 @@ function fzf_alias() {
             printf "%-${max_length}s = %s\n" "$alias_name" "$alias_command"
         done
     }
-    if [ -z "$1" ]; then
-        format_aliases | fzf
-    else
-        format_aliases | grep --color=auto "$1"
+    alias_file="${XDG_CONFIG_HOME:-{HOME}/.config}/shell/aliasrc"
+    selected_alias=$(format_aliases | fzf --header="select an alias")
+    # check if an alias was selected
+    if [ -n "$selected_alias" ]; then
+        # extract the alias name
+        alias_name=$(echo "$selected_alias" | cut -d'=' -f1 | xargs)
+
+        # get the line number from the alias file
+        line_number=$(grep -n "^alias $alias_name=" "$alias_file" | cut -d':' -f1)
+
+        # open nvim at the specified line
+        if [ -n "$line_number" ]; then
+            nvim "+$line_number" "$alias_file"
+        else
+            echo "alias $alias_name not found in $alias_file."
+        fi
     fi
 }
 
