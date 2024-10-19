@@ -1,40 +1,11 @@
 #!/bin/sh
 
-# Get the repository root path
-repo_root=$(git rev-parse --show-toplevel)
-
 # Use fzf to select files and store them in a string with newline as a separator
 IFS='
 '
-files=$(git status -s | awk '{print $2}' | grep -v '^$' | fzf-tmux --preview "bat --color=always {}" --reverse --multi --select-1 --exit-0)
+files=$(git status -s | awk '$1 != "D" {print $2}' | grep -v '^$' | fzf-tmux --preview "bat --color=always {}" --reverse --multi --select-1 --exit-0)
 
 # Check if any files were selected, and exit if not
 [ -z "$files" ] && exit 0
 
-# Resolve each file to its absolute path
-resolved_files=""
-for file in $files; do
-    resolved_files="$resolved_files $(realpath "$repo_root/$file")"
-done
-
-# Split resolved_files into positional parameters
-set -- "$resolved_files"
-
-# Get the number of selected files
-count=$#
-
-# Use case statement to handle different numbers of files
-case "$count" in
-2)
-    ${EDITOR:-nvim} -O "$@"
-    ;;
-3)
-    ${EDITOR:-nvim} -O "$1" -c 'wincmd j' -c "vsplit $2" -c "split $3"
-    ;;
-4)
-    ${EDITOR:-nvim} -O "$1" -c "vsplit $2" -c "split $3" -c 'wincmd h' -c "split $4"
-    ;;
-*)
-    ${EDITOR:-nvim} "$@"
-    ;;
-esac
+openfiles "$files"

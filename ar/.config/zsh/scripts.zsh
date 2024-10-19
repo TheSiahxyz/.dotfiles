@@ -359,45 +359,8 @@ function fetch_git_repos_status() {
 EOF
     )
 
-    # Split the selected directories into an array
-    SELECTED_DIRS_ARRAY=(${=SELECTED_DIRS})
-    # Filter out any empty selections
-    SELECTED_DIRS_ARRAY=(${SELECTED_DIRS_ARRAY[@]//#/})
-    [ -z "$SELECTED_DIRS_ARRAY" ] && return
-
-    # Function to clean and create a valid session name
-    clean_session_name() { echo $(basename "$1" | sed 's/[^a-zA-Z0-9]/_/g'); }
-
-    # If only one directory is selected, just change to that directory
-    if [[ ${#SELECTED_DIRS_ARRAY[@]} -eq 1 ]]; then
-        if [ -d "${SELECTED_DIRS_ARRAY[1]}" ]; then
-            cd "${SELECTED_DIRS_ARRAY[1]}"
-            git status
-        fi
-    else
-        # Handle session creation for multiple selected directories
-        for DIR in "${SELECTED_DIRS_ARRAY[@]}"; do
-            if [ -d "$DIR" ]; then
-                SESSION_NAME=$(clean_session_name "$DIR")
-                if ! tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
-                    tmux new-session -d -s "$SESSION_NAME" -c "$DIR"
-                fi
-            fi
-        done
-        if [[ ${#SELECTED_DIRS_ARRAY[@]} -gt 0 ]]; then
-            FIRST_SESSION=$(clean_session_name "${SELECTED_DIRS_ARRAY[1]}")
-            if [[ -n "$TMUX" ]]; then
-                tmux switch-client -t "$FIRST_SESSION"
-            else
-                tmux attach-session -t "$FIRST_SESSION"
-            fi
-        fi
-    fi
+    opensessions "$SELECTED_DIRS"
 }
-
-
-
-
 
 
 ###########################################################################################

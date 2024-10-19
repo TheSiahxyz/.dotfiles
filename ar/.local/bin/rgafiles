@@ -50,43 +50,7 @@ search_term() {
         return 0
     fi
 
-    open_file "$files"
-}
-
-# Common function to open files with nvim
-open_file() {
-    if ! command -v nvim >/dev/null 2>&1; then
-        echo "Error: 'nvim' is not installed." >&2
-        exit 1
-    fi
-
-    IFS='
-'
-
-    files=$*
-    for file in $files; do
-        files_list="$files_list \"$(realpath "$file")\""
-    done
-
-    eval "set -- $files_list"
-
-    count=$#
-
-    case "$count" in
-    2)
-        ${EDITOR:-nvim} -O +'silent! normal g;' "$@"
-        ;;
-    3)
-        ${EDITOR:-nvim} -O "$1" -c 'wincmd j' -c "silent! vsplit $2" -c "silent! split $3"
-        ;;
-    4)
-        ${EDITOR:-nvim} -O "$1" -c "silent! vsplit $2" -c "silent! split $3" -c 'wincmd h' -c "silent! split $4"
-        ;;
-    *)
-        ${EDITOR:-nvim} "$@"
-        ;;
-    esac
-
+    openfiles "$files"
 }
 
 # Function to list and/or open all files associated with a given project tag
@@ -121,7 +85,7 @@ list_or_open_project_files() {
     else
         # Otherwise, open the files with nvim
         set -- "$(printf "%s\n" "$rga_output")"
-        open_file "$@"
+        openfiles "$@"
     fi
 }
 
