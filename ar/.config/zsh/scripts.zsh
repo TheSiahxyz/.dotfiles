@@ -62,7 +62,7 @@ alias fcfg=fzf_config
 function fzf_config() {
     [ $# -gt 0 ] && zoxide query -i "$1" | xargs "${EDITOR}" && return
     local file
-    file="$(zoxide query -l | fzf --cycle -1 -0 --no-sort +m)" && nvim "${file}" || return 1
+    file="$(zoxide query -l | fzf --cycle -1 -0 --no-sort +m)" && cd "${file}" || return 1
 }
 
 
@@ -272,7 +272,8 @@ function cd_clipboard_path() {
 # fzf files in root and open in default editor
 alias ff=fzf_file
 function fzf_file() {
-    file=$(find "$HOME" -type d \( -name ".git" -o -path "${ZPLUGINDIR:-${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/zsh}" -o -path "${XDG_SOURCE_HOME:-${HOME}/.local/src}/yay" -o -path "${XDG_DATA_HOME:-${HOME}/.local/share}" -o -path "$HOME/Private/repos/THESIAH/public" -o -path "$HOME/.local/lib" -o -name ".cache" -o -name "Trash" \) -prune -o \( -type f -not -name "*lock*" -not -name "*.o" -o -type l \) -print 2>/dev/null | fzf) && nvim "$file"
+    files=$(find "$HOME" -type d \( -name ".git" -o -path "${ZPLUGINDIR:-${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/zsh}" -o -path "${XDG_SOURCE_HOME:-${HOME}/.local/src}/yay" -o -path "${XDG_DATA_HOME:-${HOME}/.local/share}" -o -path "$HOME/Private/repos/THESIAH/public" -o -path "$HOME/.local/lib" -o -name ".cache" -o -name "Trash" \) -prune -o \( -type f -not -name "*lock*" -not -name "*.o" -o -type l \) -print 2>/dev/null | fzf --multi)
+    openfiles "$files"
 }
 
 # fzf directory and go to the parent directory
@@ -283,7 +284,7 @@ function fzf_directory() { cd $(find "$HOME" -type d >/dev/null 2>&1 | fzf); }
 alias sscs=search_scripts
 function search_scripts() {
     choice="$(find ~/.local/bin -mindepth 1 \( -type f -o -type l \) -not -name '*.md' -not -path '*/zsh/*' -printf '%P\n' | fzf --cycle)"
-    ([ -n "$choice" ] && [ -f "$HOME/.local/bin/$choice" ]) && $EDITOR "$HOME/.local/bin/$choice"
+    ([ -n "$choice" ] && [ -f "$HOME/.local/bin/$choice" ]) && ${EDITOR:-nvim} "$HOME/.local/bin/$choice"
 }
 
 # check git status by directories in specific path
