@@ -386,7 +386,6 @@ alias tmka='tmux kill-session -a'
 alias tmls='tmux ls'
 alias tmo='tmuxopen'
 alias tmpk='command pkill tmux'
-alias tms='tmuxing'
 alias tm.='tmux new -s "$(basename $PWD)"'
 
 # transmission-remote

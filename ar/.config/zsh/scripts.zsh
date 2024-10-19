@@ -660,6 +660,7 @@ alias cds=cd_session_path
 function cd_session_path() { cd "$(tmux display-message -p '#{session_path}')"; }
 
 # kill tmux session
+alias tmk='kill_tmux_sessions'
 function kill_tmux_sessions() {
     local sessions
     sessions="$(tmux ls | fzf --cycle --exit-0 --multi)"  || return $?
@@ -673,17 +674,9 @@ function kill_tmux_sessions() {
     done
 }
 
-# new or switch tmux
-function new_tmux_session() {
-    [[ -n "$TMUX" ]] && change="switch-client" || change="attach-session"
-    if [ $1 ]; then
-        tmux $change -t "$1" >/dev/null 2>&1 || (tmux new-session -d -s $1 && tmux $change -t "$1"); return
-    fi
-    session=$(tmux list-sessions -F "#{session_name}" >/dev/null 2>&1 | fzf --cycle --exit-0) &&  tmux $change -t "$session" || echo "No sessions found."
-}
-
-# select tmux session
-function fzf_tmux_session() {
+# switch tmux session
+alias tms='switch_tmux_session'
+function switch_tmux_session() {
     local session
     session=$(tmux list-sessions -F "#{session_name}" \
         | fzf --cycle --query="$1" --select-1 --exit-0) &&
