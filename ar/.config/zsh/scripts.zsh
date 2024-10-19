@@ -281,16 +281,9 @@ function cd_clipboard_path() {
     fi
 }
 
-# fzf files in root and open in default editor
-alias ff=fzf_file
-function fzf_file() {
-    files=$(find "$HOME" -type d \( -name ".git" -o -path "${ZPLUGINDIR:-${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/zsh}" -o -path "${XDG_SOURCE_HOME:-${HOME}/.local/src}/yay" -o -path "${XDG_DATA_HOME:-${HOME}/.local/share}" -o -path "$HOME/Private/repos/THESIAH/public" -o -path "$HOME/.local/lib" -o -name ".cache" -o -name "Trash" \) -prune -o \( -type f -not -name "*lock*" -not -name "*.o" -o -type l \) -print 2>/dev/null | fzf --multi)
-    openfiles "$files"
-}
-
 # fzf directory and go to the parent directory
 alias fD=fzf_directory
-function fzf_directory() { cd $(find "$HOME" -type d >/dev/null 2>&1 | fzf); }
+function fzf_directory() { cd "$(find "$HOME" -type d -not -path '*/.git/*' -not -path '*/.cache/*' | fzf)"; }
 
 # search scripts in ~/.local/bin
 alias sscs=search_scripts
