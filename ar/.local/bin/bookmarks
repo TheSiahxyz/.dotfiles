@@ -46,7 +46,16 @@ open() {
     # Set the selected tool to the variable 'open'
     case "$opentool" in
     xdg-open) xdg-open "$1" ;;
-    open) open "$1" ;;
+    open)
+        case "$(uname -s)" in
+        Darwin)
+            open "$1"
+            ;;
+        *)
+            xdg-open "$1"
+            ;;
+        esac
+        ;;
     links) setsid -f "$TERMINAL" -e links "$1" ;;
     lynx) setsid -f "$TERMINAL" -e lynx "$1" ;;
     *) echo "Invalid selection" >&2 && exit 1 ;;
