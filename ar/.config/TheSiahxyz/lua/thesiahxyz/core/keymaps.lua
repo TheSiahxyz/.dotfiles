@@ -387,12 +387,6 @@ vim.keymap.set("n", "<leader>c0", ":.!figlet -w 200 -f shadow<cr>", { desc = "As
 vim.keymap.set("n", "<leader>RT", function()
 	vim.fn.system("restartnvim")
 end, { noremap = true, silent = true, desc = "Restart nvim (tmux)" })
-vim.keymap.set("n", "<leader>RS", function()
-	local cmd = "exec 'nvim -c \"execute ''edit '' . v:oldfiles[0] | normal ''0''' &'"
-	vim.cmd("silent! wa") -- Save all files
-	vim.cmd("silent! !" .. cmd) -- Run the new nvim instance in the background
-	vim.cmd("qa") -- Quit the current Neovim instance
-end, { noremap = true, silent = true, desc = "Restart nvim" })
 
 -- Source shortcuts from bm-files and bm-folders
 local shortcuts_file = vim.fn.expand("~/.config/nvim/shortcuts.lua")
