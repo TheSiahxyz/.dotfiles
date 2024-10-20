@@ -20,7 +20,7 @@ files=$(fzf-tmux --header "^a pwd ^b public ^c configs ^d .dotfiles ^g git ^h ho
     --bind "ctrl-c:change-prompt(🗂️  )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . ${XDG_CONFIG_HOME:-${HOME}/.config})" \
     --bind "ctrl-d:change-prompt(⚙️  )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . ${XDG_DOTFILES_DIR:-${HOME}/.dotfiles})" \
     --bind "ctrl-g:change-prompt(  )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . $HOME/Private/repos $HOME/Public/repos)" \
-    --bind "ctrl-h:change-prompt(⚡  )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . $HOME)" \
+    --bind "ctrl-h:change-prompt(🏠  )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . $HOME)" \
     --bind "ctrl-k:change-prompt(🖥️  )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . ${XDG_DESKTOP_DIR:-${HOME}/Desktop})" \
     --bind "ctrl-r:change-prompt(👟  )+reload(fd -H -L -t f -E .Trash -E .git -E .cache -E zsh . ${XDG_BIN_HOME:-${HOME}/.local/bin})" \
     --bind "ctrl-s:change-prompt(🦴  )+reload(find ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless -maxdepth 2 -type f -not -path '*/.git/*')" \
