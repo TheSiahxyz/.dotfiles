@@ -9,7 +9,7 @@ dirs=$(echo "$dirs" | tr -s ' ' '\n' | sed '/^$/d')
 
 # function to clean and create a valid session name
 get_session_name() {
-    basename "$1" | sed 's/[^a-za-z0-9]/_/g'
+    basename "$1" | sed 's/[^a-zA-Z0-9]/_/g'
 }
 
 set -- $dirs
@@ -27,6 +27,7 @@ if [ "$#" -eq 1 ]; then
 else
     # handle session creation for multiple selected directories
     for dir in $dirs; do
+        echo "dir $dir"
         if [ -d "$dir" ]; then
             session_name=$(get_session_name "$dir")
             if ! tmux has-session -t "$session_name" 2>/dev/null; then
