@@ -4,8 +4,8 @@
 ###########################################################################################
 ### --- ALIAS --- ###
 # find aliases
-alias ali=fzf_alias
-function fzf_alias() {
+alias ali=fzf_aliases
+function fzf_aliases() {
     local aliases=$(alias)
     local max_length=$(echo "$aliases" | cut -d'=' -f1 | awk '{print length}' | sort -nr | head -n 1)
     [ "$max_length" -gt 20 ] && max_length=20
@@ -16,7 +16,7 @@ function fzf_alias() {
             printf "%-${max_length}s = %s\n" "$alias_name" "$alias_command"
         done
     }
-    alias_file="${XDG_CONFIG_HOME:-{HOME}/.config}/shell/aliasrc"
+    alias_file="${XDG_CONFIG_HOME:-${HOME}/.config}/shell/aliasrc"
     selected_alias=$(format_aliases | fzf --header="select an alias")
     # check if an alias was selected
     if [ -n "$selected_alias" ]; then
@@ -30,7 +30,9 @@ function fzf_alias() {
         if [ -n "$line_number" ]; then
             nvim "+$line_number" "$alias_file"
         else
-            echo "alias $alias_name not found in $alias_file."
+            scripts_file="${ZDOTDIR:-${XDG_CONFIG_HOME:-${HOME}/.config}/zsh}/scripts.zsh"
+            line_number=$(grep -n "^alias $alias_name=" "$scripts_file" | cut -d':' -f1)
+            nvim "+$line_number" "$scripts_file"
         fi
     fi
 }
