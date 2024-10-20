@@ -286,7 +286,8 @@ function cd_clipboard_path() {
 # fzf directory and go to the parent directory
 alias fD=fzf_directory
 function fzf_directory() {
-    dirs="$(find "$HOME" -type d -not -path '*/.git/*' -not -path '*/.cache/*' | fzf --multi)"
+    dirs="$(find "$HOME" -type d \( -path "**/.git/*" -o -path "**/.cache/*" -o -path "**/yay/*" -o -path "$HOME/.local/bin/zsh" \) -prune -o -type d -print | fzf --multi)"
+    [ -z "dirs" ] || return
     cd "$dirs" && ls -A || opensessions "$dirs"
 }
 
