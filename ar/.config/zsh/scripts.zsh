@@ -285,7 +285,10 @@ function cd_clipboard_path() {
 
 # fzf directory and go to the parent directory
 alias fD=fzf_directory
-function fzf_directory() { cd "$(find "$HOME" -type d -not -path '*/.git/*' -not -path '*/.cache/*' | fzf)"; }
+function fzf_directory() {
+    dirs="$(find "$HOME" -type d -not -path '*/.git/*' -not -path '*/.cache/*' | fzf --multi)"
+    cd "$dirs" && ls -A || opensessions "$dirs"
+}
 
 # search scripts in ~/.local/bin
 alias sscs=search_scripts
