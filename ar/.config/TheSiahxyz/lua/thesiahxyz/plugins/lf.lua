@@ -4,7 +4,9 @@ return {
 		{
 			"akinsho/toggleterm.nvim",
 			version = "*",
-			config = true,
+			config = function()
+				require("toggleterm").setup()
+			end,
 		},
 	},
 	config = function()
@@ -20,7 +22,7 @@ return {
 				["<C-v>"] = "vsplit",
 				["<C-o>"] = "tab drop",
 			},
-			winblend = 10, -- Pseudotransparency level
+			winblend = 0, -- Pseudotransparency level
 			direction = "float", -- Window type
 			border = "rounded", -- Border kind
 			height = fn.float2nr(fn.round(0.75 * vim.o.lines)), -- Height of the *floating* window
