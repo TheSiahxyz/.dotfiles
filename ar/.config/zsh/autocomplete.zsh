@@ -54,7 +54,7 @@ background() {
 # A function for expanding any aliases before accepting the line as is and executing the entered command
 expand-alias-and-accept-line() {
     expand-alias-space
-    zle .backward-delete-char
+    # zle .backward-delete-char
     zle .accept-line
 }
 zle -N accept-line expand-alias-and-accept-line
