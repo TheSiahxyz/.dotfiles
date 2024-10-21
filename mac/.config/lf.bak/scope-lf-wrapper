@@ -1,3 +1,0 @@
-#!/bin/bash
-
-"$HOME/.config/lf/ranger-scope" "${1}" "${2}" "${3}" "" "" || true
