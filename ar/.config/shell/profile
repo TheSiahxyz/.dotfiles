@@ -115,7 +115,7 @@ export JUPYTER_PLATFORM_DIRS="1"
 export KODI_DATA="$XDG_DATA_HOME/kodi"
 
 ### --- MANPAGER --- ###
-[ -x "$(command -v batman)" ] && {
+([ -x "$(command -v batcat)" ] || [ -x "$(command -v batman)" ]) && {
     export MANPAGER="sh -c 'col -bx | bat -l man -p'"
     export MANROFFOPT="-c"
 } || {

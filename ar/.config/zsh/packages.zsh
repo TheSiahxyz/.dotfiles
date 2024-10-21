@@ -4,6 +4,7 @@
 typeset -A packages
 packages=(
     atuin ""
+    batman "--export-env"
     zoxide "--cmd cd"
 )
 
