@@ -118,7 +118,7 @@ export KODI_DATA="$XDG_DATA_HOME/kodi"
 [ -x "$(command -v batman)" ] && {
     export MANPAGER="sh -c 'col -bx | bat -l man -p'"
     export MANROFFOPT="-c"
-    } || {
+} || {
     export MANPAGER='less -s'
     export LESS="R"
     export LESS_TERMCAP_mb="$(printf '%b' '[1;31m')"
