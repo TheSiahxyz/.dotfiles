@@ -4,23 +4,7 @@ return {
 		{
 			"akinsho/toggleterm.nvim",
 			version = "*",
-			config = function()
-				require("toggleterm").setup({
-					highlights = {
-						Normal = {
-							guibg = "NONE", -- Set to transparent background
-						},
-						NormalFloat = {
-							link = "Normal", -- Link to the Normal highlight
-						},
-						FloatBorder = {
-							guifg = "NONE",
-							guibg = "NONE",
-						},
-					},
-					shade_terminals = false, -- Disable shading
-				})
-			end,
+			config = true,
 		},
 	},
 	config = function()
