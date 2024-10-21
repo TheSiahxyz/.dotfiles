@@ -384,7 +384,7 @@ vim.keymap.set("n", "<leader>c9", ":.!figlet -w 200 -f big<cr>", { desc = "Ascii
 vim.keymap.set("n", "<leader>c0", ":.!figlet -w 200 -f shadow<cr>", { desc = "Ascii art shadow" })
 
 -- Restart
-vim.keymap.set("n", "<leader>RT", function()
+vim.keymap.set("n", "<leader>RS", function()
 	vim.fn.system("restartnvim")
 end, { noremap = true, silent = true, desc = "Restart nvim (tmux)" })
 
