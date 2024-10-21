@@ -23,7 +23,7 @@ Question
 """
 
 
-from type import Dict
+from typing import Dict
 
 class Solution:
     """
@@ -42,27 +42,18 @@ class Solution:
         return {8}
 
     def print(self, examples: Dict[str, {parameters_type}]) -> None:
-        """
-        funciton to print the result.
-
-        Args:
-            example: Dict, a dictionary of examples
-        """
         for name, example in examples.items():
             result = self.{3}(example)
             print(f"{{name}}: {{result}}")
 
     def main(self):
-        """
-        main function to call print function to test examples
-        """
-        examples = {{
-            "ex1" : {9},
-            "ex2" : {10},
-            "ex3" : {11},
+        cases = {{
+            "case1" : {9},
+            "case2" : {10},
+            "case3" : {11},
         }}
 
-        self.print(examples)
+        self.print(cases)
 
 
 solution = Solution()
