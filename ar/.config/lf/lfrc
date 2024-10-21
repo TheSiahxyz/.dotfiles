@@ -244,7 +244,7 @@ cmd mpvdir ${{
         set -- $fx
         setsid -f mpv --really-quiet -- "$@"
     else
-        for file in *.mp4 *.mkv *.avi *.flv *.webm *.mov; do
+        for file in *.mp4 *.mkv *.avi *.flv *.webm *.mov *.ts; do
             [ -e "$file" ] && set -- "$@" "$file"
         done
         [ -n "$1" ] && setsid -f mpv --really-quiet -- "$@"
@@ -504,7 +504,7 @@ map si :invert; save-select
 map sp :glob-select "*.png"; glob-select "*.jpg"; glob-select "*.jpeg"; glob-select "*.bmp"; glob-select "*.gif"; glob-select "*.tiff"; glob-select "*.tif"; glob-select "*.svg"; glob-select "*.webp"; save-select
 map su :unselect; save-select
 map sU :glob-unselect; save-select
-map sv :glob-select "*.mp4"; glob-select "*.mkv"; glob-select "*.mov"; glob-select "*.flv"; glob-select "*.wmv"; glob-select "*.webm"; glob-select "*.mpeg"; glob-select "*.mpg"; glob-select "*.ts" ; glob-select "*.avi" ; save-select
+map sv :glob-select "*.mp4"; glob-select "*.mkv"; glob-select "*.mov"; glob-select "*.flv"; glob-select "*.wmv"; glob-select "*.webm"; glob-select "*.mpeg"; glob-select "*.mpg"; glob-select "*.ts"; glob-select "*.avi"; save-select
 load-select
 
 # Sort
