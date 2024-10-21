@@ -31,7 +31,7 @@ if ! command -v winetricks >/dev/null; then
     }
 fi
 
-winetricks -q mfc42 vcrun2003
+winetricks -q corefonts mfc42
 
 wine "$DST_FILE" /S
 
