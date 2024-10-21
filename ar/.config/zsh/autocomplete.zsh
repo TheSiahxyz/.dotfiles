@@ -1,8 +1,7 @@
-# auto-completes aliases
-# enables to define
-# - normal aliases (completed with trailing space)
-# - blank aliases (completed without space)
-# - ignored aliases (not completed)
+### --- Auto-completes aliases --- ###
+# alias     - normal aliases (completed with trailing space)
+# balias    - blank aliases (completed without space)
+# ialias    - ignored aliases (not completed)
 
 
 # ignored aliases
@@ -31,13 +30,13 @@ balias() {
 
 # functionality
 expand-alias-space() {
-    [[ $LBUFFER =~ "\<(${(j:|:)baliases})\$" ]]; insertBlank=$?
+    [[ $LBUFFER =~ "\<(${(j:|:)baliases})\$" ]] && insertBlank=$?
     if [[ ! $LBUFFER =~ "\<(${(j:|:)ialiases})\$" ]]; then
         zle _expand_alias
         zle expand-word
     fi
     zle self-insert
-    if [[ "$insertBlank" = "0" ]]; then
+    if [[ "$insertBlank" -eq 0 ]]; then
         zle backward-delete-char
     fi
 }
@@ -58,12 +57,12 @@ expand-alias-and-accept-line() {
     zle .backward-delete-char
     zle .accept-line
 }
-# zle -N accept-line expand-alias-and-accept-line
+zle -N accept-line expand-alias-and-accept-line
 
 
-bindkey " " expand-alias-space
-# bindkey '^ '       magic-space     # control-space to bypass completion
-bindkey -M isearch " " magic-space
+bindkey '^ ' expand-alias-space
+bindkey ' '  magic-space    # ctrl-space to bypass completion
+bindkey -M isearch ' ' magic-space
 
 
 # file completion patterns

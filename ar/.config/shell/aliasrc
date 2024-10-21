@@ -1,3 +1,7 @@
+# alias     - normal aliases (completed with trailing space)
+# balias    - blank aliases (completed without space)
+# ialias    - ignored aliases (not completed)
+
 # Use neovim for vim if present.
 [ -x "$(command -v nvim)" ] && alias vimdiff="nvim -d"
 
