@@ -248,21 +248,6 @@ function thesiahxyz_git() {
     [ -n "$choice" ] && [ -n "$1" ] && git clone "${THESIAH_GIT:-git@${THESIAH:-thesiah.xyz}}":"$choice" "$1" || [ -n "$choice" ] && git clone "${THESIAH_GIT:-git@${THESIAH:-thesiah.xyz}}":"$choice"
 }
 
-# git push origin/home master
-alias gp=git_push_origin_home
-function git_push_origin_home() {
-    branch="$(git rev-parse --abbrev-ref HEAD)"
-    [[ -z "$1" ]] && {
-        git push home "$branch" && echo "Pushed to home on branch $branch successfully.\n" ||
-        { echo "Failed to push to home on branch $branch.\n"; return 1; }
-        } || {
-        git push "$1" "$branch" && echo "Pushed to $1 on branch $branch successfully.\n" ||
-        { echo "Failed to push to $1 on branch $branch.\n"; return 1; }
-    }
-    git push && echo "Pushed to default remote successfully." ||
-    { echo "Failed to push to default remote."; return 1; }
-}
-
 
 ###########################################################################################
 ###########################################################################################

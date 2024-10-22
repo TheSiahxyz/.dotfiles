@@ -1,6 +1,6 @@
 #!/bin/sh
 
-transmission-remote -l | grep % |
+status=$(transmission-remote -l | grep % |
     sed " # The letters are for sorting and will not appear
 	s/.*Stopped.*/A 🛑/;
 	s/.*Seeding.*/Z 🌱/;
@@ -8,7 +8,13 @@ transmission-remote -l | grep % |
 	s/.*Idle.*/B 🕰️/;
 	s/.*Uploading.*/L 🔼/;
 	s/.*%.*/M 🔽/" |
-    sort -h | uniq -c | awk '{print $3 $1}' | paste -sd ' ' -
+    sort -h | uniq -c | awk '{print $3 $1}' | paste -sd ' ' -)
+
+if [ -z "$status" ]; then
+    echo "$status"
+else
+    pidof transmission-daemon >/dev/null && echo "🌲"
+fi
 
 case $BLOCK_BUTTON in
 1) setsid -f "$TERMINAL" -e stig ;;
