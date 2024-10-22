@@ -350,6 +350,15 @@ cmd select-images &{{
         tr '\0' ' ')"
     [ -n "$files" ] && lf -remote "send $id :unselect; toggle $files"
 }}
+cmd select-music &{{
+    set -f
+    files="$(
+        find "$PWD" -mindepth 1 -maxdepth 1 \( \( -type f -o \( -type l -a -exec test -f {} \; \) \) \) \( -iname '*.mp3' -o -iname '*.flac' -o -iname '*.wav' -o -iname '*.aac' -o -iname '*.ogg' -o -iname '*.m4a' -o -iname '*.wma' \) \
+        $([ "$lf_hidden" = false ] && printf '%s\n' ! -name '.*') -print0 |
+        sed -z 's/\\/\\\\/g;s/"/\\"/g;s/\n/\\n/g;s/^/"/;s/$/"/' |
+        tr '\0' ' ')"
+    [ -n "$files" ] && lf -remote "send $id :unselect; toggle $files"
+}}
 cmd on-select &{{
     lf -remote "send $id set statfmt \"$(eza -ld --color=always "$f")\""
 }}
@@ -522,7 +531,7 @@ map <c-r> :redraw; reload
 map U restore_trash
 
 # Samba
-map sm share-samba
+map SMB share-samba
 
 # Select
 map <space> :toggle; down; save-select
@@ -530,6 +539,7 @@ map sb :invert-below; save-select
 map sd select-dirs
 map sf select-files
 map si :invert; save-select
+map sm select-music
 map sp select-images
 map su :unselect; save-select
 map sU :glob-unselect; save-select
