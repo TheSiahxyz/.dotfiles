@@ -78,14 +78,20 @@ cmd tar ${{
 
 # Copy
 cmd copyto ${{
-    clear; tput cup $(($(tput lines)/3)); tput bold
     set -f
-    clear; echo "Copy to where?"
-    dest="$(sed -e 's/\s*#.*//' -e '/^$/d' -e 's/^\S*\s*//' ${XDG_CONFIG_HOME:-$HOME/.config}/shell/bm-dirs | fzf | sed 's|~|$HOME|')" &&
+    dest=$(sed -e 's/\s*#.*//' -e '/^$/d' -e 's/^\S*\s*//' "${XDG_CONFIG_HOME:-$HOME/.config}/shell/bm-dirs" | fzf --prompt 'Copy to where? ' | sed 's|~|$HOME|')
+	[ -z "$dest" ] && exit
+	destpath=$(eval printf '%s' \"$dest\")
+	clear; tput cup $(($(tput lines)/3)); tput bold
+	echo "From:"
+	echo "$fx" | sed 's/^/   /'
+	printf "To:\n   %s\n\n\tcopy?[y/N]" "$destpath"
+	read -r ans
+	[ "$ans" != "y" ] && exit
     for x in $fx; do
-        eval cp -ivr \"$x\" \"$dest\"
+        cp -ivr "$x" "$destpath"
     done &&
-    notify-send "📋 File(s) copied." "File(s) copies to $dest."
+    notify-send "📋 File(s) copied." "File(s) copied to $destpath."
 }}
 cmd yank-dirname $dirname -- "$f" | head -c-1 | xclip -i -selection clipboard
 cmd yank-path $printf '%s' "$fx" | xclip -i -selection clipboard
@@ -228,14 +234,19 @@ cmd setlock "$1"
 
 # Move
 cmd moveto ${{
-    clear; tput cup $(($(tput lines)/3)); tput bold
-    set -f
-    clear; echo "Move to where?"
-    dest="$(sed -e 's/\s*#.*//' -e '/^$/d' -e 's/^\S*\s*//' ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/bm-dirs | fzf | sed 's|~|$HOME|')" &&
+    dest=$(sed -e 's/\s*#.*//' -e '/^$/d' -e 's/^\S*\s*//' "${XDG_CONFIG_HOME:-$HOME/.config}/shell/bm-dirs" | fzf --prompt 'Move to where? ' | sed 's|~|$HOME|')
+	[ -z "$dest" ] && exit
+	destpath=$(eval printf '%s' \"$dest\")
+	clear; tput cup $(($(tput lines)/3)); tput bold
+	echo "From:"
+	echo "$fx" | sed 's/^/   /'
+	printf "To:\n   %s\n\n\tmove?[y/N]" "$destpath"
+	read -r ans
+	[ "$ans" != "y" ] && exit
     for x in $fx; do
-        eval mv -iv \"$x\" \"$dest\"
+        mv -iv "$x" "$destpath"
     done &&
-    notify-send "🚚 File(s) moved." "File(s) moved to $dest."
+    notify-send "🚚 File(s) moved." "File(s) moved to $destpath."
 }}
 
 # MPV
