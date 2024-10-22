@@ -1,32 +1,12 @@
 #!/bin/sh
 
-MOUNT_POINT="$HOME/Private"
-MOUNT_POINT2="/mnt/second/videos"
-MOUNT_SCRIPT="${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/ecrypt"
-
-is_mounted() {
-    mount | grep -q " $1 "
-}
-
-toggle_mount() {
-    $MOUNT_SCRIPT
-}
+is_mounted() { mount | grep -q "$HOME/Private"; }
 
 case $BLOCK_BUTTON in
-1) toggle_mount ;;
+1) "${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/ecrypt" ;;
 3) notify-send "🔒 Encrypted Media Folder " "\- Shows mount status of Media
 - Left click to toggle mount" ;;
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
-if [ -d /mnt/second ]; then
-    if is_mounted "$MOUNT_POINT" && is_mounted "$MOUNT_POINT2"; then
-        echo "🔑" # Both mount points are mounted
-    elif ! is_mounted "$MOUNT_POINT" && ! is_mounted "$MOUNT_POINT2"; then
-        echo "🔒" # Neither mount point is mounted
-    else
-        echo "⚠️" # One mount point is mounted, the other is not
-    fi
-else
-    is_mounted "$MOUNT_POINT" && echo "🔑" || echo "🔒"
-fi
+is_mounted "$MOUNT_POINT" && echo "🔑" || echo "🔒"
