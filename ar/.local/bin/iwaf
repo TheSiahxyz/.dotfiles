@@ -32,6 +32,8 @@ curl -s "$SRC_URL" -o "$DST_FILE" || {
 echo 'Initializing Wine environment...'
 wineboot >/dev/null 2>&1
 
+# Install necessary libraries via winetricks
+echo 'Installing required libraries via winetricks...'
 # Check if winetricks is installed, if not, install it
 if ! command -v winetricks >/dev/null; then
     sudo pacman --noconfirm --needed -S winetricks || {
@@ -39,25 +41,28 @@ if ! command -v winetricks >/dev/null; then
         exit 1
     }
 fi
+winetricks -q mfc42 >/dev/null 2>&1
 
-# Install necessary libraries via winetricks
-echo 'Installing required libraries via winetricks...'
-winetricks -q corefonts mfc42 >/dev/null 2>&1
+# Ensure directories exist before copying files
+cp -rf "${XDG_DATA_HOME:-${HOME}/.local/share}/wine/system32" "$DEFAULT_WINEPREFIX/drive_c/windows/system32"
+[ -d "$DEFAULT_WINEPREFIX/drive_c/users/si/AppData/Local/SOOP" ] || mkdir -p "$DEFAULT_WINEPREFIX/drive_c/users/si/AppData/Local/SOOP"
+cp -rf "$DST_FILE" "$DEFAULT_WINEPREFIX/drive_c/users/si/AppData/Local/SOOP"
 
 # Run the SOOP Streamer installer without sudo
 echo 'Running the SOOP Streamer installer...'
-wine "$DST_FILE" /S >/dev/null 2>&1 || {
-    echo "Installation failed!"
-    exit 1
-}
+wine "$DST_FILE" /S >/dev/null 2>&1 && success=true || success=false
 
-# Clean up
+# Clean up temporary Wine HOME directory
 echo 'Cleaning up...'
-rm "$DST_FILE"
 rm -rf "$HOME_PATCH"
 
 # Restore original HOME and WINEARCH variables
 export HOME="$HOME_ORIGIN"
 export WINEARCH=win64
 
-echo 'Installation completed successfully.'
+# Check success status and print the result
+if $success; then
+    echo 'Installation completed successfully.'
+else
+    echo 'Installation failed!'
+fi
