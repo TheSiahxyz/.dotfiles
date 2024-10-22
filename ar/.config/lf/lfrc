@@ -319,15 +319,42 @@ cmd share-samba ${{
 }}
 
 # Select
+cmd select-type &{{
+    set -f
+    [ "$#" -eq 0 ] && exit
+    files="$(
+        find "$PWD" -mindepth 1 -maxdepth 1 \
+        \( \( -type "$1" -o \( -type l -a -exec test -"$1" {} \; \) \) \) \
+        $([ "$lf_hidden" = false ] && printf '%s\n' -not -name '.*') -print0 |
+        sed -z 's/\\/\\\\/g;s/"/\\"/g;s/\n/\\n/g;s/^/"/;s/$/"/' |
+        tr '\0' ' ')"
+    [ -n "$files" ] && lf -remote "send $id :unselect; toggle $files"
+}}
+cmd select-dirs select-type d
+cmd select-files select-type f
+cmd select-videos &{{
+    set -f
+    files="$(
+        find "$PWD" -mindepth 1 -maxdepth 1 \( \( -type f -o \( -type l -a -exec test -f {} \; \) \) \( -iname '*.mp4' -o -iname '*.mkv' -o -iname '*.flv' -o -iname '*.avi' -o -iname '*.webm' -o -iname '*.mov' -o -iname '*.ts' -o -iname '*.wmv' -o -iname '*.vob' \) \
+        $([ "$lf_hidden" = false ] && printf '%s\n' ! -name '.*') -print0 |
+        sed -z 's/\\/\\\\/g;s/"/\\"/g;s/\n/\\n/g;s/^/"/;s/$/"/' |
+        tr '\0' ' ')"
+    [ -n "$files" ] && lf -remote "send $id :unselect; toggle $files"
+}}
+cmd select-images &{{
+    set -f
+    files="$(
+        find "$PWD" -mindepth 1 -maxdepth 1 \( \( -type f -o \( -type l -a -exec test -f {} \; \) \) \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.gif' -o -iname '*.bmp' -o -iname '*.tiff' -o -iname '*.tif' -o -iname '*.svg' -o -iname '*.webp' \) \
+        $([ "$lf_hidden" = false ] && printf '%s\n' ! -name '.*') -print0 |
+        sed -z 's/\\/\\\\/g;s/"/\\"/g;s/\n/\\n/g;s/^/"/;s/$/"/' |
+        tr '\0' ' ')"
+    [ -n "$files" ] && lf -remote "send $id :unselect; toggle $files"
+}}
 cmd on-select &{{
     lf -remote "send $id set statfmt \"$(eza -ld --color=always "$f")\""
 }}
 cmd load-select &{{
-    # skip if triggered via save-select from itself
-    if [ "$1" = "$id" ]; then
-        exit 0
-    fi
-
+    [ "$1" = "$id" ] && exit 0
     lf -remote "send $id unselect"
     if [ -s ~/.local/share/lf/select ]; then
         files=$(tr '\n' '\0' < ~/.local/share/lf/select | xargs -0 printf ' %q')
@@ -500,11 +527,13 @@ map sm share-samba
 # Select
 map <space> :toggle; down; save-select
 map sb :invert-below; save-select
+map sd select-dirs
+map sf select-files
 map si :invert; save-select
-map sp :glob-select "*.png"; glob-select "*.jpg"; glob-select "*.jpeg"; glob-select "*.bmp"; glob-select "*.gif"; glob-select "*.tiff"; glob-select "*.tif"; glob-select "*.svg"; glob-select "*.webp"; save-select
+map sp select-images
 map su :unselect; save-select
 map sU :glob-unselect; save-select
-map sv :glob-select "*.mp4"; glob-select "*.mkv"; glob-select "*.mov"; glob-select "*.flv"; glob-select "*.wmv"; glob-select "*.webm"; glob-select "*.mpeg"; glob-select "*.mpg"; glob-select "*.ts"; glob-select "*.avi"; save-select
+map sv select-videos
 load-select
 
 # Sort
