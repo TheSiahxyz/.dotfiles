@@ -73,7 +73,7 @@ return {
 						mappings = {
 							["i"] = {
 								["<C-a>"] = fb_actions.create,
-								["<C-i>"] = fb_actions.create_from_prompt,
+								["<C-e>"] = fb_actions.create_from_prompt,
 								["<C-r>"] = fb_actions.rename,
 								["<C-d>"] = fb_actions.move,
 								["<C-y>"] = fb_actions.copy,
@@ -167,6 +167,22 @@ return {
 											print("Update to (" .. selection.z_score .. ") " .. selection.path)
 										end,
 									},
+									["<C-s>"] = {
+										action = require("telescope._extensions.zoxide.utils").create_basic_command(
+											"split"
+										),
+										opts = { desc = "split" },
+									},
+									["<C-v>"] = {
+										action = require("telescope._extensions.zoxide.utils").create_basic_command(
+											"vsplit"
+										),
+									},
+									["<C-e>"] = {
+										action = require("telescope._extensions.zoxide.utils").create_basic_command(
+											"edit"
+										),
+									},
 									["<C-b>"] = {
 										keepinsert = true,
 										action = function(selection)
@@ -202,7 +218,7 @@ return {
 								-- define mappings, e.g.
 								mappings = { -- extend mappings
 									i = {
-										["<C-k>"] = lga_actions.quote_prompt(),
+										["<C-w>"] = lga_actions.quote_prompt(),
 										["<C-i>"] = lga_actions.quote_prompt({ postfix = " --iglob " }),
 										-- freeze the current list and start a fuzzy search in the frozen list
 										["<C-space>"] = actions.to_fuzzy_refine,
@@ -303,7 +319,6 @@ return {
 						end
 					end
 
-					local default_opts = { noremap = true, silent = true }
 					vim.keymap.set("n", "<leader>flt", function()
 						search_tmux(false)
 					end, { remap = true, silent = false, desc = "Live grep in the current tmux session folder" })
@@ -313,15 +328,9 @@ return {
 					end, { remap = true, silent = false, desc = "Grep string in the current tmux session folder" })
 					vim.api.nvim_set_keymap(
 						"v",
-						"<leader>ls",
-						'y<ESC>:Telescope live_grep default_text=<c-r>0<CR> search_dirs={"$PWD"}',
-						default_opts
-					)
-					vim.api.nvim_set_keymap(
-						"n",
-						"<leader>tm",
-						":lua require('telescope').extensions.tmuxinator.projects{}<CR>",
-						default_opts
+						"<leader>fls",
+						'y<esc>:Telescope live_grep default_text=<c-r>0<cr> search_dirs={"$PWD"}',
+						{ noremap = true, silent = true, desc = "Live grep default text" }
 					)
 					vim.keymap.set("n", "<leader>f/", function()
 						require("telescope.builtin").current_buffer_fuzzy_find(
@@ -402,7 +411,6 @@ return {
 							["<C-q>"] = actions.send_to_qflist + actions.open_qflist,
 							["<M-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
 							["<C-z>"] = actions.select_horizontal,
-							["<C-x>"] = actions.delete_buffer,
 							["<C-w>"] = { "<c-s-w>", type = "command" },
 							["<C-o><C-w>"] = actions.insert_original_cword,
 							["<C-o><C-a>"] = actions.insert_original_cWORD,
@@ -412,7 +420,6 @@ return {
 							["<M-k"] = actions.nop,
 						},
 						n = {
-							["dd"] = actions.delete_buffer,
 							["q"] = actions.close,
 							["<C-c>"] = actions.close,
 							["<C-d>"] = actions.nop,
@@ -420,13 +427,16 @@ return {
 							["<C-f>"] = actions.nop,
 							["<C-b>"] = actions.nop,
 							["<C-e>"] = actions.complete_tag,
-							["<C-g>"] = function(prompt_bufnr)
-								local selection = actions_state.get_selected_entry()
-								local dir = vim.fn.fnamemodify(selection.path, ":p:h")
-								actions.close(prompt_bufnr)
-								-- Depending on what you want put `cd`, `lcd`, `tcd`
-								vim.cmd(string.format("silent lcd %s", dir))
-							end,
+							["<C-g>"] = {
+								function(prompt_bufnr)
+									local selection = actions_state.get_selected_entry()
+									local dir = vim.fn.fnamemodify(selection.path, ":p:h")
+									actions.close(prompt_bufnr)
+									-- Depending on what you want put `cd`, `lcd`, `tcd`
+									vim.cmd(string.format("silent lcd %s", dir))
+								end,
+								opts = { desc = "Change directory" },
+							},
 							["<C-j>"] = actions.preview_scrolling_down,
 							["<C-k>"] = actions.preview_scrolling_up,
 							["<C-h>"] = actions.preview_scrolling_left,
@@ -434,7 +444,6 @@ return {
 							["<C-q>"] = actions.send_to_qflist + actions.open_qflist,
 							["<M-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
 							["<C-z>"] = actions.select_horizontal,
-							["<C-x>"] = actions.delete_buffer,
 							["<M-f"] = actions.nop,
 							["<M-k"] = actions.nop,
 						},
@@ -473,6 +482,17 @@ return {
 					scroll_strategy = "limit",
 				},
 				pickers = {
+					buffers = {
+						mappings = {
+							i = {
+								["<C-x>"] = actions.delete_buffer,
+							},
+							n = {
+								["dd"] = actions.delete_buffer,
+								["<C-x>"] = actions.delete_buffer,
+							},
+						},
+					},
 					find_files = {
 						-- `hidden = true` will still show the inside of `.git/` as it's not `.gitignore`d.
 						find_command = {
@@ -494,7 +514,7 @@ return {
 					initial_mode = "normal",
 				})
 			end, { desc = "Find buffer files" })
-			vim.keymap.set("n", "<C-g>", function()
+			vim.keymap.set({ "i", "n" }, "<C-g>", function()
 				require("telescope.builtin").buffers({
 					sort_mru = true,
 					sort_lastused = true,
