@@ -14,42 +14,44 @@ select_stow_package() {
 
 # Function to ask user for resolution strategy using dmenu
 ask_resolution_strategy() {
-	printf "delete\nmove" | dmenu -i -p "Choose resolution strategy: "
+    printf "delete\nmove" | dmenu -i -p "Choose resolution strategy: "
 }
 
 # Function to stow a package and resolve conflicts
 stow_package() {
     target="$1"
-	resolve_strategy="$2"
-	# Attempt to stow the package
-	output=$(stow --no-folding -S "$target" 2>&1)
-	status=$?
+    resolve_strategy="$2"
+    # Attempt to stow the package
+    output=$(stow --no-folding -S "$target" 2>&1)
+    status=$?
 
-	# Handle conflicts based on resolution strategy
-	if [ $status -ne 0 ]; then
-		echo "$output" | grep "over existing target is stowed to a different package" | while IFS= read -r line; do
-			conflict_path=$(echo "$line" | sed -E 's/.*\: (.*) =>.*/\1/')
-			full_path="$HOME/$conflict_path"
-			if [ "$resolve_strategy" = "delete" ]; then
-				rm -rf "$full_path"
-			elif [ "$resolve_strategy" = "move" ]; then
-				mv "$full_path" "${full_path}.dotbak"
-			fi
-		done
-		echo "$output" | grep "over existing target" | while IFS= read -r line; do
-			conflict_path=$(echo "$line" | sed -E 's/.* (.*) since.*/\1/')
-			full_path="$HOME/$conflict_path"
-			if [ "$resolve_strategy" = "delete" ]; then
-				rm -rf "$full_path"
-			elif [ "$resolve_strategy" = "move" ]; then
-				mv "$full_path" "${full_path}.dotbak"
-			fi
-		done
+    # Handle conflicts based on resolution strategy
+    if [ $status -ne 0 ]; then
+        echo "$output" | grep "over existing target is stowed to a different package" | while IFS= read -r line; do
+            conflict_path=$(echo "$line" | sed -E 's/.*\: (.*) =>.*/\1/')
+            full_path="$HOME/$conflict_path"
+            if [ "$resolve_strategy" = "delete" ]; then
+                echo "1.fullpath $full_path"
+                # rm -rf "$full_path"
+            elif [ "$resolve_strategy" = "move" ]; then
+                echo "2.fullpath $full_path"
+                # mv "$full_path" "${full_path}.dotbak"
+            fi
+        done
+        echo "$output" | grep "over existing target" | while IFS= read -r line; do
+            conflict_path=$(echo "$line" | sed -E 's/.*over existing target\s(.*)\ssince.*/\1/')
+            full_path="$HOME/$conflict_path"
+            if [ "$resolve_strategy" = "delete" ]; then
+                rm -rf "$full_path"
+            elif [ "$resolve_strategy" = "move" ]; then
+                mv "$full_path" "${full_path}.dotbak"
+            fi
+        done
 
-		# Retry stowing after conflict resolution
-		output=$(stow --no-folding -S "$target" 2>&1)
-		status=$?
-	fi
+        # Retry stowing after conflict resolution
+        output=$(stow --no-folding -S "$target" 2>&1)
+        status=$?
+    fi
 }
 
 mail_sync() {

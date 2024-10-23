@@ -472,7 +472,7 @@ map yy copy
 # Create
 map Md mkdir
 map Mf mkfile
-map Ml :link
+map Ml link
 
 # Cut
 map dd cut-add
@@ -484,7 +484,7 @@ map <delete> delete; clear
 
 # Editor
 map <enter> $$EDITOR "$f"
-map V push :!nvim<space>
+map <c-v> push :!nvim<space>
 
 # Extract
 map E extract; clear
@@ -499,7 +499,7 @@ map <a-backspace2> $setlock "$f"
 map Mt moveto; clear
 
 # MPV
-map Mpv :mpvdir; unselect
+map Mpv mpvdir; unselect
 
 # Nsxiv
 map th $nsxiv -apt "$(pwd)"
@@ -575,7 +575,7 @@ map fD zi
 map fd $lf -remote "send $id select \"$(find . -type d | fzf)\""
 map ff $lf -remote "send $id select \"$(find . -type f | fzf)\""
 map gl follow_link
-map <c-f> :fzf_search
+map <c-f> fzf_search
 map <c-z> z
 
 # Wallpaper
