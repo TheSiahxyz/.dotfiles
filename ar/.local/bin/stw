@@ -31,11 +31,9 @@ stow_package() {
             conflict_path=$(echo "$line" | sed -E 's/.*\: (.*) =>.*/\1/')
             full_path="$HOME/$conflict_path"
             if [ "$resolve_strategy" = "delete" ]; then
-                echo "1.fullpath $full_path"
-                # rm -rf "$full_path"
+                rm -rf "$full_path"
             elif [ "$resolve_strategy" = "move" ]; then
-                echo "2.fullpath $full_path"
-                # mv "$full_path" "${full_path}.dotbak"
+                mv "$full_path" "${full_path}.dotbak"
             fi
         done
         echo "$output" | grep "over existing target" | while IFS= read -r line; do
