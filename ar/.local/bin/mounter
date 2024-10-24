@@ -100,7 +100,7 @@ smbs="$(echo "$smbshares" | while IFS= read -r smb; do
         mountedsmb="${mountedsmb##*/}"
         [[ "$mountedsmb" =~ $smb ]] && break 1
     done && continue 1
-    echo "📡 $smb"
+    [ -z "$smb" ] || echo "📡 $smb"
 done)"
 
 # Add all to one variable. If no mountable drives found, exit.
