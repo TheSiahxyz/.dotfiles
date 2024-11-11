@@ -8,6 +8,7 @@
 ###################################################
 # Add all directories in each subdirectory to $PATH
 export PATH="$PATH:$(find ~/.local/bin -type d -o -type l | paste -sd ':' -)"
+export PATH="$PATH:$(find ~/.local/share/.password-store -type d -o -type l -name ".extensions" | paste -sd ':' -)"
 
 unsetopt PROMPT_SP 2>/dev/null
 

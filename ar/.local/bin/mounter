@@ -81,15 +81,25 @@ for smbip in $smbips; do
     smb=$(
         smbclient -L "$smbip" -U% -A /dev/stdin <<EOF 2>/dev/null | awk '/Disk/ {print $1}' | grep -vEi '(ADMIN|\w)\$'
 username=$(whoami)
-password=$(pass show default)
+password=$(pass show default/default)
 EOF
     )
-    [ -z "$smb" ] && continue 1
+    win=$(
+        smbclient -L "$smbip" -U% -A /dev/stdin <<EOF 2>/dev/null | awk '/Disk/ {print $1}' | grep -vEi '(ADMIN|\w)\$'
+username=$(whoami)
+password=$(pass show default/windows)
+EOF
+    )
     while IFS= read -r share; do
         if ! echo "$smbshares" | grep -q "$share"; then
             smbshares+="//$smbip/$share"$'\n'
         fi
     done <<<"$smb"
+    while IFS= read -r share; do
+        if ! echo "$smbshares" | grep -q "$share"; then
+            smbshares+="//$smbip/$share"$'\n'
+        fi
+    done <<<"$win"
 done
 
 smbshares="$(echo "$smbshares" | sed '/^$/d')"
@@ -97,10 +107,9 @@ smbshares="$(echo "$smbshares" | sed '/^$/d')"
 smbs="$(echo "$smbshares" | while IFS= read -r smb; do
     [ -n "$mountedsmbs" ] && for mountedsmb in $mountedsmbs; do
         mountedsmb="${mountedsmb%% *}"
-        mountedsmb="${mountedsmb##*/}"
         [[ "$mountedsmb" =~ $smb ]] && break 1
     done && continue 1
-    [ -z "$smb" ] || echo "📡 $smb"
+    echo "📡 $smb"
 done)"
 
 # Add all to one variable. If no mountable drives found, exit.
@@ -158,12 +167,15 @@ case "$chosen" in
 📡*)
     chosen="${chosen##* }"
     path="${chosen##*/}"
-    getmount "/media/$USER/$path" && sudo -A mount -t cifs -o username="$(whoami)",password="$(pass show default)" "$chosen" "$mp" || {
+    if getmount "/media/$USER/$path"; then
+        sudo -A mount -t cifs -o username="$(whoami)",password="$(pass show default/default)" "$chosen" "$mp" ||
+            sudo -A mount -t cifs -o username="$(whoami)",password="$(pass show default/windows)" "$chosen" "$mp"
+    else
         notify-send "❌ Failed to mount samba" "$chosen
 Check if $(whoami) is added to samba user list."
         sudo rm -rf "$mp"
         exit
-    }
+    fi
     notify-send "📡 Samba successfully mounted to" "$mp"
     ;;
 esac
