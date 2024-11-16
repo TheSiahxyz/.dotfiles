@@ -168,8 +168,8 @@ case "$chosen" in
     chosen="${chosen##* }"
     path="${chosen##*/}"
     if getmount "/media/$USER/$path"; then
-        sudo -A mount -t cifs -o username="$(whoami)",password="$(pass show default/default)" "$chosen" "$mp" ||
-            sudo -A mount -t cifs -o username="$(whoami)",password="$(pass show default/windows)" "$chosen" "$mp"
+        sudo -A mount -t cifs -o username="$(whoami)",password="$(pass show default/default)" "$chosen" "$mp" >/dev/null 2>&1 ||
+            sudo -A mount -t cifs -o username="$(whoami)",password="$(pass show default/windows)" "$chosen" "$mp" >/dev/null 2>&1
     else
         notify-send "❌ Failed to mount samba" "$chosen
 Check if $(whoami) is added to samba user list."
