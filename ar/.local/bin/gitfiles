@@ -3,6 +3,20 @@
 # Exit immediately if any command fails
 set -e
 
+get_full_file_list() {
+    echo "$sorted_files" | awk '{print $9}' | awk '!seen[$0]++' | grep -v '^$'
+}
+
+handle_fzf_error() {
+    if [ $? -eq 130 ]; then
+        # If fzf-tmux was interrupted by Ctrl+C (exit code 130), exit gracefully
+        exit 0
+    else
+        # Otherwise, re-raise the error
+        return $?
+    fi
+}
+
 # Get the repository root path and change to the repo root directory
 repo_root=$(git rev-parse --show-toplevel 2>/dev/null)
 cd "$repo_root" || {
@@ -10,18 +24,39 @@ cd "$repo_root" || {
     exit 1
 }
 
+# Determine the base branch (main or master)
+if git show-ref --quiet refs/heads/main; then
+    base_branch=main
+elif git show-ref --quiet refs/heads/master; then
+    base_branch=master
+else
+    base_branch=main
+fi
+
+merge_base=$(git merge-base HEAD "$base_branch")
+file_list=$(git ls-tree -r HEAD --name-only)
+
 # Generate the file list and verify each file path
-existing_files=$(git ls-tree -r HEAD --name-only | while IFS= read -r file; do
-    if [ -f "$file" ]; then
-        echo "$repo_root/$file"
-    fi
+existing_files=$(echo "$file_list" | while IFS= read -r file; do
+    [ -f "$file" ] && echo "$repo_root/$file"
 done)
 
 # Sort and list files
-sorted_files=$(echo "$existing_files" | xargs ls -lt 2>/dev/null)
+sorted_files=$(echo "$existing_files" | xargs -d '\n' ls -lt 2>/dev/null)
 
 # Use fzf-tmux to select from the sorted list
-selected_files=$(echo "$sorted_files" | awk '{print $9}' | awk '!seen[$0]++' | grep -v '^$' | fzf-tmux --preview "bat --color=always {}" --reverse --multi --select-1 --exit-0)
+selected_files=$(get_full_file_list | fzf-tmux \
+    --header "^u: unstaged, ^s: staged" \
+    --preview "bat --color=always {}" \
+    --reverse \
+    --multi \
+    --select-1 \
+    --exit-0 \
+    --info=inline \
+    --bind "ctrl-s:reload(git diff --name-only $merge_base..HEAD || handle_fzf_error)" \
+    --bind "ctrl-u:reload((git diff --name-only $merge_base..HEAD && git status --porcelain | awk '/^ [MDA]/{print \$2}') | sort -u || handle_fzf_error)" \
+    --bind "change:top" ||
+    handle_fzf_error)
 
 # Check if any files were selected, and exit if not
 [ -z "$selected_files" ] && {
