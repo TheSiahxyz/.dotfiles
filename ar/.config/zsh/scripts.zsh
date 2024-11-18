@@ -438,7 +438,23 @@ function lfcd () {
 ###########################################################################################
 ### --- MAN --- ###
 # color man page
-alias man=batman
+# alias man=batman
+function man() {
+    if [[ -z "$@" ]]; then
+        if command -v fzf >/dev/null 2>&1; then
+            local page=$(command man -k . | fzf --prompt='Man> ' | awk '{print $1}')
+            if [[ -z $page ]]; then
+                sudo mandb
+                page=$(command man -k . | fzf --prompt='Man> ' | awk '{print $1}')
+            fi
+            if [[ -n $page ]]; then
+                nvim +"Man $page | only"
+            fi
+        fi
+    else
+        batman "$@"
+    fi
+}
 function batman() {
     BAT_THEME="Catppuccin Mocha" command batman "$@"
     return $?
