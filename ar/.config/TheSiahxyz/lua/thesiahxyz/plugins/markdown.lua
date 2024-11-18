@@ -176,7 +176,17 @@ return {
 			if vim.fn.executable("npx") then
 				vim.g.mkdp_filetypes = { "markdown" }
 			end
+			local wk = require("which-key")
+			wk.add({
+				mode = { "n", "v" },
+				{ "<leader>m", group = "Markdown" },
+			})
 		end,
+		keys = {
+			{ "<leader>mp", "<cmd> MarkdownPreview <CR>", desc = "Markdown Preview" },
+			{ "<leader>ms", "<cmd> MarkdownPreviewStop <CR>", desc = "Markdown Stop" },
+			{ "<leader>mt", "<cmd> MarkdownPreviewToggle <CR>", desc = "Markdown Toggle" },
+		},
 	},
 	{
 		"dhruvasagar/vim-open-url",

@@ -269,7 +269,7 @@ alias v.="$EDITOR ."
 alias nv.='nvim .'
 alias nts='NVIM_APPNAME=TheSiahxyz nvim'
 alias nlv='NVIM_APPNAME=LazyVim nvim'
-alias nvc='NVIM_APPNAME=NvChad nvim'
+alias nnc='NVIM_APPNAME=NvChad nvim'
 alias rv='$EDITOR -c '\''execute "edit " . v:oldfiles[0] | normal ''0'\'
 alias snv='sudo nvim'
 

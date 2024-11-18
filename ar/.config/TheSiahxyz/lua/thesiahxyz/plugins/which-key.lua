@@ -219,6 +219,7 @@ return {
 				{ "<leader>q", group = "Quit" },
 				{ "<leader>R", group = "Refresh" },
 				{ "<leader>sk", group = "Keys" },
+				{ "<leader>S", group = "Save/Source" },
 				{ "<leader>W", group = "Save all" },
 				{ "<leader><tab>", group = "Tabs" },
 			},

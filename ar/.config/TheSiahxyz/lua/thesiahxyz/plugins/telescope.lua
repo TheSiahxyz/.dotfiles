@@ -67,7 +67,7 @@ return {
 						dir_icon = "",
 						dir_icon_hl = "Default",
 						display_stat = { date = true, size = true, mode = true },
-						hijack_netrw = true,
+						hijack_netrw = false,
 						use_fd = true,
 						git_status = true,
 						mappings = {
@@ -575,19 +575,16 @@ return {
 			vim.keymap.set("n", "<leader>fs", function()
 				require("telescope.builtin").find_files({
 					cwd = vim.fn.expand("~/.local/src/suckless/"),
-				})
-			end, { desc = "Find suckless files" })
-			vim.keymap.set("n", "<leader>fts", function()
-				require("telescope.builtin").find_files({
-					cwd = vim.fn.expand("~/Private/repos"),
 					find_command = {
-						"rg",
-						"--files",
-						"--follow",
-						"--hidden",
-						"--glob",
-						"!**/public/*/*",
-						"--sortr=modified",
+						"find",
+						"-maxdepth",
+						"2",
+						"-type",
+						"f",
+						"-name",
+						".git",
+						"-prune",
+						"-o",
 					},
 				})
 			end, { desc = "Find suckless files" })
@@ -694,6 +691,135 @@ return {
 		end,
 		keys = {
 			{ mode = "n", "<leader>fG", "<cmd>Telescope repo list<cr>", desc = "Find git repo" },
+		},
+	},
+	{
+		"debugloop/telescope-undo.nvim",
+		dependencies = { -- note how they're inverted to above example
+			{
+				"nvim-telescope/telescope.nvim",
+				dependencies = { "nvim-lua/plenary.nvim" },
+			},
+		},
+		keys = {
+			{ -- lazy style key map
+				"<leader>u",
+				"<cmd>Telescope undo<cr>",
+				desc = "Find undo history",
+			},
+		},
+		opts = {
+			-- don't use `defaults = { }` here, do this in the main telescope spec
+			extensions = {
+				undo = {
+					-- telescope-undo.nvim config, see below
+				},
+				-- no other extensions here, they can have their own spec too
+			},
+		},
+		config = function(_, opts)
+			-- Calling telescope's setup from multiple specs does not hurt, it will happily merge the
+			-- configs for us. We won't use data, as everything is in it's own namespace (telescope
+			-- defaults, as well as each extension).
+			require("telescope").setup(opts)
+			require("telescope").load_extension("undo")
+		end,
+	},
+	{
+		"nvim-telescope/telescope-frecency.nvim",
+		config = function()
+			require("telescope").load_extension("frecency")
+		end,
+		keys = {
+			{
+				"<leader>fq",
+				"<cmd>Telescope frecency<cr>",
+				desc = "Find frecent files",
+			},
+		},
+	},
+	{
+		"nvim-telescope/telescope-media-files.nvim",
+		dependencies = {
+			"nvim-lua/popup.nvim",
+			"nvim-lua/plenary.nvim",
+			"nvim-telescope/telescope.nvim",
+		},
+		config = function()
+			require("telescope").setup({
+				extensions = {
+					media_files = {
+						-- filetypes whitelist
+						-- defaults to {"png", "jpg", "mp4", "webm", "pdf"}
+						filetypes = { "png", "jpg", "mp4", "mkv", "webm", "pdf" },
+						-- find command (defaults to `fd`)
+						find_cmd = "rg",
+					},
+				},
+			})
+			require("telescope").load_extension("media_files")
+		end,
+		keys = {
+			{
+				"<leader>fm",
+				"<cmd>Telescope media_files<cr>",
+				desc = "Find media files",
+			},
+		},
+	},
+	{
+		"nvim-telescope/telescope-project.nvim",
+		dependencies = {
+			"nvim-telescope/telescope.nvim",
+			"nvim-telescope/telescope-file-browser.nvim",
+		},
+		config = function()
+			local project_actions = require("telescope._extensions.project.actions")
+			require("telescope").setup({
+				extensions = {
+					project = {
+						base_dirs = {
+							{ path = "~/Private", max_depth = 2 },
+							{ path = "~/Public", max_depth = 2 },
+						},
+						mappings = {
+							n = {
+								["d"] = project_actions.delete_project,
+								["r"] = project_actions.rename_project,
+								["c"] = project_actions.add_project,
+								["C"] = project_actions.add_project_cwd,
+								["f"] = project_actions.find_project_files,
+								["b"] = project_actions.browse_project_files,
+								["s"] = project_actions.search_in_project_files,
+								["R"] = project_actions.recent_project_files,
+								["w"] = project_actions.change_working_directory,
+								["o"] = project_actions.next_cd_scope,
+							},
+							i = {
+								["<c-d>"] = project_actions.delete_project,
+								["<c-v>"] = project_actions.rename_project,
+								["<c-a>"] = project_actions.add_project,
+								["<c-A>"] = project_actions.add_project_cwd,
+								["<c-f>"] = project_actions.find_project_files,
+								["<c-b>"] = project_actions.browse_project_files,
+								["<c-s>"] = project_actions.search_in_project_files,
+								["<c-r>"] = project_actions.recent_project_files,
+								["<c-l>"] = project_actions.change_working_directory,
+								["<c-o>"] = project_actions.next_cd_scope,
+								["<c-w>"] = project_actions.change_workspace,
+							},
+						},
+					},
+				},
+			})
+			require("telescope").load_extension("project")
+		end,
+		keys = {
+			{
+				"<leader>fpj",
+				"<cmd>Telescope projects<cr>",
+				desc = "Find projects",
+			},
 		},
 	},
 }
