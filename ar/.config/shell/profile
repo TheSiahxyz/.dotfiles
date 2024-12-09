@@ -7,8 +7,8 @@
 ### --- ENV PATH --- ###
 ###################################################
 # Add all directories in each subdirectory to $PATH
-export PATH="$PATH:$(find ~/.local/bin -path '*/.git*' -prune -o \( -type d -o -type l \) -print | paste -sd ':' -)"
-export PATH="$PATH:$(find ~/.local/share/.password-store -type d -name ".extensions" | paste -sd ':' -)"
+export PATH='$PATH:$(find ~/.local/bin -path "*/.git*" -prune -o \( -type d -o -type l \) -print | paste -sd ":" -)'
+export PATH='$PATH:$(find ~/.local/share/.password-store -type d -name ".extensions" | paste -sd ":" -)'
 
 unsetopt PROMPT_SP 2>/dev/null
 
@@ -119,7 +119,7 @@ export KODI_DATA="$XDG_DATA_HOME/kodi"
 ([ -x "$(command -v batcat)" ] || [ -x "$(command -v batman)" ]) && {
     export MANPAGER="sh -c 'col -bx | bat -l man -p'"
     export MANROFFOPT="-c"
-} || {
+    } || {
     export MANPAGER='less -s'
     export LESS="R"
     export LESS_TERMCAP_mb="$(printf '%b' '[1;31m')"
