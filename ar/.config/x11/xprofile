@@ -3,10 +3,7 @@
 xrandr --dpi 96 # Set DPI. User may want to use a larger number for larger screens.
 for display in $(xrandr -q | grep -v 'eDP|LVDS|LFP' | grep "\sconnected" | awk '{print $1}'); do
     case "$display" in
-        HDMI*|DP*)
-            xrandr --output eDP1 --off --output "$display" --auto --primary
-            break
-            ;;
+    HDMI* | DP*) xrandr --output eDP1 --off --output "$display" --auto --primary && break ;;
     esac
 done
 setbg & # set the background with the `setbg` script
@@ -19,7 +16,7 @@ setbg & # set the background with the `setbg` script
 autostart="mpd xcompmgr dunst unclutter pipewire remapd"
 
 for program in $autostart; do
-	pidof -sx "$program" || "$program" &
+    pidof -sx "$program" || "$program" &
 done >/dev/null 2>&1
 
 # Ensure that xrdb has finished running before moving on to start the WM/DE.
