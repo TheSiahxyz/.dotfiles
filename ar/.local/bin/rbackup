@@ -115,14 +115,71 @@ sync_nextcloud() {
     rm -r "$tmpdir"
 }
 
-echo "Backup starts to $backup_path..."
-while getopts "r" opt; do
-    case $opt in
-    r) echo "Sync root files..." && sync_root && echo "Success to sync root!" && echo "Done!" && exit || error "Failed back up root" ;;
-    *) ;;
-    esac
-done
+print_help() {
+    cat <<EOF
+Usage: rbackup [OPTIONS]
 
+Synchronize files and save them in backup path.
+
+Options:
+    -h, --help      Display this help message
+    -r, --root      Sync root files
+
+Example:
+    rbackup             # Sync all files to backup path
+    rbackup --help      # Print help messages
+    rbackup --root      # Sync root files
+EOF
+}
+
+handle_long_option() {
+    case $1 in
+    help)
+        print_help
+        exit 0
+        ;;
+    root)
+        echo "Sync root files..."
+        sync_root && echo "Success to sync root!" && echo "Done!" || error "Failed to back up root"
+        exit 0
+        ;;
+    *)
+        error "Unknown option: --$1"
+        ;;
+    esac
+}
+
+process_options() {
+    while [ $# -gt 0 ]; do
+        case $1 in
+        -h | --help)
+            print_help
+            exit 0
+            ;;
+        -r | --root)
+            echo "Sync root files..."
+            sync_root && echo "Success to sync root!" && echo "Done!" || error "Failed to back up root"
+            exit 0
+            ;;
+        --*)
+            handle_long_option "${1#--}"
+            ;;
+        -*)
+            error "Unknown option: $1"
+            ;;
+        *)
+            break
+            ;;
+        esac
+        shift
+    done
+}
+
+# Start script
+echo "Backup starts to $backup_path..."
+process_options "$@"
+
+# Main script logic
 mount_luks && echo "Mount backup drive... " && echo "Success to mount luks drive!" || error "Failed to mount $backup_path"
 [ -d "$backup_path" ] || sudo mkdir -p "$backup_path"
 echo "Sync home files..." && sync_files && echo "Success to sync files!" || error "Failed back up files"
