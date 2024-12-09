@@ -7,8 +7,8 @@
 ### --- ENV PATH --- ###
 ###################################################
 # Add all directories in each subdirectory to $PATH
-export PATH='$PATH:$(find ~/.local/bin -path "*/.git*" -prune -o \( -type d -o -type l \) -print | paste -sd ":" -)'
-export PATH='$PATH:$(find ~/.local/share/.password-store -type d -name ".extensions" | paste -sd ":" -)'
+export PATH="$PATH:$(find ~/.local/bin -path '*/.git*' -prune -o \( -type d -o -type l \) -print | paste -sd ':' -)"
+export PATH="$PATH:$(find ~/.local/share/.password-store -type d -name '.extensions' | paste -sd ':' -)"
 
 unsetopt PROMPT_SP 2>/dev/null
 
