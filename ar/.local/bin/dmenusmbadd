@@ -2,7 +2,7 @@
 
 samba_conf="/etc/samba/smb.conf"
 base_path="/"
-os="$(whereami)"
+os="$(grep '^ID=' /etc/os-release | cut -d= -f2)"
 
 restartinit() {
     case "$(basename "$(readlink -f /sbin/init)" | sed 's/-init//g')" in
@@ -28,6 +28,12 @@ else
 fi
 
 [ -d "$folder_path" ] || exit 1
+
+share_name="[$os-$folder_name]"
+if grep -qF "$share_name" "$samba_conf"; then
+    notify-send "The folder '$folder_name' is already shared."
+    exit 0
+fi
 
 echo | sudo tee -a "$samba_conf" >/dev/null
 sudo tee -a "$samba_conf" >/dev/null <<EOF && restartinit || exit 1
