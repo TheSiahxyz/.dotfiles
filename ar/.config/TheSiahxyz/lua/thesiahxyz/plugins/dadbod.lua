@@ -15,15 +15,15 @@ return {
 		vim.g.db_ui_use_nerd_fonts = 1
 		local home = vim.fn.expand("~")
 		vim.g.dbs = {
+			firefox = "sqlite://" .. home .. "/.mozilla/firefox/si.default/places.sqlite",
 			mysql = "mariadb://user:password@localhost/mysql",
 			postsql = "postgresql://postgres:mypassword@localhost:5432/postgresql",
 			sqlite = "sqlite://" .. home .. "/.local/share/db/sqlite.db",
-			firefox = "sqlite://" .. home .. "/.mozilla/firefox/si.default/places.sqlite",
 		}
 		local wk = require("which-key")
 		wk.add({
 			mode = { "n" },
-			{ "<localleader>b", group = "DB" },
+			{ "<localleader>d", group = "DB" },
 		})
 	end,
 	config = function()
@@ -42,11 +42,11 @@ return {
 		})
 	end,
 	keys = {
-		{ "<localleader>bu", "<cmd>DBUI<cr>", desc = "DB UI" },
-		{ "<localleader>bt", "<cmd>DBUIToggle<cr>", desc = "Toggle DB UI" },
-		{ "<localleader>ba", "<cmd>DBUIAddConnection<cr>", desc = "Add connection" },
-		{ "<localleader>bf", "<cmd>DBUIFindBuffer<cr>", desc = "Find buffer" },
-		{ "<localleader>br", "<cmd>DBUIRenameBuffer<cr>", desc = "Rename buffer" },
-		{ "<localleader>bi", "<cmd>DBUILastQueryInfo<cr>", desc = "Last query info" },
+		{ "<localleader>du", "<cmd>DBUI<cr>", desc = "DB UI" },
+		{ "<localleader>dt", "<cmd>DBUIToggle<cr>", desc = "Toggle DB UI" },
+		{ "<localleader>da", "<cmd>DBUIAddConnection<cr>", desc = "Add connection" },
+		{ "<localleader>df", "<cmd>DBUIFindBuffer<cr>", desc = "Find buffer" },
+		{ "<localleader>dr", "<cmd>DBUIRenameBuffer<cr>", desc = "Rename buffer" },
+		{ "<localleader>di", "<cmd>DBUILastQueryInfo<cr>", desc = "Last query info" },
 	},
 }

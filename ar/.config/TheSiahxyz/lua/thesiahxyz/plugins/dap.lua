@@ -26,8 +26,8 @@ return {
 			local wk = require("which-key")
 			wk.add({
 				mode = { "n" },
-				{ "<localleader>d", group = "Dap/Python" },
-				{ "<localleader>dP", group = "Python" },
+				{ "<localleader>dp", group = "Debug" },
+				{ "<localleader>dP", group = "Debug (Python)" },
 			})
 		end,
 		config = function()
@@ -64,126 +64,126 @@ return {
 		end,
 		keys = {
 			{
-				"<localleader>dB",
+				"<localleader>dpB",
 				function()
 					require("dap").set_breakpoint(vim.fn.input("Breakpoint condition: "))
 				end,
 				desc = "Dap breakpoint condition",
 			},
 			{
-				"<localleader>db",
+				"<localleader>dpb",
 				function()
 					require("dap").toggle_breakpoint()
 				end,
 				desc = "Dap toggle breakpoint",
 			},
 			{
-				"<localleader>dc",
+				"<localleader>dpc",
 				function()
 					require("dap").continue()
 				end,
 				desc = "Dap continue",
 			},
 			{
-				"<localleader>da",
+				"<localleader>dpa",
 				function()
 					require("dap").continue({ before = get_args })
 				end,
 				desc = "Dap run with args",
 			},
 			{
-				"<localleader>dC",
+				"<localleader>dpC",
 				function()
 					require("dap").run_to_cursor()
 				end,
 				desc = "Dap run to cursor",
 			},
 			{
-				"<localleader>dg",
+				"<localleader>dpg",
 				function()
 					require("dap").goto_()
 				end,
 				desc = "Dap go to line (no execute)",
 			},
 			{
-				"<localleader>di",
+				"<localleader>dpi",
 				function()
 					require("dap").step_into()
 				end,
 				desc = "Dap step into",
 			},
 			{
-				"<localleader>dj",
+				"<localleader>dpj",
 				function()
 					require("dap").down()
 				end,
 				desc = "Dap down",
 			},
 			{
-				"<localleader>dk",
+				"<localleader>dpk",
 				function()
 					require("dap").up()
 				end,
 				desc = "Dap up",
 			},
 			{
-				"<localleader>dl",
+				"<localleader>dpl",
 				function()
 					require("dap").run_last()
 				end,
 				desc = "Dap run last",
 			},
 			{
-				"<localleader>do",
+				"<localleader>dpo",
 				function()
 					require("dap").step_out()
 				end,
 				desc = "Dap step out",
 			},
 			{
-				"<localleader>dO",
+				"<localleader>dpO",
 				function()
 					require("dap").step_over()
 				end,
 				desc = "Dap step over",
 			},
 			{
-				"<localleader>dp",
+				"<localleader>dpp",
 				function()
 					require("dap").pause()
 				end,
 				desc = "Dap pause",
 			},
 			{
-				"<localleader>dr",
+				"<localleader>dpr",
 				function()
 					require("dap").repl.toggle()
 				end,
 				desc = "Dap toggle repl",
 			},
 			{
-				"<localleader>ds",
+				"<localleader>dps",
 				function()
 					require("dap").session()
 				end,
 				desc = "Dap session",
 			},
 			{
-				"<localleader>dt",
+				"<localleader>dpt",
 				function()
 					require("dap").terminate()
 				end,
 				desc = "Dap terminate",
 			},
 			{
-				"<localleader>dw",
+				"<localleader>dpw",
 				function()
 					require("dap.ui.widgets").hover()
 				end,
 				desc = "Dap widgets",
 			},
 			{
-				"<localleader>dR",
+				"<localleader>dpR",
 				"<cmd>lua require('dapui').open({ reset = true })<cr>",
 				desc = "Dap UI reset",
 			},
