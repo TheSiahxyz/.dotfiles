@@ -185,15 +185,3 @@ table.insert(
 )
 
 ls.add_snippets("markdown", snippets)
-
--- #####################################################################
---                         all the filetypes
--- #####################################################################
-ls.add_snippets("all", {
-	s({
-		trig = "snippets_example",
-		name = "Add this -> examples",
-	}, {
-		t("snippet example"),
-	}),
-})
