@@ -3,12 +3,11 @@
 turnonoffvpn() {
     case "$1" in
     *on*)
-        nmcli connection up "$THESIAH_VPN" >/dev/null 2>&1
-        notify-send "🛰️ THESIAH_VPN: ON"
+        nmcli connection up "$THESIAH_VPN" 2>/dev/null && notify-send "🛰️ THESIAH_VPN: ON" || notify-send "🛰️ Error to connect"
         ;;
     *off*)
-        nmcli connection down "$THESIAH_VPN" >/dev/null 2>&1
-        notify-send "✂️ THESIAH_VPN: OFF"
+        nmcli connection down "$THESIAH_VPN" 2>/dev/null && notify-send "✂️ THESIAH_VPN: OFF" || notify-send "✂️ Error to disconnect"
+
         ;;
     esac
 }

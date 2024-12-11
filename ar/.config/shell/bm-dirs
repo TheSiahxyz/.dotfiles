@@ -75,6 +75,7 @@ pbg             ${XDG_PUBLICSHARE_DIR:-${HOME}/Public}/repos
 pvg             $HOME/Private/repos
 pvn             $HOME/Private/repos/neetcode
 pvo             $HOME/Private/repos/Obsidian/SI
+pvs             $HOME/Private/repos/SQL
 pww             $HOME/Private/photo
 shm             ${XDG_DATA_HOME:-${HOME}/.local/share}/mail
 shr             ${XDG_DATA_HOME:-${HOME}/.local/share}
