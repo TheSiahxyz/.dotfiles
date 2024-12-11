@@ -1,13 +1,16 @@
 return {
 	{ "nvim-lua/plenary.nvim" },
 	{
-		"christoomey/vim-tmux-navigator",
-		keys = {
-			{ "<C-h>", "<cmd><C-U>TmuxNavigateLeft<cr>", desc = "Tmux navigator left" },
-			{ "<C-j>", "<cmd><C-U>TmuxNavigateDown<cr>", desc = "Tmux navigator down" },
-			{ "<C-k>", "<cmd><C-U>TmuxNavigateUp<cr>", desc = "Tmux navigator up" },
-			{ "<C-l>", "<cmd><C-U>TmuxNavigateRight<cr>", desc = "Tmux navigator right" },
-			{ "<C-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>", desc = "Tmux navigator previous" },
-		},
+		"alexghergh/nvim-tmux-navigation",
+		config = function()
+			local nvim_tmux_nav = require("nvim-tmux-navigation")
+
+			vim.keymap.set("n", "<C-h>", nvim_tmux_nav.NvimTmuxNavigateLeft, { desc = "Tmux navigator left" })
+			vim.keymap.set("n", "<C-j>", nvim_tmux_nav.NvimTmuxNavigateDown, { desc = "Tmux navigator down" })
+			vim.keymap.set("n", "<C-k>", nvim_tmux_nav.NvimTmuxNavigateUp, { desc = "Tmux navigator up" })
+			vim.keymap.set("n", "<C-l>", nvim_tmux_nav.NvimTmuxNavigateRight, { desc = "Tmux navigator right" })
+			vim.keymap.set("n", "<C-\\>", nvim_tmux_nav.NvimTmuxNavigateLastActive, { desc = "Tmux navigator prev" })
+			vim.keymap.set("n", "<A-n>", nvim_tmux_nav.NvimTmuxNavigateNext, { desc = "Tmux navigator next" })
+		end,
 	},
 }

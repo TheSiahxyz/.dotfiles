@@ -114,6 +114,8 @@ vim.keymap.set("i", "<C-h>", "<left>", { noremap = true, silent = true, desc = "
 vim.keymap.set("i", "<C-l>", "<right>", { noremap = true, silent = true, desc = "Move right" })
 vim.keymap.set("i", "<C-j>", "<down>", { noremap = true, silent = true, desc = "Move down" })
 vim.keymap.set("i", "<C-k>", "<up>", { noremap = true, silent = true, desc = "Move up" })
+vim.keymap.set("i", "<C-b>", "<up><end><cr>", { noremap = true, silent = true, desc = "New line above" })
+vim.keymap.set("i", "<C-f>", "<end><cr>", { noremap = true, silent = true, desc = "New line below" })
 vim.keymap.set("n", "<C-c>", ":", { noremap = true, desc = "Enter command mode" })
 vim.keymap.set("n", "J", "mzJ`z", { noremap = true, desc = "Join lines and keep cursor position" })
 vim.keymap.set("n", "n", "'Nn'[v:searchforward].'zv'", { expr = true, desc = "Next search result and center" })
@@ -138,8 +140,6 @@ vim.keymap.set("n", "G", "Gzz", { noremap = true, silent = true, desc = "Go to b
 vim.keymap.set("n", "gg", "ggzz", { noremap = true, silent = true, desc = "Go to top of file and center" })
 vim.keymap.set("n", "gd", "gdzz", { noremap = true, silent = true, desc = "Go to definition and center" })
 vim.keymap.set("n", "<C-i>", "<C-i>zz", { noremap = true, silent = true, desc = "Jump forward in jumplist and center" })
-vim.keymap.set("i", "<C-b>", "<up><end><cr>", { noremap = true, silent = true, desc = "New line above" })
-vim.keymap.set("i", "<C-f>", "<end><cr>", { noremap = true, silent = true, desc = "New line below" })
 vim.keymap.set(
 	"n",
 	"<C-o>",
@@ -351,17 +351,24 @@ vim.keymap.set("t", "<C-l>", "<cmd>wincmd l<cr>", { desc = "Move to right window
 vim.keymap.set("t", "<C-Space>l", "clear<cr>", { silent = true, desc = "Move to right window" })
 vim.keymap.set("t", "<C-\\>", "<cmd>close<cr>", { desc = "Close terminal" })
 
--- Tmux
+-- Windows
 vim.keymap.set("n", "<C-h>", "<C-w><C-h>", { desc = "Move to left window" })
 vim.keymap.set("n", "<C-j>", "<C-w><C-j>", { desc = "Move to window below" })
 vim.keymap.set("n", "<C-k>", "<C-w><C-k>", { desc = "Move to window above" })
 vim.keymap.set("n", "<C-l>", "<C-w><C-l>", { desc = "Move to right window" })
-vim.keymap.set(
-	"n",
-	"<leader>tm",
-	"<cmd>silent !~/.config/tmux/plugins/tmux-fzf/scripts/session.sh<cr>",
-	{ desc = "Find tmux session" }
-)
+
+-- Tmux
+if vim.env.TMUX then
+	vim.keymap.set(
+		"n",
+		"<leader>tm",
+		"<cmd>silent !~/.config/tmux/plugins/tmux-fzf/scripts/session.sh<cr>",
+		{ desc = "Find tmux session" }
+	)
+	vim.keymap.set("n", "<leader>RS", function()
+		vim.fn.system("restartnvim")
+	end, { noremap = true, silent = true, desc = "Restart nvim (tmux)" })
+end
 
 -- Lazy
 vim.keymap.set("n", "<leader>L", "<cmd>Lazy<cr>", { desc = "Open lazy plugin manager" })
@@ -396,11 +403,6 @@ vim.keymap.set("n", "<leader>c7", ":.!figlet -w 200 -f standard<cr>", { desc = "
 vim.keymap.set("n", "<leader>c8", ":.!figlet -w 200 -f slant<cr>", { desc = "Ascii art slant" })
 vim.keymap.set("n", "<leader>c9", ":.!figlet -w 200 -f big<cr>", { desc = "Ascii art big" })
 vim.keymap.set("n", "<leader>c0", ":.!figlet -w 200 -f shadow<cr>", { desc = "Ascii art shadow" })
-
--- Restart
-vim.keymap.set("n", "<leader>RS", function()
-	vim.fn.system("restartnvim")
-end, { noremap = true, silent = true, desc = "Restart nvim (tmux)" })
 
 -- Source shortcuts from bm-files and bm-folders
 local shortcuts_file = vim.fn.expand("~/.config/nvim/shortcuts.lua")
