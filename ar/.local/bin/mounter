@@ -146,7 +146,7 @@ case "$chosen" in
     while [ -e "/dev/mapper/usb$num" ]; do
         num=$((num + 1))
     done
-    ${TERMINAL:-st} -n floatterm -g 60x1 -e sudo cryptsetup open "$chosen" "usb$num"
+    pass show default/default | sudo cryptsetup open "$chosen" "usb$num" || ${TERMINAL:-st} -n floatterm -g 60x1 -e sudo cryptsetup open "$chosen" "usb$num"
     # Check if now decrypted.
     test -b "/dev/mapper/usb$num"
     chosen="/dev/mapper/usb$num"
