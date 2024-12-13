@@ -249,14 +249,14 @@ return {
 		end,
 		keys = {
 			{
-				"<localleader>du",
+				"<localleader>dpu",
 				function()
 					require("dapui").toggle()
 				end,
 				desc = "Dap UI",
 			},
 			{
-				"<localleader>de",
+				"<localleader>dpe",
 				function()
 					require("dapui").eval()
 				end,
