@@ -92,7 +92,7 @@ return {
 					end,
 				},
 			})
-			vim.cmd("colorscheme catppuccin")
+
 			ColorMyPencils()
 		end,
 	},
