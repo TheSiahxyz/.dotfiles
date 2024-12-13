@@ -41,7 +41,7 @@ else
         status=$(echo "$line" | cut -c1-2)
         file=$(echo "$line" | cut -c4-)
         generate_message "$status" "$file"
-    done | tr '\n' ',' | sed 's/,$//;s/,/, /g')
+    done | tr '\n' ',' | sed 's/,$//;s/,/, /g;s/"$//')
 fi
 
 message="${1:-$default}"
