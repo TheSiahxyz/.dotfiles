@@ -207,6 +207,13 @@ return {
 				-- This will not install any breaking changes.
 				-- For major updates, this must be adjusted manually.
 				version = "^1.0.0",
+				init = function()
+					local wk = require("which-key")
+					wk.add({
+						mode = { "n" },
+						{ "<leader>fl", group = "Live grep" },
+					})
+				end,
 				config = function()
 					local lga_actions = require("telescope-live-grep-args.actions")
 					local actions = require("telescope.actions")
