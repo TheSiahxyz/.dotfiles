@@ -625,7 +625,7 @@ return {
 			vim.keymap.set("n", "<leader>sC", function()
 				require("telescope.builtin").command_history({})
 			end, { desc = "Search history" })
-			vim.keymap.set("n", "<leader>co", function()
+			vim.keymap.set("n", "<leader>cc", function()
 				require("telescope.builtin").colorscheme({})
 			end, { desc = "Search color scheme" })
 			vim.keymap.set("n", "<leader>sd", function()
