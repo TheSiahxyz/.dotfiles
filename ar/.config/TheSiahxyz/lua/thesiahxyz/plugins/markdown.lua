@@ -179,12 +179,12 @@ return {
 			local wk = require("which-key")
 			wk.add({
 				mode = { "n", "v" },
-				{ "<leader>m", group = "Markdown" },
+				{ "<leader>m", group = "Markdown/Map" },
 			})
 		end,
 		keys = {
 			{ "<leader>mp", "<cmd> MarkdownPreview <CR>", desc = "Markdown Preview" },
-			{ "<leader>ms", "<cmd> MarkdownPreviewStop <CR>", desc = "Markdown Stop" },
+			{ "<leader>mx", "<cmd> MarkdownPreviewStop <CR>", desc = "Markdown Stop" },
 			{ "<leader>mt", "<cmd> MarkdownPreviewToggle <CR>", desc = "Markdown Toggle" },
 		},
 	},

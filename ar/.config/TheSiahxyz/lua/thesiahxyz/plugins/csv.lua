@@ -3,18 +3,18 @@ return {
 		"cameron-wags/rainbow_csv.nvim",
 		config = function()
 			require("rainbow_csv").setup()
-			-- vim.g.rcsv_colorpairs = {
-			-- 	{ "red", "red" },
-			-- 	{ "blue", "blue" },
-			-- 	{ "green", "green" },
-			-- 	{ "magenta", "magenta" },
-			-- 	{ "NONE", "NONE" },
-			-- 	{ "darkred", "darkred" },
-			-- 	{ "darkblue", "darkblue" },
-			-- 	{ "darkgreen", "darkgreen" },
-			-- 	{ "darkmagenta", "darkmagenta" },
-			-- 	{ "darkcyan", "darkcyan" },
-			-- }
+			vim.g.rcsv_colorpairs = {
+				{ "red", "red" },
+				{ "blue", "blue" },
+				{ "green", "green" },
+				{ "magenta", "magenta" },
+				{ "NONE", "NONE" },
+				{ "darkred", "darkred" },
+				{ "darkblue", "darkblue" },
+				{ "darkgreen", "darkgreen" },
+				{ "darkmagenta", "darkmagenta" },
+				{ "darkcyan", "darkcyan" },
+			}
 		end,
 		ft = {
 			"csv",
@@ -42,12 +42,23 @@ return {
 			vim.api.nvim_create_autocmd("BufRead", {
 				pattern = "*.csv",
 				callback = function()
-					pcall(vim.cmd, "CsvViewEnable") -- Call CsvViewEnable safely
+					vim.cmd("CsvViewEnable")
+				end,
+			})
+
+			vim.api.nvim_create_autocmd("FileType", {
+				pattern = "csv",
+				callback = function()
+					vim.keymap.set(
+						"n",
+						"<leader>tv",
+						"<cmd>CsvViewToggle<cr>",
+						{ desc = "Toggle CSV view", buffer = true }
+					)
 				end,
 			})
 		end,
 		keys = {
-			{ "<leader>tv", "<cmd>CsvViewToggle<cr>", desc = "Toggle CSV view" },
 			{
 				"<leader>csv",
 				function()

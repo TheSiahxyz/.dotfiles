@@ -710,7 +710,7 @@ return {
 		},
 		keys = {
 			{ -- lazy style key map
-				"<leader>u",
+				"<leader>fu",
 				"<cmd>Telescope undo<cr>",
 				desc = "Find undo history",
 			},
