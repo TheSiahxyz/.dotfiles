@@ -42,8 +42,8 @@ sync_files() {
 
 sync_root() {
     # clean targets
-    sudo rm -rf /root/.config
-    sudo mkdir -p /root/.config/bash /root/.config/lf /root/.config/shell /root/.config/vim /root/.local/bin /root/.local/share /root/.local/state
+    sudo rm -rf /root/.config /root/.bash_history
+    sudo mkdir -p /root/.config/bash /root/.config/lf /root/.config/shell /root/.config/vim /root/.local/bin /root/.local/share/history /root/.local/state
 
     # Root configuration synchronization on local system
     sudo rsync -vrazPlu --delete "$vim_path/vimrc" "/root/.config/vim/" >/dev/null 2>&1
