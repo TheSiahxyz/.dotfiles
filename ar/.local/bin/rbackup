@@ -58,7 +58,7 @@ sync_root() {
     # Modify root's Bash and LF configuration to include user-specific settings
     echo "[ -f \"$USER_HOME/.config/shell/shortcutrc\" ] && source \"$USER_HOME/.config/shell/shortcutrc\"" | sudo tee -a /root/.config/bash/bashrc >/dev/null 2>&1
     echo "[ -f \"$USER_HOME/.config/shell/zshnameddirrc\" ] && source \"$USER_HOME/.config/shell/zshnameddirrc\"" | sudo tee -a /root/.config/bash/bashrc >/dev/null 2>&1
-    sudo sed -i "s|source \"~/.config/lf/shortcutrc\"|source \"$USER_HOME/.config/lf/shortcutrc\"|" /root/.config/lf/lfrc >/dev/null 2>&1
+    sudo sed -i "s|source[[:space:]]*\"\?~/.config/lf/shortcutrc\"\?|source \"$USER_HOME/.config/lf/shortcutrc\"|" /root/.config/lf/lfrc >/dev/null 2>&1
     echo 'source "/root/.config/lf/rootshortcutrc"' | sudo tee -a /root/.config/lf/lfrc >/dev/null 2>&1
 
     # Final ownership and link adjustments
