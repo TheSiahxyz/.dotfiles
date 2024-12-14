@@ -30,7 +30,11 @@ else
 
     set backupdir=/root/.config/vim/backup | call mkdir(&backupdir, 'p')
     set directory=/root/.config/vim/swap   | call mkdir(&directory, 'p')
-    set undodir=/root/.local/share/history/vim_history     | call mkdir(&undodir,   'p')
+    let g:history_dir = '/root/.local/share/history'
+    call mkdir(g:history_dir, 'p')
+    let g:undodir_path = g:history_dir . '/vim_history'
+    call mkdir(g:undodir_path, 'p')
+    set undodir=g:undodir_path
     set viewdir=/root/.config/vim/view     | call mkdir(&viewdir,   'p')
 endif
 
