@@ -1,11 +1,11 @@
 [default_session]
 startup_command = "if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then git status; else clear && ls -I .git; fi"
 
-# [[session]]
-# name = "config"
-# path = "~/.config"
-# startup_command = "clear && ls -A"
-#
+[[session]]
+name = "code"
+path = "~"
+startup_command = "clear && ls -A"
+
 # [[session]]
 # name = "suckless"
 # path = "~/.local/src/suckless"
