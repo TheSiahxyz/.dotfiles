@@ -51,7 +51,7 @@ return {
 			},
 		})
 
-		vim.keymap.set("n", "<leader>lf", "<Cmd>Lf<CR>")
+		vim.keymap.set("n", "<leader>el", "<Cmd>Lf<CR>")
 
 		-- Autocommand to set key mapping in terminal buffer
 		vim.api.nvim_create_autocmd("User", {

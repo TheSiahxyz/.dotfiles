@@ -5,7 +5,7 @@ return {
 		local wk = require("which-key")
 		wk.add({
 			mode = { "n", "v" },
-			{ "s", group = "Surround" },
+			{ "s", group = "Surround/Search & replace on line" },
 		})
 	end,
 	config = function()

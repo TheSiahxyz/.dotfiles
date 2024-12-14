@@ -18,14 +18,6 @@ return {
 		{ "folke/neodev.nvim", opts = {} },
 		"stevearc/conform.nvim",
 	},
-	init = function()
-		local wk = require("which-key")
-		wk.add({
-			mode = { "n", "v", "x" },
-			{ "<leader>c", group = "Format" },
-			{ "<leader>tf", group = "Format" },
-		})
-	end,
 	config = function()
 		local cmp = require("cmp")
 		local cmp_lsp = require("cmp_nvim_lsp")
@@ -241,7 +233,7 @@ return {
 	keys = {
 		{
 			mode = { "n", "v" },
-			"<leader>cf",
+			"<leader>lf",
 			function()
 				require("conform").format({ async = true })
 			end,
