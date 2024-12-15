@@ -405,7 +405,7 @@ return {
 	end,
 	keys = {
 		{
-			"<leader>cb",
+			"<leader>oc",
 			function()
 				return require("obsidian").util.toggle_checkbox()
 			end,
@@ -434,18 +434,28 @@ return {
 		},
 		{
 			"<leader>os",
-			"<cmd> ObsidianQuickSwitch <CR>",
+			"<cmd>ObsidianQuickSwitch<CR>",
 			desc = "Quick switch (Obsidian)",
 		},
 		{
 			"<leader>o]",
-			"<cmd> ObsidianFollowLink <CR>",
+			"<cmd>ObsidianFollowLink<CR>",
 			desc = "Follow link (Obsidian)",
 		},
 		{
 			"<leader>o[",
-			"<cmd> ObsidianBacklinks <CR>",
+			"<cmd>ObsidianBacklinks<CR>",
 			desc = "Back link (Obsidian)",
+		},
+		{
+			"<leader>ong",
+			function()
+				local tags = vim.fn.input("Enter tag: ")
+				if tags and #tags > 0 then
+					vim.cmd("ObsidianTags " .. tags)
+				end
+			end,
+			desc = "Search tag notes (Obsidian)",
 		},
 		{
 			"<leader>ont",
@@ -461,13 +471,25 @@ return {
 		},
 		{
 			"<leader>ony",
-			"<cmd> ObsidianYesterday <cr>",
+			"<cmd>ObsidianYesterday<cr>",
 			desc = "Yesterday note (Obsidian)",
 		},
 		{
 			"<leader>ont",
-			"<cmd> ObsidianTomorrow <cr>",
+			"<cmd>ObsidianTomorrow<cr>",
 			desc = "Tomorrow note (Obsidian)",
+		},
+		{
+			"<leader>ond",
+			function()
+				local offset = vim.fn.input("Enter offset: ")
+				if offset and #offset > 0 then
+					vim.cmd("ObsidianDailies " .. offset)
+				else
+					vim.cmd("ObsidianDailies")
+				end
+			end,
+			desc = "Daily notes (Obsidian)",
 		},
 		{
 			"<leader>oti",
@@ -539,6 +561,29 @@ return {
 				end
 			end,
 			desc = "New link note (Obsidian)",
+		},
+		{
+			mode = "v",
+			"<leader>ox",
+			function()
+				local note = vim.fn.input("Enter note: ")
+				if note and #note > 0 then
+					vim.cmd("ObsidianExtractNote " .. note)
+				else
+					vim.cmd("ObsidianExtractNote")
+				end
+			end,
+			desc = "New extract text (Obsidian)",
+		},
+		{
+			"<leader>otn",
+			"<cmd>ObsidianNewFromTemplate<CR>",
+			desc = "Open new note with template (Obsidian)",
+		},
+		{
+			"<leader>oc",
+			"<cmd>ObsidianTOC<CR>",
+			desc = "Open contents (Obsidian)",
 		},
 	},
 }
