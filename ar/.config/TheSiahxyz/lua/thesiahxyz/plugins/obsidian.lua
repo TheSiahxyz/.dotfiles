@@ -49,7 +49,7 @@ return {
 
 				vim.keymap.set("n", "<leader>mp", function()
 					require("telescope").extensions.pomodori.timers()
-				end, { desc = "Manage Pomodori Timers" })
+				end, { desc = "Manage pomodori" })
 			end,
 		},
 	},
@@ -410,7 +410,7 @@ return {
 				return require("obsidian").util.toggle_checkbox()
 			end,
 			buffer = true,
-			desc = "Check Box (Obsidian)",
+			desc = "Check box (Obsidian)",
 		},
 		{
 			"<leader>ono",
@@ -420,7 +420,7 @@ return {
 					vim.cmd("ObsidianOpen " .. query)
 				end
 			end,
-			desc = "Open Note (Obsidian)",
+			desc = "Open note (Obsidian)",
 		},
 		{
 			"<leader>onn",
@@ -430,22 +430,22 @@ return {
 					vim.cmd("ObsidianNew " .. title)
 				end
 			end,
-			desc = "New Note (Obsidian)",
+			desc = "New note (Obsidian)",
 		},
 		{
 			"<leader>os",
 			"<cmd> ObsidianQuickSwitch <CR>",
-			desc = "Quick Switch (Obsidian)",
+			desc = "Quick switch (Obsidian)",
 		},
 		{
 			"<leader>o]",
 			"<cmd> ObsidianFollowLink <CR>",
-			desc = "Follow Link (Obsidian)",
+			desc = "Follow link (Obsidian)",
 		},
 		{
 			"<leader>o[",
 			"<cmd> ObsidianBacklinks <CR>",
-			desc = "Back Link (Obsidian)",
+			desc = "Back link (Obsidian)",
 		},
 		{
 			"<leader>ont",
@@ -457,22 +457,22 @@ return {
 					vim.cmd("ObsidianToday")
 				end
 			end,
-			desc = "Today Note (Obsidian)",
+			desc = "Today note (Obsidian)",
 		},
 		{
 			"<leader>ony",
 			"<cmd> ObsidianYesterday <cr>",
-			desc = "Yesterday Note (Obsidian)",
+			desc = "Yesterday note (Obsidian)",
 		},
 		{
 			"<leader>ont",
 			"<cmd> ObsidianTomorrow <cr>",
-			desc = "Tomorrow Note (Obsidian)",
+			desc = "Tomorrow note (Obsidian)",
 		},
 		{
 			"<leader>oti",
 			"<cmd>ObsidianTemplate<cr>",
-			desc = "Insert Templates (Obsidian)",
+			desc = "Insert templates (Obsidian)",
 		},
 		{
 			"<leader>of",
@@ -482,7 +482,7 @@ return {
 					vim.cmd("ObsidianSearch " .. note)
 				end
 			end,
-			desc = "Search Note (Obsidian)",
+			desc = "Search note (Obsidian)",
 		},
 		{
 			"<leader>ow",
@@ -492,7 +492,7 @@ return {
 					vim.cmd("ObsidianWorkspace " .. name)
 				end
 			end,
-			desc = "Workspace Name (Obsidian)",
+			desc = "Workspace name (Obsidian)",
 		},
 		{
 			"<leader>opi",
@@ -502,7 +502,7 @@ return {
 					vim.cmd("ObsidianPasteImg " .. image)
 				end
 			end,
-			desc = "Paste Image (Obsidian)",
+			desc = "Paste image (Obsidian)",
 		},
 		{
 			"<leader>onr",
@@ -512,7 +512,7 @@ return {
 					vim.cmd("ObsidianRename " .. name)
 				end
 			end,
-			desc = "Rename Note (Obsidian)",
+			desc = "Rename note (Obsidian)",
 		},
 		{
 			mode = "v",
@@ -525,7 +525,7 @@ return {
 					vim.cmd("ObsidianLink")
 				end
 			end,
-			desc = "Link Query (Obsidian)",
+			desc = "Link query (Obsidian)",
 		},
 		{
 			mode = "v",
@@ -538,7 +538,7 @@ return {
 					vim.cmd("ObsidianLinkNew")
 				end
 			end,
-			desc = "New Link Note (Obsidian)",
+			desc = "New link note (Obsidian)",
 		},
 	},
 }
