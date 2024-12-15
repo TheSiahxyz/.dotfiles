@@ -9,6 +9,7 @@ vim.g.have_nerd_font = true
 -- vim.g.loaded_netrwPlugin = 1
 vim.opt.backup = false
 vim.opt.breakindent = true
+vim.opt.conceallevel = 1
 vim.opt.cursorline = true
 vim.opt.expandtab = true
 vim.opt.hlsearch = true
