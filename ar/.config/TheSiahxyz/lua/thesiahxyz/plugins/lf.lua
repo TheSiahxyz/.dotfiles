@@ -5,7 +5,58 @@ return {
 			"akinsho/toggleterm.nvim",
 			version = "*",
 			config = function()
-				require("toggleterm").setup()
+				require("toggleterm").setup({
+					open_mapping = [[<leader><c-s>]], -- or { [[<c-\>]], [[<c-¥>]] } if you also use a Japanese keyboard.
+				})
+				vim.keymap.set(
+					"n",
+					"<leader><C-\\>",
+					"<cmd>ToggleTerm direction=float name=Terminal<cr>",
+					{ desc = "Toggle float terminal" }
+				)
+				vim.keymap.set(
+					"n",
+					"<leader><C-t>",
+					"<cmd>ToggleTermToggleAll<cr>",
+					{ desc = "Toggle all float terminals" }
+				)
+				vim.keymap.set("n", "<leader><C-u>", "<cmd>TermSelect<cr>", { desc = "Select float terminal" })
+
+				local function set_opfunc(opfunc)
+					_G._opfunc = opfunc -- Define the function globally
+					vim.go.operatorfunc = "v:lua._opfunc" -- Assign the global function
+				end
+
+				local trim_spaces = false
+				vim.keymap.set("v", "<leader><C-l>", function()
+					require("toggleterm").send_lines_to_terminal("single_line", trim_spaces, { args = vim.v.count })
+				end, { desc = "Send line to terminal" })
+				-- Replace with these for the other two options
+				-- require("toggleterm").send_lines_to_terminal("visual_lines", trim_spaces, { args = vim.v.count })
+				-- require("toggleterm").send_lines_to_terminal("visual_selection", trim_spaces, { args = vim.v.count })
+
+				-- For use as an operator map:
+				-- Send motion to terminal
+				vim.keymap.set("n", "<leader><C-l>", function()
+					set_opfunc(function(motion_type)
+						require("toggleterm").send_lines_to_terminal(motion_type, false, { args = vim.v.count })
+					end)
+					vim.api.nvim_feedkeys("g@", "n", false)
+				end, { desc = "Send line to terminal" })
+				-- Double the command to send line to terminal
+				vim.keymap.set("n", "<leader><C-a>", function()
+					set_opfunc(function(motion_type)
+						require("toggleterm").send_lines_to_terminal(motion_type, false, { args = vim.v.count })
+					end)
+					vim.api.nvim_feedkeys("g@_", "n", false)
+				end, { desc = "Send lines to terminal" })
+				-- Send whole file
+				vim.keymap.set("n", "<leader><C-g>", function()
+					set_opfunc(function(motion_type)
+						require("toggleterm").send_lines_to_terminal(motion_type, false, { args = vim.v.count })
+					end)
+					vim.api.nvim_feedkeys("ggg@G''", "n", false)
+				end, { desc = "Send lines to terminal (clipboard)" })
 			end,
 		},
 	},
