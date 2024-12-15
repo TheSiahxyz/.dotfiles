@@ -147,7 +147,7 @@ return {
 						{ desc = "Find gh pull request" }
 					)
 					vim.keymap.set({ "n", "v" }, "<leader>gt", ":Telescope gh gist ", { desc = "Find gh gist" })
-					vim.keymap.set({ "n", "v" }, "<leader>gr", ":Telescope gh run ", { desc = "Find gh run" })
+					vim.keymap.set({ "n", "v" }, "<leader>gh", ":Telescope gh run ", { desc = "Find gh run" })
 				end,
 			},
 			{
@@ -649,9 +649,24 @@ return {
 			vim.keymap.set("n", "<leader>gc", function()
 				require("telescope.builtin").git_commits()
 			end, { desc = "Find git commits" })
+			vim.keymap.set("n", "<leader>gn", function()
+				require("telescope.builtin").git_bcommits()
+			end, { desc = "Find buffer git commits" })
+			vim.keymap.set("n", "<leader>gr", function()
+				require("telescope.builtin").git_bcommits_range()
+			end, { desc = "Find lines git commits" })
+			vim.keymap.set("v", "<leader>gr", function()
+				require("telescope.builtin").git_bcommits_range()
+			end, { desc = "Find lines git commits" })
+			vim.keymap.set("n", "<leader>gb", function()
+				require("telescope.builtin").git_branches()
+			end, { desc = "Find branches" })
 			vim.keymap.set("n", "<leader>gs", function()
 				require("telescope.builtin").git_status()
 			end, { desc = "Find git status" })
+			vim.keymap.set("n", "<leader>gS", function()
+				require("telescope.builtin").git_stash()
+			end, { desc = "Find git stash" })
 			-- lsp
 			vim.keymap.set("n", "gR", function()
 				require("telescope.builtin").lsp_references({})
