@@ -36,6 +36,13 @@ return {
 		"hat0uma/csvview.nvim",
 		cmd = { "CsvViewEnable", "CsvViewDisable", "CsvViewToggle" },
 		event = { "BufReadPre *.csv" }, -- Lazy-load the plugin when a CSV file is about to be read
+		init = function()
+			local wk = require("which-key")
+			wk.add({
+				mode = { "n", "v", "x" },
+				{ "<leader>csv", group = "csv" },
+			})
+		end,
 		config = function()
 			require("csvview").setup()
 

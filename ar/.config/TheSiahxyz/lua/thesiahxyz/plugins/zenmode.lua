@@ -5,8 +5,8 @@ return {
 		local wk = require("which-key")
 		wk.add({
 			mode = { "n" },
-			{ "<leader>z", group = "Zenmode" },
-			{ "<leader>Z", group = "Zenmode" },
+			{ "<leader>z", group = "Zenmode (default)" },
+			{ "<leader>Z", group = "Zenmode (custom)" },
 		})
 	end,
 	config = function()

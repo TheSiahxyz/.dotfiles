@@ -14,6 +14,7 @@ return {
 		wk.add({
 			mode = { "n" },
 			{ "<leader>h", group = "Harpoon" },
+			{ "<leader>hr", group = "Replace harpoon slot" },
 			{ "<M-x>", group = "Harpoon list delete" },
 		})
 	end,
