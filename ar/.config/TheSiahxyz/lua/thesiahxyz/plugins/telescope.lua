@@ -260,6 +260,18 @@ return {
 										["<C-space>"] = actions.to_fuzzy_refine,
 									},
 								},
+								vimgrep_arguments = {
+									"rg",
+									"--color=never",
+									"--no-heading",
+									"--with-filename",
+									"--line-number",
+									"--column",
+									"--smart-case",
+									"--follow",
+									"--hidden",
+									"--no-ignore",
+								},
 								-- ... also accepts theme settings, for example:
 								-- theme = "dropdown", -- use dropdown theme
 								-- theme = { }, -- use own theme spec
@@ -273,6 +285,14 @@ return {
 						"<leader>flf",
 						":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>",
 						{ desc = "Find live grep args" }
+					)
+
+					local live_grep_args_shortcuts = require("telescope-live-grep-args.shortcuts")
+					vim.keymap.set(
+						"n",
+						"<leader>ss",
+						live_grep_args_shortcuts.grep_word_under_cursor,
+						{ desc = "Search shortcuts (Live grep)" }
 					)
 
 					local function search_git(visual)
@@ -501,6 +521,7 @@ return {
 						"--files",
 						"--follow",
 						"--hidden",
+						"--no-ignore",
 						"--sortr=modified",
 					},
 					hidden = true,
@@ -510,8 +531,8 @@ return {
 					git_worktrees = {
 						{
 							home = vim.env.HOME,
-							private = vim.env.HOME .. "/Private/git",
-							public = vim.env.HOME .. "/Public/git",
+							private = vim.env.HOME .. "/Private/repos",
+							public = vim.env.HOME .. "/Public/repos",
 						},
 					},
 					results_title = vim.fn.fnamemodify(vim.uv.cwd(), ":~"),
@@ -663,10 +684,10 @@ return {
 			vim.keymap.set("n", "<leader>sg", vim.live_grep_from_project_git_root, { desc = "Grep from git files" })
 			vim.keymap.set("n", "<leader>sw", function()
 				require("telescope.builtin").live_grep({})
-			end, { desc = "Search word with live grep" })
+			end, { desc = "Search word (Live grep)" })
 			vim.keymap.set("n", "<leader>sW", function()
 				require("telescope.builtin").grep_string({})
-			end, { desc = "Search word with grep" })
+			end, { desc = "Search word (Grep)" })
 			vim.keymap.set("n", "<leader>sh", function()
 				require("telescope.builtin").help_tags({})
 			end, { desc = "Search help tags" })
