@@ -345,7 +345,7 @@ vim.keymap.set("n", "<leader><tab>d", "<cmd>tabclose<cr>", { desc = "Close Tab" 
 vim.keymap.set("n", "[<tab>", "<cmd>tabprevious<cr>", { desc = "Previous Tab" })
 
 -- Terminal
-vim.keymap.set("n", "<leader>ot", "<cmd>term<cr>i", { desc = "Open terminal" })
+vim.keymap.set("n", "<C-\\>", "<cmd>term<cr>i", { desc = "Open terminal" })
 vim.keymap.set("n", "<leader>t-", "<cmd>sp term://zsh | startinsert<cr>", { desc = "Open terminal (horizontal split)" })
 vim.keymap.set("n", "<leader>t|", "<cmd>vsp term://zsh | startinsert<cr>", { desc = "Open terminal (vertical split)" })
 vim.keymap.set("t", "<esc><esc>", "<C-\\><C-n>", { desc = "Escape terminal mode" })
