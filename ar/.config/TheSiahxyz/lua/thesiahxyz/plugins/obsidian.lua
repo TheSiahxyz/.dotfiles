@@ -413,7 +413,7 @@ return {
 			desc = "Check box (Obsidian)",
 		},
 		{
-			"<leader>ono",
+			"<leader>ob",
 			function()
 				local query = vim.fn.input("Enter query: ")
 				if query and #query > 0 then
