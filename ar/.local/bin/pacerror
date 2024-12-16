@@ -7,3 +7,4 @@ pacman -Syyu
 pacman-key --refresh-keys
 pacman-key --populate archlinux artix
 pacman -Syu
+remaps
