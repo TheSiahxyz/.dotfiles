@@ -4,7 +4,7 @@
 show_help() {
     cat <<EOF
 Usage: ${0##*/} [OPTION]
-  Open the most recent file or the list of them edited by nvim.
+  Open the most recent file or the list of old files in fzf edited by nvim.
 
 Options:
                     Open the most recent old file in Neovim.
