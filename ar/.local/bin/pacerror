@@ -1,0 +1,9 @@
+#!/bin/sh
+
+rm -r /etc/pacman.d/gnupg /var/lib/pacman/sync
+pacman-key --init
+pacman -Scc
+pacman -Syyu
+pacman-key --refresh-keys
+pacman-key --populate archlinux artix
+pacman -Syu
