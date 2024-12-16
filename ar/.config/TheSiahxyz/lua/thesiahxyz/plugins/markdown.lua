@@ -238,14 +238,20 @@ return {
 	{
 		"vhyrro/luarocks.nvim",
 		priority = 1001, -- this plugin needs to run before anything else
-		opts = {
+		init = function()
+			package.path = package.path
+				.. ";"
+				.. vim.fn.expand("$HOME")
+				.. "/.config/luarocks/share/lua/5.1/magick/init.lua;"
+		end,
+		opt = {
 			rocks = { "magick" },
 		},
 	},
 	{ "benlubas/image-save.nvim", cmd = "SaveImage" },
 	{
 		"3rd/image.nvim",
-		dependencies = { "leafo/magick", "luarocks.nvim" },
+		dependencies = { "leafo/magick", "vhyrro/luarocks.nvim" },
 		config = function()
 			require("image").setup({
 				backend = "ueberzug", -- or "kitty", whatever backend you would like to use

@@ -57,6 +57,11 @@ return {
 					relative = "editor", -- What the notification window position is relative to
 				},
 			},
+			integration = {
+				["nvim-tree"] = {
+					enable = false, -- Integrate with nvim-tree/nvim-tree.lua (if installed)
+				},
+			},
 		})
 		require("mason").setup()
 		require("mason-lspconfig").setup({
@@ -130,6 +135,11 @@ return {
 				"shellcheck", -- bash lint
 				"shfmt", -- sh formatter
 				"stylua", -- lua formatter
+			},
+			integrations = {
+				["mason-lspconfig"] = true,
+				["mason-null-ls"] = false,
+				["mason-nvim-dap"] = true,
 			},
 		})
 
