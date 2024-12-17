@@ -217,7 +217,6 @@ return {
 				{ "<leader>M", group = "Mason" },
 				{ "<leader>o", group = "Open" },
 				{ "<leader>q", group = "Quit" },
-				{ "<leader>R", group = "Refresh" },
 				{ "<leader>sk", group = "Keys" },
 				{ "<leader>S", group = "Save/Source" },
 				{ "<leader>W", group = "Save all" },

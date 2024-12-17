@@ -318,6 +318,12 @@ vim.api.nvim_set_keymap(
 )
 vim.api.nvim_set_keymap(
 	"n",
+	"<leader>rR",
+	':w!<cr>:lua vim.cmd("split | resize 10 | terminal compiler " .. vim.fn.expand("%:p"))<cr>i',
+	{ noremap = true, silent = true, desc = "Run compiler interactively" }
+)
+vim.api.nvim_set_keymap(
+	"n",
 	"<leader>ov",
 	":!opout <C-r>%<cr><cr>",
 	{ noremap = true, silent = true, desc = "Docs viewer" }

@@ -4,11 +4,18 @@ return {
 		cmd = { "CompilerOpen", "CompilerToggleResults", "CompilerRedo" },
 		dependencies = { "stevearc/overseer.nvim", "nvim-telescope/telescope.nvim" },
 		opts = {},
+		init = function()
+			local wk = require("which-key")
+			wk.add({
+				mode = { "n", "v" },
+				{ "<leader>r", group = "Compiler" },
+			})
+		end,
 		keys = {
 			-- Open compiler
 			vim.api.nvim_set_keymap(
 				"n",
-				"<leader>rR",
+				"<leader>ro",
 				"<cmd>CompilerOpen<cr>",
 				{ noremap = true, silent = true, desc = "Open compiler" }
 			),
