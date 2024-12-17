@@ -17,11 +17,6 @@ Examples:
 EOF
 }
 
-# Open files in Neovim
-openfiles() {
-    echo "$1" | xargs nvim
-}
-
 # List and handle oldfiles
 list_oldfiles() {
     # Fetch the oldfiles list from Neovim

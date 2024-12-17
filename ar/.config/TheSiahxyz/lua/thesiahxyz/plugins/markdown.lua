@@ -226,13 +226,13 @@ return {
 			{ "<A-i>", insert_code_cell, desc = "Insert Code Cell" },
 			{ "<A-x>", delete_cell, desc = "Delete Cell" },
 			{
-				"<A-h>",
+				"<S-Tab>",
 				function()
 					navigate_cell(true)
 				end,
 				desc = "Previous Cell",
 			},
-			{ "<A-l>", navigate_cell, desc = "Next Cell" },
+			{ "<Tab>", navigate_cell, desc = "Next Cell" },
 		},
 	},
 	{
