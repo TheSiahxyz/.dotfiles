@@ -8,8 +8,8 @@ Usage: ${0##*/} [OPTION]
 
 Options:
                     Open the most recent old file in Neovim.
-  -l, --list        Show all recent files in Neovim using fzf.
   -h, --help        Show this help message.
+  -l, --list        Show all recent files in Neovim using fzf.
 
 Examples:
   ${0##*/}          Open the most recent file.
@@ -29,6 +29,9 @@ list_oldfiles() {
     }
 
     case "$1" in
+    -h | --help)
+        show_help
+        ;;
     -l | --list)
         # Filter valid files
         valid_files=$(echo "$oldfiles" | while IFS= read -r file; do
@@ -54,9 +57,6 @@ list_oldfiles() {
 
         # Open selected files in Neovim
         openfiles "$selected_files"
-        ;;
-    -h | --help)
-        show_help
         ;;
     *)
         # Open the most recent file
