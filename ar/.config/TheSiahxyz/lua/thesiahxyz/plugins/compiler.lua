@@ -8,7 +8,7 @@ return {
 			local wk = require("which-key")
 			wk.add({
 				mode = { "n", "v" },
-				{ "<leader>r", group = "Compiler" },
+				{ "<leader>r", group = "Compiler/Refactoring" },
 			})
 		end,
 		keys = {
