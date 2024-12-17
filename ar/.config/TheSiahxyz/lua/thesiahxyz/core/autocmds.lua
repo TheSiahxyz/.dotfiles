@@ -76,10 +76,17 @@ autocmd("FileType", {
 		"checkhealth",
 		"neotest-summary",
 		"neotest-output-panel",
+		"terminal",
 	},
 	callback = function(event)
 		vim.bo[event.buf].buflisted = false
 		vim.keymap.set("n", "q", "<cmd>close<cr>", { buffer = event.buf, silent = true })
+	end,
+})
+vim.api.nvim_create_autocmd("TermOpen", {
+	pattern = "*",
+	callback = function()
+		vim.api.nvim_buf_set_keymap(0, "n", "q", "<cmd>close<cr>", { noremap = true, silent = true })
 	end,
 })
 

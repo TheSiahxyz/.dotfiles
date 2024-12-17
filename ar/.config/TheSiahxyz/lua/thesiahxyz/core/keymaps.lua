@@ -313,13 +313,7 @@ vim.keymap.set("n", "<C-right>", "<cmd>vertical resize +2<cr>", { desc = "Increa
 vim.api.nvim_set_keymap(
 	"n",
 	"<leader>rr",
-	':w!<cr>:!compiler "%:p"<cr>',
-	{ noremap = true, silent = true, desc = "Run compiler" }
-)
-vim.api.nvim_set_keymap(
-	"n",
-	"<leader>rR",
-	':w!<cr>:lua vim.cmd("split | resize 10 | terminal compiler " .. vim.fn.expand("%:p"))<cr>i',
+	':w!<cr>:lua vim.cmd("split | resize 10 | terminal compiler " .. vim.fn.expand("%:p"))<cr>',
 	{ noremap = true, silent = true, desc = "Run compiler interactively" }
 )
 vim.api.nvim_set_keymap(
