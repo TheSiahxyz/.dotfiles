@@ -226,7 +226,7 @@ return {
 					})
 					require("telescope").load_extension("zoxide")
 
-					vim.keymap.set("n", "<leader>cd", function()
+					vim.keymap.set("n", "<leader>fz", function()
 						require("telescope").extensions.zoxide.list()
 					end, { desc = "Find files (zoxide)" })
 				end,

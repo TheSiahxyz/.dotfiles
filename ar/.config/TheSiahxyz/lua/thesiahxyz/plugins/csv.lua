@@ -40,7 +40,7 @@ return {
 			local wk = require("which-key")
 			wk.add({
 				mode = { "n", "v", "x" },
-				{ "<leader>csv", group = "csv" },
+				{ "<leader>cs", group = "csv" },
 			})
 		end,
 		config = function()

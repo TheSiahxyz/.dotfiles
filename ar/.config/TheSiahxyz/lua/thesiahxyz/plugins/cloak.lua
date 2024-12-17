@@ -1,5 +1,6 @@
 return {
 	"laytan/cloak.nvim",
+	lazy = false,
 	config = function()
 		require("cloak").setup({
 			enabled = true,
@@ -14,6 +15,7 @@ return {
 						".env*",
 						"wrangler.toml",
 						".dev.vars",
+						"address*",
 					},
 					-- Match an equals sign and any character after it.
 					-- This can also be a table of patterns to cloak,
@@ -23,4 +25,11 @@ return {
 			},
 		})
 	end,
+	keys = {
+		{ "<leader>cle", "<cmd>CloakEnable<cr>", desc = "Enable cloak" },
+		{ "<leader>cld", "<cmd>CloakDisable<cr>", desc = "Disable cloak" },
+		{ "<leader>cld", "<cmd>CloakDisable<cr>", desc = "Disable cloak" },
+		{ "<leader>clp", "<cmd>CloakPreviewLine<cr>", desc = "Preview line cloak" },
+		{ "<leader>tC", "<cmd>CloakToggle<cr>", desc = "Toggle cloak" },
+	},
 }
