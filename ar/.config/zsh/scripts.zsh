@@ -713,24 +713,25 @@ alias createv=create_venv
 function create_venv() {
     local env_dir="${XDG_DATA_HOME:-${HOME}/.local/share}/venvs/${1:-venv}"
     local requirements_path="${XDG_DATA_HOME:-${HOME}/.local/share}/venvs/captured-requirements.txt"
+
     # Check if the environment already exists
     # Create the virtual environment
-    echo "Creating new virtual environment '$env_dir'..."
+    echo "Creating new virtual environment in '$env_dir'..."
     python3 -m venv $env_dir
 
     # Activate the virtual environment
     source $env_dir/bin/activate
 
     # Optional: Install any default packages
-    pip3 install --upgrade pip
-    pip3 install wheel
+    pip3 install --upgrade pip >/dev/null 2>&1
+    pip3 install wheel pynvim >/dev/null 2>&1
 
     if [ -f "$requirements_path" ]; then
         echo "Installing packages from '$requirements_path'..."
-        pip3 install -r "$requirements_path"
+        pip3 install -r "$requirements_path" >/dev/null 2>&1
     fi
 
-    echo "Virtual environment '$env_dir' created and activated!"
+    echo "Virtual environment '${1:-venv}' created and activated!"
 }
 
 # activate or switch venvs
@@ -779,21 +780,32 @@ function deactive_venv() {
 # delete venv
 alias delv=delete_venv
 function delete_venv() {
+    local venv="$1"
     local env_dir="${XDG_DATA_HOME:-${HOME}/.local/share}/venvs"
-    local options=($(find "$env_dir" -maxdepth 1 -mindepth 1 -type d -exec basename {} \;))
-    options+=("Delete All")
 
-    # Prompt user to select a virtual environment or choose an option to delete all
-    local selected_env=$(printf "%s\n" "${options[@]}" | fzf --cycle --prompt="venvs  " --height=~50% --layout=reverse --border --exit-0)
+    if [[ -z $venv ]]; then
+        local options=($(find "$env_dir" -maxdepth 1 -mindepth 1 -type d -exec basename {} \;))
+        options+=("Delete All")
 
-    if [[ -z $selected_env ]]; then
-        echo "No venvs selected"
-        return 0
-    elif [[ $selected_env == "Delete All" ]]; then
-        rm -rf "$env_dir"/*
-        echo "All venvs deleted"
+        # Prompt user to select virtual environments or choose to delete all
+        local selected_envs=$(printf "%s\n" "${options[@]}" | fzf --cycle --prompt="venvs  " --height=~50% --layout=reverse --border --multi --exit-0)
+
+        if [[ -z $selected_envs ]]; then
+            echo "No venvs selected"
+            return 0
+        elif [[ $selected_envs == *"Delete All"* ]]; then
+            rm -rf "$env_dir"/*
+            echo "All venvs deleted"
+        else
+            # Loop through selected environments and delete each
+            local env
+            while IFS= read -r env; do
+                rm -rf "$env_dir/$env"
+                echo "$env deleted"
+            done <<< "$selected_envs"
+        fi
     else
-        rm -rf "$env_dir/$selected_env"
-        echo "$selected_env deleted"
+        rm -rf "$env_dir/$venv"
+        echo "$venv deleted"
     fi
 }
