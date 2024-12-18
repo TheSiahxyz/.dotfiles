@@ -3,13 +3,12 @@ local ch = require("thesiahxyz.utils.cheatsheet.init")
 local state = ch.state
 
 local ascii = {
-	"                                        ",
-	"                                        ",
-	"░█▀▀░█░█░█▀▀░█▀█░▀█▀░█▀▀░█░█░█▀▀░█▀▀░▀█▀",
-	"░█░░░█▀█░█▀▀░█▀█░░█░░▀▀█░█▀█░█▀▀░█▀▀░░█░",
-	"░▀▀▀░▀░▀░▀▀▀░▀░▀░░▀░░▀▀▀░▀░▀░▀▀▀░▀▀▀░░▀░",
-	"                                        ",
-	"                                        ",
+	"                                      ",
+	"                                      ",
+	"█▀▀ █░█ █▀▀ ▄▀█ ▀█▀ █▀ █░█ █▀▀ █▀▀ ▀█▀",
+	"█▄▄ █▀█ ██▄ █▀█ ░█░ ▄█ █▀█ ██▄ ██▄ ░█░",
+	"                                      ",
+	"                                      ",
 }
 
 return function(buf, win, action)
@@ -37,12 +36,13 @@ return function(buf, win, action)
 		local total_width = lhs_max_width + rhs_max_width + 6 -- Add spacing for readability
 		local center_offset = math.floor((total_width - vim.fn.strdisplaywidth(ascii[1])) / 2)
 
-		-- Align ASCII art and title to the center of the mappings
+		-- Align ASCII art to the center
 		local ascii_header = vim.tbl_values(ascii)
 		for i, line in ipairs(ascii_header) do
 			ascii_header[i] = string.rep(" ", center_offset) .. line
 		end
 
+		-- Center-align the title
 		local title = "Cheatsheet"
 		local title_padding = math.floor((total_width - vim.fn.strdisplaywidth(title)) / 2)
 		local title_line = string.rep(" ", title_padding) .. title
@@ -58,7 +58,11 @@ return function(buf, win, action)
 
 		-- Add mappings grouped by section
 		for section_name, mappings in pairs(state.mappings_tb) do
-			table.insert(lines, section_name .. ":") -- Section header
+			-- Center-align the section name
+			local section_padding = math.floor((total_width - vim.fn.strdisplaywidth(section_name)) / 2)
+			table.insert(lines, string.rep(" ", section_padding) .. section_name) -- Section header
+
+			-- Add mappings aligned to lhs and rhs
 			for _, mapping in ipairs(mappings) do
 				local lhs = mapping[1]
 				local rhs = mapping[2]
