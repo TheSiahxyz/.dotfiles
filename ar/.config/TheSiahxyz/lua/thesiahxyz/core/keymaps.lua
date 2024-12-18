@@ -30,6 +30,23 @@ vim.keymap.set("n", "<leader>rn", function()
 	vim.cmd("edit " .. vim.fn.fnameescape(new_name))
 	vim.cmd("bdelete " .. vim.fn.bufnr(current_name))
 end, { noremap = true, silent = true, desc = "Rename file" })
+vim.keymap.set("n", "<leader>ms", function()
+	vim.cmd("new | put=execute('messages') | setlocal buftype=nofile")
+	local buf = vim.api.nvim_get_current_buf()
+	local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+	local filtered_lines = {}
+	for _, line in ipairs(lines) do
+		local trimmed_line = line:match("^%s*(.-)%s*$") -- Remove leading and trailing whitespace
+		if trimmed_line ~= "" then
+			table.insert(filtered_lines, trimmed_line) -- Only add non-empty lines
+		end
+	end
+	vim.fn.setreg('"', table.concat(filtered_lines, "\n"))
+	vim.api.nvim_buf_set_lines(buf, 0, -1, false, filtered_lines)
+	vim.keymap.set("n", "q", function()
+		vim.api.nvim_buf_delete(buf, { force = true })
+	end, { buffer = buf, desc = "Close message buffer" })
+end, { desc = "Open messages, trim, and copy content" })
 
 -- Clear search with <esc>
 vim.keymap.set({ "i", "n" }, "<esc>", "<cmd>noh<cr><esc>", { desc = "Clear search highlights" })

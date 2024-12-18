@@ -135,7 +135,18 @@ return {
 			},
 			winbar = {},
 			inactive_winbar = {},
-			extensions = {},
+			extensions = {
+				{
+					sections = {
+						lualine_a = {
+							function()
+								return "Cheatsheet"
+							end,
+						},
+					},
+					filetypes = { "nvcheatsheet" },
+				},
+			},
 		})
 
 		local lualine_hidden = true
