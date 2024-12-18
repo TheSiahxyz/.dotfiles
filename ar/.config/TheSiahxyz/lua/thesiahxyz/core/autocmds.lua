@@ -86,7 +86,7 @@ autocmd("FileType", {
 vim.api.nvim_create_autocmd("TermOpen", {
 	pattern = "*",
 	callback = function()
-		vim.api.nvim_buf_set_keymap(0, "n", "q", "<cmd>close<cr>", { noremap = true, silent = true })
+		vim.cmd("startinsert")
 	end,
 })
 
