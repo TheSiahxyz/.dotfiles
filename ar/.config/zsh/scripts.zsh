@@ -442,11 +442,7 @@ function lfcd () {
 function man() {
     if [[ -z "$@" ]]; then
         if command -v fzf >/dev/null 2>&1; then
-            local page=$(command man -k . | fzf --prompt='Man> ' | awk '{print $1}')
-            if [[ -z $page ]]; then
-                sudo mandb
-                page=$(command man -k . | fzf --prompt='Man> ' | awk '{print $1}')
-            fi
+            local page=$(command man -k . | fzf --prompt='Man> ' --exit-0 | awk '{print $1}')
             if [[ -n $page ]]; then
                 nvim +"Man $page | only"
             fi
