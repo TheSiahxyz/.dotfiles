@@ -19,6 +19,9 @@ restartinit() {
 if [ "$#" -eq 1 ]; then
     folder_path="$1"
     folder_name=$(basename "$folder_path" | tr '[:upper:]' '[:lower:]')
+    if [ "$folder_path" = "/media/$USER" ]; then
+        folder_name="media"
+    fi
 else
     folder_name=$(echo | dmenu -p "Enter the name of the folder to share:" | tr '[:upper:]' '[:lower:]') || exit 1
     [ -z "$folder_name" ] && notify-send "📁No folder name provided." && exit 1
