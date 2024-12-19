@@ -50,6 +50,7 @@ bindkey -s '^X^V' '^uv.\n'
 bindkey -s '^X^]' '^usesh last\n'
 bindkey -s '^X^_' '^uali\n'
 bindkey -s '^X^X^B' '^urbackup\n'
+bindkey -s '^X^X^P' '^upcyr\n'
 bindkey -s '^X^X^R' '^urbackup -r\n'
 bindkey -s '^X^X^S' '^usshadd\n'
 
