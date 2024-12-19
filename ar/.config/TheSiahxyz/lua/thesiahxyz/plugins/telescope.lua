@@ -15,6 +15,22 @@ function vim.live_grep_from_project_git_root()
 	require("telescope.builtin").live_grep(opts)
 end
 
+local function find_nvim_plugin_files(prompt_bufnr)
+	local actions = require("telescope.actions")
+	local action_state = require("telescope.actions.state")
+
+	actions.close(prompt_bufnr)
+
+	local selection = action_state.get_selected_entry()
+	if selection and selection.value then
+		-- Construct the full path
+		local base_path = vim.fn.stdpath("data")
+		local full_path = vim.fn.resolve(base_path .. "/" .. selection.value)
+
+		require("mini.files").open(full_path, true)
+	end
+end
+
 return {
 	{
 		"nvim-telescope/telescope-file-browser.nvim",
@@ -615,6 +631,28 @@ return {
 			vim.keymap.set("n", "<leader>fn", function()
 				require("telescope.builtin").find_files({ cwd = vim.fn.stdpath("config") })
 			end, { desc = "Find neovim config files" })
+			vim.keymap.set("n", "<leader>fN", function()
+				require("telescope.builtin").find_files({
+					cwd = vim.fn.stdpath("data"),
+					find_command = {
+						"find",
+						"-maxdepth",
+						"2",
+						"-type",
+						"d",
+						"-iname",
+						".git",
+						"-prune",
+						"-o",
+					},
+					attach_mappings = function(_, map)
+						map("i", "<CR>", find_nvim_plugin_files)
+						map("n", "<CR>", find_nvim_plugin_files)
+						return true
+					end,
+				})
+			end, { desc = "Find neovim plugin files" })
+
 			vim.keymap.set("n", "<leader>fo", function()
 				require("telescope.builtin").oldfiles({})
 			end, { desc = "Find old files" })
