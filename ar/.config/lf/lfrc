@@ -20,6 +20,7 @@ set ratios 1:2:3
 set relativenumber true
 set scrolloff 10
 set shellopts '-eu'
+set tempmarks '123456'
 set truncatepct 50
 
 
@@ -485,6 +486,7 @@ map <delete> delete; clear
 # Editor
 map <enter> $$EDITOR "$f"
 map <c-v> push :!nvim<space>
+map vnl :!nvim -c "execute 'edit ' . v:oldfiles[0]" +normal\ \'0
 
 # Extract
 map E extract; clear
