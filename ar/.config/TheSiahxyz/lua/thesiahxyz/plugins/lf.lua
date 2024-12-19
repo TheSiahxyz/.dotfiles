@@ -42,21 +42,21 @@ return {
 						require("toggleterm").send_lines_to_terminal(motion_type, false, { args = vim.v.count })
 					end)
 					vim.api.nvim_feedkeys("g@", "n", false)
-				end, { desc = "Send line to terminal" })
+				end, { desc = "Send motions to terminal" })
 				-- Double the command to send line to terminal
 				vim.keymap.set("n", "<leader><C-a>", function()
 					set_opfunc(function(motion_type)
 						require("toggleterm").send_lines_to_terminal(motion_type, false, { args = vim.v.count })
 					end)
 					vim.api.nvim_feedkeys("g@_", "n", false)
-				end, { desc = "Send lines to terminal" })
+				end, { desc = "Send double command to terminal" })
 				-- Send whole file
 				vim.keymap.set("n", "<leader><C-g>", function()
 					set_opfunc(function(motion_type)
 						require("toggleterm").send_lines_to_terminal(motion_type, false, { args = vim.v.count })
 					end)
 					vim.api.nvim_feedkeys("ggg@G''", "n", false)
-				end, { desc = "Send lines to terminal (clipboard)" })
+				end, { desc = "Send whole file to terminal (clipboard)" })
 			end,
 		},
 	},
@@ -68,10 +68,10 @@ return {
 		require("lf").setup({
 			default_action = "drop", -- Default action when `Lf` opens a file
 			default_actions = {
-				["<C-t>"] = "tabedit",
-				["<C-x>"] = "split",
+				["<CR>"] = "tabedit",
+				["<C-t>"] = "tab drop",
 				["<C-v>"] = "vsplit",
-				["<C-o>"] = "tab drop",
+				["<C-x>"] = "split",
 			},
 			winblend = 0, -- Pseudotransparency level
 			direction = "float", -- Window type
