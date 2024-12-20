@@ -323,7 +323,7 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 	group = lf_config,
 	pattern = { "lfrc" },
 	callback = function()
-		vim.cmd("silent !lf -remote 'send $id source ~/.config/lf/lfrc'")
+		vim.cmd("silent !source ~/.config/lf/lfrc")
 	end,
 })
 
