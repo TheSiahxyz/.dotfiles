@@ -426,11 +426,19 @@ cmd zi ${{
 cmd follow_link %{{
     lf -remote "send ${id} select '$(readlink $f)'"
 }}
+cmd lastnvim ${{
+    file=$(nvim -u NONE --headless +'lua io.write(vim.v.oldfiles[1] .. "\n")' +qa)
+    $EDITOR "$file"
+}}
+cmd edit-config ${{
+    echo "1"
+    $EDITOR ~/.config/lf/lfrc
+    lf -remote "send $id source ~/.config/lf/lfrc"
+}}
 
 # Wallpaper
 cmd setbg "$1"
 
-# load selection on startup
 ### --- Bindings --- ###
 # Unbinding
 map b
@@ -448,6 +456,9 @@ map w
 map y
 map z
 map ,
+
+# Shortcuts
+source ~/.config/lf/shortcutrc
 
 # Chmod
 map zx chmods
@@ -486,7 +497,8 @@ map <delete> delete; clear
 # Editor
 map <enter> $$EDITOR "$f"
 map <c-v> push :!nvim<space>
-map vnl :!nvim -c "execute 'edit ' . v:oldfiles[0]" +normal\ \'0
+map vlf edit-config
+map vln lastnvim
 
 # Extract
 map E extract; clear
@@ -585,6 +597,3 @@ map bg $setbg "$f"
 
 # Wine
 map wi $wine "$f"
-
-# shortcuts
-source ~/.config/lf/shortcutrc
