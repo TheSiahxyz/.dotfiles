@@ -431,7 +431,6 @@ cmd lastnvim ${{
     $EDITOR "$file"
 }}
 cmd edit-config ${{
-    echo "1"
     $EDITOR ~/.config/lf/lfrc
     lf -remote "send $id source ~/.config/lf/lfrc"
 }}

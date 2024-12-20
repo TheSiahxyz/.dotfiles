@@ -318,6 +318,15 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 	end,
 })
 
+-- Source lfrc if it's edited
+vim.api.nvim_create_autocmd("BufWritePost", {
+	group = lf_config,
+	pattern = { "lfrc" },
+	callback = function()
+		vim.cmd("silent !lf -remote 'send $id source ~/.config/lf/lfrc'")
+	end,
+})
+
 -- Run xrdb whenever Xdefaults or Xresources are updated.
 local x_config = augroup("x_config")
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
