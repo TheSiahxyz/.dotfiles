@@ -865,6 +865,8 @@ return {
 					search_dirs = frecency.query({}),
 				})
 			end, { desc = "Find frequency live grep" })
+
+			vim.keymap.set("n", "<leader>qd", "<cmd>FrecencyDelete<cr>", { desc = "Delete current buffer frequency" })
 		end,
 	},
 	{
