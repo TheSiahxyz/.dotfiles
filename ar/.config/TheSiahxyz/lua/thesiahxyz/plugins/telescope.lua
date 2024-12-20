@@ -811,13 +811,6 @@ return {
 				dependencies = { "nvim-lua/plenary.nvim" },
 			},
 		},
-		keys = {
-			{ -- lazy style key map
-				"<leader>fu",
-				"<cmd>Telescope undo<cr>",
-				desc = "Find undo history",
-			},
-		},
 		opts = {
 			-- don't use `defaults = { }` here, do this in the main telescope spec
 			extensions = {
@@ -834,19 +827,45 @@ return {
 			require("telescope").setup(opts)
 			require("telescope").load_extension("undo")
 		end,
+		keys = {
+			{ -- lazy style key map
+				"<leader>fu",
+				"<cmd>Telescope undo<cr>",
+				desc = "Find undo history",
+			},
+		},
 	},
 	{
 		"nvim-telescope/telescope-frecency.nvim",
-		config = function()
-			require("telescope").load_extension("frecency")
-		end,
-		keys = {
-			{
-				"<leader>fq",
-				"<cmd>Telescope frecency<cr>",
-				desc = "Find frecent files",
-			},
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+			"nvim-telescope/telescope.nvim",
 		},
+		config = function()
+			require("telescope").setup({
+				extensions = {
+					frecency = {
+						auto_validate = false,
+						matcher = "fuzzy",
+					},
+				},
+			})
+
+			require("telescope").load_extension("frecency")
+
+			vim.keymap.set("n", "<leader>fq", function()
+				require("telescope").extensions.frecency.frecency({
+					workspace = "CWD",
+				})
+			end, { desc = "Find frequency files" })
+
+			vim.keymap.set("n", "<leader>flq", function()
+				local frecency = require("telescope").extensions.frecency
+				require("telescope.builtin").live_grep({
+					search_dirs = frecency.query({}),
+				})
+			end, { desc = "Find frequency live grep" })
+		end,
 	},
 	{
 		"nvim-telescope/telescope-media-files.nvim",
