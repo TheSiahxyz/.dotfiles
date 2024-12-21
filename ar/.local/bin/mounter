@@ -27,13 +27,13 @@ attemptmount() {
     mp="/media/$USER/$mplabel"
     [ -n "$mplabel" ] || return
     if [ ! -d "$mp" ] && [ ! -d "/mnt/$mplabel" ]; then
-        getmount "$mp" && sudo -A mount "$chosen" "$mp" || return 1
+        getmount "$mp" && sudo -A mount "$chosen" "$mp" >/dev/null 2>&1 || return 1
     elif [ -d "$mp" ] && [ ! -d "/mnt/$mplabel" ]; then
-        sudo -A mount "$chosen" "$mp" || return 1
+        sudo -A mount "$chosen" "$mp" >/dev/null 2>&1 || return 1
     elif [ -d "/mnt/$mplabel" ]; then
-        getmount "/mnt/$mplabel" && sudo -A mount "$chosen" "/mnt/$mplabel" || return 1
+        getmount "/mnt/$mplabel" && sudo -A mount "$chosen" "/mnt/$mplabel" >/dev/null 2>&1 || return 1
     else
-        sudo -A mount "$chosen" || return 1
+        sudo -A mount "$chosen" >/dev/null 2>&1 || return 1
     fi
 }
 
