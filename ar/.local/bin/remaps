@@ -2,7 +2,7 @@
 
 # This script is called on startup to remap keys.
 # Decrease key repeat delay to 300ms and increase key repeat rate to 50 per second.
-xset r rate 300 50
+xset r rate 200 50
 # Map the caps lock key to control, and map the menu key to right super.
 xinput list | grep 'id=' | while read -r line; do
     id=$(echo "$line" | grep -i 'keyboard.*id.*keyboard' | sed 's/.*id=\([0-9]\+\).*/\1/')
