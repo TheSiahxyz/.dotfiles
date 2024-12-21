@@ -2,8 +2,10 @@
 
 # Define default Wine prefix
 export WINEPREFIX="${XDG_DATA_HOME:-${HOME}/.local/share}/soop"
+export WINEARCH='win32'
+
 # Clean up any previous Wine prefix for a fresh start
-rm -rf "$DEFAULT_WINEPREFIX"
+rm -rf "$WINEPREFIX"
 
 # Set Wine prefix and architecture
 
@@ -30,8 +32,6 @@ curl -s "$SRC_URL" -o "$DST_FILE" || {
 echo 'Initializing Wine environment...'
 wineboot >/dev/null 2>&1
 
-# Install necessary libraries via winetricks
-echo 'Installing required libraries via winetricks...'
 # Check if winetricks is installed, if not, install it
 if ! command -v winetricks >/dev/null; then
     sudo pacman --noconfirm --needed -S winetricks || {
@@ -40,8 +40,9 @@ if ! command -v winetricks >/dev/null; then
     }
 fi
 
+# Install necessary libraries via winetricks
 echo "Installing required libraries via winetricks..."
-if ! winetricks -q vcrun2005 mfc42; then
+if ! winetricks -q vcrun6 mfc42; then
     echo "Failed to install required libraries!"
     exit 1
 fi
