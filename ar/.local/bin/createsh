@@ -1,0 +1,106 @@
+#!/bin/sh
+
+# Function to display help
+help() {
+    cat <<EOF
+Usage: ${0##*/} [OPTION] [FILENAME]
+
+Generate a shell script in sh, bash, or zsh
+
+Options:
+  -d, --dash    Create a POSIX-compliant shell script (sh)
+  -b, --bash    Create a Bash script (bash)
+  -z, --zsh     Create a Zsh script (zsh)
+  -h, --help    Show this help message and exit
+
+Example:
+  ${0##*/} -d sambacreate
+EOF
+}
+
+# Check for arguments
+if [ $# -eq 0 ]; then
+    echo "Error: No filename provided. Use -h or --help for usage information."
+    exit 1
+fi
+
+# Default shell to POSIX if no option is provided
+if [ $# -eq 1 ]; then
+    shell="sh"
+    script_name="$1"
+else
+    # Parse options
+    while [ "$1" ]; do
+        case "$1" in
+        -d | --dash)
+            shell="sh"
+            ;;
+        -b | --bash)
+            shell="bash"
+            ;;
+        -z | --zsh)
+            shell="zsh"
+            ;;
+        -h | --help)
+            help
+            exit 0
+            ;;
+        *)
+            if [ -z "$script_name" ]; then
+                script_name="$1"
+            else
+                echo "Error: Invalid option '$1'. Use -h or --help for usage information."
+                exit 1
+            fi
+            ;;
+        esac
+        shift
+    done
+fi
+
+# Validate script name
+if [ -z "$script_name" ]; then
+    echo "Error: No filename provided. Use -h or --help for usage information."
+    exit 1
+fi
+
+# Check if the script already exists
+script_path="$HOME/.local/bin"
+if [ -f "$script_path/$script_name" ]; then
+    echo "Error: File '$script_path/$script_name' already exists."
+    exit 1
+fi
+
+# Create the new script file
+mkdir -p "$script_path"
+
+cat <<EOF >"$script_path/$script_name"
+#!/bin/$shell
+
+# Help function
+help() {
+    cat << HELP
+Usage: \${0##*/} [OPTION] [FILENAME]
+
+????
+
+Options:
+  -h, --help            Show this help message
+  -?, --????            ????
+
+Example:
+  ${0##*/} -? ????      ????
+}
+
+# Main function
+$script_name() {
+}
+
+# Call the main function with arguments
+$script_name "\$@"
+EOF
+
+# Make the script executable
+chmod +x "$script_path/$script_name"
+
+echo "'$script_name' created successfully at $script_path."
