@@ -4,9 +4,37 @@
 WORK_PROFILE="si.work"
 HOME_PROFILE="si.default"
 
+help() {
+    cat <<EOF
+Usage: $(basename "$0") <browser> [<profile_type>]
+
+Update the default profile in profiles.ini for Firefox or Librewolf.
+
+Options:
+  <browser>       The browser to configure. Accepted values:
+                  - firefox
+                  - librewolf
+
+  <profile_type>  The profile to set as default. Accepted values:
+                  - work: Sets the work profile ($WORK_PROFILE)
+                  - default: Sets the home profile ($HOME_PROFILE)
+                  If not specified, the default profile will be used.
+
+Examples:
+  # Set the work profile for Firefox
+  ${0##*/}      firefox work
+
+  # Set the default profile for Librewolf
+  ${0##*/}      librewolf default
+
+  # Set the default profile for Firefox (profile_type is optional)
+  ${0##*/}      firefox
+EOF
+}
+
 update_profiles_ini() {
     case "$1" in
-    -f | --firefo | firefox) profiles_ini_path="$HOME/.mozilla/firefox/profiles.ini" ;;
+    -f | --firefox | firefox) profiles_ini_path="$HOME/.mozilla/firefox/profiles.ini" ;;
     -l | --librewolf | librewolf) profiles_ini_path="$HOME/.librewolf/profiles.ini" ;;
     *)
         echo "Invalid browser type. Please use 'firefox' or 'librewolf'."
@@ -45,9 +73,7 @@ update_profile() {
 
     # Check if a browser is provided
     if [ -z "$browser" ]; then
-        echo "Usage: update_profile <browser> [<profile_type>]"
-        echo "Accepted browsers: firefox, librewolf"
-        echo "Accepted profile types: work, default"
+        help
         return 1
     fi
 
@@ -73,6 +99,12 @@ update_profile() {
         ;;
     esac
 }
+
+# Check for help flag
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    help
+    exit 0
+fi
 
 # Execute the main function with arguments passed to the script
 update_profile "$1" "$2"

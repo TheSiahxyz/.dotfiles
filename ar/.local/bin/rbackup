@@ -127,9 +127,9 @@ Options:
     -r, --root      Sync root files
 
 Example:
-    rbackup             # Sync all files to backup path
-    rbackup --help      # Print help messages
-    rbackup --root      # Sync root files
+    #{0##*/}             # Sync all files to backup path
+    #{0##*/} --help      # Print help messages
+    #{0##*/} --root      # Sync root files
 EOF
 }
 
