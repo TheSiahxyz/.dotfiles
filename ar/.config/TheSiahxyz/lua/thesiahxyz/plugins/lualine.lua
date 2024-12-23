@@ -35,7 +35,6 @@ return {
 					"branch",
 					"diff",
 					"diagnostics",
-					"require('molten.status').initialized()",
 				},
 				lualine_c = {
 					{
@@ -62,6 +61,11 @@ return {
 					"encoding",
 					"fileformat",
 					{
+						function()
+							return require("molten.status").initialized()
+						end,
+					},
+					{
 						"filetype",
 						colored = true, -- Displays filetype icon in color if set to true
 						icon_only = true, -- Display only an icon for filetype
@@ -81,23 +85,23 @@ return {
 			inactive_sections = {},
 			tabline = {
 				lualine_a = {
-					-- {
-					-- 	function()
-					-- 		local function tab_status()
-					-- 			local tabs = vim.api.nvim_list_tabpages()
-					-- 			local current_tab = vim.api.nvim_get_current_tabpage()
-					-- 			local current_tab_index = 0
-					-- 			for i, tab in ipairs(tabs) do
-					-- 				if tab == current_tab then
-					-- 					current_tab_index = i
-					-- 					break
-					-- 				end
-					-- 			end
-					-- 			return string.format("%d", current_tab_index)
-					-- 		end
-					-- 		return tab_status()
-					-- 	end,
-					-- },
+					{
+						function()
+							local function tab_status()
+								local tabs = vim.api.nvim_list_tabpages()
+								local current_tab = vim.api.nvim_get_current_tabpage()
+								local current_tab_index = 0
+								for i, tab in ipairs(tabs) do
+									if tab == current_tab then
+										current_tab_index = i
+										break
+									end
+								end
+								return string.format("%d", current_tab_index)
+							end
+							return tab_status()
+						end,
+					},
 				},
 				lualine_b = {
 					{
@@ -135,18 +139,7 @@ return {
 			},
 			winbar = {},
 			inactive_winbar = {},
-			extensions = {
-				{
-					sections = {
-						lualine_a = {
-							function()
-								return "Cheatsheet"
-							end,
-						},
-					},
-					filetypes = { "nvcheatsheet" },
-				},
-			},
+			extensions = {},
 		})
 
 		local lualine_hidden = true

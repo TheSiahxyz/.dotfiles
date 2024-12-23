@@ -720,7 +720,7 @@ function create_venv() {
 
     # Optional: Install any default packages
     pip3 install --upgrade pip >/dev/null 2>&1
-    pip3 install wheel pynvim >/dev/null 2>&1
+    pip3 install wheel pynvim jupytext jupyter_client cairosvg pnglatex plotly kaleido pyperclip nbformat pillow requests websocket-client >/dev/null 2>&1
 
     if [ -f "$requirements_path" ]; then
         echo "Installing packages from '$requirements_path'..."

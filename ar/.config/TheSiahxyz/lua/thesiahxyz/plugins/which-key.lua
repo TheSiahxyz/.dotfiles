@@ -209,6 +209,7 @@ return {
 				},
 				{ "<leader>B", group = "Force buffer" },
 				{ "<leader>c", group = "Ascii/Goto" },
+				{ "<leader>cl", group = "Cloak" },
 				{ "<leader>C", group = "Goto realpath" },
 				{ "<leader>e", group = "Explorer" },
 				{ "<leader>i", group = "Inspect" },

@@ -216,13 +216,13 @@ autocmd("LspAttach", {
 -- Save file as sudo on files that require root permission
 vim.api.nvim_create_user_command("SudoWrite", function()
 	vim.cmd([[
-        write !sudo tee % >/dev/null
+        write !sudo tee % 2>/dev/null
         edit!
     ]])
 end, {})
 vim.api.nvim_create_user_command("SudoWritequit", function()
 	vim.cmd([[
-        write !sudo tee % >/dev/null
+        write !sudo tee % 2>/dev/null
         edit!
         quit!
     ]])
