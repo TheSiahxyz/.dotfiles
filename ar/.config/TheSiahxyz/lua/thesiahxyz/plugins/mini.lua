@@ -566,8 +566,8 @@ return {
 				object_scope_with_border = "a-",
 
 				-- Motions (jump to respective border line; if not present - body line)
-				goto_top = "<leader>[-",
-				goto_bottom = "<leader>]-",
+				goto_top = "g,",
+				goto_bottom = "g;",
 			},
 			draw = {
 				animation = function()
