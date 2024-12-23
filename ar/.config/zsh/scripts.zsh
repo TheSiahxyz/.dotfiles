@@ -708,7 +708,7 @@ function switch_tmux_session() {
 alias createv=create_venv
 function create_venv() {
     local env_dir="${XDG_DATA_HOME:-${HOME}/.local/share}/venvs/${1:-venv}"
-    local requirements_path="${XDG_DATA_HOME:-${HOME}/.local/share}/venvs/captured-requirements.txt"
+    local requirements_path="${XDG_DATA_HOME:-${HOME}/.local/share}/venvs"
 
     # Check if the environment already exists
     # Create the virtual environment
@@ -720,11 +720,15 @@ function create_venv() {
 
     # Optional: Install any default packages
     pip3 install --upgrade pip >/dev/null 2>&1
-    pip3 install wheel pynvim jupytext jupyter_client cairosvg pnglatex plotly kaleido pyperclip nbformat pillow requests websocket-client >/dev/null 2>&1
 
-    if [ -f "$requirements_path" ]; then
-        echo "Installing packages from '$requirements_path'..."
-        pip3 install -r "$requirements_path" >/dev/null 2>&1
+    if [ -f "$requirements_path/default-requirements.txt" ]; then
+        echo "Installing packages from '$requirements_path/default-requirements.txt'..."
+        pip3 install -r "$requirements_path/default-requirements.txt" >/dev/null 2>&1
+    fi
+
+    if [ -f "$requirements_path/captured-requirements.txt" ]; then
+        echo "Installing packages from '$requirements_path/captured-requirements.txt'..."
+        pip3 install -r "$requirements_path/captured-requirements.txt" >/dev/null 2>&1
     fi
 
     echo "Virtual environment '${1:-venv}' created and activated!"
@@ -764,7 +768,7 @@ alias deactv=deactive_venv
 function deactive_venv() {
     if [[ "$VIRTUAL_ENV" != "" ]]; then
         if [[ ! -f "${XDG_DATA_HOME:-${HOME}/.local/share}/venvs/requirements.txt" ]]; then
-            pip3 freeze > "${XDG_DATA_HOME:-${HOME}/.local/share}/venvs/captured-requirements.txt}"
+            pip3 freeze > "${XDG_DATA_HOME:-${HOME}/.local/share}/venvs/captured-requirements.txt"
         fi
         deactivate
         echo "Virtual environment deactivated and all installed packages captured"
