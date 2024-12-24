@@ -23,10 +23,9 @@ user_pref("dom.security.https_only_mode", false);
 // Keep cookies until expiration or user deletion:
 user_pref("network.cookie.lifetimePolicy", 0);
 
-user_pref("dom.webnotifications.serviceworker.enabled", false);
-
 // Disable push notifications:
 user_pref("dom.push.enabled", false);
+user_pref("dom.webnotifications.serviceworker.enabled", false);
 
 // Disable the pocket antifeature:
 user_pref("extensions.pocket.enabled", false);
@@ -45,3 +44,24 @@ user_pref("identity.fxaccounts.enabled", false);
 
 // Fix the issue where right mouse button instantly clicks
 user_pref("ui.context_menus.after_mouseup", true);
+
+// CSS
+user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
+
+// Fullscreen notifications
+user_pref("full-screen-api.warning.timeout", false);
+
+// Alt key menu
+user_pref("ui.key.menuAccessKeyFocuses", false);
+
+// Alt key change
+user_pref("ui.key.menuAccessKey", -1);
+
+// Bookmarks visibility
+user_pref("browser.toolbars.bookmarks.visibility", "newtab");
+user_pref("browser.uidensity", 1);
+
+// screen & video & audio share
+user_pref("media.webrtc.camera.allow-pipewire", false);
+user_pref("media.webrtc.capture.allow-pipewire", true);
+user_pref("media.navigator.mediadatadecoder_vpx_enabled", true);
