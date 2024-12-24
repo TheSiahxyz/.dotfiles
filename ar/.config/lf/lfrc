@@ -424,7 +424,8 @@ cmd follow_link %{{
     lf -remote "send ${id} select '$(readlink $f)'"
 }}
 cmd lastnvim ${{
-    file=$(nvim -u NONE --headless +'lua io.write(vim.v.oldfiles[1] .. "\n")' +qa)
+    list=$(nvim -u NONE --headless +'lua io.write(table.concat(vim.v.oldfiles, "\n") .. "\n")' +qa)
+    file=$(printf "%s" "$list" | fzf)
     $EDITOR "$file"
 }}
 cmd edit-config ${{
@@ -495,7 +496,8 @@ map <delete> delete; clear
 map <enter> $$EDITOR "$f"
 map <c-v> push :!nvim<space>
 map vlf edit-config
-map vln lastnvim
+map vll lastnvim
+map vln $$EDITOR "$(nvim -u NONE --headless +'lua io.write(vim.v.oldfiles[1] .. "\n")' +qa)"
 
 # Extract
 map E extract; clear
