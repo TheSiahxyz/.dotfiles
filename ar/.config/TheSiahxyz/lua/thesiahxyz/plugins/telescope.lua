@@ -795,12 +795,31 @@ return {
 		dependencies = {
 			"nvim-lua/plenary.nvim",
 			"nvim-telescope/telescope.nvim",
+			"nvim-telescope/telescope-frecency.nvim",
 		},
 		config = function()
+			local frecency = require("telescope").extensions.frecency
+			require("telescope").setup({
+				extensions = {
+					repo = {
+						list = {
+							fd_opts = {
+								"--no-ignore-vcs",
+							},
+							file_ignore_patterns = {
+								"^" .. vim.env.HOME .. "/%.cache/",
+								"^" .. vim.env.HOME .. "/%.cargo/",
+							},
+							search_dirs = frecency.query({}),
+						},
+					},
+				},
+			})
+
 			require("telescope").load_extension("repo")
 		end,
 		keys = {
-			{ mode = "n", "<leader>fG", "<cmd>Telescope repo list<cr>", desc = "Find git repo" },
+			{ mode = "n", "<leader>fG", "<cmd>Telescope repo list<cr>", desc = "Find git files from repos" },
 		},
 	},
 	{
