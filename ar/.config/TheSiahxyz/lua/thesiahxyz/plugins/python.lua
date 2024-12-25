@@ -21,24 +21,32 @@ return {
 	},
 	{
 		"linux-cultist/venv-selector.nvim",
-		dependencies = { "neovim/nvim-lspconfig", "nvim-telescope/telescope.nvim", "mfussenegger/nvim-dap-python" },
-		branch = "regexp", -- Use this branch for the new version
-		event = "VeryLazy", -- Optional: needed only if you want to type `:VenvSelect` without a keymapping
+		dependencies = {
+			"neovim/nvim-lspconfig",
+			"mfussenegger/nvim-dap",
+			"mfussenegger/nvim-dap-python", --optional
+			{ "nvim-telescope/telescope.nvim", branch = "0.1.x", dependencies = { "nvim-lua/plenary.nvim" } },
+		},
+		lazy = false,
+		branch = "regexp", -- This is the regexp branch, use this for the new version
 		ft = "python",
 		init = function()
 			local wk = require("which-key")
 			wk.add({
 				mode = { "n", "v" },
-				{ "<leader>v", group = "Venv" },
+				{ "<leader>v", group = "Virtual envs" },
 			})
 		end,
-		cmd = { "VenvSelect", "VenvSelectCached" },
 		config = function()
 			require("venv-selector").setup({
-				name = { "venv", ".venv", "venvs" },
 				settings = {
 					options = {
 						notify_user_on_venv_activation = true,
+					},
+					search = {
+						find_venvs = {
+							command = "fd /bin/python$ ~/.local/share/venvs --full-path",
+						},
 					},
 				},
 			})
