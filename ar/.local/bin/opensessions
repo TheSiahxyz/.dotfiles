@@ -27,7 +27,6 @@ if [ "$#" -eq 1 ]; then
 else
     # handle session creation for multiple selected directories
     for dir in $dirs; do
-        echo "dir $dir"
         if [ -d "$dir" ]; then
             session_name=$(get_session_name "$dir")
             if ! tmux has-session -t "$session_name" 2>/dev/null; then
