@@ -32,11 +32,10 @@ return {
 				{ "<leader>v", group = "Venv" },
 			})
 		end,
+		cmd = { "VenvSelect", "VenvSelectCached" },
 		config = function()
 			require("venv-selector").setup({
-				-- Your options go here
-				-- name = "venv",
-				-- auto_refresh = false
+				name = { "venv", ".venv", "venvs" },
 				settings = {
 					options = {
 						notify_user_on_venv_activation = true,

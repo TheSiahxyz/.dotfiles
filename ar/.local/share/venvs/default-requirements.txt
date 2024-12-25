@@ -7,7 +7,6 @@ jupytext
 kaleido
 nbformat
 notebook
-pcairosvg
 pillow
 pip
 pipx
@@ -18,7 +17,6 @@ pynvim
 pyperclip
 requests
 trash-cli
-ueberzug
 urlscan
 virtualenv
 websocket-client

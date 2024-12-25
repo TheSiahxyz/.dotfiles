@@ -742,6 +742,8 @@ function active_venv() {
         venv=$(find "$XDG_DATA_HOME/venvs" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | fzf)
     fi
     source "$XDG_DATA_HOME/venvs/$venv/bin/activate"
+    python -m ensurepip --upgrade >/dev/null 2>&1
+    python -m pip install --upgrade pip >/dev/null 2>&1
 }
 
 # list venvs
