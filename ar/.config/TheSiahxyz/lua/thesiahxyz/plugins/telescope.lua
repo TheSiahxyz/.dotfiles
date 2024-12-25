@@ -139,7 +139,7 @@ return {
 	},
 	{
 		"nvim-telescope/telescope.nvim",
-		version = false,
+		tag = "0.1.8",
 		dependencies = {
 			{ "nvim-lua/plenary.nvim" },
 			{
@@ -795,10 +795,8 @@ return {
 		dependencies = {
 			"nvim-lua/plenary.nvim",
 			"nvim-telescope/telescope.nvim",
-			"nvim-telescope/telescope-frecency.nvim",
 		},
 		config = function()
-			local frecency = require("telescope").extensions.frecency
 			require("telescope").setup({
 				extensions = {
 					repo = {
@@ -945,17 +943,17 @@ return {
 								["o"] = project_actions.next_cd_scope,
 							},
 							i = {
-								["<c-d>"] = project_actions.delete_project,
-								["<c-v>"] = project_actions.rename_project,
-								["<c-a>"] = project_actions.add_project,
-								["<c-A>"] = project_actions.add_project_cwd,
-								["<c-f>"] = project_actions.find_project_files,
-								["<c-b>"] = project_actions.browse_project_files,
-								["<c-s>"] = project_actions.search_in_project_files,
-								["<c-r>"] = project_actions.recent_project_files,
-								["<c-l>"] = project_actions.change_working_directory,
-								["<c-o>"] = project_actions.next_cd_scope,
-								["<c-w>"] = project_actions.change_workspace,
+								["<C-d>"] = project_actions.delete_project,
+								["<C-v>"] = project_actions.rename_project,
+								["<C-a>"] = project_actions.add_project,
+								["<C-A>"] = project_actions.add_project_cwd,
+								["<C-f>"] = project_actions.find_project_files,
+								["<C-b>"] = project_actions.browse_project_files,
+								["<C-s>"] = project_actions.search_in_project_files,
+								["<C-r>"] = project_actions.recent_project_files,
+								["<C-l>"] = project_actions.change_working_directory,
+								["<C-o>"] = project_actions.next_cd_scope,
+								["<C-w>"] = project_actions.change_workspace,
 							},
 						},
 					},

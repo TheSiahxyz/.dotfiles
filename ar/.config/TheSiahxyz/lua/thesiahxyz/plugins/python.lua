@@ -44,7 +44,7 @@ return {
 						notify_user_on_venv_activation = true,
 					},
 					search = {
-						find_venvs = {
+						venvs = {
 							command = "fd /bin/python$ ~/.local/share/venvs --full-path",
 						},
 					},
