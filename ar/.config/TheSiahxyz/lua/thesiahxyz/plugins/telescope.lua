@@ -687,7 +687,7 @@ return {
 			vim.keymap.set("n", "<leader>gc", function()
 				require("telescope.builtin").git_commits()
 			end, { desc = "Find git commits" })
-			vim.keymap.set("n", "<leader>gn", function()
+			vim.keymap.set("n", "<leader>gC", function()
 				require("telescope.builtin").git_bcommits()
 			end, { desc = "Find buffer git commits" })
 			vim.keymap.set("n", "<leader>gr", function()

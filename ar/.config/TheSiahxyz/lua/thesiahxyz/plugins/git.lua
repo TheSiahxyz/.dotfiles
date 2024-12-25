@@ -46,7 +46,7 @@ return {
             map("n", "<leader>gS", gs.stage_buffer, "Stage buffer")
             map("n", "<leader>gu", gs.undo_stage_hunk, "Undo stage hunk")
             map("n", "<leader>gR", gs.reset_buffer, "Reset buffer")
-            map("n", "<leader>gp", gs.preview_hunk_inline, "Preview hunk inline")
+            map("n", "<leader>gpv", gs.preview_hunk_inline, "Preview hunk inline")
             map("n", "<leader>gb", function() gs.blame_line({ full = true }) end, "Blame line")
             map("n", "<leader>gB", function() gs.blame() end, "Blame buffer")
             map("n", "<leader>gd", gs.diffthis, "Diff this")
@@ -79,19 +79,23 @@ return {
 					end
 
 					local bufnr = vim.api.nvim_get_current_buf()
-					vim.keymap.set("n", "<leader>p", function()
+					vim.keymap.set("n", "<leader>gps", function()
 						vim.cmd.Git("push")
 					end, { buffer = bufnr, remap = false, desc = "Git push" })
-
-					vim.keymap.set("n", "<leader>P", function()
+					vim.keymap.set("n", "<leader>gpl", function()
 						vim.cmd.Git({ "pull", "--rebase" })
 					end, { buffer = bufnr, remap = false, desc = "Git pull" })
-
 					vim.keymap.set(
 						"n",
-						"<leader>t",
+						"<leader>gpo",
 						":Git push -u origin ",
 						{ buffer = bufnr, remap = false, desc = "Git push origin" }
+					)
+					vim.keymap.set(
+						"n",
+						"<leader>gph",
+						":Git push -u home ",
+						{ buffer = bufnr, remap = false, desc = "Git push home" }
 					)
 				end,
 			})
