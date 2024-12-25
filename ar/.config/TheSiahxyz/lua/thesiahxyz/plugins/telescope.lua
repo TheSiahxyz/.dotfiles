@@ -734,7 +734,7 @@ return {
 			vim.keymap.set("n", "<leader>sd", function()
 				require("telescope.builtin").diagnostics({})
 			end, { desc = "Search diagonostics" })
-			vim.keymap.set("n", "<leader>sg", vim.live_grep_from_project_git_root, { desc = "Grep from git files" })
+			vim.keymap.set("n", "<leader>sg", vim.live_grep_from_project_git_root, { desc = "Live grep (git)" })
 			vim.keymap.set("n", "<leader>sw", function()
 				require("telescope.builtin").live_grep({})
 			end, { desc = "Search word (Live grep)" })
@@ -810,7 +810,6 @@ return {
 								"^" .. vim.env.HOME .. "/%.cache/",
 								"^" .. vim.env.HOME .. "/%.cargo/",
 							},
-							search_dirs = frecency.query({}),
 						},
 					},
 				},
@@ -819,7 +818,7 @@ return {
 			require("telescope").load_extension("repo")
 		end,
 		keys = {
-			{ mode = "n", "<leader>fG", "<cmd>Telescope repo list<cr>", desc = "Find git files from repos" },
+			{ mode = "n", "<leader>fG", "<cmd>Telescope repo list<cr>", desc = "Find git files (repo)" },
 		},
 	},
 	{
