@@ -16,7 +16,7 @@ vly     $HOME/.lynxrc                                                           
 vmw     ${XDG_CONFIG_HOME:-${HOME}/.config}/mutt/muttrc                         # Mutt (email client) config
 Vmw     /usr/share/mutt-wizard/mutt-wizard.muttrc                               # Global mutt config
 vnb     ${XDG_CONFIG_HOME:-${HOME}/.config}/ncmpcpp/bindings                    # Ncmpcpp (music player) keybinds file
-vnc     ${XDG_CONFIG_HOME:-${HOME}/.config}/ncmpcpp/config                      # Ncmpcpp (music player) config
+vnp     ${XDG_CONFIG_HOME:-${HOME}/.config}/ncmpcpp/config                      # Ncmpcpp (music player) config
 vns     ${XDG_CONFIG_HOME:-${HOME}/.config}/newsboat/config                     # Newsboat config (RSS reader)
 vnu     ${XDG_CONFIG_HOME:-${HOME}/.config}/newsboat/urls                       # Newsboat url (RSS reader)
 Vsm     /etc/samba/smb.conf                                                     # Samba config
