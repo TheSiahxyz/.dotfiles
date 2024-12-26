@@ -1,6 +1,18 @@
--- Leader Keys
+-- Init leader Keys
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
+
+-- Ascii
+vim.keymap.set("n", "<leader>c1", ":.!toilet -w 200 -f bfraktur<cr>", { desc = "Ascii art bfraktur" })
+vim.keymap.set("n", "<leader>c2", ":.!toilet -w 200 -f emboss<cr>", { desc = "Ascii art emboss" })
+vim.keymap.set("n", "<leader>c3", ":.!toilet -w 200 -f emboss2<cr>", { desc = "Ascii art emboss2" })
+vim.keymap.set("n", "<leader>c4", ":.!toilet -w 200 -f future<cr>", { desc = "Ascii art future" })
+vim.keymap.set("n", "<leader>c5", ":.!toilet -w 200 -f pagga<cr>", { desc = "Ascii art pagga" })
+vim.keymap.set("n", "<leader>c6", ":.!toilet -w 200 -f wideterm<cr>", { desc = "Ascii art wideterm" })
+vim.keymap.set("n", "<leader>c7", ":.!figlet -w 200 -f standard<cr>", { desc = "Ascii art standard" })
+vim.keymap.set("n", "<leader>c8", ":.!figlet -w 200 -f slant<cr>", { desc = "Ascii art slant" })
+vim.keymap.set("n", "<leader>c9", ":.!figlet -w 200 -f big<cr>", { desc = "Ascii art big" })
+vim.keymap.set("n", "<leader>c0", ":.!figlet -w 200 -f shadow<cr>", { desc = "Ascii art shadow" })
 
 -- Buffers
 vim.keymap.set({ "n", "v", "x", "t" }, "<A-x>", "<cmd>bd!<cr>", { desc = "Delete buffer" })
@@ -48,10 +60,22 @@ vim.keymap.set("n", "<leader>ms", function()
 	end, { buffer = buf, desc = "Close message buffer" })
 end, { desc = "Open messages, trim, and copy content" })
 
+-- Cd
+vim.keymap.set("n", "gcd", ":cd %:p:h<cr>:pwd<cr>", { desc = "Go to current file path" })
+vim.keymap.set("n", "gcD", function()
+	local realpath = vim.fn.systemlist("readlink -f " .. vim.fn.shellescape(vim.fn.expand("%:p")))[1]
+	vim.cmd("cd " .. vim.fn.fnameescape(vim.fn.fnamemodify(realpath, ":h")))
+	vim.cmd("pwd")
+end, { desc = "Go to real path of current file" })
+vim.keymap.set("n", "<leader>..", ":cd ..<cr>:pwd<cr>", { desc = "Go to current file path" })
+
+-- Check health
+vim.keymap.set("n", "<leader>ch", ":checkhealth<cr>", { desc = "Check neovim health" })
+
 -- Clear search with <esc>
 vim.keymap.set({ "i", "n" }, "<esc>", "<cmd>noh<cr><esc>", { desc = "Clear search highlights" })
 
--- Clear search, diff update and redraw
+-- Clear search / diff update / redraw
 vim.keymap.set(
 	"n",
 	"<leader>R",
@@ -86,25 +110,33 @@ vim.keymap.set(
 	{ desc = "Copy current file name and path" }
 )
 
--- Remove
-vim.keymap.set("n", "<leader>rm", function()
-	local filepath = vim.fn.expand("%")
-	local filename = vim.fn.expand("%:t")
-	if vim.fn.filereadable(filepath) == 1 then
-		local confirm = vim.fn.input('Do you want to delete "' .. filename .. '"? (y/n): ')
-		if confirm:lower() == "y" then
-			local trash_put = vim.fn.executable("trash-put") == 1
-			if trash_put then
-				-- If trash-put exists, move the file to trash
-				vim.cmd("silent !trash-put " .. filepath)
-			else
-				-- If trash-put doesn't exist, use the rm command to delete the file
-				vim.cmd("silent !rm " .. filepath)
-			end
-			vim.cmd("bd!")
-		end
+-- Cut, Yank & Paste
+vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]], { desc = "Yank to clipboard" })
+vim.keymap.set("n", "<leader>Y", [["+Y]], { desc = "Yank line to clipboard" })
+vim.keymap.set({ "n", "v" }, "<leader><C-y>", ":%y<cr>", { desc = "Yank current file to clipboard" })
+vim.keymap.set({ "n", "v", "x" }, "<leader>pp", [["+p]], { desc = "Paste from clipboard after cursor" })
+vim.keymap.set({ "n", "v", "x" }, "<leader>PP", [["+P]], { desc = "Paste from clipboard before cursor" })
+vim.keymap.set({ "n", "v", "x" }, "<leader>pP", [["_dP]], { desc = "Paste over and preserve clipboard" })
+vim.keymap.set({ "n", "v" }, "<leader>dd", [["_d]], { desc = "Delete without storing in clipboard" })
+vim.keymap.set({ "n", "v" }, "<leader>DD", [["+d]], { desc = "Delete and yank to clipboard" })
+vim.keymap.set("n", "<leader><C-d>", ":%d_<cr>", { desc = "Delete all to black hole register" })
+
+-- Diagnostic
+local diagnostic_goto = function(next, severity)
+	local go = next and vim.diagnostic.goto_next or vim.diagnostic.goto_prev
+	severity = severity and vim.diagnostic.severity[severity] or nil
+	return function()
+		go({ severity = severity })
 	end
-end, { desc = "Remove current file" })
+end
+-- vim.keymap.set("n", "[d", diagnostic_goto(false), { desc = "Previous diagnostic" })
+-- vim.keymap.set("n", "]d", diagnostic_goto(true), { desc = "Next diagnostic" })
+vim.keymap.set("n", "<leader>[e", diagnostic_goto(false, "ERROR"), { desc = "Previous error" })
+vim.keymap.set("n", "<leader>]e", diagnostic_goto(true, "ERROR"), { desc = "Next error" })
+vim.keymap.set("n", "<leader>[w", diagnostic_goto(false, "WARN"), { desc = "Previous warning" })
+vim.keymap.set("n", "<leader>]w", diagnostic_goto(true, "WARN"), { desc = "Next warning" })
+vim.keymap.set("n", "<leader>od", vim.diagnostic.open_float, { desc = "Open diagnostic message" })
+vim.keymap.set("n", "<leader>la", vim.diagnostic.setloclist, { desc = "Add diagnostics to location list" })
 
 -- Disable
 vim.keymap.set("n", "Q", "<nop>", { desc = "Disable q command" })
@@ -119,8 +151,197 @@ vim.keymap.set("n", "<leader>qe", function()
 	end
 end, { desc = "Close explorer (netrw)" })
 
+-- Files
+vim.keymap.set("n", "<leader>fn", "<cmd>enew<cr>", { desc = "Open new buffer" })
+
+-- Fix List & Trouble
+vim.keymap.set("n", "[o", "<cmd>lprev<cr>zz", { desc = "Previous location list item" })
+vim.keymap.set("n", "]o", "<cmd>lnext<cr>zz", { desc = "Next location list item" })
+vim.keymap.set("n", "[q", "<cmd>cprev<cr>zz", { desc = "Previous quickfix item" })
+vim.keymap.set("n", "]q", "<cmd>cnext<cr>zz", { desc = "Next quickfix item" })
+vim.keymap.set(
+	"n",
+	"<leader>rw",
+	[[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
+	{ desc = "Search and replace word under cursor" }
+)
+vim.keymap.set("n", "<leader>oo", "<cmd>lopen<cr>", { desc = "Open location list" })
+vim.keymap.set("n", "<leader>oq", "<cmd>copen<cr>", { desc = "Open quickfix list" })
+
+-- Formats
+vim.keymap.set("n", "<leader>cF", vim.lsp.buf.format, { desc = "Format buffer by default lsp" })
+
+-- Git
+-- create repository
+vim.keymap.set("n", "<leader>gR", function()
+	-- Check if GitHub CLI is installed
+	local gh_installed = vim.fn.system("command -v gh")
+	if gh_installed == "" then
+		print("GitHub CLI is not installed. Please install it using 'brew install gh'.")
+		return
+	end
+	-- Get the current working directory and extract the repository name
+	local cwd = vim.fn.getcwd()
+	local repo_name = vim.fn.fnamemodify(cwd, ":t")
+	if repo_name == "" then
+		print("Failed to extract repository name from the current directory.")
+		return
+	end
+	-- Display the message and ask for confirmation
+	local confirmation = vim.fn.input('The name of the repo will be: "' .. repo_name .. '"\nType "yes" to continue: ')
+	if confirmation:lower() ~= "yes" then
+		print("Operation canceled.")
+		return
+	end
+	-- Check if the repository already exists on GitHub
+	local check_repo_command =
+		string.format("gh repo view %s/%s", vim.fn.system("gh api user --jq '.login'"):gsub("%s+", ""), repo_name)
+	local check_repo_result = vim.fn.systemlist(check_repo_command)
+	if not string.find(table.concat(check_repo_result), "Could not resolve to a Repository") then
+		print("Repository '" .. repo_name .. "' already exists on GitHub.")
+		return
+	end
+	-- Prompt for repository type
+	local repo_type = vim.fn.input("Enter the repository type (private/public): "):lower()
+	if repo_type ~= "private" and repo_type ~= "public" then
+		print("Invalid repository type. Please enter 'private' or 'public'.")
+		return
+	end
+	-- Set the repository type flag
+	local repo_type_flag = repo_type == "private" and "--private" or "--public"
+	-- Initialize the git repository and create the GitHub repository
+	local init_command = string.format("cd %s && git init", vim.fn.shellescape(cwd))
+	vim.fn.system(init_command)
+	local create_command =
+		string.format("cd %s && gh repo create %s %s --source=.", vim.fn.shellescape(cwd), repo_name, repo_type_flag)
+	local create_result = vim.fn.system(create_command)
+	-- Print the result of the repository creation command
+	if string.find(create_result, "https://github.com") then
+		print("Repository '" .. repo_name .. "' created successfully.")
+	else
+		print("Failed to create the repository: " .. create_result)
+	end
+end, { desc = "Create GitHub repository" })
+-- open repository
+-- Open current file's GitHub repo link lamw25wmal
+vim.keymap.set("n", "<leader>fG", function()
+	local file_path = vim.fn.expand("%:p")
+	if file_path ~= "" then
+		-- Get the root directory of the git repository
+		local git_root = vim.fn.systemlist("git rev-parse --show-toplevel")[1]
+		if git_root and git_root ~= "" then
+			-- Get the origin URL of the git repository
+			local origin_url = vim.fn.systemlist("git config --get remote.origin.url")[1]
+			if origin_url and origin_url ~= "" then
+				-- Get the current branch name
+				local branch_name = vim.fn.systemlist("git rev-parse --abbrev-ref HEAD")[1]
+				if branch_name and branch_name ~= "" then
+					-- Convert the origin URL to a GitHub URL
+					local repo_url = origin_url:gsub("git@github.com[^:]*:", "https://github.com/"):gsub("%.git$", "")
+					-- Extract the relative path from the file path
+					local relative_path = file_path:sub(#git_root + 2)
+					local github_url = repo_url .. "/blob/" .. branch_name .. "/" .. relative_path
+					local command = "open " .. vim.fn.shellescape(github_url)
+					vim.fn.system(command)
+					print("Opened GitHub link: " .. github_url)
+				else
+					print("Could not determine the current branch name")
+				end
+			else
+				print("Could not determine the origin URL for the GitHub repository")
+			end
+		else
+			print("Could not determine the root directory for the GitHub repository")
+		end
+	else
+		print("No file is currently open")
+	end
+end, { desc = "Open current file's GitHub repo link" })
+-- paste a github link and add it in this format
+vim.keymap.set({ "n", "v", "i" }, "<M-;>", function()
+	-- Insert the text in the desired format
+	vim.cmd('normal! a[](){:target="_blank"} ')
+	vim.cmd("normal! F(pv2F/lyF[p")
+	-- Leave me in normal mode or command mode
+	vim.cmd("stopinsert")
+end, { desc = "Paste github link" })
+
+-- Health
+vim.keymap.set("n", "<leader>ch", ":checkhealth<cr>", { desc = "Check neovim health" })
+
 -- Highlights under cursor
 vim.keymap.set("n", "<leader>ip", vim.show_pos, { desc = "Inspect position" })
+
+-- Keywordprg
+vim.keymap.set("n", "<leader>K", "<cmd>norm! K<cr>", { desc = "Look up keyword" })
+
+-- Lines
+vim.keymap.set("n", "<A-,>", "<cmd>m .-2<cr>==", { desc = "Move line up" })
+vim.keymap.set("n", "<C-,>", "<cmd>m .-2<cr>==", { desc = "Move line up" })
+vim.keymap.set("n", "<A-.>", "<cmd>m .+1<cr>==", { desc = "Move line down" })
+vim.keymap.set("n", "<C-.>", "<cmd>m .+1<cr>==", { desc = "Move line down" })
+vim.keymap.set(
+	"i",
+	"<A-,>",
+	"<esc><cmd>m .-2<cr>==gi",
+	{ noremap = true, silent = true, desc = "Move line up in insert mode" }
+)
+vim.keymap.set(
+	"i",
+	"<C-,>",
+	"<esc><cmd>m .-2<cr>==gi",
+	{ noremap = true, silent = true, desc = "Move line up in insert mode" }
+)
+vim.keymap.set(
+	"i",
+	"<A-.>",
+	"<esc><cmd>m .+1<cr>==gi",
+	{ noremap = true, silent = true, desc = "Move line down in insert mode" }
+)
+vim.keymap.set(
+	"i",
+	"<C-.>",
+	"<esc><cmd>m .+1<cr>==gi",
+	{ noremap = true, silent = true, desc = "Move line down in insert mode" }
+)
+vim.keymap.set("v", "<C-,>", ":m '<-2<cr>gv=gv", { desc = "Move selected lines up" })
+vim.keymap.set("v", "<C-.>", ":m '>+1<cr>gv=gv", { desc = "Move selected lines down" })
+
+-- Markdown
+vim.keymap.set({ "n", "v" }, "gk", function()
+	-- `?` - Start a search backwards from the current cursor position.
+	-- `^` - Match the beginning of a line.
+	-- `##` - Match 2 ## symbols
+	-- `\\+` - Match one or more occurrences of prev element (#)
+	-- `\\s` - Match exactly one whitespace character following the hashes
+	-- `.*` - Match any characters (except newline) following the space
+	-- `$` - Match extends to end of line
+	vim.cmd("silent! ?^##\\+\\s.*$")
+	-- Clear the search highlight
+	vim.cmd("nohlsearch")
+end, { desc = "Go to previous markdown header" })
+vim.keymap.set({ "n", "v" }, "gj", function()
+	-- `/` - Start a search forwards from the current cursor position.
+	-- `^` - Match the beginning of a line.
+	-- `##` - Match 2 ## symbols
+	-- `\\+` - Match one or more occurrences of prev element (#)
+	-- `\\s` - Match exactly one whitespace character following the hashes
+	-- `.*` - Match any characters (except newline) following the space
+	-- `$` - Match extends to end of line
+	vim.cmd("silent! /^##\\+\\s.*$")
+	-- Clear the search highlight
+	vim.cmd("nohlsearch")
+end, { desc = "Go to next markdown header" })
+
+-- Marks
+vim.keymap.set("n", "<leader>mD", function()
+	-- Delete all marks in the current buffer
+	vim.cmd("delmarks!")
+	print("All marks deleted.")
+end, { desc = "Delete all marks" })
+
+-- Ownerships
+vim.keymap.set("n", "<leader>cx", "<cmd>!chmod +x %<cr>", { silent = true, desc = "Make file executable" })
 
 -- Remap Default
 vim.keymap.set("i", "jk", "<esc>", { noremap = true, silent = true, desc = "Escape to normal mode" })
@@ -147,8 +368,17 @@ vim.keymap.set(
 	{ expr = true, desc = "Previous search result in operator-pending mode" }
 )
 vim.keymap.set("n", "x", '"_x', { desc = "Delete character without yanking" })
-vim.keymap.set("n", "<C-d>", "<C-d>zz", { noremap = true, silent = true, desc = "Scroll down and center" })
-vim.keymap.set("n", "<C-u>", "<C-u>zz", { noremap = true, silent = true, desc = "Scroll up and center" })
+local scroll_percentage = 0.50
+vim.keymap.set("n", "<C-d>", function()
+	local lines = math.floor(vim.api.nvim_win_get_height(0) * scroll_percentage)
+	vim.cmd("normal! " .. lines .. "jzz")
+end, { noremap = true, silent = true, desc = "Scroll down and center" })
+vim.keymap.set("n", "<C-u>", function()
+	local lines = math.floor(vim.api.nvim_win_get_height(0) * scroll_percentage)
+	vim.cmd("normal! " .. lines .. "kzz")
+end, { noremap = true, silent = true, desc = "Scroll up and center" })
+-- vim.keymap.set("n", "<C-d>", "<C-d>zz", { noremap = true, silent = true, desc = "Scroll down and center" })
+-- vim.keymap.set("n", "<C-u>", "<C-u>zz", { noremap = true, silent = true, desc = "Scroll up and center" })
 vim.keymap.set("n", "<C-b>", "<C-b>zz", { noremap = true, silent = true, desc = "Page up and center" })
 vim.keymap.set("n", "<C-f>", "<C-f>zz", { noremap = true, silent = true, desc = "Page down and center" })
 vim.keymap.set("n", "{", "{zz", { noremap = true, silent = true, desc = "Move to previous paragraph and center" })
@@ -219,112 +449,56 @@ vim.keymap.set("n", "SS", ":%s/\\v", { desc = "Search and replace in file" })
 vim.keymap.set("v", "<leader><C-s>", ":s/\\%V", { desc = "Search only in visual selection using %V atom" })
 vim.keymap.set("v", "<C-r>", '"hy:%s/\\v<C-r>h//g<left><left>', { desc = "Change selection" })
 
--- Cd
-vim.keymap.set("n", "gcd", ":cd %:p:h<cr>:pwd<cr>", { desc = "Go to current file path" })
-vim.keymap.set("n", "gcD", function()
-	local realpath = vim.fn.systemlist("readlink -f " .. vim.fn.shellescape(vim.fn.expand("%:p")))[1]
-	vim.cmd("cd " .. vim.fn.fnameescape(vim.fn.fnamemodify(realpath, ":h")))
-	vim.cmd("pwd")
-end, { desc = "Go to real path of current file" })
-vim.keymap.set("n", "<leader>..", ":cd ..<cr>:pwd<cr>", { desc = "Go to current file path" })
-
--- Check Health
-vim.keymap.set("n", "<leader>ch", ":checkhealth<cr>", { desc = "Check neovim health" })
-
--- Cut, Yank & Paste
-vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]], { desc = "Yank to clipboard" })
-vim.keymap.set("n", "<leader>Y", [["+Y]], { desc = "Yank line to clipboard" })
-vim.keymap.set({ "n", "v" }, "<leader><C-y>", ":%y<cr>", { desc = "Yank current file to clipboard" })
-vim.keymap.set("n", "<leader>p", [["+p]], { desc = "Paste over clipboard" })
-vim.keymap.set("n", "<leader>P", [["+P]], { desc = "Paste over clipboard" })
-vim.keymap.set("x", "<leader>p", [["_dP]], { desc = "Paste over and preserve clipboard" })
-vim.keymap.set("v", "<leader>d", [["+d]], { desc = "Delete without store to clipboard" })
-vim.keymap.set("v", "<leader>D", [["_d]], { desc = "Delete and yank to clipboard" })
-vim.keymap.set("n", "<leader><C-d>", ":%d_<cr>", { desc = "Delete all to black hole register" })
-
--- Diagnostic
-local diagnostic_goto = function(next, severity)
-	local go = next and vim.diagnostic.goto_next or vim.diagnostic.goto_prev
-	severity = severity and vim.diagnostic.severity[severity] or nil
-	return function()
-		go({ severity = severity })
+-- Remove
+local function delete_current_file()
+	local current_file = vim.fn.expand("%:p")
+	if current_file and current_file ~= "" then
+		-- Check if trash utility is installed
+		if vim.fn.executable("trash") == 0 then
+			vim.api.nvim_echo({
+				{ "- Trash utility not installed. Make sure to install it first\n", "ErrorMsg" },
+				{ "- In macOS run `brew install trash`\n", nil },
+			}, false, {})
+			return
+		end
+		-- Prompt for confirmation before deleting the file
+		vim.ui.input({
+			prompt = "Type 'del' to delete the file '" .. current_file .. "': ",
+		}, function(input)
+			if input == "del" then
+				-- Delete the file using trash app
+				local success, _ = pcall(function()
+					vim.fn.system({ "trash", vim.fn.fnameescape(current_file) })
+				end)
+				if success then
+					vim.api.nvim_echo({
+						{ "File deleted from disk:\n", "Normal" },
+						{ current_file, "Normal" },
+					}, false, {})
+					-- Close the buffer after deleting the file
+					vim.cmd("bd!")
+				else
+					vim.api.nvim_echo({
+						{ "Failed to delete file:\n", "ErrorMsg" },
+						{ current_file, "ErrorMsg" },
+					}, false, {})
+				end
+			else
+				vim.api.nvim_echo({
+					{ "File deletion canceled.", "Normal" },
+				}, false, {})
+			end
+		end)
+	else
+		vim.api.nvim_echo({
+			{ "No file to delete", "WarningMsg" },
+		}, false, {})
 	end
 end
--- vim.keymap.set("n", "[d", diagnostic_goto(false), { desc = "Previous diagnostic" })
--- vim.keymap.set("n", "]d", diagnostic_goto(true), { desc = "Next diagnostic" })
-vim.keymap.set("n", "<leader>[e", diagnostic_goto(false, "ERROR"), { desc = "Previous error" })
-vim.keymap.set("n", "<leader>]e", diagnostic_goto(true, "ERROR"), { desc = "Next error" })
-vim.keymap.set("n", "<leader>[w", diagnostic_goto(false, "WARN"), { desc = "Previous warning" })
-vim.keymap.set("n", "<leader>]w", diagnostic_goto(true, "WARN"), { desc = "Next warning" })
-vim.keymap.set("n", "<leader>od", vim.diagnostic.open_float, { desc = "Open diagnostic message" })
-vim.keymap.set("n", "<leader>la", vim.diagnostic.setloclist, { desc = "Add diagnostics to location list" })
 
--- Files
-vim.keymap.set("n", "<leader>fn", "<cmd>enew<cr>", { desc = "Open new buffer" })
-
--- Fix List & Trouble
-vim.keymap.set("n", "[o", "<cmd>lprev<cr>zz", { desc = "Previous location list item" })
-vim.keymap.set("n", "]o", "<cmd>lnext<cr>zz", { desc = "Next location list item" })
-vim.keymap.set("n", "[q", "<cmd>cprev<cr>zz", { desc = "Previous quickfix item" })
-vim.keymap.set("n", "]q", "<cmd>cnext<cr>zz", { desc = "Next quickfix item" })
-vim.keymap.set(
-	"n",
-	"<leader>rw",
-	[[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
-	{ desc = "Search and replace word under cursor" }
-)
-vim.keymap.set("n", "<leader>oo", "<cmd>lopen<cr>", { desc = "Open location list" })
-vim.keymap.set("n", "<leader>oq", "<cmd>copen<cr>", { desc = "Open quickfix list" })
-
--- Formats
-vim.keymap.set("n", "<leader>cF", vim.lsp.buf.format, { desc = "Format buffer by default lsp" })
-
--- Health
-vim.keymap.set("n", "<leader>ch", ":checkhealth<cr>", { desc = "Check neovim health" })
-
--- Keywordprg
-vim.keymap.set("n", "<leader>K", "<cmd>norm! K<cr>", { desc = "Look up keyword" })
-
--- Lines
-vim.keymap.set("n", "<A-,>", "<cmd>m .-2<cr>==", { desc = "Move line up" })
-vim.keymap.set("n", "<C-,>", "<cmd>m .-2<cr>==", { desc = "Move line up" })
-vim.keymap.set("n", "<A-.>", "<cmd>m .+1<cr>==", { desc = "Move line down" })
-vim.keymap.set("n", "<C-.>", "<cmd>m .+1<cr>==", { desc = "Move line down" })
-vim.keymap.set(
-	"i",
-	"<A-,>",
-	"<esc><cmd>m .-2<cr>==gi",
-	{ noremap = true, silent = true, desc = "Move line up in insert mode" }
-)
-vim.keymap.set(
-	"i",
-	"<C-,>",
-	"<esc><cmd>m .-2<cr>==gi",
-	{ noremap = true, silent = true, desc = "Move line up in insert mode" }
-)
-vim.keymap.set(
-	"i",
-	"<A-.>",
-	"<esc><cmd>m .+1<cr>==gi",
-	{ noremap = true, silent = true, desc = "Move line down in insert mode" }
-)
-vim.keymap.set(
-	"i",
-	"<C-.>",
-	"<esc><cmd>m .+1<cr>==gi",
-	{ noremap = true, silent = true, desc = "Move line down in insert mode" }
-)
-vim.keymap.set("v", "<C-,>", ":m '<-2<cr>gv=gv", { desc = "Move selected lines up" })
-vim.keymap.set("v", "<C-.>", ":m '>+1<cr>gv=gv", { desc = "Move selected lines down" })
-
--- Ownerships
-vim.keymap.set("n", "<leader>cx", "<cmd>!chmod +x %<cr>", { silent = true, desc = "Make file executable" })
-
--- Resize window using <ctrl> arrow keys
-vim.keymap.set("n", "<C-up>", "<cmd>resize +2<cr>", { desc = "Increase window height" })
-vim.keymap.set("n", "<C-down>", "<cmd>resize -2<cr>", { desc = "Decrease window height" })
-vim.keymap.set("n", "<C-left>", "<cmd>vertical resize -2<cr>", { desc = "Decrease window width" })
-vim.keymap.set("n", "<C-right>", "<cmd>vertical resize +2<cr>", { desc = "Increase window width" })
+vim.keymap.set("n", "<leader>rm", function()
+	delete_current_file()
+end, { desc = "Remove current file" })
 
 -- Scripts
 vim.api.nvim_set_keymap(
@@ -341,13 +515,138 @@ vim.api.nvim_set_keymap(
 )
 
 -- Source
+-- source nvim config
 vim.keymap.set("n", "<leader>SO", function()
 	vim.cmd("so")
 end, { desc = "Source current file" })
+-- reload zsh configuration by sourcing ~/.config/zsh/.zshrc in a separate shell
+vim.keymap.set("n", "<leader>SZ", function()
+	-- Define the command to source zshrc
+	local command = "source ~/.config/zsh/.zshrc"
+	-- Execute the command in a new Zsh shell
+	local full_command = "zsh -c '" .. command .. "'"
+	-- Run the command and capture the output
+	local output = vim.fn.system(full_command)
+	-- Check the exit status of the command
+	local exit_code = vim.v.shell_error
+	if exit_code == 0 then
+		vim.api.nvim_echo({ { "Successfully sourced ~/.config/zsh/.zshrc", "NormalMsg" } }, false, {})
+	else
+		vim.api.nvim_echo({
+			{ "Failed to source ~/.config/zsh/.zshrc:", "ErrorMsg" },
+			{ output, "ErrorMsg" },
+		}, false, {})
+	end
+end, { desc = "Source zshrc" })
+-- source shortcuts from bm-files and bm-folders
+local shortcuts_file = vim.fn.expand("~/.config/nvim/shortcuts.lua")
+local file = io.open(shortcuts_file, "r")
+if file then
+	file:close()
+	vim.cmd("silent! source " .. shortcuts_file)
+end
 
 -- Sudo
 vim.keymap.set("n", "<leader>SW", "<cmd>SudoWrite<cr><cr>", { silent = true, desc = "Save file with sudo" })
 vim.keymap.set("n", "<leader>SWQ", "<cmd>SudoWritequit<cr>", { silent = true, desc = "Save and quit with sudo" })
+
+-- Surround
+vim.keymap.set("n", "sau", function()
+	local line = vim.api.nvim_get_current_line()
+	local col = vim.api.nvim_win_get_cursor(0)[2] + 1 -- Adjust for 0-index in Lua
+	-- This makes the `s` optional so it matches both http and https
+	local pattern = "https?://[^ ,;'\"<>%s)]*"
+	-- Find the starting and ending positions of the URL
+	local s, e = string.find(line, pattern)
+	while s and e do
+		if s <= col and e >= col then
+			-- When the cursor is within the URL
+			local url = string.sub(line, s, e)
+			-- Update the line with backticks around the URL
+			local new_line = string.sub(line, 1, s - 1) .. "`" .. url .. "`" .. string.sub(line, e + 1)
+			vim.api.nvim_set_current_line(new_line)
+			vim.cmd("silent write")
+			return
+		end
+		-- Find the next URL in the line
+		s, e = string.find(line, pattern, e + 1)
+		-- Save the file to update trouble list
+	end
+	print("No URL found under cursor")
+end, { desc = "Add surrounding to URL" })
+vim.keymap.set("v", "<leader>bl", function()
+	-- Get the selected text range
+	local start_row, start_col = unpack(vim.fn.getpos("'<"), 2, 3)
+	local end_row, end_col = unpack(vim.fn.getpos("'>"), 2, 3)
+	-- Get the selected lines
+	local lines = vim.api.nvim_buf_get_lines(0, start_row - 1, end_row, false)
+	local selected_text = table.concat(lines, "\n"):sub(start_col, #lines == 1 and end_col or -1)
+	if selected_text:match("^%*%*.*%*%*$") then
+		vim.notify("Text already bold", vim.log.levels.INFO)
+	else
+		vim.cmd("normal 2gsa*")
+	end
+end, { desc = "Bold current selection" })
+vim.keymap.set("n", "<leader>tb", function()
+	local cursor_pos = vim.api.nvim_win_get_cursor(0)
+	local current_buffer = vim.api.nvim_get_current_buf()
+	local start_row = cursor_pos[1] - 1
+	local col = cursor_pos[2]
+	-- Get the current line
+	local line = vim.api.nvim_buf_get_lines(current_buffer, start_row, start_row + 1, false)[1]
+	-- Check if the cursor is on an asterisk
+	if line:sub(col + 1, col + 1):match("%*") then
+		vim.notify("Cursor is on an asterisk, run inside the bold text", vim.log.levels.WARN)
+		return
+	end
+	-- Search for '**' to the left of the cursor position
+	local left_text = line:sub(1, col)
+	local bold_start = left_text:reverse():find("%*%*")
+	if bold_start then
+		bold_start = col - bold_start
+	end
+	-- Search for '**' to the right of the cursor position and in following lines
+	local right_text = line:sub(col + 1)
+	local bold_end = right_text:find("%*%*")
+	local end_row = start_row
+	while not bold_end and end_row < vim.api.nvim_buf_line_count(current_buffer) - 1 do
+		end_row = end_row + 1
+		local next_line = vim.api.nvim_buf_get_lines(current_buffer, end_row, end_row + 1, false)[1]
+		if next_line == "" then
+			break
+		end
+		right_text = right_text .. "\n" .. next_line
+		bold_end = right_text:find("%*%*")
+	end
+	if bold_end then
+		bold_end = col + bold_end
+	end
+	-- Remove '**' markers if found, otherwise bold the word
+	if bold_start and bold_end then
+		-- Extract lines
+		local text_lines = vim.api.nvim_buf_get_lines(current_buffer, start_row, end_row + 1, false)
+		local text = table.concat(text_lines, "\n")
+		-- Calculate positions to correctly remove '**'
+		-- vim.notify("bold_start: " .. bold_start .. ", bold_end: " .. bold_end)
+		local new_text = text:sub(1, bold_start - 1) .. text:sub(bold_start + 2, bold_end - 1) .. text:sub(bold_end + 2)
+		local new_lines = vim.split(new_text, "\n")
+		-- Set new lines in buffer
+		vim.api.nvim_buf_set_lines(current_buffer, start_row, end_row + 1, false, new_lines)
+	-- vim.notify("Unbolded text", vim.log.levels.INFO)
+	else
+		-- Bold the word at the cursor position if no bold markers are found
+		local before = line:sub(1, col)
+		local after = line:sub(col + 1)
+		local inside_surround = before:match("%*%*[^%*]*$") and after:match("^[^%*]*%*%*")
+		if inside_surround then
+			vim.cmd("normal gsd*.")
+		else
+			vim.cmd("normal viw")
+			vim.cmd("normal 2gsa*")
+		end
+		vim.notify("Bolded current word", vim.log.levels.INFO)
+	end
+end, { desc = "Toggle bold" })
 
 -- Tab
 vim.keymap.set("n", "<leader><tab>l", "<cmd>tablast<cr>", { desc = "Last Tab" })
@@ -374,12 +673,6 @@ vim.keymap.set("t", "<C-l>", "<cmd>wincmd l<cr>", { desc = "Move to right window
 vim.keymap.set("t", "<C-Space>l", "clear<cr>", { silent = true, desc = "Clear terminal" })
 vim.keymap.set("t", "<C-\\>", "<cmd>close<cr>", { desc = "Close terminal" })
 
--- Windows
-vim.keymap.set("n", "<C-h>", "<C-w><C-h>", { desc = "Move to left window" })
-vim.keymap.set("n", "<C-j>", "<C-w><C-j>", { desc = "Move to window below" })
-vim.keymap.set("n", "<C-k>", "<C-w><C-k>", { desc = "Move to window above" })
-vim.keymap.set("n", "<C-l>", "<C-w><C-l>", { desc = "Move to right window" })
-
 -- Tmux
 if vim.env.TMUX then
 	vim.keymap.set(
@@ -393,11 +686,38 @@ if vim.env.TMUX then
 	end, { noremap = true, silent = true, desc = "Restart nvim (tmux)" })
 end
 
--- Lazy
-vim.keymap.set("n", "<leader>L", "<cmd>Lazy<cr>", { desc = "Open lazy plugin manager" })
+-- Todo
+-- detect todos and toggle between ":" and ";", or show a message if not found
+-- this is to "mark them as done"
+vim.keymap.set("n", "<leader>Td", function()
+	-- Get the current line
+	local current_line = vim.fn.getline(".")
+	-- Get the current line number
+	local line_number = vim.fn.line(".")
+	if string.find(current_line, "TODO:") then
+		-- Replace the first occurrence of ":" with ";"
+		local new_line = current_line:gsub("TODO:", "TODO;")
+		-- Set the modified line
+		vim.fn.setline(line_number, new_line)
+	elseif string.find(current_line, "TODO;") then
+		-- Replace the first occurrence of ";" with ":"
+		local new_line = current_line:gsub("TODO;", "TODO:")
+		-- Set the modified line
+		vim.fn.setline(line_number, new_line)
+	else
+		vim.cmd("echo 'todo item not detected'")
+	end
+end, { desc = "TODO toggle item done or not" })
 
--- Mason
-vim.keymap.set("n", "<leader>M", "<cmd>Mason<cr>", { desc = "Open mason" })
+-- Windows
+vim.keymap.set("n", "<C-h>", "<C-w><C-h>", { desc = "Move to left window" })
+vim.keymap.set("n", "<C-j>", "<C-w><C-j>", { desc = "Move to window below" })
+vim.keymap.set("n", "<C-k>", "<C-w><C-k>", { desc = "Move to window above" })
+vim.keymap.set("n", "<C-l>", "<C-w><C-l>", { desc = "Move to right window" })
+vim.keymap.set("n", "<C-up>", "<cmd>resize +2<cr>", { desc = "Increase window height" })
+vim.keymap.set("n", "<C-down>", "<cmd>resize -2<cr>", { desc = "Decrease window height" })
+vim.keymap.set("n", "<C-left>", "<cmd>vertical resize -2<cr>", { desc = "Decrease window width" })
+vim.keymap.set("n", "<C-right>", "<cmd>vertical resize +2<cr>", { desc = "Increase window width" })
 
 -- Word Definition
 function WordDefinition(input)
@@ -415,22 +735,8 @@ vim.api.nvim_set_keymap(
 	{ noremap = true, silent = true, desc = "Word definition" }
 )
 
--- Ascii
-vim.keymap.set("n", "<leader>c1", ":.!toilet -w 200 -f bfraktur<cr>", { desc = "Ascii art bfraktur" })
-vim.keymap.set("n", "<leader>c2", ":.!toilet -w 200 -f emboss<cr>", { desc = "Ascii art emboss" })
-vim.keymap.set("n", "<leader>c3", ":.!toilet -w 200 -f emboss2<cr>", { desc = "Ascii art emboss2" })
-vim.keymap.set("n", "<leader>c4", ":.!toilet -w 200 -f future<cr>", { desc = "Ascii art future" })
-vim.keymap.set("n", "<leader>c5", ":.!toilet -w 200 -f pagga<cr>", { desc = "Ascii art pagga" })
-vim.keymap.set("n", "<leader>c6", ":.!toilet -w 200 -f wideterm<cr>", { desc = "Ascii art wideterm" })
-vim.keymap.set("n", "<leader>c7", ":.!figlet -w 200 -f standard<cr>", { desc = "Ascii art standard" })
-vim.keymap.set("n", "<leader>c8", ":.!figlet -w 200 -f slant<cr>", { desc = "Ascii art slant" })
-vim.keymap.set("n", "<leader>c9", ":.!figlet -w 200 -f big<cr>", { desc = "Ascii art big" })
-vim.keymap.set("n", "<leader>c0", ":.!figlet -w 200 -f shadow<cr>", { desc = "Ascii art shadow" })
+-- Lazy
+vim.keymap.set("n", "<leader>L", "<cmd>Lazy<cr>", { desc = "Open lazy plugin manager" })
 
--- Source shortcuts from bm-files and bm-folders
-local shortcuts_file = vim.fn.expand("~/.config/nvim/shortcuts.lua")
-local file = io.open(shortcuts_file, "r")
-if file then
-	file:close()
-	vim.cmd("silent! source " .. shortcuts_file)
-end
+-- Mason
+vim.keymap.set("n", "<leader>M", "<cmd>Mason<cr>", { desc = "Open mason" })

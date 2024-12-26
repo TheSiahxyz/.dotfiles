@@ -395,11 +395,11 @@ return {
 			},
 		})
 
-		vim.keymap.set("n", "gf", function()
+		vim.keymap.set("n", "gl", function()
 			if require("obsidian").util.cursor_on_markdown_link() then
 				return "<cmd>ObsidianFollowLink<CR>"
 			else
-				return "gf"
+				return "gl"
 			end
 		end, { noremap = false, expr = true, desc = "Follow link (Obsidian)" })
 	end,
@@ -438,17 +438,17 @@ return {
 			desc = "Quick switch (Obsidian)",
 		},
 		{
-			"<leader>o]",
+			"<leader>oL",
 			"<cmd>ObsidianFollowLink<CR>",
 			desc = "Follow link (Obsidian)",
 		},
 		{
-			"<leader>o[",
+			"<leader>oH",
 			"<cmd>ObsidianBacklinks<CR>",
 			desc = "Back link (Obsidian)",
 		},
 		{
-			"<leader>ong",
+			"<leader>oft",
 			function()
 				local tags = vim.fn.input("Enter tag: ")
 				if tags and #tags > 0 then
@@ -497,7 +497,7 @@ return {
 			desc = "Insert templates (Obsidian)",
 		},
 		{
-			"<leader>of",
+			"<leader>ofn",
 			function()
 				local note = vim.fn.input("Enter note: ")
 				if note and #note > 0 then

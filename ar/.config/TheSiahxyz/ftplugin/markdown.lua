@@ -96,9 +96,6 @@ vim.keymap.set(
 	{ remap = true, silent = false, desc = "Make a line into a list" }
 )
 
--- MarkdownClipboardImage settings
-vim.keymap.set("n", "<leader>im", ":call mdip#MarkdownClipboardImage()<CR>", { desc = "Image" })
-
 function BoldMe()
 	-- Get the start and end positions of the visual selection
 	local start_pos = vim.fn.getpos("'<")
