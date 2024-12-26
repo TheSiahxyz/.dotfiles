@@ -712,19 +712,54 @@ return {
 					)
 					map_split(buf_id, opts.mappings and opts.mappings.go_in_vertical_plus or "<C-w>V", "vertical", true)
 
-					vim.keymap.set("n", "T", open_tmux_pane, { buffer = buf_id, desc = "Open tmux pane" })
-					vim.keymap.set("n", "cc", copy_to_clipboard, { buffer = buf_id, desc = "Copy to clipboard" })
+					vim.keymap.set(
+						"n",
+						"T",
+						open_tmux_pane,
+						{ buffer = buf_id, noremap = true, silent = true, desc = "Open tmux pane" }
+					)
+					vim.keymap.set(
+						"n",
+						"cc",
+						copy_to_clipboard,
+						{ buffer = buf_id, noremap = true, silent = true, desc = "Copy to clipboard" }
+					)
 					vim.keymap.set(
 						"n",
 						"cp",
 						copy_path_to_clipboard,
 						{ buffer = buf_id, desc = "Copy path to clipboard" }
 					)
-					vim.keymap.set("n", "zz", zip_and_copy_to_clipboard, { buffer = buf_id, desc = "Zip and copy" })
-					vim.keymap.set("n", "pp", paste_from_clipboard, { buffer = buf_id, desc = "Paste from clipboard" })
-					vim.keymap.set("n", "pi", preview_image, { buffer = buf_id, desc = "Preview image" })
-					vim.keymap.set("n", "pI", preview_image_popup, { buffer = buf_id, desc = "Pop-up preview image" })
-					vim.keymap.set("n", "gl", follow_symlink, { buffer = buf_id, desc = "Follow link" })
+					vim.keymap.set(
+						"n",
+						"Z",
+						zip_and_copy_to_clipboard,
+						{ buffer = buf_id, noremap = true, silent = true, desc = "Zip and copy" }
+					)
+					vim.keymap.set(
+						"n",
+						"pp",
+						paste_from_clipboard,
+						{ buffer = buf_id, noremap = true, silent = true, desc = "Paste from clipboard" }
+					)
+					vim.keymap.set(
+						"n",
+						"pi",
+						preview_image,
+						{ buffer = buf_id, noremap = true, silent = true, desc = "Preview image" }
+					)
+					vim.keymap.set(
+						"n",
+						"pI",
+						preview_image_popup,
+						{ buffer = buf_id, noremap = true, silent = true, desc = "Pop-up preview image" }
+					)
+					vim.keymap.set(
+						"n",
+						"gl",
+						follow_symlink,
+						{ buffer = buf_id, noremap = true, silent = true, desc = "Follow link" }
+					)
 				end,
 			})
 
