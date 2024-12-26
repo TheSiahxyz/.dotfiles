@@ -1,3 +1,6 @@
+-- Updated pattern to match what Echasnovski has in the documentation
+-- https://github.com/echasnovski/mini.nvim/blob/c6eede272cfdb9b804e40dc43bb9bff53f38ed8a/doc/mini-files.txt#L508-L529
+
 return {
 	{
 		"echasnovski/mini.bracketed",
@@ -316,6 +319,370 @@ return {
 				end
 			end
 
+			local mini_files = require("mini.files")
+
+			local tmux_pane_function = function(dir)
+				-- NOTE: variable that controls the auto-cd behavior
+				local auto_cd_to_new_dir = true
+				-- NOTE: Variable to control pane direction: 'right' or 'bottom'
+				-- If you modify this, make sure to also modify TMUX_PANE_DIRECTION in the
+				-- zsh-vi-mode section on the .zshrc file
+				-- Also modify this in your tmux.conf file if you want it to work when in tmux
+				-- copy-mode
+				local pane_direction = vim.g.tmux_pane_direction or "bottom"
+				-- NOTE: Below, the first number is the size of the pane if split horizontally,
+				-- the 2nd number is the size of the pane if split vertically
+				local pane_size = (pane_direction == "right") and 60 or 15
+				local move_key = (pane_direction == "right") and "C-l" or ""
+				local split_cmd = (pane_direction == "right") and "-h" or "-v"
+				-- if no dir is passed, use the current file's directory
+				local file_dir = dir or vim.fn.expand("%:p:h")
+				-- Simplified this, was checking if a pane existed
+				local has_panes = vim.fn.system("tmux list-panes | wc -l"):gsub("%s+", "") ~= "1"
+				-- Check if the current pane is zoomed (maximized)
+				local is_zoomed = vim.fn.system("tmux display-message -p '#{window_zoomed_flag}'"):gsub("%s+", "")
+					== "1"
+				-- Escape the directory path for shell
+				local escaped_dir = file_dir:gsub("'", "'\\''")
+				-- If any additional pane exists
+				if has_panes then
+					if is_zoomed then
+						-- Compare the stored pane directory with the current file directory
+						if auto_cd_to_new_dir and vim.g.tmux_pane_dir ~= escaped_dir then
+							-- If different, cd into the new dir
+							vim.fn.system("tmux send-keys -t :.+ 'cd \"" .. escaped_dir .. "\"' Enter")
+							-- Update the stored directory to the new one
+							vim.g.tmux_pane_dir = escaped_dir
+						end
+						-- If zoomed, unzoom and switch to the correct pane
+						vim.fn.system("tmux resize-pane -Z")
+						vim.fn.system("tmux send-keys " .. move_key)
+					else
+						-- If not zoomed, zoom current pane
+						vim.fn.system("tmux resize-pane -Z")
+					end
+				else
+					-- Store the initial directory in a Neovim variable
+					if vim.g.tmux_pane_dir == nil then
+						vim.g.tmux_pane_dir = escaped_dir
+					end
+					-- If no pane exists, open it with zsh and DISABLE_PULL variable
+					vim.fn.system(
+						"tmux split-window "
+							.. split_cmd
+							.. " -l "
+							.. pane_size
+							.. " 'cd \""
+							.. escaped_dir
+							.. "\" && DISABLE_PULL=1 zsh'"
+					)
+					vim.fn.system("tmux send-keys " .. move_key)
+				end
+			end
+
+			local open_tmux_pane = function()
+				local curr_entry = mini_files.get_fs_entry()
+				if curr_entry and curr_entry.fs_type == "directory" then
+					tmux_pane_function(curr_entry.path)
+				else
+					vim.notify("Not a directory or no entry selected", vim.log.levels.WARN)
+				end
+			end
+
+			local copy_to_clipboard = function()
+				local curr_entry = mini_files.get_fs_entry()
+				if curr_entry then
+					local path = curr_entry.path
+					-- Escape the path for shell command
+					local escaped_path = vim.fn.fnameescape(path)
+					local cmd = vim.fn.has("mac") == 1
+							and string.format([[osascript -e 'set the clipboard to POSIX file "%s"']], escaped_path)
+						or string.format([[echo -n %s | xclip -selection clipboard]], escaped_path)
+					local result = vim.fn.system(cmd)
+					if vim.v.shell_error ~= 0 then
+						vim.notify("Copy failed: " .. result, vim.log.levels.ERROR)
+					else
+						vim.notify(vim.fn.fnamemodify(path, ":t"), vim.log.levels.INFO)
+						vim.notify("Copied to system clipboard", vim.log.levels.INFO)
+					end
+				else
+					vim.notify("No file or directory selected", vim.log.levels.WARN)
+				end
+			end
+
+			local zip_and_copy_to_clipboard = function()
+				local curr_entry = require("mini.files").get_fs_entry()
+				if curr_entry then
+					local path = curr_entry.path
+					local name = vim.fn.fnamemodify(path, ":t") -- Extract the file or directory name
+					local parent_dir = vim.fn.fnamemodify(path, ":h") -- Get the parent directory
+					local timestamp = os.date("%y%m%d%H%M%S") -- Append timestamp to avoid duplicates
+					local zip_path = string.format("/tmp/%s_%s.zip", name, timestamp) -- Path in macOS's tmp directory
+					-- Create the zip file
+					local zip_cmd = string.format(
+						"cd %s && zip -r %s %s",
+						vim.fn.shellescape(parent_dir),
+						vim.fn.shellescape(zip_path),
+						vim.fn.shellescape(name)
+					)
+					local result = vim.fn.system(zip_cmd)
+					if vim.v.shell_error ~= 0 then
+						vim.notify("Failed to create zip file: " .. result, vim.log.levels.ERROR)
+						return
+					end
+					-- Copy the zip file to the system clipboard
+					local copy_cmd = vim.fn.has("mac") == 1
+							and string.format([[osascript -e 'set the clipboard to POSIX file "%s"']], zip_path)
+						or string.format([[echo -n %s | xclip -selection clipboard]], zip_path)
+					local copy_result = vim.fn.system(copy_cmd)
+					if vim.v.shell_error ~= 0 then
+						vim.notify("Failed to copy zip file to clipboard: " .. copy_result, vim.log.levels.ERROR)
+						return
+					end
+					vim.notify(zip_path, vim.log.levels.INFO)
+					vim.notify("Zipped and copied to clipboard: ", vim.log.levels.INFO)
+				else
+					vim.notify("No file or directory selected", vim.log.levels.WARN)
+				end
+			end
+
+			local paste_from_clipboard = function()
+				-- vim.notify("Starting the paste operation...", vim.log.levels.INFO)
+				if not mini_files then
+					vim.notify("mini.files module not loaded.", vim.log.levels.ERROR)
+					return
+				end
+				local curr_entry = mini_files.get_fs_entry() -- Get the current file system entry
+				if not curr_entry then
+					vim.notify("Failed to retrieve current entry in mini.files.", vim.log.levels.ERROR)
+					return
+				end
+				local curr_dir = curr_entry.fs_type == "directory" and curr_entry.path
+					or vim.fn.fnamemodify(curr_entry.path, ":h") -- Use parent directory if entry is a file
+				-- vim.notify("Current directory: " .. curr_dir, vim.log.levels.INFO)
+				local script = [[
+            tell application "System Events"
+              try
+                set theFile to the clipboard as alias
+                set posixPath to POSIX path of theFile
+                return posixPath
+              on error
+                return "error"
+              end try
+            end tell
+          ]]
+				local output = vim.fn.has("mac") == 1 and vim.fn.system("osascript -e " .. vim.fn.shellescape(script))
+					or vim.fn.system("xclip -o -selection clipboard")
+				if vim.v.shell_error ~= 0 or output:find("error") then
+					vim.notify("Clipboard does not contain a valid file or directory.", vim.log.levels.WARN)
+					return
+				end
+				local source_path = output:gsub("%s+$", "") -- Trim whitespace from clipboard output
+				if source_path == "" then
+					vim.notify("Clipboard is empty or invalid.", vim.log.levels.WARN)
+					return
+				end
+				local dest_path = curr_dir .. "/" .. vim.fn.fnamemodify(source_path, ":t") -- Destination path in current directory
+				local copy_cmd = vim.fn.isdirectory(source_path) == 1 and { "cp", "-R", source_path, dest_path }
+					or { "cp", source_path, dest_path } -- Construct copy command
+				local result = vim.fn.system(copy_cmd) -- Execute the copy command
+				if vim.v.shell_error ~= 0 then
+					vim.notify("Paste operation failed: " .. result, vim.log.levels.ERROR)
+					return
+				end
+				-- vim.notify("Pasted " .. source_path .. " to " .. dest_path, vim.log.levels.INFO)
+				mini_files.synchronize() -- Refresh mini.files to show updated directory content
+				vim.notify("Pasted successfully.", vim.log.levels.INFO)
+			end
+
+			local copy_path_to_clipboard = function()
+				-- Get the current entry (file or directory)
+				local curr_entry = mini_files.get_fs_entry()
+				if curr_entry then
+					-- Convert path to be relative to home directory
+					local home_dir = vim.fn.expand("~")
+					local relative_path = curr_entry.path:gsub("^" .. home_dir, "~")
+					vim.fn.setreg("+", relative_path) -- Copy the relative path to the clipboard register
+					vim.notify(vim.fn.fnamemodify(relative_path, ":t"), vim.log.levels.INFO)
+					vim.notify("Path copied to clipboard: ", vim.log.levels.INFO)
+				else
+					vim.notify("No file or directory selected", vim.log.levels.WARN)
+				end
+			end
+
+			local preview_image = function()
+				local curr_entry = mini_files.get_fs_entry()
+				if curr_entry then
+					-- Preview the file using Quick Look
+					if vim.fn.has("mac") == 1 then
+						vim.system({ "qlmanage", "-p", curr_entry.path }, {
+							stdout = false,
+							stderr = false,
+						})
+						vim.defer_fn(function()
+							vim.system({ "osascript", "-e", 'tell application "qlmanage" to activate' })
+						end, 200)
+					else
+						-- TODO: add previewer for linux
+						vim.notify("Preview not supported on Linux.", vim.log.levels.WARN)
+					end
+				else
+					vim.notify("No file selected", vim.log.levels.WARN)
+				end
+			end
+
+			local preview_image_popup = function()
+				-- Clear any existing images before rendering the new one
+				require("image").clear()
+				local curr_entry = mini_files.get_fs_entry()
+				if curr_entry and curr_entry.fs_type == "file" then
+					local ext = vim.fn.fnamemodify(curr_entry.path, ":e"):lower()
+					local supported_image_exts = { "png", "jpg", "jpeg", "gif", "bmp", "webp", "avif" }
+					-- Check if the file has a supported image extension
+					if vim.tbl_contains(supported_image_exts, ext) then
+						-- Save mini.files state (current path and focused entry)
+						local current_dir = vim.fn.fnamemodify(curr_entry.path, ":h")
+						local focused_entry = vim.fn.fnamemodify(curr_entry.path, ":t") -- Extract filename
+						-- Create a floating window for the image preview
+						local popup_width = math.floor(vim.o.columns * 0.6)
+						local popup_height = math.floor(vim.o.lines * 0.6)
+						local col = math.floor((vim.o.columns - popup_width) / 2)
+						local row = math.floor((vim.o.lines - popup_height) / 2)
+						local buf = vim.api.nvim_create_buf(false, true) -- Create a scratch buffer
+						local win = vim.api.nvim_open_win(buf, true, {
+							relative = "editor",
+							row = row,
+							col = col,
+							width = popup_width,
+							height = popup_height,
+							style = "minimal",
+							border = "rounded",
+						})
+						-- Declare img_width and img_height at the top
+						local img_width, img_height
+						-- Get image dimensions using ImageMagick's identify command
+						local dimensions = vim.fn.systemlist(
+							string.format("identify -format '%%w %%h' %s", vim.fn.shellescape(curr_entry.path))
+						)
+						if #dimensions > 0 then
+							img_width, img_height = dimensions[1]:match("(%d+) (%d+)")
+							img_width = tonumber(img_width)
+							img_height = tonumber(img_height)
+						end
+						-- Calculate image display size while maintaining aspect ratio
+						local display_width = popup_width
+						local display_height = popup_height
+						if img_width and img_height then
+							local aspect_ratio = img_width / img_height
+							if aspect_ratio > (popup_width / popup_height) then
+								-- Image is wider than the popup window
+								display_height = math.floor(popup_width / aspect_ratio)
+							else
+								-- Image is taller than the popup window
+								display_width = math.floor(popup_height * aspect_ratio)
+							end
+						end
+						-- Center the image within the popup window
+						local image_x = math.floor((popup_width - display_width) / 2)
+						local image_y = math.floor((popup_height - display_height) / 2)
+						-- Use image.nvim to render the image
+						local img = require("image").from_file(curr_entry.path, {
+							id = curr_entry.path, -- Unique ID
+							window = win, -- Bind the image to the popup window
+							buffer = buf, -- Bind the image to the popup buffer
+							x = image_x,
+							y = image_y,
+							width = display_width,
+							height = display_height,
+							with_virtual_padding = true,
+						})
+						-- Render the image
+						if img ~= nil then
+							img:render()
+						end
+						-- Use `stat` or `ls` to get the file size in bytes
+						local file_size_bytes = ""
+						if vim.fn.has("mac") == 1 or vim.fn.has("unix") == 1 then
+							-- For macOS or Linux systems
+							local handle = io.popen(
+								"stat -f%z "
+									.. vim.fn.shellescape(curr_entry.path)
+									.. " || ls -l "
+									.. vim.fn.shellescape(curr_entry.path)
+									.. " | awk '{print $5}'"
+							)
+							if handle then
+								file_size_bytes = handle:read("*a"):gsub("%s+$", "") -- Trim trailing whitespace
+								handle:close()
+							end
+						else
+							-- Fallback message if the command isn't available
+							file_size_bytes = "0"
+						end
+						-- Convert the size to MB (if valid)
+						local file_size_mb = tonumber(file_size_bytes) and tonumber(file_size_bytes) / (1024 * 1024)
+							or 0
+						local file_size_mb_str = string.format("%.2f", file_size_mb) -- Format to 2 decimal places as a string
+						-- Add image information (filename, size, resolution)
+						local image_info = {}
+						table.insert(image_info, "Image File: " .. focused_entry) -- Add only the filename
+						if tonumber(file_size_bytes) > 0 then
+							table.insert(image_info, "Size: " .. file_size_mb_str .. " MB") -- Use the formatted string
+						else
+							table.insert(image_info, "Size: Unable to detect") -- Fallback if size isn't found
+						end
+						if img_width and img_height then
+							table.insert(image_info, "Resolution: " .. img_width .. " x " .. img_height)
+						else
+							table.insert(image_info, "Resolution: Unable to detect")
+						end
+						-- Append the image information after the image
+						local line_count = vim.api.nvim_buf_line_count(buf)
+						vim.api.nvim_buf_set_lines(buf, line_count, -1, false, { "", "", "" }) -- Add 3 empty lines
+						vim.api.nvim_buf_set_lines(buf, -1, -1, false, image_info)
+						-- Keymap for closing the popup and reopening mini.files
+						local function reopen_mini_files()
+							if img ~= nil then
+								img:clear()
+							end
+							vim.api.nvim_win_close(win, true)
+							-- Reopen mini.files in the same directory
+							require("mini.files").open(current_dir, true)
+							vim.defer_fn(function()
+								-- Simulate navigation to the file by searching for the line matching the file
+								local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false) -- Get all lines in the buffer
+								for i, line in ipairs(lines) do
+									if line:match(focused_entry) then
+										vim.api.nvim_win_set_cursor(0, { i, 0 }) -- Move cursor to the matching line
+										break
+									end
+								end
+							end, 50) -- Small delay to ensure mini.files is initialized
+						end
+						vim.keymap.set("n", "<esc>", reopen_mini_files, { buffer = buf, noremap = true, silent = true })
+					else
+						vim.notify("Not an image file.", vim.log.levels.WARN)
+					end
+				else
+					vim.notify("No file selected or not a file.", vim.log.levels.WARN)
+				end
+			end
+
+			local follow_symlink = function()
+				local curr_entry = mini_files.get_fs_entry()
+				if curr_entry and curr_entry.fs_type == "file" then
+					local resolved_path = vim.fn.resolve(curr_entry.path) -- Resolve symlink to original file
+					if resolved_path ~= curr_entry.path then
+						vim.notify("Following symlink to: " .. resolved_path, vim.log.levels.INFO)
+						mini_files.open(resolved_path, true) -- Open the original file in mini.files
+					else
+						vim.notify("The file is not a symlink.", vim.log.levels.WARN)
+					end
+				else
+					vim.notify("No file selected or not a valid file.", vim.log.levels.WARN)
+				end
+			end
+
 			vim.api.nvim_create_autocmd("User", {
 				pattern = "MiniFilesBufferCreate",
 				callback = function(args)
@@ -344,6 +711,20 @@ return {
 						true
 					)
 					map_split(buf_id, opts.mappings and opts.mappings.go_in_vertical_plus or "<C-w>V", "vertical", true)
+
+					vim.keymap.set("n", "T", open_tmux_pane, { buffer = buf_id, desc = "Open tmux pane" })
+					vim.keymap.set("n", "cc", copy_to_clipboard, { buffer = buf_id, desc = "Copy to clipboard" })
+					vim.keymap.set(
+						"n",
+						"cp",
+						copy_path_to_clipboard,
+						{ buffer = buf_id, desc = "Copy path to clipboard" }
+					)
+					vim.keymap.set("n", "zz", zip_and_copy_to_clipboard, { buffer = buf_id, desc = "Zip and copy" })
+					vim.keymap.set("n", "pp", paste_from_clipboard, { buffer = buf_id, desc = "Paste from clipboard" })
+					vim.keymap.set("n", "pi", preview_image, { buffer = buf_id, desc = "Preview image" })
+					vim.keymap.set("n", "pI", preview_image_popup, { buffer = buf_id, desc = "Pop-up preview image" })
+					vim.keymap.set("n", "gl", follow_symlink, { buffer = buf_id, desc = "Follow link" })
 				end,
 			})
 

@@ -47,7 +47,7 @@ cmd chmods ${{
 }}
 
 # Compress
-cmd tar ${{
+cmd compress ${{
     clear; tput cup $(($(tput lines)/3)); tput bold
     set -f
     printf "%s\n\t" "$fx"
@@ -467,7 +467,7 @@ map zx chmods
 map <c-l> :clear; unselect
 
 # Compress
-map C tar
+map C compress
 
 # Copy
 # map yy %cp -ri -- $fs .; clear
