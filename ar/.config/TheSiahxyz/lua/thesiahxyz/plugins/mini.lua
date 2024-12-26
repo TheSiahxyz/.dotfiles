@@ -729,43 +729,43 @@ return {
 
 					vim.keymap.set(
 						"n",
-						",t",
+						"zt",
 						open_tmux_pane,
 						{ buffer = buf_id, noremap = true, silent = true, desc = "Open tmux pane" }
 					)
 					vim.keymap.set(
 						"n",
-						",yy",
+						"zy",
 						copy_to_clipboard,
 						{ buffer = buf_id, noremap = true, silent = true, desc = "Copy to clipboard" }
 					)
 					vim.keymap.set(
 						"n",
-						",yp",
+						"zY",
 						copy_path_to_clipboard,
 						{ buffer = buf_id, desc = "Copy path to clipboard" }
 					)
 					vim.keymap.set(
 						"n",
-						",z",
+						"zc",
 						zip_and_copy_to_clipboard,
 						{ buffer = buf_id, noremap = true, silent = true, desc = "Zip and copy" }
 					)
 					vim.keymap.set(
 						"n",
-						",pp",
+						"zp",
 						paste_from_clipboard,
 						{ buffer = buf_id, noremap = true, silent = true, desc = "Paste from clipboard" }
 					)
 					vim.keymap.set(
 						"n",
-						",pi",
+						"zi",
 						preview_image,
 						{ buffer = buf_id, noremap = true, silent = true, desc = "Preview image" }
 					)
 					vim.keymap.set(
 						"n",
-						",pI",
+						"zI",
 						preview_image_popup,
 						{ buffer = buf_id, noremap = true, silent = true, desc = "Pop-up preview image" }
 					)
