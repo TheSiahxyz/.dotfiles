@@ -81,6 +81,7 @@ return {
 		wk.add({
 			mode = { "n", "v", "x" },
 			{ "<leader>o", group = "Open/Obsidian" },
+			{ "<leader>of", group = "Find files (Obsidian)" },
 			{ "<leader>on", group = "Notes (Obsidian)" },
 			{ "<leader>op", group = "Paste (Obsidian)" },
 			{ "<leader>ot", group = "Templates (Obsidian)" },
@@ -240,8 +241,8 @@ return {
 			---@param url string
 			follow_url_func = function(url)
 				-- Open the URL in the default web browser.
-				vim.fn.jobstart({ "open", url }) -- Mac OS
-				-- vim.fn.jobstart({"xdg-open", url})  -- linux
+				-- vim.fn.jobstart({ "open", url }) -- Mac OS
+				vim.fn.jobstart({ "xdg-open", url }) -- linux
 				-- vim.cmd(':silent exec "!start ' .. url .. '"') -- Windows
 				-- vim.ui.open(url) -- need Neovim 0.10.0+
 			end,
@@ -395,13 +396,18 @@ return {
 			},
 		})
 
-		vim.keymap.set("n", "gl", function()
-			if require("obsidian").util.cursor_on_markdown_link() then
-				return "<cmd>ObsidianFollowLink<CR>"
-			else
-				return "gl"
-			end
-		end, { noremap = false, expr = true, desc = "Follow link (Obsidian)" })
+		vim.api.nvim_create_autocmd("FileType", {
+			pattern = "markdown",
+			callback = function()
+				vim.keymap.set("n", "gl", function()
+					if require("obsidian").util.cursor_on_markdown_link() then
+						return "<cmd>ObsidianFollowLink<CR>"
+					else
+						return "gl"
+					end
+				end, { noremap = false, expr = true, desc = "Follow link (Obsidian)" })
+			end,
+		})
 	end,
 	keys = {
 		{
@@ -410,6 +416,7 @@ return {
 				return require("obsidian").util.toggle_checkbox()
 			end,
 			buffer = true,
+			ft = "markdown",
 			desc = "Check box (Obsidian)",
 		},
 		{
@@ -420,6 +427,7 @@ return {
 					vim.cmd("ObsidianOpen " .. query)
 				end
 			end,
+			ft = "markdown",
 			desc = "Open note (Obsidian)",
 		},
 		{
@@ -430,21 +438,25 @@ return {
 					vim.cmd("ObsidianNew " .. title)
 				end
 			end,
+			ft = "markdown",
 			desc = "New note (Obsidian)",
 		},
 		{
 			"<leader>os",
 			"<cmd>ObsidianQuickSwitch<CR>",
+			ft = "markdown",
 			desc = "Quick switch (Obsidian)",
 		},
 		{
 			"<leader>oL",
 			"<cmd>ObsidianFollowLink<CR>",
+			ft = "markdown",
 			desc = "Follow link (Obsidian)",
 		},
 		{
 			"<leader>oH",
 			"<cmd>ObsidianBacklinks<CR>",
+			ft = "markdown",
 			desc = "Back link (Obsidian)",
 		},
 		{
@@ -455,6 +467,7 @@ return {
 					vim.cmd("ObsidianTags " .. tags)
 				end
 			end,
+			ft = "markdown",
 			desc = "Search tag notes (Obsidian)",
 		},
 		{
@@ -467,16 +480,19 @@ return {
 					vim.cmd("ObsidianToday")
 				end
 			end,
+			ft = "markdown",
 			desc = "Today note (Obsidian)",
 		},
 		{
 			"<leader>ony",
 			"<cmd>ObsidianYesterday<cr>",
+			ft = "markdown",
 			desc = "Yesterday note (Obsidian)",
 		},
 		{
 			"<leader>ont",
 			"<cmd>ObsidianTomorrow<cr>",
+			ft = "markdown",
 			desc = "Tomorrow note (Obsidian)",
 		},
 		{
@@ -489,11 +505,13 @@ return {
 					vim.cmd("ObsidianDailies")
 				end
 			end,
+			ft = "markdown",
 			desc = "Daily notes (Obsidian)",
 		},
 		{
 			"<leader>oti",
 			"<cmd>ObsidianTemplate<cr>",
+			ft = "markdown",
 			desc = "Insert templates (Obsidian)",
 		},
 		{
@@ -504,6 +522,7 @@ return {
 					vim.cmd("ObsidianSearch " .. note)
 				end
 			end,
+			ft = "markdown",
 			desc = "Search note (Obsidian)",
 		},
 		{
@@ -514,6 +533,7 @@ return {
 					vim.cmd("ObsidianWorkspace " .. name)
 				end
 			end,
+			ft = "markdown",
 			desc = "Workspace name (Obsidian)",
 		},
 		{
@@ -524,6 +544,7 @@ return {
 					vim.cmd("ObsidianPasteImg " .. image)
 				end
 			end,
+			ft = "markdown",
 			desc = "Paste image (Obsidian)",
 		},
 		{
@@ -534,6 +555,7 @@ return {
 					vim.cmd("ObsidianRename " .. name)
 				end
 			end,
+			ft = "markdown",
 			desc = "Rename note (Obsidian)",
 		},
 		{
@@ -547,6 +569,7 @@ return {
 					vim.cmd("ObsidianLink")
 				end
 			end,
+			ft = "markdown",
 			desc = "Link query (Obsidian)",
 		},
 		{
@@ -560,6 +583,7 @@ return {
 					vim.cmd("ObsidianLinkNew")
 				end
 			end,
+			ft = "markdown",
 			desc = "New link note (Obsidian)",
 		},
 		{
@@ -573,16 +597,19 @@ return {
 					vim.cmd("ObsidianExtractNote")
 				end
 			end,
+			ft = "markdown",
 			desc = "New extract text (Obsidian)",
 		},
 		{
 			"<leader>otn",
 			"<cmd>ObsidianNewFromTemplate<CR>",
+			ft = "markdown",
 			desc = "Open new note with template (Obsidian)",
 		},
 		{
 			"<leader>oc",
 			"<cmd>ObsidianTOC<CR>",
+			ft = "markdown",
 			desc = "Open contents (Obsidian)",
 		},
 	},

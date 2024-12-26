@@ -689,7 +689,7 @@ end
 -- Todo
 -- detect todos and toggle between ":" and ";", or show a message if not found
 -- this is to "mark them as done"
-vim.keymap.set("n", "<leader>Td", function()
+vim.keymap.set("n", "<leader>TD", function()
 	-- Get the current line
 	local current_line = vim.fn.getline(".")
 	-- Get the current line number
