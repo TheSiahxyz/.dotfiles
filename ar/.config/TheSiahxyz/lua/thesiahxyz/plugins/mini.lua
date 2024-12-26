@@ -720,37 +720,37 @@ return {
 					)
 					vim.keymap.set(
 						"n",
-						"cc",
+						",yy",
 						copy_to_clipboard,
 						{ buffer = buf_id, noremap = true, silent = true, desc = "Copy to clipboard" }
 					)
 					vim.keymap.set(
 						"n",
-						"cp",
+						",yp",
 						copy_path_to_clipboard,
 						{ buffer = buf_id, desc = "Copy path to clipboard" }
 					)
 					vim.keymap.set(
 						"n",
-						"Z",
+						",z",
 						zip_and_copy_to_clipboard,
 						{ buffer = buf_id, noremap = true, silent = true, desc = "Zip and copy" }
 					)
 					vim.keymap.set(
 						"n",
-						"pp",
+						",pp",
 						paste_from_clipboard,
 						{ buffer = buf_id, noremap = true, silent = true, desc = "Paste from clipboard" }
 					)
 					vim.keymap.set(
 						"n",
-						"pi",
+						",pi",
 						preview_image,
 						{ buffer = buf_id, noremap = true, silent = true, desc = "Preview image" }
 					)
 					vim.keymap.set(
 						"n",
-						"pI",
+						",pI",
 						preview_image_popup,
 						{ buffer = buf_id, noremap = true, silent = true, desc = "Pop-up preview image" }
 					)
