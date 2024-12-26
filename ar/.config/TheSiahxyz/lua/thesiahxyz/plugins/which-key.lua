@@ -220,6 +220,7 @@ return {
 				{ "<leader>q", group = "Quit" },
 				{ "<leader>sk", group = "Keys" },
 				{ "<leader>S", group = "Save/Source" },
+				{ "<leader>w", group = "Which-key" },
 				{ "<leader>W", group = "Save all" },
 				{ "<leader><tab>", group = "Tabs" },
 				{ "<localleader>", group = "Local Leader (bookmarks)" },

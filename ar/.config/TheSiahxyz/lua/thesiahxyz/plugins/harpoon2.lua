@@ -18,6 +18,29 @@ return {
 			{ "<M-x>", group = "Harpoon list delete" },
 		})
 	end,
+	config = function(_, opts)
+		local harpoon = require("harpoon")
+
+		-- Apply the base configuration
+		harpoon.setup(opts)
+
+		-- Extend functionality
+		harpoon:extend({
+			UI_CREATE = function(cx)
+				vim.keymap.set("n", "<C-v>", function()
+					harpoon.ui:select_menu_item({ vsplit = true })
+				end, { buffer = cx.bufnr })
+
+				vim.keymap.set("n", "<C-x>", function()
+					harpoon.ui:select_menu_item({ split = true })
+				end, { buffer = cx.bufnr })
+
+				vim.keymap.set("n", "<C-t>", function()
+					harpoon.ui:select_menu_item({ tabedit = true })
+				end, { buffer = cx.bufnr })
+			end,
+		})
+	end,
 	keys = function()
 		local keys = {
 			{
@@ -36,16 +59,16 @@ return {
 				desc = "Open harpoon list menu",
 			},
 			{
-				"<C-p>",
+				"<C-S-P>",
 				function()
-					require("harpoon"):list():prev()
+					require("harpoon"):list():prev({ ui_nav_wrap = false })
 				end,
 				desc = "Previous harpoon list",
 			},
 			{
-				"<C-n>",
+				"<C-S-N>",
 				function()
-					require("harpoon"):list():next()
+					require("harpoon"):list():next({ ui_nav_wrap = false })
 				end,
 				desc = "Next harpoon list",
 			},

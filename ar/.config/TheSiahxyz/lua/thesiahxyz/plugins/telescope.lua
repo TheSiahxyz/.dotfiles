@@ -255,7 +255,7 @@ return {
 				init = function()
 					local wk = require("which-key")
 					wk.add({
-						mode = { "n" },
+						mode = { "n", "v" },
 						{ "<leader>fl", group = "Live grep" },
 					})
 				end,
