@@ -382,10 +382,25 @@ return {
 
 			local open_tmux_pane = function()
 				local curr_entry = mini_files.get_fs_entry()
-				if curr_entry and curr_entry.fs_type == "directory" then
-					tmux_pane_function(curr_entry.path)
+				if curr_entry then
+					if curr_entry.fs_type == "directory" then
+						tmux_pane_function(curr_entry.path)
+					elseif curr_entry.fs_type == "file" then
+						local parent_dir = vim.fn.fnamemodify(curr_entry.path, ":h")
+						tmux_pane_function(parent_dir)
+					elseif curr_entry.fs_type == "link" then
+						local resolved_path = vim.fn.resolve(curr_entry.path)
+						if vim.fn.isdirectory(resolved_path) == 1 then
+							tmux_pane_function(resolved_path)
+						else
+							local parent_dir = vim.fn.fnamemodify(resolved_path, ":h")
+							tmux_pane_function(parent_dir)
+						end
+					else
+						vim.notify("Unsupported file system entry type", vim.log.levels.WARN)
+					end
 				else
-					vim.notify("Not a directory or no entry selected", vim.log.levels.WARN)
+					vim.notify("No entry selected", vim.log.levels.WARN)
 				end
 			end
 
@@ -714,7 +729,7 @@ return {
 
 					vim.keymap.set(
 						"n",
-						"T",
+						",t",
 						open_tmux_pane,
 						{ buffer = buf_id, noremap = true, silent = true, desc = "Open tmux pane" }
 					)
