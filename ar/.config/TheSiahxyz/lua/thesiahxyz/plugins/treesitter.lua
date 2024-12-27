@@ -11,6 +11,7 @@ return {
 				"cpp",
 				"html",
 				"java",
+				"latex",
 				"lua",
 				"markdown",
 				"markdown_inline",

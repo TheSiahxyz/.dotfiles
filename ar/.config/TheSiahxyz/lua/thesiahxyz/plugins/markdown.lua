@@ -185,7 +185,7 @@ return {
 		keys = {
 			{ "<leader>mp", "<cmd>MarkdownPreview<CR>", desc = "Markdown Preview" },
 			{ "<leader>mx", "<cmd>MarkdownPreviewStop<CR>", desc = "Markdown Stop" },
-			{ "<leader>mt", "<cmd>MarkdownPreviewToggle<CR>", desc = "Markdown Toggle" },
+			{ "<leader>md", "<cmd>MarkdownPreviewToggle<CR>", desc = "Markdown Toggle" },
 		},
 	},
 	{

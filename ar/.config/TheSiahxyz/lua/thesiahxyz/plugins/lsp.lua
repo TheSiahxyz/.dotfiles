@@ -133,6 +133,7 @@ return {
 				"debugpy", -- python debuger
 				"eslint_d", -- eslint linter
 				"isort", -- python formatter
+				"markdown-toc", -- markdown toc
 				"prettier", -- prettier formatter
 				"pylint", -- python linter
 				"ruff", -- python formatter
