@@ -42,7 +42,7 @@ fi
 
 # Install necessary libraries via winetricks
 echo "Installing required libraries via winetricks..."
-if ! winetricks -q vcrun6 mfc42; then
+if ! winetricks -q mfc42; then
     echo "Failed to install required libraries!"
     exit 1
 fi
