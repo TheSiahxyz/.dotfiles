@@ -34,11 +34,11 @@ local function set_foldmethod_expr()
 	-- doesn't have them set
 	if vim.fn.has("nvim-0.10") == 1 then
 		vim.opt.foldmethod = "expr"
-		vim.wo.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+		vim.wo.foldexpr = "v:lua.require'thesiahxyz.utils.markdown'.foldexpr()"
 		vim.opt.foldtext = ""
 	else
 		vim.opt.foldmethod = "indent"
-		vim.wo.foldtext = "v:lua.vim.treesitter.foldexpr()"
+		vim.wo.foldtext = "v:lua.require'thesiahxyz.utils.markdown'.foldexpr()"
 	end
 	vim.opt.foldlevel = 99
 end
