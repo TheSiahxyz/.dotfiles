@@ -117,8 +117,8 @@ vim.keymap.set({ "n", "v" }, "<leader><C-y>", ":%y<cr>", { desc = "Yank current 
 vim.keymap.set({ "n", "v", "x" }, "<leader>pp", [["+p]], { desc = "Paste from clipboard after cursor" })
 vim.keymap.set({ "n", "v", "x" }, "<leader>PP", [["+P]], { desc = "Paste from clipboard before cursor" })
 vim.keymap.set({ "n", "v", "x" }, "<leader>pP", [["_dP]], { desc = "Paste over and preserve clipboard" })
-vim.keymap.set({ "n", "v" }, "<leader>dd", [["_d]], { desc = "Delete without storing in clipboard" })
-vim.keymap.set({ "n", "v" }, "<leader>DD", [["+d]], { desc = "Delete and yank to clipboard" })
+vim.keymap.set({ "n", "v" }, "<leader>dd", [["+d]], { desc = "Delete and yank to clipboard" })
+vim.keymap.set({ "n", "v" }, "<leader>DD", [["_d]], { desc = "Delete without storing in clipboard" })
 vim.keymap.set("n", "<leader><C-d>", ":%d_<cr>", { desc = "Delete all to black hole register" })
 
 -- Diagnostic

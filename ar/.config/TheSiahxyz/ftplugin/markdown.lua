@@ -28,13 +28,89 @@ function BoldMe()
 	vim.api.nvim_buf_set_lines(0, start_line - 1, end_line, false, lines)
 end
 
+-- Function to fold all headings of a specific level
+local function set_foldmethod_expr()
+	-- These are lazyvim.org defaults but setting them just in case a file
+	-- doesn't have them set
+	if vim.fn.has("nvim-0.10") == 1 then
+		vim.opt.foldmethod = "expr"
+		vim.wo.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+		vim.opt.foldtext = ""
+	else
+		vim.opt.foldmethod = "indent"
+		vim.wo.foldtext = "v:lua.vim.treesitter.foldexpr()"
+	end
+	vim.opt.foldlevel = 99
+end
+
+local function fold_headings_of_level(level)
+	-- Move to the top of the file
+	vim.cmd("normal! gg")
+	-- Get the total number of lines
+	local total_lines = vim.fn.line("$")
+	for line = 1, total_lines do
+		-- Get the content of the current line
+		local line_content = vim.fn.getline(line)
+		-- "^" -> Ensures the match is at the start of the line
+		-- string.rep("#", level) -> Creates a string with 'level' number of "#" characters
+		-- "%s" -> Matches any whitespace character after the "#" characters
+		-- So this will match `## `, `### `, `#### ` for example, which are markdown headings
+		if line_content:match("^" .. string.rep("#", level) .. "%s") then
+			-- Move the cursor to the current line
+			vim.fn.cursor(line, 1)
+			-- Fold the heading if it matches the level
+			if vim.fn.foldclosed(line) == -1 then
+				vim.cmd("normal! za")
+			end
+		end
+	end
+end
+
+local function fold_markdown_headings(levels)
+	set_foldmethod_expr()
+	-- I save the view to know where to jump back after folding
+	local saved_view = vim.fn.winsaveview()
+	for _, level in ipairs(levels) do
+		fold_headings_of_level(level)
+	end
+	vim.cmd("nohlsearch")
+	-- Restore the view to jump to where I was
+	vim.fn.winrestview(saved_view)
+end
+
+local function make_heading_content()
+	-- Get the total number of lines in the buffer
+	local total_lines = vim.api.nvim_buf_line_count(0)
+
+	-- Iterate through all lines
+	for line = 1, total_lines do
+		-- Get the content of the current line
+		local line_content = vim.api.nvim_buf_get_lines(0, line - 1, line, false)[1]
+		-- Match headings with at least two '#' characters
+		local heading = line_content:match("^(##+)%s(.+)")
+		if heading then
+			-- Extract the heading text
+			local heading_text = line_content:match("^#+%s(.+)")
+			if heading_text then
+				-- Create the content line with markdown link syntax
+				local content_line = string.format("%s [%s]()", heading, heading_text)
+				-- Replace the current line with the modified content
+				vim.api.nvim_buf_set_lines(0, line - 1, line, false, { content_line })
+			end
+		end
+	end
+	-- Notify the user that the headings have been updated
+	vim.notify("Headings transformed into content format", vim.log.levels.INFO)
+end
+
 -- Generate/update a Markdown TOC
 -- To generate the TOC I use the markdown-toc plugin
 -- https://github.com/jonschlinkert/markdown-toc
 -- And the markdown-toc plugin installed as a LazyExtra
 -- Function to update the Markdown TOC with customizable headings
 local function update_markdown_toc(heading2, heading3)
-	local path = vim.fn.expand("%") -- Expands the current file name to a full path
+	-- local path = vim.fn.expand("%") -- Expands the current file name to a full path
+	local path = vim.api.nvim_buf_get_name(0)
 	local bufnr = 0 -- The current buffer number, 0 references the current active buffer
 	-- Save the current view
 	-- If I don't do this, my folds are lost when I run this keymap
@@ -87,11 +163,11 @@ local function update_markdown_toc(heading2, heading3)
 	-- Silently save the file, in case TOC is being created for the first time
 	vim.cmd("silent write")
 	-- Silently run markdown-toc to update the TOC without displaying command output
-	-- vim.fn.system("markdown-toc -i " .. path)
+	-- vim.fn.system('markdown-toc -i "' .. path .. '"')
 	-- I want my bulletpoints to be created only as "-" so passing that option as
 	-- an argument according to the docs
 	-- https://github.com/jonschlinkert/markdown-toc?tab=readme-ov-file#optionsbullets
-	vim.fn.system('markdown-toc --bullets "-" -i ' .. path)
+	vim.fn.system('markdown-toc --bullets "-" -i "' .. path .. '"')
 	vim.cmd("edit!") -- Reloads the file to reflect the changes made by markdown-toc
 	vim.cmd("silent write") -- Silently save the file
 	vim.notify("TOC updated and file saved", vim.log.levels.INFO)
@@ -115,6 +191,7 @@ local function update_markdown_toc(heading2, heading3)
 	-- Restore the saved view (including folds)
 	vim.cmd("loadview")
 end
+
 -- this setting makes markdown auto-set the 80 text width limit when typing
 -- vim.cmd('set fo+=a')
 if is_in_obsidian_repo() then
@@ -122,13 +199,6 @@ if is_in_obsidian_repo() then
 end
 
 vim.cmd("set conceallevel=0")
-vim.api.nvim_create_autocmd("FileType", {
-	pattern = "markdown",
-	callback = function()
-		vim.opt_local.conceallevel = 0
-	end,
-})
-
 vim.cmd("setlocal spell spelllang=en_us")
 vim.cmd("setlocal expandtab shiftwidth=4 softtabstop=4 autoindent")
 vim.cmd([[
@@ -140,17 +210,17 @@ vim.cmd([[
 ]])
 
 -- Makrdown.nvim settings
-vim.g.vim_markdown_folding_disabled = 0
-vim.g.vim_markdown_folding_style_pythonic = 1
-vim.g.vim_markdown_folding_level = 2
-vim.g.vim_markdown_toc_autofit = 1
+vim.g.vim_markdown_auto_insert_bullets = 0
+vim.g.vim_markdown_autowrite = 1
 vim.g.vim_markdown_conceal = 0
 vim.g.vim_markdown_conceal_code_blocks = 0
-vim.g.vim_markdown_no_extensions_in_markdown = 1
-vim.g.vim_markdown_autowrite = 1
+vim.g.vim_markdown_folding_disabled = 0
+vim.g.vim_markdown_folding_level = 2
+vim.g.vim_markdown_folding_style_pythonic = 1
 vim.g.vim_markdown_follow_anchor = 1
-vim.g.vim_markdown_auto_insert_bullets = 0
 vim.g.vim_markdown_new_list_item_indent = 0
+vim.g.vim_markdown_no_extensions_in_markdown = 1
+vim.g.vim_markdown_toc_autofit = 1
 
 -- MarkdownPreview settings
 -- Get the BROWSER environment variable
@@ -167,13 +237,14 @@ wk.add({
 	{ "<leader>ct", group = "Copy" },
 	{ "<leader>i", group = "Image" },
 	{ "<leader>m", group = "Markdown" },
+	{ "<leader>mh", group = "Headings" },
 })
 
 -- bold
 vim.api.nvim_buf_set_keymap(
 	0,
 	"v",
-	"<Leader>mb",
+	"<leader>mb",
 	":<C-u>lua BoldMe()<CR>",
 	{ noremap = true, silent = true, desc = "Bold selection" }
 )
@@ -181,8 +252,53 @@ vim.api.nvim_buf_set_keymap(
 -- copy
 vim.keymap.set("n", "<leader>mcd", "4wvg$y", { desc = "Copy description" })
 
--- increase
-vim.keymap.set("v", "<leader>mhi", ":HeaderIncrease<CR>", { desc = "Increase header level" })
+-- heading
+vim.keymap.set("n", "<leader>mhi", function()
+	-- Save the current cursor position
+	local cursor_pos = vim.api.nvim_win_get_cursor(0)
+	-- I'm using [[ ]] to escape the special characters in a command
+	vim.cmd([[:g/\(^$\n\s*#\+\s.*\n^$\)/ .+1 s/^#\+\s/#&/]])
+	-- Restore the cursor position
+	vim.api.nvim_win_set_cursor(0, cursor_pos)
+	-- Clear search highlight
+	vim.cmd("nohlsearch")
+end, { desc = "Increase headings without confirmation" })
+
+vim.keymap.set("n", "<leader>mhd", function()
+	-- Save the current cursor position
+	local cursor_pos = vim.api.nvim_win_get_cursor(0)
+	-- I'm using [[ ]] to escape the special characters in a command
+	vim.cmd([[:g/^\s*#\{2,}\s/ s/^#\(#\+\s.*\)/\1/]])
+	-- Restore the cursor position
+	vim.api.nvim_win_set_cursor(0, cursor_pos)
+	-- Clear search highlight
+	vim.cmd("nohlsearch")
+end, { desc = "Decrease headings without confirmation" })
+local function make_heading_content()
+	-- Get the total number of lines in the buffer
+	local total_lines = vim.api.nvim_buf_line_count(0)
+
+	-- Iterate through all lines
+	for line = 1, total_lines do
+		-- Get the content of the current line
+		local line_content = vim.api.nvim_buf_get_lines(0, line - 1, line, false)[1]
+		-- Match headings with at least two '#' characters
+		local heading = line_content:match("^(##+)%s(.+)")
+		if heading then
+			-- Extract the heading text
+			local heading_text = line_content:match("^#+%s(.+)")
+			if heading_text then
+				-- Create the content line with markdown link syntax
+				local content_line = string.format("%s [%s]()", heading, heading_text)
+				-- Replace the current line with the modified content
+				vim.api.nvim_buf_set_lines(0, line - 1, line, false, { content_line })
+			end
+		end
+	end
+	-- Notify the user that the headings have been updated
+	vim.notify("Headings transformed into content format", vim.log.levels.INFO)
+end
+vim.keymap.set("n", "<leader>mhl", make_heading_content, { desc = "Make heading content" })
 
 -- line to list
 vim.keymap.set(
@@ -191,6 +307,83 @@ vim.keymap.set(
 	"^I-<Space>[<Space>]<Space><Esc>^j",
 	{ remap = true, silent = false, desc = "Make a line into a list" }
 )
+
+-- folding
+-- use <CR> to fold when in normal mode
+-- to see help about folds use `:help fold`
+vim.keymap.set("n", "zi", function()
+	-- Get the current line number
+	local line = vim.fn.line(".")
+	-- Get the fold level of the current line
+	local foldlevel = vim.fn.foldlevel(line)
+	if foldlevel == 0 then
+		vim.notify("No fold found", vim.log.levels.INFO)
+	else
+		vim.cmd("normal! za")
+	end
+end, { desc = "Toggle fold" })
+
+-- Keymap for unfolding markdown headings of level 2 or above
+-- Changed all the markdown folding and unfolding keymaps from <leader>mfj to
+-- zj, zk, zl, z; and zu respectively lamw25wmal
+vim.keymap.set("n", "zu", function()
+	-- vim.keymap.set("n", "<leader>mfu", function()
+	-- Reloads the file to reflect the changes
+	vim.cmd("edit!")
+	vim.cmd("normal! zR") -- Unfold all headings
+end, { desc = "Unfold all headings level 2 or above" })
+
+-- gk jummps to the markdown heading above and then folds it
+-- zi by default toggles folding, but I don't need it lamw25wmal
+vim.keymap.set("n", "zh", function()
+	-- Difference between normal and normal!
+	-- - `normal` executes the command and respects any mappings that might be defined.
+	-- - `normal!` executes the command in a "raw" mode, ignoring any mappings.
+	vim.cmd("normal gk")
+	-- This is to fold the line under the cursor
+	vim.cmd("normal! za")
+end, { desc = "Fold the heading cursor currently on" })
+
+-- Keymap for folding markdown headings of level 1 or above
+vim.keymap.set("n", "zj", function()
+	-- vim.keymap.set("n", "<leader>mfj", function()
+	-- Reloads the file to refresh folds, otherwise you have to re-open neovim
+	vim.cmd("edit!")
+	-- Unfold everything first or I had issues
+	vim.cmd("normal! zR")
+	fold_markdown_headings({ 6, 5, 4, 3, 2, 1 })
+end, { desc = "Fold all headings level 1 or above" })
+
+-- Keymap for folding markdown headings of level 2 or above
+-- I know, it reads like "madafaka" but "k" for me means "2"
+vim.keymap.set("n", "zk", function()
+	-- vim.keymap.set("n", "<leader>mfk", function()
+	-- Reloads the file to refresh folds, otherwise you have to re-open neovim
+	vim.cmd("edit!")
+	-- Unfold everything first or I had issues
+	vim.cmd("normal! zR")
+	fold_markdown_headings({ 6, 5, 4, 3, 2 })
+end, { desc = "Fold all headings level 2 or above" })
+
+-- Keymap for folding markdown headings of level 3 or above
+vim.keymap.set("n", "zl", function()
+	-- vim.keymap.set("n", "<leader>mfl", function()
+	-- Reloads the file to refresh folds, otherwise you have to re-open neovim
+	vim.cmd("edit!")
+	-- Unfold everything first or I had issues
+	vim.cmd("normal! zR")
+	fold_markdown_headings({ 6, 5, 4, 3 })
+end, { desc = "Fold all headings level 3 or above" })
+
+-- Keymap for folding markdown headings of level 4 or above
+vim.keymap.set("n", "z;", function()
+	-- vim.keymap.set("n", "<leader>mf;", function()
+	-- Reloads the file to refresh folds, otherwise you have to re-open neovim
+	vim.cmd("edit!")
+	-- Unfold everything first or I had issues
+	vim.cmd("normal! zR")
+	fold_markdown_headings({ 6, 5, 4 })
+end, { desc = "Fold all headings level 4 or above" })
 
 -- link text objects for i and a
 vim.keymap.set(

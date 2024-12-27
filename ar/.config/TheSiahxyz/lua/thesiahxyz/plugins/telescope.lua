@@ -256,6 +256,7 @@ return {
 					local wk = require("which-key")
 					wk.add({
 						mode = { "n", "v" },
+						{ "<leader>f", group = "Find" },
 						{ "<leader>fl", group = "Live grep" },
 					})
 				end,

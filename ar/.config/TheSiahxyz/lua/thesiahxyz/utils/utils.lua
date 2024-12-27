@@ -62,8 +62,8 @@ end
 
 vim.api.nvim_set_keymap(
 	"i",
-	"<M-i>",
-	"<Cmd>lua require('thesiahxyz.utils.utils').insert_file_path()<CR>",
+	"<M-p>",
+	"<cmd>lua require('thesiahxyz.utils.utils').insert_file_path()<cr>",
 	{ noremap = true, silent = true }
 )
 function M.create_floating_scratch(content)
