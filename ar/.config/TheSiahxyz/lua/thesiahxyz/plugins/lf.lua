@@ -68,7 +68,7 @@ return {
 		require("lf").setup({
 			default_action = "drop", -- Default action when `Lf` opens a file
 			default_actions = {
-				["<CR>"] = "tabedit",
+				["e"] = "tabedit",
 				["<C-t>"] = "tab drop",
 				["<C-v>"] = "vsplit",
 				["<C-x>"] = "split",

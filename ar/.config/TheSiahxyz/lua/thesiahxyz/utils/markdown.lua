@@ -1,4 +1,3 @@
----@class thesiahxyz.utils.markdown
 local M = {}
 
 -- foldtext for Neovim < 0.10.0

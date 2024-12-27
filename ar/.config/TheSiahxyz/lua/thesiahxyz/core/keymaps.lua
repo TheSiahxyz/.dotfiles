@@ -662,7 +662,7 @@ vim.keymap.set("n", "<leader><tab>p", "<cmd>tabprevious<cr>", { desc = "Previous
 vim.keymap.set("n", "[<tab>", "<cmd>tabprevious<cr>", { desc = "Previous Tab" })
 
 -- Terminal
-vim.keymap.set("n", "<leader>te", "<cmd>term<cr>i", { desc = "Open terminal" })
+vim.keymap.set("n", "<leader>te", "<cmd>term<cr>", { desc = "Open terminal" })
 vim.keymap.set("n", "<leader>t-", "<cmd>sp term://zsh | startinsert<cr>", { desc = "Open terminal (horizontal split)" })
 vim.keymap.set("n", "<leader>t|", "<cmd>vsp term://zsh | startinsert<cr>", { desc = "Open terminal (vertical split)" })
 vim.keymap.set("t", "<esc><esc>", "<C-\\><C-n>", { desc = "Escape terminal mode" })
@@ -671,7 +671,9 @@ vim.keymap.set("t", "<C-j>", "<cmd>wincmd j<cr>", { desc = "Move to window below
 vim.keymap.set("t", "<C-k>", "<cmd>wincmd k<cr>", { desc = "Move to window above" })
 vim.keymap.set("t", "<C-l>", "<cmd>wincmd l<cr>", { desc = "Move to right window" })
 vim.keymap.set("t", "<C-Space>l", "clear<cr>", { silent = true, desc = "Clear terminal" })
-vim.keymap.set("t", "<C-\\>", "<cmd>close<cr>", { desc = "Close terminal" })
+vim.keymap.set("t", "<C-\\>", "<C-\\><C-n>iexit<cr>", { desc = "Close terminal" })
+vim.keymap.set("t", "<C-/>", "<cmd>close<cr>", { desc = "Close terminal" })
+vim.keymap.set("t", "<C-_>", "<cmd>close<cr>", { desc = "Close terminal" })
 
 -- Tmux
 if vim.env.TMUX then
