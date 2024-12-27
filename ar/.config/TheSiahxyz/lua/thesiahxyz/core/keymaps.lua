@@ -98,7 +98,7 @@ vim.keymap.set("n", "<leader>cp", function()
 	new_filename = new_filename .. "." .. file_ext
 	local cmd = "cp " .. filepath .. " " .. new_filename
 	local confirm = vim.fn.input('Do you want to copy "' .. filename .. '"? (y/n): ')
-	if confirm:lower() == "y" then
+	if confirm:lower() == "y" or confirm:lower() == "yes" then
 		vim.cmd("silent !" .. cmd)
 		vim.cmd("silent edit " .. new_filename)
 	end
@@ -457,15 +457,15 @@ local function delete_current_file()
 		if vim.fn.executable("trash") == 0 then
 			vim.api.nvim_echo({
 				{ "- Trash utility not installed. Make sure to install it first\n", "ErrorMsg" },
-				{ "- In macOS run `brew install trash`\n", nil },
+				{ "- Install `trash-cli`\n", nil },
 			}, false, {})
 			return
 		end
 		-- Prompt for confirmation before deleting the file
 		vim.ui.input({
-			prompt = "Type 'del' to delete the file '" .. current_file .. "': ",
+			prompt = 'Do you want to delete "' .. current_file .. '"? (y/n): ',
 		}, function(input)
-			if input == "del" then
+			if input:lower() == "y" or input:lower() == "yes" then
 				-- Delete the file using trash app
 				local success, _ = pcall(function()
 					vim.fn.system({ "trash", vim.fn.fnameescape(current_file) })
