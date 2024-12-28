@@ -98,7 +98,7 @@ _resize_img() {
     _w=$(_get_resolution_screen)
     convert -resize "${_w}" "${1}" "${_dir_img}/wallpaper-${_n}.jpg"
     if [[ "${add}" == 1 ]]; then
-        feh --bg-scale "${_dir_img}/wallpaper-${_n}.jpg"
+        feh --no-fehbg --bg-scale "${_dir_img}/wallpaper-${_n}.jpg"
         [[ $(which gsettings >&- 2>&-) ]] &&
             gsettings set org.gnome.desktop.background picture-uri file:///"${_dir_img}/wallpaper-${_n}.jpg"
     fi
@@ -121,9 +121,9 @@ _loop() {
     while :; do
         [[ "${i}" -ge "$(_count)" ]] && i=1
         if [[ $(expr length $i) == 1 ]]; then
-            feh --bg-scale "${_dir_img}/wallpaper-00${i}.jpg"
+            feh --no-fehbg --bg-scale "${_dir_img}/wallpaper-00${i}.jpg"
         else
-            feh --bg-scale "${_dir_img}/wallpaper-0${i}.jpg"
+            feh --no-fehbg --bg-scale "${_dir_img}/wallpaper-0${i}.jpg"
         fi
         sleep $1
         let i=i+1
@@ -140,7 +140,7 @@ _quit_loop() {
 _set_img() {
     ls "${_dir_img}/wallpaper-${1}.jpg" >/dev/null 2>/dev/null
     if [[ "$?" == 0 ]]; then
-        feh --bg-scale "${_dir_img}/wallpaper-$1.jpg"
+        feh --no-fehbg --bg-scale "${_dir_img}/wallpaper-$1.jpg"
         if [[ $(which gsettings >&- 2>&-) && "$XDG_CURRENT_DESKTOP" == "GNOME" ]]; then
             gsettings set org.gnome.desktop.background picture-uri file:///"${_dir_img}/wallpaper-$1.jpg"
         fi
@@ -153,7 +153,7 @@ _set_img() {
 }
 
 _show() {
-    egrep -o '[0-9]{3}' "${HOME}/.fehbg"
+    mpv --really-quiet "${XDG_DATA_HOME:-${HOME}/.local/share}/wallpapers/video/bg.mp4"
 }
 
 _video() {
@@ -175,7 +175,7 @@ _video() {
     i=1
     # ctrl_c
     while :; do
-        feh --bg-scale $(ls -1 ${_dir_vid}/${a}/* | sed -n "${i}p")
+        feh --no-fehbg --bg-scale $(ls -1 ${_dir_vid}/${a}/* | sed -n "${i}p")
         sleep 0.01
         let i=i+1
         [[ "${i}" -gt "${t}" ]] && i=1
@@ -212,7 +212,7 @@ _set_video() {
             i=1
             # ctrl_c
             while :; do
-                feh --bg-scale $(ls -1 ${_dir_vid}/${1}/* | sed -n "${i}p")
+                feh --no-fehbg --bg-scale $(ls -1 ${_dir_vid}/${1}/* | sed -n "${i}p")
                 sleep 0.01
                 let i=i+1
                 [[ "${i}" -gt "${t}" ]] && i=1
