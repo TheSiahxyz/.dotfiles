@@ -309,20 +309,6 @@ vim.keymap.set(
 )
 
 -- folding
--- use <CR> to fold when in normal mode
--- to see help about folds use `:help fold`
-vim.keymap.set("n", "zi", function()
-	-- Get the current line number
-	local line = vim.fn.line(".")
-	-- Get the fold level of the current line
-	local foldlevel = vim.fn.foldlevel(line)
-	if foldlevel == 0 then
-		vim.notify("No fold found", vim.log.levels.INFO)
-	else
-		vim.cmd("normal! za")
-	end
-end, { desc = "Toggle fold" })
-
 -- Keymap for unfolding markdown headings of level 2 or above
 -- Changed all the markdown folding and unfolding keymaps from <leader>mfj to
 -- zj, zk, zl, z; and zu respectively lamw25wmal
