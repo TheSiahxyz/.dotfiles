@@ -38,7 +38,7 @@ shift $((OPTIND - 1))
 
 trueloc="$(readlink -f "$1")" &&
     case "$(file --mime-type -b "$trueloc")" in
-    image/*) ln -sf "$trueloc" "$bgloc" && [ -z "$silent" ] && notify-send -i "$bgloc" "⌛ Changing wallpaper..." ;;
+    image/*) ln -sf "$trueloc" "$bgloc" && [ -z "$silent" ] && notify-send -i "$bgloc" "Changing wallpaper..." ;;
     inode/directory) ln -sf "$(find -L "$trueloc" -iregex '.*.\(jpg\|jpeg\|png\|gif\)' -type f | shuf -n 1)" "$bgloc" && [ -z "$silent" ] && notify-send -i "$bgloc" "Random Wallpaper chosen." ;;
     video/*)
         mkdir -p "$wallloc/video" 2>/dev/null
@@ -49,6 +49,7 @@ trueloc="$(readlink -f "$1")" &&
         fi
         trueloc="$wallloc/video/bg.mp4"
         wallset --video "$trueloc" >/dev/null 2>&1 && [ -z "$silent" ] && notify-send -i "$vidloc" "Changing wallpaper..."
+        exit
         ;;
     *)
         [ -z "$silent" ] && notify-send "🖼️ Error" "Not a valid image or directory."
