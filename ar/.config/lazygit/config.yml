@@ -10,6 +10,6 @@ customCommands:
     description: "Open current PR in browser"
 
   - key: "H"
-    context: "remoteBranches"
-    command: "git push home master"
+    context: "remotes"
+    command: "git push {{.SelectedRemote.Name}} / {{.CheckedOutBranch.Name}}"
     description: "Push to home remote"
