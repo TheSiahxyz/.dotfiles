@@ -79,21 +79,21 @@ return {
 					end
 
 					local bufnr = vim.api.nvim_get_current_buf()
-					vim.keymap.set("n", "<leader>gps", function()
+					vim.keymap.set("n", "<leader>P", function()
 						vim.cmd.Git("push")
 					end, { buffer = bufnr, remap = false, desc = "Git push" })
-					vim.keymap.set("n", "<leader>gpl", function()
+					vim.keymap.set("n", "<leader>p", function()
 						vim.cmd.Git({ "pull", "--rebase" })
 					end, { buffer = bufnr, remap = false, desc = "Git pull" })
 					vim.keymap.set(
 						"n",
-						"<leader>gpo",
+						"<leader>o",
 						":Git push -u origin ",
 						{ buffer = bufnr, remap = false, desc = "Git push origin" }
 					)
 					vim.keymap.set(
 						"n",
-						"<leader>gph",
+						"<leader>h",
 						":Git push -u home ",
 						{ buffer = bufnr, remap = false, desc = "Git push home" }
 					)
@@ -101,8 +101,8 @@ return {
 			})
 		end,
 		keys = {
-			{ mode = "n", "<leader>gf", ":Git ", desc = "Git" },
-			{ mode = "n", "<leader>gF", vim.cmd.Git, desc = "Git fugitive" },
+			{ mode = "n", "<leader>g<leader>", ":Git ", desc = "Git" },
+			{ mode = "n", "<leader>gf", vim.cmd.Git, desc = "Git fugitive" },
 			{ mode = "n", "gm", "<cmd>diffget //2<cr>", desc = "Git diff on my side" },
 			{ mode = "n", "go", "<cmd>diffget //3<cr>", desc = "Git diff on their side" },
 		},

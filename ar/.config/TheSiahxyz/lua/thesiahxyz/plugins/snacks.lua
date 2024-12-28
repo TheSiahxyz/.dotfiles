@@ -31,22 +31,28 @@ return {
 						},
 						{ icon = icons.ui.NewFile, key = "n", desc = "New File", action = ":ene | startinsert" },
 						{
-							icon = icons.ui.List,
-							key = "g",
-							desc = "Grep Text",
-							action = ":lua Snacks.dashboard.pick('live_grep')",
-						},
-						{
 							icon = icons.documents.Files,
 							key = "o",
 							desc = "Old Files",
 							action = ":lua Snacks.dashboard.pick('oldfiles')",
 						},
 						{
+							icon = icons.ui.List,
+							key = "s",
+							desc = "Search Text",
+							action = ":lua Snacks.dashboard.pick('live_grep')",
+						},
+						{
 							icon = icons.ui.Gear,
 							key = "c",
 							desc = "Config",
 							action = ":lua Snacks.dashboard.pick('files', {cwd = vim.fn.stdpath('config')})",
+						},
+						{
+							icon = icons.ui.Gear,
+							key = "g",
+							desc = "Git (lazygit)",
+							action = ":lua Snacks.lazygit()",
 						},
 						{ icon = icons.ui.Refresh, key = "s", desc = "Restore Session", section = "session" },
 						-- {
