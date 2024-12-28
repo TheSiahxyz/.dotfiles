@@ -206,6 +206,7 @@ alias ffmpeg='ffmpeg -hide_banner'
 balias fdn='find . -name "'
 
 # git
+alias lg="lazygit"
 alias gu="gitupdate"
 alias ggg="ssh $THESIAH_GIT"
 alias gis="githubissuesync"
