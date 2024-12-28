@@ -12,6 +12,7 @@ customCommands:
   - key: "H"
     command: 'echo "pushing to remote"'
     context: "commits"
+    description: "Push to home remote"
     prompts:
       - type: "confirm"
         title: "Push to remote"
