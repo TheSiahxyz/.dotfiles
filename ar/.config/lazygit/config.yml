@@ -1,10 +1,18 @@
 customCommands:
   - key: "<c-a>"
-    context: "global"
     command: "gh repo view --branch {{.CheckedOutBranch.Name}} --web"
+    context: "global"
     description: "Open current branch in browser"
 
   - key: "<c-p>"
-    context: "global"
     command: "gh pr view --web"
+    context: "global"
     description: "Open current PR in browser"
+
+  - key: "H"
+    command: 'echo "pushing to remote"'
+    context: "commits"
+    prompts:
+      - type: "confirm"
+        title: "Push to remote"
+        body: "Are you sure you want to push to the remote?"
