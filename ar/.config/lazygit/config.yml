@@ -13,7 +13,3 @@ customCommands:
     context: "commits"
     command: "git push home master"
     description: "Push to home remote"
-    prompts:
-      - type: "confirm"
-        title: "Push to remote"
-        body: "Are you sure you want to push to the remote?"
