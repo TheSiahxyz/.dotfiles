@@ -1,6 +1,0 @@
---dir=.
---target=~
---no-folding
---ignore='.git'
---ignore='DS_Store'
---ignore='.*/atuin/.*'
