@@ -7,8 +7,9 @@
 #	If wal is installed, also generates a colorscheme.
 
 # Location of link to wallpaper link.
-bgloc="${XDG_DATA_HOME:-${HOME}/.local/share}/bg"
-vidloc="$HOME/.wallpapers/video/1/filename00001.jpg"
+wallloc="${XDG_DATA_HOME:-${HOME}/.local/share}/wallpapers"
+bgloc="$wallloc/bg"
+vidloc="$wallloc/video/1/filename00001.jpg"
 
 # Configuration files of applications that have their themes changed by pywal.
 dunstconf="${XDG_CONFIG_HOME:-${HOME}/.config}/dunst/dunstrc"
@@ -24,26 +25,28 @@ done
 
 shift $((OPTIND - 1))
 
-[ "$(ls ~/.wallpapers 2>/dev/null)" ] && {
+[ -d "$wallloc" ] || mkdir -p "$wallloc"
+
+[ "$(ls "$wallloc/video" 2>/dev/null)" ] && {
     wallset -r 2>/dev/null
     wallset -q 2>/dev/null
-    rm -rf ~/.wallpapers
+    rm -rf "$wallloc/video"
 }
 
 [ -f ~/.fehbg ] && rm -f ~/.fehbg
 
 trueloc="$(readlink -f "$1")" &&
     case "$(file --mime-type -b "$trueloc")" in
-    image/*) ln -sf "$trueloc" "$bgloc" && [ -z "$silent" ] && notify-send -i "$bgloc" "Changing wallpaper..." ;;
+    image/*) ln -sf "$trueloc" "$bgloc" && [ -z "$silent" ] && notify-send -i "$bgloc" "⌛ Changing wallpaper..." ;;
     inode/directory) ln -sf "$(find -L "$trueloc" -iregex '.*.\(jpg\|jpeg\|png\|gif\)' -type f | shuf -n 1)" "$bgloc" && [ -z "$silent" ] && notify-send -i "$bgloc" "Random Wallpaper chosen." ;;
     video/*)
-        mkdir -p ~/.wallpapers/video 2>/dev/null
+        mkdir -p "$wallloc/video" 2>/dev/null
         if [ ! "${trueloc##*.}" = "mp4" ] || [ "$(($(mediainfo --Output="General;%Duration%" "$trueloc")))" -gt 10000 ]; then
-            notify-send "Converting video for wallpaper..." && ffmpeg -i "$trueloc" -t 3 "$HOME/.wallpapers/video/bg.mp4" 2>/dev/null
+            notify-send "⌛ Converting video for wallpaper..." && ffmpeg -i "$trueloc" -t 3 "$wallloc/video/bg.mp4" 2>/dev/null
         else
-            cp "$trueloc" ~/.wallpapers/video/bg.mp4 2>/dev/null
+            cp "$trueloc" "$wallloc/video/bg.mp4" 2>/dev/null
         fi
-        trueloc="$HOME/.wallpapers/video/bg.mp4"
+        trueloc="$wallloc/video/bg.mp4"
         wallset --video "$trueloc" >/dev/null 2>&1 && [ -z "$silent" ] && notify-send -i "$vidloc" "Changing wallpaper..."
         ;;
     *)

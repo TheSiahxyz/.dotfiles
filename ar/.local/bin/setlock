@@ -1,6 +1,6 @@
 #!/bin/sh
 
-lockloc="${XDG_DATA_HOME:-${HOME}/.local/share}/lock"
+lockloc="${XDG_DATA_HOME:-${HOME}/.local/share}/wallpapers/lock"
 
 # Give -s as parameter to make notifications silent.
 while getopts "s" o; do

@@ -81,6 +81,7 @@ pww             $HOME/Private/photo
 shm             ${XDG_DATA_HOME:-${HOME}/.local/share}/mail
 shr             ${XDG_DATA_HOME:-${HOME}/.local/share}
 shv             ${XDG_DATA_HOME:-${HOME}/.local/share}/venvs
+shw             ${XDG_DATA_HOME:-${HOME}/.local/share}/wallpapers
 sk              ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless
 slr             ${XDG_DATA_HOME:-${HOME}/.local/share}/lyrics
 sr              ${XDG_SOURCES_HOME:-${HOME}/.local/src}
