@@ -10,6 +10,6 @@ customCommands:
     description: "Open current PR in browser"
 
   - key: "H"
-    context: "commits"
+    context: "remoteBranches"
     command: "git push home master"
     description: "Push to home remote"
