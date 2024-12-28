@@ -8,8 +8,3 @@ customCommands:
     context: "global"
     command: "gh pr view --web"
     description: "Open current PR in browser"
-
-  - key: "H"
-    context: "global"
-    command: "git push home master"
-    description: "Push commits to home remote"
