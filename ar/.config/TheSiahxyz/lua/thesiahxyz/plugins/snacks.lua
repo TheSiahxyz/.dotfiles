@@ -24,33 +24,33 @@ return {
 				preset = {
 					keys = {
 						{
-							icon = " ",
+							icon = icons.ui.Search,
 							key = "f",
 							desc = "Find File",
 							action = ":lua Snacks.dashboard.pick('files')",
 						},
-						{ icon = " ", key = "n", desc = "New File", action = ":ene | startinsert" },
+						{ icon = icons.ui.NewFile, key = "n", desc = "New File", action = ":ene | startinsert" },
 						{
-							icon = " ",
+							icon = icons.ui.List,
 							key = "g",
-							desc = "Find Text",
+							desc = "Grep Text",
 							action = ":lua Snacks.dashboard.pick('live_grep')",
 						},
 						{
-							icon = " ",
-							key = "r",
-							desc = "Recent Files",
+							icon = icons.documents.Files,
+							key = "o",
+							desc = "Old Files",
 							action = ":lua Snacks.dashboard.pick('oldfiles')",
 						},
 						{
-							icon = " ",
+							icon = icons.ui.Gear,
 							key = "c",
 							desc = "Config",
 							action = ":lua Snacks.dashboard.pick('files', {cwd = vim.fn.stdpath('config')})",
 						},
-						{ icon = " ", key = "s", desc = "Restore Session", section = "session" },
+						{ icon = icons.ui.Refresh, key = "s", desc = "Restore Session", section = "session" },
 						-- {
-						-- 	icon = "󰒲 ",
+						-- 	icon = icons.ui.Sleep,
 						-- 	key = "L",
 						-- 	desc = "Lazy",
 						-- 	action = ":Lazy",
