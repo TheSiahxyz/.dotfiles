@@ -11,5 +11,5 @@ customCommands:
 
   - key: "H"
     context: "remotes"
-    command: "git push {{.SelectedRemote.Name}} / {{.CheckedOutBranch.Name}}"
+    command: "git push {{.SelectedRemote.Name}} {{.CheckedOutBranch.Name}}"
     description: "Push to home remote"
