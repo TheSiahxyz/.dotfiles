@@ -1,17 +1,17 @@
 customCommands:
   - key: "<c-a>"
-    command: "gh repo view --branch {{.CheckedOutBranch.Name}} --web"
     context: "global"
+    command: "gh repo view --branch {{.CheckedOutBranch.Name}} --web"
     description: "Open current branch in browser"
 
   - key: "<c-p>"
-    command: "gh pr view --web"
     context: "global"
+    command: "gh pr view --web"
     description: "Open current PR in browser"
 
   - key: "H"
-    command: 'echo "pushing to remote"'
     context: "commits"
+    command: 'echo "pushing to remote"'
     description: "Push to home remote"
     prompts:
       - type: "confirm"
