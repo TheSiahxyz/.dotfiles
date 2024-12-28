@@ -94,7 +94,7 @@ return {
 					vim.keymap.set(
 						"n",
 						"<leader>h",
-						":Git push -u home ",
+						":Git push home ",
 						{ buffer = bufnr, remap = false, desc = "Git push home" }
 					)
 				end,
