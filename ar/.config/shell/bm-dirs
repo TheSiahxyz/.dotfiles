@@ -11,6 +11,7 @@ cdw             ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwm
 cfg             ${XDG_CONFIG_HOME:-${HOME}/.config}
 cfx             ${XDG_CONFIG_HOME:-${HOME}/.config}/firefox
 clf             ${XDG_CONFIG_HOME:-${HOME}/.config}/lf
+clg             ${XDG_CONFIG_HOME:-${HOME}/.config}/lazygit
 clv             ${XDG_CONFIG_HOME:-${HOME}/.config}/LazyVim
 cmd             ${XDG_CONFIG_HOME:-${HOME}/.config}/mpd
 cmv             ${XDG_CONFIG_HOME:-${HOME}/.config}/mpv

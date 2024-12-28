@@ -11,6 +11,7 @@ vdm     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dmenu/config.h         
 vdw     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwm/config.h           # Dwm: a dynamic window manager
 vgc     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/git-aliasrc                   # Git aliases
 vlf     ${XDG_CONFIG_HOME:-${HOME}/.config}/lf/lfrc                             # LF (file browser) config
+vlg     ${XDG_CONFIG_HOME:-${HOME}/.config}/lazygit/config.yml                  # Lazygit config
 vls     ${XDG_CONFIG_HOME:-${HOME}/.config}/lf/scope                            # LF's scope/preview file
 vly     $HOME/.lynxrc                                                           # Lynx config
 vmw     ${XDG_CONFIG_HOME:-${HOME}/.config}/mutt/muttrc                         # Mutt (email client) config
