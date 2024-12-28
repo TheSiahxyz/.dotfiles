@@ -8,7 +8,7 @@ IFS='
 '
 
 # Get the list of selected files with key bindings for specific paths
-files=$(fzf-tmux --header "^a pwd ^b public ^c configs ^d .dotfiles ^g git ^h home ^k desktop ^r scripts ^s suckless ^u staged files ^v private ^/ help" \
+files=$(fzf-tmux --header "^a pwd ^b public ^d .dotfiles ^f configs ^g git ^h home ^k desktop ^r scripts ^s suckless ^u staged files ^v private ^/ help" \
     --preview 'if [ -d {} ]; then exa --color=always --long --all --header --icons --git {}; elif [ -L {} ]; then file -h {}; else bat --color=always --style=header,grid --line-range=:500 {}; fi' \
     --reverse \
     --query="$1" \
@@ -17,8 +17,8 @@ files=$(fzf-tmux --header "^a pwd ^b public ^c configs ^d .dotfiles ^g git ^h ho
     --exit-0 \
     --bind "ctrl-a:change-prompt(⚡  )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . $PWD)" \
     --bind "ctrl-b:change-prompt(👯  )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . ${XDG_PUBLICSHARE_DIR:-${HOME}/Public})" \
-    --bind "ctrl-c:change-prompt(🗂️  )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . ${XDG_CONFIG_HOME:-${HOME}/.config})" \
     --bind "ctrl-d:change-prompt(⚙️  )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . ${XDG_DOTFILES_DIR:-${HOME}/.dotfiles})" \
+    --bind "ctrl-f:change-prompt(🗂️  )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . ${XDG_CONFIG_HOME:-${HOME}/.config})" \
     --bind "ctrl-g:change-prompt(  )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . $HOME/Private/repos $HOME/Public/repos)" \
     --bind "ctrl-h:change-prompt(🏠  )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . $HOME)" \
     --bind "ctrl-k:change-prompt(🖥️  )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . ${XDG_DESKTOP_DIR:-${HOME}/Desktop})" \
