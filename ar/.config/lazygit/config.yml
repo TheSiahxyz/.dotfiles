@@ -11,7 +11,7 @@ customCommands:
 
   - key: "H"
     context: "commits"
-    command: 'echo "pushing to remote"'
+    command: "git push home master"
     description: "Push to home remote"
     prompts:
       - type: "confirm"
