@@ -312,5 +312,9 @@ return {
 				},
 			},
 		})
+
+		vim.keymap.set("n", "<M-g>", function()
+			Snacks.lazygit()
+		end, { desc = "Lazygit" })
 	end,
 }
