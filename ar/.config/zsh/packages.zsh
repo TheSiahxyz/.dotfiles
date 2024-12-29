@@ -3,7 +3,7 @@
 ### --- Packages --- ###
 typeset -A packages
 packages=(
-    atuin ""
+    atuin "--disable-up-arrow"
     batman "--export-env"
     zoxide "--cmd cd"
 )
