@@ -109,32 +109,37 @@ return {
 			return home_dir .. "/" .. timestamp .. "_" .. file_name .. "_" .. file_extension .. ".png"
 		end,
 	},
+	keys = {
+		{
+			mode = "v",
+			"<leader>sc",
+			function()
+				require("nvim-silicon").clip()
+			end,
+			desc = "Copy code screenshot to clipboard",
+		},
+		{
+			mode = "v",
+			"<leader>sf",
+			function()
+				require("nvim-silicon").file()
+			end,
+			desc = "Save code screenshot as file",
+		},
+		{
+			mode = "v",
+			"<leader>ss",
+			function()
+				require("nvim-silicon").shoot()
+			end,
+			desc = "Create code screenshot",
+		},
+	},
 	init = function()
 		local wk = require("which-key")
 		wk.add({
 			mode = { "v" },
-			{ "<localleader>s", group = "Snapshot" },
-			{
-				"<localleader>sc",
-				function()
-					require("nvim-silicon").clip()
-				end,
-				desc = "Copy code screenshot to clipboard",
-			},
-			{
-				"<localleader>sf",
-				function()
-					require("nvim-silicon").file()
-				end,
-				desc = "Save code screenshot as file",
-			},
-			{
-				"<localleader>ss",
-				function()
-					require("nvim-silicon").shoot()
-				end,
-				desc = "Create code screenshot",
-			},
+			{ "<leader>s", group = "Snapshot" },
 		})
 	end,
 }
