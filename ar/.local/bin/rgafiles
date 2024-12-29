@@ -38,6 +38,9 @@ search_term() {
     preview_cmd=$(printf "rga %s --pretty --context 10 '%s' {}" "$ignore_case_flag" "$*")
     rga_output=$(rga --follow --no-ignore --hidden --text --max-count=1 "$ignore_case_flag" --files-with-matches --no-messages --glob '!**/.git/*' "$*")
 
+    # print the file names to the clipboard
+    echo "$rga_output" | xclip -selection clipboard 2>/dev/null
+
     # Use fzf to select files
     files=$(echo "$rga_output" | fzf-tmux +m --preview="$preview_cmd" --multi --select-1 --exit-0) || return 1
 
