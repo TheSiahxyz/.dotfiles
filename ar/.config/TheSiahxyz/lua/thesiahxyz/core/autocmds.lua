@@ -83,7 +83,20 @@ autocmd("FileType", {
 		vim.keymap.set("n", "q", "<cmd>close<cr>", { buffer = event.buf, silent = true })
 	end,
 })
-vim.api.nvim_create_autocmd("TermOpen", {
+autocmd("FileType", {
+	group = augroup("q_as_bd"),
+	pattern = "netrw",
+	callback = function(event)
+		vim.bo[event.buf].buflisted = false
+		vim.keymap.set("n", "q", function()
+			vim.cmd("bd")
+		end, { buffer = event.buf, silent = true })
+	end,
+})
+
+-- Start insert mode in terminal
+autocmd("TermOpen", {
+	group = augroup("terminal"),
 	pattern = "*",
 	callback = function()
 		vim.cmd("startinsert")
