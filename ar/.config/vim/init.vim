@@ -1,6 +1,9 @@
 
 " AUTOCMD ---------------------------------------------------------------- {{{
 
+" Close with q
+autocmd FileType checkhealth,help,lspinfo,neotest-output,neotest-output-panel,neotest-summary,netrw,notify,qf,query,spectre_panel,startuptime,terminal,tsplayground noremap <buffer> q :bd<cr>
+
 " Disables automatic commenting on newline:
 autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
 
@@ -288,6 +291,7 @@ nnoremap <leader>fF :Files ~<CR>
 nnoremap <leader>fg :GFiles<CR>
 nnoremap <leader>fG :GFiles?<CR>
 nnoremap <leader>fs :Files ~/.local/src/suckless<CR>
+nnoremap <leader>fv :Files ~/.config/vim<CR>
 nnoremap <leader>sb :Buffers<CR>
 nnoremap <leader>sc :Changes<CR>
 nnoremap <leader>sC :Commands<CR>
@@ -317,6 +321,7 @@ let g:which_key_map.f = {
             \ 'g' : 'Git-files'         ,
             \ 'G' : 'Git-status'        ,
             \ 's' : 'Suckless'          ,
+            \ 'v' : 'Vim-config'        ,
             \ }
 
 let g:which_key_map.g = {
