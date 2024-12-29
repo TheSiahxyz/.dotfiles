@@ -101,7 +101,7 @@ return {
 					path = "~/Private/repos/Obsidian/SI",
 					-- Optional, override certain settings.
 					overrides = {
-						notes_subdir = "Notes",
+						notes_subdir = "",
 					},
 				},
 			},
@@ -111,7 +111,7 @@ return {
 			-- dir = "~/vaults/work",
 
 			-- Optional, if you keep notes in a specific subdirectory of your vault.
-			notes_subdir = "Notes",
+			notes_subdir = "",
 
 			-- Optional, set the log level for obsidian.nvim. This is an integer corresponding to one of the log
 			-- levels defined by "vim.log.levels.*".
@@ -153,7 +153,7 @@ return {
 			-- Where to put new notes. Valid options are
 			--  * "current_dir" - put new notes in same directory as the current buffer.
 			--  * "notes_subdir" - put new notes in the default notes subdirectory.
-			new_notes_location = "notes_subdir",
+			new_notes_location = "current_dir",
 
 			-- Optional, customize how note IDs are generated given an optional title.
 			---@param title string|?
@@ -172,7 +172,7 @@ return {
 						suffix = suffix .. string.char(math.random(65, 90))
 					end
 				end
-				return tostring(os.time()) .. "-" .. suffix
+				return suffix
 			end,
 
 			-- Optional, customize how note file names are generated given the ID, target directory, and title.
@@ -180,7 +180,7 @@ return {
 			---@return string|obsidian.Path The full path to the new note.
 			note_path_func = function(spec)
 				-- This is equivalent to the default behavior.
-				local path = spec.dir / tostring(spec.id)
+				local path = spec.dir / "Contents" / tostring(spec.title)
 				return path:with_suffix(".md")
 			end,
 
@@ -191,7 +191,7 @@ return {
 			--  * "use_path_only", e.g. '[[foo-bar.md]]'
 			-- Or you can set it to a function that takes a table of options and returns a string, like this:
 			wiki_link_func = function(opts)
-				return require("obsidian.util").wiki_link_id_prefix(opts)
+				return require("obsidian.util").wiki_link_path_prefix(opts)
 			end,
 
 			-- Optional, customize how markdown links are formatted.
@@ -206,26 +206,26 @@ return {
 			-- `true` indicates that you don't want obsidian.nvim to manage frontmatter.
 			disable_frontmatter = false,
 
-			-- Optional, alternatively you can customize the frontmatter data.
-			---@return table
-			note_frontmatter_func = function(note)
-				-- Add the title of the note as an alias.
-				if note.title then
-					note:add_alias(note.title)
-				end
-
-				local out = { id = note.id, aliases = note.aliases, tags = note.tags }
-
-				-- `note.metadata` contains any manually added fields in the frontmatter.
-				-- So here we just make sure those fields are kept in the frontmatter.
-				if note.metadata ~= nil and not vim.tbl_isempty(note.metadata) then
-					for k, v in pairs(note.metadata) do
-						out[k] = v
-					end
-				end
-
-				return out
-			end,
+			-- -- Optional, alternatively you can customize the frontmatter data.
+			-- ---@return table
+			-- note_frontmatter_func = function(note)
+			-- 	-- Add the title of the note as an alias.
+			-- 	if note.title then
+			-- 		note:add_alias(note.title)
+			-- 	end
+			--
+			-- 	local out = { id = note.id, aliases = note.aliases, tags = note.tags }
+			--
+			-- 	-- `note.metadata` contains any manually added fields in the frontmatter.
+			-- 	-- So here we just make sure those fields are kept in the frontmatter.
+			-- 	if note.metadata ~= nil and not vim.tbl_isempty(note.metadata) then
+			-- 		for k, v in pairs(note.metadata) do
+			-- 			out[k] = v
+			-- 		end
+			-- 	end
+			--
+			-- 	return out
+			-- end,
 
 			-- Optional, for templates (see below).
 			templates = {
@@ -251,8 +251,8 @@ return {
 			-- file it will be ignored but you can customize this behavior here.
 			---@param img string
 			follow_img_func = function(img)
-				vim.fn.jobstart({ "qlmanage", "-p", img }) -- Mac OS quick look preview
-				-- vim.fn.jobstart({"xdg-open", url})  -- linux
+				-- vim.fn.jobstart({ "qlmanage", "-p", img }) -- Mac OS quick look preview
+				vim.fn.jobstart({ "nsxiv", "-aiop", img }) -- linux
 				-- vim.cmd(':silent exec "!start ' .. url .. '"') -- Windows
 			end,
 
@@ -401,7 +401,7 @@ return {
 			callback = function()
 				vim.keymap.set("n", "gl", function()
 					if require("obsidian").util.cursor_on_markdown_link() then
-						return "<cmd>ObsidianFollowLink<CR>"
+						return "<cmd>ObsidianFollowLink<cr>"
 					else
 						return "gl"
 					end
@@ -443,19 +443,19 @@ return {
 		},
 		{
 			"<leader>os",
-			"<cmd>ObsidianQuickSwitch<CR>",
+			"<cmd>ObsidianQuickSwitch<cr>",
 			ft = "markdown",
 			desc = "Quick switch (Obsidian)",
 		},
 		{
 			"<leader>oL",
-			"<cmd>ObsidianFollowLink<CR>",
+			"<cmd>ObsidianFollowLink<cr>",
 			ft = "markdown",
 			desc = "Follow link (Obsidian)",
 		},
 		{
 			"<leader>oH",
-			"<cmd>ObsidianBacklinks<CR>",
+			"<cmd>ObsidianBacklinks<cr>",
 			ft = "markdown",
 			desc = "Back link (Obsidian)",
 		},
@@ -602,13 +602,13 @@ return {
 		},
 		{
 			"<leader>otn",
-			"<cmd>ObsidianNewFromTemplate<CR>",
+			"<cmd>ObsidianNewFromTemplate<cr>",
 			ft = "markdown",
 			desc = "Open new note with template (Obsidian)",
 		},
 		{
 			"<leader>oc",
-			"<cmd>ObsidianTOC<CR>",
+			"<cmd>ObsidianTOC<cr>",
 			ft = "markdown",
 			desc = "Open contents (Obsidian)",
 		},
