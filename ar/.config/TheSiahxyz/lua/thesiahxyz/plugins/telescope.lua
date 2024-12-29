@@ -581,14 +581,14 @@ return {
 			})
 
 			-- find
-			vim.keymap.set("n", "<leader>fb", function()
+			vim.keymap.set({ "i", "n" }, "<C-g>", function()
 				require("telescope.builtin").buffers({
 					sort_mru = true,
 					sort_lastused = true,
 					initial_mode = "normal",
 				})
 			end, { desc = "Find buffer files" })
-			vim.keymap.set({ "i", "n" }, "<C-g>", function()
+			vim.keymap.set("n", "<leader>fb", function()
 				require("telescope.builtin").buffers({
 					sort_mru = true,
 					sort_lastused = true,
@@ -626,9 +626,39 @@ return {
 					},
 				})
 			end, { desc = "Find root files" })
+			vim.keymap.set("n", "<leader>fk", function()
+				require("telescope.builtin").find_files({
+					cwd = vim.fn.expand("~/.local/src/suckless/"),
+					find_command = {
+						"find",
+						"-maxdepth",
+						"2",
+						"-type",
+						"f",
+						"-name",
+						".git",
+						"-prune",
+						"-o",
+					},
+				})
+			end, { desc = "Find suckless files" })
 			vim.keymap.set("n", "<leader>fg", function()
 				require("telescope.builtin").git_files()
 			end, { desc = "Find git files" })
+			vim.keymap.set("n", "<leader>fo", function()
+				require("telescope.builtin").oldfiles({})
+			end, { desc = "Find old files" })
+			vim.keymap.set("n", "<leader>fpv", function()
+				require("telescope.builtin").find_files({ cwd = vim.fn.expand("~/Private") })
+			end, { desc = "Find private files" })
+			vim.keymap.set("n", "<leader>fpb", function()
+				require("telescope.builtin").find_files({ cwd = vim.fn.expand("~/Public") })
+			end, { desc = "Find public files" })
+			vim.keymap.set("n", "<leader>fr", function()
+				require("telescope.builtin").find_files({
+					cwd = vim.fn.expand("~/.local/bin"),
+				})
+			end, { desc = "Find script files" })
 			vim.keymap.set("n", "<leader>fv", function()
 				require("telescope.builtin").find_files({ cwd = vim.fn.stdpath("config") })
 			end, { desc = "Find neovim config files" })
@@ -653,37 +683,6 @@ return {
 					end,
 				})
 			end, { desc = "Find neovim plugin files" })
-
-			vim.keymap.set("n", "<leader>fo", function()
-				require("telescope.builtin").oldfiles({})
-			end, { desc = "Find old files" })
-			vim.keymap.set("n", "<leader>fpv", function()
-				require("telescope.builtin").find_files({ cwd = vim.fn.expand("~/Private") })
-			end, { desc = "Find private files" })
-			vim.keymap.set("n", "<leader>fpb", function()
-				require("telescope.builtin").find_files({ cwd = vim.fn.expand("~/Public") })
-			end, { desc = "Find public files" })
-			vim.keymap.set("n", "<leader>fr", function()
-				require("telescope.builtin").find_files({
-					cwd = vim.fn.expand("~/.local/bin"),
-				})
-			end, { desc = "Find script files" })
-			vim.keymap.set("n", "<leader>fs", function()
-				require("telescope.builtin").find_files({
-					cwd = vim.fn.expand("~/.local/src/suckless/"),
-					find_command = {
-						"find",
-						"-maxdepth",
-						"2",
-						"-type",
-						"f",
-						"-name",
-						".git",
-						"-prune",
-						"-o",
-					},
-				})
-			end, { desc = "Find suckless files" })
 			-- git
 			vim.keymap.set("n", "<leader>gc", function()
 				require("telescope.builtin").git_commits()
@@ -691,15 +690,15 @@ return {
 			vim.keymap.set("n", "<leader>gC", function()
 				require("telescope.builtin").git_bcommits()
 			end, { desc = "Find buffer git commits" })
+			vim.keymap.set("n", "<leader>gb", function()
+				require("telescope.builtin").git_branches()
+			end, { desc = "Find branches" })
 			vim.keymap.set("n", "<leader>gr", function()
 				require("telescope.builtin").git_bcommits_range()
 			end, { desc = "Find lines git commits" })
 			vim.keymap.set("v", "<leader>gr", function()
 				require("telescope.builtin").git_bcommits_range()
 			end, { desc = "Find lines git commits" })
-			vim.keymap.set("n", "<leader>gb", function()
-				require("telescope.builtin").git_branches()
-			end, { desc = "Find branches" })
 			vim.keymap.set("n", "<leader>gs", function()
 				require("telescope.builtin").git_status()
 			end, { desc = "Find git status" })
@@ -707,13 +706,16 @@ return {
 				require("telescope.builtin").git_stash()
 			end, { desc = "Find git stash" })
 			-- lsp
-			vim.keymap.set("n", "gR", function()
-				require("telescope.builtin").lsp_references({})
-			end, { desc = "Find references" })
 			vim.keymap.set("n", "gd", function()
 				require("telescope.builtin").lsp_definitions({})
 			end, { desc = "Find definitions" })
+			vim.keymap.set("n", "gR", function()
+				require("telescope.builtin").lsp_references({})
+			end, { desc = "Find references" })
 			-- search
+			vim.keymap.set("n", "<leader>cc", function()
+				require("telescope.builtin").colorscheme({})
+			end, { desc = "Search color scheme" })
 			vim.keymap.set("n", "<leader>sa", function()
 				require("telescope.builtin").autocommands({})
 			end, { desc = "Search auto commands" })
@@ -729,19 +731,10 @@ return {
 			vim.keymap.set("n", "<leader>sC", function()
 				require("telescope.builtin").command_history({})
 			end, { desc = "Search history" })
-			vim.keymap.set("n", "<leader>cc", function()
-				require("telescope.builtin").colorscheme({})
-			end, { desc = "Search color scheme" })
 			vim.keymap.set("n", "<leader>sd", function()
 				require("telescope.builtin").diagnostics({})
 			end, { desc = "Search diagonostics" })
 			vim.keymap.set("n", "<leader>sg", vim.live_grep_from_project_git_root, { desc = "Live grep (git)" })
-			vim.keymap.set("n", "<leader>sw", function()
-				require("telescope.builtin").live_grep({})
-			end, { desc = "Search word (Live grep)" })
-			vim.keymap.set("n", "<leader>sW", function()
-				require("telescope.builtin").grep_string({})
-			end, { desc = "Search word (Grep)" })
 			vim.keymap.set("n", "<leader>sh", function()
 				require("telescope.builtin").help_tags({})
 			end, { desc = "Search help tags" })
@@ -754,6 +747,14 @@ return {
 			vim.keymap.set("n", "<leader>skb", function()
 				require("telescope.builtin").keymaps({})
 			end, { desc = "Search key bindings" })
+			vim.keymap.set("n", "<leader>skk", function()
+				local word = vim.fn.expand("<cword>")
+				require("telescope.builtin").grep_string({ search = word })
+			end, { desc = "Search words under cursor" })
+			vim.keymap.set("n", "<leader>skK", function()
+				local word = vim.fn.expand("<cWORD>")
+				require("telescope.builtin").grep_string({ search = word })
+			end, { desc = "Search all words under cursor" })
 			vim.keymap.set("n", "<leader>sl", function()
 				require("telescope.builtin").loclist({})
 			end, { desc = "Search location list" })
@@ -781,14 +782,12 @@ return {
 			vim.keymap.set("n", "<leader>st", function()
 				require("telescope.builtin").filetypes({})
 			end, { desc = "Search file types" })
-			vim.keymap.set("n", "<leader>skk", function()
-				local word = vim.fn.expand("<cword>")
-				require("telescope.builtin").grep_string({ search = word })
-			end, { desc = "Search words under cursor" })
-			vim.keymap.set("n", "<leader>skK", function()
-				local word = vim.fn.expand("<cWORD>")
-				require("telescope.builtin").grep_string({ search = word })
-			end, { desc = "Search all words under cursor" })
+			vim.keymap.set("n", "<leader>sw", function()
+				require("telescope.builtin").live_grep({})
+			end, { desc = "Search word (Live grep)" })
+			vim.keymap.set("n", "<leader>sW", function()
+				require("telescope.builtin").grep_string({})
+			end, { desc = "Search word (Grep)" })
 		end,
 	},
 	{

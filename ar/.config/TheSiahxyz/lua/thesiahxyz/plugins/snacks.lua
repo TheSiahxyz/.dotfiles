@@ -42,7 +42,7 @@ return {
 							desc = "Config",
 							action = ":lua Snacks.dashboard.pick('files', {cwd = vim.fn.stdpath('config')})",
 						},
-						{ icon = icons.ui.Refresh, key = "s", desc = "Restore Session", section = "session" },
+						{ icon = icons.ui.Refresh, key = "r", desc = "Restore Session", section = "session" },
 						{
 							icon = icons.ui.Sleep,
 							key = "L",
@@ -60,9 +60,9 @@ return {
 						{ icon = " ", key = "q", desc = "Quit", action = ":qa" },
 					},
 					header = [[
-╺┳╸╻ ╻┏━╸┏━┓╻┏━┓╻ ╻╻ ╻╻ ╻╺━┓
- ┃ ┣━┫┣╸ ┗━┓┃┣━┫┣━┫┏╋┛┗┳┛┏━┛
- ╹ ╹ ╹┗━╸┗━┛╹╹ ╹╹ ╹╹ ╹ ╹ ┗━╸]],
+		╺┳╸╻ ╻┏━╸┏━┓╻┏━┓╻ ╻╻ ╻╻ ╻╺━┓
+		 ┃ ┣━┫┣╸ ┗━┓┃┣━┫┣━┫┏╋┛┗┳┛┏━┛
+		 ╹ ╹ ╹┗━╸┗━┛╹╹ ╹╹ ╹╹ ╹ ╹ ┗━╸]],
 				},
 				sections = {
 					{ section = "header" },
