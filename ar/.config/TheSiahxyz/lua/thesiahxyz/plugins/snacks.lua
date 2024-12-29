@@ -67,17 +67,6 @@ return {
 				sections = {
 					{ section = "header" },
 					{
-						icon = icons.ui.GitHub,
-						title = "Browse Repo ",
-						desc = Snacks.git.get_root() and ("'" .. Snacks.git.get_root() .. "'") or "",
-						enabled = Snacks.git.get_root() ~= nil,
-						padding = 1,
-						key = "b",
-						action = function()
-							Snacks.gitbrowse()
-						end,
-					},
-					{
 						icon = icons.ui.Keyboard,
 						title = "Keymaps",
 						section = "keys",
@@ -97,6 +86,17 @@ return {
 						section = "projects",
 						indent = 2,
 						padding = 1,
+					},
+					{
+						icon = icons.ui.GitHub,
+						title = "Browse Repo ",
+						desc = Snacks.git.get_root() and ("'" .. Snacks.git.get_root() .. "'") or "",
+						enabled = Snacks.git.get_root() ~= nil,
+						padding = 1,
+						key = "b",
+						action = function()
+							Snacks.gitbrowse()
+						end,
 					},
 					{ section = "startup" },
 				},
