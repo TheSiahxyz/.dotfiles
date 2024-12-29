@@ -49,9 +49,9 @@ return {
 							action = ":lua Snacks.dashboard.pick('files', {cwd = vim.fn.stdpath('config')})",
 						},
 						{
-							icon = icons.ui.Gear,
+							icon = icons.ui.GitHub,
 							key = "g",
-							desc = "Git (lazygit)",
+							desc = "Git",
 							action = ":lua Snacks.lazygit()",
 						},
 						{ icon = icons.ui.Refresh, key = "s", desc = "Restore Session", section = "session" },
@@ -74,8 +74,7 @@ return {
 					header = [[
 ╺┳╸╻ ╻┏━╸┏━┓╻┏━┓╻ ╻╻ ╻╻ ╻╺━┓
  ┃ ┣━┫┣╸ ┗━┓┃┣━┫┣━┫┏╋┛┗┳┛┏━┛
- ╹ ╹ ╹┗━╸┗━┛╹╹ ╹╹ ╹╹ ╹ ╹ ┗━╸
-                    ]],
+ ╹ ╹ ╹┗━╸┗━┛╹╹ ╹╹ ╹╹ ╹ ╹ ┗━╸]],
 				},
 				sections = {
 					{ section = "header" },
@@ -142,7 +141,7 @@ return {
 			},
 			lazygit = { enabled = true },
 			notifier = {
-				enabled = true,
+				enabled = false,
 				timeout = 2000,
 				width = { min = 40, max = 0.4 },
 				height = { min = 1, max = 0.6 },

@@ -99,6 +99,14 @@ return {
 					)
 				end,
 			})
+			autocmd("FileType", {
+				group = TheSiahxyz_Fugitive,
+				pattern = "fugitive",
+				callback = function(event)
+					vim.bo[event.buf].buflisted = false
+					vim.keymap.set("n", "q", "<cmd>close<cr>", { buffer = event.buf, silent = true })
+				end,
+			})
 		end,
 		keys = {
 			{ mode = "n", "<leader>g<leader>", ":Git ", desc = "Git" },

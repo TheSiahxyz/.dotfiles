@@ -3,16 +3,16 @@ vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 
 -- Ascii
-vim.keymap.set("n", "<leader>c1", ":.!toilet -w 200 -f bfraktur<cr>", { desc = "Ascii art bfraktur" })
-vim.keymap.set("n", "<leader>c2", ":.!toilet -w 200 -f emboss<cr>", { desc = "Ascii art emboss" })
-vim.keymap.set("n", "<leader>c3", ":.!toilet -w 200 -f emboss2<cr>", { desc = "Ascii art emboss2" })
-vim.keymap.set("n", "<leader>c4", ":.!toilet -w 200 -f future<cr>", { desc = "Ascii art future" })
-vim.keymap.set("n", "<leader>c5", ":.!toilet -w 200 -f pagga<cr>", { desc = "Ascii art pagga" })
-vim.keymap.set("n", "<leader>c6", ":.!toilet -w 200 -f wideterm<cr>", { desc = "Ascii art wideterm" })
-vim.keymap.set("n", "<leader>c7", ":.!figlet -w 200 -f standard<cr>", { desc = "Ascii art standard" })
-vim.keymap.set("n", "<leader>c8", ":.!figlet -w 200 -f slant<cr>", { desc = "Ascii art slant" })
-vim.keymap.set("n", "<leader>c9", ":.!figlet -w 200 -f big<cr>", { desc = "Ascii art big" })
-vim.keymap.set("n", "<leader>c0", ":.!figlet -w 200 -f shadow<cr>", { desc = "Ascii art shadow" })
+vim.keymap.set("n", "<leader>a1", ":.!toilet -w 200 -f bfraktur<cr>", { desc = "Ascii art bfraktur" })
+vim.keymap.set("n", "<leader>a2", ":.!toilet -w 200 -f emboss<cr>", { desc = "Ascii art emboss" })
+vim.keymap.set("n", "<leader>a3", ":.!toilet -w 200 -f emboss2<cr>", { desc = "Ascii art emboss2" })
+vim.keymap.set("n", "<leader>a4", ":.!toilet -w 200 -f future<cr>", { desc = "Ascii art future" })
+vim.keymap.set("n", "<leader>a5", ":.!toilet -w 200 -f pagga<cr>", { desc = "Ascii art pagga" })
+vim.keymap.set("n", "<leader>a6", ":.!toilet -w 200 -f wideterm<cr>", { desc = "Ascii art wideterm" })
+vim.keymap.set("n", "<leader>a7", ":.!figlet -w 200 -f standard<cr>", { desc = "Ascii art standard" })
+vim.keymap.set("n", "<leader>a8", ":.!figlet -w 200 -f slant<cr>", { desc = "Ascii art slant" })
+vim.keymap.set("n", "<leader>a9", ":.!figlet -w 200 -f big<cr>", { desc = "Ascii art big" })
+vim.keymap.set("n", "<leader>a0", ":.!figlet -w 200 -f shadow<cr>", { desc = "Ascii art shadow" })
 
 -- Buffers
 vim.keymap.set({ "n", "v", "x", "t" }, "<A-x>", "<cmd>bd!<cr>", { desc = "Delete buffer" })
