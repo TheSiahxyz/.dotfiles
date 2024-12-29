@@ -629,10 +629,10 @@ return {
 			vim.keymap.set("n", "<leader>fg", function()
 				require("telescope.builtin").git_files()
 			end, { desc = "Find git files" })
-			vim.keymap.set("n", "<leader>fn", function()
+			vim.keymap.set("n", "<leader>fv", function()
 				require("telescope.builtin").find_files({ cwd = vim.fn.stdpath("config") })
 			end, { desc = "Find neovim config files" })
-			vim.keymap.set("n", "<leader>fN", function()
+			vim.keymap.set("n", "<leader>fV", function()
 				require("telescope.builtin").find_files({
 					cwd = vim.fn.stdpath("data"),
 					find_command = {

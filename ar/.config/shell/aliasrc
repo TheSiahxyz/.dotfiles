@@ -272,6 +272,7 @@ alias nts='NVIM_APPNAME=TheSiahxyz nvim'
 alias nlv='NVIM_APPNAME=LazyVim nvim'
 alias nnc='NVIM_APPNAME=NvChad nvim'
 alias snv='sudo nvim'
+alias vll='lastnvim -l'
 alias vln='$EDITOR -c '\''execute "edit " . v:oldfiles[0] | normal ''0'\'
 
 # nxsiv
