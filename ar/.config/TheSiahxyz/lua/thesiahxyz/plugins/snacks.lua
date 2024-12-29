@@ -31,12 +31,6 @@ return {
 						},
 						{ icon = icons.ui.NewFile, key = "n", desc = "New File", action = ":ene | startinsert" },
 						{
-							icon = icons.documents.Files,
-							key = "o",
-							desc = "Old Files",
-							action = ":lua Snacks.dashboard.pick('oldfiles')",
-						},
-						{
 							icon = icons.ui.List,
 							key = "s",
 							desc = "Search Text",
@@ -48,27 +42,21 @@ return {
 							desc = "Config",
 							action = ":lua Snacks.dashboard.pick('files', {cwd = vim.fn.stdpath('config')})",
 						},
-						{
-							icon = icons.ui.GitHub,
-							key = "g",
-							desc = "Git",
-							action = ":lua Snacks.lazygit()",
-						},
 						{ icon = icons.ui.Refresh, key = "s", desc = "Restore Session", section = "session" },
-						-- {
-						-- 	icon = icons.ui.Sleep,
-						-- 	key = "L",
-						-- 	desc = "Lazy",
-						-- 	action = ":Lazy",
-						-- 	enabled = package.loaded.lazy ~= nil,
-						-- },
-						-- {
-						-- 	icon = icons.kind.Language,
-						-- 	key = "M",
-						-- 	desc = "Mason",
-						-- 	action = ":Mason",
-						-- 	enabled = package.loaded.lazy ~= nil,
-						-- },
+						{
+							icon = icons.ui.Sleep,
+							key = "L",
+							desc = "Lazy",
+							action = ":Lazy",
+							enabled = package.loaded.lazy ~= nil,
+						},
+						{
+							icon = icons.kind.Language,
+							key = "M",
+							desc = "Mason",
+							action = ":Mason",
+							enabled = package.loaded.lazy ~= nil,
+						},
 						{ icon = " ", key = "q", desc = "Quit", action = ":qa" },
 					},
 					header = [[
@@ -78,6 +66,17 @@ return {
 				},
 				sections = {
 					{ section = "header" },
+					{
+						icon = icons.ui.GitHub,
+						title = "Browse Repo ",
+						desc = Snacks.git.get_root() and ("'" .. Snacks.git.get_root() .. "'") or "",
+						enabled = Snacks.git.get_root() ~= nil,
+						padding = 1,
+						key = "b",
+						action = function()
+							Snacks.gitbrowse()
+						end,
+					},
 					{
 						icon = icons.ui.Keyboard,
 						title = "Keymaps",
@@ -283,7 +282,7 @@ return {
 				},
 				refresh = 50,
 			},
-			terminal = { enabled = false },
+			terminal = { enabled = true },
 			toggle = { enabled = false },
 			win = { enabled = true },
 			words = { enabled = false },

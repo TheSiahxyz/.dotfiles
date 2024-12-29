@@ -114,7 +114,7 @@ return {
 		Home = " ",
 		Incoming = " ",
 		Jump = " ",
-		Keyboard = "  ",
+		Keyboard = " ",
 		Ligthbulb = "󰌵 ",
 		List = "",
 		Lock = " ",
