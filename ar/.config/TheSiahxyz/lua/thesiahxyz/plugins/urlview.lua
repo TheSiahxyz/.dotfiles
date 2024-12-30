@@ -12,6 +12,6 @@ return {
 		require("urlview").setup({})
 
 		vim.keymap.set("n", "<leader>ur", "<Cmd>UrlView<CR>", { desc = "View buffer URLs" })
-		vim.keymap.set("n", "<leader>ul", "<Cmd>UrlView lazy<CR>", { desc = "View plugin URLs" })
+		vim.keymap.set("n", "<leader>up", "<Cmd>UrlView lazy<CR>", { desc = "View plugin URLs" })
 	end,
 }
