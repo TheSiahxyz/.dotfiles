@@ -199,7 +199,7 @@ return {
 				{ "gx", desc = "Open with system app" },
 				{ "<C-w>", group = "Windows" },
 				{ "<leader>", group = "Leader" },
-				{ "<leader>.", group = "cd .." },
+				{ "<leader>a", group = "Ascii" },
 				{
 					"<leader>b",
 					group = "Buffer",
@@ -207,12 +207,10 @@ return {
 						return require("which-key.extras").expand.buf()
 					end,
 				},
-				{ "<leader>B", group = "Force buffer" },
-				{ "<leader>c", group = "Ascii/Goto" },
-				{ "<leader>cl", group = "Cloak" },
+				{ "<leader>B", group = "Buffer (force)" },
 				{ "<leader>C", group = "Goto realpath" },
 				{ "<leader>d", group = "Delete" },
-				{ "<leader>D", group = "Delete" },
+				{ "<leader>D", group = "Delete (blackhole)" },
 				{ "<leader>e", group = "Explorer" },
 				{ "<leader>i", group = "Inspect" },
 				{ "<leader>l", group = "Location" },

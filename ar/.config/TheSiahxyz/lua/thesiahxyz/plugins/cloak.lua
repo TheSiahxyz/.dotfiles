@@ -1,6 +1,13 @@
 return {
 	"laytan/cloak.nvim",
 	lazy = false,
+	init = function()
+		local wk = require("which-key")
+		wk.add({
+			mode = { "n", "v" },
+			{ "<leader>c", group = "Cloak" },
+		})
+	end,
 	config = function()
 		require("cloak").setup({
 			enabled = true,
@@ -27,10 +34,9 @@ return {
 		})
 	end,
 	keys = {
-		{ "<leader>cle", "<cmd>CloakEnable<cr>", desc = "Enable cloak" },
-		{ "<leader>cld", "<cmd>CloakDisable<cr>", desc = "Disable cloak" },
-		{ "<leader>cld", "<cmd>CloakDisable<cr>", desc = "Disable cloak" },
-		{ "<leader>clp", "<cmd>CloakPreviewLine<cr>", desc = "Preview line cloak" },
+		{ "<leader>ce", "<cmd>CloakEnable<cr>", desc = "Enable cloak" },
+		{ "<leader>cd", "<cmd>CloakDisable<cr>", desc = "Disable cloak" },
+		{ "<leader>cp", "<cmd>CloakPreviewLine<cr>", desc = "Preview line cloak" },
 		{ "<leader>tC", "<cmd>CloakToggle<cr>", desc = "Toggle cloak" },
 	},
 }
