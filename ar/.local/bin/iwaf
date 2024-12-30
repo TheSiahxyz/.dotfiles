@@ -11,6 +11,7 @@ rm -rf "$WINEPREFIX"
 
 # Source URL for the SOOPStreamer installer
 SRC_URL='https://creatorup.sooplive.co.kr/SOOPStreamer_installer.exe'
+
 # Create a temporary file for the installer
 DST_FILE="$(mktemp)"
 # Ensure the temporary file is removed after the script finishes
