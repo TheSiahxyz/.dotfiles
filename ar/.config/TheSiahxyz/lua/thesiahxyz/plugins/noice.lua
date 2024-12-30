@@ -17,7 +17,7 @@ return {
 			},
 			messages = {
 				enabled = true,
-				view = "notify", -- default view for messages
+				view = "mini", -- default view for messages
 				view_error = "messages", -- view for errors
 				view_warn = "notify", -- view for warnings
 				view_history = "messages", -- view for :messages

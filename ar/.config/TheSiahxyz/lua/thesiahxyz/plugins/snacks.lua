@@ -36,13 +36,13 @@ return {
 							desc = "Search Text",
 							action = ":lua Snacks.dashboard.pick('live_grep')",
 						},
+						{ icon = icons.ui.Refresh, key = "r", desc = "Restore Session", section = "session" },
 						{
 							icon = icons.ui.Gear,
 							key = "c",
 							desc = "Config",
 							action = ":lua Snacks.dashboard.pick('files', {cwd = vim.fn.stdpath('config')})",
 						},
-						{ icon = icons.ui.Refresh, key = "r", desc = "Restore Session", section = "session" },
 						{
 							icon = icons.ui.Sleep,
 							key = "L",
