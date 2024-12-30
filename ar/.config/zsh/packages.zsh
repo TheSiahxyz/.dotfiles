@@ -5,7 +5,7 @@ typeset -A packages
 packages=(
     atuin "--disable-up-arrow"
     batman "--export-env"
-    zoxide "--cmd cd"
+    zoxide "--cmd cd --hook prompt"
 )
 
 ### --- Eval Function --- ###

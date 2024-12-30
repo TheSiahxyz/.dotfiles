@@ -60,15 +60,15 @@ list_oldfiles() {
         ;;
     *)
         # Open the most recent file
-        most_recent=$(printf "%s\n" "$oldfiles" | head -n 1)
+        for file in $oldfiles; do
+            if [ -f "$file" ]; then
+                openfiles "$file"
+                exit 0
+            fi
+        done
 
-        # Check if the file exists
-        if [ -f "$most_recent" ]; then
-            openfiles "$most_recent"
-        else
-            echo "Most recent file does not exist: $most_recent" >&2
-            exit 1
-        fi
+        echo "No valid recent files found." >&2
+        exit 1
         ;;
     esac
 }
