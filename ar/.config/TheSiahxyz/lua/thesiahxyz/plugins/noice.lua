@@ -10,9 +10,9 @@ return {
 			messages = {
 				enabled = true,
 				view = false, -- default view for messages
-				view_error = false, -- view for errors
-				view_warn = false, -- view for warnings
-				view_history = false, -- view for :messages
+				view_error = "messages", -- view for errors
+				view_warn = "notify", -- view for warnings
+				view_history = "messages", -- view for :messages
 				view_search = "virtualtext", -- view for search count messages. Set to `false` to disable
 			},
 			popupmenu = {
