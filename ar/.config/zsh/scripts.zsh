@@ -348,13 +348,13 @@ function fetch_git_repos_status() {
         done
 
         # Pass the output to fzf with multi-select enabled (-m)
-        SELECTED=$(printf "%s\n" "${OUTPUT[@]}" | fzf -m --ansi)
+        SELECTED=$(printf "%s\n" "${OUTPUT[@]}" | fzf -m --ansi --layout=reverse)
 
         # Filter out lines that do not end with a valid directory path and are not empty
         echo "$SELECTED" | awk '{if (NF > 1 && system("[ -d \""$NF"\" ]") == 0) print $NF}'
 EOF
     )
-    cd "$SELECTED_DIRS" 2>/dev/null || opensessions "$SELECTED_DIRS"
+    [[ -n "$SELECTED_DIRS" ]] && cd "$SELECTED_DIRS" 2>/dev/null || opensessions "$SELECTED_DIRS"
 }
 
 
