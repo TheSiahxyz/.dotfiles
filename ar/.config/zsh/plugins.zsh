@@ -58,12 +58,13 @@ zsh_add_plugins() {
                     git clone "https://github.com/$plugin.git" "$PLUGIN_PATH" >/dev/null 2>&1
                     ;;
             esac
+            rm -rf "$PLUGIN_PATH/.git"
             chmod +x "$PLUGIN_PATH"
         fi
     done
 }
 
-# Function to update plugins
+# Function to sync plugins
 zsh_sync_plugins() {
     ACTIVE_PLUGINS=$(grep '^[[:space:]]*"[^"]\+"' ~/.config/zsh/plugins.zsh | sed 's|.*/\([^/"]*\)".*|\1|')
 
@@ -77,6 +78,16 @@ zsh_sync_plugins() {
             }
         fi
     done
+}
+
+# Function to update plugins
+# Since .git folder in each plugin dir is removed,
+# Delete all plugins and install them agian
+# .git is searched in Neovim projects
+alias zup=zsh_update_plugins
+zsh_update_plugins() {
+    [ -d "$ZPLUGINDIR" ] && rm -rf "$ZPLUGINDIR" && zsh_check_plugins "${plugins[@]}"
+    zsh_sync_plugins
 }
 
 zsh_check_plugins "${plugins[@]}"
