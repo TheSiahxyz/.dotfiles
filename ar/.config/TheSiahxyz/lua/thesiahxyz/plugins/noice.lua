@@ -1,45 +1,36 @@
 return {
 	"folke/noice.nvim",
 	event = "VeryLazy",
-	dependencies = {
-		-- if you lazy-load any plugin below, make sure to add proper `module="..."` entries
-		"MunifTanjim/nui.nvim",
-		-- OPTIONAL:
-		--   `nvim-notify` is only needed, if you want to use the notification view.
-		--   If not available, we use `mini` as the fallback
-		"rcarriga/nvim-notify",
-	},
-	config = function()
-		require("noice").setup({
-			cmdline = {
-				enabled = true, -- enables the Noice cmdline UI
-				view = "cmdline",
-			},
-			messages = {
-				enabled = true,
-				view = "mini", -- default view for messages
-				view_error = "messages", -- view for errors
-				view_warn = "notify", -- view for warnings
-				view_history = "messages", -- view for :messages
-				view_search = "virtualtext", -- view for search count messages. Set to `false` to disable
-			},
-			routes = {
-				{
-					filter = {
-						event = "msg_show",
-						any = {
-							{ find = "%d+L, %d+B" },
-							{ find = "; after #%d+" },
-							{ find = "; before #%d+" },
-							{ find = "%d fewer lines" },
-							{ find = "%d more lines" },
-						},
+	dependencies = "MunifTanjim/nui.nvim",
+	opts = {
+		cmdline = {
+			enabled = true, -- enables the Noice cmdline UI
+			view = "cmdline",
+		},
+		messages = {
+			enabled = true,
+			view = "mini", -- default view for messages
+			view_error = "messages", -- view for errors
+			view_warn = "notify", -- view for warnings
+			view_history = "messages", -- view for :messages
+			view_search = "virtualtext", -- view for search count messages. Set to `false` to disable
+		},
+		routes = {
+			{
+				filter = {
+					event = "msg_show",
+					any = {
+						{ find = "%d+L, %d+B" },
+						{ find = "; after #%d+" },
+						{ find = "; before #%d+" },
+						{ find = "%d fewer lines" },
+						{ find = "%d more lines" },
 					},
-					opts = { skip = true },
 				},
+				opts = { skip = true },
 			},
-		})
-	end,
+		},
+	},
 	init = function()
 		local wk = require("which-key")
 		wk.add({
