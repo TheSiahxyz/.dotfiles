@@ -411,7 +411,7 @@ return {
 	end,
 	keys = {
 		{
-			"<leader>oc",
+			"<leader>cb",
 			function()
 				return require("obsidian").util.toggle_checkbox()
 			end,

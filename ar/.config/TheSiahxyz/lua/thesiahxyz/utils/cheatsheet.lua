@@ -6,7 +6,7 @@ local options = {
 }
 
 -- Define a keymap for opening the cheatsheet
-vim.keymap.set("n", "<leader>CH", function()
+vim.keymap.set("n", "<leader>skc", function()
 	require("thesiahxyz.utils.cheatsheet.grid")()
 end, { desc = "Open Cheatsheet" })
 
