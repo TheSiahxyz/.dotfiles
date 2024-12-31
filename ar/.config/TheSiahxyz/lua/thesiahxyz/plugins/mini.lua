@@ -1054,6 +1054,8 @@ return {
 					silent = false,
 				}
 			)
+
+			vim.api.nvim_set_hl(0, "MiniJump", { fg = "#cdd6f4", bg = "#3e5767", bold = true })
 		end,
 	},
 	{

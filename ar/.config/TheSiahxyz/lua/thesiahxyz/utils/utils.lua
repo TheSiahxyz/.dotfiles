@@ -30,7 +30,7 @@ function M.insert_file_path()
 	local action_state = require("telescope.actions.state")
 
 	require("telescope.builtin").find_files({
-		cwd = "~/dev", -- Set the directory to search
+		cwd = "~/.config", -- Set the directory to search
 		attach_mappings = function(_, map)
 			map("i", "<CR>", function(prompt_bufnr)
 				local selected_file = action_state.get_selected_entry(prompt_bufnr).path
