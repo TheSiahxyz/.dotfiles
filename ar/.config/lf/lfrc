@@ -427,7 +427,7 @@ cmd lastnvim ${{
     list=$(nvim -u NONE --headless +'lua io.write(table.concat(vim.v.oldfiles, "\n") .. "\n")' +qa)
     file=$(printf "%s" "$list" | while read -r file; do
         [ -f "$file" ] && printf "%s\n" "$file"
-    done | fzf || lf -remote "send $id reload")
+    done | fzf --reverse || lf -remote "send $id reload")
     [ -n "$file" ] && $EDITOR "$file"
 }}
 cmd edit-config ${{
