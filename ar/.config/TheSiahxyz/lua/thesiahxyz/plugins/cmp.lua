@@ -29,7 +29,7 @@ return {
 	event = "InsertEnter",
 	opts = function(_, opts)
 		opts.sources = vim.tbl_deep_extend("force", opts.sources or {}, {
-			default = { "lsp", "path", "snippets", "buffer", "luasnip", "dadbod" },
+			default = { "lsp", "path", "snippets", "buffer", "copilot", "luasnip", "dadbod" },
 			providers = {
 				lsp = {
 					name = "lsp",
@@ -87,14 +87,14 @@ return {
 					score_offset = 85, -- the higher the number, the higher the priority
 				},
 				-- Third class citizen mf always talking shit
-				-- copilot = {
-				-- 	name = "Copilot",
-				-- 	enabled = true,
-				-- 	module = "blink-cmp-copilot",
-				-- 	min_keyword_length = 6,
-				-- 	score_offset = -100, -- the higher the number, the higher the priority
-				-- 	async = true,
-				-- },
+				copilot = {
+					name = "Copilot",
+					enabled = true,
+					module = "blink-cmp-copilot",
+					min_keyword_length = 6,
+					score_offset = -100, -- the higher the number, the higher the priority
+					async = true,
+				},
 			},
 			-- command line completion, thanks to dpetka2001 in reddit
 			-- https://www.reddit.com/r/neovim/comments/1hjjf21/comment/m37fe4d/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
