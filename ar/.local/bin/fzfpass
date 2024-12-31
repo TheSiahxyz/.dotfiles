@@ -25,7 +25,7 @@ pass show "$(tree -Ffi | grep '.gpg' | sed 's/.gpg$//g' | sed 's/^..//' | head -
 PASSFILE=$(tree -Ffi | grep '.gpg' | sed 's/.gpg$//g' | sed 's/^..//' |
     fzf \
         --header="🔑 Password Manager" \
-        --layout=reverse \
+        --reverse \
         --no-mouse \
         --preview="pass {}" \
         --header="🔑 ^a: Generate | ^e: Edit | ^g: Generate (Insertion) | ^x: Delete | tab: Replace" \

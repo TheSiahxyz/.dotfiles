@@ -49,7 +49,6 @@ list_oldfiles() {
             fzf --multi \
                 --preview 'bat -n --color=always --line-range=:500 {} 2>/dev/null || echo "Error previewing file"' \
                 --height=70% \
-                --layout=default \
                 --reverse)
 
         # Exit if no files were selected

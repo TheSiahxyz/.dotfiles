@@ -15,6 +15,10 @@ return {
 			view_history = "messages", -- view for :messages
 			view_search = "virtualtext", -- view for search count messages. Set to `false` to disable
 		},
+		lsp = {
+			progress = { enabled = false },
+			message = { enabled = false },
+		},
 		routes = {
 			{
 				filter = {
@@ -27,6 +31,10 @@ return {
 						{ find = "%d more lines" },
 					},
 				},
+				opts = { skip = true },
+			},
+			{
+				filter = { event = "lsp", kind = "progress" },
 				opts = { skip = true },
 			},
 		},

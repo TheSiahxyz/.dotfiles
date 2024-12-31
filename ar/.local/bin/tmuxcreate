@@ -31,7 +31,7 @@ else
         session=$( (
             echo "$sessions"
             echo "[new session]"
-        ) | fzf | cut -d: -f1)
+        ) | fzf --reverse | cut -d: -f1)
         [ -z "$session" ] && exit
         if [ "$session" = "[new session]" ]; then
             create_new_session

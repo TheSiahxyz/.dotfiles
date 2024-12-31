@@ -9,7 +9,6 @@ return {
 		"hrsh7th/cmp-buffer",
 		"hrsh7th/cmp-path",
 		"hrsh7th/cmp-cmdline",
-		"hrsh7th/nvim-cmp",
 		{
 			"L3MON4D3/LuaSnip",
 			version = "v2.*",
@@ -21,6 +20,7 @@ return {
 		{ "folke/neoconf.nvim", cmd = "Neoconf", config = false, dependencies = { "nvim-lspconfig" } },
 		{ "folke/neodev.nvim", opts = {} },
 		"stevearc/conform.nvim",
+		"saghen/blink.cmp",
 	},
 	init = function()
 		local wk = require("which-key")
@@ -29,16 +29,68 @@ return {
 			{ "<leader>tf", group = "Format" },
 		})
 	end,
-	config = function()
-		local cmp = require("cmp")
-		local cmp_lsp = require("cmp_nvim_lsp")
-		local capabilities = vim.tbl_deep_extend(
-			"force",
-			{},
-			vim.lsp.protocol.make_client_capabilities(),
-			cmp_lsp.default_capabilities()
-		)
+	opts = {
+		servers = {
+			lua_ls = {
+				settings = {
+					Lua = {
+						workspace = {
+							checkThirdParty = false,
+						},
+						codeLens = {
+							enable = true,
+						},
+						completion = {
+							callSnippet = "Replace",
+						},
+						doc = {
+							privateName = { "^_" },
+						},
+						hint = {
+							enable = true,
+							setType = false,
+							paramType = true,
+							paramName = "Disable",
+							semicolon = "Disable",
+							arrayIndex = "Disable",
+						},
+						runtime = { version = "Lua 5.4" },
+						diagnostics = {
+							globals = { "bit", "vim", "it", "describe", "before_each", "after_each" },
+						},
+					},
+				},
+			},
+			pyright = {
+				settings = {
+					python = {
+						disableLanguageServices = false,
+						disableOrganizeImports = false,
+					},
+				},
+			},
+		},
+	},
+	config = function(_, opts)
+		local cmp = require("blink.cmp")
 		local lspconfig = require("lspconfig")
+
+		require("mason").setup()
+
+		for server, config in pairs(opts.servers) do
+			-- passing config.capabilities to blink.cmp merges with the capabilities in your
+			-- `opts[server].capabilities, if you've defined it
+			config.capabilities = cmp.get_lsp_capabilities(config.capabilities)
+			lspconfig[server].setup(config)
+			require("mason-lspconfig").setup({
+				ensure_installed = { server },
+				handlers = {
+					[server] = function()
+						lspconfig[server].setup(config)
+					end,
+				},
+			})
+		end
 
 		require("fidget").setup({
 			progress = {
@@ -46,6 +98,11 @@ return {
 				suppress_on_insert = true, -- Suppress new messages while in insert mode
 				ignore_done_already = true, -- Ignore new tasks that are already complete
 				ignore_empty_message = true, -- Ignore new tasks that don't contain a message
+				clear_on_detach = function(client_id) -- Clear notification group when LSP server detaches
+					local client = vim.lsp.get_client_by_id(client_id)
+					return client and client.name or nil
+				end,
+				ignore = { "lua_ls" },
 			},
 			notification = {
 				window = {
@@ -65,45 +122,6 @@ return {
 				["nvim-tree"] = {
 					enable = false, -- Integrate with nvim-tree/nvim-tree.lua (if installed)
 				},
-			},
-		})
-		require("mason").setup()
-		require("mason-lspconfig").setup({
-			ensure_installed = {
-				"jdtls",
-				"lua_ls",
-				"pyright",
-			},
-			handlers = {
-				function(server_name) -- default handler (optional)
-					require("lspconfig")[server_name].setup({
-						capabilities = capabilities,
-					})
-				end,
-				["lua_ls"] = function()
-					lspconfig.lua_ls.setup({
-						capabilities = capabilities,
-						settings = {
-							Lua = {
-								runtime = { version = "Lua 5.4" },
-								diagnostics = {
-									globals = { "bit", "vim", "it", "describe", "before_each", "after_each" },
-								},
-							},
-						},
-					})
-				end,
-				["pyright"] = function()
-					lspconfig.pyright.setup({
-						capabilities = capabilities,
-						settings = {
-							python = {
-								disableLanguageServices = false,
-								disableOrganizeImports = false,
-							},
-						},
-					})
-				end,
 			},
 		})
 
@@ -146,51 +164,6 @@ return {
 				["mason-null-ls"] = false,
 				["mason-nvim-dap"] = true,
 			},
-		})
-
-		local cmp_select = { behavior = cmp.SelectBehavior.Select }
-		local luasnip = require("luasnip")
-
-		cmp.setup({
-			snippet = {
-				expand = function(args)
-					luasnip.lsp_expand(args.body) -- For `luasnip` users.
-				end,
-			},
-			mapping = cmp.mapping.preset.insert({
-				["<C-u>"] = cmp.mapping.scroll_docs(-4), -- Up
-				["<C-d>"] = cmp.mapping.scroll_docs(4), -- Down
-				["<C-p>"] = cmp.mapping.select_prev_item(cmp_select),
-				["<C-n>"] = cmp.mapping.select_next_item(cmp_select),
-				["<CR>"] = cmp.mapping.confirm({
-					behavior = cmp.ConfirmBehavior.Replace,
-					select = true,
-				}),
-				["<C-Space>"] = cmp.mapping.complete(),
-				["<Tab>"] = cmp.mapping(function(fallback)
-					if cmp.visible() then
-						cmp.select_next_item()
-					elseif luasnip.expand_or_jumpable() then
-						luasnip.expand_or_jump()
-					else
-						fallback()
-					end
-				end, { "i", "s" }),
-				["<S-Tab>"] = cmp.mapping(function(fallback)
-					if cmp.visible() then
-						cmp.select_prev_item()
-					elseif luasnip.jumpable(-1) then
-						luasnip.jump(-1)
-					else
-						fallback()
-					end
-				end, { "i", "s" }),
-			}),
-			sources = cmp.config.sources({
-				{ name = "nvim_lsp" },
-				{ name = "luasnip" }, -- For luasnip users.
-				{ name = "buffer" },
-			}),
 		})
 
 		vim.diagnostic.config({

@@ -3,6 +3,15 @@ return {
 		"L3MON4D3/LuaSnip",
 		version = "v2.*",
 		build = "make install_jsregexp",
+		dependencies = {
+			"rafamadriz/friendly-snippets",
+			config = function()
+				require("luasnip.loaders.from_vscode").lazy_load()
+				require("luasnip.loaders.from_vscode").lazy_load({
+					paths = { vim.fn.stdpath("config") .. "/lua/thesiahxyz/snippets" },
+				})
+			end,
+		},
 		config = function()
 			local ls = require("luasnip")
 			ls.setup({
@@ -21,8 +30,10 @@ return {
 				return c(pos, choices, opts)
 			end
 
-			-- vim.cmd.runtime({ args = { "lua/thesiahxyz/snippets/*.lua" }, bang = true }) -- load custom snippets
-			require("luasnip.loaders.from_vscode").lazy_load({ paths = { "lua/thesiahxyz/snippets" } })
+			vim.cmd.runtime({ args = { "lua/thesiahxyz/snippets/*.lua" }, bang = true }) -- load custom snippets
+			-- require("luasnip.loaders.from_vscode").lazy_load({
+			-- 	paths = { '"' .. vim.fn.stdpath("config") .. '/lua/thesiahxyz/snippets"' },
+			-- })
 
 			vim.keymap.set({ "i", "x" }, "<A-L>", function()
 				if ls.expand_or_jumpable() then

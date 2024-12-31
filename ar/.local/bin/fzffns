@@ -54,7 +54,7 @@ formatted=$(printf '%b' "$sorted" | while IFS='|' read -r f_name alias_name comm
 done)
 
 # Use fzf to select a function
-selected=$(printf '%b' "$formatted" | fzf --header "Select a function:")
+selected=$(printf '%b' "$formatted" | fzf --header "Select a function:" --reverse)
 
 # Check if a function was selected
 if [ -n "$selected" ]; then

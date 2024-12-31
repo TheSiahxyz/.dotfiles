@@ -36,10 +36,10 @@ search_term() {
 
     # Construct the preview command
     preview_cmd=$(printf "rga %s --pretty --context 10 '%s' {}" "$ignore_case_flag" "$*")
-    rga_output=$(rga --follow --no-ignore --hidden --text --max-count=1 "$ignore_case_flag" --files-with-matches --no-messages --glob '!**/.git/*' "$*")
+    rga_output=$(rga --follow --no-ignore --hidden --text --max-count=1 ${ignore_case_flag:+$ignore_case_flag} --files-with-matches --no-messages --glob '!**/.git/*' "$*")
 
     # Use fzf to select files
-    files=$(echo "$rga_output" | fzf-tmux +m --preview="$preview_cmd" --multi --select-1 --exit-0) || return 1
+    files=$(echo "$rga_output" | fzf-tmux +m --preview="$preview_cmd" --reverse --multi --select-1 --exit-0) || return 1
 
     # Check if files are selected
     if [ -z "$files" ]; then

@@ -660,7 +660,10 @@ return {
 				})
 			end, { desc = "Find script files" })
 			vim.keymap.set("n", "<leader>fv", function()
-				require("telescope.builtin").find_files({ cwd = vim.fn.stdpath("config") })
+				require("telescope.builtin").find_files({
+					cwd = vim.fn.stdpath("config"),
+					find_command = { "fd", "--type", "f", "--follow", "--color", "never", "--extension", "lua" },
+				})
 			end, { desc = "Find neovim config files" })
 			vim.keymap.set("n", "<leader>fV", function()
 				require("telescope.builtin").find_files({

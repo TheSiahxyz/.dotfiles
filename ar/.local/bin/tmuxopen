@@ -40,6 +40,7 @@ get_fzf_output() {
 
     rg --line-number --no-heading --color=always --smart-case --glob '!**/.git/**' --glob '!LICENSE' '' 2>/dev/null |
         fzf --ansi --multi --delimiter : \
+            --reverse \
             --print-query \
             --preview 'bat --style=numbers --color=always --highlight-line {2} {1} 2>/dev/null || echo "Preview not available"' \
             --preview-window 'up,60%,border-bottom,+{2}+3/3,~3' \

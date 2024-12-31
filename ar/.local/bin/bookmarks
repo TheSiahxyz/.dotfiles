@@ -84,7 +84,7 @@ openinbrowser() {
 
     type dmenu >/dev/null 2>&1 &&
         selection="dmenu -i -l 20 -p \"Choose a $1 to open:\"" ||
-        selection="fzf --cycle --ansi --delimiter='|' --with-nth=1..-2"
+        selection="fzf --reverse --cycle --ansi --delimiter='|' --with-nth=1..-2"
 
     case "$1" in
     *bookmark*)

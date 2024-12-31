@@ -35,6 +35,7 @@ sessionizer() {
         sesh list | fzf-tmux -p 85%,70% \
             --no-sort --cycle --ignore-case --ansi --border=sharp --multi --border-label "╢ TheSiahxyz ╟" --prompt "⚡  " \
             --header "^a all ^t tmux ^e sesh ^f zoxide ^h home ^c configs ^d .dotfiles ^g git ^u staged files ^k desktop ^v private ^b public ^r scripts ^s suckless ^x tmux kill M-CR open ^/ help" \
+            --reverse \
             --bind "ctrl-a:change-prompt(⚡  )+reload(sesh list)" \
             --bind "ctrl-b:change-prompt(👯  )+reload(fd -H -d 3 -t d -E .Trash -E .git -E .cache . ${XDG_PUBLICSHARE_DIR:-${HOME}/Public} | sed 's|$HOME|~|g')" \
             --bind "ctrl-c:change-prompt(🗂️  )+reload(fd -H -d 2 -t d -E .Trash -E .git -E .cache . ${XDG_CONFIG_DIR:-${HOME}/.config} | sed 's|$HOME|~|g')" \
