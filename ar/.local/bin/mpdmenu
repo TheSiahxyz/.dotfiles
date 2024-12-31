@@ -95,8 +95,12 @@ case "$mode" in
     esac
     mpc play >/dev/null
     ;;
-"playlist") mpc play "$(d_playlist)" >/dev/null ;;
+"playlist")
+    mpc clear
+    mpc play "$(d_playlist)" >/dev/null
+    ;;
 "saved playlist")
+    mpc clear
     mpc load "$(d_saved_playlist)" >/dev/null || exit
     mpc play >/dev/null
     ;;

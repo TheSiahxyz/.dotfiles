@@ -97,7 +97,16 @@ vim.keymap.set("n", "<leader>cp", function()
 	end
 	new_filename = new_filename .. "." .. file_ext
 	local cmd = "cp " .. filepath .. " " .. new_filename
-	local confirm = vim.fn.input('Do you want to copy "' .. filename .. '"? (y/n): ')
+
+	-- Wrap input in pcall to handle Ctrl-c interruptions
+	local ok, confirm = pcall(vim.fn.input, 'Do you want to copy "' .. filename .. '"? (y/n): ')
+
+	-- If interrupted (Ctrl-c), return silently
+	if not ok or confirm == nil or confirm == "" then
+		return
+	end
+
+	-- Handle positive confirmation
 	if confirm:lower() == "y" or confirm:lower() == "yes" then
 		vim.cmd("silent !" .. cmd)
 		vim.cmd("silent edit " .. new_filename)
@@ -451,8 +460,9 @@ vim.keymap.set("v", "<C-r>", '"hy:%s/\\v<C-r>h//g<left><left>', { desc = "Change
 
 -- Remove
 local function delete_current_file()
-	local current_file = vim.fn.expand("%:p")
-	if current_file and current_file ~= "" then
+	local filepath = vim.fn.expand("%:p")
+	local filename = vim.fn.expand("%:t") -- Get the current filename
+	if filepath and filepath ~= "" then
 		-- Check if trash utility is installed
 		if vim.fn.executable("trash") == 0 then
 			vim.api.nvim_echo({
@@ -463,24 +473,28 @@ local function delete_current_file()
 		end
 		-- Prompt for confirmation before deleting the file
 		vim.ui.input({
-			prompt = 'Do you want to delete "' .. current_file .. '"? (y/n): ',
+			prompt = 'Do you want to delete "' .. filename .. '"? (y/n): ',
 		}, function(input)
+			if input == nil then
+				return
+			end
+
 			if input:lower() == "y" or input:lower() == "yes" then
 				-- Delete the file using trash app
 				local success, _ = pcall(function()
-					vim.fn.system({ "trash", vim.fn.fnameescape(current_file) })
+					vim.fn.system({ "trash", vim.fn.fnameescape(filepath) })
 				end)
 				if success then
 					vim.api.nvim_echo({
 						{ "File deleted from disk:\n", "Normal" },
-						{ current_file, "Normal" },
+						{ filepath, "Normal" },
 					}, false, {})
 					-- Close the buffer after deleting the file
 					vim.cmd("bd!")
 				else
 					vim.api.nvim_echo({
 						{ "Failed to delete file:\n", "ErrorMsg" },
-						{ current_file, "ErrorMsg" },
+						{ filepath, "ErrorMsg" },
 					}, false, {})
 				end
 			else
