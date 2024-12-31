@@ -253,7 +253,7 @@ cmd mpvdir ${{
         set -- $fx
         setsid -f mpv --really-quiet -- "$@"
     else
-        for file in *.mp4 *.mkv *.avi *.flv *.webm *.mov *.ts; do
+        for file in $(printf '%s\n' *.mp4 *.mkv *.avi *.flv *.webm *.mov *.ts | sort); do
             [ -e "$file" ] && set -- "$@" "$file"
         done
         [ -n "$1" ] && setsid -f mpv --really-quiet -- "$@"
@@ -346,6 +346,7 @@ cmd select-videos &{{
     files="$(
         find "$PWD" -mindepth 1 -maxdepth 1 \( \( -type f -o \( -type l -a -exec test -f {} \; \) \) \) \( -iname '*.mp4' -o -iname '*.mkv' -o -iname '*.flv' -o -iname '*.avi' -o -iname '*.webm' -o -iname '*.mov' -o -iname '*.ts' -o -iname '*.wmv' -o -iname '*.vob' \) \
         $([ "$lf_hidden" = false ] && printf '%s\n' ! -name '.*') -print0 |
+        sort -z |
         sed -z 's/\\/\\\\/g;s/"/\\"/g;s/\n/\\n/g;s/^/"/;s/$/"/' |
         tr '\0' ' ')"
     [ -n "$files" ] && lf -remote "send $id :unselect; toggle $files"
