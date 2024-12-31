@@ -102,6 +102,7 @@ case "$mode" in
 "saved playlist")
     mpc clear
     mpc load "$(d_saved_playlist)" >/dev/null || exit
+    mpc random on
     mpc play >/dev/null
     ;;
 *) exit ;;
