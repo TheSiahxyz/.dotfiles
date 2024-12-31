@@ -70,14 +70,23 @@ browsercheck() {
 }
 
 openinbrowser() {
+    # Extract only the default part of the profile name
     case $BROWSER in
-    firefox) profile_dir=$(find ~/.mozilla/firefox -type d -name "*.default*" | head -n 1) ;;
-    librewolf) profile_dir=$(find ~/.librewolf -type d -name "*.default*" | head -n 1) ;;
+    firefox)
+        profiles_ini_path="$HOME/.mozilla/firefox/profiles.ini"
+        profile=$(awk '/\[Install/ {found=1} found && /^Default=/ {split($0, arr, "."); print arr[2]; exit}' "$profiles_ini_path")
+        profile_dir=$(find ~/.mozilla/firefox -type d -name "*.$profile*" | head -n 1)
+        ;;
+    librewolf)
+        profiles_ini_path="$HOME/.librewolf/profiles.ini"
+        profile=$(awk '/\[Install/ {found=1} found && /^Default=/ {split($0, arr, "."); print arr[2]; exit}' "$profiles_ini_path")
+        profile_dir=$(find ~/.librewolf -type d -name "*.$profile*" | head -n 1)
+        ;;
     *) echo "Default browser path is needed." && exit ;;
     esac
 
     db_path="$profile_dir/places.sqlite"
-    tmp_dir="${XDG_CACHE_HOME:-$HOME/.cache}/mozilla/firefox/$USER.default-default"
+    tmp_dir="${XDG_CACHE_HOME:-$HOME/.cache}/mozilla/firefox/$USER.$profile"
     tmp_file="$tmp_dir/$1.sqlite"
     mkdir -p "$tmp_dir"
     cp -f "$db_path" "$tmp_file"
