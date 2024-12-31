@@ -8,6 +8,7 @@ https://lukesmith.xyz/rss.xml "Blog" "~Luke Smith (Blog)"
 # Git
 https://github.com/LukeSmithxyz/voidrice/commits/master.atom "Git" "~Luke Smith dotfiles (Git)"
 https://github.com/Piotr1215/dotfiles/commits/master.atom "Git" "~Piotr1215 dotfiles (Git)"
+https://github.com/linkarzu/dotfiles-latest/commits/main.atom "Git" "~Linkarzu dotfiles (Git)"
 
 # Youtube
 https://www.youtube.com/feeds/videos.xml?channel_id=UC2eYFnH61tmytImy1mTYvhA "Linux" "Tech" "Youtube" "~Luke Smith (Youtube)"
