@@ -78,10 +78,11 @@ pvn             $HOME/Private/repos/neetcode
 pvo             $HOME/Private/repos/Obsidian/SI
 pvs             $HOME/Private/repos/SQL
 pww             $HOME/Private/photo
+shb             ${XDG_DATA_HOME:-${HOME}/.local/share}/wallpapers
 shm             ${XDG_DATA_HOME:-${HOME}/.local/share}/mail
 shr             ${XDG_DATA_HOME:-${HOME}/.local/share}
 shv             ${XDG_DATA_HOME:-${HOME}/.local/share}/venvs
-shw             ${XDG_DATA_HOME:-${HOME}/.local/share}/wallpapers
+shw             ${XDG_DATA_HOME:-${HOME}/.local/share}/wine
 sk              ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless
 slr             ${XDG_DATA_HOME:-${HOME}/.local/share}/lyrics
 sr              ${XDG_SOURCES_HOME:-${HOME}/.local/src}
