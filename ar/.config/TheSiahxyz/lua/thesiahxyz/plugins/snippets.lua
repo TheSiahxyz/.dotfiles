@@ -30,10 +30,11 @@ return {
 				return c(pos, choices, opts)
 			end
 
-			vim.cmd.runtime({ args = { "lua/thesiahxyz/snippets/*.lua" }, bang = true }) -- load custom snippets
 			require("luasnip.loaders.from_vscode").lazy_load({
 				paths = { '"' .. vim.fn.stdpath("config") .. '/lua/thesiahxyz/snippets"' },
 			})
+
+			vim.cmd.runtime({ args = { "lua/thesiahxyz/snippets/*.lua" }, bang = true }) -- load custom snippets
 
 			vim.keymap.set({ "i", "x" }, "<A-L>", function()
 				if ls.expand_or_jumpable() then
