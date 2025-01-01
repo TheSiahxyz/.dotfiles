@@ -439,6 +439,15 @@ cmd edit-config ${{
     lf -remote "send $id source ~/.config/lf/lfrc"
 }}
 
+cmd wine-run ${{
+    if [ $(file --mime-type "$(readlink -f $f)" -b) = "application/vnd.microsoft.portable-executable" ]; then
+        file="${f##*/}"
+        file="${file%.*}"
+        export WINEPREFIX="${WINEPREFIX:-${XDG_DATA_HOME:-${HOME}/.local/share}/wine}/$file"
+        wine $f
+    fi
+}}
+
 # Wallpaper
 cmd setbg "$1"
 cmd setlock "$1"
@@ -599,4 +608,4 @@ map bg $setbg "$f"
 map bl $setlock "$f"
 
 # Wine
-map wi $wine "$f"
+map wi wine-run

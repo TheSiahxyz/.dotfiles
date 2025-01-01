@@ -13,7 +13,7 @@ _exec_wine() {
 
     echo 'Executing Soop...'
     wine "${WINE_EXE}"
-    wine "${WINE_EXE2}"
+    # wine "${WINE_EXE2}"
 }
 
 _install_wine() {
@@ -51,7 +51,7 @@ _install_wine() {
 
     # Install necessary libraries via winetricks
     echo "Installing required libraries via winetricks..."
-    if ! winetricks -q mfc42 vcrun2019 windowscodecs; then
+    if ! winetricks -q mfc42 videomemorysize=2048; then
         echo "Failed to install required libraries!"
         exit 1
     fi
