@@ -13,10 +13,18 @@ return {
 		cmdline = {
 			enabled = true, -- enables the Noice cmdline UI
 			view = "cmdline",
+			format = {
+				cmdline = false,
+				search_down = false,
+				search_up = false,
+				filter = false,
+				lua = false,
+				help = false,
+			},
 		},
 		messages = {
 			enabled = true,
-			view = "notify", -- default view for messages
+			view = "mini", -- default view for messages
 			view_error = "messages", -- view for errors
 			view_warn = "notify", -- view for warnings
 			view_history = "messages", -- view for :messages

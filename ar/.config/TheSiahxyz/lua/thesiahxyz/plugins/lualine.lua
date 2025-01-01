@@ -31,8 +31,8 @@ return {
 						end,
 					},
 					{
-						require("noice").api.statusline.mode.get,
-						cond = require("noice").api.statusline.mode.has,
+						require("noice").api.status.mode.get,
+						cond = require("noice").api.status.mode.has,
 						color = { bg = "#ff9e64" },
 					},
 				},
@@ -63,6 +63,10 @@ return {
 					},
 				},
 				lualine_x = {
+					{
+						require("noice").api.status.search.get,
+						cond = require("noice").api.status.search.has,
+					},
 					"encoding",
 					"fileformat",
 					{

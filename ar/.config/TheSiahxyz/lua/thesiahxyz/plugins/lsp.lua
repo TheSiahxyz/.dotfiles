@@ -43,10 +43,15 @@ return {
 
 			require("fidget").setup({
 				progress = {
-					poll_rate = 0, -- How and when to poll for progress messages
+					poll_rate = false, -- How and when to poll for progress messages
 					suppress_on_insert = true, -- Suppress new messages while in insert mode
 					ignore_done_already = true, -- Ignore new tasks that are already complete
 					ignore_empty_message = true, -- Ignore new tasks that don't contain a message
+					clear_on_detach = function(client_id) -- Clear notification group when LSP server detaches
+						local client = vim.lsp.get_client_by_id(client_id)
+						return client and client.name or nil
+					end,
+					-- ignore = { "lua_ls" },
 				},
 				notification = {
 					window = {
@@ -68,6 +73,7 @@ return {
 					},
 				},
 			})
+
 			require("mason").setup()
 			require("mason-lspconfig").setup({
 				ensure_installed = {
