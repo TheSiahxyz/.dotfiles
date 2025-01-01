@@ -526,7 +526,7 @@ map o open
 map <c-o> $mimeopen --ask "$f"
 
 # Paste
-map pP alt-paste cut
+map PP alt-paste cut
 map pp alt-paste copy
 
 # Preview
