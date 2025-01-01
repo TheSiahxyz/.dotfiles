@@ -12,7 +12,9 @@ case $BLOCK_BUTTON in
 1) groff -mom "${READMEFILE:-${XDG_DATA_HOME:-${HOME}/.local/share}/thesiah/thesiah.mom}" -Tpdf | zathura - ;;
 2) restartwm ;;
 3) notify-send "❓ Help module" "\- Left click to open THESIAH guide
-- Middle click to refresh window manager" ;;
+- Middle click to refresh window manager
+- Shift + Left click to run system action" ;;
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
+7) sysact ;;
 esac
 echo "❓"
