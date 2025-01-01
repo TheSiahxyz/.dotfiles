@@ -13,8 +13,10 @@ case $BLOCK_BUTTON in
 2) restartwm ;;
 3) notify-send "❓ Help module" "\- Left click to open THESIAH guide
 - Middle click to refresh window manager
-- Shift + Left click to run system action" ;;
+- Shift + Middle click to run system action
+- Shift + Right clict to lock screen" ;;
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 7) sysact ;;
+8) slock ;;
 esac
 echo "❓"
