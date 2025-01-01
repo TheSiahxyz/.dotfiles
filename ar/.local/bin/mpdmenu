@@ -92,18 +92,18 @@ case "$mode" in
         ;;
     *) exit ;;
     esac
-    mpc play >/dev/null
+    mpc random on
+    mpc play 2>/dev/null
     ;;
 "playlist")
     mpc clear
-    mpc load "$(d_playlist)" >/dev/null || exit
+    mpc load "$(d_playlist)" 2>/dev/null || exit
     mpc random on
-    mpc play >/dev/null
+    mpc play 2>/dev/null
     ;;
 "queue")
     ! mpc playlist | grep -q '.' && exit
-    tracks="$(d_queue)"
-    [[ -z "$tracks" ]] && mpc play "$tracks" >/dev/null || exit
+    mpc play "$(d_queue)" 2>/dev/null || exit
     ;;
 *) exit ;;
 esac
