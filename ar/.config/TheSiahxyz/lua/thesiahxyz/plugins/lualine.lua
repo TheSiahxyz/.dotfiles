@@ -30,6 +30,11 @@ return {
 							return str:sub(1, 1)
 						end,
 					},
+					{
+						require("noice").api.statusline.mode.get,
+						cond = require("noice").api.statusline.mode.has,
+						color = { bg = "#ff9e64" },
+					},
 				},
 				lualine_b = {
 					"branch",

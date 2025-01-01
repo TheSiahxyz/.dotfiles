@@ -41,7 +41,7 @@ tmp_playlist() {
     [ -d "$playlistdir" ] || mkdir -p "$playlistdir"
     tmplist="$playlistdir/tmplist.m3u"
     [ -f "$tmplist" ] && rm -rf "$tmplist"
-    find "$1" -maxdepth 1 -type f \( -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.mov" -o -iname "*.flv" -o -iname "*.wmv" -o -iname "*.webm" -o -iname "*.mpeg" -o -iname "*.mpg" -o -iname "*.ts" \) \
+    find "$1" -maxdepth 1 -type f \( -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.mov" -o -iname "*.flv" -o -iname "*.wmv" -o -iname "*.webm" -o -iname "*.mpeg" -o -iname "*.mpg" -o -iname "*.avi" -o -iname "*.ts" -o -iname "*.3gp" \) \
         -exec echo {} \; >>"$tmplist"
     play_playlist "$tmplist"
     rm -rf "$tmplist"
@@ -55,7 +55,7 @@ list_and_play() {
         search_term=$(echo | dmenu -i -p "File names:")
         [ -z "$search_term" ] && echo "Invalid search term \"$search_term\"" && exit
         notify-send "Finding videos named with '$search_term'.."
-        files=$(find "$dir" -type f \( -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.mov" -o -iname "*.flv" -o -iname "*.wmv" -o -iname "*.webm" -o -iname "*.mpeg" -o -iname "*.mpg" -o -iname "*.ts" \) -iname "*$search_term*")
+        files=$(find "$dir" -type f \( -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.mov" -o -iname "*.flv" -o -iname "*.wmv" -o -iname "*.webm" -o -iname "*.mpeg" -o -iname "*.mpg" -o -iname "*.avi" -o -iname "*.ts" -o -iname "*.3gp" \) -iname "*$search_term*" | sort)
         [ -z "$files" ] && echo "No files named with \"$search_term\"." && exit
         tmpplaylist=$(mktemp /tmp/mpv_playlist_XXXXXX.m3u)
         echo "$files" | while read -r file; do
@@ -65,7 +65,7 @@ list_and_play() {
         rm -rf "$tmpplaylist"
         ;;
     "List files")
-        files_with_paths=$(find "$dir" -mindepth 1 -maxdepth 1 -type f \( -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.webm" -o -iname "*.avi" -o -iname "*.flv" -o -iname "*.wmv" -o -iname "*.ts" \) | sort)
+        files_with_paths=$(find "$dir" -mindepth 1 -maxdepth 1 -type f \( -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.mov" -o -iname "*.flv" -o -iname "*.wmv" -o -iname "*.webm" -o -iname "*.mpeg" -o -iname "*.mpg" -o -iname "*.avi" -o -iname "*.ts" -o -iname "*.3gp" \) | sort)
         SELECTED_FILE=$(printf "All files\n%s" "$files_with_paths" | sed 's!.*/!!' | dmenu -i -l 21 -p "Select a file:")
         [ -z "$SELECTED_FILE" ] && echo "No file selected." && exit
         [ "$SELECTED_FILE" = "All files" ] && tmp_playlist "$dir" && return

@@ -253,7 +253,7 @@ cmd mpvdir ${{
         set -- $fx
         setsid -f mpv --really-quiet -- "$@"
     else
-        for file in $(printf '%s\n' *.mp4 *.mkv *.avi *.flv *.webm *.mov *.ts | sort); do
+        for file in $(printf '%s\n' *.mp4 *.mkv *.avi *.flv *.webm *.mov *.mpg *.3gp *.ts | sort); do
             [ -e "$file" ] && set -- "$@" "$file"
         done
         [ -n "$1" ] && setsid -f mpv --really-quiet -- "$@"
@@ -335,6 +335,7 @@ cmd select-type &{{
         find "$PWD" -mindepth 1 -maxdepth 1 \
         \( \( -type "$1" -o \( -type l -a -exec test -"$1" {} \; \) \) \) \
         $([ "$lf_hidden" = false ] && printf '%s\n' -not -name '.*') -print0 |
+        sort -z |
         sed -z 's/\\/\\\\/g;s/"/\\"/g;s/\n/\\n/g;s/^/"/;s/$/"/' |
         tr '\0' ' ')"
     [ -n "$files" ] && lf -remote "send $id :unselect; toggle $files"
@@ -344,7 +345,7 @@ cmd select-files select-type f
 cmd select-videos &{{
     set -f
     files="$(
-        find "$PWD" -mindepth 1 -maxdepth 1 \( \( -type f -o \( -type l -a -exec test -f {} \; \) \) \) \( -iname '*.mp4' -o -iname '*.mkv' -o -iname '*.flv' -o -iname '*.avi' -o -iname '*.webm' -o -iname '*.mov' -o -iname '*.ts' -o -iname '*.wmv' -o -iname '*.vob' \) \
+        find "$PWD" -mindepth 1 -maxdepth 1 \( \( -type f -o \( -type l -a -exec test -f {} \; \) \) \) \( -iname '*.mp4' -o -iname '*.mkv' -o -iname '*.flv' -o -iname '*.avi' -o -iname '*.webm' -o -iname '*.mov' -o -iname '*.mpg' -o -iname '*.ts' -o -iname '*.wmv' -o -iname '*.vob' -o -iname '*.3gp' \) \
         $([ "$lf_hidden" = false ] && printf '%s\n' ! -name '.*') -print0 |
         sort -z |
         sed -z 's/\\/\\\\/g;s/"/\\"/g;s/\n/\\n/g;s/^/"/;s/$/"/' |
@@ -356,6 +357,7 @@ cmd select-images &{{
     files="$(
         find "$PWD" -mindepth 1 -maxdepth 1 \( \( -type f -o \( -type l -a -exec test -f {} \; \) \) \) \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.gif' -o -iname '*.bmp' -o -iname '*.tiff' -o -iname '*.tif' -o -iname '*.svg' -o -iname '*.webp' \) \
         $([ "$lf_hidden" = false ] && printf '%s\n' ! -name '.*') -print0 |
+        sort -z |
         sed -z 's/\\/\\\\/g;s/"/\\"/g;s/\n/\\n/g;s/^/"/;s/$/"/' |
         tr '\0' ' ')"
     [ -n "$files" ] && lf -remote "send $id :unselect; toggle $files"
@@ -365,6 +367,7 @@ cmd select-music &{{
     files="$(
         find "$PWD" -mindepth 1 -maxdepth 1 \( \( -type f -o \( -type l -a -exec test -f {} \; \) \) \) \( -iname '*.mp3' -o -iname '*.flac' -o -iname '*.wav' -o -iname '*.aac' -o -iname '*.ogg' -o -iname '*.m4a' -o -iname '*.wma' \) \
         $([ "$lf_hidden" = false ] && printf '%s\n' ! -name '.*') -print0 |
+        sort -z |
         sed -z 's/\\/\\\\/g;s/"/\\"/g;s/\n/\\n/g;s/^/"/;s/$/"/' |
         tr '\0' ' ')"
     [ -n "$files" ] && lf -remote "send $id :unselect; toggle $files"

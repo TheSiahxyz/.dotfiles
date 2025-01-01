@@ -17,24 +17,27 @@ user_pref("browser.startup.homepage", "https://www.searx.thesiah.xyz");
  * [TEST] http://example.com [upgrade]
  * [TEST] http://httpforever.com/ | http://http.rip [no upgrade] ***/
 user_pref("dom.security.https_only_mode", false); // [FF76+] Allow access to http (i.e. not https) sites:
-/** SANITIZE ON SHUTDOWN: IGNORES "ALLOW" SITE EXCEPTIONS | v2 migration is FF128+ ***/
-/* 2811: set/enforce what items to clear on shutdown (if 2810 is true) [SETUP-CHROME]
- * [NOTE] If "history" is true, downloads will also be cleared ***/
-user_pref("privacy.clearOnShutdown.formdata", false); // [DEFAULT: true]
-user_pref("privacy.clearOnShutdown.history", false); // [DEFAULT: true]
+/** SANITIZE ON SHUTDOWN: RESPECTS "ALLOW" SITE EXCEPTIONS FF103+ | v2 migration is FF128+ ***/
+/* 2815: set "Cookies" and "Site Data" to clear on shutdown (if 2810 is true) [SETUP-CHROME]
+ * [NOTE] Exceptions: A "cookie" permission also controls "offlineApps" (see note below). For cross-domain logins,
+ * add exceptions for both sites e.g. https://www.youtube.com (site) + https://accounts.google.com (single sign on)
+ * [NOTE] "offlineApps": Offline Website Data: localStorage, service worker cache, QuotaManager (IndexedDB, asm-cache)
+ * [NOTE] "sessions": Active Logins (has no site exceptions): refers to HTTP Basic Authentication [1], not logins via cookies
+ * [WARNING] Be selective with what sites you "Allow", as they also disable partitioning (1767271)
+ * [SETTING] to add site exceptions: Ctrl+I>Permissions>Cookies>Allow (when on the website in question)
+ * [SETTING] to manage site exceptions: Options>Privacy & Security>Permissions>Settings
+ * [1] https://en.wikipedia.org/wiki/Basic_access_authentication ***/
 user_pref("privacy.clearOnShutdown.cookies", false); // Cookies
 user_pref("privacy.clearOnShutdown.offlineApps", false); // Site Data
 user_pref("privacy.clearOnShutdown.sessions", false); // Active Logins [DEFAULT: true]
 user_pref("privacy.clearOnShutdown_v2.cookiesAndStorage", false); // Cookies, Site Data, Active Logins [FF128+]
 /* 5010: disable location bar suggestion types
  * [SETTING] Search>Address Bar>When using the address bar, suggest ***/
-user_pref("browser.urlbar.suggest.history", false); // Do not suggest web history in the URL bar:
-user_pref("browser.urlbar.suggest.bookmark", false);
-user_pref("browser.urlbar.suggest.openpage", false);
+user_pref("browser.urlbar.suggest.history", false);
 user_pref("browser.urlbar.suggest.topsites", false); // [FF78+]
 /* 5012: disable location bar autofill
  * [1] https://support.mozilla.org/kb/address-bar-autocomplete-firefox#w_url-autocomplete ***/
-user_pref("browser.urlbar.autoFill", false); // Do not autocomplete in the URL bar:
+user_pref("browser.urlbar.autoFill", false);
 /* 5021: disable location bar using search
  * Don't leak URL typos to a search engine, give an error message instead
  * Examples: "secretplace,com", "secretplace/com", "secretplace com", "secret place.com"
@@ -44,11 +47,8 @@ user_pref("keyword.enabled", true); // Enable the addition of search keywords:
 /* 5510: control when to send a cross-origin referer
  * 0=always (default), 1=only if base domains match, 2=only if hosts match
  * [NOTE] Will cause breakage: older modems/routers and some sites e.g banks, vimeo, icloud, instagram ***/
-user_pref("network.http.referer.XOriginPolicy", 2); // This could otherwise cause some issues on bank logins and other annoying sites:
-/* 7018: disable service worker Web Notifications [FF44+]
- * [WHY] Web Notifications are behind a prompt (7002)
- * [1] https://blog.mozilla.org/en/products/firefox/block-notification-requests/
- * [-] https://bugzilla.mozilla.org/1842457 ***/
+user_pref("network.http.referer.XOriginPolicy", 0); // This could otherwise cause some issues on bank logins and other annoying sites:
+// 7018: disable service worker Web Notifications [FF44+]
 user_pref("dom.webnotifications.serviceworker.enabled", false);
 /* 7019: disable Push Notifications [FF44+]
  * [WHY] Website "push" requires subscription, and the API is required for CRLite (1224)
@@ -65,14 +65,10 @@ user_pref("extensions.pocket.enabled", false);
 user_pref("full-screen-api.warning.timeout", false);
 // Disable Firefox sync and its menu entries
 user_pref("identity.fxaccounts.enabled", false);
-// screen & video & audio share
-user_pref("media.webrtc.camera.allow-pipewire", false);
-user_pref("media.webrtc.capture.allow-pipewire", true);
-user_pref("media.navigator.mediadatadecoder_vpx_enabled", true);
 // Keep cookies until expiration or user deletion:
 user_pref("network.cookie.lifetimePolicy", 0);
 // Prefil forms:
-user_pref("signon.prefillForms", true);
+user_pref("signon.prefillForms", false);
 // Enable custom userChrome.js:
 user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
 // Fix the issue where right mouse button instantly clicks

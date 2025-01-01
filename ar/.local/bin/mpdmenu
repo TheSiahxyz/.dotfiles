@@ -1,7 +1,6 @@
 #!/bin/bash
 
 all_name='[ALL]'
-mode=library
 PLAYLIST_DIR="${XDG_CONFIG_HOME:-${HOME}/.config}/mpd/playlists"
 
 # Functions
@@ -27,11 +26,19 @@ d_album() {
 
 d_title() {
     titles=$(mpc list title | sort -f)
-    [ -z "$titles" ] && exit
+    [[ -z "$titles" ]] && exit
     echo "$titles" | dmenu -p "Select title:" "${dmenu_args[@]}"
 }
 
 d_playlist() {
+    playlists=$(find "$PLAYLIST_DIR" \( -type f -o -type l \) -name "*.m3u" -exec basename {} .m3u \;)
+
+    selected_playlist=$(echo "$playlists" | dmenu -i -p "Select Playlist:" "${dmenu_args[@]}")
+
+    printf '%s' "$selected_playlist"
+}
+
+d_queue() {
     format="%position% %title%"
     extra_format="(%artist% - %album%)"
 
@@ -43,20 +50,9 @@ d_playlist() {
     printf '%s' "${track%% *}"
 }
 
-d_saved_playlist() {
-    playlists=$(find "$PLAYLIST_DIR" \( -type f -o -type l \) -name "*.m3u" -exec basename {} .m3u \;)
-
-    selected_playlist=$(echo "$playlists" | dmenu -i -p "Select Playlist:" "${dmenu_args[@]}")
-
-    printf '%s' "$selected_playlist"
-}
-
-# Main Menu
-mode=$(echo -e "library\nplaylist\nsaved playlist" | dmenu -p "Choose mode:" "${dmenu_args[@]}")
-
 # Parse arguments (if any)
 i=2
-for arg; do
+for arg in "$@"; do
     if [[ $arg == :: ]]; then
         dmenu_args=("${@:$i}")
         break
@@ -65,11 +61,14 @@ for arg; do
     case "$arg" in
     -l) mode="library" ;;
     -p) mode="playlist" ;;
-    -s) mode="saved playlist" ;;
+    -q) mode="queue" ;;
     esac
 
-    i++
+    ((i + 1))
 done
+
+# Main Menu
+[[ -z "$mode" ]] && mode=$(echo -e "library\nplaylist\nqueue" | dmenu -p "Choose mode:" "${dmenu_args[@]}")
 
 # Mode Handling
 case "$mode" in
@@ -97,13 +96,14 @@ case "$mode" in
     ;;
 "playlist")
     mpc clear
-    mpc play "$(d_playlist)" >/dev/null
-    ;;
-"saved playlist")
-    mpc clear
-    mpc load "$(d_saved_playlist)" >/dev/null || exit
+    mpc load "$(d_playlist)" >/dev/null || exit
     mpc random on
     mpc play >/dev/null
+    ;;
+"queue")
+    ! mpc playlist | grep -q '.' && exit
+    tracks="$(d_queue)"
+    [[ -z "$tracks" ]] && mpc play "$tracks" >/dev/null || exit
     ;;
 *) exit ;;
 esac
