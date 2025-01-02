@@ -17,18 +17,21 @@ num_changes=$(echo "$changes" | wc -l)
 generate_message() {
     status=$1
     file=$2
+    file_name="${file##*/}"
+    dir_name="${file%/*}"
+    dir_name="${dir_name##*/}"
     case "$status" in
     " M" | "M ") # Modified
-        echo "modified $(dirname "$file")/$(basename "$file")"
+        echo "modified $dir_name/$file_name"
         ;;
     "??") # Untracked (new) files
-        echo "created $(dirname "$file")/$(basename "$file")"
+        echo "created $dir_name/$file_name"
         ;;
     "D ") # Deleted from the index
-        echo "deleted $(dirname "$file")/$(basename "$file")"
+        echo "deleted $dir_name/$file_name"
         ;;
     *) # Catch-all for other statuses
-        echo "updated $(dirname "$file")/$(basename "$file")"
+        echo "updated $dir_name/$file_name"
         ;;
     esac
 }
