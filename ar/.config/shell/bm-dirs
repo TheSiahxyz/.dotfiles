@@ -5,12 +5,12 @@ btt             ${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/task/taskwarrior-tui
 cab             ${XDG_CONFIG_HOME:-${HOME}/.config}/abook
 cac             ${XDG_CACHE_HOME:-${HOME}/.cache}
 cbc             ${XDG_CONFIG_HOME:-${HOME}/.config}/bash
-ccf             ${XDG_CONFIG_HOME:-${HOME}/.config}
 cdb             ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwmblocks
 cdm             ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dmenu
 cdw             ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwm
-cfg             ${XDG_CONFIG_HOME:-${HOME}/.config}/git
+cfg             ${XDG_CONFIG_HOME:-${HOME}/.config}
 cfx             ${XDG_CONFIG_HOME:-${HOME}/.config}/firefox
+cgc             ${XDG_CONFIG_HOME:-${HOME}/.config}/git
 clf             ${XDG_CONFIG_HOME:-${HOME}/.config}/lf
 clg             ${XDG_CONFIG_HOME:-${HOME}/.config}/lazygit
 clv             ${XDG_CONFIG_HOME:-${HOME}/.config}/LazyVim

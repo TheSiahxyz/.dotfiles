@@ -1,13 +1,13 @@
 [advice]
     detachedHead = false
+[core]
+    excludesFile = ~/.config/git/ignore
+    pager = delta
 [color "status"]
 	added = green
 	branch = bold magenta
 	changed = yellow
 	untracked = blue
-[core]
-    excludesFile = ~/.config/git/ignore
-    pager = delta
 [credential]
     helper = store
 [delta]
