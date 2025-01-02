@@ -19,16 +19,16 @@ generate_message() {
     file=$2
     case "$status" in
     " M" | "M ") # Modified
-        echo "modified $(basename "$file")"
+        echo "modified $(dirname "$file")/$(basename "$file")"
         ;;
     "??") # Untracked (new) files
-        echo "created $(basename "$file")"
+        echo "created $(dirname "$file")/$(basename "$file")"
         ;;
     "D ") # Deleted from the index
-        echo "deleted $(basename "$file")"
+        echo "deleted $(dirname "$file")/$(basename "$file")"
         ;;
     *) # Catch-all for other statuses
-        echo "updated $(basename "$file")"
+        echo "updated $(dirname "$file")/$(basename "$file")"
         ;;
     esac
 }
