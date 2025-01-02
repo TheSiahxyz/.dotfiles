@@ -34,6 +34,18 @@ return {
 			progress = { enabled = false },
 			message = { enabled = false },
 		},
+		views = {
+			mini = {
+				timeout = 5000,
+				align = "center",
+				position = {
+					-- Centers messages top to bottom
+					row = "98%",
+					-- Aligns messages to the far right
+					col = "0%",
+				},
+			},
+		},
 		routes = {
 			{
 				filter = {
@@ -59,6 +71,13 @@ return {
 		})
 	end,
 	keys = {
+		{
+			"<leader>nd",
+			function()
+				require("noice").cmd("all")
+			end,
+			desc = "All",
+		},
 		{
 			"<leader>nd",
 			function()
