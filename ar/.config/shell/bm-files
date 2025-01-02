@@ -9,6 +9,7 @@ vcr     ${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/$(whereami)/.config/crons        
 vdb     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwmblocks/config.h     # Dwmblocks: the status bar for dwm
 vdm     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dmenu/config.h         # Dmenu: a dynamic menu
 vdw     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwm/config.h           # Dwm: a dynamic window manager
+vfg     ${XDG_CONFIG_HOME:-${HOME}/.config}/git/config                          # Git config
 vgc     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/git-aliasrc                   # Git aliases
 vlf     ${XDG_CONFIG_HOME:-${HOME}/.config}/lf/lfrc                             # LF (file browser) config
 vlg     ${XDG_CONFIG_HOME:-${HOME}/.config}/lazygit/config.yml                  # Lazygit config
