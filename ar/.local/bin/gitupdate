@@ -32,7 +32,7 @@ generate_message() {
     "??") # Untracked (new) files
         echo "created $dir_file_name"
         ;;
-    "D ") # Deleted from the index
+    " D" | "D ") # Deleted from the index
         echo "deleted $dir_file_name"
         ;;
     *) # Catch-all for other statuses
