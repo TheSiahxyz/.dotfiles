@@ -30,7 +30,7 @@ function fzf_aliases() {
         if [ -n "$line_number" ]; then
             nvim "+$line_number" "$alias_file"
         else
-            scripts_file="${ZDOTDIR:-${XDG_CONFIG_HOME:-${HOME}/.config}/zsh}/scripts.zsh"
+            scripts_file="${ZDOTDIR:-${XDG_CONFIG_HOME:-${HOME}/.config}/zsh}/7-scripts.zsh"
             line_number=$(grep -n "^alias $alias_name=" "$scripts_file" | cut -d':' -f1)
             nvim "+$line_number" "$scripts_file"
         fi

@@ -3,7 +3,7 @@
 ### --- Plugins --- ###
 plugins=(
     "Aloxaf/fzf-tab"
-    # "jeffreytse/zsh-vi-mode"
+    "jeffreytse/zsh-vi-mode"
     "kutsan/zsh-system-clipboard"
     # "MichaelAquilina/zsh-you-should-use"
     # "marlonrichert/zsh-autocomplete"
@@ -67,7 +67,7 @@ zsh_add_plugins() {
 
 # Function to sync plugins
 zsh_sync_plugins() {
-    ACTIVE_PLUGINS=$(grep '^[[:space:]]*"[^"]\+"' ~/.config/zsh/plugins.zsh | sed 's|.*/\([^/"]*\)".*|\1|')
+    ACTIVE_PLUGINS=$(grep '^[[:space:]]*"[^"]\+"' ~/.config/zsh/5-plugins.zsh | sed 's|.*/\([^/"]*\)".*|\1|')
 
     for PLUGIN_DIR in "$ZPLUGINDIR"/*; do
         if [ -d "$PLUGIN_DIR" ]; then
