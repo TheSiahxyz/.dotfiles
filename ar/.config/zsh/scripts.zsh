@@ -355,7 +355,15 @@ function fetch_git_repos_status() {
         echo "$SELECTED" | awk '{if (NF > 1 && system("[ -d \""$NF"\" ]") == 0) print $NF}'
 EOF
     )
-    [[ -n "$SELECTED_DIRS" ]] && cd "$SELECTED_DIRS" && git status --porcelain 2>/dev/null || opensessions "$SELECTED_DIRS"
+    [[ -z "${SELECTED_DIRS// }" ]] && return
+    if [[ "$(echo "$SELECTED_DIRS" | wc -l)" -eq 1 ]]; then
+        cd "$SELECTED_DIRS"
+        if  [[ -n "$(git -C "$SELECTED_DIRS" status --porcelain)" ]]; then
+            git status --porcelain 2>/dev/null
+        fi
+    else
+        opensessions "$SELECTED_DIRS"
+    fi
 }
 
 
