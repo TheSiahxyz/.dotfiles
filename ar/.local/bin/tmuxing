@@ -37,7 +37,7 @@ sessionizer() {
             --header "^a all ^t tmux ^e sesh ^f zoxide ^h home ^c configs ^d .dotfiles ^g git ^u staged files ^k desktop ^v private ^b public ^r scripts ^s suckless ^x tmux kill M-CR open ^/ help" \
             --reverse \
             --bind "ctrl-a:change-prompt(⚡  )+reload(sesh list)" \
-            --bind "ctrl-b:change-prompt(👯  )+reload(fd -H -d 3 -t d -E .Trash -E .git -E .cache . ${XDG_PUBLICSHARE_DIR:-${HOME}/Public} | sed 's|$HOME|~|g')" \
+            --bind "ctrl-b:change-prompt(👯  )+reload(fd -H -d 1 -t d -E .Trash -E .git -E repos . ${XDG_PUBLICSHARE_DIR:-${HOME}/Public} | sed 's|$HOME|~|g')" \
             --bind "ctrl-c:change-prompt(🗂️  )+reload(fd -H -d 2 -t d -E .Trash -E .git -E .cache . ${XDG_CONFIG_DIR:-${HOME}/.config} | sed 's|$HOME|~|g')" \
             --bind "ctrl-d:change-prompt(⚙️  )+reload(fd -H -d 1 -t d -E .Trash -E .git -E .cache . ${XDG_DOTFILES_DIR:-${HOME}/.dotfiles} | sed 's|$HOME|~|g')" \
             --bind "ctrl-e:change-prompt(📑  )+reload(sesh list -c)" \
@@ -49,7 +49,7 @@ sessionizer() {
             --bind "ctrl-s:change-prompt(🦴  )+reload(find ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless -maxdepth 2 -type d -name .git -prune -o -type d -print | sed 's|$HOME|~|g')" \
             --bind "ctrl-t:change-prompt(🪟  )+reload(sesh list -t)" \
             --bind "ctrl-u:change-prompt(📝  )+reload(git -C $(git rev-parse --show-toplevel) status -s | awk -v pwd=\"$PWD\" '{print pwd \"\/\" \$2}' | grep -v '^$' | sed 's|$HOME|~|g')" \
-            --bind "ctrl-v:change-prompt(🧑  )+reload(fd -H -d 3 -t d -E .Trash -E .git -E .cache . $HOME/Private | sed 's|$HOME|~|g')" \
+            --bind "ctrl-v:change-prompt(🧑  )+reload(fd -H -d 1 -t d -E .Trash -E .git -E repos . $HOME/Private | sed 's|$HOME|~|g')" \
             --bind "ctrl-x:execute(tmux kill-session -t {})+change-prompt(⚡  )+reload(sesh list)" \
             --bind "alt-enter:execute(nvim {})+abort" \
             --bind 'ctrl-/:change-prompt(❓  )+reload(echo "^a all
