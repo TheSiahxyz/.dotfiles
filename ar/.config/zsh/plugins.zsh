@@ -3,7 +3,7 @@
 ### --- Plugins --- ###
 plugins=(
     "Aloxaf/fzf-tab"
-    "jeffreytse/zsh-vi-mode"
+    # "jeffreytse/zsh-vi-mode"
     "kutsan/zsh-system-clipboard"
     # "MichaelAquilina/zsh-you-should-use"
     # "marlonrichert/zsh-autocomplete"
