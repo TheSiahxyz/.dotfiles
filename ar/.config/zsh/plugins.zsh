@@ -3,7 +3,7 @@
 ### --- Plugins --- ###
 plugins=(
     "Aloxaf/fzf-tab"
-    "jeffreytse/zsh-vi-mode"
+    # "jeffreytse/zsh-vi-mode"
     "kutsan/zsh-system-clipboard"
     # "MichaelAquilina/zsh-you-should-use"
     # "marlonrichert/zsh-autocomplete"
@@ -22,6 +22,7 @@ zsh_check_plugins() {
     installed="true"
     for plugin in "${plugins[@]}"; do
         PLUGIN_NAME=$(echo "$plugin" | cut -d '/' -f 2)
+        [ "$ZPLUGINDIR" = "ohmyzsh" ] && ZPLUGINDIR="$PLUGIN_NAME"
         PLUGIN_PATH="$ZPLUGINDIR/$PLUGIN_NAME"
         [ -d "$PLUGIN_PATH" ] && zsh_source_plugin "$PLUGIN_NAME/$PLUGIN_NAME" || { installed="false"; break; }
     done
@@ -31,8 +32,13 @@ zsh_check_plugins() {
 # Function to source plugin files
 zsh_source_plugin() {
     for file in "$@"; do
-        [ -f "$ZPLUGINDIR/$file.plugin.zsh" ] && . "$ZPLUGINDIR/$file.plugin.zsh"
-        [ -f "$ZPLUGINDIR/$file.zsh" ] && . "$ZPLUGINDIR/$file.zsh"
+        if [ -f "$ZPLUGINDIR/$file.plugin.zsh" ] && echo "$file" | grep -vq "command-not-found/command-not-found"; then
+            . "$ZPLUGINDIR/$file.plugin.zsh"
+        elif echo "$file" | grep -q "command-not-found/command-not-found"; then
+            . "$ZPLUGINDIR/command-not-found/command-not-found.plugin.zsh"
+        elif [ -z "$ZPLUGINDIR/$file.plugin.zsh" ] && [ -f "$ZPLUGINDIR/$file.zsh" ]; then
+            . "$ZPLUGINDIR/$file.zsh"
+        fi
         [ -f "$ZPLUGINDIR/$file.zsh-theme" ] && . "$ZPLUGINDIR/$file.zsh-theme" && . "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/p10k"
     done
 }
@@ -67,7 +73,7 @@ zsh_add_plugins() {
 
 # Function to sync plugins
 zsh_sync_plugins() {
-    ACTIVE_PLUGINS=$(grep '^[[:space:]]*"[^"]\+"' ~/.config/zsh/5-plugins.zsh | sed 's|.*/\([^/"]*\)".*|\1|')
+    ACTIVE_PLUGINS=$(grep '^[[:space:]]*"[^"]\+"' ~/.config/zsh/plugins.zsh | sed 's|.*/\([^/"]*\)".*|\1|')
 
     for PLUGIN_DIR in "$ZPLUGINDIR"/*; do
         if [ -d "$PLUGIN_DIR" ]; then

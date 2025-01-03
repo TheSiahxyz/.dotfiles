@@ -1,43 +1,6 @@
 #!/bin/zsh
 
-### --- DEFAULT KEY BINDINGS --- ###
-# emacs style
-bindkey '^a' beginning-of-line
-bindkey '^e' end-of-line
-
-# programs & scripts
-bindkey -s '^B' '^ubc -lq\n'
-bindkey -s '^D' '^ucdi\n'
-bindkey -s '^F' '^ufzffiles\n'
-bindkey -s '^G' '^ulf\n'
-bindkey -s '^K' '^uhtop\n'
-bindkey -s '^N' '^ulastnvim\n'
-bindkey -s '^O' '^utmo\n'
-bindkey -s '^P' '^ufzfpass\n'
-bindkey -s '^T' '^utm\n'
-bindkey -s '^Y' '^ulfcd\n'
-bindkey -s '^Z' '^upd\n'
-# bindkey -s '^_' '^u\n'
-bindkey -s '^X^A' '^uali\n'
-bindkey -s '^X^B' '^ugitopenbranch\n'
-bindkey -s '^X^D' '^ufD\n'
-bindkey -s '^X^F' '^ugitfiles\n'
-bindkey -s '^X^G' '^urgafiles '
-bindkey -s '^X^K' '^upkill\n'
-bindkey -s '^X^L' '^ugloac\n'
-bindkey -s '^X^N' '^ulastnvim -l\n'
-# bindkey -s '^X^O' '^u\n'
-bindkey -s '^X^R' '^ufgst\n'
-bindkey -s '^X^T' '^ugitstagedfiles\n'
-bindkey -s '^X^U' '^ugitupdate\n'
-bindkey -s '^X^V' '^uv.\n'
-# bindkey -s '^X^]' '^u\n'
-bindkey -s '^X^_' '^ufzffns\n'
-bindkey -s '^X^X^B' '^urbackup\n'
-bindkey -s '^X^X^P' '^upcyr\n'
-bindkey -s '^X^X^R' '^urbackup -r\n'
-bindkey -s '^X^X^S' '^usshadd\n'
-
+### --- CUSTOM FUNCTIONS --- ###
 # man
 function man-command-line() { pre_cmd "man"; }
 
@@ -51,30 +14,22 @@ function clear-tree-2() {
     zle reset-prompt
 }
 zle -N clear-tree-2
-bindkey '^X^J' clear-tree-2
 
 # clears the shell and displays the dir tree with level 3
 function clear-tree-3() { clear && tree -L 3 && zle reset-prompt; }
 zle -N clear-tree-3
-bindkey '^X^H' clear-tree-3
 
 # prints the current date in ISO 8601
 function print-current-date() { LBUFFER+=$(date -I); }
 zle -N print-current-date
 
-bindkey '^X^X^T' print-current-date
-
 # prints the current Unix timestamp
 function print-unix-timestamp() { LBUFFER+=$(date +%s); }
 zle -N print-unix-timestamp
 
-bindkey '^X^X^U' print-unix-timestamp
-
 # git status
 function git-status() { clear && git status && zle reset-prompt; }
 zle -N git-status
-
-bindkey '^X^S' git-status
 
 # appends the clipboard contents to the buffer
 function vi-append-clip-selection() { char=${RBUFFER:0:1} && RBUFFER=${RBUFFER:1} && RBUFFER=$char$(clippaste)$RBUFFER; }
@@ -155,10 +110,25 @@ function tmux_left_pane() {
     tmux resize-pane -Z
 }
 
+
+### --- GLOBAL --- ###
+# emacs style
+bindkey '^a' beginning-of-line
+bindkey '^e' end-of-line
+
+# function key bindings
+bindkey '^X^H' clear-tree-2
+bindkey '^X^J' clear-tree-3
+bindkey '^X^S' git-status
+bindkey '^X^X^T' print-current-date
+bindkey '^X^X^U' print-unix-timestamp
+
+
 ### --- VI-MODE --- ###
-if [[ -d "${ZPLUGINDIR:-${HOME}/.local/bin/zsh}/zsh-vi-mode" ]] && [[ -f "${ZPLUGINDIR:-${HOME}/.local/bin/zsh}/zsh-vi-mode/zsh-vi-mode.plugin.zsh" ]] ; then
-    ### --- PLUGIN --- ###
-    # Cursor shape
+if [[ -f "${ZPLUGINDIR:-${HOME}/.local/bin/zsh}/zsh-vi-mode/zsh-vi-mode.plugin.zsh" ]]; then
+    ### --- ZSH-VI-MODE--- ###
+    # config
+    ZVM_INIT_MODE=sourcing
     ZVM_VI_ESCAPE_BINDKEY=jk
     ZVM_VI_INSERT_ESCAPE_BINDKEY=$ZVM_VI_ESCAPE_BINDKEY
     ZVM_VI_VISUAL_ESCAPE_BINDKEY=$ZVM_VI_ESCAPE_BINDKEY
@@ -166,10 +136,63 @@ if [[ -d "${ZPLUGINDIR:-${HOME}/.local/bin/zsh}/zsh-vi-mode" ]] && [[ -f "${ZPLU
     ZVM_INSERT_MODE_CURSOR=$ZVM_CURSOR_BLINKING_BEAM
     ZVM_NORMAL_MODE_CURSOR=$ZVM_CURSOR_BLOCK
     ZVM_OPPEND_MODE_CURSOR=$ZVM_CURSOR_UNDERLINE
-    ZVM_VI_HIGHLIGHT_BACKGROUND=#458588
+    ZVM_LAZY_KEYBINDINGS=false
+    # ZVM_VI_HIGHLIGHT_BACKGROUND=#458588
 
-    # Key bindings
-    function zvm_after_lazy_keybindings() {
+
+    function zvm_bind_script() {
+        local keymap="$1"
+        local key="$2"
+        local script="$3"
+
+        # Dynamically define a widget to run the script
+        eval "function run_script_${keymap}_${key//\^/}() {
+        zle -I
+        $script
+        zle reset-prompt
+        }"
+
+        # Register the widget with zsh-vi-mode
+        zvm_define_widget "run_script_${keymap}_${key//\^/}"
+        zvm_bindkey "$keymap" "$key" "run_script_${keymap}_${key//\^/}"
+    }
+
+    function zvm_after_init() {
+        ### --- KEY BINDINGS --- ###
+        # programs & scripts
+        zvm_bind_script viins '^B' 'bc -lq'
+        zvm_bind_script viins '^D' 'cdi'
+        zvm_bind_script viins '^F' 'fzffiles'
+        zvm_bind_script viins '^G' 'lf'
+        zvm_bind_script viins '^K' 'htop'
+        zvm_bind_script viins '^N' 'lastnvim'
+        zvm_bind_script viins '^O' 'tmo'
+        zvm_bind_script viins '^P' 'fzfpass'
+        zvm_bind_script viins '^T' 'tm'
+        zvm_bind_script viins '^Y' 'lfcd'
+        zvm_bind_script viins '^Z' 'pd'
+        # zvm_bind_script viins '^_' '^u\n'
+        zvm_bind_script viins '^X^A' 'ali'
+        zvm_bind_script viins '^X^B' 'gitopenbranch'
+        zvm_bind_script viins '^X^D' 'fD'
+        zvm_bind_script viins '^X^F' 'gitfiles'
+        zvm_bind_script viins '^X^G' 'rgafiles '
+        zvm_bind_script viins '^X^K' 'pkill'
+        zvm_bind_script viins '^X^L' 'gloac'
+        zvm_bind_script viins '^X^N' 'lastnvim -l'
+        #  zvm_bind_script viins '^X^O' '^u\n'
+        zvm_bind_script viins '^X^R' 'fgst'
+        zvm_bind_script viins '^X^T' 'gitstagedfiles'
+        zvm_bind_script viins '^X^U' 'gitupdate'
+        zvm_bind_script viins '^X^V' 'v.'
+        #  zvm_bind_script viins '^X^]' '^u\n'
+        zvm_bind_script viins '^X^_' 'fzffns'
+        zvm_bind_script viins '^X^X^B' 'rbackup'
+        zvm_bind_script viins '^X^X^P' 'pcyr'
+        zvm_bind_script viins '^X^X^R' 'rbackup -r'
+        zvm_bind_script viins '^X^X^S' 'sshadd'
+
+        # widgets
         zvm_define_widget sudo-command-line
         zvm_bindkey vicmd '^S' sudo-command-line
         zvm_bindkey viins '^S' sudo-command-line
@@ -189,10 +212,18 @@ if [[ -d "${ZPLUGINDIR:-${HOME}/.local/bin/zsh}/zsh-vi-mode" ]] && [[ -f "${ZPLU
         zvm_bindkey vicmd "^X^Y" copybuffer
     }
 
+    # key bindings (lazy)
+    # function zvm_after_lazy_keybindings() {
+    #
+    # }
+
     # Append a command directly
     # Since the default initialization mode, this plugin will overwrite the previous key
     # bindings, this causes the key bindings of other plugins (i.e. fzf, zsh-autocomplete, etc.) to fail.
     # zvm_after_init_commands+=('[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh')
+    # function zvm_after_init() {
+    #     [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+    # }
 else
     ### --- Built-in --- ###
     # Cursor shape
@@ -217,7 +248,8 @@ else
     echo -ne '\e[5 q' # Use beam shape cursor on startup.
     function preexec() { echo -ne '\e[5 q' ;} # Use beam shape cursor for each new prompt.
 
-    # Key bindings
+
+    ### --- VI-MODE KEY BINDINGS --- ###
     bindkey -M menuselect 'h' vi-backward-char
     bindkey -M menuselect 'l' vi-forward-char
     bindkey -M menuselect 'k' vi-up-line-or-history
@@ -234,6 +266,10 @@ else
     bindkey -M visual '^[[P' vi-delete      # delete
     bindkey -M viins 'jk' vi-cmd-mode       # normal mode
 
+    # last command output
+    zle -N insert_last_command_output
+    bindkey -M viins '^]' insert_last_command_output
+
     # man
     zle -N man-command-line
     bindkey -M emacs '^X^M' man-command-line
@@ -245,10 +281,6 @@ else
     bindkey -M emacs '^S' sudo-command-line
     bindkey -M vicmd '^S' sudo-command-line
     bindkey -M viins '^S' sudo-command-line
-
-    # last command output
-    zle -N insert_last_command_output
-    bindkey -M viins '^]' insert_last_command_output
 
     # bind y/Y to yank until end of line/yank whole line
     # bindkey -M vicmd y zsh-system-clipboard-vicmd-vi-yank-eol
@@ -270,4 +302,38 @@ else
     zle -N tmux_left_pane
     bindkey -M vicmd '^[t' tmux_left_pane
     bindkey -M viins '^[t' tmux_left_pane
+
+    ### --- DEFAULT KEY BINDINGS --- ###
+    # programs & scripts
+    bindkey -s '^B' '^ubc -lq\n'
+    bindkey -s '^D' '^ucdi\n'
+    bindkey -s '^F' '^ufzffiles\n'
+    bindkey -s '^G' '^ulf\n'
+    bindkey -s '^K' '^uhtop\n'
+    bindkey -s '^N' '^ulastnvim\n'
+    bindkey -s '^O' '^utmo\n'
+    bindkey -s '^P' '^ufzfpass\n'
+    bindkey -s '^T' '^utm\n'
+    bindkey -s '^Y' '^ulfcd\n'
+    bindkey -s '^Z' '^upd\n'
+    # bindkey -s '^_' '^u\n'
+    bindkey -s '^X^A' '^uali\n'
+    bindkey -s '^X^B' '^ugitopenbranch\n'
+    bindkey -s '^X^D' '^ufD\n'
+    bindkey -s '^X^F' '^ugitfiles\n'
+    bindkey -s '^X^G' '^urgafiles '
+    bindkey -s '^X^K' '^upkill\n'
+    bindkey -s '^X^L' '^ugloac\n'
+    bindkey -s '^X^N' '^ulastnvim -l\n'
+    # bindkey -s '^X^O' '^u\n'
+    bindkey -s '^X^R' '^ufgst\n'
+    bindkey -s '^X^T' '^ugitstagedfiles\n'
+    bindkey -s '^X^U' '^ugitupdate\n'
+    bindkey -s '^X^V' '^uv.\n'
+    # bindkey -s '^X^]' '^u\n'
+    bindkey -s '^X^_' '^ufzffns\n'
+    bindkey -s '^X^X^B' '^urbackup\n'
+    bindkey -s '^X^X^P' '^upcyr\n'
+    bindkey -s '^X^X^R' '^urbackup -r\n'
+    bindkey -s '^X^X^S' '^usshadd\n'
 fi

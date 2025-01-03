@@ -39,6 +39,29 @@ zstyle ':vcs_info:git*+set-message:*' hooks git-untracked git-behind-upstream gi
 }
 
 
+# ### --- Cursor Shape --- ###
+# # Activate vim mode.
+# bindkey -v
+# KEYTIMEOUT=5
+#
+# # Change cursor shape for different vi modes.
+# function zle-keymap-select () {
+#     case "$KEYMAP $1" in
+#         vicmd*|*block) echo -ne '\e[1 q' ;;         # block
+#         viins*|main*|''|*beam) echo -ne '\e[5 q' ;; # beam
+#     esac
+# }
+# zle -N zle-keymap-select
+#
+# function zle-line-init() {
+#     zle -K viins # initiate `vi insert` as keymap (can be removed if `bindkey -V` has been set elsewhere)
+#     echo -ne "\e[5 q"
+# }
+# zle -N zle-line-init
+# echo -ne '\e[5 q' # Use beam shape cursor on startup.
+# function preexec() { echo -ne '\e[5 q' ;} # Use beam shape cursor for each new prompt.
+
+
 ### --- ZSH --- ###
 # GnuPG
 unset SSH_AGENT_PID
@@ -99,7 +122,14 @@ zstyle ':fzf-tab:*' switch-group ',' '.'    # switch group using `,` and `.`
 
 
 ### --- Load ZSH Configs, Aliases, Functions, and Shortcuts --- ###
-for zsh_config in ${ZDOTDIR:-${HOME}/.config/zsh}/*.zsh; do source "$zsh_config"; done
+# NOTE: the sequence of sourcing files is strict. Be careful to change the sequence.
+[ -f "${ZDOTDIR:-${HOME}/.config/zsh}/git.zsh" ] && source "${ZDOTDIR:-${HOME}/.config/zsh}/git.zsh"
+[ -f "${ZDOTDIR:-${HOME}/.config/zsh}/p10k.zsh" ] && source "${ZDOTDIR:-${HOME}/.config/zsh}/p10k.zsh"
+[ -f "${ZDOTDIR:-${HOME}/.config/zsh}/autocomplete.zsh" ] && source "${ZDOTDIR:-${HOME}/.config/zsh}/autocomplete.zsh"
+[ -f "${ZDOTDIR:-${HOME}/.config/zsh}/scripts.zsh" ] && source "${ZDOTDIR:-${HOME}/.config/zsh}/scripts.zsh"
+[ -f "${ZDOTDIR:-${HOME}/.config/zsh}/keymaps.zsh" ] && source "${ZDOTDIR:-${HOME}/.config/zsh}/keymaps.zsh"
+[ -f "${ZDOTDIR:-${HOME}/.config/zsh}/plugins.zsh" ] && source "${ZDOTDIR:-${HOME}/.config/zsh}/plugins.zsh"
+[ -f "${ZDOTDIR:-${HOME}/.config/zsh}/packages.zsh" ] && source "${ZDOTDIR:-${HOME}/.config/zsh}/packages.zsh"
 [ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/aliasrc" ] && source "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/aliasrc"
 [ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/git-aliasrc" ] && source "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/git-aliasrc"
 [ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutrc" ] && source "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutrc"
