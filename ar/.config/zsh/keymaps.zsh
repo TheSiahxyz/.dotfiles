@@ -160,18 +160,20 @@ if [[ -f "${ZPLUGINDIR:-${HOME}/.local/bin/zsh}/zsh-vi-mode/zsh-vi-mode.plugin.z
     function zvm_after_init() {
         ### --- KEY BINDINGS --- ###
         # programs & scripts
-        zvm_bind_script viins '^B' 'bc -lq'
-        zvm_bind_script viins '^D' 'cdi'
-        zvm_bind_script viins '^F' 'fzffiles'
-        zvm_bind_script viins '^G' 'lf'
-        zvm_bind_script viins '^K' 'htop'
-        zvm_bind_script viins '^N' 'lastnvim'
-        zvm_bind_script viins '^O' 'tmo'
-        zvm_bind_script viins '^P' 'fzfpass'
-        zvm_bind_script viins '^T' 'tm'
-        zvm_bind_script viins '^Y' 'lfcd'
-        zvm_bind_script viins '^Z' 'pd'
-        # zvm_bind_script viins '^_' '^u\n'
+        bindkey -s '^B' '^ubc -lq\n'
+        bindkey -s '^D' '^ucdi\n'
+        bindkey -s '^F' '^ufzffiles\n'
+        bindkey -s '^G' '^ulf\n'
+        bindkey -s '^K' '^uhtop\n'
+        bindkey -s '^N' '^ulastnvim\n'
+        bindkey -s '^O' '^utmo\n'
+        bindkey -s '^P' '^ufzfpass\n'
+        bindkey -s '^T' '^utm\n'
+        bindkey -s '^Y' '^ulfcd\n'
+        bindkey -s '^Z' '^upd\n'
+        # bindkey -s '^_' '^u\n'
+
+        # ctrl+x key bindings
         zvm_bind_script viins '^X^A' 'ali'
         zvm_bind_script viins '^X^B' 'gitopenbranch'
         zvm_bind_script viins '^X^D' 'fD'
