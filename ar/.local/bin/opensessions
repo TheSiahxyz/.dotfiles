@@ -31,12 +31,15 @@ else
             session_name=$(get_session_name "$dir")
             if ! tmux has-session -t "$session_name" 2>/dev/null; then
                 tmux new-session -d -s "$session_name" -c "$dir"
+                if git -C "$dir" rev-parse --is-inside-work-tree >/dev/null 2>&1 && [ -n "$(git -C "$dir" status --porcelain)" ]; then
+                    tmux send-keys -t "$session_name" "git status" C-m
+                fi
             fi
         fi
     done
     if [ "$#" -gt 0 ]; then
         first_session=$(get_session_name "$1")
-        if [ -n "$tmux" ]; then
+        if [ -n "$TMUX" ]; then
             tmux switch-client -t "$first_session"
         else
             tmux attach-session -t "$first_session"

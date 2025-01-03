@@ -14,9 +14,9 @@ Options:
     [<tag>] <query>     Optional tag for project mode, followed by the search query
 
 Examples:
-    ${0##*/} -p TODO KEYWORD      Search for 'KEYWORD' in files tagged with 'TODO' in the project directories
-    ${0##*/} -l -p KEYWORD        List files associated with the default 'PROJECT' tag and 'KEYWORD'
-    ${0##*/} KEYWORD              Open files containing 'KEYWORD' in nvim
+    ${0##*/} -p TODO 'KEYWORD'      Search for 'KEYWORD' in files tagged with 'TODO' in the project directories
+    ${0##*/} -l -p 'KEYWORD'        List files associated with the default 'PROJECT' tag and 'KEYWORD'
+    ${0##*/} 'KEYWORD'              Open files containing 'KEYWORD' in nvim
 EOF
     exit 0
 }
