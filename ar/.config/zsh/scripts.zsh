@@ -331,11 +331,11 @@ function fetch_git_repos_status() {
             if [ -d "$DIR/.git" ]; then
                 cd "$DIR" || continue
 
-                # if [ "$(dirname $DIR)" = ".password-store" ]; then
-                #     pass git fetch >/dev/null 2>&1
-                # else
-                #     git fetch --all --prune --jobs=10 >/dev/null 2>&1
-                # fi
+                if [ "$(dirname $DIR)" = ".password-store" ]; then
+                    pass git fetch >/dev/null 2>&1
+                else
+                    git fetch --all --prune --jobs=10 >/dev/null 2>&1
+                fi
 
                 # Get Git branch and status using __git_ps1
                 GIT_STATUS=$(__git_ps1 "%s")
