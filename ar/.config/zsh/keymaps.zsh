@@ -207,3 +207,21 @@ zle -N copybuffer
 bindkey -M emacs "^X^Y" copybuffer
 bindkey -M viins "^X^Y" copybuffer
 bindkey -M vicmd "^X^Y" copybuffer
+
+# Function to switch to the left tmux pane and maximize it
+function tmux_left_pane() {
+    export TMUX_PANE_DIRECTION="right"
+    if [[ $TMUX_PANE_DIRECTION == "right" ]]; then
+        tmux select-pane -L # Move to the left (opposite of right)
+    elif [[ $TMUX_PANE_DIRECTION == "bottom" ]]; then
+        tmux select-pane -U # Move to the top (opposite of bottom)
+    fi
+    tmux resize-pane -Z
+}
+
+# Register the function as a ZLE widget
+zle -N tmux_left_pane
+bindkey -M vicmd 'gh' beginning-of-line
+bindkey -M vicmd 'gl' end-of-line
+bindkey -M vicmd '^[t' tmux_left_pane
+bindkey -M viins '^[t' tmux_left_pane

@@ -2,6 +2,7 @@
 bb              ${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}
 bs              ${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/statusbar
 btt             ${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/task/taskwarrior-tui
+bz              ${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/zsh
 cab             ${XDG_CONFIG_HOME:-${HOME}/.config}/abook
 cac             ${XDG_CACHE_HOME:-${HOME}/.cache}
 cbc             ${XDG_CONFIG_HOME:-${HOME}/.config}/bash

@@ -99,7 +99,7 @@ vim.keymap.set("n", "<leader>cp", function()
 	local cmd = "cp " .. filepath .. " " .. new_filename
 
 	-- Wrap input in pcall to handle Ctrl-c interruptions
-	local ok, confirm = pcall(vim.fn.input, 'Copy "' .. filename .. '"? (y/n): ')
+	local ok, confirm = pcall(vim.fn.input, 'Do you want to copy "' .. filename .. '"? (y/n): ')
 
 	-- If interrupted (Ctrl-c), return silently
 	if not ok or confirm == nil or confirm == "" then
@@ -473,7 +473,7 @@ local function delete_current_file()
 		end
 		-- Prompt for confirmation before deleting the file
 		vim.ui.input({
-			prompt = 'Delete "' .. filename .. '"? (y/n): ',
+			prompt = 'Do you want to delete "' .. filename .. '"? (y/n): ',
 		}, function(input)
 			if input == nil then
 				return
