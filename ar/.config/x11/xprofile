@@ -6,6 +6,7 @@ for display in $(xrandr -q | grep -v 'eDP|LVDS|LFP' | grep "\sconnected" | awk '
     HDMI* | DP*) xrandr --output eDP1 --off --output "$display" --auto --primary && break ;;
     esac
 done
+
 setbg & # set the background with the `setbg` script
 # fcitx5 & # set the input method, but it will be separate with fcitx5-remote
 

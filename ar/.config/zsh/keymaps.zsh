@@ -229,8 +229,7 @@ if [[ -f "${ZPLUGINDIR:-${HOME}/.local/bin/zsh}/zsh-vi-mode/zsh-vi-mode.plugin.z
 else
     ### --- Built-in --- ###
     # Cursor shape
-    # Activate vim mode.
-    bindkey -v
+    bindkey -v # activate vim mode.
     KEYTIMEOUT=5
 
     # Change cursor shape for different vi modes.
