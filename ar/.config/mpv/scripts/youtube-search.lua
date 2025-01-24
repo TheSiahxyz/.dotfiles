@@ -137,7 +137,7 @@ local function html_decode(str)
 end
 
 --creates a formatted results table from an invidious API call
-function format_invidious_results(response)
+local function format_invidious_results(response)
 	if not response then
 		return nil
 	end
@@ -405,9 +405,9 @@ local function open_search_input()
 	end, { request_text = "Enter Query:" })
 end
 
-mp.add_key_binding("Ctrl+/", "yt", open_search_input)
+mp.add_key_binding("", "yt", open_search_input)
 
-mp.add_key_binding("Y", "youtube-search", function()
+mp.add_key_binding("", "youtube-search", function()
 	if not list.hidden then
 		open_search_input()
 	else
