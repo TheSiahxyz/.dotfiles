@@ -1,0 +1,94 @@
+[alias]
+afk=/status set away
+unafk=/status set online
+consi=/connect si@thesiah.xyz
+jts=/join conference.chat.thesiah.xyz
+yj=/msg yejin@thesiah.xyz hey wassup?
+
+[chatstates]
+enabled=true
+gone=10
+outtype=false
+
+[connection]
+account=si@thesiah.xyz
+autoping=60
+reconnect=5
+receipts.request=false
+receipts.send=false
+
+[logging]
+chlog=true
+grlog=true
+maxsize=1048580
+rotate=true
+shared=true
+
+[notifications]
+invite=true
+message=true
+message.current=true
+message.text=true
+remind=60
+room=true
+room.current=true
+room.mention=true
+room.offline=true
+room.text=true
+sub=true
+typing=true
+typing.current=false
+
+[otr]
+log=redact
+otr.char=@
+policy=manual
+warn=true
+
+[pgp]
+pgp.char=%
+
+[presence]
+autoaway.awaytime=15
+autoaway.awaymessage=Away from computer
+autoaway.check=true
+autoaway.mode=away
+
+[ui]
+beep=false
+color.nick=true
+enc.warn=true
+flash=false
+history=true
+intype=true
+mouse=false
+occupants=true
+occupants.jid=false
+occupants.size=15
+privileges=true
+presence=true
+resource.title=true
+resource.message=true
+roster=true
+roster.offline=true
+roster.resource=false
+roster.empty=true
+roster.by=presence
+roster.size=25
+splash=false
+statuses.chat=all
+statuses.console=all
+statuses.muc=all
+theme=boothj5
+time.statusbar=%H:%M:%S
+titlebar=true
+vercheck=false
+wins.autotidy=true
+wrap=true
+time.console=%d-%m-%y %H:%M
+time.chat=%d-%m-%y %H:%M
+time.muc=%d-%m-%y %H:%M
+time.config=%d-%m-%y %H:%M
+time.private=%d-%m-%y %H:%M
+time.xmlconsole=%d-%m-%y %H:%M
+wintitle.show=true

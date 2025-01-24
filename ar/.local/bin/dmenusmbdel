@@ -1,0 +1,55 @@
+#!/bin/sh
+
+samba_conf="/etc/samba/smb.conf"
+dmenu_command=$(command -v dmenu)
+
+# Check if Samba configuration file exists
+[ -f "$samba_conf" ] || {
+  echo "Error: Samba configuration file not found at $samba_conf"
+  exit 1
+}
+
+# Extract share names and their paths for selection, with alignment
+shares=$(awk '
+/^\[.*\]/ {
+  share_name = $0
+  gsub(/[\[\]]/, "", share_name)
+}
+/^ *path *=/ {
+  sub(/^ *path *= */, "", $0)
+  printf "%-40s %s\n", share_name, $0
+}
+' "$samba_conf")
+
+# Check if dmenu is installed and available
+if [ -n "$dmenu_command" ]; then
+  selected=$(printf "%s\n" "$shares" | "$dmenu_command" -l 10 -p "Select a shared folder to disable:")
+
+  # Exit if no selection was made
+  [ -z "$selected" ] && exit 0
+
+  # Extract share name from the selected entry (before the spaces)
+  selected_share=$(echo "$selected" | awk '{print $1}')
+
+  # Confirm with the user
+  confirm=$(printf "Yes\nNo\n" | "$dmenu_command" -p "Disable sharing for $selected_share?")
+  if [ "$confirm" = "Yes" ]; then
+    # Remove only the selected share block and its preceding empty line
+    sed -n -e "/^$/N;/^\n\[${selected_share}\]/,/^ *create mask = 0755$/!p" "$samba_conf" | sudo tee "$samba_conf" >/dev/null
+
+    # Restart Samba services
+    case "$(basename "$(readlink -f /sbin/init)" | sed 's/-init//g')" in
+    *systemd*)
+      sudo systemctl restart smb >/dev/null 2>&1 && sudo systemctl restart nmb >/dev/null 2>&1
+      ;;
+    *runit*)
+      sudo sv restart smbd >/dev/null 2>&1 && sudo sv restart nmbd >/dev/null 2>&1
+      ;;
+    esac
+
+    notify-send "✂️ Disabled sharing for '$selected_share'"
+  fi
+else
+  # Print share names if dmenu is not installed
+  printf "%s\n" "$shares"
+fi

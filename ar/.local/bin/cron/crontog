@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# Toggles all cronjobs off/on.
+# Stores disabled crontabs in ~/.config/crons until restored.
+
+CRON_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/crons"
+
+# Check if there are any active cronjobs
+if crontab -l 2>/dev/null | grep -q '^[^#[:space:]]'; then
+  # If active cronjobs are found, save and disable them
+  ln -sf "${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/$(whereami)/.config/crons" "${XDG_CONFIG_HOME:-${HOME}/.config}/crons"
+  crontab -r
+  notify-send "⏰ Cronjobs saved and disabled."
+else
+  # If no active cronjobs are found, try re-enabling from saved file
+  if [ -f "$CRON_FILE" ]; then
+    crontab - <"$CRON_FILE"
+    rm "$CRON_FILE"
+    notify-send "🕓 Cronjobs re-enabled."
+  else
+    notify-send "🕰️ No saved cronjobs to re-enable."
+  fi
+fi
+
+# Notify status bar to update
+pkill -RTMIN+3 "${STATUSBAR:-dwmblocks}"

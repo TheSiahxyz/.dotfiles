@@ -1,0 +1,22 @@
+#!/bin/sh
+
+if [ -z "$1" ]; then
+  echo "Usage: ${0##*/} <date-string>"
+  echo " Example: ${0##*/} 'tomorrow 06:00'"
+  exit 2
+fi
+
+set -e
+
+# Calculate the seconds until the given date
+secsUntil=$(expr "$(date +%s -d "$*")" - "$(date +%s)")
+
+# Calculate minutes and hours
+minutesUntil=$(echo "scale=1; $secsUntil/60" | bc)
+hoursUntil=$(echo "scale=2; $secsUntil/3600" | bc)
+
+# Get the formatted date
+date=$(date -d "$*")
+
+# Display the result
+echo "$hoursUntil hours (or $minutesUntil mins) until $date"

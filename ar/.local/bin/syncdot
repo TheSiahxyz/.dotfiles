@@ -1,0 +1,46 @@
+#!/bin/sh
+
+# Define ANSI color codes for better readability in script output
+GREEN='\033[1;32m'
+BLUE='\033[1;34m'
+RED='\033[1;31m'
+NC='\033[0m' # No Color
+
+# Ensure the script exits on any error
+set -e
+
+# Navigate to the dotfiles directory
+cd "${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}" || exit
+
+echo "${BLUE}Stashing existing changes...${NC}"
+stash_result=$(git stash push -m "sync-dotfiles: Before syncing dotfiles" 2>&1)
+needs_pop=0
+if ! echo "$stash_result" | grep -q "No local changes to save"; then
+  needs_pop=1
+fi
+
+echo "${BLUE}Pulling updates from dotfiles repo...${NC}"
+git pull origin master
+
+if [ "$needs_pop" -eq 1 ]; then
+  echo "${BLUE}Popping stashed changes...${NC}"
+  git stash pop
+fi
+
+# Check for merge conflicts after attempting to pop the stash
+unmerged_files=$(git diff --name-only --diff-filter=U)
+if [ -n "$unmerged_files" ]; then
+  echo "${RED}The following files have merge conflicts after popping the stash:${NC}"
+  printf "%s\n" "$unmerged_files"
+  exit 1
+else
+  echo "${GREEN}No merge conflicts detected. Proceeding with dotfiles linkage...${NC}"
+  # Ensure GNU Stow is installed
+  if ! command -v stow >/dev/null 2>&1; then
+    echo "${RED}GNU Stow not found. Please install GNU Stow to continue.${NC}"
+    exit 1
+  fi
+  # Run stow to ensure all new dotfiles are linked, targeting directories named after the OS
+  stow -v --no-folding -S "$(whereami)" # Verbose output
+  echo "${GREEN}Dotfiles successfully linked.${NC}"
+fi

@@ -1,0 +1,4 @@
+[Desktop Entry]
+Type=Application
+Name=Html Viewer
+Exec=/usr/bin/lynx %u

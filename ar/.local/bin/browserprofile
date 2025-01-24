@@ -1,0 +1,102 @@
+#!/bin/sh
+
+# Define the profile paths
+WORK_PROFILE="si.work"
+HOME_PROFILE="si.default"
+
+usage() {
+  echo "Update the default profile in profiles.ini for Firefox or Librewolf."
+  echo ""
+  echo "Usage: ${0##*/} <browser> [<profile_type>]"
+  echo ""
+  echo "Options:"
+  echo "  -h              : Show this help message."
+  echo "  <browser>       : The browser to configure."
+  echo "                    Accepted values:"
+  echo "                      -f/firefox"
+  echo "                      -l/librewolf"
+  echo "  <profile_type>  : (Optional) If not specified, the default profile will be used."
+  echo "                    Accepted values:"
+  echo "                      work: Sets the work profile ($WORK_PROFILE)"
+  echo "                      default: Sets the home profile ($HOME_PROFILE)"
+  echo ""
+  echo "Examples:"
+  echo "  ${0##*/} -f -w    # Set the work profile for Firefox"
+  echo "  ${0##*/} -l -d    # Set the default profile for Librewolf"
+  echo "  ${0##*/} -f -d    # Set the default profile for Firefox"
+}
+
+update_profiles_ini() {
+  case "$1" in
+  -f | --firefox | firefox) profiles_ini_path="$HOME/.mozilla/firefox/profiles.ini" ;;
+  -l | --librewolf | librewolf) profiles_ini_path="$HOME/.librewolf/profiles.ini" ;;
+  *)
+    echo "Invalid browser type. Please use 'firefox' or 'librewolf'."
+    return 1
+    ;;
+  esac
+
+  profile_to_set=$2
+
+  # Backup current profiles.ini
+  cp "$profiles_ini_path" "$profiles_ini_path.bak"
+
+  # Update the profiles.ini
+  awk -v profile="$profile_to_set" '
+    /^\[Install/ {
+        print
+        found=1
+        next
+    }
+    found && /^Default=/ {
+        sub(/=.*/, "=" profile)
+        print
+        next
+    }
+    {
+        print
+    }' "$profiles_ini_path" >"$profiles_ini_path.tmp" && mv "$profiles_ini_path.tmp" "$profiles_ini_path"
+
+  echo "Updated profiles.ini to use profile: $profile_to_set"
+}
+
+# Main function
+update_profile() {
+  browser=$1
+  profile_type=$2
+
+  # Check if a browser is provided
+  if [ -z "$browser" ]; then
+    usage && exit 1
+  fi
+
+  # Convert profile_type to lowercase for case-insensitive comparison
+  if [ -n "$profile_type" ]; then
+    profile_type=$(echo "$profile_type" | tr '[:upper:]' '[:lower:]')
+  else
+    # Set to "default" if profile_type is not given
+    profile_type="default"
+  fi
+
+  # Set the profile based on the input
+  case "$profile_type" in
+  -w | --work | work)
+    update_profiles_ini "$browser" "$WORK_PROFILE"
+    ;;
+  -d | --default | default)
+    update_profiles_ini "$browser" "$HOME_PROFILE"
+    ;;
+  *)
+    echo "Invalid profile type. Please use 'work' or 'default'."
+    return 1
+    ;;
+  esac
+}
+
+# Check for help flag
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+  usage && exit 0
+fi
+
+# Execute the main function with arguments passed to the script
+update_profile "$1" "$2"

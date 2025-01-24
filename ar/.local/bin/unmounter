@@ -1,0 +1,44 @@
+#!/bin/sh
+
+# Unmount USB drives or Android phones. Replaces the older `dmenuumount`. Fewer
+# prompt and also de-decrypts LUKS drives that are unmounted.
+
+set -e
+
+mounteddroids="$(grep simple-mtpfs /etc/mtab | awk '{print "📱" $2}')"
+lsblkoutput="$(lsblk -nrpo "name,type,size,mountpoint")"
+mounteddrives="$(echo "$lsblkoutput" | awk '($2=="part"||$2="crypt")&&$4!~/\/boot|\/home$|SWAP/&&length($4)>1{printf "💾%s (%s)\n",$4,$3}')"
+mountedcifs="$(grep cifs /etc/mtab | awk '{print "🪟" $2}')"
+
+allunmountable="$(echo "$mounteddroids
+$mounteddrives
+$mountedcifs" | sed "/^$/d;s/ *$//")"
+test -n "$allunmountable"
+
+chosen="$(echo "$allunmountable" | dmenu -i -p "Unmount which drive?")"
+chosen="${chosen%% *}"
+test -n "$chosen"
+
+if grep -q "/${chosen#*/}" /etc/mtab | grep -q "cifs" /etc/mtab; then
+  sudo -A umount "/${chosen#*/}" && sudo -A rm -r "/${chosen#*/}"
+  notify-send "⏏️ SMB Drive unmounted." "/${chosen#*/} has been unmounted."
+  exit 0
+fi
+
+[ "${chosen#*/}" = "${chosen}" ] && [ "${chosen##*/}" = "$(sudo lsblk -no "label" "$(df "/${chosen#*/}" | tail -n 1 | awk '{print $1}')")" ] && rmcheck=true || rmcheck=false
+mountpath="$(sudo lsblk -no "mountpoints" "$(df "/${chosen#*/}" | tail -n 1 | awk '{print $1}')")"
+sudo -A umount -l "/${chosen#*/}"
+[ "/media/$USER/${chosen##*/}" = "$mountpath" ] && [ "$rmcheck" ] && {
+  [ -e "/${chosen#*/}" ] && [ -z "$(ls -A "/${chosen#*/}")" ] && (rm -rf "/${chosen#*/}" >/dev/null 2>&1 || sudo rm -rf "/${chosen#*/}") || {
+    rmdiryn=$(printf "No\\nYes" | dmenu -i -p "Do you want to delete /${chosen#*/}?")
+    [ "$rmdiryn" = "Yes" ] && (rm -rf "/${chosen#*/}" >/dev/null 2>&1 || sudo -A rm -r "/${chosen#*/}")
+  }
+}
+notify-send "⏏️ Device unmounted." "$chosen has been unmounted."
+
+# Close the chosen drive if decrypted.
+cryptid="$(echo "$lsblkoutput" | grep "/${chosen#*/}$")"
+cryptid="${cryptid%% *}"
+test -b /dev/mapper/"${cryptid##*/}"
+sudo -A cryptsetup close "$cryptid"
+notify-send "🔒 Device dencryption closed." "Drive is now securely locked again."

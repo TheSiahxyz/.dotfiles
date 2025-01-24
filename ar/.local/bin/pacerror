@@ -1,0 +1,27 @@
+#!/bin/sh
+
+# Remove existing keyring and package database to start fresh
+sudo rm -rf /etc/pacman.d/gnupg /var/lib/pacman/sync
+
+# Reinitialize the pacman keyring
+sudo pacman-key --init
+
+# Install updated keyrings for Arch and Artix
+sudo pacman -Sy archlinux-keyring artix-keyring
+
+# Refresh all keys to ensure they're up-to-date
+sudo pacman-key --refresh-keys
+
+# Populate the keyring with default keys
+sudo pacman-key --populate archlinux artix
+
+# Clear the package cache
+sudo pacman -Scc --noconfirm
+
+# Forcefully refresh the package databases
+sudo pacman -Syy
+
+# Update the system packages
+sudo pacman -Syu
+
+remaps

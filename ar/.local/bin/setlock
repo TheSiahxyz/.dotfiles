@@ -1,0 +1,23 @@
+#!/bin/sh
+
+lockloc="${XDG_DATA_HOME:-${HOME}/.local/share}/wallpapers/lock"
+
+# Give -s as parameter to make notifications silent.
+while getopts "s" o; do
+  case "${o}" in
+  s) silent='1' ;;
+  *) ;;
+  esac
+done
+
+shift $((OPTIND - 1))
+
+trueloc="$(readlink -f "$1")" &&
+  case "$(file --mime-type -b "$trueloc")" in
+  image/*) ln -sf "$trueloc" "$lockloc" && [ -z "$silent" ] && notify-send -i "$lockloc" "Changing lock screen..." ;;
+  inode/directory) ln -sf "$(find -L "$trueloc" -iregex '.*.\(jpg\|jpeg\|png\|gif\)' -type f | shuf -n 1)" "$lockloc" && [ -z "$silent" ] && notify-send -i "$lockloc" "Random Lock Screen chosen." ;;
+  *)
+    [ -z "$silent" ] && notify-send "🖼️ Error" "Not a valid image or directory."
+    exit 1
+    ;;
+  esac

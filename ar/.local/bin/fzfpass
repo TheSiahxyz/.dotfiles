@@ -1,0 +1,89 @@
+#!/bin/sh
+
+set -e
+
+usage() {
+  echo "Find pass gpg files in Password-Store using fzf."
+  echo ""
+  echo "Usage: ${0##*/} [-h|--help]"
+  echo ""
+  echo "Options:"
+  echo "  -h, --help  : Show this message"
+  echo ""
+  echo "Shortcuts:"
+  echo "  return     - echo password and copy to clipboard (wayland only)"
+  echo "  ctrl+a     - new password (named as per the prompt)"
+  echo "  ctrl+e     - edit selected password"
+  echo "  ctrl+g     - regenerate selected password"
+  echo "  ctrl+r     - rename selected password"
+  echo "  ctrl+x     - delete selected password"
+  echo "  tab        - tab complete"
+  echo "  esc/ctrl+c - exit"
+  exit 0
+}
+
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+  usage
+fi
+
+PASSDIR=${PASSWORD_STORE_DIR:-$HOME/.local/share/.password-store}
+cd "$PASSDIR"
+
+# Unlock the password for this session
+pass show "$(tree -Ffi | grep '.gpg' | sed 's/.gpg$//g' | sed 's/^..//' | head -n 1)" >/dev/null
+
+# Main fzf session
+PASSFILE=$(
+  tree -Ffi | grep '.gpg' | sed 's/.gpg$//g' | sed 's/^..//' |
+    fzf-tmux \
+      --header="🔑 Password Manager" \
+      --reverse \
+      --no-mouse \
+      --preview="pass {}" \
+      --header="🔑 ^a: Generate | ^e: Edit | ^g: Generate (Insertion) | ^r: Rename | ^x: Delete | tab: Replace" \
+      --bind="ctrl-a:execute(if [ -z {q} ]; then read -p \"Can't generate empty password. Press enter to continue...\"; else pass generate -n {q} < /dev/tty > /dev/tty 2>&1 && pass edit {q} < /dev/tty > /dev/tty 2>&1; fi)+reload(tree -Ffi | grep '.gpg' | sed 's/.gpg$//g')" \
+      --bind="ctrl-e:execute(pass edit {} < /dev/tty > /dev/tty 2>&1)+reload(tree -Ffi | grep '.gpg' | sed 's/.gpg$//g')" \
+      --bind="ctrl-r:execute(bash -c '
+echo -n \"Enter new name for {}: \" > /dev/tty;
+read new_name < /dev/tty;
+if [ -n \"\$new_name\" ]; then
+  pass mv {} \"\$new_name\" || echo \"Rename failed.\" > /dev/tty;
+else
+  echo \"No name entered. Rename aborted.\" > /dev/tty;
+fi' < /dev/tty > /dev/tty 2>&1)+reload(tree -Ffi | grep '.gpg' | sed 's/.gpg$//g')" \
+      --bind="ctrl-g:execute(if [ -z {} ]; then read -p \"Can't generate empty password. Press enter to continue...\"; else pass generate -in {} < /dev/tty > /dev/tty 2>&1 && pass edit {} < /dev/tty > /dev/tty 2>&1; fi)+reload(tree -Ffi | grep '.gpg' | sed 's/.gpg$//g')" \
+      --bind="ctrl-x:execute(pass rm {} < /dev/tty > /dev/tty 2>&1)+reload(tree -Ffi | grep '.gpg' | sed 's/.gpg$//g')" \
+      --bind="tab:replace-query"
+)
+
+PASSDATA="$(pass "$PASSFILE")"
+PASSWORD="$(echo "$PASSDATA" | head -n 1)"
+SHOW_PASSDATA=false
+
+if [ "$1" = "-i" ]; then
+  SHOW_PASSDATA=true
+  shift
+fi
+
+if [ "$SHOW_PASSDATA" = true ]; then
+  PASSDATA="$(pass "$PASSFILE")"
+  echo "$PASSDATA"
+else
+  PASSWORD="$(pass show "$PASSFILE" | head -n 1)"
+  echo "$PASSWORD"
+
+  if [ -n "$PASSWORD" ]; then
+    case "$(uname)" in
+    Darwin*)
+      echo "$PASSWORD" | pbcopy # Use pbcopy on macOS
+      ;;
+    Linux*)
+      echo "$PASSWORD" | xclip -selection clipboard # Use xclip on Linux
+      ;;
+    *)
+      echo "Unsupported operating system"
+      ;;
+    esac
+    sleep 0.1
+  fi
+fi

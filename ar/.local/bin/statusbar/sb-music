@@ -1,0 +1,78 @@
+#!/bin/bash
+
+truncate_string() {
+  local input="$1"
+  local max_length="$2"
+  if [ "${#input}" -gt "$max_length" ]; then
+    echo "${input:0:$((max_length - 2))}.."
+  else
+    echo "$input"
+  fi
+}
+
+filter() {
+  if ps -C mpd >/dev/null 2>&1; then
+    screen_width=$(xrandr | grep '\*' | awk '{print $1}' | cut -d'x' -f1)
+    artist=$(mpc current -f %artist%)
+    title=$(mpc current -f %title%)
+
+    if [ "$screen_width" -le 2048 ]; then
+      max_length=$((screen_width / 100))
+      artist=$(truncate_string "$artist" "$max_length")
+      title=$(truncate_string "$title" "$max_length")
+    else
+      artist="$(mpc current -f %artist%)"
+      title="$(mpc current -f %title%)"
+    fi
+
+    case "$(mpc status %state%)" in
+    "playing") prefix="🎵" ;;
+    "paused") prefix="⏸" ;;
+    *) return ;;
+    esac
+
+    indicators=""
+    [ "$(mpc status %single%)" = "on" ] && indicators="${indicators}🔀"
+    [ "$(mpc status %random%)" = "on" ] && indicators="${indicators}🔂"
+    [ "$(mpc status %repeat%)" = "on" ] && indicators="${indicators}🔁"
+
+    sig=$(grep "${0##*/}" "${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwmblocks/config.h" | awk -F',' '{print $3}')
+    case $sig in
+    *0*)
+      echo "$prefix$artist - $title$([ -n "$indicators" ] && echo "$indicators")"
+      ;;
+    *1*)
+      echo "$prefix$artist - $title $(mpc status %currenttime%)/$(mpc status %totaltime%)$([ -n "$indicators" ] && echo "$indicators")"
+      ;;
+    esac
+  fi
+}
+
+[ "$(grep "${0##*/}" "${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwmblocks/config.h" | awk -F',' '{print $3}')" -eq 0 ] && {
+  pidof -x sb-mpdup >/dev/null 2>&1 || sb-mpdup >/dev/null 2>&1 &
+}
+
+# Handling interaction based on button press
+case $BLOCK_BUTTON in
+1) # left click, opens ncmpcpp
+  mpc status | filter
+  setsid -f "$TERMINAL" -e ncmpcpp
+  ;;
+2) mpc toggle | filter ;; # middle click, pause/unpause
+3)                        # right click
+  notify-send "🎵 Music module" "\- Shows mpd song playing and status
+- 🎵 if playing
+- ⏸ if paused
+- 🔂 if single on
+- 🔁 if repeat on
+- 🔀 if random on
+- Left click opens ncmpcpp
+- Middle click pauses/unpause
+- Scroll changes track"
+  notify-send "🎵 $(mpc current)" "⏭️ $(mpc queued)"
+  ;;
+4) mpc prev | filter ;; # scroll up, previous
+5) mpc next | filter ;; # scroll down, next
+6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
+*) mpc status | filter ;; # default, show current status
+esac

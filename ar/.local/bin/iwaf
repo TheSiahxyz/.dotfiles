@@ -1,0 +1,96 @@
+#!/bin/sh
+
+_check_wine() {
+  WINE_EXE="$1"
+
+  ls "${WINE_EXE}" >/dev/null 2>/dev/null
+}
+
+_exec_wine() {
+  WINE_EXE="$1"
+  WINE_EXE2="${WINE_EXE%/*}"
+  WINE_EXE2="${WINE_EXE2}/SOOPStreamer.exe"
+
+  echo 'Executing Soop...'
+  wine "${WINE_EXE}"
+  # wine "${WINE_EXE2}"
+}
+
+_install_wine() {
+  # Source URL for the SOOPStreamer installer
+  SRC_URL='https://creatorup.sooplive.co.kr/SOOPStreamer_installer.exe'
+
+  # Create a temporary file for the installer
+  DST_FILE="$(mktemp)"
+  # Ensure the temporary file is removed after the script finishes
+  trap 'rm -f "$DST_FILE"' EXIT
+
+  # Set a temporary HOME for the Wine process to avoid conflicts
+  HOME_ORIGIN="$HOME"
+  HOME_PATCH="$WINEPREFIX/tmp"
+  export HOME="$HOME_PATCH"
+
+  # Download the installer
+  echo 'Downloading SOOP Streamer installer...'
+  curl -s "$SRC_URL" -o "$DST_FILE" || {
+    echo "Failed to download installer!"
+    exit 1
+  }
+
+  # Initialize Wine environment with win32 architecture
+  echo 'Initializing Wine environment...'
+  wineboot >/dev/null 2>&1
+
+  # Check if winetricks is installed, if not, install it
+  if ! command -v winetricks >/dev/null; then
+    sudo pacman --noconfirm --needed -S winetricks || {
+      echo "Failed to install winetricks!"
+      exit 1
+    }
+  fi
+
+  # Install necessary libraries via winetricks
+  echo "Installing required libraries via winetricks..."
+  if ! winetricks -q mfc42 vcrun2008; then
+    echo "Failed to install required libraries!"
+    exit 1
+  fi
+
+  # Run the SOOP Streamer installer without sudo
+  echo 'Running the SOOP Streamer installer...'
+  wine "$DST_FILE" /S >/dev/null 2>&1 && success=true || success=false
+
+  # Clean up temporary Wine HOME directory
+  echo 'Cleaning up...'
+  rm -rf "$HOME_PATCH"
+
+  # Restore original HOME and WINEARCH variables
+  export HOME="$HOME_ORIGIN"
+
+  # Check success status and print the result
+  if $success; then
+    echo 'Installation completed successfully.'
+  else
+    echo 'Installation failed!'
+  fi
+}
+
+# Define a main function
+main() {
+  # Configure environment variables
+  export LANG='en_US.UTF-8'
+  export LC_ALL='en_US.UTF-8'
+  export WINEARCH='win32'
+  export WINEPREFIX="${WINEPREFIX:-${XDG_DATA_HOME:-${HOME}/.local/share}/wine}/soop"
+
+  # Install
+  WINE_EXE="${WINEPREFIX}/drive_c/users/$(whoami)/AppData/Local/SOOP/SOOPPackage.exe"
+  if ! _check_wine "${WINE_EXE}"; then
+    _install_wine "${WINE_EXE}"
+  fi
+
+  # Exec
+  _exec_wine "${WINE_EXE}"
+}
+
+main

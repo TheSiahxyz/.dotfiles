@@ -1,0 +1,35 @@
+#!/bin/sh
+
+mount_encrypted() {
+  ! mount | grep -q " $1 " && echo "$PASSPHRASE" | sudo mount -t ecryptfs "$1" "$2" \
+    -o ecryptfs_cipher=aes,ecryptfs_key_bytes=32,ecryptfs_passthrough=no,ecryptfs_enable_filename_crypto=yes,ecryptfs_sig=$ECRYPTFS_SIG,ecryptfs_fnek_sig=$FNEK_SIG,passwd=$(printf '%s' "$PASSPHRASE")
+}
+
+attempt_mount() {
+  if mount | grep -q " $2 "; then
+    sudo umount "$2" && notify-send "🔒 Locked: $3" || notify-send "❗ Unable to lock" "Mounted: $3"
+  else
+    ECRYPTFS_SIG=$(pass show encryption/ecryptfs-sig-"$4")
+    FNEK_SIG=$ECRYPTFS_SIG
+    PASSPHRASE=$(pass show encryption/ecryptfs)
+    [ -z "$PASSPHRASE" ] && {
+      notify-send "❌ Failed to retrieve passphrase."
+      exit 1
+    }
+    mount_encrypted "$1" "$2" && notify-send "🔑 Unlocked: $3"
+  fi
+}
+
+targets="$HOME/.secret"
+mounts="$HOME/Private"
+pw="default"
+set -- $mounts # Set positional parameters to mounts
+i=1
+for target in $targets; do
+  mp=$(eval echo "\$$i")            # Get the mount point using indirect expansion
+  path=$(basename "$mp")            # Extract last directory component
+  pw=$(echo "$pw" | cut -d' ' -f$i) # Get the corresponding passthrough option
+
+  attempt_mount "$target" "$mp" "$path" "$pw"
+  i=$((i + 1))
+done

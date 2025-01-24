@@ -1,0 +1,15 @@
+#!/bin/bash
+
+query="switch"
+
+if [ "$query" == "switch" ]; then
+  osascript <<EOF
+tell application "System Events"
+  tell dock preferences
+    set autohide menu bar to not autohide menu bar
+  end tell
+end tell
+
+display notification "Menu bar autohide feature is toggled" with title "Menu Bar Autohide"
+EOF
+fi

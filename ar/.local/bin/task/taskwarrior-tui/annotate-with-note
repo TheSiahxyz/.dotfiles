@@ -1,0 +1,41 @@
+#!/bin/sh
+
+# UUID of the task to annotate
+uuid="$*"
+
+# Base directory where notes are stored
+notes_dir="$HOME/Private/repos/Obsidian/SI/Notes"
+
+# List of subdirectories to search in
+subdirs="areas meetings projects resources reviews"
+
+# Construct the find command with the subdirectories
+search_paths=""
+for subdir in $subdirs; do
+  search_paths="$search_paths $notes_dir/$subdir"
+done
+
+# Find files in the specified subdirectories and show fzf dialog to select an existing note
+filepath=$(find "$search_paths" -type f -name '*.md' | fzf --preview "bat --color=always {}")
+
+# If fzf was cancelled, exit the script
+if [ -z "$filepath" ]; then
+  echo "No file selected. Exiting."
+  exit 1
+fi
+
+# Annotate the task with the selected filepath
+task_output=$(task rc.bulk=0 rc.confirmation=off "$uuid" annotate "$filepath")
+
+# Check if annotation was successful
+case "$task_output" in
+*"Annotated"*)
+  echo "Successfully annotated the task with the note."
+  ;;
+*)
+  echo "Failed to annotate the task."
+  ;;
+esac
+
+# Open the selected note in nvim
+${EDITOR:-nvim} "$filepath"

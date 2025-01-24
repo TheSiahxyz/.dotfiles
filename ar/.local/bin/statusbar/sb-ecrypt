@@ -1,0 +1,12 @@
+#!/bin/sh
+
+is_mounted() { mount | grep -q "$HOME/Private"; }
+
+case $BLOCK_BUTTON in
+1) "${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/ecrypt" ;;
+3) notify-send "🔒 Encrypted Media Folder " "\- Shows mount status of Media
+- Left click to toggle mount" ;;
+6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
+esac
+
+is_mounted "$MOUNT_POINT" && echo "🔑" || echo "🔒"

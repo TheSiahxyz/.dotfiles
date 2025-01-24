@@ -1,0 +1,11 @@
+#!/bin/sh
+
+case $BLOCK_BUTTON in
+3) notify-send "🔆 Backlight module
+- Scroll up & down changes backlight" ;;
+4) monbright -inc 5 ;;
+5) monbright -dec 5 ;;
+6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
+esac
+
+monitorbright

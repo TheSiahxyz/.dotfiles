@@ -1,0 +1,231 @@
+###################################################
+### --- PROFILE --- ###
+###################################################
+[ "$(tty)" = "/dev/tty1" ] && set -e # Exit immediately if a command exits with a non-zero status.
+
+###################################################
+### --- ENV PATH --- ###
+###################################################
+# Add all directories in each subdirectory to $PATH
+export PATH="$PATH:$(find ~/.local/bin -path '*/.git*' -prune -o \( -type d -o -type l \) -print | paste -sd ':' -)"
+export PATH="$PATH:$(find ~/.local/share/.password-store -type d -name '.extensions' | paste -sd ':' -)"
+
+unsetopt PROMPT_SP 2>/dev/null
+
+###################################################
+### --- DEFAULT PROGRAMS --- ###
+###################################################
+export BROWSER="firefox"
+export EDITOR="nvim"
+export EDITOR2="vim"
+export KEYTIMEOUT=10
+export SUDO_EDITOR=$EDITOR
+export SUDO_ASKPASS="$HOME/.local/bin/dmenupass"
+export TERMINAL="st"
+export TERMINAL_PROG="st"
+export TERM="st-256color"
+export VISUAL=$EDITOR
+
+###################################################
+### --- XDG ENV PATHES --- ###
+###################################################
+### --- XDG DEFAULT --- ###
+export XDG_CACHE_HOME="$HOME/.cache"
+export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_DATA_HOME="$HOME/.local/share"
+export XDG_STATE_HOME="$HOME/.local/state"
+
+### --- XDG CUSTOMS --- ###
+export XDG_DOTFILES_DIR="$HOME/.dotfiles"
+export XDG_SCRIPTS_HOME="$HOME/.local/bin"
+export XDG_SOURCES_HOME="$HOME/.local/src"
+export XDG_DESKTOP_DIR="$HOME/Desktop"
+export XDG_DOCUMENTS_DIR="$HOME/Documents"
+export XDG_DOWNLOAD_DIR="$HOME/Downloads"
+export XDG_MUSIC_DIR="$HOME/Music"
+export XDG_PICTURES_DIR="$HOME/Pictures"
+export XDG_PUBLICSHARE_DIR="$HOME/Public"
+export XDG_TEMPLATES_DIR="$HOME/Templates"
+export XDG_VIDEOS_DIR="$HOME/Videos"
+
+###################################################
+### --- DEFAULT ENV PATHES FOR ALL PROGRAMS --- ###
+###################################################
+### --- ANDROID --- ###
+export ANDROID_SDK_HOME="$XDG_CONFIG_HOME/android"
+
+### --- ANSIBLE --- ###
+export ANSIBLE_CONFIG="$XDG_CONFIG_HOME/ansible/ansible.cfg"
+
+### --- BAT --- ###
+export BAT_CONFIG_PATH="$XDG_CONFIG_HOME/bat/config"
+
+### --- CARGO --- ###
+export CARGO_HOME="$XDG_DATA_HOME/cargo"
+
+### --- DICS --- ###
+export DICS="/usr/share/stardict/dic/"
+
+### --- ELECTRUM --- ###
+export ELECTRUMDIR="$XDG_DATA_HOME/electrum"
+
+### --- FCITX5 --- ###
+export GTK_IM_MODULE=fcitx
+export QT_IM_MODULE=fcitx
+export XMODIFIERS=@im=fcitx
+
+### --- FZF --- ###
+export FZF_ALT_C_COMMAND="fd --type d . --color=never --hidden"
+export FZF_ALT_C_OPTS="--preview 'tree -C {} | head -50'"
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+export FZF_CTRL_T_OPTS="--preview 'bat --color=always --line-range :50 {}'"
+# export FZF_DEFAULT_OPTS="--no-height --color=bg+:#343d46,gutter:-1,pointer:#ff3c3c,info:#0dbc79,hl:#0dbc79,hl+:#23d18b"
+export FZF_DEFAULT_OPTS="--reverse --height 60% --color=bg+:#343d46,gutter:-1,pointer:#ff3c3c,info:#0dbc79,hl:#0dbc79,hl+:#23d18b"
+
+### --- FORGIT --- ###
+export FORGIT_CHECKOUT_BRANCH_BRANCH_GIT_OPTS='--sort=-committerdate'
+export FORGIT_COPY_CMD='xclip -selection clipboard'
+
+### --- GEM --- ###
+export GEMRC="$HOME/.config/gem/gemrc"
+export GEM_HOME="$XDG_DATA_HOME/gem"
+export GEM_PATH="$GEM_HOME"
+
+### --- GO --- ###
+export GOMODCACHE="$XDG_CACHE_HOME/go/mod"
+export GOPATH="$XDG_SCRIPTS_HOME/go"
+
+### --- GTK --- ###
+export GTK2_RC_FILES="$XDG_CONFIG_HOME/gtk-2.0/gtkrc-2.0"
+
+### --- HISTORY --- ###
+export HISTFILE="$XDG_DATA_HOME/history/sh_history"
+
+### --- INPUTRC --- ###
+export INPUTRC="$XDG_CONFIG_HOME/shell/inputrc"
+
+### --- JAVA --- ###
+export AWT_TOOLKIT="MToolkit wmname LG3D" # May have to install wmname
+export _JAVA_AWT_WM_NONREPARENTING=1      # Fix for Java applications in dwm
+
+### --- Jupyter --- ###
+export JUPYTER_CONFIG_DIR="$XDG_CONFIG_HOME/jupyter"
+export JUPYTER_PLATFORM_DIRS="1"
+
+### --- KODI --- ###
+export KODI_DATA="$XDG_DATA_HOME/kodi"
+
+### --- LF --- ###
+export FILE_MANAGER="lf $(lf -version)"
+
+### --- MANPAGER --- ###
+([ -x "$(command -v batcat)" ] || [ -x "$(command -v batman)" ]) && {
+  export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+  export MANROFFOPT="-c"
+} || {
+  export MANPAGER='less -s'
+  export LESS="R"
+  export LESS_TERMCAP_mb="$(printf '%b' '[1;31m')"
+  export LESS_TERMCAP_md="$(printf '%b' '[1;36m')"
+  export LESS_TERMCAP_me="$(printf '%b' '[0m')"
+  export LESS_TERMCAP_so="$(printf '%b' '[01;44;33m')"
+  export LESS_TERMCAP_se="$(printf '%b' '[0m')"
+  export LESS_TERMCAP_us="$(printf '%b' '[1;32m')"
+  export LESS_TERMCAP_ue="$(printf '%b' '[0m')"
+  export LESSOPEN="| /usr/bin/highlight -O ansi %s 2>/dev/null"
+}
+
+### --- MBSYNC --- ###
+export MBSYNCRC="$XDG_CONFIG_HOME/mbsync/config"
+
+### --- MOZILLA --- ###
+export MOZ_USE_XINPUT2=1 # Mozilla smooth scrolling/touchpads.
+
+### --- NOTMUCH --- ###
+export NOTMUCH_CONFIG="$XDG_CONFIG_HOME/notmuch/config"
+
+### --- NPM --- ###
+export NPM_CONFIG_USERCONFIG="~/.config/npm/.npmrc"
+
+### --- NVM --- ###
+export NVM_DIR="$XDG_CONFIG_HOME/nvm"
+
+### --- PAM GNUPG --- ###
+# export GNUPGHOME="$XDG_DATA_HOME/gnupg"
+
+### --- PASSWORD STORE --- ###
+export PASSWORD_STORE_DIR="$XDG_DATA_HOME/.password-store"
+export PASSWORD_STORE_CLIP_TIME=180 # Specifies the number of seconds to wait before restoring the clipboard, by default 45 seconds.
+# export PASSWORD_STORE_CHARACTER_SET="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*=[]{}|:,.?/"
+export PASSWORD_STORE_ENABLE_EXTENSIONS="true"                         # This environment variable must be set to "true" for extensions to be enabled.
+# export PASSWORD_STORE_EXTENSIONS_DIR="$PASSWORD_STORE_DIR/.extensions" # The location to look for executable extension files, by default PASSWORD_STORE_DIR/.extensions.
+# export BASH_COMPLETION_USER_DIR=$XDG_DATA_HOME/bash-completion/completions
+
+### --- POWERLEVEL10K --- ###
+export POWERLEVEL9K_INSTALLATION_DIR="/usr/share/zsh-theme-powerlevel10k"
+
+### --- PYTHON --- ###
+export PYTHONPYCACHEPREFIX=$XDG_CACHE_HOME/python
+export PYTHONSTARTUP="$XDG_CONFIG_HOME/python/pythonrc"
+
+### --- QT --- ###
+export QT_QPA_PLATFORMTHEME="gtk2" # Have QT use gtk2 theme.
+
+### --- RUST --- ###
+export RUSTUP_HOME="$XDG_DATA_HOME/rustup"
+
+### --- SERVER --- ###
+export THESIAH="thesiah.xyz"
+export THESIAH_GIT="git@$THESIAH"
+export THESIAH_SERVER="root@$THESIAH"
+export THESIAH_VPN="${THESIAH%%.*}"
+export THESIAH_WWW="$HOME/Private/repos/THESIAH"
+
+### --- SQLITE --- ###
+export SQLITE_HISTORY="$XDG_DATA_HOME/history/sqlite_history"
+
+### --- STARSHIP --- ###
+export STARSHIP_CONFIG="$XDG_CONFIG_HOME/starship/starship.toml"
+
+### --- TMUX --- ###
+export TMUX_TMPDIR="$XDG_RUNTIME_DIR"
+
+### --- UNISON --- ###
+export UNISON="$XDG_DATA_HOME/unison"
+
+### --- VIM --- ###
+# export GVIMINIT='let $MYGVIMRC = !has("nvim") ? "$XDG_CONFIG_HOME/vim/gvimrc" : "$XDG_CONFIG_HOME/nvim/init.lua" | so $MYGVIMRC'
+# export VIMINIT='let $MYVIMRC = !has("nvim") ? "$XDG_CONFIG_HOME/vim/vimrc" : "$XDG_CONFIG_HOME/nvim/init.lua" | so $MYVIMRC'
+
+### --- VIRTUAL ENVIRONMENT --- ###
+export WORKON_HOME="$XDG_DATA_HOME/venvs"
+
+### --- VISUAL STUDIO CODE --- ###
+export VSCODE_PORTABLE="$XDG_DATA_HOME/vscode"
+
+### --- WINE --- ###
+export WINEPREFIX="$XDG_DATA_HOME/wine"
+export WINEDLLOVERRIDES="winemenubuilder.exe=d"
+
+### --- WGET --- ###
+export WGETRC="$XDG_CONFIG_HOME/wget/wgetrc"
+
+### --- X11 --- ###
+export XINITRC="$XDG_CONFIG_HOME/x11/xinitrc"
+export XSERVERRC="$XDG_CONFIG_HOME/X11/xserverrc"
+
+### --- XAUTH --- ###
+export XAUTHORITY="$XDG_RUNTIME_DIR/Xauthority" # This line will break some DMs.
+
+### --- ZSH --- ###
+export ZDOTDIR="$XDG_CONFIG_HOME/zsh"
+export ZPLUGINDIR="$XDG_SCRIPTS_HOME/zsh"
+
+### --- SHORTCUTS --- ###
+[ ! -f "$XDG_CONFIG_HOME/shell/shortcutrc" ] && setsid -f shortcuts >/dev/null 2>&1
+
+### --- START GRAPHICAL SERVER ON USER'S CURRENT TTY IF NOT ALREADY RUNNING --- ###
+[ "$(tty)" = "/dev/tty1" ] && ! pidof -s Xorg >/dev/null 2>&1 && exec startx "$XINITRC"
+
+### --- LAPTOP KEYMAP --- ###
+sudo -n loadkeys "$XDG_DATA_HOME/thesiah/ttymaps.kmap" 2>/dev/null

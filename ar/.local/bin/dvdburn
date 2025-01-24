@@ -1,0 +1,44 @@
+#!/bin/sh
+
+# Check if input file is provided
+if [ $# -eq 0 ]; then
+  echo "Usage: $0 input_video.mp4"
+  exit 1
+fi
+
+# Check if input file exists
+input_file="$1"
+if [ ! -f "$input_file" ]; then
+  echo "Error: Input file '$input_file' not found."
+  exit 1
+fi
+
+# Set default VIDEO_FORMAT if not provided
+VIDEO_FORMAT="${VIDEO_FORMAT:-PAL}"
+
+# Create temporary directory for DVD structure
+tmp_dir=$(mktemp -d)
+echo "Temporary directory created: $tmp_dir"
+
+# Convert MP4 to DVD-compatible MPEG-2 format
+echo "Converting $input_file to DVD-Video format ($VIDEO_FORMAT)..."
+ffmpeg -i "$input_file" -target "$VIDEO_FORMAT"-dvd -vf scale=720:576 -aspect 16:9 "$tmp_dir/video.mpg"
+
+# Create DVD file structure
+echo "Creating DVD file structure..."
+dvdauthor -o "$tmp_dir/dvd" -t "$tmp_dir/video.mpg"
+dvdauthor -o "$tmp_dir/dvd" -T
+
+# Create ISO image from DVD structure
+echo "Creating ISO image..."
+mkisofs -dvd-video -o "$tmp_dir/dvd.iso" "$tmp_dir/dvd/"
+
+# Burn ISO image to DVD
+echo "Burning DVD..."
+wodim -v dev=/dev/sr0 speed=8 -eject "$tmp_dir/dvd.iso"
+
+# Cleanup
+echo "Cleaning up..."
+rm -rf "$tmp_dir"
+
+echo "Done!"

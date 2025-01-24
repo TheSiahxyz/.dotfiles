@@ -1,0 +1,5 @@
+#!/bin/sh
+
+cmd=$(echo | dmenu -p "Enter command for man page:")
+
+[ -n "$cmd" ] && man_path=$(man -w "$cmd" 2>/dev/null) && [ -n "$man_path" ] && setsid -f "${TERMINAL:-st}" -e man "$cmd"

@@ -1,0 +1,68 @@
+#!/bin/sh
+
+# Prints all batteries, their percentage remaining and an emoji corresponding
+# to charge status (🔌 for plugged up, 🔋 for discharging on battery, etc.).
+
+# Function to get the battery status icon
+get_status_icon() {
+  case "$1" in
+  Full) echo "⚡" ;;
+  Discharging) echo "🔋" ;;
+  Charging) echo "🔌" ;;
+  "Not charging") echo "🛑" ;;
+  Unknown) echo "♻️" ;;
+  *) echo "" ;;
+  esac
+}
+
+# Function to print battery status
+battery_status() {
+  device=$1
+  capacity=$(cat "$device/capacity" 2>/dev/null)
+  status=$(cat "$device/status" 2>/dev/null)
+  icon=$(get_status_icon "$status")
+  [ -z "$icon" ] && return
+  case $(basename "$device") in
+  BAT?*)
+    [ "$icon" = "🔋" ] && [ "$capacity" -le 25 ] && warn="❗"
+    printf "%s%s%d%%" "$icon" "$warn" "$capacity"
+    ;;
+  hid*)
+    model="$(cat "$device/model_name")"
+    notify-send "$icon $model:" "$capacity%"
+    ;;
+  esac
+  unset warn
+}
+
+devices() {
+  for battery in /sys/class/power_supply/$1; do
+    battery_status "$battery"
+  done && printf "\\n"
+}
+
+bluetooth() {
+  bluedevices=$(upower -e | grep -iv 'line' | grep -iv 'display' | grep -v 'BAT[0-9]' | grep -v 'hid')
+  for bluedevice in $bluedevices; do
+    bluedevice_name=$(upower -i "$bluedevice" | grep "model" | awk -F ': ' '{print $2}' | sed 's/ //g')
+    bluedevice_battery=$(upower -i "$bluedevice" | grep "percentage" | awk -F ': ' '{print $2}' | sed 's/ //g')
+    if [ -n "$bluedevice_battery" ]; then
+      notify-send "🔋 $bluedevice_name:" "$bluedevice_battery"
+    fi
+  done
+}
+
+# Handle mouse click actions
+case "$BLOCK_BUTTON" in
+2) bluetooth && devices "hid*" ;; # Middle click for Bluetooth battery levels
+3) notify-send "🔋 Battery module" "\- 🔋: discharging
+- 🛑: not charging
+- ♻️: stagnant charge
+- 🔌: charging
+- ⚡: fully charged
+- ❗: battery very low!
+- Middle click: bluetooth battery levels via upower" ;;
+6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
+esac
+
+devices "BAT?*"

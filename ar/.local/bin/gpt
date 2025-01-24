@@ -1,0 +1,26 @@
+#!/bin/sh
+
+set -e
+
+# Check if input is piped
+if [ -t 0 ]; then
+  input="$1"
+else
+  input=$(cat | sed -E "s/\x1b\[[0-9;]*m//g")
+fi
+
+# Use a temporary file for the processed content
+tmpfile=$(mktemp /tmp/nvim_buffer_cleaned.XXXXXX)
+
+# Save the input to the temporary file
+echo "$input" >"$tmpfile"
+
+# Process the input and open Neovim directly, ensuring it doesn't suspend
+nvim \
+  -c "GpChatNew" \
+  -c "call append(line('\$')-1, readfile('$tmpfile'))" \
+  -c "normal! Gdd" \
+  -c "startinsert"
+
+# Remove the temporary file after usage
+rm "$tmpfile"

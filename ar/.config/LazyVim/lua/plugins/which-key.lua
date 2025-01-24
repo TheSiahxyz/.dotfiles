@@ -1,0 +1,55 @@
+return {
+  "folke/which-key.nvim",
+  opts = {
+    plugins = { spelling = true },
+    defaults = {
+      mode = { "n", "v" },
+      ["g"] = { name = "+goto" },
+      ["gz"] = { name = "+surround" },
+      ["z"] = { name = "+fold" },
+      ["]"] = { name = "+next" },
+      ["["] = { name = "+prev" },
+      ["="] = { name = "+line paste" },
+      ["\\"] = { name = "+local leader" },
+      ["<leader>"] = { name = "+leader" },
+      ["<leader><"] = { name = "+B/A paste & L/R indent" },
+      ["<leader>="] = { name = "+paste & B/A filtter" },
+      ["<leader>>"] = { name = "+B/A paste & L/R indent" },
+      ["<leader>["] = { name = "+indent B/A cursor" },
+      ["<leader>]"] = { name = "+indent B/A cursor" },
+      ["<leader><tab>"] = { name = "+tabs" },
+      ["<leader>b"] = { name = "+buffer" },
+      ["<leader>c"] = { name = "+code" },
+      ["<leader>cp"] = { name = "+copy" },
+      ["<leader>dd"] = { name = "+db" },
+      ["<leader>dP"] = { name = "+class/method" },
+      ["<leader>f"] = { name = "+file/find" },
+      ["<leader>h"] = { name = "+harpoon" },
+      ["<leader>g"] = { name = "+git" },
+      ["<leader>gh"] = { name = "+hunks" },
+      ["<leader>gz"] = { name = "+surround" },
+      ["<leader>m"] = { name = "+mason" },
+      ["<leader>n"] = { name = "+annotation" },
+      ["<leader>o"] = { name = "+obsidian" },
+      ["<leader>on"] = { name = "+note" },
+      ["<leader>op"] = { name = "+paste" },
+      ["<leader>ot"] = { name = "+template" },
+      ["<leader>p"] = { name = "+playground" },
+      ["<leader>q"] = { name = "+quit/session" },
+      ["<leader>r"] = { name = "+refactoring" },
+      ["<leader>s"] = { name = "+search" },
+      ["<leader>u"] = { name = "+ui" },
+      ["<leader>w"] = { name = "+windows/which-key" },
+      ["<leader>x"] = { name = "+trouble/quickfix" },
+    },
+  },
+  keys = {
+    vim.keymap.set("n", "<leader>wK", function()
+      vim.cmd("WhichKey")
+    end, { desc = "Which-key All Key" }),
+    vim.keymap.set("n", "<leader>wk", function()
+      local input = vim.fn.input("WhichKey: ")
+      vim.cmd("WhichKey " .. input)
+    end, { desc = "Which-key Query Lookup" }),
+  },
+}

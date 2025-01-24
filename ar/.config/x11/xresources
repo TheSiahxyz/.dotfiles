@@ -1,0 +1,386 @@
+!! Transparency (0-1):
+*.alpha: 0.8
+
+!! Set a default font and font size as below:
+/* *.font: monospace:size=10 */
+
+/* name		dark	light */
+/* black	0	8 */
+/* red		1	9 */
+/* green	2	10 */
+/* yellow	3	11 */
+/* blue		4	12 */
+/* purple	5	13 */
+/* cyan		6	14 */
+/* white	7	15 */
+
+/* ! base16 dark */
+! *.foreground:  #d8d8d8
+! *.background:  #181818
+! *.cursorcolor: #d8d8d8
+! *.color0:      #181818
+! *.color1:      #ab4642
+! *.color2:      #a1b56c
+! *.color3:      #f7ca88
+! *.color4:      #7cafc2
+! *.color5:      #ba8baf
+! *.color6:      #86c1b9
+! *.color7:      #d8d8d8
+! *.color8:      #585858
+! *.color9:      #ab4642
+! *.color10:     #a1b56c
+! *.color11:     #f7ca88
+! *.color12:     #7cafc2
+! *.color13:     #ba8baf
+! *.color14:     #86c1b9
+! *.color15:     #f8f8f8
+
+/* !! brogrammer: */
+! *.foreground:  #d6dbe5
+! *.background:  #131313
+! *.cursorcolor: #b9b9b9
+! *.colorbd:     #d6dbe5
+! *.color0:      #1f1f1f
+! *.color8:      #d6dbe5
+! *.color1:      #f81118
+! *.color9:      #de352e
+! *.color2:      #2dc55e
+! *.color10:     #1dd361
+! *.color3:      #ecba0f
+! *.color11:     #f3bd09
+! *.color4:      #2a84d2
+! *.color12:     #1081d6
+! *.color5:      #4e5ab7
+! *.color13:     #5350b9
+! *.color6:      #1081d6
+! *.color14:     #0f7ddb
+! *.color7:      #d6dbe5
+! *.color15:     #ffffff
+! *.colorbd:     #d6dbe5
+
+/* !! catppuccin frappe: */
+! *.background:  #303446
+! *.foreground:  #c6d0f5
+! *.cursorColor: #f2d5cf
+! *.color0:      #51576d
+! *.color1:      #e78284
+! *.color2:      #a6d189
+! *.color3:      #e5c890
+! *.color4:      #8caaee
+! *.color5:      #f4b8e4
+! *.color6:      #81c8be
+! *.color7:      #b5bfe2
+! *.color8:      #626880
+! *.color9:      #e78284
+! *.color10:     #a6d189
+! *.color11:     #e5c890
+! *.color12:     #8caaee
+! *.color13:     #f4b8e4
+! *.color14:     #81c8be
+! *.color15:     #a5adce
+
+/* !! catppuccin latte: */
+! *.background:  #eff1f5
+! *.foreground:  #4c4f69
+! *.cursorColor: #dc8a78
+! *.color0:      #5c5f77
+! *.color1:      #d20f39
+! *.color2:      #40a02b
+! *.color3:      #df8e1d
+! *.color4:      #1e66f5
+! *.color5:      #ea76cb
+! *.color6:      #179299
+! *.color7:      #acb0be
+! *.color8:      #6c6f85
+! *.color9:      #d20f39
+! *.color10:     #40a02b
+! *.color11:     #df8e1d
+! *.color12:     #1e66f5
+! *.color13:     #ea76cb
+! *.color14:     #179299
+! *.color15:     #bcc0cc
+
+/* !! catppuccin macchiato: */
+! *.background:  #24273a
+! *.foreground:  #cad3f5
+! *.cursorColor: #f4dbd6
+! *.color0:      #494d64
+! *.color1:      #ed8796
+! *.color2:      #a6da95
+! *.color3:      #eed49f
+! *.color4:      #8aadf4
+! *.color5:      #f5bde6
+! *.color6:      #8bd5ca
+! *.color7:      #b8c0e0
+! *.color8:      #5b6078
+! *.color9:      #ed8796
+! *.color10:     #a6da95
+! *.color11:     #eed49f
+! *.color12:     #8aadf4
+! *.color13:     #f5bde6
+! *.color14:     #8bd5ca
+! *.color15:     #a5adcb
+
+/* !! catppuccin mocha: */
+! *.background:  #1e1e2e
+! *.foreground:  #cdd6f4
+! *.cursorColor: #f5e0dc
+! *.color0:      #45475a
+! *.color1:      #f38ba8
+! *.color2:      #a6e3a1
+! *.color3:      #f9e2af
+! *.color4:      #89b4fa
+! *.color5:      #f5c2e7
+! *.color6:      #94e2d5
+! *.color7:      #bac2de
+! *.color8:      #585b70
+! *.color9:      #f38ba8
+! *.color10:     #a6e3a1
+! *.color11:     #f9e2af
+! *.color12:     #89b4fa
+! *.color13:     #f5c2e7
+! *.color14:     #94e2d5
+! *.color15:     #a6adc8
+
+/* ! dracula */
+! *.foreground:  #F8F8F2
+! *.background:  #282A36
+! *.cursorColor: #bbbbbb
+! *.color0:      #000000
+! *.color1:      #FF5555
+! *.color2:      #50FA7B
+! *.color3:      #F1FA8C
+! *.color4:      #BD93F9
+! *.color5:      #FF79C6
+! *.color6:      #8BE9FD
+! *.color7:      #BFBFBF
+! *.color8:      #4D4D4D
+! *.color9:      #FF6E67
+! *.color10:     #5AF78E
+! *.color11:     #F4F99D
+! *.color12:     #CAA9FA
+! *.color13:     #FF92D0
+! *.color14:     #9AEDFE
+! *.color15:     #E6E6E6
+
+/* !! gruvbox dark */
+! *background:   #282828
+! *foreground:   #ebdbb2
+! *color0:       #282828
+! *color8:       #928374
+! *color1:       #cc241d
+! *color9:       #fb4934
+! *color2:       #98971a
+! *color10:      #b8bb26
+! *color3:       #d79921
+! *color11:      #fabd2f
+! *color4:       #458588
+! *color12:      #83a598
+! *color5:       #b16286
+! *color13:      #d3869b
+! *color6:       #689d6a
+! *color14:      #8ec07c
+! *color7:       #a89984
+! *color15:      #ebdbb2
+! *.color256:    #1d2021
+! *.color257:    #EBDBB2
+! *.color258:    #32302f
+
+/* !! gruvbox light: */
+! *.background:  #fbf1c7
+! *.foreground:  #3c3836
+! *.color0:      #fdf4c1
+! *.color1:      #cc241d
+! *.color2:      #98971a
+! *.color3:      #d79921
+! *.color4:      #458588
+! *.color5:      #b16286
+! *.color6:      #689d6a
+! *.color7:      #7c6f64
+! *.color8:      #928374
+! *.color9:      #9d0006
+! *.color10:     #79740e
+! *.color11:     #b57614
+! *.color12:     #076678
+! *.color13:     #8f3f71
+! *.color14:     #427b58
+! *.color15:     #3c3836
+! *.color256:    #f9f5d7
+! *.color257:    #282828
+! *.color258:    #f2e5bc
+
+/* !! one dark */
+! *.foreground:    #ABB2BF
+! *.background:    #1E2127
+! *.cursorColor:   #5C6370
+! *.highlightColor:#3A3F4B
+! *.color0:        #1E2127
+! *.color1:        #E06C75
+! *.color2:        #98C379
+! *.color3:        #D19A66
+! *.color4:        #61AFEF
+! *.color5:        #C678DD
+! *.color6:        #56B6C2
+! *.color7:        #ABB2BF
+! *.color8:        #5C6370
+! *.color9:        #E06C75
+! *.color10:       #98C379
+! *.color11:       #D19A66
+! *.color12:       #61AFEF
+! *.color13:       #C678DD
+! *.color14:       #56B6C2
+! *.color15:       #FFFFFF
+
+/* !! one half dark */
+! *.foreground:  #dcdfe4
+! *.background:  #282c34
+! *.cursorColor: #a3b3cc
+! *.color0:      #282c34
+! *.color1:      #e06c75
+! *.color2:      #98c379
+! *.color3:      #e5c07b
+! *.color4:      #61afef
+! *.color5:      #c678dd
+! *.color6:      #56b6c2
+! *.color7:      #dcdfe4
+! *.color8:      #282c34
+! *.color9:      #e06c75
+! *.color10:     #98c379
+! *.color11:     #e5c07b
+! *.color12:     #61afef
+! *.color13:     #c678dd
+! *.color14:     #56b6c2
+! *.color15:     #dcdfe4
+
+/* !! one half light */
+! *.foreground:  #383a42
+! *.background:  #fafafa
+! *.cursorColor: #bfceff
+! *.color0:      #383a42
+! *.color1:      #e45649
+! *.color2:      #50a14f
+! *.color3:      #c18401
+! *.color4:      #0184bc
+! *.color5:      #a626a4
+! *.color6:      #0997b3
+! *.color7:      #fafafa
+! *.color8:      #4f525e
+! *.color9:      #e06c75
+! *.color10:     #98c379
+! *.color11:     #e5c07b
+! *.color12:     #61afef
+! *.color13:     #c678dd
+! *.color14:     #56b6c2
+! *.color15:     #ffffff
+
+/* !! solarized dark */
+! *.foreground:  #93a1a1
+! *.background:  #002b36
+! *.cursorcolor: #93a1a1
+! *.color0:      #073642
+! *.color1:      #dc322f
+! *.color2:      #859900
+! *.color3:      #b58900
+! *.color4:      #268bd2
+! *.color5:      #d33682
+! *.color6:      #2aa198
+! *.color7:      #eee8d5
+! *.color9:      #cb4b16
+! *.color8:      #fdf6e3
+! *.color10:     #586e75
+! *.color11:     #657b83
+! *.color12:     #839496
+! *.color13:     #6c71c4
+! *.color14:     #93a1a1
+! *.color15:     #fdf6e3
+
+/* !! nord */
+! *.foreground:  #D8DEE9
+! *.background:  #2E3440
+! *.cursorColor: #D8DEE9
+! *.color0       #2E3440
+! *.color1       #3B4252
+! *.color2       #434C5E
+! *.color3       #4C566A
+! *.color4       #D8DEE9
+! *.color5       #E5E9F0
+! *.color6       #ECEFF4
+! *.color7       #8FBCBB
+! *.color8       #88C0D0
+! *.color9       #81A1C1
+! *.color10      #5E81AC
+! *.color11      #BF616A
+! *.color12      #D08770
+! *.color13      #EBCB8B
+! *.color14      #A3BE8C
+! *.color15      #B48EAD
+
+/* !! xterm light */
+! *.foreground:  #a8a8a8
+! *.background:  #000000
+! *.color0:      #000000
+! *.color1:      #CD0000
+! *.color2:      #00CD00
+! *.color3:      #CDCD00
+! *.color4:      #0000CD
+! *.color5:      #CD00CD
+! *.color6:      #00CDCD
+! *.color7:      #E5E5E5
+! *.color8:      #4D4D4D
+! *.color9:      #FF0000
+! *.color10:     #00FF00
+! *.color11:     #FFFF00
+! *.color12:     #0000FF
+! *.color13:     #FF00FF
+! *.color14:     #00FFFF
+! *.color15:     #AABAC8
+
+/* !! xterm dark */
+! *.foreground:  #a8a8a8
+! *.background:  #000000
+! *.color0:      #000000
+! *.color1:      #a80000
+! *.color2:      #00a800
+! *.color3:      #a85400
+! *.color4:      #0000a8
+! *.color5:      #a800a8
+! *.color6:      #00a8a8
+! *.color7:      #a8a8a8
+! *.color8:      #545454
+! *.color9:      #fc5454
+! *.color10:     #54fc54
+! *.color11:     #fcfc54
+! *.color12:     #5454fc
+! *.color13:     #fc54fc
+! *.color14:     #54fcfc
+! *.color15:     #fcfcfc
+
+/* !! palette */
+/* bg:           #1D2021 */
+/* fg:           #CDD6F4 */
+/* bg: 		       #1E1E2E */
+/* fg: 		       #EBDBB2 */
+/* red: 		     #F38BA8 */
+/* green: 	     #A6E3A1 */
+/* yellow: 	     #F9E2AF */
+/* peach: 	     #FAB387 */
+/* blue: 		     #89B4FA */
+/* maroon: 	     #EBA0AC */
+/* teal: 		     #94E2D5 */
+/* rosewater:    #F5E0DC */
+/* flamingo:     #F2CDCD */
+/* pink: 		     #F5C2E7 */
+/* mauve: 	     #CBA6F7 */
+/* sky: 		     #89DCEB */
+/* sapphire:     #74C7EC */
+/* lavender:     #B4BEFE */
+/* subtext_1:    #A6ADC8 */
+/* subtext_0:    #BAC2DE */
+/* overlay_2:    #9399B2 */
+/* overlay_1:    #7F849C */
+/* overlay_0:    #6C7086 */
+/* surface_2:    #585B70 */
+/* surface_1:    #45475A */
+/* surface_0:    #313244 */
+/* mantle: 		   #181825 */
+/* crust: 		   #11111B */

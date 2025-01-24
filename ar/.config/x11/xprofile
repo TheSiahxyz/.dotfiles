@@ -1,0 +1,49 @@
+#!/bin/sh
+
+xrandr --dpi 96 # adjust the number if the resolution is higher than 1920x1080 or monitor size is bigger than 24"
+default="--mode 1920x1080 --rotate normal --scale 1.0x1.0 --dpi 96"
+for connected in $(xrandr -q | grep "\sconnected" | awk '{print $1}'); do
+  case $connected in
+  eDP*) edp="$connected" ;;
+  HDMI*) hdmi="$connected" ;;
+  DP*) dp="$connected" ;;
+  *) display="$connected" ;;
+  esac
+done
+if grep -q "disabled" /sys/class/drm/card0-eDP-1/enabled || grep -q "closed" /proc/acpi/button/lid/LID/state; then
+  # If the lid is closed, turn off the laptop's screen
+  if [ -n "$hdmi" ] && [ -z "$dp" ] && [ -n "$edp" ]; then
+    xrandr --output "$edp" --off --output "$hdmi" --primary $default
+  elif [ -z "$hdmi" ] && [ -n "$dp" ] && [ -n "$edp" ]; then
+    xrandr --output "$edp" --off --output "$dp" --primary $default
+  else
+    xrandr --output "$edp" --off --output "$display" --primary $default
+  fi
+else
+  # Apply display settings when lid is open
+  if [ -n "$hdmi" ] && [ -z "$dp" ] && [ -n "$edp" ]; then
+    xrandr --output "$edp" --pos 1920x0 $default --output "$hdmi" --primary --pos 0x0 $default
+  elif [ -z "$hdmi" ] && [ -n "$dp" ] && [ -n "$edp" ]; then
+    xrandr --output "$edp" --pos 1920x0 $default --output "$dp" --primary --pos 0x0 $default
+  elif [ -z "$hdmi" ] && [ -z "$dp" ] && [ -n "$edp" ]; then
+    xrandr --output "$edp" --primary $default
+  else
+    xrandr --output "$display" --primary --auto
+  fi
+fi
+
+setbg & # set the background with the `setbg` script
+# fcitx5 & # set the input method, but it will be separate with fcitx5-remote
+
+# Uncomment to use Xresources colors/settings on startup
+# xrdb "${XDG_CONFIG_HOME:-${HOME}/.config}/x11/xresources" &
+# xrdbpid=$!
+
+autostart="mpd xcompmgr dunst unclutter pipewire remapd"
+
+for program in $autostart; do
+  pidof -sx "$program" || "$program" &
+done >/dev/null 2>&1
+
+# Ensure that xrdb has finished running before moving on to start the WM/DE.
+[ -n "$xrdbpid" ] && wait "$xrdbpid"

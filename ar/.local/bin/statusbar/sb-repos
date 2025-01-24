@@ -1,0 +1,130 @@
+#!/bin/bash
+
+pidof transmission-daemon >/dev/null && exit 1
+
+# Directories containing Git repositories
+DOTFILES_REPOS="$HOME/.dotfiles"
+SUCKLESS_REPOS="$HOME/.local/src/suckless"
+PRIVATE_REPOS="$HOME/Private/repos"
+PUBLIC_REPOS="$HOME/Public/repos"
+
+# Icon indicators
+DOTFILES_ICON="⚙️"
+SUCKLESS_ICON="🛠"
+PRIVATE_ICON="🏠"
+PUBLIC_ICON="🏢"
+
+# Function to parse Git status and format symbols
+get_git_status_symbols() {
+  git status --porcelain | awk '
+    {
+        if ($1 == "??") {
+            changes["?"]++
+        } else if ($1 ~ /^[MADR]$/) {
+            changes[$1]++
+        }
+    }
+    END {
+        for (change in changes) {
+            printf "%s%s", change, changes[change]
+        }
+    }'
+}
+
+# Function to check for unpushed commits
+get_unpushed_commits() { git cherry -v 2>/dev/null | wc -l; }
+
+# Function to check for unpulled commits
+get_unpulled_commits() { git rev-list --count HEAD..@{upstream} 2>/dev/null; }
+
+# Function to check Git repository status for multiple repos
+check_multi_repo_status() {
+  local dir="$1"
+  local icon="$2"
+  local status=""
+  local changed_repos=""
+
+  while IFS= read -r git_dir; do
+    local repo_dir="${git_dir%/.git}"
+    cd "$repo_dir" || continue
+
+    changes=$(get_git_status_symbols)
+    unpushed=$(get_unpushed_commits)
+    unpulled=$(get_unpulled_commits)
+
+    if [ -n "$changes" ] || [ "$unpushed" -gt 0 ] || [ "$unpulled" -gt 0 ]; then
+      status+="$icon$changes"
+      [ "$unpushed" -gt 0 ] && status+="↑$unpushed"
+      [ "$unpulled" -gt 0 ] && status+="↓$unpulled"
+      status+=" "
+      changed_repos+="$repo_dir"
+    fi
+  done < <(find "$dir" -mindepth 2 -maxdepth 2 -type d -name ".git" 2>/dev/null)
+
+  printf "%s%s" "$status" "$changed_repos"
+}
+
+# Function to check Git repository status for a single repository
+check_single_repo_status() {
+  local dir="$1"
+  local icon="$2"
+  local repo_status=""
+  local changed_repo=""
+
+  if [ -d "$dir/.git" ]; then
+    cd "$dir" || return
+
+    changes=$(get_git_status_symbols)
+    unpushed=$(get_unpushed_commits)
+    unpulled=$(get_unpulled_commits)
+
+    if [ -n "$changes" ] || [ "$unpushed" -gt 0 ] || [ "$unpulled" -gt 0 ]; then
+      repo_status+="$icon$changes"
+      [ "$unpushed" -gt 0 ] && repo_status+="↑$unpushed"
+      [ "$unpulled" -gt 0 ] && repo_status+="↓$unpulled"
+      repo_status+=" "
+      changed_repo="$dir"
+    fi
+  fi
+
+  printf "%s%s" "$repo_status" "$changed_repo"
+}
+
+# Check statuses for repositories
+dotfiles_status=$(check_single_repo_status "$DOTFILES_REPOS" "$DOTFILES_ICON" | awk -F' ' '{print $1}')
+dotfiles_changes=$(check_single_repo_status "$DOTFILES_REPOS" "$DOTFILES_ICON" | awk -F' ' '{print $2}')
+
+suckless_status=$(check_single_repo_status "$SUCKLESS_REPOS" "$SUCKLESS_ICON" | awk -F' ' '{print $1}')
+suckless_changes=$(check_single_repo_status "$SUCKLESS_REPOS" "$SUCKLESS_ICON" | awk -F' ' '{print $2}')
+
+private_status=$(check_multi_repo_status "$PRIVATE_REPOS" "$PRIVATE_ICON" | awk -F' ' '{print $1}')
+private_changes=$(check_multi_repo_status "$PRIVATE_REPOS" "$PRIVATE_ICON" | awk -F' ' '{print $2}')
+
+public_status=$(check_multi_repo_status "$PUBLIC_REPOS" "$PUBLIC_ICON" | awk -F' ' '{print $1}')
+public_changes=$(check_multi_repo_status "$PUBLIC_REPOS" "$PUBLIC_ICON" | awk -F' ' '{print $1}')
+
+[ -f /tmp/gitsync ] && rm -f /tmp/gitsync
+
+# Combine statuses
+output=""
+[ -n "$dotfiles_status" ] && output+="$dotfiles_status "
+[ -n "$suckless_status" ] && output+="$suckless_status "
+[ -n "$private_status" ] && output+="$private_status "
+[ -n "$public_status" ] && output+="$public_status "
+
+# Trim trailing spaces and display output
+output="${output%"${output##*[! ]}"}"
+[ -n "$output" ] && (cat /tmp/gitsync 2>/dev/null || echo "$output")
+
+openrepos() {
+  all_changed_repos="$dotfiles_changes"$'\n'"$suckless_changes"$'\n'"$private_changes"$'\n'"$public_changes"
+  [ -n "$all_changed_repos" ] && exec "$TERMINAL" -e opensessions "$(echo "$all_changed_repos" | grep -v '^$')"
+}
+
+# Handle button actions
+case "$BLOCK_BUTTON" in
+1) openrepos ;;
+3) notify-send "  Git module" "\- Shows git repositories changes
+- Left click opens changed repositories" ;;
+6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;; # Launch editor for the script
+esac

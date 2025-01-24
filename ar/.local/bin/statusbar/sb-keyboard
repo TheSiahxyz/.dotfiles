@@ -1,0 +1,35 @@
+#!/bin/sh
+
+# works on any init system
+# requirements: dmenu, xorg-setxkbmap
+kb="$(setxkbmap -query | grep -oP 'layout:\s*\K\w+')" || exit 1
+
+case $BLOCK_BUTTON in
+1) fcitx5-remote -t && kill -44 "$(pidof "${STATUSBAR:-dwmblocks}")" ;;
+2)
+  kb_choice="$(awk '/! layout/{flag=1; next} /! variant/{flag=0} flag {print $2, "- " $1}' /usr/share/X11/xkb/rules/base.lst | dmenu -l 15)"
+  [ -z "$kb_choice" ] && exit 0
+  kb="$(echo "$kb_choice" | awk '{print $3}')"
+  setxkbmap "$kb"
+  pkill -RTMIN+10 "${STATUSBAR:-dwmblocks}"
+  ;;
+3) notify-send "⌨️ Input Method module" "\- Shows current input method (defalt US)
+- Left click to switch language (EN/KO)
+- Middle click to change keyboard" ;;
+6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
+esac
+
+if [ "$kb" = "us" ] || [ "$kb" = "kr" ]; then
+  if [ "$(fcitx5-remote)" -eq 1 ]; then
+    echo "⌨️US"
+  elif [ "$(fcitx5-remote)" -eq 2 ]; then
+    case "$(fcitx5-remote -n)" in
+    *ko* | *Korean* | *hangul*) echo "⌨️KO" ;;
+    *) echo "⌨️$(setxkbmap -query | grep 'layout:' | sed 's/layout:\s*\(\S*\)/\1/g')" ;;
+    esac
+  else
+    echo "⌨️??"
+  fi
+else
+  echo "⌨️$kb"
+fi

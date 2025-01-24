@@ -1,0 +1,46 @@
+#!/bin/sh
+#
+# Get the weather on the terminal. You can pass an alternative location as a parameter,
+# and/or use the 'cp' option to copy the forecast as plaintext to the clipboard.
+
+weatherreport="${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport"
+
+formats() {
+  [ "$MANPAGER" = "less -s" ] && pager=true || pager=false
+  [ "$pager" = "false" ] && {
+    export MANPAGER='less -s'
+    export LESS="R"
+    export LESS_TERMCAP_mb="$(printf '%b' '[1;31m')"
+    export LESS_TERMCAP_md="$(printf '%b' '[1;36m')"
+    export LESS_TERMCAP_me="$(printf '%b' '[0m')"
+    export LESS_TERMCAP_so="$(printf '%b' '[01;44;33m')"
+    export LESS_TERMCAP_se="$(printf '%b' '[0m')"
+    export LESS_TERMCAP_us="$(printf '%b' '[1;32m')"
+    export LESS_TERMCAP_ue="$(printf '%b' '[0m')"
+    export LESSOPEN="| /usr/bin/highlight -O ansi %s 2>/dev/null"
+  }
+  setsid -f "$TERMINAL" less -S "$1" >/dev/null 2>&1
+  [ "$pager" = "false" ] && {
+    export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+    export MANROFFOPT="-c"
+  }
+}
+
+if [ "$1" = 'cp' ]; then
+  # shellcheck disable=SC2015
+  [ -z "$2" ] && sed 's/\x1b\[[^m]*m//g' "$weatherreport" | xclip -selection clipboard &&
+    notify-send "Weather forecast for '${LOCATION:-$(head -n 1 "$weatherreport" | cut -d' ' -f3-)}' copied to clipboard." ||
+    { data="$(curl -sfm 5 "${WTTRURL:-wttr.in}/$2?T")" &&
+      notify-send "🌞Weather forecast for '$2' copied to clipboard." &&
+      echo "$data" | xclip -selection clipboard ||
+      notify-send '🥶Failed to get weather forecast!' 'Check your internet connection and the supplied location.'; }
+else
+  [ -n "$2" ] &&
+    notify-send "⛔Invalid option '$1'! The only valid option is 'cp'." &&
+    exit 1
+
+  # shellcheck disable=SC2015
+  [ -z "$1" ] && formats "$weatherreport" ||
+    data="$(curl -sfm 5 "${WTTRURL:-wttr.in}/$1")" && echo "$data" | formats - ||
+    notify-send '❗Failed to get weather forecast!' 'Check your internet connection and the supplied location.'
+fi

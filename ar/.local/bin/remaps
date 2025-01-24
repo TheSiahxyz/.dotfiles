@@ -1,0 +1,66 @@
+#!/bin/sh
+
+# This script is called on startup to remap keys.
+# Decrease key repeat delay to 300ms and increase key repeat rate to 50 per second.
+xset r rate 200 50
+# Map the caps lock key to control, and map the menu key to right super.
+xinput list | grep 'id=' | while read -r line; do
+  id=$(echo "$line" | grep -i 'keyboard.*id.*keyboard' | sed 's/.*id=\([0-9]\+\).*/\1/')
+  [ -z "$id" ] || {
+    case "$(echo "$line" | grep -oE '.*id=' | sed 's/ id=.*//')" in
+    *"Lite-On Tech Lenovo USB Travel Keyboard with Ultra Nav"*)
+      setxkbmap -device "$id" -option
+      setxkbmap -device "$id" -option caps:ctrl_modifier,ctrl:swap_lwin_lctl
+      ;;
+    *"Lite-On Technology Corp. ThinkPad USB Keyboard with TrackPoint"*)
+      setxkbmap -device "$id" -option
+      setxkbmap -device "$id" -option caps:ctrl_modifier,altwin:menu_win,altwin:swap_lalt_lwin
+      ;;
+    *"AT Translated Set 2 keyboard"*)
+      setxkbmap -device "$id" -option
+      setxkbmap -device "$id" -option caps:ctrl_modifier,altwin:menu_win,altwin:swap_lalt_lwin
+      ;;
+    *"Soomin Im’s Keyboard"*)
+      setxkbmap -device "$id" -option
+      setxkbmap -device "$id" -option caps:ctrl_modifier
+      ;;
+    *"HHKB"*)
+      setxkbmap -device "$id" -option
+      setxkbmap -device "$id" -option altwin:menu_win
+      ;;
+    *)
+      setxkbmap -device "$id" -option
+      setxkbmap -device "$id" -option caps:ctrl_modifier,altwin:menu_win
+      ;;
+    esac
+  }
+  id=$(echo "$line" | grep -i '.*id.*pointer' | sed 's/.*id=\([0-9]\+\).*/\1/')
+  [ -z "$id" ] || {
+    case "$(echo "$line" | grep -oE '.*id=' | sed 's/ id=.*//')" in
+    *"Apple Inc. Magic Trackpad"*)
+      xinput set-prop "$id" "libinput Tapping Enabled" 0
+      ;;
+    *"SynPS/2 Synaptics TouchPad"*)
+      xinput set-prop "$id" "libinput Tapping Enabled" 0
+      ;;
+    *"Lite-On Tech Lenovo USB Travel Keyboard with Ultra Nav Mouse"*)
+      [ -z "$1" ] && xinput set-prop "$id" "Coordinate Transformation Matrix" 5, 0, 0, 0, 5, 0, 0, 0, 1 || xinput set-prop "$id" "Coordinate Transformation Matrix" $1, 0, 0, 0, $1, 0, 0, 0, 1
+      xinput set-prop "$id" "libinput Scroll Method Enabled" 0, 0, 1
+      ;;
+    *"Logitech USB Receiver"*)
+      [ -z "$1" ] && xinput set-prop "$id" "Coordinate Transformation Matrix" 3, 0, 0, 0, 3, 0, 0, 0, 1 || xinput set-prop "$id" "Coordinate Transformation Matrix" $1, 0, 0, 0, $1, 0, 0, 0, 1
+      ;;
+    *"TPPS/2 IBM TrackPoint"*)
+      [ -z "$1" ] && xinput set-prop "$id" "Coordinate Transformation Matrix" 1, 0, 0, 0, 1, 0, 0, 0, 1 || xinput set-prop "$id" "Coordinate Transformation Matrix" $1, 0, 0, 0, $1, 0, 0, 0, 1
+      ;;
+    *"Lite-On Technology Corp. ThinkPad USB Keyboard with TrackPoint"*)
+      [ -z "$1" ] && xinput set-prop "$id" "Coordinate Transformation Matrix" 3, 0, 0, 0, 3, 0, 0, 0, 1 || xinput set-prop "$id" "Coordinate Transformation Matrix" $1, 0, 0, 0, $1, 0, 0, 0, 1
+      ;;
+    esac
+  }
+done
+# When left control, caps lock, or Super_L is pressed only once, treat it as escape.
+killall xcape 2>/dev/null
+xcape -e 'Caps_Lock=Escape' #;Control_L=Escape' #;Super_L=Escape'
+# Turn off caps lock if on since there is no longer a key for it.
+xset -q | grep -q "Caps Lock:\s*on" && xdotool key Caps_Lock

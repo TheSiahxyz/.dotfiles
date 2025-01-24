@@ -1,0 +1,84 @@
+#!/bin/sh
+
+# Get the current time and the time in one hour
+now=$(date +%s)
+in_one_hour=$(date -d "+1 hour" +%s)
+
+# Check for tasks due in the next hour
+tasks_due_today=$(task due:tomorrow _ids)
+tasks_due_count=0
+tasks_due_list=""
+
+for task_id in $tasks_due_today; do
+  task_due_date=$(task _get "$task_id".due)
+  task_due_epoch=$(date -d "$task_due_date" +%s)
+  task_description=$(task _get "$task_id".description)
+
+  # Check if the task is due within the next hour
+  if [ "$task_due_epoch" -gt "$now" ] && [ "$task_due_epoch" -le "$in_one_hour" ]; then
+    tasks_due_list="$tasks_due_list- $task_description\n"
+    tasks_due_count=$((tasks_due_count + 1))
+  fi
+done
+
+# Check for overdue tasks (tasks with due date in the past)
+overdue_tasks=$(task +OVERDUE _ids)
+overdue_count=0
+overdue_list=""
+
+for task_id in $overdue_tasks; do
+  task_description=$(task _get "$task_id".description)
+  overdue_list="$overdue_list- $task_description\n"
+  overdue_count=$((overdue_count + 1))
+done
+
+# Check for follow-up tasks
+follow_up_tasks=$(task follow.is:Y _ids -PARENT)
+follow_up_count=0
+follow_up_list=""
+
+for task_id in $follow_up_tasks; do
+  task_due_date=$(task _get "$task_id".due)
+  task_due_epoch=$(date -d "$task_due_date" +%s)
+  task_description=$(task _get "$task_id".description)
+
+  # Ensure that follow-up tasks are only shown if they are not overdue
+  if [ "$task_due_epoch" -ge "$now" ]; then
+    follow_up_list="$follow_up_list- $task_description\n"
+    follow_up_count=$((follow_up_count + 1))
+  fi
+done
+
+check_task_sync() {
+  if [ "$(task _get tw.syncneeded)" -eq 1 ]; then
+    tasks-sync
+    notify-send "📚 Tasks synced"
+  fi
+}
+
+# Handle mouse clicks
+case $BLOCK_BUTTON in
+1) # Combine actions for button 1 and button 2
+  notify-send "📚 Follow-up task(s) to complete:" "$(printf "%b" "$follow_up_list")
+📕 Tasks due in the next hour:
+$(printf "%b" "$tasks_due_list")
+⏰ Overdue Tasks:
+$(printf "%b" "$overdue_list")"
+  ;;
+2) check_task_sync ;;
+3)
+  notify-send "🗂️ Task Module" "Shows task counts.
+- Left click: Show tasks due soon.
+- Middle click: Show follow-up tasks."
+  ;;
+6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
+esac
+
+# Output task information to dwmblocks
+output=""
+
+[ "$overdue_count" -gt 0 ] && output="${output}⏰$overdue_count "
+[ "$follow_up_count" -gt 0 ] && output="${output}📚$follow_up_count "
+[ "$tasks_due_count" -gt 0 ] && output="${output}📕$tasks_due_count " && notify-send -u critical "🚑 Tasks Remained!" "$tasks_due_list"
+[ "$(task _get tw.syncneeded)" -eq 1 ] && output="${output}📑 "
+echo "${output%* }"

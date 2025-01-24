@@ -1,0 +1,87 @@
+#!/bin/sh
+
+# Directory where your stow packages are located, adjust as necessary
+stowdir="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}"
+
+# Function to list and select stow packages using dmenu
+select_stow_package() {
+  find "$stowdir" -mindepth 1 -maxdepth 1 -type d -not -name ".*" -not -name "default" | while read -r dir; do
+    if [ -n "$(find "$dir" -mindepth 1 -maxdepth 1)" ]; then
+      basename "$dir"
+    fi
+  done | dmenu -i -p "Select package to stow: "
+}
+
+# Function to ask user for resolution strategy using dmenu
+ask_resolution_strategy() {
+  printf "delete\nmove" | dmenu -i -p "Choose resolution strategy: "
+}
+
+# Function to stow a package and resolve conflicts
+stow_package() {
+  target="$1"
+  resolve_strategy="$2"
+  # Attempt to stow the package
+  output=$(stow --no-folding -S "$target" 2>&1)
+  status=$?
+
+  # Handle conflicts based on resolution strategy
+  if [ $status -ne 0 ]; then
+    echo "$output" | grep "over existing target is stowed to a different package" | while IFS= read -r line; do
+      conflict_path=$(echo "$line" | sed -E 's/.*\: (.*) =>.*/\1/')
+      full_path="$HOME/$conflict_path"
+      if [ "$resolve_strategy" = "delete" ]; then
+        rm -rf "$full_path"
+      elif [ "$resolve_strategy" = "move" ]; then
+        mv "$full_path" "${full_path}.dotbak"
+      fi
+    done
+    echo "$output" | grep "over existing target" | while IFS= read -r line; do
+      conflict_path=$(echo "$line" | sed -E 's/.*over existing target\s(.*)\ssince.*/\1/')
+      full_path="$HOME/$conflict_path"
+      if [ "$resolve_strategy" = "delete" ]; then
+        rm -rf "$full_path"
+      elif [ "$resolve_strategy" = "move" ]; then
+        mv "$full_path" "${full_path}.dotbak"
+      fi
+    done
+
+    # Retry stowing after conflict resolution
+    output=$(stow --no-folding -S "$target" 2>&1)
+    status=$?
+  fi
+}
+
+mail_sync() {
+  [ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/mutt/muttrc" ] && [ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/mutt/thesiah.muttrc" ] &&
+    ! grep -qF "source /home/$USER/.config/mutt/thesiah.muttrc" "${XDG_CONFIG_HOME:-${HOME}/.config}/mutt/muttrc" &&
+    sed -i "/source \/usr\/share\/mutt-wizard\/mutt-wizard\.muttrc/a source \/home\/$USER\/.config\/mutt\/thesiah\.muttrc" /home/"$USER"/.config/mutt/muttrc
+}
+
+# Ensure running from the correct directory
+cd "$stowdir" || exit 1
+
+# Select a stow package
+targetdir=$(select_stow_package) || exit 1
+
+# Ask the user for the resolution strategy
+resolve=$(ask_resolution_strategy) || exit 1
+
+stow_package "$targetdir" "$resolve" && stow_package "default" "$resolve" || exit
+ln -sf "$stowdir/$targetdir/.config/shell/profile" "$HOME/.zprofile"
+
+# Link for bash
+ln -sf "$stowdir/$targetdir/.config/bash/bash_profile" "$HOME/.bash_profile"
+ln -sf "$stowdir/$targetdir/.config/bash/bashrc" "$HOME/.bashrc"
+
+# Link for cro# Link for gtk 2.0
+ln -sf "$stowdir/$targetdir/.config/gtk-2.0/gtkrc-2.0" "$HOME/.gtkrc-2.0"
+
+# Sync mail
+mail_sync
+
+# Reload shortcuts (assumes this functionality is defined elsewhere and works as expected)
+shortcuts >/dev/null 2>&1 || exit 1
+zsh -c "source '${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutrc'" 2>/dev/null || exit 1
+zsh -c "source '${XDG_CONFIG_HOME:-${HOME}/.config}/shell/zshnameddirrc'" 2>/dev/null || exit 1
+notify-send "✅ Updated shortcuts"

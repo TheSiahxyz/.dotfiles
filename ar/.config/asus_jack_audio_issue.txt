@@ -1,0 +1,7 @@
+# static noise bacause of the power saving.
+# create this file.
+# /etc/modprobe.d/audio_powersave.conf
+
+# add these lines into the file.
+options snd_hda_intel power_save=0
+options snd_ac97_codec power_save=0

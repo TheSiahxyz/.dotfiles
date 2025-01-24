@@ -1,0 +1,108 @@
+#!/bin/sh
+
+YTDL_CMD_BASE="yt-dlp --continue --embed-metadata --ignore-errors --no-force-overwrites --no-playlist --verbose"
+
+# Process command-line options for download type
+while getopts "mvr" opt; do
+  case $opt in
+  m)
+    DOWNLOAD_TYPE="music"
+    OUTPUT_DIR="${XDG_MUSIC_DIR:-${HOME}/Music}"
+    ARCHIVE_FILE="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/default/Music/.music.txt"
+    YTDL_OUTPUT_FORMAT="${OUTPUT_DIR}/%(artist|)s%(artist& - |)s%(title)s.%(ext)s"
+    YTDL_CMD_BASE="$YTDL_CMD_BASE --audio-format best --audio-quality 0 --download-archive \"$ARCHIVE_FILE\" --extract-audio --recode-video mp3"
+    ;;
+  v)
+    DOWNLOAD_TYPE="video"
+    OUTPUT_DIR="${XDG_VIDEOS_DIR:-${HOME}/Videos}"
+    YTDL_OUTPUT_FORMAT="${OUTPUT_DIR}/%(title)s [%(id)s].%(ext)s"
+    VIDEO_EXT=$(printf "best\n60fps\n30fps\nmp4\nmkv" | dmenu -i -p "Choose an encoding (default: 1080p)") || exit
+    case $VIDEO_EXT in
+    best)
+      VIDEO_FORMATS="--format bestvideo+bestaudio/best"
+      VIDEO_OPTIONS=""
+      ;;
+    60fps)
+      VIDEO_FORMATS='--format "((bv*[fps=60]/bv*)[height<=1080]/(wv*[fps=60]/wv*)) + ba / (b[fps=60]/b)[height<=1080]/(w[fps=60]/w)"'
+      VIDEO_OPTIONS=""
+      ;;
+    30fps)
+      VIDEO_FORMATS='--format "((bv*[fps=30]/bv*)[height<=1080]/(wv*[fps=30]/wv*)) + ba / (b[fps=30]/b)[height<=1080]/(w[fps=30]/w)"'
+      VIDEO_OPTIONS=""
+      ;;
+    *)
+      VIDEO_FORMATS="--format bestvideo+bestaudio/best"
+      VIDEO_OPTIONS="--recode-video $VIDEO_EXT"
+      ;;
+    esac
+    YTDL_CMD_BASE="$YTDL_CMD_BASE --buffer-size 1M --embed-thumbnail $VIDEO_FORMATS --no-sponsorblock $VIDEO_OPTIONS"
+    ;;
+  r)
+    OUTPUT_DIR="${XDG_MUSIC_DIR:-${HOME}/Music}"
+    ARCHIVE_FILE="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/default/Music/.music.txt"
+    YTDL_OUTPUT_FORMAT="${OUTPUT_DIR}/%(artist|)s%(artist& - |)s%(title)s.%(ext)s"
+    YTDL_CMD_BASE="$YTDL_CMD_BASE --audio-format best --audio-quality 0 --extract-audio --recode-video mp3"
+    YTDL_CMD="$YTDL_CMD_BASE --output \"$YTDL_OUTPUT_FORMAT\""
+    [ ! -f "$ARCHIVE_FILE" ] && exit 1
+    while read -r line; do
+      video_id=$(echo "$line" | awk '{print $2}')
+      YTDL_CMD="$YTDL_CMD_BASE --output \"$YTDL_OUTPUT_FORMAT\" \"https://www.youtube.com/watch?v=$video_id\""
+      idnum=$(tsp bash -c "$YTDL_CMD")
+      pkill -RTMIN+21 "${STATUSBAR:-dwmblocks}"
+    done <"$ARCHIVE_FILE"
+    exit 0
+    ;;
+  *)
+    notify-send "⛔ Invalid option: -$OPTARG"
+    exit 1
+    ;;
+  esac
+done
+
+shift $((OPTIND - 1))
+
+# Use the first non-option argument as the URL if provided, else from clipboard
+URL="${1:-$(xclip -selection clipboard -o)}"
+[ -z "$URL" ] && notify-send "⛔ No URL provided and clipboard is empty or does not contain a valid URL." && exit 1
+
+# Validate the URL format
+! echo "$URL" | grep -qE '^https?://[a-zA-Z0-9.-]+(/[a-zA-Z0-9./?&%=_-]*)?$' && notify-send "⛔ Invalid URL format: $URL" && exit 1
+
+# Validate URL accessibility
+! curl --head --silent --fail "$URL" >/dev/null && notify-send "⛔ URL is not accessible: $URL" && exit 1
+
+case $URL in
+*playlist* | *list=*)
+  PL_DOWNLOAD_CHOICE=$(printf "playlist\na content" | dmenu -i -p "Download entire playlist or just this content?")
+  [ "$PL_DOWNLOAD_CHOICE" = "playlist" ] &&
+    YTDL_CMD_BASE=$(echo "$YTDL_CMD_BASE" | sed 's/ --no-playlist//') &&
+    YTDL_CMD_BASE="$YTDL_CMD_BASE --yes-playlist" &&
+    echo 🪏 >/tmp/qplaylist
+  [ "$DOWNLOAD_TYPE" = "video" ] &&
+    SUBDIR=$(yt-dlp --dump-single-json "$URL" --no-playlist | jq -r '.channel' | sed 's/[\/:*?"<>|]/_/g;s/[[:space:]]/-/g') &&
+    mkdir -p "${OUTPUT_DIR}/${SUBDIR}" &&
+    YTDL_OUTPUT_FORMAT="${OUTPUT_DIR}/${SUBDIR}/%(playlist_index)02d_%(title)s [%(id)s].%(ext)s"
+  ;;
+esac
+
+SIMULATION_CMD="yt-dlp --simulate --print filename $URL"
+YTDL_CMD="$YTDL_CMD_BASE --output \"$YTDL_OUTPUT_FORMAT\" \"$URL\""
+
+# Notify and perform simulation to get filename (feedback to user)
+echo "$SIMULATION_CMD" | while IFS= read -r line; do
+  filename=$(basename "$line")
+  notify-send "📥 Queuing $DOWNLOAD_TYPE to download:" "$filename"
+done
+
+# Enqueue the download task with tsp
+FILENAME=$($SIMULATION_CMD 2>/dev/null)
+rm -rf /tmp/qplaylist
+notify-send "⏳ Downloading $DOWNLOAD_TYPE:" "$FILENAME"
+idnum=$(tsp bash -c "$YTDL_CMD")
+pkill -RTMIN+21 "${STATUSBAR:-dwmblocks}"
+
+# Notify upon completion
+tsp -D "$idnum" notify-send "✅ $DOWNLOAD_TYPE download complete:" "$URL"
+
+# Conditionally update the music database if the download type is music
+[ "$DOWNLOAD_TYPE" = "music" ] && tsp -D "$idnum" bash -c "mpc update"

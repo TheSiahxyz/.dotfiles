@@ -1,0 +1,164 @@
+#!/bin/sh
+
+usage() {
+  echo "Open bookmarks, URLs, or browser history in a program."
+  echo ""
+  echo "Usage: ${0##*/} [OPTIONS]"
+  echo ""
+  echo "Options:"
+  echo "  -h        : Show this message"
+  echo "  -b        : Open a browser bookmark"
+  echo "  -c        : Copy a URL from snippets/URLs to the clipboard"
+  echo "  -o        : Get a URL from snippets/URLs and open it in a new browser window"
+  echo "  -p        : Get a URL from snippets/URLs and open it in a private browser window"
+  echo "  -s        : Open browser history"
+  echo "  -t        : Get a URL from snippets/URLs and type it using xdotool"
+  echo "  -v        : Open a browser bookmark in private browser window"
+  echo ""
+  echo "Programs:"
+  echo "  browser     : System default browser"
+  echo "  links       : A text WWW browser, similar to lynx"
+  echo "  lynx        : A text browser for World Wide Web"
+  echo ""
+  echo "Examples:"
+  echo "  ${0##*/} -b         # Opens a browser bookmark in a program"
+  echo "  ${0##*/} -c         # Copies a URL from snippets/URLs to the clipboard"
+  echo "  ${0##*/} -o         # Opens a URL from snippets/URLs in a new browser window"
+  echo "  ${0##*/} -p         # Opens a URL in a private browser window"
+  echo "  ${0##*/} -s         # Opens browser history in a program"
+  echo "  ${0##*/} -v         # Opens browser boomark in private browser window"
+}
+
+open() {
+  available_tools=""
+  command -v xdg-open 2>/dev/null | grep -v "alias" -q && available_tools="$available_tools xdg-open"
+  command -v open 2>/dev/null | grep -v "alias" -q && available_tools="$available_tools open"
+  command -v links 2>/dev/null | grep -v "alias" -q && available_tools="$available_tools links"
+  command -v lynx 2>/dev/null | grep -v "alias" -q && available_tools="$available_tools lynx"
+  available_tools=$(printf "%s" "$available_tools" | awk '{$1=$1; print}' | tr ' ' '\n')
+  if [ -z "$available_tools" ]; then
+    printf "No browser found\n" >&2
+    exit 1
+  fi
+
+  opentool=$(printf "%s\n" "$available_tools" | dmenu -i -p "Choose an open tool:")
+
+  # Set the selected tool to the variable 'open'
+  case "$opentool" in
+  xdg-open) xdg-open "$1" ;;
+  open)
+    case "$(uname -s)" in
+    Darwin)
+      open "$1"
+      ;;
+    *)
+      xdg-open "$1"
+      ;;
+    esac
+    ;;
+  links) setsid -f "$TERMINAL" -e links "$1" ;;
+  lynx) setsid -f "$TERMINAL" -e lynx "$1" ;;
+  *) echo "Invalid selection" >&2 && exit 1 ;;
+  esac
+}
+
+browsercheck() {
+  if pidof "$BROWSER" >/dev/null; then
+    notify-send "❌ Failed to $1 from '$BROWSER'." "'$BROWSER' is locked. Check if '$BROWSER' is running."
+    exit 1
+  fi
+}
+
+openinbrowser() {
+  # Extract only the default part of the profile name
+  case $BROWSER in
+  firefox)
+    profiles_ini_path="$HOME/.mozilla/firefox/profiles.ini"
+    profile=$(awk '/\[Install/ {found=1} found && /^Default=/ {split($0, arr, "."); print arr[2]; exit}' "$profiles_ini_path")
+    profile_dir=$(find ~/.mozilla/firefox -type d -name "*.$profile*" | head -n 1)
+    ;;
+  librewolf)
+    profiles_ini_path="$HOME/.librewolf/profiles.ini"
+    profile=$(awk '/\[Install/ {found=1} found && /^Default=/ {split($0, arr, "."); print arr[2]; exit}' "$profiles_ini_path")
+    profile_dir=$(find ~/.librewolf -type d -name "*.$profile*" | head -n 1)
+    ;;
+  *) echo "Default browser path is needed." && exit ;;
+  esac
+
+  db_path="$profile_dir/places.sqlite"
+  tmp_dir="${XDG_CACHE_HOME:-$HOME/.cache}/mozilla/firefox/$USER.$profile"
+  tmp_file="$tmp_dir/$1.sqlite"
+  mkdir -p "$tmp_dir"
+  cp -f "$db_path" "$tmp_file"
+
+  type dmenu >/dev/null 2>&1 &&
+    selection="dmenu -i -l 20 -p \"Choose a $1 to open:\"" ||
+    selection="fzf-tmux --reverse --cycle --ansi --delimiter='|' --with-nth=1..-2"
+
+  case "$1" in
+  *bookmark*)
+    sqlite_query="
+    SELECT b.title || ' | ' || p.url AS bookmark
+    FROM moz_bookmarks b
+    JOIN moz_places p ON b.fk = p.id
+    WHERE b.type = 1 AND p.url LIKE 'http%' AND b.title NOT NULL
+    ORDER BY b.dateAdded DESC;
+    "
+    ;;
+  *history*)
+    cols=$((${COLUMNS:-90} / 3))
+    sqlite_query="
+    SELECT substr(p.title, 1, $cols) || ' | ' || p.url
+    FROM moz_places p
+    JOIN moz_historyvisits hv ON hv.place_id = p.id
+    ORDER BY hv.visit_date DESC LIMIT 100;
+    "
+    ;;
+  esac
+  choice=$(sqlite3 "$tmp_file" "$sqlite_query" | eval "$selection" | cut -d'|' -f2 | sed 's|.*\(https://\)|\1|' | xargs)
+  if [ -n "$choice" ]; then
+    if echo "$1" | grep -q "private"; then
+      "$BROWSER" --private-window "$choice"
+    else
+      open "$choice"
+    fi
+  else
+    exit
+  fi
+}
+
+geturls() {
+  [ -f ~/.local/share/thesiah/urls ] &&
+    URLS=$(cat ~/.local/share/thesiah/snippets ~/.local/share/thesiah/urls) ||
+    URLS=$(cat ~/.local/share/thesiah/snippets)
+  CHOICE=$(echo "$URLS" | grep -v -e '^#' -e '^$' | awk -F'"' '{print $2}' | dmenu -i -l 50 -p "Choose a URL $1:")
+  [ -z "$CHOICE" ] && exit
+  URL=$(echo "$URLS" | grep -v -e '^#' -e '^$' | grep "\"$CHOICE\"" | awk '{print $1}')
+}
+
+copytoclipboard() {
+  if command -v xclip >/dev/null 2>&1; then
+    printf "%s" "$URL" | xclip -selection clipboard
+  elif command -v xsel >/dev/null 2>&1; then
+    printf "%s" "$URL" | xsel --clipboard --input
+  else
+    echo "Clipboard utility not found. Install xclip or xsel." >&2
+    exit 1
+  fi
+  notify-send "'$CHOICE' copied in clipbaord" "$URL"
+}
+
+[ $# -eq 0 ] && usage && exit 1
+
+while getopts "bchopstv" opt; do
+  case $opt in
+  b) browsercheck "open bookmark" && openinbrowser "bookmark" ;;
+  c) geturls "to copy" && copytoclipboard ;;
+  o) geturls "to open in $BROWSER" && "$BROWSER" --new-window "$URL" ;;
+  p) geturls "to open in private $BROWSER" && "$BROWSER" --private-window "$URL" ;;
+  s) browsercheck "open history" && openinbrowser "history" ;;
+  t) geturls "to type under cursor" && xdotool type "$URL" ;;
+  v) browsercheck "open bookmark" && openinbrowser "private bookmark" ;;
+  h | *) usage && exit 0 ;;
+  esac
+done

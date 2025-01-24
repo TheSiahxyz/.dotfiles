@@ -1,0 +1,185 @@
+#!/bin/sh
+
+# local backup
+backup_path="/mnt/second/backup"
+dot_path="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}"
+git_path="$HOME/Private/repos"
+pass_path="${PASSWORD_STORE_DIR:-${XDG_DATA_HOME:-${HOME}/.local/share}/.password-store}/exported_keys"
+suck_path="${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless"
+USER_HOME=$(eval echo ~"$USER")
+
+# targets
+bash_path="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/ar/.config/bash"
+shell_path="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/ar/.config/shell"
+vim_path="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/ar/.config/vim"
+thesiah_path="${THESIAH_WWW:-${HOME}/Private/repos/THESIAH}/public"
+lf_path="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/ar/.config/lf"
+
+usage() {
+  echo "Synchronize files and save them in backup path."
+  echo ""
+  echo "Usage: ${0##*/} [OPTIONS]"
+  echo ""
+  echo "Options:"
+  echo "  -h, --help      Show this help message"
+  echo "  -r, --root      Sync root files only"
+  echo ""
+  echo "Example:"
+  echo "  ${0##*/}             # Sync all files to backup path"
+  echo "  ${0##*/} --root      # Sync root files only"
+  exit 0
+}
+
+error() {
+  printf "%s\n" "$1" >&2
+  exit 1
+}
+
+mount_luks() {
+  if ! mount | grep -q " /mnt/second "; then
+    SIZE_NVME0=$(sudo blockdev --getsize64 /dev/nvme0n1p1)
+    SIZE_NVME1=$(sudo blockdev --getsize64 /dev/nvme1n1p1)
+    [ "$SIZE_NVME1" -lt "$SIZE_NVME0" ] && TARGET_DEVICE="/dev/nvme0n1p1" || TARGET_DEVICE="/dev/nvme1n1p1"
+    ${TERMINAL:-st} -n floatterm -g 60x1 -e sudo cryptsetup open "$TARGET_DEVICE" "second"
+    sudo -A mount "/dev/mapper/second" "/mnt/second" -o uid="$(id -u)",gid="$(id -g)" 2>/dev/null || sudo -A mount "/dev/mapper/second" "/mnt/second"
+  fi
+}
+
+# Using a loop over space-separated strings instead of an array
+sync_files() {
+  for source in "$dot_path" "$git_path" "$pass_path" "$suck_path"; do
+    rsync -vrazPlu --exclude=".music.txt" --delete "$source" "$backup_path/" >/dev/null 2>&1 || {
+      echo "Failed to sync $(basename "$source")"
+    }
+  done
+}
+
+sync_root() {
+  # clean targets
+  sudo rm -rf /root/.config /root/.bash_history /root/.local/share/history
+  sudo mkdir -p /root/.config/bash /root/.config/lf /root/.config/shell /root/.config/vim /root/.local/bin /root/.local/share/history/vim_history /root/.local/state
+
+  # Root configuration synchronization on local system
+  sudo rsync -vrazPlu --delete "$vim_path/vimrc" "/root/.config/vim/" >/dev/null 2>&1
+  sudo rsync -vrazPlu --delete "$lf_path" "/root/.config/" >/dev/null 2>&1
+  sudo mv -f "/root/.config/lf/rooticons" "/root/.config/lf/icons" >/dev/null 2>&1
+  sudo rsync -vrazPlu --delete "$bash_path" "/root/.config/" >/dev/null 2>&1
+  sudo rsync -vrazPlu --delete "$shell_path/inputrc" "/root/.config/shell/" >/dev/null 2>&1
+
+  # load shortcuts
+  shortcuts >/dev/null 2>&1
+
+  # Modify root's Bash and LF configuration to include user-specific settings
+  echo "[ -f \"$USER_HOME/.config/shell/shortcutrc\" ] && source \"$USER_HOME/.config/shell/shortcutrc\"" | sudo tee -a /root/.config/bash/bashrc >/dev/null 2>&1
+  echo "[ -f \"$USER_HOME/.config/shell/zshnameddirrc\" ] && source \"$USER_HOME/.config/shell/zshnameddirrc\"" | sudo tee -a /root/.config/bash/bashrc >/dev/null 2>&1
+  sudo sed -i "s|source[[:space:]]*\"\?~/.config/lf/shortcutrc\"\?|source \"$USER_HOME/.config/lf/shortcutrc\"|" /root/.config/lf/lfrc >/dev/null 2>&1
+  sudo grep -q "source \"\?/root/.config/lf/rootshortcutrc\"\?" /root/.config/lf/lfrc ||
+    sudo sed -i "\|source \"\?$USER_HOME/.config/lf/shortcutrc\"\?|a source \"/root/.config/lf/rootshortcutrc\"" /root/.config/lf/lfrc
+
+  # Final ownership and link adjustments
+  sudo chown -R root:root /root/.config/ >/dev/null 2>&1
+  sudo ln -sf /root/.config/bash/bashrc /root/.bashrc >/dev/null 2>&1
+  sudo ln -sf /root/.config/bash/bash_profile /root/.bash_profile >/dev/null 2>&1
+  sudo ln -sf /root/.config/shell/inputrc /root/.inputrc >/dev/null 2>&1
+  sudo ln -sf /root/.config/vim/vimrc /root/.vimrc >/dev/null 2>&1
+}
+
+sync_server() {
+  # clean targets
+  ssh "$THESIAH_SERVER" "rm -rf /root/.config /var/www/thesiah"
+  ssh "$THESIAH_SERVER" "mkdir -p /root/.config/bash /root/.config/shell /root/.config/vim /root/.local/bin /root/.local/share /root/.local/state /var/www/thesiah"
+
+  # Sync operations with explicit error checking
+  rsync -vrazPlu --delete "$thesiah_path/" "$THESIAH_SERVER:/var/www/thesiah/" >/dev/null 2>&1
+  rsync -vrazPlu --delete "$vim_path/vimrc" "$THESIAH_SERVER:/root/.config/vim/" >/dev/null 2>&1
+  rsync -vrazPlu --delete "$shell_path/inputrc" "$THESIAH_SERVER:/root/.config/shell/" >/dev/null 2>&1
+  sudo cp /root/.config/shell/rootshortcutrc ~/.cache/
+  sudo chown -R "$USER":wheel ~/.cache/rootshortcutrc
+  rsync -vrazPlu --remove-source-files "$HOME/.cache/rootshortcutrc" "$THESIAH_SERVER:/root/.config/shell/" >/dev/null 2>&1
+
+  # Adding custom shortcuts to root's shell configuration on the remote system
+  ssh "$THESIAH_SERVER" "echo 'web=\"cd /var/www && ls -A\" \\' >> /root/.config/shell/rootshortcutrc"
+  ssh "$THESIAH_SERVER" "echo 'wen=\"cd /var/www/nextcloud && ls -A\" \\' >> /root/.config/shell/rootshortcutrc"
+  ssh "$THESIAH_SERVER" "echo 'wep=\"cd /var/www/prosody && ls -A\" \\' >> /root/.config/shell/rootshortcutrc"
+  ssh "$THESIAH_SERVER" "echo 'wet=\"cd /var/www/thesiah && ls -A\" \\' >> /root/.config/shell/rootshortcutrc"
+  ssh "$THESIAH_SERVER" "echo 'gng=\"cd /etc/nginx/sites-available && ls -A\" \\' >> /root/.config/shell/rootshortcutrc"
+
+  # Sync Bash configuration
+  rsync -vrazPlu --delete "$bash_path" "$THESIAH_SERVER:/root/.config/" >/dev/null 2>&1
+  ssh "$THESIAH_SERVER" "chown -R root:root /var/www/thesiah"
+  ssh "$THESIAH_SERVER" "chown -R root:root /root/.config/"
+  ssh "$THESIAH_SERVER" "ln -sf /root/.config/bash/bash_profile /root/.profile"
+  ssh "$THESIAH_SERVER" "source /root/.profile"
+
+  # Sync for Git
+  ssh "$THESIAH_SERVER" "cp -r /root/.config /var/www/git/"
+  ssh "$THESIAH_SERVER" "chown -R git:git /var/www/git/.config/"
+  ssh "$THESIAH_GIT" "ln -sf /var/www/git/.config/bash/bash_profile /var/www/git/.profile"
+  ssh "$THESIAH_GIT" "source /var/www/git/.profile"
+}
+
+sync_nextcloud() {
+  base="$(basename $backup_path)"
+  parent="$(dirname $backup_path)"
+  tmpdir="$(mktemp -d)"
+  cd "$tmpdir" || exit
+  tar -C "$parent" -zcf "$base".tar.gz "$base" >/dev/null 2>&1
+  rsync -vrazPlu --delete "$tmpdir/$base".tar.gz "$THESIAH_SERVER:/var/www/nextcloud/data/si@thesiah.xyz/files/backup/" >/dev/null 2>&1
+  ssh "$THESIAH_SERVER" "chown -R www-data:www-data /var/www/nextcloud/data/si@thesiah.xyz/files/backup" >/dev/null 2>&1
+  ssh "$THESIAH_SERVER" "cd /var/www/nextcloud && sudo -u www-data ./occ files:scan --path="/si@thesiah.xyz/files"" >/dev/null 2>&1
+  rm -r "$tmpdir"
+}
+
+handle_long_option() {
+  case $1 in
+  help)
+    usage
+    ;;
+  root)
+    echo "Sync root files..."
+    sync_root && echo "Success to sync root!" && echo "Done!" || error "Failed to back up root"
+    exit 0
+    ;;
+  *)
+    error "Unknown option: --$1"
+    ;;
+  esac
+}
+
+process_options() {
+  while [ $# -gt 0 ]; do
+    case $1 in
+    -h | --help)
+      usage
+      ;;
+    -r | --root)
+      echo "Sync root files..."
+      sync_root && echo "Success to sync root!" && echo "Done!" || error "Failed to back up root"
+      exit 0
+      ;;
+    --*)
+      handle_long_option "${1#--}"
+      ;;
+    -*)
+      error "Unknown option: $1"
+      ;;
+    *)
+      break
+      ;;
+    esac
+    shift
+  done
+}
+
+# Start script
+echo "Backup starts to $backup_path..."
+process_options "$@"
+
+# Main script logic
+mount_luks && echo "Mount backup drive... " && echo "Success to mount luks drive!" || error "Failed to mount $backup_path"
+[ -d "$backup_path" ] || sudo mkdir -p "$backup_path"
+echo "Sync home files..." && sync_files && echo "Success to sync files!" || error "Failed back up files"
+echo "Sync root files..." && sync_root && echo "Success to sync root!" || error "Failed back up root"
+echo "Sync server files..." && sync_server && echo "Success to sync server!" || error "Failed back up server"
+echo "Sync files to nextcloud..." && sync_nextcloud && echo "Success to sync nextcloud!" || error "Failed back up nextcloud"
+echo "Done!"

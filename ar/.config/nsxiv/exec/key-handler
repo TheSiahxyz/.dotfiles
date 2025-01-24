@@ -1,0 +1,67 @@
+#!/bin/sh
+
+while read -r file; do
+    case "$1" in
+    "h")
+        notify-send "Macro <C-x> key bindings:" "\- b: Set as wallpaper
+- c: Copy file
+- d: Delete file
+- h: Help key bindings
+- f: Flip file horizontally
+- g: Edit in GIMP
+- i: Show file information
+- m: Move file
+- r: Rotate file 90 degrees
+- R: Rotate file -90 degrees
+- s: Resize file
+- S: Change resolution
+- y: Copy file name to clipboard
+- Y: Copy file path to clipboard" &
+        ;;
+    "b") setbg "$file" & ;;
+    "c")
+        [ -z "$destdir" ] && destdir="$(sed "s/#.*$//;/^\s*$/d" ${XDG_CONFIG_HOME:-$HOME/.config}/shell/bm-dirs | awk '{print $2}' | dmenu -l 20 -i -p "Copy file(s) to where?" | sed "s|~|$HOME|g")"
+        [ ! -d "$destdir" ] && notify-send "$destdir is not a directory, cancelled." && exit
+        cp "$file" "$destdir" && notify-send -i "$(readlink -f "$file")" "$file copied to $destdir." &
+        ;;
+    "d")
+        [ "$(printf "No\\nYes" | dmenu -i -p "Really delete $file?")" = "Yes" ] && rm "$file" && notify-send "$file deleted."
+        ;;
+    "f")
+        magick "$file" -flop "$file"
+        ;;
+    "g") ifinstalled gimp && setsid -f gimp "$file" ;;
+    "i") notify-send "File information" "$(mediainfo "$file" | sed "s/[ ]\+:/:/g;s/: /: <b>/;s/$/<\/b>/" | grep "<b>")" ;;
+    "m")
+        [ -z "$destdir" ] && destdir="$(sed "s/#.*$//;/^\s*$/d" ${XDG_CONFIG_HOME:-$HOME/.config}/shell/bm-dirs | awk '{print $2}' | dmenu -l 20 -i -p "Move file(s) to where?" | sed "s|~|$HOME|g")"
+        [ ! -d "$destdir" ] && notify-send "$destdir is not a directory, cancelled." && exit
+        mv "$file" "$destdir" && notify-send -i "$(readlink -f "$file")" "$file moved to $destdir." &
+        ;;
+    "r")
+        magick "$file" -rotate 90 "$file"
+        ;;
+    "R")
+        magick "$file" -rotate -90 "$file"
+        ;;
+    "s")
+        size="$(echo "" | dmenu -i -p "Enter a size to resize $file ($(identify -format "%wx%h" $file)): ")"
+        magick "$file" -resize "$size" "$file" && notify-send "$file size has changed to $size."
+        ;;
+    "S")
+        resolution="$(printf low\\nmedium\\nhigh | dmenu -i -p "Choose a resolution: ")"
+        case "$resolution" in
+        low) magick "$file" -resample 72 "$file" ;;
+        medium) magick "$file" -resample 150 "$file" ;;
+        high) magick "$file" -resample 300 "$file" ;;
+        esac && notify-send "Changed $file resolution to $resolution."
+        ;;
+    "y")
+        printf "%s" "$file" | tr -d '\n' | xclip -selection clipboard &&
+            notify-send "$file copied to clipboard" &
+        ;;
+    "Y")
+        readlink -f "$file" | tr -d '\n' | xclip -selection clipboard &&
+            notify-send "$(readlink -f "$file") copied to clipboard" &
+        ;;
+    esac
+done

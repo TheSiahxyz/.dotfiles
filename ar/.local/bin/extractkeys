@@ -1,0 +1,142 @@
+#!/bin/bash
+
+# Define paths and phrases
+path="${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwm/thesiah"
+readme_file="${XDG_DATA_HOME:-${HOME}/.local/share}/thesiah/thesiah.mom"
+output_file="$path.mom"
+temp_file_before="$path.tmp.before"
+temp_file_after="$path.tmp.after"
+start_phrase="When config.h in DWM and ST is saved, key bindings will be extracted and updated below."
+end_phrase=".HEADING 2 \"Other buttons\""
+
+[ -f "$path.mom" ] && source_file="$path.mom" || source_file="$path-default.mom"
+
+# Extract the section before the end marker
+sed "/$end_phrase/,\$d" "$source_file" >"$temp_file_before"
+
+# Extract the section from the end marker to the end of the file
+sed -n "/$end_phrase/,\$p" "$source_file" >"$temp_file_after"
+
+# Remove the contents between the start and end phrases, including the markers themselves
+sed -i "/$start_phrase/,/$end_phrase/d" "$temp_file_before"
+
+# Verify that the section has been removed
+echo "Section between markers removed. Check $temp_file_before for correctness."
+
+# Re-append the start marker since it was deleted
+echo "$start_phrase" >>"$temp_file_before"
+
+# Define your configuration files
+mapfile -t config_files <<EOF
+${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwm/config.h
+${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/st/config.h
+EOF
+
+# Process each configuration file and append content
+for file_path in "${config_files[@]}"; do
+  project_name=$(basename "$(dirname "$file_path")")
+  project_name=${project_name^^}
+
+  echo ".HEADING 3 \"$project_name\"" >>"$temp_file_before"
+  if [ "$project_name" == "DWM" ]; then
+    printf ".PP\nTHESIAH's window manager. I do not use a desktop environment.\n" >>"$temp_file_before"
+  elif [ "$project_name" == "ST" ]; then
+    printf ".PP\nTHESIAH's default terminal in C. It is light, configurable, and fast.\n" >>"$temp_file_before"
+  fi
+  echo ".LI" >>"$temp_file_before"
+
+  awk 'BEGIN {flag=0} /static[[:space:]]+(const[[:space:]]+)?(Key|Shortcut|Command|Button)[[:space:]]+(keys|cmdkeys|shortcuts|commands|buttons)[[:space:]]*\[\][[:space:]]*=[[:space:]]*{/ {flag=1} /\};/ {flag=0} flag' "$file_path" | while read -r line; do
+    if [[ "$line" =~ \/\*.*\*\/ || "$line" =~ .*\"\\.* || "$line" =~ ^$ || "$line" =~ STACKKEYS || "$line" =~ TAGKEYS || "$line" =~ static\ Key\ cmdkeys || "$line" =~ ^\#.* ]]; then
+      continue
+    fi
+
+    if [[ "$line" =~ ^\/\/.* ]]; then
+      echo ".LIST OFF" >>"$temp_file_before"
+      line=$(echo "$line" | sed -e 's/\/\/\s*//g' | awk '{for (i=1; i<=NF; i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2)); print}')
+      output_line=".HEADING 5 \"$line\""
+      echo "$output_line" >>"$temp_file_before"
+      echo ".LI" >>"$temp_file_before"
+      continue
+    fi
+
+    if [[ "$line" =~ static\ const|static\ Shortcut ]]; then
+      echo ".LIST OFF" >>"$temp_file_before"
+      output_line=".HEADING 4 \"INSERT MODE\""
+      echo "$output_line" >>"$temp_file_before"
+      echo ".LI" >>"$temp_file_before"
+      continue
+    fi
+
+    if [[ "$line" =~ static\ Command ]]; then
+      echo ".LIST OFF" >>"$temp_file_before"
+      output_line=".HEADING 4 \"COMMAND MODE\""
+      echo "$output_line" >>"$temp_file_before"
+      echo ".LI" >>"$temp_file_before"
+      continue
+    fi
+
+    line=$(echo "$line" | sed -e "s/^{ \(.*\) },/\1/g;s/{ \([^,]*\), \([^,]*\), \([^,]*\), \([^}]*\) }/\1 \2 \3 \4/g")
+    modkey=$(echo "$line" | awk -F',' '{print $1}' | sed "s/\b0//g;s/MODKEY\(\d*\)/MOD\1/g;s/\([Shift|Contrl]\)Mask/\1/g;s/Control/Ctrl/g;s/TERMMOD/MOD+Shift/g;s/|/+/g;s/ //g;s/XK_ANY_MOD/ANY MOD/g")
+    key=$(echo "$line" | awk -F',' '{print $2}' | sed "s/\b0//g;s/XF86XK_//g;s/XK_//g;s/\s*\(.*\)_R$/Right_\1/g;s/\s*\(.*\)_L$/Left_\1/g;s/MODKEY\(\d*\)/MOD\1/g;s/\([Shift|Contrl]\)Mask/\1/g;s/Control/Ctrl/g;s/|/+/g;s/ //g")
+    func=$(echo "$line" | awk -F',' '{print $3}' | grep -v "spawn" | sed "s/ //g")
+    args=$(echo "$line" | cut -d',' -f4- | sed -E 's/.*\.v\s*=\s*\(const\s*char\s*\*\[\]\)\s*\{\s*([^}]*)\s*\}.*/\1/g;
+                                                       s/.*\.v\s*=\s*\(int\s*\[\]\)\s*\{\s*([^}]*)\s*\}.*/\1/g;
+                                                       s/.*SHCMD\((.*)\).*/\1/g;
+                                                       s/.*\{\s*\.\w*\s*=\s*(.*)\s*\}.*/\1/g;
+                                                       s/\{0\}//g;
+                                                       s/\"//g;
+                                                       s/\,//g;
+                                                       s/NULL//g;
+                                                       s/TERMINAL\s*-e\s*//g;
+                                                       s/&layouts\[0\]/"[]="/g;
+                                                       s/&layouts\[1\]/"[M]"/g;
+                                                       s/&layouts\[2\]/"|||"/g;
+                                                       s/&layouts\[3\]/"[@]"/g;
+                                                       s/&layouts\[4\]/"[\\\\]"/g;
+                                                       s/&layouts\[5\]/"H[]"/g;
+                                                       s/&layouts\[6\]/"TTT"/g;
+                                                       s/&layouts\[7\]/"==="/g;
+                                                       s/&layouts\[8\]/"HHH"/g;
+                                                       s/&layouts\[9\]/"###"/g;
+                                                       s/&layouts\[10\]/"---"/g;
+                                                       s/&layouts\[11\]/":::"/g;
+                                                       s/&layouts\[12\]/"|M|"/g;
+                                                       s/&layouts\[13\]/">M>"/g;
+                                                       s/^\s*//g;
+                                                       /^\s*0\s*$/d
+                                                       ')
+
+    # args=$(echo "$line" | cut -d',' -f4- | sed "s/\.v = (const char \*\[\])//g;s/{\s*\.v = (int \[\])//g;s/SHCMD(\(.*\))/\1/g;s/\.. = //g")
+
+    if [[ -z "$modkey" ]]; then
+      if [[ -z $func ]]; then
+        output_line="\\f(CW${key}\\fP \\(en ${args}"
+      else
+        output_line="\\f(CW${key}\\fP \\(en ${func} ${args}"
+      fi
+    else
+      if [[ -z $func ]]; then
+        output_line="\\f(CW${modkey}+${key}\\fP \\(en ${args}"
+      else
+        output_line="\\f(CW${modkey}+${key}\\fP \\(en ${func} ${args}"
+      fi
+    fi
+
+    echo ".ITEM" >>"$temp_file_before"
+    echo "$output_line" >>"$temp_file_before"
+  done
+
+  echo ".LIST OFF" >>"$temp_file_before"
+done
+
+# Append the latter part of the document that follows the end marker
+cat "$temp_file_after" >>"$temp_file_before"
+
+# Replace the original file with the updated content
+mv -f "$temp_file_before" "$output_file"
+cp -f "$output_file" "$readme_file"
+
+# Clean up the temporary after-section file
+rm -f "$temp_file_after"
+
+notify-send "👍 Operation completed successfully."

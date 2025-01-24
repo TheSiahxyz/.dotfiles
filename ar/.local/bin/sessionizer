@@ -1,0 +1,36 @@
+#!/bin/sh
+
+sessionizer() {
+  [ -n "$TMUX" ] && gitpath=$(tmux display-message -p '#{pane_current_path}') || gitpath="$PWD"
+  path="$(
+    sesh list -c -H | fzf-tmux -p 80%,70% \
+      --no-sort --cycle --ignore-case --ansi --border=sharp --multi --border-label "╢ TheSiahxyz ╟" --prompt "💡  " \
+      --header "^a all ^e sesh ^f zoxide ^g git ^t tmux ^u staged files ^x tmux kill M-cr open in editor ^/ help" \
+      --reverse \
+      --bind "ctrl-a:change-prompt(💡  )+reload(sesh list -H)" \
+      --bind "ctrl-e:change-prompt(📑  )+reload(sesh list -c -H)" \
+      --bind "ctrl-f:change-prompt(🔎  )+reload(sesh list -z -H)" \
+      --bind "ctrl-g:change-prompt(  )+reload(fd -H -d 1 -t d -E .Trash -E .git -E .cache . $HOME/Private/repos $HOME/Public/repos | sed 's|$HOME|~|g')" \
+      --bind "ctrl-t:change-prompt(🪟  )+reload(sesh list -t)" \
+      --bind "ctrl-v:execute($EDITOR ${0})+abort" \
+      --bind 'ctrl-x:execute(tmux kill-session -t {})+change-prompt(💡  )+reload(sesh list -t)' \
+      --bind "alt-enter:execute($EDITOR {})+abort" \
+      --bind 'ctrl-/:change-prompt(❓  )+reload(echo "^a all
+^e sesh config
+^f zoxide
+^g git
+^t tmux
+^x tmux kill
+M-cr open in editor
+^/ help")' \
+      --preview-window 'right:60%' \
+      --preview 'sesh preview {}'
+  )" 2>/dev/null
+
+  case "$path" in
+  ^*) sessionizer ;;
+  *) sesh connect "$path" >/dev/null 2>&1 && exit ;;
+  esac
+}
+
+sessionizer

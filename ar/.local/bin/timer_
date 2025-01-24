@@ -1,0 +1,14 @@
+#!/bin/sh
+set -eu
+
+mins=$1
+message=${2:-Time out!}
+
+# Calculate the sleep time in seconds
+sleep_time=$(expr "$mins" \* 60)
+sleep "$sleep_time"
+
+# Send a notification using a POSIX-compliant command
+# 'notify-send' is not POSIX, but we'll keep it since it's a common tool
+# For complete POSIX compliance, replace this with another method if needed
+notify-send -t 0 "${message}" "Your timer of $mins min is over" -u normal

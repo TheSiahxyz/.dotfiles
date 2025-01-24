@@ -1,0 +1,40 @@
+#!/bin/sh
+
+notify_filenames() {
+  while IFS= read -r line; do
+    id=$(echo "$line" | awk '{print $1}')
+    url=$(tsp -l | awk -v id="$id" 'flag && /notify-send/ {print $0; flag=0} $1 == id {flag=1}' | grep -o 'https://[^\"]*')
+    if [ -n "$url" ]; then
+      decoded_url=$(echo "$url" | sed 's/&amp;/\&/g')
+      yt-dlp --no-playlist --simulate --get-filename "$decoded_url" 2>/dev/null | while IFS= read -r filename; do
+        notify-send "🔽 Downloading:" "$filename"
+      done
+    else
+      notify-send "🪹 No URL extracted for task $id"
+    fi
+  done <<EOF
+$(tsp -l | awk '/running/ && /yt-dlp/')
+EOF
+  if [ -z "$url" ]; then
+    notify-send "💤 No active yt-dlp downloads"
+  fi
+  pkill -RTMIN+21 "${STATUSBAR:-dwmblocks}"
+}
+
+# This block displays the number of running and queued background tasks. Requires tsp.
+num=$(tsp -l | awk -v numr=0 -v numq=0 '{if (!/notify-send/ && /running/) numr++; if (!/notify-send/ && /queued/) numq++} END{print numr"|"numq}')
+
+# Handle mouse clicks
+case $BLOCK_BUTTON in
+1) setsid -f "$TERMINAL" -e sh -c 'tsp -l; echo "\nPress enter to close..." ; read REPLY' ;;
+2) setsid -f "$TERMINAL" -e sh -c 'tsp -t' ;;
+3)
+  notify_filenames
+  notify-send "📝 Tasks module" "🤖: number of running/queued background tasks
+- Left click to show all tasks
+- Middle click to show the current task progress"
+  ;;
+6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
+esac
+
+cat /tmp/qplaylist 2>/dev/null || ([ "$num" != "0|0" ] && echo "🤖$num")

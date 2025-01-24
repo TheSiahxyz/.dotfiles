@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# Use fzf to select files and store them in a string with newline as a separator
+IFS='
+'
+files=$(git status -s | awk '$1 != "D" {print $2}' | grep -v '^$' | fzf-tmux --preview "bat --color=always {}" --reverse --multi --select-1 --exit-0)
+
+# Check if any files were selected, and exit if not
+[ -z "$files" ] && exit 0
+
+openfiles "$files"

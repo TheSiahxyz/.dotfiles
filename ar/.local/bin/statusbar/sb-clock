@@ -1,0 +1,77 @@
+#!/bin/sh
+
+# Get current hour and minute
+hour=$(date '+%I')
+minute=$(date '+%M')
+calendar="🗓️"
+
+# Determine the icon based on hour and minute
+if crontab -l 2>/dev/null | grep -q '^[^#[:space:]]'; then
+  if [ "$minute" -ge 30 ]; then
+    case "$hour" in
+    "00" | "12") icon="🕧" ;; # 12:30
+    "01" | "13") icon="🕜" ;; # 1:30
+    "02" | "14") icon="🕝" ;; # 2:30
+    "03" | "15") icon="🕞" ;; # 3:30
+    "04" | "16") icon="🕟" ;; # 4:30
+    "05" | "17") icon="🕠" ;; # 5:30
+    "06" | "18") icon="🕡" ;; # 6:30
+    "07" | "19") icon="🕢" ;; # 7:30
+    "08" | "20") icon="🕣" ;; # 8:30
+    "09" | "21") icon="🕤" ;; # 9:30
+    "10" | "22") icon="🕥" ;; # 10:30
+    "11" | "23") icon="🕦" ;; # 11:30
+    esac
+  else
+    case "$hour" in
+    "00" | "12") icon="🕛" ;; # 12:00
+    "01" | "13") icon="🕐" ;; # 1:00
+    "02" | "14") icon="🕑" ;; # 2:00
+    "03" | "15") icon="🕒" ;; # 3:00
+    "04" | "16") icon="🕓" ;; # 4:00
+    "05" | "17") icon="🕔" ;; # 5:00
+    "06" | "18") icon="🕕" ;; # 6:00
+    "07" | "19") icon="🕖" ;; # 7:00
+    "08" | "20") icon="🕗" ;; # 8:00
+    "09" | "21") icon="🕘" ;; # 9:00
+    "10" | "22") icon="🕙" ;; # 10:00
+    "11" | "23") icon="🕚" ;; # 11:00
+    esac
+  fi
+else
+  icon="⏰"
+fi
+
+# Shows the current moon phase.
+moonfile="${XDG_DATA_HOME:-${HOME}/.local/share}/moonphase"
+
+[ -s "$moonfile" ] && [ "$(stat -c %y "$moonfile" 2>/dev/null | cut -d' ' -f1)" = "$(date '+%Y-%m-%d')" ] ||
+  { curl -sf "wttr.in/?format=%m" >"$moonfile" || exit 1; }
+
+moon="$(cat "$moonfile")"
+
+case $BLOCK_BUTTON in
+1)
+  notify-send "This Month" "$(cal | sed "s/\<$(date +'%B' | tr -d ' ')\>/<b><span color='blue'>&<\/span><\/b>/;s/\<$(date +'%Y' | sed 's/ //g')\>/<b><span color='blue'>&<\/span><\/b>/;s/\<$(date +'%B' | sed 's/ //g')\>/<b><span color='blue'>&<\/span><\/b>/;s/\<$(date +'%e' | sed 's/ //g')\>/<b><span color='red'>&<\/span><\/b>/")" && notify-send "Appointments" "$(calcurse -d3)"
+  ;;
+2) setsid -f "$TERMINAL" -e calcurse ;;
+3)
+  notify-send "📅 Time/date module" "\- Left click to show upcoming appointments for the next three days via \`calcurse -d3\` and show the month via \`cal\`
+- Left click also displays the current time in other cities.
+- Middle click opens calcurse if installed"
+  notify-send "🌜 Moon phase module" "Displays current moon phase
+- 🌑: New
+- 🌒: Waxing Crescent
+- 🌓: First Quarter
+- 🌔: Waxing Gibbous
+- 🌕: Full
+- 🌖: Waning Gibbous
+- 🌗: Last Quarter
+- 🌘: Waning Crescent"
+  ;;
+6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
+7) timezones ;;
+esac
+
+# Output the formatted date and time
+date "+${moon-$calendar}%a,%d $icon%H:%M"

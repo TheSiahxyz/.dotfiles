@@ -1,0 +1,91 @@
+#!/bin/sh
+
+set -eu
+
+pidof transmission-daemon >/dev/null && echo "Turn off transmission-daemon first!" && exit 1
+
+# Check if inside a Git repository
+! git rev-parse --is-inside-work-tree >/dev/null 2>&1 && echo "Not a git repository." && exit 1
+
+# Function to generate a message for each status line
+generate_message() {
+  status=$1
+  file=$2
+  if echo "$file" | grep -q '/'; then
+    file_name="${file##*/}"
+    path_name="${file%/*}"
+    dir_name="${path_name##*/}"
+    dir_file_name="$dir_name/$file_name"
+  else
+    dir_file_name="$file"
+  fi
+  case "$status" in
+  " M" | "M ") # Modified
+    echo "modified $dir_file_name"
+    ;;
+  "??") # Untracked (new) files
+    echo "created $dir_file_name"
+    ;;
+  " D" | "D ") # Deleted from the index
+    echo "deleted $dir_file_name"
+    ;;
+  *) # Catch-all for other statuses
+    echo "updated $dir_file_name"
+    ;;
+  esac
+}
+
+# Check for changes in the working directory
+changes=$(git status --porcelain)
+
+# Check for unpushed commits
+unpushed=$(git cherry -v | wc -l)
+
+[ -z "$changes" ] && [ "$unpushed" -eq 0 ] && exit
+
+# Generate default commit message if there are changes
+if [ -n "$changes" ] && [ "$unpushed" -eq 0 ]; then
+  num_changes=$(echo "$changes" | wc -l)
+  if [ "$num_changes" -gt 5 ]; then
+    default="updates"
+  else
+    default=$(echo "$changes" | while IFS= read -r line; do
+      status=$(echo "$line" | cut -c1-2)
+      file=$(echo "$line" | cut -c4-)
+      generate_message "$status" "$file"
+    done | tr '\n' ',' | sed 's/,$//;s/,/, /g;s/"$//')
+  fi
+  message="${1:-$default}"
+
+  # Add and commit changes
+  git add --all .
+  git commit -m "$message"
+else
+  message=$(git cherry -v | awk '{$1=$2=""; print $0}' | sed 's/^ *//' | tail -n 1)
+fi
+
+# Get the current Git branch name
+branch=$(git symbolic-ref -q HEAD | sed -e 's|^refs/heads/||')
+
+# Save current directory and change to the Git repo root
+repo_root=$(git rev-parse --show-toplevel || echo ".")
+cd "$repo_root"
+
+# Pull and rebase before pushing
+git pull --rebase origin "$branch"
+
+# Check if the 'home' remote exists
+if git remote | grep -q "^home$"; then
+  # Push to both 'home' and 'origin'
+  git push home "$branch" && git push origin "$branch"
+else
+  # Push only to 'origin'
+  git push origin "$branch"
+fi
+
+printf "\n[repo] %s(%s): %s\n" "$(basename "$repo_root")" "$branch" "$message"
+
+# Return to the original directory
+cd - >/dev/null
+
+command -v dwmblocks >/dev/null 2>&1 && pkill -RTMIN+18 "${STATUSBAR:-dwmblocks}"

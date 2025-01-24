@@ -1,0 +1,25 @@
+{
+  "title": "esc = ctrl + c",
+  "rules": [
+    {
+      "description": "Control + c => Escape",
+      "manipulators": [
+        {
+          "from": {
+            "key_code": "c",
+            "modifiers": {
+              "mandatory": ["control"],
+              "optional": ["caps_lock", "option"]
+            }
+          },
+          "to": [
+            {
+              "key_code": "escape"
+            }
+          ],
+          "type": "basic"
+        }
+      ]
+    }
+  ]
+}

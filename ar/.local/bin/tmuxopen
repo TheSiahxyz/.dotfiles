@@ -1,0 +1,193 @@
+#!/bin/sh
+
+usage() {
+  echo "Search for files and open them in Neovim within tmux panes."
+  echo ""
+  echo "Usage: tmuxopen [OPTIONS]"
+  echo ""
+  echo "Options:"
+  echo "  -h, --help      : Show this help message"
+  echo "  -d, --debug     : Enable debug output"
+  echo ""
+  echo "Controls:"
+  echo "  Tab         Select files"
+  echo "  Ctrl+f      Search filenames"
+  echo "  Ctrl+g      Search file contents"
+  echo "  Ctrl+d      Search directories"
+  echo ""
+  echo "Environment Variables:"
+  echo "  NVIM_SEARCH_REGISTRY    Set to the search query, allowing Neovim to highlight matches"
+  echo ""
+  echo "Example:"
+  echo "  tmuxopen             # Run the normal search and open"
+  echo "  tmuxopen --debug     # Run with debug output"
+}
+
+debug() {
+  [ "$DEBUG" -eq 1 ] && echo "DEBUG: $*" >&2
+}
+
+get_fzf_output() {
+  RG_BIND="ctrl-g:reload:rg --line-number --no-heading --color=always --smart-case --glob '!**/.git/**' --glob '!node_modules/**' '' 2>/dev/null || true"
+  FILE_BIND="ctrl-f:reload:rg --files --glob '!**/.git/**' --glob '!node_modules/**' 2>/dev/null || true"
+  if command -v fd >/dev/null 2>&1; then
+    DIR_BIND="ctrl-d:change-prompt(directory> )+reload(cd \"$HOME\" && echo \"$HOME\"; fd --type d --hidden --absolute-path --color never --exclude .git --exclude node_modules)"
+  else
+    DIR_BIND="ctrl-d:change-prompt(directory> )+reload(cd \"$HOME\" && find \"$HOME\" -type d -name node_modules -prune -o -name .git -prune -o -type d -print)"
+  fi
+
+  rg --line-number --no-heading --color=always --smart-case --glob '!**/.git/**' --glob '!LICENSE' '' 2>/dev/null |
+    fzf-tmux \
+      --ansi --multi --delimiter : \
+      --reverse \
+      --print-query \
+      --preview 'bat --style=numbers --color=always --highlight-line {2} {1} 2>/dev/null || echo "Preview not available"' \
+      --preview-window 'up,60%,border-bottom,+{2}+3/3,~3' \
+      --bind "$FILE_BIND" \
+      --bind "$RG_BIND" \
+      --bind "$DIR_BIND" \
+      --bind 'ctrl-c:abort' \
+      --header "^f filenames, ^g contents, ^d directories"
+}
+
+set_nvim_search_variable() {
+  raw_output="$1"
+  query=$(echo "$raw_output" | head -n1)
+  export NVIM_SEARCH_REGISTRY="$query"
+}
+
+open_files_in_nvim() {
+  pane="$1"
+  shift
+  file_indices="$*"
+  nvim_cmd="nvim"
+  for index in $file_indices; do
+    file=$(echo "$files" | awk -v idx="$index" '{print $idx}')
+    line=$(echo "$lines" | awk -v idx="$index" '{print $idx}')
+    nvim_cmd="$nvim_cmd +$line $file"
+  done
+  nvim_cmd="$nvim_cmd -c 'let @/=\"$NVIM_SEARCH_REGISTRY\"'"
+  debug "Running command in pane $pane: $nvim_cmd"
+  tmux send-keys -t "$pane" "$nvim_cmd" C-m
+}
+
+# Main logic
+DEBUG=0
+
+# Parse command line arguments
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+  -d | --debug)
+    DEBUG=1
+    shift
+    ;;
+  -h | --help)
+    usage
+    exit 0
+    ;;
+  *)
+    echo "Unknown option: $1" >&2
+    usage
+    exit 1
+    ;;
+  esac
+done
+
+for cmd in rg fzf bat tmux nvim; do
+  if ! command -v "$cmd" >/dev/null 2>&1; then
+    echo "Error: $cmd not found" >&2
+    exit 1
+  fi
+done
+
+if [ -z "$TMUX" ]; then
+  echo "Error: Not in a tmux session" >&2
+  exit 1
+fi
+
+raw_output=$(get_fzf_output)
+debug "Raw fzf output:"
+debug "$raw_output"
+set_nvim_search_variable "$raw_output"
+
+# Split the newline-delimited output into an array, skipping the first line (query)
+selections=$(echo "$raw_output" | sed 1d)
+
+debug "Number of selections: $(echo "$selections" | wc -l)"
+debug "Selections:"
+debug "$selections"
+if [ -z "$selections" ]; then
+  debug "No selections made"
+  exit 0
+fi
+
+files=""
+lines=""
+count=0
+
+# Use a here document to avoid subshell issues
+while IFS= read -r selection; do
+  file=$(echo "$selection" | awk -F: '{print $1}')
+  line=$(echo "$selection" | awk -F: '{print $2}')
+  debug "Processing selection: $selection"
+  debug "File: $file, Line: $line"
+  if [ -f "$file" ]; then
+    files="$files $file"
+    lines="$lines $line"
+    count=$((count + 1))
+  else
+    debug "File not found: $file"
+  fi
+done <<EOF
+$selections
+EOF
+
+debug "Number of valid files: $count"
+debug "Valid files:"
+debug "$files"
+if [ "$count" -eq 0 ]; then
+  debug "No valid files selected"
+  exit 0
+fi
+
+if [ "$count" -eq 1 ]; then
+  debug "Opening single file"
+  open_files_in_nvim "$(tmux display-message -p '#P')" 1
+else
+  debug "Opening multiple files"
+  window_name="TheSiahxyz-$(date +%s)"
+  tmux new-window -n "$window_name"
+  case "$count" in
+  2)
+    debug "Opening 2 files side-by-side"
+    tmux split-window -t "$window_name" -h -p 50
+    open_files_in_nvim "$window_name.1" 1
+    open_files_in_nvim "$window_name.2" 2
+    tmux select-pane -t "$window_name.1"
+    ;;
+  3)
+    debug "Opening 3 files"
+    tmux split-window -t "$window_name" -h -p 50
+    tmux split-window -t "$window_name.2" -v -p 50
+    open_files_in_nvim "$window_name.1" 1
+    open_files_in_nvim "$window_name.2" 2
+    open_files_in_nvim "$window_name.3" 3
+    ;;
+  *)
+    debug "Opening 4 or more files"
+    tmux split-window -t "$window_name" -h -p 50
+    tmux split-window -t "$window_name.1" -v -p 50
+    tmux split-window -t "$window_name.3" -v -p 50
+    open_files_in_nvim "$window_name.1" 1
+    open_files_in_nvim "$window_name.2" 2
+    open_files_in_nvim "$window_name.3" 3
+    remaining_indices=""
+    for i in $(seq 4 "$count"); do
+      remaining_indices="$remaining_indices $i"
+    done
+    open_files_in_nvim "$window_name.4" "$remaining_indices"
+    ;;
+  esac
+fi
+
+debug "Script completed"
