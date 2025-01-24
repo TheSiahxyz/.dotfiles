@@ -71,16 +71,26 @@ branch=$(git symbolic-ref -q HEAD | sed -e 's|^refs/heads/||')
 repo_root=$(git rev-parse --show-toplevel || echo ".")
 cd "$repo_root"
 
-# Pull and rebase before pushing
-git pull --rebase origin "$branch"
-
-# Check if the 'home' remote exists
-if git remote | grep -q "^home$"; then
-  # Push to both 'home' and 'origin'
-  git push home "$branch" && git push origin "$branch"
+if [ "$repo_root" = "${PASSWORD_STORE_DIR:-${HOME}/.password-store}" ]; then
+  if git remote | grep -q "^home$"; then
+    # Push to both 'home' and 'origin'
+    pass git push home "$branch" && pass git push origin "$branch"
+  else
+    # Push only to 'origin'
+    pass git push origin "$branch"
+  fi
 else
-  # Push only to 'origin'
-  git push origin "$branch"
+  # Pull and rebase before pushing
+  git pull --rebase origin "$branch"
+
+  # Check if the 'home' remote exists
+  if git remote | grep -q "^home$"; then
+    # Push to both 'home' and 'origin'
+    git push home "$branch" && git push origin "$branch"
+  else
+    # Push only to 'origin'
+    git push origin "$branch"
+  fi
 fi
 
 printf "\n[repo] %s(%s): %s\n" "$(basename "$repo_root")" "$branch" "$message"

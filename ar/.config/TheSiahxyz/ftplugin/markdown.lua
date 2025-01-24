@@ -28,6 +28,27 @@ function BoldMe()
 	vim.api.nvim_buf_set_lines(0, start_line - 1, end_line, false, lines)
 end
 
+local function MarkdownCodeBlock(outside)
+	vim.cmd("call search('```', 'cb')")
+	vim.cmd(outside and "normal! Vo" or "normal! j0Vo")
+	vim.cmd("call search('```')")
+	if not outside then
+		vim.cmd("normal! k")
+	end
+end
+
+-- Code block text objects
+for _, mode in ipairs({ "o", "x" }) do
+	for _, mapping in ipairs({
+		{ "am", true },
+		{ "im", false },
+	}) do
+		vim.keymap.set(mode, mapping[1], function()
+			MarkdownCodeBlock(mapping[2])
+		end, { buffer = 0 })
+	end
+end
+
 -- Function to fold all headings of a specific level
 local function set_foldmethod_expr()
 	-- These are lazyvim.org defaults but setting them just in case a file
@@ -192,41 +213,63 @@ local function update_markdown_toc(heading2, heading3)
 	vim.cmd("loadview")
 end
 
+-- FileType autocmd for markdown files
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = { "markdown", "mdx", "mdown", "mkd", "mkdn", "mdwn" },
+	callback = function()
+		-- Local settings
+		vim.opt_local.conceallevel = 0
+		vim.bo.textwidth = is_in_obsidian_repo() and 80 or 175
+		vim.opt_local.spell = true
+		vim.opt_local.spelllang = "en_us"
+		vim.opt_local.expandtab = true
+		vim.opt_local.shiftwidth = 4
+		vim.opt_local.softtabstop = 4
+		vim.opt_local.autoindent = true
+
+		local arrows = { [">>"] = "→", ["<<"] = "←", ["^^"] = "↑", ["VV"] = "↓" }
+		for key, val in pairs(arrows) do
+			vim.cmd(string.format("iabbrev %s %s", key, val))
+		end
+	end,
+})
+
 -- this setting makes markdown auto-set the 80 text width limit when typing
 -- vim.cmd('set fo+=a')
 if is_in_obsidian_repo() then
 	vim.bo.textwidth = 175 -- No limit for Obsidian repository
 end
 
-vim.cmd("set conceallevel=0")
-vim.cmd("setlocal spell spelllang=en_us")
-vim.cmd("setlocal expandtab shiftwidth=4 softtabstop=4 autoindent")
-vim.cmd([[
-  " arrows
-  iabbrev >> →
-  iabbrev << ←
-  iabbrev ^^ ↑
-  iabbrev VV ↓
-]])
-
 -- Makrdown.nvim settings
-vim.g.vim_markdown_auto_insert_bullets = 0
-vim.g.vim_markdown_autowrite = 1
-vim.g.vim_markdown_conceal = 0
-vim.g.vim_markdown_conceal_code_blocks = 0
-vim.g.vim_markdown_folding_disabled = 0
-vim.g.vim_markdown_folding_level = 2
-vim.g.vim_markdown_folding_style_pythonic = 1
-vim.g.vim_markdown_follow_anchor = 1
-vim.g.vim_markdown_new_list_item_indent = 0
-vim.g.vim_markdown_no_extensions_in_markdown = 1
-vim.g.vim_markdown_toc_autofit = 1
+local markdown_settings = {
+	auto_insert_bullets = 0,
+	autowrite = 1,
+	conceal = 0,
+	conceal_code_blocks = 0,
+	folding_disabled = 0,
+	folding_level = 2,
+	folding_style_pythonic = 1,
+	follow_anchor = 1,
+	new_list_item_indent = 0,
+	no_extensions_in_markdown = 1,
+	no_default_key_mappings = 1,
+	toc_autofit = 1,
+}
+
+for key, value in pairs(markdown_settings) do
+	vim.g["vim_markdown_" .. key] = value
+end
 
 -- MarkdownPreview settings
 -- Get the BROWSER environment variable
-local browser = os.getenv("BROWSER")
-vim.g.mkdp_browser = browser or "/usr/bin/firefox"
-vim.g.mkdp_echo_preview_url = 0
+local markdown_preview_settings = {
+	browser = os.getenv("BROWSER") or "/usr/bin/firefox",
+	echo_preview_url = 0,
+}
+
+for key, value in pairs(markdown_preview_settings) do
+	vim.g["mkdp_" .. key] = value
+end
 
 -- Save the cursor position globally to access it across different mappings
 _G.saved_positions = {}
@@ -274,6 +317,7 @@ vim.keymap.set("n", "<leader>mhd", function()
 	-- Clear search highlight
 	vim.cmd("nohlsearch")
 end, { desc = "Decrease headings without confirmation" })
+
 local function make_heading_content()
 	-- Get the total number of lines in the buffer
 	local total_lines = vim.api.nvim_buf_line_count(0)
