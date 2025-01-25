@@ -22,7 +22,7 @@ EOF
 }
 
 # This block displays the number of running and queued background tasks. Requires tsp.
-num=$(tsp -l | awk -v numr=0 -v numq=0 '{if (!/notify-send/ && /running/) numr++; if (!/notify-send/ && /queued/) numq++} END{print numr"|"numq}')
+num=$(tsp -l | awk -v numr=0 -v numq=0 '{if (!/notify-send/ && /running/) numr++; if (!/notify-send/ && /queued/) numq++} END{print numr"|"numr+numq}')
 
 # Handle mouse clicks
 case $BLOCK_BUTTON in
