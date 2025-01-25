@@ -57,7 +57,7 @@ fi' < /dev/tty > /dev/tty 2>&1)+reload(tree -Ffi | grep '.gpg' | sed 's/.gpg$//g
 )
 
 PASSDATA="$(pass "$PASSFILE")"
-PASSWORD="$(echo "$PASSDATA" | head -n 1)"
+PASSWORD="$(printf '%s' "$PASSDATA" | head -n 1)"
 SHOW_PASSDATA=false
 
 if [ "$1" = "-i" ]; then
@@ -67,18 +67,18 @@ fi
 
 if [ "$SHOW_PASSDATA" = true ]; then
   PASSDATA="$(pass "$PASSFILE")"
-  echo "$PASSDATA"
+  printf "%s" "$PASSDATA"
 else
   PASSWORD="$(pass show "$PASSFILE" | head -n 1)"
-  echo "$PASSWORD"
+  printf "%s" "$PASSWORD"
 
   if [ -n "$PASSWORD" ]; then
     case "$(uname)" in
     Darwin*)
-      echo "$PASSWORD" | pbcopy # Use pbcopy on macOS
+      printf "%s" "$PASSWORD" | pbcopy # Use pbcopy on macOS
       ;;
     Linux*)
-      echo "$PASSWORD" | xclip -selection clipboard # Use xclip on Linux
+      printf "%s" "$PASSWORD" | xclip -selection clipboard # Use xclip on Linux
       ;;
     *)
       echo "Unsupported operating system"
