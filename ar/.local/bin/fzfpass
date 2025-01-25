@@ -56,8 +56,6 @@ fi' < /dev/tty > /dev/tty 2>&1)+reload(tree -Ffi | grep '.gpg' | sed 's/.gpg$//g
       --bind="tab:replace-query"
 )
 
-PASSDATA="$(pass "$PASSFILE")"
-PASSWORD="$(printf '%s' "$PASSDATA" | head -n 1)"
 SHOW_PASSDATA=false
 
 if [ "$1" = "-i" ]; then
@@ -67,10 +65,10 @@ fi
 
 if [ "$SHOW_PASSDATA" = true ]; then
   PASSDATA="$(pass "$PASSFILE")"
-  printf "%s" "$PASSDATA"
+  echo "$PASSDATA"
 else
   PASSWORD="$(pass show "$PASSFILE" | head -n 1)"
-  printf "%s" "$PASSWORD"
+  echo "$PASSWORD"
 
   if [ -n "$PASSWORD" ]; then
     case "$(uname)" in
