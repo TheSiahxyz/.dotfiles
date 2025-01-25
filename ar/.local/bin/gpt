@@ -16,11 +16,11 @@ tmpfile=$(mktemp /tmp/nvim_buffer_cleaned.XXXXXX)
 echo "$input" >"$tmpfile"
 
 # Process the input and open Neovim directly, ensuring it doesn't suspend
-nvim \
-  -c "GpChatNew" \
-  -c "call append(line('\$')-1, readfile('$tmpfile'))" \
-  -c "normal! Gdd" \
-  -c "startinsert"
+nvim -c "GpChatNew" \
+  -c "call append(line('$'), readfile('$tmpfile'))" \
+  -c "normal iKeep your responses short and simple, when asked to provide command, provide only one. Do not provide explanations unless explicitly asked for." \
+  -c "normal o" \
+  -c "call timer_start(100, {-> feedkeys('A', 'n')})"
 
 # Remove the temporary file after usage
 rm "$tmpfile"
