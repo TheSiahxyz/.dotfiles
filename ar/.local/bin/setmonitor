@@ -1,9 +1,17 @@
 #!/bin/sh
 
 # Parse connected displays
-default="--mode 1920x1080 --rotate normal --scale 1.0x1.0 --dpi 96"
+default="--mode 1920x1080 --rotate normal --scale 1.0x1.0"
+default_dpi=96
+displays=$(xrandr -q | grep -w "connected")
+x=$(echo "$displays" | grep "mm" | sed -E "s/.* ([0-9]+)mm x ([0-9]+)mm.*/\1/")
+y=$(echo "$displays" | grep "mm" | sed -E "s/.* ([0-9]+)mm x ([0-9]+)mm.*/\2/")
+calx=$(((1920 + (x / 10) - 1) / (x / 10))) # Ceiling for x
+caly=$(((1080 + (y / 10) - 1) / (y / 10))) # Ceiling for y
+dpi=$(if [ "$calx" -gt "$caly" ]; then echo "$calx"; else echo "$caly"; fi)
+dpi=$(if [ "$dpi" -lt "$default_dpi" ]; then echo "$default_dpi"; else echo "$dpi"; fi)
 
-for connected in $(xrandr -q | grep "\sconnected" | awk '{print $1}'); do
+for connected in $(echo "$displays" | cut -d ' ' -f 1); do
   case $connected in
   eDP*) edp="$connected" ;;
   HDMI*) hdmi="$connected" ;;
@@ -15,20 +23,20 @@ done
 # If the lid is closed, turn off the laptop's screen
 if grep -q "disabled" /sys/class/drm/card0-eDP-1/enabled || grep -q "closed" /proc/acpi/button/lid/LID/state; then
   if [ -n "$hdmi" ] && [ -z "$dp" ] && [ -n "$edp" ]; then
-    xrandr --output "$edp" --off --output "$hdmi" --primary $default
+    xrandr --output "$edp" --off --output "$hdmi" --primary $default --dpi "$dpi"
   elif [ -z "$hdmi" ] && [ -n "$dp" ] && [ -n "$edp" ]; then
-    xrandr --output "$edp" --off --output "$dp" --primary $default
+    xrandr --output "$edp" --off --output "$dp" --primary $default --dpi "$dpi"
   else
-    xrandr --output "$edp" --off --output "$display" --primary $default
+    xrandr --output "$edp" --off --output "$display" --primary $default --dpi "$dpi"
   fi
 else
   # Apply display settings when lid is open
   if [ -n "$hdmi" ] && [ -z "$dp" ] && [ -n "$edp" ]; then
-    xrandr --output "$edp" --pos 1920x0 $default --output "$hdmi" --primary --pos 0x0 $default
+    xrandr --output "$edp" --pos 1920x0 $default --dpi "$dpi" --output "$hdmi" --primary --pos 0x0 $default --dpi "$dpi"
   elif [ -z "$hdmi" ] && [ -n "$dp" ] && [ -n "$edp" ]; then
-    xrandr --output "$edp" --pos 1920x0 $default --output "$dp" --primary --pos 0x0 $default
+    xrandr --output "$edp" --pos 1920x0 $default --dpi "$dpi" --output "$dp" --primary --pos 0x0 $default --dpi "$dpi"
   elif [ -z "$hdmi" ] && [ -z "$dp" ] && [ -n "$edp" ]; then
-    xrandr --output "$edp" --primary $default
+    xrandr --output "$edp" --primary $default --dpi "$dpi"
   else
     xrandr --output "$display" --primary --auto
   fi
