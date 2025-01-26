@@ -62,13 +62,6 @@ open() {
   esac
 }
 
-browsercheck() {
-  if pidof "$BROWSER" >/dev/null; then
-    notify-send "❌ Failed to $1 from '$BROWSER'." "'$BROWSER' is locked. Check if '$BROWSER' is running."
-    exit 1
-  fi
-}
-
 openinbrowser() {
   # Extract only the default part of the profile name
   case $BROWSER in
@@ -86,9 +79,7 @@ openinbrowser() {
   esac
 
   db_path="$profile_dir/places.sqlite"
-  tmp_dir="${XDG_CACHE_HOME:-$HOME/.cache}/mozilla/firefox/$USER.$profile"
-  tmp_file="$tmp_dir/$1.sqlite"
-  mkdir -p "$tmp_dir"
+  tmp_file="$(mktemp)"
   cp -f "$db_path" "$tmp_file"
 
   type dmenu >/dev/null 2>&1 &&
@@ -125,6 +116,7 @@ openinbrowser() {
   else
     exit
   fi
+  rm "$tmp_file"
 }
 
 geturls() {
@@ -152,13 +144,13 @@ copytoclipboard() {
 
 while getopts "bchopstv" opt; do
   case $opt in
-  b) browsercheck "open bookmark" && openinbrowser "bookmark" ;;
+  b) openinbrowser "bookmark" ;;
   c) geturls "to copy" && copytoclipboard ;;
   o) geturls "to open in $BROWSER" && "$BROWSER" --new-window "$URL" ;;
   p) geturls "to open in private $BROWSER" && "$BROWSER" --private-window "$URL" ;;
-  s) browsercheck "open history" && openinbrowser "history" ;;
+  s) openinbrowser "history" ;;
   t) geturls "to type under cursor" && xdotool type "$URL" ;;
-  v) browsercheck "open bookmark" && openinbrowser "private bookmark" ;;
+  v) openinbrowser "private bookmark" ;;
   h | *) usage && exit 0 ;;
   esac
 done
