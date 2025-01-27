@@ -87,11 +87,13 @@ return {
 			require("mason").setup()
 			require("mason-lspconfig").setup({
 				ensure_installed = {
+					"bashls",
 					"dockerls",
 					"docker_compose_language_service",
 					"jdtls",
 					"jsonls",
 					"lua_ls",
+					"mutt_ls",
 					"pyright",
 					"ruff",
 				},
@@ -99,6 +101,11 @@ return {
 				handlers = {
 					function(server_name) -- default handler (optional)
 						require("lspconfig")[server_name].setup({
+							capabilities = capabilities,
+						})
+					end,
+					["bashls"] = function()
+						lspconfig.bashls.setup({
 							capabilities = capabilities,
 						})
 					end,
@@ -124,6 +131,24 @@ return {
 							-- },
 						})
 					end,
+					["jdtls"] = function()
+						lspconfig.jdtls.setup({
+							capabilities = capabilities,
+						})
+					end,
+					["jsonls"] = function()
+						lspconfig.jsonls.setup({
+							capabilities = capabilities,
+							settings = {
+								json = {
+									format = {
+										enable = true,
+									},
+									validate = { enable = true },
+								},
+							},
+						})
+					end,
 					["lua_ls"] = function()
 						lspconfig.lua_ls.setup({
 							capabilities = capabilities,
@@ -135,6 +160,11 @@ return {
 									},
 								},
 							},
+						})
+					end,
+					["mutt_ls"] = function()
+						lspconfig.mutt_ls.setup({
+							capabilities = capabilities,
 						})
 					end,
 					["pyright"] = function()
@@ -157,24 +187,6 @@ return {
 							-- 		disableOrganizeImports = false,
 							-- 	},
 							-- },
-						})
-					end,
-					["jdtls"] = function()
-						lspconfig.jdtls.setup({
-							capabilities = capabilities,
-						})
-					end,
-					["jsonls"] = function()
-						lspconfig.jsonls.setup({
-							capabilities = capabilities,
-							settings = {
-								json = {
-									format = {
-										enable = true,
-									},
-									validate = { enable = true },
-								},
-							},
 						})
 					end,
 				},
