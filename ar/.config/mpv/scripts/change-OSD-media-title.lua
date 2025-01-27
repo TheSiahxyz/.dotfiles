@@ -2,6 +2,7 @@ function set_osd_title()
 	local name = mp.get_property_osd("filename")
 	local percent_pos = ""
 	local chapter = ""
+	local playlist_num = ""
 	local frames_dropped = ""
 
 	if mp.get_property_osd("percent-pos") ~= "" then
