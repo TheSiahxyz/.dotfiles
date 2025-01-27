@@ -2,9 +2,9 @@
 
 # Usage:
 #	price <currency-base currency> <name of currency> <icon> <signal>
-#	price bat-btc "Basic Attention Token" 🦁 24
+#	price bat-btc "Basic Attention Token" 🦁 25
 #	This will give the price of BAT denominated in BTC and will update on
-#	signal 24.
+#	signal 25.
 # When the name of the currency is multi-word, put it in quotes.
 
 [ -z "$1" ] && exit 1
