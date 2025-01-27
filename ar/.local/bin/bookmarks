@@ -29,7 +29,7 @@ usage() {
   echo "  ${0##*/} -v         # Opens browser boomark in private browser window"
 }
 
-open() {
+opentool() {
   available_tools=""
   command -v xdg-open 2>/dev/null | grep -v "alias" -q && available_tools="$available_tools xdg-open"
   command -v open 2>/dev/null | grep -v "alias" -q && available_tools="$available_tools open"
@@ -111,7 +111,7 @@ openinbrowser() {
     if echo "$1" | grep -q "private"; then
       "$BROWSER" --private-window "$choice"
     else
-      open "$choice"
+      opentool "$choice"
     fi
   else
     exit
