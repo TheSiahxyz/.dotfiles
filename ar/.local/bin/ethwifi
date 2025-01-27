@@ -8,9 +8,24 @@ check_ethernet() {
   return 1
 }
 
-check_ethernet && nmcli radio wifi off && notify-send "📡 wifi: OFF" || {
-  nmcli radio wifi on
-  notify-send "📡 wifi: ON"
+toggle_wifi() {
+  wifi_status=$(nmcli radio wifi) # Get current Wi-Fi status
+  if [ "$wifi_status" = "enabled" ]; then
+    nmcli radio wifi off
+    notify-send "📡 wifi: OFF"
+  else
+    nmcli radio wifi on
+    notify-send "📡 wifi: ON"
+  fi
 }
 
+# Check Ethernet and toggle Wi-Fi based on its status
+if check_ethernet; then
+  nmcli radio wifi off
+  notify-send "📡 wifi: OFF (Ethernet connected)"
+else
+  toggle_wifi
+fi
+
+# Refresh status bar
 pkill -RTMIN+7 "${STATUSBAR:-dwmblocks}"

@@ -31,12 +31,11 @@ fi
 [ "$(cat /sys/class/net/e*/operstate 2>/dev/null)" = 'up' ] && ethericon="🌐" || ethericon="❎"
 
 # TUN
-[ -n "$(cat /sys/class/net/tun*/operstate 2>/dev/null)" ] && tunicon=" 🛰️"
+[ -n "$(cat /sys/class/net/tun*/operstate 2>/dev/null)" ] && tunicon="🛰️"
 
-if [ "$(cat /sys/class/net/w*/operstate 2>/dev/null)" = 'up' ] && [ ! "$(cat /sys/class/net/e*/operstate 2>/dev/null)" = 'up' ]; then
-  printf "%s%s\n" "$wifiicon" "$tunicon"
-elif [ ! "$(cat /sys/class/net/w*/operstate 2>/dev/null)" = 'up' ] && [ "$(cat /sys/class/net/e*/operstate 2>/dev/null)" = 'up' ]; then
-  printf "%s%s\n" "$ethericon" "$tunicon"
-else
-  printf "%s%s%s\n" "$wifiicon" " $ethericon" "$tunicon"
-fi
+icons=""
+[ -n "$wifiicon" ] && icons="${icons}$wifiicon "
+[ -n "$ethericon" ] && icons="${icons}$ethericon "
+[ -n "$tunicon" ] && icons="${icons}$tunicon "
+
+printf "%s\n" "${icons% }"

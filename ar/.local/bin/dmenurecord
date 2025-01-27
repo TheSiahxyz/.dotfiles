@@ -4,7 +4,7 @@ usage() {
   echo "Asks for recording type via dmenu."
   echo "If there is already a running instance, user will be prompted to end it. "
   echo ""
-  echo "Usage: ${0##*/} [-h] [audio] [kill] [video] [screencast]"
+  echo "Usage: ${0##*/} [-h] [-a|--audio|audio] [-k|--kill|kill] [-v|--video|video] [-s|--screencast|screencast]"
   echo ""
   echo "Options:"
   echo "  - audio         : Records only audio"
@@ -17,7 +17,7 @@ getdim() { xrandr | grep -oP '(?<=current ).*(?=,)' | tr -d ' '; }
 
 updateicon() {
   echo "$1" >/tmp/recordingicon
-  pkill -RTMIN+31 "${STATUSBAR:-dwmblocks}"
+  pkill -RTMIN+30 "${STATUSBAR:-dwmblocks}"
 }
 
 killrecording() {
@@ -25,7 +25,7 @@ killrecording() {
   kill -15 "$recpid"
   rm -f /tmp/recordingpid
   updateicon ""
-  pkill -RTMIN+31 "${STATUSBAR:-dwmblocks}"
+  pkill -RTMIN+24 "${STATUSBAR:-dwmblocks}"
 }
 
 screencast() {
@@ -39,7 +39,7 @@ screencast() {
     -f alsa -thread_queue_size 1024 -i default \
     -c:v h264 \
     -crf 0 -preset ultrafast -c:a aac \
-    "$HOME/screencast-$(date '+%y%m%d-%H%M-%S').mp4" &
+    "$recordings/screencast-$(date '+%y%m%d-%H%M-%S').mp4" &
   echo $! >/tmp/recordingpid
   updateicon "⏺️🎙️"
 }
@@ -51,7 +51,7 @@ video() {
     -s "$(getdim)" \
     -i "$DISPLAY" \
     -c:v libx264 -qp 0 -r 30 \
-    "$HOME/video-$(date '+%y%m%d-%H%M-%S').mkv" &
+    "$recordings/video-$(date '+%y%m%d-%H%M-%S').mkv" &
   echo $! >/tmp/recordingpid
   updateicon "⏺️"
 }
@@ -61,7 +61,7 @@ webcamhidef() {
     -f v4l2 \
     -i /dev/video0 \
     -video_size 1920x1080 \
-    "$HOME/webcam-$(date '+%y%m%d-%H%M-%S').mkv" &
+    "$recordings/webcam-$(date '+%y%m%d-%H%M-%S').mkv" &
   echo $! >/tmp/recordingpid
   updateicon "🎥"
 }
@@ -71,7 +71,7 @@ webcam() {
     -f v4l2 \
     -i /dev/video0 \
     -video_size 640x480 \
-    "$HOME/webcam-$(date '+%y%m%d-%H%M-%S').mkv" &
+    "$recordings/webcam-$(date '+%y%m%d-%H%M-%S').mkv" &
   echo $! >/tmp/recordingpid
   updateicon "🎥"
 }
@@ -80,7 +80,7 @@ audio() {
   ffmpeg \
     -f alsa -i default \
     -c:a flac \
-    "$HOME/audio-$(date '+%y%m%d-%H%M-%S').flac" &
+    "$recordings/audio-$(date '+%y%m%d-%H%M-%S').flac" &
   echo $! >/tmp/recordingpid
   updateicon "🎙️"
 }
@@ -113,17 +113,20 @@ videoselected() {
     -video_size "$W"x"$H" \
     -i :0.0+"$X,$Y" \
     -c:v libx264 -qp 0 -r 30 \
-    "$HOME/box-$(date '+%y%m%d-%H%M-%S').mkv" &
+    "$recordings/box-$(date '+%y%m%d-%H%M-%S').mkv" &
   echo $! >/tmp/recordingpid
   updateicon "⏺️"
 }
 
+recordings="${XDG_VIDEOS_DIR:-$HOME/Videos}/recordings"
+[ -d "$recordings" ] || mkdir -p "$recordings"
+
 case "$1" in
 -h | --help | help) usage && exit 0 ;;
-audio) audio ;;
-kill) killrecording ;;
-screencast) screencast ;;
-video) video ;;
+-a | --audio | audio) audio ;;
+-k | --kill | kill) killrecording ;;
+-s | --screencast | screencast) screencast ;;
+-v | --video | video) video ;;
 *selected) videoselected ;;
 *) ([ -f /tmp/recordingpid ] && asktoend && exit) || askrecording ;;
 esac
