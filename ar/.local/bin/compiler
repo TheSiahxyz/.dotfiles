@@ -12,7 +12,7 @@
 # config.h files: (For suckless utils) recompiles and installs program.
 # all others: run `sent` to show a presentation
 
-file="${1}"
+file=$(readlink -f "$1")
 ext="${file##*.}"
 dir=${file%/*}
 base="${file%.*}"
