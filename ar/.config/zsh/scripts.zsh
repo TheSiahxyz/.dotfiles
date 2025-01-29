@@ -425,7 +425,7 @@ function xev_aligned_key_event() {
 # kill process
 alias fpkill=fzf_kill_process
 function fzf_kill_process() {
-    ps aux |
+    ps aux | grep -e "^$(whoami)" |
     fzf --height 40% \
         --layout=reverse \
         --header-lines=1 \

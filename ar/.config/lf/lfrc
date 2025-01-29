@@ -194,13 +194,17 @@ cmd extract ${{
       *.tar.bz|*.tar.bz2|*.tbz|*.tbz2) tar xjf $fx;;
       *.tar.gz|*.tgz) tar xzf $fx                 ;;
       *.tar.xz|*.txz) tar xf $fx                  ;;
-      *.bz2)       bunzip2 $fx                    ;;
-      *.rar)       unrar e $fx                    ;;
-      *.gz)        gunzip $fx                     ;;
-      *.tar)       tar xf $fx                     ;;
-      *.zip)       unzip $fx                      ;;
-      *.Z)         uncompress $fx                 ;;
-      *.7z)        7z x $fx                       ;;
+      *.bz2)        bunzip2 $fx                   ;;
+      *.lzma)       unlzma $fx                    ;;
+      *.rar)        unrar e $fx                   ;;
+      *.gz)         gunzip $fx                    ;;
+      *.tar)        tar xf $fx                    ;;
+      *.xz)         unxz $fx                      ;;
+      *.zip|*.jar|*.war) unzip $fx                ;;
+      *.Z)          uncompress $fx                ;;
+      *.7z)         7z x $fx                      ;;
+      *.exe)        cabextract $fx                ;;
+      *.ace)        unace x $fx                   ;;
     esac
   }
 }}
