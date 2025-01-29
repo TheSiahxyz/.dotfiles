@@ -10,15 +10,15 @@ return {
 				vim.g.goyo_width = 80
 				vim.g.seoul256_background = 235
 				vim.cmd([[
-      Goyo
-      set bg=light
-      set linebreak
-      set wrap
-      set textwidth=0
-      set wrapmargin=0
-      set background=dark
-      colorscheme seoul256
-    ]])
+          Goyo
+          set bg=light
+          set linebreak
+          set wrap
+          set textwidth=0
+          set wrapmargin=0
+          set background=dark
+          colorscheme seoul256
+        ]])
 				vim.api.nvim_buf_set_keymap(
 					0,
 					"n",

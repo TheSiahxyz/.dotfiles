@@ -533,7 +533,7 @@ vim.api.nvim_set_keymap(
 )
 vim.api.nvim_set_keymap(
 	"n",
-	"<leader>ov",
+	"<leader>RR",
 	":!opout <C-r>%<cr><cr>",
 	{ noremap = true, silent = true, desc = "Docs viewer" }
 )
