@@ -52,12 +52,6 @@ stow_package() {
   fi
 }
 
-mail_sync() {
-  [ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/mutt/muttrc" ] && [ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/mutt/thesiah.muttrc" ] &&
-    ! grep -qF "source /home/$USER/.config/mutt/thesiah.muttrc" "${XDG_CONFIG_HOME:-${HOME}/.config}/mutt/muttrc" &&
-    sed -i "/source \/usr\/share\/mutt-wizard\/mutt-wizard\.muttrc/a source \/home\/$USER\/.config\/mutt\/thesiah\.muttrc" /home/"$USER"/.config/mutt/muttrc
-}
-
 # Ensure running from the correct directory
 cd "$stowdir" || exit 1
 
@@ -67,18 +61,15 @@ targetdir=$(select_stow_package) || exit 1
 # Ask the user for the resolution strategy
 resolve=$(ask_resolution_strategy) || exit 1
 
+# Stow
 stow_package "$targetdir" "$resolve" && stow_package "default" "$resolve" || exit
+
+# Link for profile
 ln -sf "$stowdir/$targetdir/.config/shell/profile" "$HOME/.zprofile"
 
 # Link for bash
 ln -sf "$stowdir/$targetdir/.config/bash/bash_profile" "$HOME/.bash_profile"
 ln -sf "$stowdir/$targetdir/.config/bash/bashrc" "$HOME/.bashrc"
-
-# Link for cro# Link for gtk 2.0
-ln -sf "$stowdir/$targetdir/.config/gtk-2.0/gtkrc-2.0" "$HOME/.gtkrc-2.0"
-
-# Sync mail
-mail_sync
 
 # Reload shortcuts (assumes this functionality is defined elsewhere and works as expected)
 shortcuts >/dev/null 2>&1 || exit 1
