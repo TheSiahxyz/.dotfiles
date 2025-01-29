@@ -37,7 +37,6 @@ cts             ${XDG_CONFIG_HOME:-${HOME}/.config}/TheSiahxyz/lua/thesiahxyz
 cvc             ${XDG_CONFIG_HOME:-${HOME}/.config}/vim
 cvp             ${XDG_CONFIG_HOME:-${HOME}/.config}/openvpn
 cxc             ${XDG_CONFIG_HOME:-${HOME}/.config}/x11
-cyv             ${XDG_CONFIG_HOME:-${HOME}/.config}/youtube-viewer
 czc             ${XDG_CONFIG_HOME:-${HOME}/.config}/zsh
 dot             ${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}
 Esm             /etc/samba

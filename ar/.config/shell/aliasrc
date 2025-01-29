@@ -311,6 +311,9 @@ command -v pacman > /dev/null 2>&1 && {
 # pass
 alias potp='pass otp totp-secret'
 
+# pipe-viewer
+alias yt='pipe-viewer'
+
 # ps
 ialias ps='ps auxf'
 alias psj='ps aux | grep "[j]ava"'
@@ -455,9 +458,6 @@ ialias wget --hsts-file="${XDG_CACHE_HOME:-${HOME}/.cache}/wget-hsts"
 
 # xrandr
 alias xauto='xrandr --auto'
-
-# youtube-viewer
-alias yt='youtube-viewer'
 
 # zathura
 alias za='zathura'

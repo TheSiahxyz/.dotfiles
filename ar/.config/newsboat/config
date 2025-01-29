@@ -37,7 +37,7 @@ macro v set browser "setsid -f mpv" ; open-in-browser ; set browser linkhandler 
 macro V set browser "qndl -v" ; open-in-browser ; set browser linkhandler ; -- "Download a video file via qndl"
 macro w set browser "firefox" ; open-in-browser ; set browser linkhandler ; -- "Open url in browser"
 macro y set browser "echo %u | xclip -r -sel c" ; open-in-browser ; set browser linkhandler ; -- "Copy url to clipboard"
-macro Y set browser "youtube-viewer ; --comments=%u" ; open-in-browser ; set browser linkhandler -- "Open youtube comments via youtube-viewer"
+macro Y set browser "pipe-viewer ; --comments=%u" ; open-in-browser ; set browser linkhandler -- "Open youtube comments via youtube-viewer"
 
 color listnormal cyan default
 color listfocus black yellow standout bold
