@@ -1,5 +1,4 @@
 #!/bin/sh
 
-cmd=$(echo | dmenu -p "Enter command for man page:")
-
+cmd="$(man -k . | dmenu -i -l 20 -p "Select Program " | cut -d" " -f1)"
 [ -n "$cmd" ] && man_path=$(man -w "$cmd" 2>/dev/null) && [ -n "$man_path" ] && setsid -f "${TERMINAL:-st}" -e man "$cmd"

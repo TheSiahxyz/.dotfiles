@@ -1,0 +1,36 @@
+#!/bin/sh
+
+# initial configuration
+# sudo pacman --noconfirm -S bluez-utils pulseaudio-bluetooth pulseaudio-alsa blueman
+# sudo ln -vsf ${PWD}/etc/bluetooth/main.conf /etc/bluetooth/main.conf
+# sudo systemctl start bluetooth.service
+# sudo systemctl enable bluetooth.service
+
+# Requires:
+# 		blueman
+# 		bluez-utils
+# 		networkmanager_dmenu (https://github.com/firecat53/networkmanager-dmenu)
+# 		btmenu               (https://github.com/cdown/btmenu)
+
+[ "$(cat /sys/class/net/w*/operstate)" = 'down' ] && wifiicon="📡"
+[ -z "${wifiicon+var}" ] && wifiicon=$(grep "^\s*w" /proc/net/wireless | awk '{ print "📶", int($3 * 100 / 70) "%" }')
+
+wifi=$(printf "%s %s" "${wifiicon}" "$(cat /sys/class/net/w*/operstate | sed "s/down/❎/;s/up/🌐/")")
+
+if [ -n "${wifi}" ]; then
+  choice=$(printf 'bluetooth\nnetwork' | dmenu -i -p "${wifi}")
+else
+  choice=$(printf 'bluetooth\nnetwork' | dmenu -i -p 'Connect:')
+fi
+
+case "${choice}" in
+bluetooth)
+  [ -z "$(pgrep blueman)" ] && blueman-applet &
+  case "$(printf 'connect\ndisable\nmanage\nnew' | dmenu -i -p 'bluetooth:')" in
+  connect) btmenu ;;
+  disable) sudo rkill block bluetooth ;;
+  manage | new) $TERMINAL bluetoothctl ;;
+  esac
+  ;;
+network) networkmanager_dmenu ;;
+esac
