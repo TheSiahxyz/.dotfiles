@@ -13,7 +13,8 @@
 # all others: run `sent` to show a presentation
 
 file=$(readlink -f "$1")
-dir=$(dirname "$file")
+ext="${file##*.}"
+dir=${file%/*}
 base="${file%.*}"
 
 cd "$dir" || exit
@@ -22,85 +23,67 @@ Ifinstalled() {
   command -v "$1" >/dev/null || { notify-send "📦 <b>$1</b> must be installed for this function." && exit 1; }
 }
 
-textype() {
-  command="pdflatex"
-  errorfmt="-file-line-error"
-  # ( sed 5q "$file" | grep -i -q 'xelatex' ) && command="xelatex"
-  secdir="$(dirname "$dir")"
-  cd "$secdir" || exit
-  if [ -f "${secdir}/Notes.tex" ]; then
-    echo "${secdir}/Notes.tex"
-    $command $errorfmt --output-directory="$secdir" "${secdir}/Notes.tex"
-    exit
-  fi
-  $command $errorfmt --output-directory="$dir" "$base"
-  grep -i addbibresource "$file" >/dev/null &&
-    biber --input-directory "$dir" "$base" &&
-    $command $errorfmt --output-directory="$dir" "$base" &&
-    $command $errorfmt --output-directory="$dir" "$base"
-}
-
 pandoccmd() {
-  # Ifinstalled pdflatex && pandoc -V geometry:margin=4cm -f markdown-implicit_figures "$1" -o "${2}.pdf"
-  Ifinstalled groff && pandoc "${1}" -t ms --pdf-engine-opt=-p -o "${2}.pdf"
+  Ifinstalled pdflatex && pandoc -V geometry:margin=4cm -f markdown-implicit_figures "$1" -o "${2}.pdf" ||
+    Ifinstalled groff && pandoc "${1}" -t ms --pdf-engine-opt=-p -o "${2}.pdf"
 }
 
 pandocorg() { pandoccmd "$file" "$base"; }
 
-compilec() {
-  if [ -f "${dir}/Makefile" ]; then
-    make
-  else
-    cc "$file" -o "$base" && "$base"
-  fi
-}
+compilec() { [ -f "${dir}/Makefile" ] && make || cc "$file" -o "$base" && "$base"; }
 
-case "$file" in
-*\.[0-9]) preconv "$file" | refer -PS -e | groff -mandoc -T pdf >"$base".pdf ;;
-*\.apl) apl -f "$file" ;;
-*\.c) compilec ;;
-*config.h) make && sudo make install ;;
-*\.cpp) g++ "$file" -o "$base" && "$base" ;;
-*\.cs) mcs "$file" && mono "$base".exe ;;
-*\.docx | *\.doc)
+case "${ext}" in
+[0-9]) preconv "$file" | refer -PS -e | groff -mandoc -T pdf >"$base".pdf ;;
+apl) apl -f "$file" ;;
+c) compilec ;;
+config.h) make && sudo make install ;;
+cpp) g++ "$file" -o "$base" && "$base" ;;
+cs) mcs "$file" && mono "$base".exe ;;
+docx | *\.doc)
   Ifinstalled libreoffice && lowriter --convert-to pdf "$file" && exit
   Ifinstalled pandoc && pandoccmd "$file" "$base" && exit
   ;;
-*\.dot | *\.gv) dot -Tsvg "$file" | convert svg:- "$base".eps ;;
-*\.h) compilec ;;
-*\.html) refreshbrowser ;;
-*\.fnl)
-  echo "fennel --compile '$file' > '$base'.lua"
-  fennel --compile "$file" >"$base".lua
-  ;;
-*\.go) go run "$file" ;;
-*\.java) javac "$file" && echo "${base##*/}" | xargs java ;;
-*\.js) node "$file" ;;
-*\.m) octave "$file" ;;
-*\.md)
+dot | *\.gv) dot -Tsvg "$file" | convert svg:- "$base".eps ;;
+h) compilec ;;
+html) refreshbrowser ;;
+fnl) fennel --compile "$file" >"$base".lua ;;
+go) go run "$file" ;;
+java) javac "$file" && echo "${base##*/}" | xargs java ;;
+js) node "$file" ;;
+m) octave "$file" ;;
+md)
   { [ -x "$(command -v lowdown)" ] && [ -x "$(command -v groff)" ]; } &&
     lowdown --parse-no-intraemph "${file}" -Tms | groff -mpdfmark -ms -kept -T pdf >"${base}.pdf" ||
     { [ -x "$(command -v groffdown)" ] && [ -x "$(command -v groff)" ]; } &&
     groffdown -i "${file}" | groff -T pdf >"${base}.pdf" ||
     pandoc -t ms --highlight-style="kate" -s -o "${base}.pdf" "${file}"
   ;;
-*\.me) groff -Gktes -b -w w -me -T ps "$file" | ps2pdf - >"$base".pdf ;;
-*\.mm) groff -Gktes -b -w w -mm -mpic -T ps "$file" | ps2pdf - >"$base".pdf ;;
-*\.mom) pdfroff -pktes -b -wall -mom -mpdfmark "$file" >"$base".pdf ;;
-*\.ms | *\.groff) preconv "$file" | groff -Tpdf -ktesp -G -ms >"$base".pdf ;;
-*\.org) Ifinstalled pandoc && pandocorg "$file" "$base" && exit ;;
-*\.present) groff -p -e -t -mm -mpresent "$file" | presentps -l | ps2pdf - >"$base".pdf ;;
-*\.ps) ps2pdf "$file" ;;
-*\.py) python "$file" ;;
-*\.[rR]md) Rscript -e "rmarkdown::render('$file', quiet=TRUE)" ;;
-*\.r) R -f "$file" ;;
-*\.rkt) racket "$file" ;;
-*\.rs) cargo build ;;
-*\.sass) sassc -a "$file" "$base".css ;;
-*\.scad) openscad -o "$base".stl "$file" ;;
-*\.sent) setsid -f sent "$file" 2>/dev/null & ;;
-*\.tex) textype "$file" ;;
-*\.tcl) tclsh "$file" ;;
-*\.vim*) vint "$file" ;;
+me) groff -Gktes -b -w w -me -T ps "$file" | ps2pdf - >"$base".pdf ;;
+mm) groff -Gktes -b -w w -mm -mpic -T ps "$file" | ps2pdf - >"$base".pdf ;;
+mom) pdfroff -pktes -b -wall -mom -mpdfmark "$file" >"$base".pdf ;;
+ms | *\.groff) preconv "$file" | groff -Tpdf -ktesp -G -ms >"$base".pdf ;;
+org) Ifinstalled pandoc && pandocorg "$file" "$base" && exit ;;
+present) groff -p -e -t -mm -mpresent "$file" | presentps -l | ps2pdf - >"$base".pdf ;;
+ps) ps2pdf "$file" ;;
+py) python "$file" ;;
+[rR]md) Rscript -e "rmarkdown::render('$file', quiet=TRUE)" ;;
+r) R -f "$file" ;;
+rkt) racket "$file" ;;
+rs) cargo build ;;
+sass) sassc -a "$file" "$base".css ;;
+scad) openscad -o "$base".stl "$file" ;;
+sent) setsid -f sent "$file" 2>/dev/null & ;;
+tex)
+  textarget="$(getcomproot "${file}" || echo "${file}")"
+  command="pdflatex"
+  head -n5 "${textarget}" | grep -qi "xelatex" && command="xelatex"
+  ${command} --output-directory="${textarget%/*}" "${textarget%.*}" &&
+    grep -qi addbibresource "${textarget}" &&
+    biber --input-directory "${textarget%/*}" "${textarget%.*}" &&
+    ${command} --output-directory="${textarget%/*}" "${textarget%.*}" &&
+    ${command} --output-directory="${textarget%/*}" "${textarget%.*}"
+  ;;
+tcl) tclsh "$file" ;;
+vim*) vint "$file" ;;
 *) chmod +x "$file" && sed 1q "$file" | grep "^#!/" | sed "s/^#!//" | xargs -r -I % "$file" ;;
 esac
