@@ -76,7 +76,7 @@ function! GoyoEnter()
         silent !tmux list-panes -F '\#F' | grep -q Z || tmux resize-pane -Z
     endif
 
-    let g:default_colorscheme = exists('g:colors_name') ? g:colors_name : 'default'
+    let g:default_colorscheme = exists('g:colors_name') ? g:colors_name : 'desert'
     set background=light
     set linebreak
     set wrap
@@ -253,12 +253,17 @@ endif
 
 " fzf
 let g:fzf_vim = {}
-let $FZF_DEFAULT_OPTS = "--layout=default --preview-window 'right:60%' --preview 'bat --style=numbers --line-range :300 {}'
-            \ --bind ctrl-y:preview-up,ctrl-e:preview-down,
-            \ctrl-b:preview-page-up,ctrl-f:preview-page-down,
-            \ctrl-u:preview-half-page-up,ctrl-d:preview-half-page-down,
-            \shift-up:preview-top,shift-down:preview-bottom,
-            \alt-up:half-page-up,alt-down:half-page-down"
+let $FZF_DEFAULT_OPTS = "--layout=default --preview-window 'right:60%' --preview 'bat --style=numbers --line-range :300 {}' \
+              --bind ctrl-y:preview-up,       \
+              ctrl-e:preview-down,            \
+              ctrl-b:preview-page-up,         \
+              ctrl-f:preview-page-down,       \
+              ctrl-u:preview-half-page-up,    \
+              ctrl-d:preview-half-page-down,  \
+              shift-up:preview-top,           \
+              shift-down:preview-bottom,      \
+              alt-up:half-page-up,            \
+              alt-down:half-page-down"
 
 " tmux
 if exists('$TMUX')

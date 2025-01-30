@@ -104,9 +104,6 @@ endfunction
 
 if has('gui_running')
 
-    " " Set the color scheme.
-    " color desert
-
     " Font
     if has("macvim")
         set guifont=Menlo\ Regular:h14
@@ -329,7 +326,7 @@ set mouse=a
 " set bg=light
 
 " Color scheme
-" colorscheme desert
+colorscheme desert
 
 " Highlight cursor line underneath the cursor horizontally.
 set cursorline
@@ -578,9 +575,9 @@ hi LineNr ctermbg=NONE guibg=NONE
 hi Folded ctermbg=NONE guibg=NONE
 hi EndOfBuffer ctermfg=Grey guifg=Grey
 
-hi User1 ctermbg=brown ctermfg=white guibg=black guifg=white
+hi User1 ctermbg=brown ctermfg=white guibg=NONE guifg=white
 hi User2 ctermbg=lightgreen ctermfg=black guibg=lightgreen guifg=black
-hi User3 ctermbg=brown ctermfg=lightcyan guibg=black guifg=lightblue
-hi User4 ctermbg=brown ctermfg=green guibg=black guifg=lightgreen
+hi User3 ctermbg=brown ctermfg=lightcyan guibg=NONE guifg=lightblue
+hi User4 ctermbg=brown ctermfg=green guibg=NONE guifg=lightgreen
 
 " }}}
