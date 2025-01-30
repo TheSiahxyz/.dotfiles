@@ -118,6 +118,9 @@ export KODI_DATA="$XDG_DATA_HOME/kodi"
 ### --- LF --- ###
 export FILE_MANAGER="lf $(lf -version)"
 
+### --- LYNX --- ###
+export LYNX_CFG="$XDG_CONFIG_HOME/lynx/lynx.cfg"
+
 ### --- MANPAGER --- ###
 ([ -x "$(command -v batcat)" ] || [ -x "$(command -v batman)" ]) && {
   export MANPAGER="sh -c 'col -bx | bat -l man -p'"
@@ -209,6 +212,9 @@ export WINEDLLOVERRIDES="winemenubuilder.exe=d"
 
 ### --- WGET --- ###
 export WGETRC="$XDG_CONFIG_HOME/wget/wgetrc"
+
+### --- W3M --- ###
+export W3M_DIR="$XDG_STATE_HOME/w3m"
 
 ### --- X11 --- ###
 export XINITRC="$XDG_CONFIG_HOME/x11/xinitrc"

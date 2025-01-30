@@ -456,6 +456,9 @@ alias w1='watch -n 1'
 # wget
 ialias wget --hsts-file="${XDG_CACHE_HOME:-${HOME}/.cache}/wget-hsts"
 
+# w3m
+alias w3m="w3m -config ${XDG_CONFIG_HOME:-${HOME}/.config}/w3m/config"
+
 # xrandr
 alias xauto='xrandr --auto'
 
