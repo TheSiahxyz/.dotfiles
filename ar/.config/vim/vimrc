@@ -136,9 +136,6 @@ let maplocalleader = "\\"
 " Diable
 nnoremap Q <nop>
 
-" Highlight
-nnoremap <Esc> :noh<CR>
-
 " Cmd & Esc
 nnoremap <C-C> :
 inoremap <C-C> <Esc>:
