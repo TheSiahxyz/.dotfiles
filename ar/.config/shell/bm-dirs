@@ -79,6 +79,7 @@ pae             ${PASSWORD_STORE_DIR:-$XDG_DATA_HOME/.password-store}/exported_k
 pah             ${PASSWORD_STORE_DIR:-$XDG_DATA_HOME/.password-store}/ssh
 pas             ${PASSWORD_STORE_DIR:-$XDG_DATA_HOME/.password-store}
 pbg             ${XDG_PUBLICSHARE_DIR:-${HOME}/Public}/repos
+pve             $HOME/Private/repos/email-wizard
 pvg             $HOME/Private/repos
 pvm             $HOME/Private/repos/mutt-wizard
 pvn             $HOME/Private/repos/neetcode
