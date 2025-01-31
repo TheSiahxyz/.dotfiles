@@ -10,7 +10,7 @@ function set_osd_title()
 	end
 
 	if mp.get_property_osd("chapter") ~= "" then
-		chapter = "Chapter: " .. mp.get_property_osd("chapter") .. " | "
+		chapter = mp.get_property_osd("chapter") .. " | "
 	end
 
 	if mp.get_property_osd("playlist-count") ~= "1" then
