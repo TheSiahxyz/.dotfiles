@@ -79,8 +79,8 @@ case $URL in
     YTDL_CMD_BASE="$YTDL_CMD_BASE --yes-playlist" &&
     echo 🪏 >/tmp/qplaylist
   [ "$DOWNLOAD_TYPE" = "video" ] &&
-    CHANNEL=$(yt-dlp --print "%(channel)s" "$URL" | head -n 1 | sed 's/[\/:*?"<>| ]/-/g' | tr '[:upper:]' '[:lower:]') &&
-    PLAYLIST=$(yt-dlp --print "%(playlist_title)s" "$URL" | head -n 1 | sed 's/[\/:*?"<>| ]/-/g' | tr '[:upper:]' '[:lower:]') &&
+    CHANNEL=$(yt-dlp --print "%(channel)s" "$URL" | head -n 1 | sed 's/, /,/g;s/[\/:*?"<>| ]/-/g' | tr '[:upper:]' '[:lower:]') &&
+    PLAYLIST=$(yt-dlp --print "%(playlist_title)s" "$URL" | head -n 1 | sed 's/, /,/g;s/[\/:*?"<>| ]/-/g' | tr '[:upper:]' '[:lower:]') &&
     SUBDIR="${CHANNEL}/${PLAYLIST}" &&
     mkdir -p "${OUTPUT_DIR}/${SUBDIR}" &&
     YTDL_OUTPUT_FORMAT="${OUTPUT_DIR}/${SUBDIR}/%(playlist_index)02d_%(title)s [%(id)s].%(ext)s"
