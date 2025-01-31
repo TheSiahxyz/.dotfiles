@@ -101,10 +101,12 @@ alias rmd="/bin/rm --recursive --force --verbose "
 alias \
   l='/usr/bin/ls -h --color=always --group-directories-first' \
   la='/usr/bin/ls -alh --color=always --group-directories-first' \
-  llf='/usr/bin/ls -Fls --color=always --group-directories-first' \
+  ll='/usr/bin/ls -lh --color=always --group-directories-first' \
   lla='/usr/bin/ls -aFls --color=always --group-directories-first' \
+  llf='/usr/bin/ls -Fls --color=always --group-directories-first' \
   lm='/usr/bin/ls -alh --color=always --group-directories-first | more' \
   lr='/usr/bin/ls -hlR --color=always --group-directories-first' \
+  lra='/usr/bin/ls -ahlR --color=always --group-directories-first' \
   ls='/usr/bin/ls -AFh --color=always --group-directories-first' \
   llsa='/usr/bin/ls -hlru --color=always --group-directories-first' \
   llsc='/usr/bin/ls -hclr --color=always --group-directories-first' \
