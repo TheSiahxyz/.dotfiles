@@ -99,25 +99,25 @@ alias rmd="/bin/rm --recursive --force --verbose "
 
 # multiple directory listing commands
 alias \
-  l="/usr/bin/ls -h --color=always --group-directories-first" \
-  la="/usr/bin/ls -alh --color=always --group-directories-first" \
-  ll="/usr/bin/ls -Fls --color=always --group-directories-first" \
-  lla="/usr/bin/ls -aFls --color=always --group-directories-first" \
-  lm="/usr/bin/ls -alh --color=always |more --group-directories-first" \
-  lr="/usr/bin/ls -hlR --color=always --group-directories-first" \
-  ls="/usr/bin/ls -AFh --color=always --group-directories-first" \
-  lsa="/usr/bin/ls -hlru --color=always --group-directories-first" \
-  lsc="/usr/bin/ls -hclr --color=always --group-directories-first" \
-  lsd="/usr/bin/ls -l --color=always | egrep '^d'" \
-  lsda="/usr/bin/ls -la --color=always | egrep '^d'" \
-  lse="/usr/bin/ls -BhlX --color=always --group-directories-first" \
-  lsf="/usr/bin/ls -l --color=always | egrep -v '^d'" \
-  lsfa="/usr/bin/ls -la --color=always | egrep -v '^d'" \
-  lsm="/usr/bin/ls -hlr --time=mtime --color=always --group-directories-first" \
-  lsn="/usr/bin/ls -alp --color=always --group-directories-first" \
-  lss="/usr/bin/ls -hlrS --color=always --group-directories-first" \
-  lst="/usr/bin/ls -hlrt --color=always --group-directories-first" \
-  lw="/usr/bin/ls -Ahx --color=always --group-directories-first"
+  l='/usr/bin/ls -h --color=always --group-directories-first' \
+  la='/usr/bin/ls -alh --color=always --group-directories-first' \
+  llf='/usr/bin/ls -Fls --color=always --group-directories-first' \
+  lla='/usr/bin/ls -aFls --color=always --group-directories-first' \
+  lm='/usr/bin/ls -alh --color=always --group-directories-first | more' \
+  lr='/usr/bin/ls -hlR --color=always --group-directories-first' \
+  ls='/usr/bin/ls -AFh --color=always --group-directories-first' \
+  llsa='/usr/bin/ls -hlru --color=always --group-directories-first' \
+  llsc='/usr/bin/ls -hclr --color=always --group-directories-first' \
+  lld='/usr/bin/ls -l --color=always | grep "^d"' \
+  llda='/usr/bin/ls -la --color=always | grep "^d"' \
+  llse='/usr/bin/ls -BhlX --color=always --group-directories-first' \
+  llsf='/usr/bin/ls -l --color=always | grep -v "^d"' \
+  llsfa='/usr/bin/ls -la --color=always | grep -v "^d"' \
+  llsm='/usr/bin/ls -hlr --time=ctime --color=always --group-directories-first' \
+  llsn='/usr/bin/ls -alp --color=always --group-directories-first' \
+  llss='/usr/bin/ls -hlrS --color=always --group-directories-first' \
+  llst='/usr/bin/ls -hlrt --color=always --group-directories-first' \
+  lw='/usr/bin/ls -Ahx --color=always --group-directories-first'
 
 # alias chmod commands
 alias \
