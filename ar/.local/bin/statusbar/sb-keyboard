@@ -2,8 +2,6 @@
 
 # works on any init system
 # requirements: dmenu, xorg-setxkbmap
-kb="$(setxkbmap -query | grep -oP 'layout:\s*\K\w+')" || exit 1
-
 case $BLOCK_BUTTON in
 1) fcitx5-remote -t && kill -44 "$(pidof "${STATUSBAR:-dwmblocks}")" ;;
 2)
@@ -19,17 +17,16 @@ case $BLOCK_BUTTON in
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
-if [ "$kb" = "us" ] || [ "$kb" = "kr" ]; then
-  if [ "$(fcitx5-remote)" -eq 1 ]; then
-    echo "⌨️US"
-  elif [ "$(fcitx5-remote)" -eq 2 ]; then
-    case "$(fcitx5-remote -n)" in
-    *ko* | *Korean* | *hangul*) echo "⌨️KO" ;;
-    *) echo "⌨️$(setxkbmap -query | grep 'layout:' | sed 's/layout:\s*\(\S*\)/\1/g')" ;;
-    esac
-  else
-    echo "⌨️??"
-  fi
-else
-  echo "⌨️$kb"
-fi
+method=$(dbus-send --print-reply --dest=org.fcitx.Fcitx5 \
+  /controller org.fcitx.Fcitx.Controller1.CurrentInputMethod |
+  awk -F '"' '/string/ {print $2}')
+
+case "$method" in
+keyboard-us)
+  icon="⌨️US"
+  ;;
+hangul)
+  icon="⌨️KO"
+  ;;
+esac
+echo "$icon"
