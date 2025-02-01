@@ -23,10 +23,10 @@ method=$(dbus-send --print-reply --dest=org.fcitx.Fcitx5 \
 
 case "$method" in
 keyboard-us)
-  icon="⌨️US"
+  lang="US"
   ;;
 hangul)
-  icon="⌨️KO"
+  lang="KO"
   ;;
 esac
-echo "$icon"
+echo "⌨️$lang"
