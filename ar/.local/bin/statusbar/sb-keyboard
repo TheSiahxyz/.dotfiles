@@ -22,11 +22,8 @@ method=$(dbus-send --print-reply --dest=org.fcitx.Fcitx5 \
   awk -F '"' '/string/ {print $2}')
 
 case "$method" in
-keyboard-us)
-  lang="US"
-  ;;
-hangul)
-  lang="KO"
-  ;;
+keyboard-us) lang="US" ;;
+hangul) lang="KO" ;;
+*) lang="??" ;;
 esac
 echo "⌨️$lang"
