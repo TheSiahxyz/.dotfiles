@@ -1,0 +1,16 @@
+#!/bin/sh
+
+case "$1" in
+-h | h | hflip) flip="--vf=lavfi=hflip" ;;
+-v | v | vflip) flip="--vf=lavfi=vflip" ;;
+-hv | hv | hvflip) flip="--vf=lavfi=hflip,vflip" ;;
+*) flip="" ;;
+esac
+
+mpv --untimed \
+  --no-cache \
+  --no-osc \
+  --no-input-default-bindings \
+  --profile=low-latency \
+  --input-conf=/dev/null \
+  --title=webcam "$flip" "$(find /dev -name 'video[02468]' 2>/dev/null | tail -n 1)"

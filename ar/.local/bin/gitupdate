@@ -72,25 +72,10 @@ repo_root=$(git rev-parse --show-toplevel || echo ".")
 cd "$repo_root"
 
 if [ "$repo_root" = "${PASSWORD_STORE_DIR:-${HOME}/.password-store}" ]; then
-  if git remote | grep -q "^home$"; then
-    # Push to both 'home' and 'origin'
-    pass git push home "$branch" && pass git push origin "$branch"
-  else
-    # Push only to 'origin'
-    pass git push origin "$branch"
-  fi
+  pass git remote | xargs -L1 pass git push -all
 else
-  # Pull and rebase before pushing
   git pull --rebase origin "$branch"
-
-  # Check if the 'home' remote exists
-  if git remote | grep -q "^home$"; then
-    # Push to both 'home' and 'origin'
-    git push home "$branch" && git push origin "$branch"
-  else
-    # Push only to 'origin'
-    git push origin "$branch"
-  fi
+  git remote | xargs -L1 git push -all
 fi
 
 printf "\n[repo] %s(%s): %s\n" "$(basename "$repo_root")" "$branch" "$message"
