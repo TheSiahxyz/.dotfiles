@@ -55,8 +55,8 @@ gss             ${XDG_PICTURES_DIR:-${HOME}/Pictures}/screenshots
 gtc             $HOME/Torrents/complete
 gti             $HOME/Torrents/incomplete
 gtt             $HOME/Torrents
+gvr             ${XDG_VIDEOS_DIR:-${HOME}/Videos}/recordings
 gvv             ${XDG_VIDEOS_DIR:-${HOME}/Videos}
-gvy             ${XDG_VIDEOS_DIR:-${HOME}/Videos}/Youtube
 gwf             $HOME/.librewolf/si.default
 gwo             ${XDG_DESKTOP_DIR:-${HOME}/Desktop}/Work
 gww             ${XDG_PICTURES_DIR:-${HOME}/Pictures}/wallpaper
@@ -84,7 +84,7 @@ pvg             $HOME/Private/repos
 pvm             $HOME/Private/repos/mutt-wizard
 pvn             $HOME/Private/repos/neetcode
 pvo             $HOME/Private/repos/Obsidian/SI
-pvs             $HOME/Private/repos/SQL
+pvs             $HOME/Private/repos/Sich
 pww             $HOME/Private/photo
 shh             ${XDG_DATA_HOME:-${HOME}/.local/share}/history
 shg             ${XDG_DATA_HOME:-${HOME}/.local/share}/nvim/gp/chats
