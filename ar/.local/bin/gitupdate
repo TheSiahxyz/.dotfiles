@@ -72,10 +72,10 @@ repo_root=$(git rev-parse --show-toplevel || echo ".")
 cd "$repo_root"
 
 if [ "$repo_root" = "${PASSWORD_STORE_DIR:-${HOME}/.password-store}" ]; then
-  pass git remote | xargs -L1 pass git push -all
+  pass git remote | xargs -L1 pass git push --all
 else
   git pull --rebase origin "$branch"
-  git remote | xargs -L1 git push -all
+  git remote | xargs -L1 git push --all
 fi
 
 printf "\n[repo] %s(%s): %s\n" "$(basename "$repo_root")" "$branch" "$message"
