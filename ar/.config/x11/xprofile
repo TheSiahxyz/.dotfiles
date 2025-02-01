@@ -3,7 +3,7 @@
 xrandr --auto --dpi 96 # adjust the number based on your resolution and size of the screen
 
 setbg &  # set the background with the `setbg` script
-fcitx5 & # set the input method, but it will be separate with fcitx5-remote
+fcitx5 & # set the input method
 
 # Uncomment to use Xresources colors/settings on startup
 # xrdb "${XDG_CONFIG_HOME:-${HOME}/.config}/x11/xresources" &
