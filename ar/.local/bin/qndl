@@ -1,6 +1,12 @@
 #!/bin/sh
 
-YTDL_CMD_BASE="yt-dlp --cookies-from-browser firefox:~/.mozilla/firefox --continue --embed-metadata --ignore-errors --no-force-overwrites --no-playlist --verbose"
+case "$BROWSER" in
+librewolf) cookies="librewolf:~/.librewolf" ;;
+firefox) cookies="firefox:~/.mozilla/firefox" ;;
+*) echo "⛔ Unsupported browser: $BROWSER" && exit 1 ;;
+esac
+
+YTDL_CMD_BASE="yt-dlp --cookies-from-browser $cookies --continue --embed-metadata --ignore-errors --no-force-overwrites --no-playlist --verbose"
 
 # Process command-line options for download type
 while getopts "mvr" opt; do
