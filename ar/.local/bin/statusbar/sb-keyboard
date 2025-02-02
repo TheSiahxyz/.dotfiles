@@ -4,17 +4,18 @@
 # requirements: dmenu, xorg-setxkbmap
 case $BLOCK_BUTTON in
 1) fcitx5-remote -t && kill -44 "$(pidof "${STATUSBAR:-dwmblocks}")" ;;
-2)
+2) remaps ;;
+3) notify-send "⌨️ Input Method module" "\- Shows current input method (defalt US)
+- Left click to switch language (EN/KO)
+- Middle click to change keyboard" ;;
+6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
+7)
   kb_choice="$(awk '/! layout/{flag=1; next} /! variant/{flag=0} flag {print $2, "- " $1}' /usr/share/X11/xkb/rules/base.lst | dmenu -l 15)"
   [ -z "$kb_choice" ] && exit 0
   kb="$(echo "$kb_choice" | awk '{print $3}')"
   setxkbmap "$kb"
   pkill -RTMIN+10 "${STATUSBAR:-dwmblocks}"
   ;;
-3) notify-send "⌨️ Input Method module" "\- Shows current input method (defalt US)
-- Left click to switch language (EN/KO)
-- Middle click to change keyboard" ;;
-6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
 method=$(dbus-send --print-reply --dest=org.fcitx.Fcitx5 \
