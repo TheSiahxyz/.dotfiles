@@ -26,4 +26,5 @@ keyboard-us) lang="US" ;;
 hangul) lang="KO" ;;
 *) lang="??" ;;
 esac
+
 echo "⌨️$lang"
