@@ -1,9 +1,9 @@
 #!/bin/sh
 
 # Get current hour and minute
+calendar="🗓️"
 hour=$(date '+%I')
 minute=$(date '+%M')
-calendar="🗓️"
 
 # Determine the icon based on hour and minute
 if crontab -l 2>/dev/null | grep -q '^[^#[:space:]]'; then
@@ -43,7 +43,7 @@ else
 fi
 
 # Shows the current moon phase.
-moonfile="${XDG_DATA_HOME:-${HOME}/.local/share}/moonphase"
+moonfile="${XDG_DATA_HOME:-${HOME}/.local/share}/wallpapers/moonphase"
 
 [ -s "$moonfile" ] && [ "$(stat -c %y "$moonfile" 2>/dev/null | cut -d' ' -f1)" = "$(date '+%Y-%m-%d')" ] ||
   { curl -sf "wttr.in/?format=%m" >"$moonfile" || exit 1; }
