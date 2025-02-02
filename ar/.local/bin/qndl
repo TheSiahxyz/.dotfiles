@@ -1,6 +1,6 @@
 #!/bin/sh
 
-YTDL_CMD_BASE="yt-dlp --continue --embed-metadata --ignore-errors --no-force-overwrites --no-playlist --verbose"
+YTDL_CMD_BASE="yt-dlp --cookies-from-browser firefox:~/.mozilla/firefox --continue --embed-metadata --ignore-errors --no-force-overwrites --no-playlist --verbose"
 
 # Process command-line options for download type
 while getopts "mvr" opt; do
@@ -87,7 +87,7 @@ case $URL in
   ;;
 esac
 
-SIMULATION_CMD="yt-dlp --simulate --print filename $URL"
+SIMULATION_CMD="yt-dlp --simulate --print %(filename)s $URL"
 YTDL_CMD="$YTDL_CMD_BASE --output \"$YTDL_OUTPUT_FORMAT\" \"$URL\""
 
 # Notify and perform simulation to get filename (feedback to user)
