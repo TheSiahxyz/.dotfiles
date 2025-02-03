@@ -293,6 +293,7 @@ cmd open ${{
   text/csv) sc-im $fx;;
   text/xml) lynx $fx;;
   text/troff) groff -mom $fx -Tpdf | zathura - ;;
+  text/html) w3m -no-cookie -graph -no-proxy $fx ;;
   text/*|application/json|inode/x-empty|application/x-subrip) $EDITOR $fx;;
   video/*) setsid -f mpv $f -quiet >/dev/null 2>&1 ;;
 	*) for f in $fx; do setsid -f $OPENER $f >/dev/null 2>&1; done;;
