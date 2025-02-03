@@ -118,9 +118,6 @@ export KODI_DATA="$XDG_DATA_HOME/kodi"
 ### --- LF --- ###
 export FILE_MANAGER="lf $(lf -version)"
 
-### --- LYNX --- ###
-export LYNX_CFG="$XDG_CONFIG_HOME/lynx/lynx.cfg"
-
 ### --- MANPAGER --- ###
 ([ -x "$(command -v batcat)" ] || [ -x "$(command -v batman)" ]) && {
   export MANPAGER="sh -c 'col -bx | bat -l man -p'"
