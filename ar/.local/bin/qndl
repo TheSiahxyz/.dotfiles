@@ -18,6 +18,21 @@ while getopts "mvr" opt; do
     YTDL_OUTPUT_FORMAT="${OUTPUT_DIR}/%(artist|)s%(artist& - |)s%(title)s.%(ext)s"
     YTDL_CMD_BASE="$YTDL_CMD_BASE --audio-format best --audio-quality 0 --download-archive \"$ARCHIVE_FILE\" --extract-audio --recode-video mp3"
     ;;
+  r)
+    OUTPUT_DIR="${XDG_MUSIC_DIR:-${HOME}/Music}"
+    ARCHIVE_FILE="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/default/Music/.music.txt"
+    YTDL_OUTPUT_FORMAT="${OUTPUT_DIR}/%(artist|)s%(artist& - |)s%(title)s.%(ext)s"
+    YTDL_CMD_BASE="$YTDL_CMD_BASE --audio-format best --audio-quality 0 --extract-audio --recode-video mp3"
+    YTDL_CMD="$YTDL_CMD_BASE --output \"$YTDL_OUTPUT_FORMAT\""
+    [ ! -f "$ARCHIVE_FILE" ] && exit 1
+    while read -r line; do
+      video_id=$(echo "$line" | awk '{print $2}')
+      YTDL_CMD="$YTDL_CMD_BASE --output \"$YTDL_OUTPUT_FORMAT\" \"https://www.youtube.com/watch?v=$video_id\""
+      idnum=$(tsp bash -c "$YTDL_CMD")
+      pkill -RTMIN+21 "${STATUSBAR:-dwmblocks}"
+    done <"$ARCHIVE_FILE"
+    exit 0
+    ;;
   v)
     DOWNLOAD_TYPE="video"
     OUTPUT_DIR="${XDG_VIDEOS_DIR:-${HOME}/Videos}"
@@ -42,21 +57,6 @@ while getopts "mvr" opt; do
       ;;
     esac
     YTDL_CMD_BASE="$YTDL_CMD_BASE --buffer-size 1M --embed-thumbnail $VIDEO_FORMATS --no-sponsorblock $VIDEO_OPTIONS"
-    ;;
-  r)
-    OUTPUT_DIR="${XDG_MUSIC_DIR:-${HOME}/Music}"
-    ARCHIVE_FILE="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/default/Music/.music.txt"
-    YTDL_OUTPUT_FORMAT="${OUTPUT_DIR}/%(artist|)s%(artist& - |)s%(title)s.%(ext)s"
-    YTDL_CMD_BASE="$YTDL_CMD_BASE --audio-format best --audio-quality 0 --extract-audio --recode-video mp3"
-    YTDL_CMD="$YTDL_CMD_BASE --output \"$YTDL_OUTPUT_FORMAT\""
-    [ ! -f "$ARCHIVE_FILE" ] && exit 1
-    while read -r line; do
-      video_id=$(echo "$line" | awk '{print $2}')
-      YTDL_CMD="$YTDL_CMD_BASE --output \"$YTDL_OUTPUT_FORMAT\" \"https://www.youtube.com/watch?v=$video_id\""
-      idnum=$(tsp bash -c "$YTDL_CMD")
-      pkill -RTMIN+21 "${STATUSBAR:-dwmblocks}"
-    done <"$ARCHIVE_FILE"
-    exit 0
     ;;
   *)
     notify-send "⛔ Invalid option: -$OPTARG"
