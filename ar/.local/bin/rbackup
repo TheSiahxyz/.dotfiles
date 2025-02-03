@@ -90,7 +90,7 @@ sync_server() {
   ssh "$THESIAH_SERVER" "mkdir -p /root/.config/bash /root/.config/shell /root/.config/vim /root/.local/bin /root/.local/share /root/.local/state /var/www/thesiah"
 
   # Sync operations with explicit error checking
-  cd "$THESIAH_WWW" && echo "1" || exit 1
+  cd "$THESIAH_WWW" || exit 1
   [ -d "$thesiah_path" ] || hugo --cleanDestinationDir
   rsync -vrazPlu --delete "$thesiah_path/" "$THESIAH_SERVER:/var/www/thesiah/" >/dev/null 2>&1 && rm -rf "$thesiah_path"
   rsync -vrazPlu --delete "$vim_path/vimrc" "$THESIAH_SERVER:/root/.config/vim/" >/dev/null 2>&1
