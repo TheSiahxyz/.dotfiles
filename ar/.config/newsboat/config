@@ -24,7 +24,7 @@ bind-key x pb-delete
 
 browser linkhandler
 macro o open-in-browser ; -- "Open url based on types"
-macro a set browser "tsp yt-dlp --embed-metadata -xic -f bestvideo*+bestaudio/best --restrict-filenames" ; open-in-browser ; set browser linkhandler ; -- "Add queue to download a file via yt-dlp"
+macro a set browser "tsp yt-dlp --embed-metadata -xic -f bestvideo*+bestaudio/best -O after_move:'%(title)s [%(id)s].%(ext)s'" ; open-in-browser ; set browser linkhandler ; -- "Download a file via yt-dlp"
 macro c set browser "clonerepo" ; open-in-browser ; set browser linkhandler ; -- "clone a git repo"
 macro d set browser "dmenuhandler" ; open-in-browser ; set browser linkhandler ; -- "dmenu handler"
 macro e set browser "nvim ~/.config/newsboat/config" ; open-in-browser ; set browser linkhandler ; -- "newsboat config"
