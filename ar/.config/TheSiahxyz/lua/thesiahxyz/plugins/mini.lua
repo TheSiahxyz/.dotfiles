@@ -1129,4 +1129,49 @@ return {
 			},
 		},
 	},
+	{
+		"echasnovski/mini.splitjoin",
+		version = false,
+		config = function()
+			require("mini.splitjoin").setup()
+
+			vim.keymap.set(
+				"n",
+				"<leader>zj",
+				":lua MiniSplitjoin.toggle()<cr>",
+				{ noremap = true, silent = true, desc = "Trim trailing whitespace" }
+			)
+			vim.keymap.set(
+				"n",
+				"<leader>J",
+				":lua MiniSplitjoin.join()<cr>",
+				{ noremap = true, silent = true, desc = "Trim trailing whitespace" }
+			)
+			vim.keymap.set(
+				"n",
+				"<leader><cr>",
+				":lua MiniSplitjoin.split()<cr>",
+				{ noremap = true, silent = true, desc = "Trim trailing whitespace" }
+			)
+		end,
+	},
+	{
+		"echasnovski/mini.trailspace",
+		version = false,
+		config = function()
+			require("mini.trailspace").setup()
+			vim.keymap.set(
+				"n",
+				"<leader>zt",
+				":lua MiniTrailspace.trim()<cr>",
+				{ noremap = true, silent = true, desc = "Trim trailing whitespace" }
+			)
+			vim.keymap.set(
+				"n",
+				"<leader>zl",
+				":lua MiniTrailspace.trim_last_lines()<cr>",
+				{ noremap = true, silent = true, desc = "Trim trailing empty lines" }
+			)
+		end,
+	},
 }

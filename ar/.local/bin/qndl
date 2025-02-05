@@ -64,7 +64,7 @@ case $type in
     option="--recode-video $encode"
     ;;
   esac
-  cmd="$base --buffer-size 1M --embed-metadata --embed-thumbnail --sponsorblock-remove $format $option"
+  cmd="$base --buffer-size 1M --embed-metadata --embed-thumbnail --no-sponsorblock $format $option"
   cmd="${cmd%* }"
   ;;
 esac

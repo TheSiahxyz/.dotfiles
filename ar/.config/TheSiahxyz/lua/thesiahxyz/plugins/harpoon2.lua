@@ -51,6 +51,13 @@ return {
 				desc = "Add buffer to harpoon list",
 			},
 			{
+				"<leader>hi",
+				function()
+					require("harpoon"):list():prepend()
+				end,
+				desc = "Prepend buffer to harpoon list",
+			},
+			{
 				"<C-q>",
 				function()
 					local harpoon = require("harpoon")
