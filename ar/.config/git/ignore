@@ -50,6 +50,9 @@ gtkfilechooser.ini
 # History
 .zcompdump
 
+# Hugo
+public/*
+
 # IDE directories
 .idea/
 
