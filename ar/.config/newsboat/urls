@@ -3,7 +3,7 @@
 "query:Unread:unread = \"yes\" and age >=8" "Query"
 "query:Read:unread = \"no\"" "Query"
 #"query:Flagged:flags != \"\"" "Query"
-"query:Podcast:enclosure_url != \"\" and enclosure_type =~ \"^(audio|video)/\"" "Query"
+"query:Media:enclosure_url != \"\" and enclosure_type =~ \"^(audio|video)/\"" "Query"
 "query:Content:content != \"\"" "Query"
 "query:No Content:content = \"\"" "Query"
 " "
