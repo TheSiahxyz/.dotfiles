@@ -41,7 +41,7 @@ alias ....='../../..'
 alias .....='../../../..'
 
 # abook
-alias abook='abook --datafile ~/.config/abook/addressbook'
+alias abook='abook -f ~/.config/abook/addressbook'
 
 # bat
 alias bath='bat cache --build'
