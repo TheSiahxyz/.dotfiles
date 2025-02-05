@@ -468,6 +468,8 @@ function man() {
             local page=$(command man -k . | fzf --prompt='Man> ' --exit-0 | awk '{print $1}')
             if [[ -n $page ]]; then
                 nvim +"Man $page | only"
+            else
+                echo "Need to run 'sudo mandb -c' to update mandb."
             fi
         fi
     else
