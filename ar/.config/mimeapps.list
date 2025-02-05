@@ -3,6 +3,7 @@
 # xdg-open will use these settings to determine how to open filetypes.
 # These .desktop entries can also be seen and changed in ~/.local/share/applications/
 
+application/pdf=firefox.desktop;
 application/postscript=pdf.desktop;
 application/rss+xml=rss.desktop;
 application/x-bittorrent=torrent.desktop;
@@ -13,6 +14,7 @@ image/jpeg=img.desktop;
 image/gif=img.desktop;
 image/png=img.desktop;
 text/csv=csv.desktop;
+text/html=html.desktop;
 text/markdown=slide.desktop;
 text/plain=text.desktop;
 text/troff=roff.desktop;
@@ -23,4 +25,3 @@ video/x-matroska=video.desktop;
 x-scheme-handler/lbry=lbry.desktop;
 x-scheme-handler/mailto=mail.desktop;
 x-scheme-handler/magnet=torrent.desktop;
-application/pdf=firefox.desktop;
