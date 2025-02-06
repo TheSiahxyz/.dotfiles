@@ -468,8 +468,6 @@ function man() {
             local page=$(command man -k . | fzf --prompt='Man> ' --exit-0 | awk '{print $1}')
             if [[ -n $page ]]; then
                 nvim +"Man $page | only"
-            else
-                echo "Need to run 'sudo mandb -c' to update mandb."
             fi
         fi
     else
@@ -613,6 +611,16 @@ if ls "${ZPLUGINDIR:-${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/zsh}/zsh-autosugges
     zstyle :bracketed-paste-magic paste-init pasteinit
     zstyle :bracketed-paste-magic paste-finish pastefinish
 fi
+
+
+###########################################################################################
+###########################################################################################
+### --- SDCV --- ###
+function def() {
+    sdcv -n --utf8-output --color "$@" 2>&1 | \
+        fold --width=$(tput cols) | \
+        less --quit-if-one-screen -RX
+}
 
 
 ###########################################################################################
