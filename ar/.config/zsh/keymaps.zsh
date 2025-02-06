@@ -319,7 +319,7 @@ else
     bindkey -s '^V' '^uv.\n'
     bindkey -s '^Y' '^ulfcd\n'
     bindkey -s '^Z' '^upd\n'
-    # bindkey -s '^_' '^u\n'
+    bindkey -s '^_' '^ucht\n'
     bindkey -s '^X^A' '^uali\n'
     bindkey -s '^X^B' '^ugitopenbranch\n'
     bindkey -s '^X^D' '^ufD\n'

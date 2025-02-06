@@ -18,8 +18,8 @@ function set_osd_title()
 
 	if mp.get_property_osd("percent-pos") ~= "" then
 		if mp.get_property_osd("percent-pos") ~= "100" then
-			percent_pos = mp.get_property_osd("percent-pos") .. "% completed | "
-			mp.set_property("force-media-title", playlist_num .. chapter .. percent_pos .. name)
+			percent_pos = " [ " .. mp.get_property_osd("percent-pos") .. "% completed ]"
+			mp.set_property("force-media-title", playlist_num .. chapter .. name .. percent_pos)
 		else
 			mp.set_property("force-media-title", playlist_num .. chapter .. name)
 		end
