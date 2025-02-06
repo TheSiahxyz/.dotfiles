@@ -200,87 +200,87 @@ return {
 			vim.keymap.set("v", "<leader>GWn", ":<C-u>'<,'>GpWhisperTabnew<cr>", keymapOptions("Tabnew"))
 		end,
 	},
-	{
-		"zbirenbaum/copilot.lua",
-		cmd = "Copilot",
-		build = ":Copilot auth",
-		event = "InsertEnter",
-		dependencies = {
-			"hrsh7th/nvim-cmp",
-			{ "AndreM222/copilot-lualine" },
-			{
-				"zbirenbaum/copilot-cmp",
-				config = function()
-					require("copilot_cmp").setup()
-				end,
-			},
-		},
-		config = function()
-			require("copilot").setup({
-				panel = {
-					enabled = true,
-					auto_refresh = true,
-					keymap = {
-						jump_prev = "[a",
-						jump_next = "]a",
-						accept = "<CR>",
-						refresh = "gr",
-						open = "<C-CR>",
-					},
-					layout = {
-						position = "right", -- | top | left | right
-						ratio = 0.4,
-					},
-				},
-				suggestion = {
-					enabled = true,
-					auto_trigger = true,
-					hide_during_completion = true,
-					debounce = 75,
-					keymap = {
-						accept = "<C-q>",
-						accept_word = false,
-						accept_line = false,
-						next = "<C-n>",
-						prev = "<C-p>",
-						dismiss = "<C-\\>",
-					},
-				},
-				filetypes = {
-					cvs = false,
-					gitcommit = false,
-					gitrebase = false,
-					help = true,
-					hgcommit = false,
-					markdown = true,
-					sh = function()
-						if string.match(vim.fs.basename(vim.api.nvim_buf_get_name(0)), "^%.env.*") then
-							-- disable for .env files
-							return false
-						end
-						return true
-					end,
-					svn = false,
-					yaml = false,
-					["."] = false,
-					["*"] = true,
-				},
-				copilot_node_command = "node", -- Node.js version must be > 18.x
-				server_opts_overrides = {},
-			})
-
-			local cmp = require("cmp")
-			cmp.event:on("menu_opened", function()
-				vim.b.copilot_suggestion_hidden = true
-			end)
-
-			cmp.event:on("menu_closed", function()
-				vim.b.copilot_suggestion_hidden = false
-			end)
-		end,
-
-		vim.keymap.set("n", "<leader>ct", function()
-			require("copilot.suggestion").toggle_auto_trigger()
-		end, { noremap = true, silent = true, desc = "Toggle copilot" }),
-	},
+	-- {
+	-- 	"zbirenbaum/copilot.lua",
+	-- 	cmd = "Copilot",
+	-- 	build = ":Copilot auth",
+	-- 	event = "InsertEnter",
+	-- 	dependencies = {
+	-- 		"hrsh7th/nvim-cmp",
+	-- 		{ "AndreM222/copilot-lualine" },
+	-- 		{
+	-- 			"zbirenbaum/copilot-cmp",
+	-- 			config = function()
+	-- 				require("copilot_cmp").setup()
+	-- 			end,
+	-- 		},
+	-- 	},
+	-- 	config = function()
+	-- 		require("copilot").setup({
+	-- 			panel = {
+	-- 				enabled = true,
+	-- 				auto_refresh = true,
+	-- 				keymap = {
+	-- 					jump_prev = "[a",
+	-- 					jump_next = "]a",
+	-- 					accept = "<CR>",
+	-- 					refresh = "gr",
+	-- 					open = "<C-CR>",
+	-- 				},
+	-- 				layout = {
+	-- 					position = "right", -- | top | left | right
+	-- 					ratio = 0.4,
+	-- 				},
+	-- 			},
+	-- 			suggestion = {
+	-- 				enabled = true,
+	-- 				auto_trigger = true,
+	-- 				hide_during_completion = true,
+	-- 				debounce = 75,
+	-- 				keymap = {
+	-- 					accept = "<C-q>",
+	-- 					accept_word = false,
+	-- 					accept_line = false,
+	-- 					next = "<C-n>",
+	-- 					prev = "<C-p>",
+	-- 					dismiss = "<C-\\>",
+	-- 				},
+	-- 			},
+	-- 			filetypes = {
+	-- 				cvs = false,
+	-- 				gitcommit = false,
+	-- 				gitrebase = false,
+	-- 				help = true,
+	-- 				hgcommit = false,
+	-- 				markdown = true,
+	-- 				sh = function()
+	-- 					if string.match(vim.fs.basename(vim.api.nvim_buf_get_name(0)), "^%.env.*") then
+	-- 						-- disable for .env files
+	-- 						return false
+	-- 					end
+	-- 					return true
+	-- 				end,
+	-- 				svn = false,
+	-- 				yaml = false,
+	-- 				["."] = false,
+	-- 				["*"] = true,
+	-- 			},
+	-- 			copilot_node_command = "node", -- Node.js version must be > 18.x
+	-- 			server_opts_overrides = {},
+	-- 		})
+	--
+	-- 		local cmp = require("cmp")
+	-- 		cmp.event:on("menu_opened", function()
+	-- 			vim.b.copilot_suggestion_hidden = true
+	-- 		end)
+	--
+	-- 		cmp.event:on("menu_closed", function()
+	-- 			vim.b.copilot_suggestion_hidden = false
+	-- 		end)
+	-- 	end,
+	--
+	-- 	vim.keymap.set("n", "<leader>ct", function()
+	-- 		require("copilot.suggestion").toggle_auto_trigger()
+	-- 	end, { noremap = true, silent = true, desc = "Toggle copilot" }),
+	-- },
 }

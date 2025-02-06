@@ -451,4 +451,10 @@ return {
 			end, { desc = "Init default molten" })
 		end,
 	},
+	{
+		"mipmip/vim-scimark",
+		config = function()
+			vim.keymap.set("n", "<leader>si", ":OpenInScim<cr>", { desc = "Sc-im" })
+		end,
+	},
 }

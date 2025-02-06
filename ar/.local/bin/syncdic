@@ -1,0 +1,33 @@
+#!/bin/sh
+
+dicfile="${XDG_DATA_HOME:-${HOME}/.local/share}/thesiah/dic"
+dest="${XDG_DATA_HOME:-${HOME}/.local/share}/dic"
+
+[ -d "$dest" ] || mkdir -p "$dest"
+
+while read -r url; do
+  [ -z "$url" ] && continue
+  filename=$(basename "$url")
+  filepath="${dest}/${filename}"
+  tarpath=$(echo "$filepath" | sed 's/.zip//;s/.tar.gz//;s/.tgz//;s/.tar.bz2//;s/.tbz2//;s/.tar.xz//;s/.txz//')
+
+  # Download only if the file does not exist
+  if [ ! -d "$tarpath" ]; then
+    curl -L "$url" -o "$filepath"
+    case "$filename" in
+    *.zip)
+      unzip -o "$filepath" -d "$dest"
+      ;;
+    *.tar.gz | *.tgz)
+      tar -xzf "$filepath" -C "$dest"
+      ;;
+    *.tar.bz2 | *.tbz2)
+      tar -xjf "$filepath" -C "$dest"
+      ;;
+    *.tar.xz | *.txz)
+      tar -xJf "$filepath" -C "$dest"
+      ;;
+    esac
+    rm -f "$filepath"
+  fi
+done <"$dicfile"
