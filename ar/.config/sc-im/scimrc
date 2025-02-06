@@ -1,4 +1,5 @@
 set autocalc
+set half_page_scroll=1
 set numeric
 set numeric_decimal=0
 set overlap
