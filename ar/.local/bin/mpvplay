@@ -11,7 +11,13 @@ play_url() {
   url=$(xclip -selection clipboard -o)
   [ -n "$url" ] && echo "$url" | grep -E '^https?://' >/dev/null || return 1
   notify-send "📽️ Playing video from URL:" "$url"
-  mpv "$url" || exit
+  if ! mpv "$url"; then
+    notify-send "🔑 Authentication required"
+    username="$(echo | dmenu -i -p "Enter a username:")"
+    password="$(echo | dmenu -i -P -p "Enter a password:")"
+    [ -n "$username" ] && [ -n "$password" ] && mpv --ytdl-raw-options=username="$username",password="$password" "$url" ||
+      notify-send "❌ Failed to play $url" "❗ Check your username or password"
+  fi
 }
 
 play_media() {
