@@ -1,8 +1,8 @@
 "--- Query ---"
 "query:0-3 Days:unread = \"yes\" and age between 0:3" "Query"
 "query:Unread:unread = \"yes\" and age >=8" "Query"
-"query:Read:unread = \"no\"" "Query"
-#"query:Flagged:flags != \"\"" "Query"
+# "query:Read:unread = \"no\"" "Query"
+# "query:Flagged:flags != \"\"" "Query"
 "query:Media:enclosure_url != \"\" and enclosure_type =~ \"^(audio|video)/\"" "Query"
 "query:Content:content != \"\"" "Query"
 "query:No Content:content = \"\"" "Query"
@@ -15,6 +15,7 @@ https://github.com/TheSiahxyz/suckless/commits/master.atom    "~TheSiahxyz suckl
 https://feeds.feedburner.com/dailycaller-us         "~U.S."       News
 https://feeds.feedburner.com/dailycaller-world      "~World"      News
 https://feeds.feedburner.com/dailycaller-opinion    "~Opinion"    News
+https://www.sciencedaily.com/rss/computers_math/artificial_intelligence.xml "~AI" News  AI
 https://www.archlinux.org/feeds/news/               "~Arch"       Distro  Linux   Tech
 https://artixlinux.org/feed.php                     "~Artix"      Distro  Linux   Tech
 " "
