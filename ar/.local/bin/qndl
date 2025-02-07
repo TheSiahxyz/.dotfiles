@@ -88,7 +88,6 @@ esac
 
 filename=$(yt-dlp -s -O "%(filename)s [%(id)s].%(ext)s" "$url")
 
-echo "1. cmd: $cmd" >>~/ytdlp.txt
 [ -z "$type" ] && output="$HOME/$filename"
 
 # queue
@@ -104,6 +103,3 @@ idnum="$(tsp $cmd -o "$output" "$url")"
 # done
 tsp -D "$idnum" notify-send "👍 Completed download!" "$filename"
 [ "$downloadtype" = "music" ] && tsp -D "$idnum" "mpc update"
-
-echo "2. cmd: $cmd" >>~/ytdlp.txt
-echo "output: $output" >>~/ytdlp.txt
