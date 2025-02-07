@@ -12,10 +12,10 @@ https://github.com/TheSiahxyz/.dotfiles/commits/master.atom   "~TheSiahxyz dotfi
 https://github.com/TheSiahxyz/suckless/commits/master.atom    "~TheSiahxyz suckless"  Git
 " "
 "--- News ---"
-https://feeds.feedburner.com/dailycaller-us         "~U.S."       News
+https://feeds.feedburner.com/dailycaller-us         "~US"         News
 https://feeds.feedburner.com/dailycaller-world      "~World"      News
 https://feeds.feedburner.com/dailycaller-opinion    "~Opinion"    News
-https://www.sciencedaily.com/rss/computers_math/artificial_intelligence.xml "~AI" News  AI
+https://feeds.bbci.co.uk/news/technology/rss.xml    "~AI"         AI      News
 https://www.archlinux.org/feeds/news/               "~Arch"       Distro  Linux   Tech
 https://artixlinux.org/feed.php                     "~Artix"      Distro  Linux   Tech
 " "
