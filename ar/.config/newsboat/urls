@@ -14,7 +14,6 @@ https://github.com/TheSiahxyz/suckless/commits/master.atom    "~TheSiahxyz suckl
 "--- News ---"
 https://feeds.feedburner.com/dailycaller-us         "~US"         News
 https://feeds.feedburner.com/dailycaller-world      "~World"      News
-https://feeds.feedburner.com/dailycaller-opinion    "~Opinion"    News
 https://feeds.bbci.co.uk/news/technology/rss.xml    "~AI"         AI      News
 https://www.archlinux.org/feeds/news/               "~Arch"       Distro  Linux   Tech
 https://artixlinux.org/feed.php                     "~Artix"      Distro  Linux   Tech
