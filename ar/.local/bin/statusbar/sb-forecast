@@ -24,6 +24,7 @@ getweatherreport() {
 getweatherreportjson() {
   timeout --signal=1 10s curl -sf "$url/$LOCATION?format=j1" >"$weatherreportjson" ||
     error "reportjson"
+  grep -q 'Unknown' "$weatherreportjson" && error "reportjson"
 }
 
 # Forecast should be updated every 3 hours, but set 3600 to check for reliability.
