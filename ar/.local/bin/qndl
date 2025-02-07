@@ -35,7 +35,7 @@ case $type in
   output="$dest/%(artist|)s%(artist& - |)s%(title)s.%(ext)s"
   cmd="$base --audio-format best --audio-quality 0 --download-archive \"$record\" --extract-audio --recode-video mp3"
   ;;
--r | r | restore)
+-r | --restore)
   dest="${XDG_MUSIC_DIR:-${HOME}/Music}"
   record="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/default/Music/.music.txt"
   output="$dest/%(artist|)s%(artist& - |)s%(title)s.%(ext)s"
@@ -88,9 +88,8 @@ esac
 
 filename=$(yt-dlp -s -O "%(filename)s [%(id)s].%(ext)s" "$url")
 
-[ -z "$type" ] &&
-  cmd="$2 -o $HOME/$filename" ||
-  cmd="$cmd -o $output"
+echo "1. cmd: $cmd" >>~/ytdlp.txt
+[ -z "$type" ] && output="$HOME/$filename"
 
 # queue
 echo "$filename" | while IFS= read -r file; do
@@ -100,8 +99,11 @@ done
 # download
 rm -rf /tmp/qplaylist
 notify-send "⏳ Downloading..." "$filename"
-idnum="$(tsp $cmd "$url")"
+idnum="$(tsp $cmd -o "$output" "$url")"
 
 # done
 tsp -D "$idnum" notify-send "👍 Completed download!" "$filename"
 [ "$downloadtype" = "music" ] && tsp -D "$idnum" "mpc update"
+
+echo "2. cmd: $cmd" >>~/ytdlp.txt
+echo "output: $output" >>~/ytdlp.txt
