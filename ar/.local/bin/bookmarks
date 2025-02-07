@@ -17,8 +17,8 @@ usage() {
   echo ""
   echo "Programs:"
   echo "  browser     : System default browser"
-  echo "  links       : A text WWW browser, similar to lynx"
   echo "  lynx        : A text browser for World Wide Web"
+  echo "  w3m         : A text WWW browser, similar to lynx"
   echo ""
   echo "Examples:"
   echo "  ${0##*/} -b         # Opens a browser bookmark in a program"
@@ -33,8 +33,8 @@ opentool() {
   available_tools=""
   command -v xdg-open 2>/dev/null | grep -v "alias" -q && available_tools="$available_tools xdg-open"
   command -v open 2>/dev/null | grep -v "alias" -q && available_tools="$available_tools open"
-  command -v links 2>/dev/null | grep -v "alias" -q && available_tools="$available_tools links"
   command -v lynx 2>/dev/null | grep -v "alias" -q && available_tools="$available_tools lynx"
+  command -v w3m 2>/dev/null | grep -v "alias" -q && available_tools="$available_tools w3m"
   available_tools=$(printf "%s" "$available_tools" | awk '{$1=$1; print}' | tr ' ' '\n')
   if [ -z "$available_tools" ]; then
     printf "No browser found\n" >&2
@@ -56,8 +56,8 @@ opentool() {
       ;;
     esac
     ;;
-  links) setsid -f "$TERMINAL" -e links "$1" ;;
   lynx) setsid -f "$TERMINAL" -e lynx "$1" ;;
+  w3m) setsid -f "$TERMINAL" -e w3m "$1" ;;
   *) echo "Invalid selection" >&2 && exit 1 ;;
   esac
 }
