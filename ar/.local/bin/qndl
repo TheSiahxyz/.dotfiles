@@ -82,7 +82,7 @@ case $url in
     playlisttitle=$(yt-dlp -s -O "%(playlist_title)s" "$url" | head -n 1 | sed 's/, /,/g;s/[\/:*?"<>| ]/-/g' | tr '[:upper:]' '[:lower:]') &&
     subdest="$channel/$playlisttitle" &&
     mkdir -p "$dest/$subdest" &&
-    output="$dest/$subdest/%(playlist_index)02d_%(title)s [%(id)s].%(ext)s"
+    output="$dest/$subdest/%(playlist_index)02d. %(title)s [%(id)s].%(ext)s"
   ;;
 esac
 

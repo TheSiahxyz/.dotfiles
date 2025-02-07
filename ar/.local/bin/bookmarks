@@ -120,9 +120,7 @@ openinbrowser() {
 }
 
 geturls() {
-  [ -f ~/.local/share/thesiah/urls ] &&
-    URLS=$(cat ~/.local/share/thesiah/snippets ~/.local/share/thesiah/urls) ||
-    URLS=$(cat ~/.local/share/thesiah/snippets)
+  URLS=$(cat ~/.local/share/thesiah/snippets ~/.local/share/thesiah/urls)
   CHOICE=$(echo "$URLS" | grep -v -e '^#' -e '^$' | awk -F'"' '{print $2}' | dmenu -i -l 50 -p "Choose a URL $1:")
   [ -z "$CHOICE" ] && exit
   URL=$(echo "$URLS" | grep -v -e '^#' -e '^$' | grep "\"$CHOICE\"" | awk '{print $1}')

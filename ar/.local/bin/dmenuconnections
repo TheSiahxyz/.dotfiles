@@ -10,10 +10,10 @@
 # 		networkmanager_dmenu (https://github.com/firecat53/networkmanager-dmenu)
 # 		btmenu               (https://github.com/cdown/btmenu)
 
-[ "$(cat /sys/class/net/w*/operstate)" = 'down' ] && wifiicon="📡"
+grep -q 'down' /sys/class/net/w*/operstate && wifiicon="❌"
 [ -z "${wifiicon+var}" ] && wifiicon=$(grep "^\s*w" /proc/net/wireless | awk '{ print "🛜", int($3 * 100 / 70) "%" }')
 
-wifi=$(printf "%s %s" "${wifiicon}" "$(cat /sys/class/net/w*/operstate | sed "s/down/❎/;s/up/🌐/")")
+wifi=$(printf "%s %s" "${wifiicon}" "$(sed "s/down/❎/;s/up/🌐/" /sys/class/net/e*/operstate)")
 
 if [ -n "${wifi}" ]; then
   choice=$(printf 'bluetooth\nnetwork\nwifi' | dmenu -i -p "${wifi}")
