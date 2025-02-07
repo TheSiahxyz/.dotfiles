@@ -2,7 +2,7 @@
 
 mount_encrypted() {
   ! mount | grep -q " $1 " && echo "$PASSPHRASE" | sudo mount -t ecryptfs "$1" "$2" \
-    -o ecryptfs_cipher=aes,ecryptfs_key_bytes=32,ecryptfs_passthrough=no,ecryptfs_enable_filename_crypto=yes,ecryptfs_sig=$ECRYPTFS_SIG,ecryptfs_fnek_sig=$FNEK_SIG,passwd=$(printf '%s' "$PASSPHRASE")
+    -o ecryptfs_cipher=aes,ecryptfs_key_bytes=32,ecryptfs_passthrough=no,ecryptfs_enable_filename_crypto=yes,ecryptfs_sig=$ECRYPTFS_SIG,ecryptfs_fnek_sig=$FNEK_SIG,key=passphrase:passphrase_passwd=$(printf '%s' "$PASSPHRASE")
 }
 
 attempt_mount() {
