@@ -278,7 +278,6 @@ cmd open ${{
   application/epub*|application/pdf|application/postscript|application/vnd.djvu|image/vnd.djvu) setsid -f zathura $fx >/dev/null 2>&1 ;;
   application/pgp-encrypted) $EDITOR $fx ;;
   application/vnd.oasis.opendocument.text|application/vnd.oasis.opendocument.spreadsheet|application/vnd.oasis.opendocument.spreadsheet-template|application/vnd.oasis.opendocument.presentation-template|application/vnd.oasis.opendocument.presentation|application/vnd.ms-powerpoint|application/vnd.oasis.opendocument.graphics|application/vnd.oasis.opendocument.graphics-template|application/vnd.oasis.opendocument.formula|application/vnd.oasis.opendocument.database) setsid -f firefox $fx >/dev/null 2>&1 ;;
-  application/vnd.openxmlformats-officedocument.spreadsheetml.sheet) localc $fx ;;
   application/x-hwp|application/vnd.openxmlformats-officedocument.presentationml.presentation|application/vnd.openxmlformats-officedocument.wordprocessingml.document) libreoffice $fx ;;
   audio/*|video/x-ms-asf) mpv --audio-display=no $f ;;
   image/x-xcf) setsid -f gimp $f >/dev/null 2>&1 ;;
@@ -290,7 +289,7 @@ cmd open ${{
       lf -remote "send toggle"
     done &
     ;;
-  text/csv) sc-im $fx;;
+  text/csv|application/vnd.openxmlformats-officedocument.spreadsheetml.sheet) sc-im $fx;;
   text/html|text/xml) lynx $fx;;
   text/troff) groff -mom $fx -Tpdf | zathura - ;;
   text/*|application/json|inode/x-empty|application/x-subrip) $EDITOR $fx;;

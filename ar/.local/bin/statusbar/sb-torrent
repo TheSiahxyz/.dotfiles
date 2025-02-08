@@ -7,13 +7,14 @@ status=$(transmission-remote -l | grep % |
 	s/.*100%.*/N ✅/;
 	s/.*Idle.*/B 🕰️/;
 	s/.*Uploading.*/L 🔼/;
-	s/.*%.*/M 🔽/" |
+	s/.*Downloading.*/M 🔽/;
+  s/.*%.*/Q ❓/" |
   sort -h | uniq -c | awk '{print $3 $1}' | paste -sd ' ' -)
 
 if [ -z "$status" ]; then
-  echo "$status"
-else
   pidof transmission-daemon >/dev/null && echo "🌲"
+else
+  echo "$status"
 fi
 
 case $BLOCK_BUTTON in

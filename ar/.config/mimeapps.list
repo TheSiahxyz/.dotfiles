@@ -14,6 +14,7 @@ image/jpeg=img.desktop;
 image/gif=img.desktop;
 image/png=img.desktop;
 text/csv=csv.desktop;
+application/vnd.openxmlformats-officedocument.spreadsheetml.sheet=csv.desktop;
 text/html=html.desktop;
 text/markdown=slide.desktop;
 text/plain=text.desktop;
