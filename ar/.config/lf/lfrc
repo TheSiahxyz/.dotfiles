@@ -200,9 +200,8 @@ cmd extract ${{
       *.gz)         gunzip $fx                    ;;
       *.tar)        tar xf $fx                    ;;
       *.xz)         unxz $fx                      ;;
-      *.zip|*.jar|*.war) unzip $fx                ;;
+      *.zip|*.jar|*.war|*.7z) 7z x $fx            ;;
       *.Z)          uncompress $fx                ;;
-      *.7z)         7z x $fx                      ;;
       *.exe)        cabextract $fx                ;;
       *.ace)        unace x $fx                   ;;
     esac

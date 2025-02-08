@@ -9,7 +9,7 @@ setbg & # set the background with the `setbg` script
 # xrdb "${XDG_CONFIG_HOME:-${HOME}/.config}/x11/xresources" &
 # xrdbpid=$!
 
-autostart="mpd xcompmgr dunst unclutter pipewire blueman-applet remapd"
+autostart="mpd xcompmgr dunst unclutter pipewire blueman-applet remapd clipmenud"
 
 for program in $autostart; do
   pidof -sx "$program" || "$program" &
