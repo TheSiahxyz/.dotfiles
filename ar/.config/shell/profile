@@ -15,7 +15,7 @@ unsetopt PROMPT_SP 2>/dev/null
 ###################################################
 ### --- DEFAULT PROGRAMS --- ###
 ###################################################
-export BROWSER="firefox"
+export BROWSER=$(command -v qutebrowser || command -v firefox || command -v librewolf)
 export EDITOR="nvim"
 export EDITOR2="vim"
 export KEYTIMEOUT=10

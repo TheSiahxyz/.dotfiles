@@ -24,6 +24,7 @@ vnb     ${XDG_CONFIG_HOME:-${HOME}/.config}/ncmpcpp/bindings                    
 vnp     ${XDG_CONFIG_HOME:-${HOME}/.config}/ncmpcpp/config                      # Ncmpcpp (music player) config
 vns     ${XDG_CONFIG_HOME:-${HOME}/.config}/newsboat/config                     # Newsboat config (RSS reader)
 vnu     ${XDG_CONFIG_HOME:-${HOME}/.config}/newsboat/urls                       # Newsboat url (RSS reader)
+vqt     ${XDG_CONFIG_HOME:-${HOME}/.config}/qutebrowser/config.py               # Qutebrowser config
 Vsm     /etc/samba/smb.conf                                                     # Samba config
 vse     ${XDG_CONFIG_HOME:-${HOME}/.config}/sesh/sesh.toml                      # Sesh config
 vsf     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/surf/config.def.h      # Surf: a simple browser

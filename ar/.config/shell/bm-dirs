@@ -25,6 +25,7 @@ cnc             ${XDG_CONFIG_HOME:-${HOME}/.config}/NvChad
 cnp             ${XDG_CONFIG_HOME:-${HOME}/.config}/ncmpcpp
 cns             ${XDG_CONFIG_HOME:-${HOME}/.config}/newsboat
 cnv             ${XDG_CONFIG_HOME:-${HOME}/.config}/nvim/lua/thesiahxyz
+cqt             ${XDG_CONFIG_HOME:-${HOME}/.config}/qutebrowser
 cr              ${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/cron
 cse             ${XDG_CONFIG_HOME:-${HOME}/.config}/sesh
 csf             ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/surf
@@ -91,6 +92,7 @@ shh             ${XDG_DATA_HOME:-${HOME}/.local/share}/history
 shg             ${XDG_DATA_HOME:-${HOME}/.local/share}/nvim/gp/chats
 shm             ${XDG_DATA_HOME:-${HOME}/.local/share}/mail
 shp             ${XDG_DATA_HOME:-${HOME}/.local/share}/wallpapers
+shq             ${XDG_DATA_HOME:-${HOME}/.local/share}/qutebrowser
 shr             ${XDG_DATA_HOME:-${HOME}/.local/share}
 sht             ${XDG_DATA_HOME:-${HOME}/.local/share}/task
 shv             ${XDG_DATA_HOME:-${HOME}/.local/share}/venvs

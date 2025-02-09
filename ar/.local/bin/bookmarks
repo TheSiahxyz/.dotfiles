@@ -48,18 +48,28 @@ opentool() {
   xdg-open) xdg-open "$1" ;;
   open)
     case "$(uname -s)" in
-    Darwin)
-      open "$1"
-      ;;
-    *)
-      xdg-open "$1"
-      ;;
+    Darwin) open "$1" ;;
+    *) xdg-open "$1" ;;
     esac
     ;;
   lynx) setsid -f "$TERMINAL" -e lynx "$1" ;;
   w3m) setsid -f "$TERMINAL" -e w3m "$1" ;;
   *) echo "Invalid selection" >&2 && exit 1 ;;
   esac
+}
+
+openwindow() {
+  if [ "$1" = "private" ]; then
+    case "$BROWSER" in
+    *qutebrowser*) "$BROWSER" --target private-window "$URL" ;;
+    *firefox* | *librewolf*) "$BROWSER" --private-window "$URL" ;;
+    esac
+  else
+    case "$BROWSER" in
+    *qutebrowser*) "$BROWSER" --target window "$URL" ;;
+    *firefox* | *librewolf*) "$BROWSER" --new-window "$URL" ;;
+    esac
+  fi
 }
 
 openinbrowser() {
@@ -69,16 +79,21 @@ openinbrowser() {
     profiles_ini_path="$HOME/.mozilla/firefox/profiles.ini"
     profile=$(awk '/\[Install/ {found=1} found && /^Default=/ {split($0, arr, "."); print arr[2]; exit}' "$profiles_ini_path")
     profile_dir=$(find ~/.mozilla/firefox -type d -name "*.$profile*" | head -n 1)
+    db_path="$profile_dir/places.sqlite"
     ;;
   librewolf)
     profiles_ini_path="$HOME/.librewolf/profiles.ini"
     profile=$(awk '/\[Install/ {found=1} found && /^Default=/ {split($0, arr, "."); print arr[2]; exit}' "$profiles_ini_path")
     profile_dir=$(find ~/.librewolf -type d -name "*.$profile*" | head -n 1)
+    db_path="$profile_dir/places.sqlite"
+    ;;
+  qutebrowser)
+    profile_dir="${XDG_DATA_HOME:-${HOME}/.local/share}/qutebrowser"
+    db_path="$profile_dir/history.sqlite"
     ;;
   *) echo "Default browser path is needed." && exit ;;
   esac
 
-  db_path="$profile_dir/places.sqlite"
   tmp_file="$(mktemp)"
   cp -f "$db_path" "$tmp_file"
 
@@ -89,21 +104,40 @@ openinbrowser() {
   cols=$((${COLUMNS:-90} / 3))
   case "$1" in
   *bookmark*)
-    sqlite_query="
-    SELECT substr(b.title, 1, $cols) || ' | ' || p.url AS bookmark
-    FROM moz_bookmarks b
-    JOIN moz_places p ON b.fk = p.id
-    WHERE b.type = 1 AND p.url LIKE 'http%' AND b.title NOT NULL
-    ORDER BY b.title;
-    "
+    case "$BROWSER" in
+    qutebrowser) bookmarks -o ;;
+    *firefox* | *librewolf*)
+      sqlite_query="
+      SELECT substr(b.title, 1, $cols) || ' | ' || p.url AS bookmark
+      FROM moz_bookmarks b
+      JOIN moz_places p ON b.fk = p.id
+      WHERE b.type = 1 AND p.url LIKE 'http%' AND b.title NOT NULL
+      ORDER BY b.title;
+      "
+      ;;
+    esac
     ;;
   *history*)
-    sqlite_query="
-    SELECT substr(p.title, 1, $cols) || ' | ' || p.url
-    FROM moz_places p
-    JOIN moz_historyvisits hv ON hv.place_id = p.id
-    ORDER BY hv.visit_date DESC LIMIT 100;
-    "
+    case "$BROWSER" in
+    *qutebrowser*)
+      sqlite_query="
+      SELECT DISTINCT h.title
+      FROM History h
+      WHERE h.redirect=1
+      ORDER BY h.atime DESC
+      LIMIT 100;
+      "
+      ;;
+    *firefox* | *librewolf*)
+      sqlite_query="
+      SELECT substr(p.title, 1, $cols) || ' | ' || p.url
+      FROM moz_places p
+      JOIN moz_historyvisits hv ON hv.place_id = p.id
+      ORDER BY hv.visit_date DESC
+      LIMIT 100;
+      "
+      ;;
+    esac
     ;;
   esac
   choice=$(sqlite3 "$tmp_file" "$sqlite_query" | eval "$selection" | cut -d'|' -f2 | sed 's|.*\(https://\)|\1|' | xargs)
@@ -120,19 +154,32 @@ openinbrowser() {
 }
 
 geturls() {
-  URLS=$(cat ~/.local/share/thesiah/snippets ~/.local/share/thesiah/urls)
-  CHOICE=$(echo "$URLS" | grep -v -e '^#' -e '^$' | awk -F'"' '{print $2}' | dmenu -i -l 50 -p "Choose a URL $1:")
+  URLS=$(cat ~/.config/qutebrowser/quickmarks ~/.config/qutebrowser/bookmarks/urls ~/.local/share/thesiah/snippets ~/.local/share/thesiah/urls 2>/dev/null)
+  CHOICE=$(echo "$URLS" | grep -v -e '^#' -e '^$' | awk '
+    {
+      if ($1 ~ /^https?:\/\//) { alias = substr($0, index($0, $2)) }  # Case 2: URL first
+      else { alias = substr($0, 1, length($0) - length($NF) - 1) }    # Case 1: URL last
+      print alias
+    }' | dmenu -i -l 50 -p "Choose an alias $1:")
+
   [ -z "$CHOICE" ] && exit
-  URL=$(echo "$URLS" | grep -v -e '^#' -e '^$' | grep "\"$CHOICE\"" | awk '{print $1}')
+  URL=$(echo "$URLS" | grep -v -e '^#' -e '^$' | awk -v choice="$CHOICE" '
+    {
+      if ($1 ~ /^https?:\/\//) { url = $1; alias = substr($0, index($0, $2)) }  # Case 2
+      else { alias = substr($0, 1, length($0) - length($NF) - 1); url = $NF }    # Case 1
+      if (alias == choice) print url
+    }')
 }
 
 copytoclipboard() {
   if command -v xclip >/dev/null 2>&1; then
     printf "%s" "$URL" | xclip -selection clipboard
+  elif command -v clipcopy >/dev/null 2>&1; then
+    printf "%s" "$URL" | clipcopy
   elif command -v xsel >/dev/null 2>&1; then
     printf "%s" "$URL" | xsel --clipboard --input
   else
-    echo "Clipboard utility not found. Install xclip or xsel." >&2
+    echo "Clipboard utility not found. Install xclip, clipcopy, or xsel." >&2
     exit 1
   fi
   notify-send "'$CHOICE' copied in clipbaord" "$URL"
@@ -144,8 +191,8 @@ while getopts "bchopstv" opt; do
   case $opt in
   b) openinbrowser "bookmark" ;;
   c) geturls "to copy" && copytoclipboard ;;
-  o) geturls "to open in $BROWSER" && "$BROWSER" --new-window "$URL" ;;
-  p) geturls "to open in private $BROWSER" && "$BROWSER" --private-window "$URL" ;;
+  o) geturls "to open in $BROWSER" && openwindow ;;
+  p) geturls "to open in private $BROWSER" && openwindow private ;;
   s) openinbrowser "history" ;;
   t) geturls "to type under cursor" && xdotool type "$URL" ;;
   v) openinbrowser "private bookmark" ;;

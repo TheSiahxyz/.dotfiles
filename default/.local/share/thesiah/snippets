@@ -1,6 +1,6 @@
 # TheSiahxyz's URLs
-https://thesiah.xyz "Sever TheSiahxyz"
-https://git.thesiah.xyz "Git TheSiahxyz"
-https://github.com/TheSiahxyz?tab=repositories "Github TheSiahxyz"
-https://mail.thesiah.xyz "Mail TheSiahxyz"
-https://nextcloud.thesiah.xyz "Nextcloud TheSiahxyz"
+homepage https://thesiah.xyz
+git TheSiahxyz https://git.thesiah.xyz
+github TheSiahxyz https://github.com/TheSiahxyz?tab=repositories
+mail TheSiahxyz https://mail.thesiah.xyz
+nextcloud TheSiahxyz https://nextcloud.thesiah.xyz
