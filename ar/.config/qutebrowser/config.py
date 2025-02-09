@@ -563,7 +563,7 @@ c.colors.webpage.darkmode.enabled = True
 ##   - auto: Use the system-wide color scheme setting.
 ##   - light: Force a light theme.
 ##   - dark: Force a dark theme.
-# c.colors.webpage.preferred_color_scheme = 'auto'
+c.colors.webpage.preferred_color_scheme = "dark"
 
 ## Number of commands to save in the command history. 0: no history / -1:
 ## unlimited
@@ -635,7 +635,7 @@ c.colors.webpage.darkmode.enabled = True
 
 ## Execute the best-matching command on a partial match.
 ## Type: Bool
-# c.completion.use_best_match = False
+c.completion.use_best_match = True
 
 ## A list of patterns which should not be shown in the history. This only
 ## affects the completion. Matching URLs are still saved in the history
@@ -707,7 +707,7 @@ c.colors.webpage.darkmode.enabled = True
 ##   - adblock: Use Brave's ABP-style adblocker
 ##   - hosts: Use hosts blocking
 ##   - both: Use both hosts blocking and Brave's ABP-style adblocker
-# c.content.blocking.method = 'auto'
+c.content.blocking.method = "adblock"
 
 ## A list of patterns that should always be loaded, despite being blocked
 ## by the ad-/host-blocker. Local domains are always exempt from
@@ -1122,7 +1122,7 @@ c.content.cookies.store = True
 ##   - ask-block-thirdparty: Ask how to proceed for normal page loads, but silently block resource loads.
 ##   - block: Automatically block loading on certificate errors.
 ##   - load-insecurely: Force loading pages despite certificate errors. This is *insecure* and should be avoided. Instead of using this, consider fixing the underlying issue or importing a self-signed certificate via `certutil` (or Chromium) instead.
-# c.content.tls.certificate_errors = 'ask'
+c.content.tls.certificate_errors = "block"
 
 ## How navigation requests to URLs with unknown schemes are handled.
 ## Type: String
@@ -1379,7 +1379,7 @@ c.content.cookies.store = True
 ##   - unique-match: Auto-follow whenever there is a unique non-empty match in either the hint string (word mode) or filter (number mode).
 ##   - full-match: Follow the hint when the user typed the whole hint (letter, word or number mode) or the element's text (only in number mode).
 ##   - never: The user will always need to press Enter to follow a hint.
-# c.hints.auto_follow = 'unique-match'
+c.hints.auto_follow = "always"
 
 ## Duration (in milliseconds) to ignore normal-mode key bindings after a
 ## successful auto-follow.
@@ -1637,7 +1637,7 @@ c.hints.chars = "asdfghjklweiovnb"
 ##   - always: Enable experimental web platform features.
 ##   - auto: Enable experimental web platform features when using Qt 5.
 ##   - never: Disable experimental web platform features.
-# c.qt.chromium.experimental_web_platform_features = 'auto'
+c.qt.chromium.experimental_web_platform_features = "always"
 
 ## When to use Chromium's low-end device mode. This improves the RAM
 ## usage of renderer processes, at the expense of performance.
@@ -1646,7 +1646,7 @@ c.hints.chars = "asdfghjklweiovnb"
 ##   - always: Always use low-end device mode.
 ##   - auto: Decide automatically (uses low-end mode with < 1 GB available RAM).
 ##   - never: Never use low-end device mode.
-# c.qt.chromium.low_end_device_mode = 'auto'
+c.qt.chromium.low_end_device_mode = "always"
 
 ## Which Chromium process model to use. Alternative process models use
 ## less resources, but decrease security and robustness. See the
@@ -1729,7 +1729,7 @@ c.hints.chars = "asdfghjklweiovnb"
 ##   - always: Disable accelerated 2d canvas
 ##   - auto: Disable on Qt6 < 6.6.0, enable otherwise
 ##   - never: Enable accelerated 2d canvas
-# c.qt.workarounds.disable_accelerated_2d_canvas = 'auto'
+c.qt.workarounds.disable_accelerated_2d_canvas = "always"
 
 ## Disable the Hangouts extension. The Hangouts extension provides
 ## additional APIs for Google domains only. Hangouts has been replaced
