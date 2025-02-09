@@ -6,9 +6,9 @@ vbf     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/bm-files                      
 vbi     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/inputrc                       # This file is for gnu readline
 vbp     ${XDG_CONFIG_HOME:-${HOME}/.config}/bash/bash_profile                   # Bash profile
 vcr     ${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/$(whereami)/.config/crons        # Cron job list
-vdb     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwmblocks/config.h     # Dwmblocks: the status bar for dwm
-vdm     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dmenu/config.h         # Dmenu: a dynamic menu
-vdw     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwm/config.h           # Dwm: a dynamic window manager
+vdb     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwmblocks/config.def.h # Dwmblocks: the status bar for dwm
+vdm     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dmenu/config.def.h     # Dmenu: a dynamic menu
+vdw     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwm/config.def.h       # Dwm: a dynamic window manager
 vff     ${XDG_CONFIG_HOME:-${HOME}/.config}/fastfetch/config.jsonc              # Fastfetch config
 vga     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/git-aliasrc                   # Git aliases
 vgc     ${XDG_CONFIG_HOME:-${HOME}/.config}/git/config                          # Git config
@@ -26,10 +26,10 @@ vns     ${XDG_CONFIG_HOME:-${HOME}/.config}/newsboat/config                     
 vnu     ${XDG_CONFIG_HOME:-${HOME}/.config}/newsboat/urls                       # Newsboat url (RSS reader)
 Vsm     /etc/samba/smb.conf                                                     # Samba config
 vse     ${XDG_CONFIG_HOME:-${HOME}/.config}/sesh/sesh.toml                      # Sesh config
-vsl     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/slock/config.h         # Slock: lock screen
+vsl     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/slock/config.def.h     # Slock: lock screen
 vsp     ${XDG_DATA_HOME:-${HOME}/.local/share}/thesiah/snippets                 # Snippets
 vss     ${XDG_CONFIG_HOME:-${HOME}/.config}/starship/starship.toml              # Starship
-vst     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/st/config.h            # St: a simple terminal
+vst     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/st/config.def.h        # St: a simple terminal
 vsx     ${XDG_CONFIG_HOME:-${HOME}/.config}/nsxiv/exec/key-handler              # Nsxiv (image viewer) key/script handler
 vtc     ${XDG_CONFIG_HOME:-${HOME}/.config}/task/taskrc                         # Task config
 vtm     ${XDG_CONFIG_HOME:-${HOME}/.config}/tmux/tmux.conf                      # Tmux config
