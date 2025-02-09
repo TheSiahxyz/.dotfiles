@@ -27,6 +27,7 @@ cns             ${XDG_CONFIG_HOME:-${HOME}/.config}/newsboat
 cnv             ${XDG_CONFIG_HOME:-${HOME}/.config}/nvim/lua/thesiahxyz
 cr              ${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/cron
 cse             ${XDG_CONFIG_HOME:-${HOME}/.config}/sesh
+csf             ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/surf
 csh             ${XDG_CONFIG_HOME:-${HOME}/.config}/shell
 csl             ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/slock
 cst             ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/st

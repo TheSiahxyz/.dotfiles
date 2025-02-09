@@ -208,6 +208,9 @@ export WORKON_HOME="$XDG_DATA_HOME/venvs"
 ### --- VISUAL STUDIO CODE --- ###
 export VSCODE_PORTABLE="$XDG_DATA_HOME/vscode"
 
+### --- WEBKIT --- ###
+export WEBKIT_DISABLE_COMPOSITING_MODE=1
+
 ### --- WINE --- ###
 export WINEPREFIX="$XDG_DATA_HOME/wine"
 export WINEDLLOVERRIDES="winemenubuilder.exe=d"
