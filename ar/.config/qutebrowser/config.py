@@ -583,7 +583,7 @@ c.colors.webpage.preferred_color_scheme = "dark"
 
 ## Height (in pixels or as percentage of the window) of the completion.
 ## Type: PercOrInt
-# c.completion.height = '50%'
+c.completion.height = "40%"
 
 ## Minimum amount of characters needed to update completions.
 ## Type: Int
@@ -623,7 +623,7 @@ c.colors.webpage.preferred_color_scheme = "dark"
 ## Shrink the completion to be smaller than the configured size if there
 ## are no scrollbars.
 ## Type: Bool
-# c.completion.shrink = False
+c.completion.shrink = True
 
 ## Format of timestamps (e.g. for the history completion). See
 ## https://sqlite.org/lang_datefunc.html and
@@ -1122,7 +1122,7 @@ c.content.prefers_reduced_motion = True
 ##   - ask-block-thirdparty: Ask how to proceed for normal page loads, but silently block resource loads.
 ##   - block: Automatically block loading on certificate errors.
 ##   - load-insecurely: Force loading pages despite certificate errors. This is *insecure* and should be avoided. Instead of using this, consider fixing the underlying issue or importing a self-signed certificate via `certutil` (or Chromium) instead.
-c.content.tls.certificate_errors = "block"
+c.content.tls.certificate_errors = "ask"
 
 ## How navigation requests to URLs with unknown schemes are handled.
 ## Type: String
@@ -1379,7 +1379,7 @@ c.editor.command = ["st", "-e", "nvim", "{file}", "+{line}", "+normal {column0}l
 ##   - unique-match: Auto-follow whenever there is a unique non-empty match in either the hint string (word mode) or filter (number mode).
 ##   - full-match: Follow the hint when the user typed the whole hint (letter, word or number mode) or the element's text (only in number mode).
 ##   - never: The user will always need to press Enter to follow a hint.
-c.hints.auto_follow = "always"
+c.hints.auto_follow = "unique-match"
 
 ## Duration (in milliseconds) to ignore normal-mode key bindings after a
 ## successful auto-follow.
@@ -1872,7 +1872,7 @@ c.session.lazy_restore = True
 ##   - always: Always show the statusbar.
 ##   - never: Always hide the statusbar.
 ##   - in-mode: Show the statusbar when in modes other than normal mode.
-c.statusbar.show = "in-mode"
+c.statusbar.show = "always"
 
 ## List of widgets displayed in the statusbar.
 ## Type: List of StatusbarWidget
@@ -2155,7 +2155,31 @@ c.url.default_page = "https://searx.thesiah.xyz/"
 ## the search engine name to the search term, e.g. `:open google
 ## qutebrowser`.
 ## Type: Dict
-c.url.searchengines = {"DEFAULT": "https://searx.thesiah.xyz/?q={}"}
+c.url.searchengines = {
+    "DEFAULT": "https://searx.thesiah.xyz/search?q={}",
+    "a": "https://www.amazon.com/s/?field-keywords=%s",
+    "ar": "https://wiki.archlinux.org/index.php?search=%s",
+    "b": "https://search.brave.com/search?q=%s",
+    "cp": "https://www.coupang.com/np/search?component=&q=%s",
+    "d": "https://duckduckgo.com/?q={}",
+    "dc": "http://www.discogs.com/search?q=%s&type=all",
+    "e": "http://www.ebay.com/sch/i.html?_from=R40&_trksid=p5197.m570.l1313&_nkw=%s&_sacat=See-All-Categories",
+    "g": "https://www.google.com/search?q={}",
+    "gd": "https://drive.google.com/drive/search?q=%s",
+    "gm": "https://www.google.com/maps?q=%s"
+    "gi": "https://www.google.com/search?tbm=isch&q=%s",
+    "gh": "https://github.com/search?q=%s&ref=opensearch",
+    "gs": "https://gist.github.com/search?q=%s&ref=opensearch",
+    "gst": "https://github.com/issues?utf8=✓&q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22++%s",
+    "gt": "https://translate.google.com/?hl=ko&sl=auto&tl=ko&text=%s%0A&op=translate",
+    "home": "https://www.google.com/maps/dir/home/%s",
+    "n": "https://search.naver.com/search.naver?where=nexearch&sm=top_hty&fbm=0&ie=utf8&query={}",
+    "pkg": "https://parcelsapp.com/en/tracking/%s",
+    "site": "javascript:location='https://www.google.com/search?num=100&q=site:'+escape(location.hostname)+'+%s'",
+    "so": "https://stackoverflow.com/search?q=%s",
+    "y": "https://www.youtube.com/results?search_query=%s",
+    "w": "https://www.wikipedia.org/w/index.php?title=Special:Search&search=%s",
+}
 
 ## Page(s) to open at the start.
 ## Type: List of FuzzyUrl, or FuzzyUrl
