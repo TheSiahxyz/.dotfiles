@@ -75,19 +75,19 @@ openwindow() {
 openinbrowser() {
   # Extract only the default part of the profile name
   case $BROWSER in
-  firefox)
+  *firefox*)
     profiles_ini_path="$HOME/.mozilla/firefox/profiles.ini"
     profile=$(awk '/\[Install/ {found=1} found && /^Default=/ {split($0, arr, "."); print arr[2]; exit}' "$profiles_ini_path")
     profile_dir=$(find ~/.mozilla/firefox -type d -name "*.$profile*" | head -n 1)
     db_path="$profile_dir/places.sqlite"
     ;;
-  librewolf)
+  *librewolf*)
     profiles_ini_path="$HOME/.librewolf/profiles.ini"
     profile=$(awk '/\[Install/ {found=1} found && /^Default=/ {split($0, arr, "."); print arr[2]; exit}' "$profiles_ini_path")
     profile_dir=$(find ~/.librewolf -type d -name "*.$profile*" | head -n 1)
     db_path="$profile_dir/places.sqlite"
     ;;
-  qutebrowser)
+  *qutebrowser*)
     profile_dir="${XDG_DATA_HOME:-${HOME}/.local/share}/qutebrowser"
     db_path="$profile_dir/history.sqlite"
     ;;
@@ -115,6 +115,7 @@ openinbrowser() {
       ORDER BY b.title;
       "
       ;;
+    *qutebrowser*) geturls && openwindow && exit ;;
     esac
     ;;
   *history*)

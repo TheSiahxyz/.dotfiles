@@ -2156,29 +2156,29 @@ c.url.default_page = "https://searx.thesiah.xyz/"
 ## qutebrowser`.
 ## Type: Dict
 c.url.searchengines = {
-    "DEFAULT": "https://searx.thesiah.xyz/search?q={}",
-    "a": "https://www.amazon.com/s/?field-keywords=%s",
-    "ar": "https://wiki.archlinux.org/index.php?search=%s",
-    "b": "https://search.brave.com/search?q=%s",
-    "cp": "https://www.coupang.com/np/search?component=&q=%s",
-    "d": "https://duckduckgo.com/?q={}",
-    "dc": "http://www.discogs.com/search?q=%s&type=all",
-    "e": "http://www.ebay.com/sch/i.html?_from=R40&_trksid=p5197.m570.l1313&_nkw=%s&_sacat=See-All-Categories",
-    "g": "https://www.google.com/search?q={}",
-    "gd": "https://drive.google.com/drive/search?q=%s",
-    "gm": "https://www.google.com/maps?q=%s"
-    "gi": "https://www.google.com/search?tbm=isch&q=%s",
-    "gh": "https://github.com/search?q=%s&ref=opensearch",
-    "gs": "https://gist.github.com/search?q=%s&ref=opensearch",
-    "gst": "https://github.com/issues?utf8=✓&q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22++%s",
-    "gt": "https://translate.google.com/?hl=ko&sl=auto&tl=ko&text=%s%0A&op=translate",
-    "home": "https://www.google.com/maps/dir/home/%s",
-    "n": "https://search.naver.com/search.naver?where=nexearch&sm=top_hty&fbm=0&ie=utf8&query={}",
-    "pkg": "https://parcelsapp.com/en/tracking/%s",
-    "site": "javascript:location='https://www.google.com/search?num=100&q=site:'+escape(location.hostname)+'+%s'",
-    "so": "https://stackoverflow.com/search?q=%s",
-    "y": "https://www.youtube.com/results?search_query=%s",
-    "w": "https://www.wikipedia.org/w/index.php?title=Special:Search&search=%s",
+    "DEFAULT": "https://searx.thesiah.xyz/search?q={}",  # default
+    "a": "https://www.amazon.com/s/?field-keywords={}",  # amazon
+    "ar": "https://wiki.archlinux.org/index.php?search={}",  # arch wiki
+    "b": "https://search.brave.com/search?q={}",  # brave
+    "cp": "https://www.coupang.com/np/search?component=&q={}",  # coupang
+    "d": "https://duckduckgo.com/?q={}",  # duckduckgo
+    "dc": "http://www.discogs.com/search?q={}&type=all",  # discord
+    "e": "http://www.ebay.com/sch/i.html?_from=R40&_trksid=p5197.m570.l1313&_nkw={}&_sacat=See-All-Categories",  # ebay
+    "g": "https://www.google.com/search?q={}",  # google
+    "gd": "https://drive.google.com/drive/search?q={}",  # google drive
+    "gm": "https://www.google.com/maps?q={}",  # google map
+    "gh": "https://github.com/search?q={}&ref=opensearch",  # github
+    "gi": "https://www.google.com/search?tbm=isch&q={}",  # google image
+    "gs": "https://gist.github.com/search?q={}&ref=opensearch",  # gist
+    "ghi": "https://github.com/issues?utf8=✓&q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22++{}",  # github issue
+    "gt": "https://translate.google.com/?hl=ko&sl=auto&tl=ko&text={}%0A&op=translate",  # google translate
+    "home": "https://www.google.com/maps/dir/home/{}",  # google home
+    "n": "https://search.naver.com/search.naver?where=nexearch&sm=top_hty&fbm=0&ie=utf8&query={}",  # naver
+    "pkg": "https://parcelsapp.com/en/tracking/{}",  # package tracking
+    "site": "javascript:location='https://www.google.com/search?num=100&q=site:'+escape(location.hostname)+'+{}'",  # google location
+    "so": "https://stackoverflow.com/search?q={}",  # stack overflow
+    "y": "https://www.youtube.com/results?search_query={}",  # youtube
+    "w": "https://www.wikipedia.org/w/index.php?title=Special:Search&search={}",  # wikipedia
 }
 
 ## Page(s) to open at the start.
