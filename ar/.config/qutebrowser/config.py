@@ -635,7 +635,7 @@ c.colors.webpage.preferred_color_scheme = "dark"
 
 ## Execute the best-matching command on a partial match.
 ## Type: Bool
-c.completion.use_best_match = True
+# c.completion.use_best_match = False
 
 ## A list of patterns which should not be shown in the history. This only
 ## affects the completion. Matching URLs are still saved in the history
@@ -707,7 +707,7 @@ c.completion.use_best_match = True
 ##   - adblock: Use Brave's ABP-style adblocker
 ##   - hosts: Use hosts blocking
 ##   - both: Use both hosts blocking and Brave's ABP-style adblocker
-c.content.blocking.method = "adblock"
+# c.content.blocking.method = "auto"
 
 ## A list of patterns that should always be loaded, despite being blocked
 ## by the ad-/host-blocker. Local domains are always exempt from
@@ -908,7 +908,7 @@ c.content.cookies.store = True
 ##   - always: Legacy touch events are always enabled. This might cause some websites to assume a mobile device.
 ##   - auto: Legacy touch events are only enabled if a touch screen was detected on startup.
 ##   - never: Legacy touch events are always disabled.
-# c.content.javascript.legacy_touch_events = 'never'
+c.content.javascript.legacy_touch_events = "auto"
 
 ## Log levels to use for JavaScript console logging messages. When a
 ## JavaScript message with the level given in the dictionary key is
@@ -1039,7 +1039,7 @@ c.content.cookies.store = True
 ## `:prompt-open-download --pdfjs` command (bound to `<Ctrl-p>` by
 ## default) can be used in the download prompt.
 ## Type: Bool
-# c.content.pdfjs = False
+c.content.pdfjs = True
 
 ## Allow websites to request persistent storage quota via
 ## `navigator.webkitPersistentStorage.requestQuota`.
@@ -1060,7 +1060,7 @@ c.content.cookies.store = True
 ## this setting is set to False, the system-wide animation setting is
 ## considered.
 ## Type: Bool
-# c.content.prefers_reduced_motion = False
+c.content.prefers_reduced_motion = True
 
 ## Draw the background color and images also when the page is printed.
 ## Type: Bool
@@ -1211,7 +1211,7 @@ c.content.tls.certificate_errors = "block"
 ## `{line0}`: Same as `{line}`, but starting from index 0. * `{column0}`:
 ## Same as `{column}`, but starting from index 0.
 ## Type: ShellCommand
-# c.editor.command = ['gvim', '-f', '{file}', '-c', 'normal {line}G{column0}l']
+c.editor.command = ["st", "-e", "nvim", "{file}", "+{line}", "+normal {column0}l"]
 
 ## Encoding to use for the editor.
 ## Type: Encoding
@@ -1646,7 +1646,7 @@ c.qt.chromium.experimental_web_platform_features = "always"
 ##   - always: Always use low-end device mode.
 ##   - auto: Decide automatically (uses low-end mode with < 1 GB available RAM).
 ##   - never: Never use low-end device mode.
-c.qt.chromium.low_end_device_mode = "always"
+# c.qt.chromium.low_end_device_mode = 'auto'
 
 ## Which Chromium process model to use. Alternative process models use
 ## less resources, but decrease security and robustness. See the
@@ -1872,7 +1872,7 @@ c.qt.workarounds.disable_accelerated_2d_canvas = "always"
 ##   - always: Always show the statusbar.
 ##   - never: Always hide the statusbar.
 ##   - in-mode: Show the statusbar when in modes other than normal mode.
-# c.statusbar.show = 'always'
+c.statusbar.show = "in-mode"
 
 ## List of widgets displayed in the statusbar.
 ## Type: List of StatusbarWidget
@@ -2038,7 +2038,7 @@ c.qt.workarounds.disable_accelerated_2d_canvas = "always"
 ##   - never: Always hide the tab bar.
 ##   - multiple: Hide the tab bar if only one tab is open.
 ##   - switching: Show the tab bar when switching tabs.
-# c.tabs.show = 'always'
+c.tabs.show = "multiple"
 
 ## Duration (in milliseconds) to show the tab bar before hiding it when
 ## tabs.show is set to 'switching'.
