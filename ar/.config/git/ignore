@@ -92,6 +92,7 @@ dwm/dwm
 dwmblocks/dwmblocks
 slock/slock
 st/st
+surf/surf
 
 # Tmux
 */tmux/plugins/
