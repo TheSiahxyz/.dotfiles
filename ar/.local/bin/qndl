@@ -4,7 +4,6 @@
 case "$BROWSER" in
 librewolf) cookies="librewolf:~/.librewolf" ;;
 firefox) cookies="firefox:~/.mozilla/firefox" ;;
-*) echo "⛔ Unsupported browser: $BROWSER" && exit 1 ;;
 esac
 
 # [url] [type] [cmd]
@@ -26,7 +25,9 @@ fi
 ! curl --head --silent --fail "$url" >/dev/null && notify-send "⛔ URL is not accessible: $url" && exit 1
 
 # opts
-base="yt-dlp --cookies-from-browser $cookies -civ --no-force-overwrites --no-playlist"
+[ -n "$cookies" ] && base="yt-dlp --cookies-from-browser $cookies -civ --no-force-overwrites --no-playlist" ||
+  base="yt-dlp -civ --no-force-overwrites --no-playlist"
+
 case $type in
 -m | --music)
   downloadtype="music"
@@ -101,5 +102,5 @@ notify-send "⏳ Downloading..." "$filename"
 idnum="$(tsp $cmd -o "$output" "$url")"
 
 # done
-tsp -D "$idnum" notify-send "👍 Completed download!" "$filename"
+tsp -D "$idnum" notify-send "👍 Completed download!" "$filename" || notify-send "❌ Failed to donwload:" "$filename"
 [ "$downloadtype" = "music" ] && tsp -D "$idnum" "mpc update"
