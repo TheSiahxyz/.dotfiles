@@ -393,11 +393,11 @@ config.load_autoconfig(True)
 
 ## Background color of the tab bar.
 ## Type: QssColor
-# c.colors.tabs.bar.bg = '#555555'
+c.colors.tabs.bar.bg = "#444444"
 
 ## Background color of unselected even tabs.
 ## Type: QtColor
-# c.colors.tabs.even.bg = 'darkgrey'
+c.colors.tabs.even.bg = "#333333"
 
 ## Foreground color of unselected even tabs.
 ## Type: QtColor
@@ -426,7 +426,7 @@ config.load_autoconfig(True)
 
 ## Background color of unselected odd tabs.
 ## Type: QtColor
-# c.colors.tabs.odd.bg = 'grey'
+c.colors.tabs.odd.bg = "#333333"
 
 ## Foreground color of unselected odd tabs.
 ## Type: QtColor
@@ -450,7 +450,7 @@ config.load_autoconfig(True)
 
 ## Background color of pinned selected even tabs.
 ## Type: QtColor
-# c.colors.tabs.pinned.selected.even.bg = 'black'
+c.colors.tabs.pinned.selected.even.bg = "#111111"
 
 ## Foreground color of pinned selected even tabs.
 ## Type: QtColor
@@ -458,7 +458,7 @@ config.load_autoconfig(True)
 
 ## Background color of pinned selected odd tabs.
 ## Type: QtColor
-# c.colors.tabs.pinned.selected.odd.bg = 'black'
+c.colors.tabs.pinned.selected.odd.bg = "#111111"
 
 ## Foreground color of pinned selected odd tabs.
 ## Type: QtColor
@@ -466,7 +466,7 @@ config.load_autoconfig(True)
 
 ## Background color of selected even tabs.
 ## Type: QtColor
-# c.colors.tabs.selected.even.bg = 'black'
+c.colors.tabs.selected.even.bg = "#111111"
 
 ## Foreground color of selected even tabs.
 ## Type: QtColor
@@ -474,7 +474,7 @@ config.load_autoconfig(True)
 
 ## Background color of selected odd tabs.
 ## Type: QtColor
-# c.colors.tabs.selected.odd.bg = 'black'
+c.colors.tabs.selected.odd.bg = "#111111"
 
 ## Foreground color of selected odd tabs.
 ## Type: QtColor
@@ -635,7 +635,7 @@ c.colors.webpage.preferred_color_scheme = "dark"
 
 ## Execute the best-matching command on a partial match.
 ## Type: Bool
-# c.completion.use_best_match = False
+c.completion.use_best_match = True
 
 ## A list of patterns which should not be shown in the history. This only
 ## affects the completion. Matching URLs are still saved in the history
@@ -1803,7 +1803,7 @@ c.qt.workarounds.disable_accelerated_2d_canvas = "always"
 
 ## Load a restored tab as soon as it takes focus.
 ## Type: Bool
-# c.session.lazy_restore = False
+c.session.lazy_restore = True
 
 ## Languages to use for spell checking. You can check for available
 ## languages and install dictionaries using scripts/dictcli.py. Run the
@@ -1955,14 +1955,14 @@ c.statusbar.show = "in-mode"
 ## not apply properly if max_width is smaller than the minimum size of
 ## tab contents, or smaller than tabs.min_width.
 ## Type: Int
-# c.tabs.max_width = -1
+c.tabs.max_width = 150
 
 ## Minimum width (in pixels) of tabs (-1 for the default minimum size
 ## behavior). This setting only applies when tabs are horizontal. This
 ## setting does not apply to pinned tabs, unless `tabs.pinned.shrink` is
 ## False.
 ## Type: Int
-# c.tabs.min_width = -1
+c.tabs.min_width = 100
 
 ## When switching tabs, what input mode is applied.
 ## Type: String
@@ -2182,7 +2182,7 @@ c.url.start_pages = ["https://searx.thesiah.xyz"]
 ## that main window transparency negatively affects performance.  Note
 ## this setting only affects windows opened after setting it.
 ## Type: Bool
-# c.window.transparent = False
+c.window.transparent = True
 
 ## Default zoom level.
 ## Type: Perc
@@ -2391,6 +2391,13 @@ config.bind("<Ctrl-C>", "cmd-set-text :")
 # config.bind('yy', 'yank')
 # config.bind('{{', 'navigate prev -t')
 # config.bind('}}', 'navigate next -t')
+
+config.bind(",d", "qndl -v {url}")
+config.bind(",D", "hint links qndl -v {hint-url}")
+config.bind(",m", "spawn mpv -quiet --loop {url}")
+config.bind(",M", "hint links spawn mpv -quiet --loop {hint-url}")
+config.bind(",v", "spawn umpv {url}")
+config.bind(",V", "hint links spawn umpv {hint-url}")
 
 ## Bindings for caret mode
 # config.bind('$', 'move-to-end-of-line', mode='caret')
