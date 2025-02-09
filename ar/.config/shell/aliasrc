@@ -392,6 +392,9 @@ alias -s {jar,JAR}="java -jar"
 alias -s gz="tar -tf"
 alias -s {tgz,TGZ}="tar -tf"
 
+# surf
+alias surf='tabbed surf -e'
+
 # tar
 alias txf='tar -xf'
 alias ttf='tar -tf'
