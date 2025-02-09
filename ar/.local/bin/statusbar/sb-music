@@ -36,7 +36,7 @@ filter() {
     [ "$(mpc status %random%)" = "on" ] && indicators="${indicators}🔂"
     [ "$(mpc status %repeat%)" = "on" ] && indicators="${indicators}🔁"
 
-    sig=$(grep "${0##*/}" "${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwmblocks/config.h" | awk -F',' '{print $3}')
+    sig=$(grep "${0##*/}" "${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwmblocks/config.def.h" | awk -F',' '{print $3}')
     case $sig in
     *0*)
       echo "$prefix$artist - $title$([ -n "$indicators" ] && echo "$indicators")"

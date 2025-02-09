@@ -6,7 +6,7 @@ readme_file="${XDG_DATA_HOME:-${HOME}/.local/share}/thesiah/thesiah.mom"
 output_file="$path.mom"
 temp_file_before="$path.tmp.before"
 temp_file_after="$path.tmp.after"
-start_phrase="When config.h in DWM and ST is saved, key bindings will be extracted and updated below."
+start_phrase="When config.def.h in DWM and ST is saved, key bindings will be extracted and updated below."
 end_phrase=".HEADING 2 \"Other buttons\""
 
 [ -f "$path.mom" ] && source_file="$path.mom" || source_file="$path-default.mom"
@@ -28,8 +28,8 @@ echo "$start_phrase" >>"$temp_file_before"
 
 # Define your configuration files
 mapfile -t config_files <<EOF
-${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwm/config.h
-${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/st/config.h
+${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwm/config.def.h
+${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/st/config.def.h
 EOF
 
 # Process each configuration file and append content
