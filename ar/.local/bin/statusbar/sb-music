@@ -48,7 +48,7 @@ filter() {
   fi
 }
 
-[ "$(grep "${0##*/}" "${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwmblocks/config.h" | awk -F',' '{print $3}')" -eq 0 ] && {
+[ "$(grep "${0##*/}" "${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwmblocks/config.def.h" | awk -F',' '{print $3}')" -eq 0 ] && {
   pidof -x sb-mpdup >/dev/null 2>&1 || sb-mpdup >/dev/null 2>&1 &
 }
 
