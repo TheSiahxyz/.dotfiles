@@ -2258,7 +2258,7 @@ c.window.transparent = True
 # config.bind('<Alt-7>', 'tab-focus 7')
 # config.bind('<Alt-8>', 'tab-focus 8')
 # config.bind('<Alt-9>', 'tab-focus -1')
-# config.bind('<Alt-m>', 'tab-mute')
+config.bind("<Ctrl-M>", "tab-mute")
 # config.bind('<Ctrl-A>', 'navigate increment')
 # config.bind('<Ctrl-Alt-p>', 'print')
 # config.bind('<Ctrl-B>', 'scroll-page 0 -1')
