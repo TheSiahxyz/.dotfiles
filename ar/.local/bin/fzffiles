@@ -42,4 +42,9 @@ files=$(fzf-tmux \
 # Check if any files were selected, and exit if not
 [ -z "$files" ] && exit 0
 
-openfiles "$files"
+absolute_files=$(realpath $files)
+if echo "$absolute_files" | while read -r file; do file --mime-type "$file" | grep -q 'video/'; done; then
+  mpv --quiet --loop $absolute_files
+else
+  openfiles "$absolute_files"
+fi

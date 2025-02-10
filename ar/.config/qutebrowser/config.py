@@ -2568,5 +2568,5 @@ config.bind(
     'spawn --userscript qute-pass --dmenu-invocation passmenu2 --unfiltered --username-pattern "name: (.+)"',
 )
 config.bind(",rs", "restart")
-config.bind(",v", "spawn mpv -quiet --loop {url}")
-config.bind(",V", "hint links spawn mpv -quiet --loop {hint-url}")
+config.bind(",v", "spawn mpv --quiet --loop {url}")
+config.bind(",V", "hint links spawn mpv --quiet --loop {hint-url}")
