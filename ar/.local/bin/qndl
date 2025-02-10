@@ -3,8 +3,8 @@
 YTDL_CMD_BASE="yt-dlp --continue --embed-metadata --ignore-errors --no-force-overwrites --no-playlist --verbose"
 
 case "$BROWSER" in
-librewolf) cookies="librewolf:~/.librewolf" ;;
-firefox) cookies="firefox:~/.mozilla/firefox" ;;
+*librewolf*) cookies="librewolf:~/.librewolf" ;;
+*firefox* | *qutebrowser*) cookies="firefox:~/.mozilla/firefox" ;;
 esac
 
 [ -n "$cookies" ] && YTDL_CMD_BASE="$YTDL_CMD_BASE --cookies-from-browser $cookies"
@@ -27,14 +27,14 @@ fi
 
 # Process command-line options for download type
 case $type in
-m)
+-m | --music | m | music)
   DOWNLOAD_TYPE="music"
   OUTPUT_DIR="${XDG_MUSIC_DIR:-${HOME}/Music}"
   ARCHIVE_FILE="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/default/Music/.music.txt"
   YTDL_OUTPUT_FORMAT="${OUTPUT_DIR}/%(artist|)s%(artist& - |)s%(title)s.%(ext)s"
   YTDL_CMD_BASE="$YTDL_CMD_BASE --audio-format best --audio-quality 0 --download-archive \"$ARCHIVE_FILE\" --extract-audio --recode-video mp3"
   ;;
-r)
+-r | --restore | r | restore)
   OUTPUT_DIR="${XDG_MUSIC_DIR:-${HOME}/Music}"
   ARCHIVE_FILE="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/default/Music/.music.txt"
   YTDL_OUTPUT_FORMAT="${OUTPUT_DIR}/%(artist|)s%(artist& - |)s%(title)s.%(ext)s"
@@ -49,7 +49,7 @@ r)
   done <"$ARCHIVE_FILE"
   exit 0
   ;;
-v)
+-v | --video | v | video)
   DOWNLOAD_TYPE="video"
   OUTPUT_DIR="${XDG_VIDEOS_DIR:-${HOME}/Videos}"
   YTDL_OUTPUT_FORMAT="${OUTPUT_DIR}/%(title)s [%(id)s].%(ext)s"
@@ -119,9 +119,8 @@ idnum=$(tsp bash -c "$YTDL_CMD")
 pkill -RTMIN+21 "${STATUSBAR:-dwmblocks}"
 
 # Notify upon completion
-filename=$(yt-dlp -s -O '%(filename)s [%(ids)s].%(ext)s' "$URL")
-tsp -D "$idnum" notify-send "✅ $DOWNLOAD_TYPE download complete:" "$filename" ||
-  notify-send "❌ Faild to download:" "$filename"
+tsp -D "$idnum" notify-send "✅ $DOWNLOAD_TYPE download complete:" "$URL" ||
+  notify-send "❌ Faild to download:" "$URL"
 
 # Conditionally update the music database if the download type is music
 [ "$DOWNLOAD_TYPE" = "music" ] && tsp -D "$idnum" bash -c "mpc update"
