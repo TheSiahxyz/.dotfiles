@@ -1,0 +1,13 @@
+#!/bin/sh
+
+speed="5"
+
+case "$1" in
+h) xdotool mousemove_relative -- -$speed 0 ;;
+j) xdotool mousemove_relative 0 $speed ;;
+k) xdotool mousemove_relative -- 0 -$speed ;;
+l) xdotool mousemove_relative $speed 0 ;;
+c) xdotool click 1 ;;
+C) xdotool click --repeat 1 ;;
+r) xdotool click 2 ;;
+esac
