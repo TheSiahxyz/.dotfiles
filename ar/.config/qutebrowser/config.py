@@ -2421,13 +2421,6 @@ config.bind("<Ctrl-C>", "cmd-set-text :")
 # config.bind('{{', 'navigate prev -t')
 # config.bind('}}', 'navigate next -t')
 
-config.bind(",d", "spawn qndl -v {url}")
-config.bind(",D", "hint links spawn qndl -v {hint-url}")
-config.bind(",m", "spawn mpv -quiet --loop {url}")
-config.bind(",M", "hint links spawn mpv -quiet --loop {hint-url}")
-config.bind(",v", "spawn umpv {url}")
-config.bind(",V", "hint links spawn umpv {hint-url}")
-
 ## Bindings for caret mode
 # config.bind('$', 'move-to-end-of-line', mode='caret')
 # config.bind('0', 'move-to-start-of-line', mode='caret')
@@ -2551,3 +2544,29 @@ config.bind("<Ctrl-]>", "command-history-prev", mode="command")
 # config.bind('Y', 'prompt-accept --save yes', mode='yesno')
 # config.bind('n', 'prompt-accept no', mode='yesno')
 # config.bind('y', 'prompt-accept yes', mode='yesno')
+
+## userscripts
+config.bind(",b", "spawn --userscript add-nextcloud-bookmarks")
+config.bind(",B", "hint links userscript add-nextcloud-bookmarks")
+config.bind(",c", "spawn --userscript add-nextcloud-cookbook")
+config.bind(",C", "hint links userscript add-nextcloud-cookbook")
+config.bind(",d", "spawn qndl -v {url}")
+config.bind(",D", "hint links spawn qndl -v {hint-url}")
+config.bind(",gd", "spawn --userscript translate")
+config.bind(",gk", "spawn --userscript translate --target_lang ko")
+config.bind(",gd", "spawn --userscript translate", mode="caret")
+config.bind(",gk", "spawn --userscript translate --target_lang ko", mode="caret")
+config.bind(",help", "open -t qute://help/index.html")
+config.bind(",msg", "open -t qute://log/?level=info")
+config.bind(",oc", "open -t qute://help/commands.html#cmd-repeat")
+config.bind(
+    ",pp",
+    "spawn --userscript qute-pass --dmenu-invocation passmenu2 --unfiltered",
+)
+config.bind(
+    ",pn",
+    'spawn --userscript qute-pass --dmenu-invocation passmenu2 --unfiltered --username-pattern "name: (.+)"',
+)
+config.bind(",rs", "restart")
+config.bind(",v", "spawn mpv -quiet --loop {url}")
+config.bind(",V", "hint links spawn mpv -quiet --loop {hint-url}")

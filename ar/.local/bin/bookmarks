@@ -122,10 +122,9 @@ openinbrowser() {
     case "$BROWSER" in
     *qutebrowser*)
       sqlite_query="
-      SELECT DISTINCT h.title
-      FROM History h
-      WHERE h.redirect=1
-      ORDER BY h.atime DESC
+      SELECT substr(h.title, 1, $cols) || ' | ' || h.url AS bookmark
+      FROM CompletionHistory h
+      ORDER BY h.last_atime DESC
       LIMIT 100;
       "
       ;;
