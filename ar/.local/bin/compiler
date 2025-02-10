@@ -9,7 +9,7 @@
 #	   Use make if Makefile exists.
 # py files: runs via python command
 # go files: compiles and runs with "go run"
-# config.h files: (For suckless utils) recompiles and installs program.
+# config.def.h files: (For suckless utils) recompiles and installs program.
 # all others: run `sent` to show a presentation
 
 file=$(readlink -f "$1")
