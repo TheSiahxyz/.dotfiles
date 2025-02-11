@@ -12,7 +12,7 @@ truncate_string() {
 
 filter() {
   if ps -C mpd >/dev/null 2>&1; then
-    screen_width=$(xrandr | grep '\*' | awk '{print $1}' | cut -d'x' -f1)
+    screen_width=$(xrandr | awk '/\*/ {split($1, res, "x"); print res[1]; exit}')
     artist=$(mpc current -f %artist%)
     title=$(mpc current -f %title%)
 
@@ -36,20 +36,21 @@ filter() {
     [ "$(mpc status %random%)" = "on" ] && indicators="${indicators}🔂"
     [ "$(mpc status %repeat%)" = "on" ] && indicators="${indicators}🔁"
 
-    sig=$(grep "${0##*/}" "${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwmblocks/config.def.h" | awk -F',' '{print $3}')
-    case $sig in
-    *0*)
-      echo "$prefix$artist - $title$([ -n "$indicators" ] && echo "$indicators")"
+    case "$(awk -F',' -v name="${0##*/}" '$0 ~ name {gsub(/[[:space:]]/, "", $3); print $3}' "${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwmblocks/config.def.h")" in
+    0) echo "$prefix$artist - $title${indicators:+$indicators}" ;;
+    [1-9]*)
+      current_time=$(mpc status %currenttime%)
+      total_time=$(mpc status %totaltime%)
+      echo "$prefix$artist - $title ${current_time:+$current_time/}$total_time${indicators:+$indicators}"
       ;;
-    *1*)
-      echo "$prefix$artist - $title $(mpc status %currenttime%)/$(mpc status %totaltime%)$([ -n "$indicators" ] && echo "$indicators")"
-      ;;
+    *) return ;;
     esac
+
   fi
 }
 
-[ "$(grep "${0##*/}" "${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwmblocks/config.def.h" | awk -F',' '{print $3}')" -eq 0 ] && {
-  pidof -x sb-mpdup >/dev/null 2>&1 || sb-mpdup >/dev/null 2>&1 &
+[ "$(awk -F',' -v name="${0##*/}" '$0 ~ name {print $3; exit}' "${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwmblocks/config.def.h")" -eq 0 ] && {
+  pidof -x sb-mpdup >/dev/null 2>&1 || (kill -57 "$(pidof "${STATUSBAR:-dwmblocks}")" && sb-mpdup >/dev/null 2>&1 &)
 }
 
 # Handling interaction based on button press

@@ -707,7 +707,7 @@ c.content.autoplay = False
 ##   - adblock: Use Brave's ABP-style adblocker
 ##   - hosts: Use hosts blocking
 ##   - both: Use both hosts blocking and Brave's ABP-style adblocker
-# c.content.blocking.method = "auto"
+c.content.blocking.method = "both"
 
 ## A list of patterns that should always be loaded, despite being blocked
 ## by the ad-/host-blocker. Local domains are always exempt from
@@ -1232,7 +1232,7 @@ c.editor.command = ["st", "-e", "nvim", "{file}", "+{line}", "+normal {column0}l
 ## Filename of the file to be written to. If not contained in any
 ## argument, the   standard output of the command is read instead.
 ## Type: ShellCommand
-# c.fileselect.folder.command = ['xterm', '-e', 'ranger', '--choosedir={}']
+c.fileselect.folder.command = ["st", "-e", "lf", "{}"]
 
 ## Handler for selecting file(s) in forms. If `external`, then the
 ## commands specified by `fileselect.single_file.command`,
@@ -1252,7 +1252,7 @@ c.editor.command = ["st", "-e", "nvim", "{file}", "+{line}", "+normal {column0}l
 ## contained in any argument, the   standard output of the command is
 ## read instead.
 ## Type: ShellCommand
-# c.fileselect.multiple_files.command = ['xterm', '-e', 'ranger', '--choosefiles={}']
+c.fileselect.multiple_files.command = ["st", "-e", "lf", "{}"]
 
 ## Command (and arguments) to use for selecting a single file in forms.
 ## The command should write the selected file path to the specified file
@@ -1260,7 +1260,7 @@ c.editor.command = ["st", "-e", "nvim", "{file}", "+{line}", "+normal {column0}l
 ## the file to be written to. If not contained in any argument, the
 ## standard output of the command is read instead.
 ## Type: ShellCommand
-# c.fileselect.single_file.command = ['xterm', '-e', 'ranger', '--choosefile={}']
+c.fileselect.single_file.command = ["st", "-e", "lf", "{}"]
 
 ## Font used in the completion categories.
 ## Type: Font
@@ -1384,7 +1384,7 @@ c.editor.command = ["st", "-e", "nvim", "{file}", "+{line}", "+normal {column0}l
 ##   - unique-match: Auto-follow whenever there is a unique non-empty match in either the hint string (word mode) or filter (number mode).
 ##   - full-match: Follow the hint when the user typed the whole hint (letter, word or number mode) or the element's text (only in number mode).
 ##   - never: The user will always need to press Enter to follow a hint.
-c.hints.auto_follow = "unique-match"
+# c.hints.auto_follow = "unique-match"
 
 ## Duration (in milliseconds) to ignore normal-mode key bindings after a
 ## successful auto-follow.
