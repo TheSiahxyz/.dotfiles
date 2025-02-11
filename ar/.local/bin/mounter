@@ -49,6 +49,16 @@ mountedphones="$(grep "simple-mtpfs" /etc/mtab)"
   echo "$phone"
 done)"
 
+iphones="$(ideviceinfo | grep -E "^DeviceName" | sed "s/DeviceName: //;s/^/🍎/")"
+mountediphones="$(grep "ifuse" /etc/mtab)"
+[ -n "$mountediphones" ] && iphones="$(for iphone in $iphones; do
+  for mounted in $mountediphones; do
+    esciphone="$(escape "$iphone")"
+    [[ "$mounted" =~ $esciphone ]] && break 1
+  done && continue 1
+  echo "$iphone"
+done)"
+
 # Check for drives.
 lsblkoutput="$(sudo lsblk -rpo "uuid,name,type,size,label,mountpoint,fstype")"
 # Get all LUKS drives
@@ -114,6 +124,7 @@ done)"
 
 # Add all to one variable. If no mountable drives found, exit.
 alldrives="$(echo "$phones
+$iphones
 $unopenedluks
 $normalparts
 $smbs" | sed "/^$/d;s/ *$//")"
@@ -161,8 +172,15 @@ case "$chosen" in
   getmount
   number="${chosen%%:*}"
   number="${chosen:1}" # This is a bashism.
-  sudo -A simple-mtpfs -o allow_other -o fsname="simple-mtpfs-$(escape "$chosen")" --device "$number" "$mp"
+  sudo -A simple-mtpfs -o allow_other -o fsname="simple-mtpfs-$(escape "$chosen")" --device "$number" "$mp" 2>dev/null
   notify-send "🤖 Android Mounted." "Android device mounted to $mp."
+  ;;
+🍎*)
+  getmount
+  number="${chosen%%:*}"
+  number="${chosen:1}" # This is a bashism.
+  sudo -A ifuse "$mp" 2>dev/null
+  notify-send "🍎 iPhone Mounted." "$chosen mounted to $mp."
   ;;
 📡*)
   chosen="${chosen##* }"
