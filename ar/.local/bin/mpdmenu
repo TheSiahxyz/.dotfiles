@@ -5,7 +5,7 @@ PLAYLIST_DIR="${XDG_CONFIG_HOME:-${HOME}/.config}/mpd/playlists"
 
 # Functions
 d_artist() {
-  mpc list artist | sort -f | dmenu -p artist "${dmenu_args[@]}" || exit
+  mpc list artist | sort -f | dmenu -i -p artist "${dmenu_args[@]}" || exit
 }
 
 d_album() {
@@ -17,7 +17,7 @@ d_album() {
     {
       printf '%s\n' "$all_name"
       printf '%s\n' "${albums[@]}" | sort -f
-    } | dmenu -p album "${dmenu_args[@]}" || exit
+    } | dmenu -i -p album "${dmenu_args[@]}" || exit
   else
     # We only have one album, so just use that.
     printf '%s\n' "${albums[0]}"
@@ -27,7 +27,7 @@ d_album() {
 d_title() {
   titles=$(mpc list title | sort -f)
   [[ -z "$titles" ]] && exit
-  echo "$titles" | dmenu -p "Select title:" "${dmenu_args[@]}"
+  echo "$titles" | dmenu -i -p "Select title:" "${dmenu_args[@]}"
 }
 
 d_playlist() {
@@ -46,7 +46,7 @@ d_queue() {
   num_extras=$(mpc playlist -f "$extra_format" | sort | uniq | wc -l)
   ((num_extras == 1)) || format+=" $extra_format"
 
-  track=$(mpc playlist -f "$format" | dmenu -p track "${dmenu_args[@]}")
+  track=$(mpc playlist -f "$format" | dmenu -i -p track "${dmenu_args[@]}")
   printf '%s' "${track%% *}"
 }
 
@@ -68,12 +68,12 @@ for arg in "$@"; do
 done
 
 # Main Menu
-[[ -z "$mode" ]] && mode=$(echo -e "library\nplaylist\nqueue" | dmenu -p "Choose mode:" "${dmenu_args[@]}")
+[[ -z "$mode" ]] && mode=$(echo -e "library\nplaylist\nqueue" | dmenu -i -p "Choose mode:" "${dmenu_args[@]}")
 
 # Mode Handling
 case "$mode" in
 "library")
-  search_type=$(echo -e "artist\ntitle" | dmenu -p "Search by:" "${dmenu_args[@]}")
+  search_type=$(echo -e "artist\ntitle" | dmenu -i -p "Search by:" "${dmenu_args[@]}")
   case "$search_type" in
   "artist")
     artist=$(d_artist)
