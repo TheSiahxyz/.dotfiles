@@ -43,6 +43,13 @@ unpushed=$(git cherry -v | wc -l)
 
 [ -z "$changes" ] && [ "$unpushed" -eq 0 ] && exit
 
+# Save current directory and change to the Git repo root
+repo_root=$(git rev-parse --show-toplevel || echo ".")
+cd "$repo_root" || exit
+
+# Get the current Git branch name
+branch=$(git symbolic-ref -q HEAD | sed -e 's|^refs/heads/||')
+
 # Generate default commit message if there are changes
 if [ -n "$changes" ] && [ "$unpushed" -eq 0 ]; then
   num_changes=$(echo "$changes" | wc -l)
@@ -63,13 +70,6 @@ if [ -n "$changes" ] && [ "$unpushed" -eq 0 ]; then
 else
   message=$(git cherry -v | awk '{$1=$2=""; print $0}' | sed 's/^ *//' | tail -n 1)
 fi
-
-# Get the current Git branch name
-branch=$(git symbolic-ref -q HEAD | sed -e 's|^refs/heads/||')
-
-# Save current directory and change to the Git repo root
-repo_root=$(git rev-parse --show-toplevel || echo ".")
-cd "$repo_root"
 
 if [ "$repo_root" = "${PASSWORD_STORE_DIR:-${HOME}/.password-store}" ]; then
   pass git remote | xargs -L1 pass git push --all
