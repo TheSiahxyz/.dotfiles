@@ -1,6 +1,8 @@
 #!/bin/sh
 
-xrandr --auto --dpi 96 # adjust the number based on your resolution and size of the screen
+sleep 1
+xrandr --dpi 96 # adjust the number based on your resolution and size of the screen
+setmonitor
 
 setbg & # set the background with the `setbg` script
 # fcitx5 & # set the input method
