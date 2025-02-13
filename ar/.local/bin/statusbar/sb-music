@@ -50,7 +50,7 @@ filter() {
 }
 
 [ "$(awk -F',' -v name="${0##*/}" '$0 ~ name {print $3; exit}' "${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwmblocks/config.def.h")" -eq 0 ] && {
-  pidof -x sb-mpdup >/dev/null 2>&1 || (kill -57 "$(pidof "${STATUSBAR:-dwmblocks}")" && sb-mpdup >/dev/null 2>&1 &)
+  pidof -x sb-mpdup >/dev/null 2>&1 || sb-mpdup >/dev/null 2>&1 &
 }
 
 # Handling interaction based on button press
