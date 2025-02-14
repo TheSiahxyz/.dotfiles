@@ -70,7 +70,7 @@ case $BLOCK_BUTTON in
 - Left click opens ncmpcpp
 - Middle click pauses/unpause
 - Scroll changes track"
-  notify-send "🎵 $(mpc current)" "⏭️ $(mpc queued)"
+  { [ -n "$(mpc current)" ] && [ -n "$(mpc queued)" ]; } && notify-send "🎵 $(mpc current)" "⏭️ $(mpc queued)"
   ;;
 4) mpc prev | filter ;; # scroll up, previous
 5) mpc next | filter ;; # scroll down, next
