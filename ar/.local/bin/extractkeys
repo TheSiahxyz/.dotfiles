@@ -76,7 +76,7 @@ for file_path in "${config_files[@]}"; do
     fi
 
     line=$(echo "$line" | sed -e "s/^{ \(.*\) },/\1/g;s/{ \([^,]*\), \([^,]*\), \([^,]*\), \([^}]*\) }/\1 \2 \3 \4/g")
-    modkey=$(echo "$line" | awk -F',' '{print $1}' | sed "s/\b0//g;s/MODKEY\(\d*\)/MOD\1/g;s/\([Shift|Contrl]\)Mask/\1/g;s/Control/Ctrl/g;s/WINMOD2/MOD+Ctrl/g;s/WINMOD/MOD+Shift/g;s/TERMMOD2/MOD2+Ctrl/g;s/TERMMOD/MOD+Shift/g;s/ULTRAMOD2/MOD2+Ctrl+Shift/g;s/ULTRAMOD/MOD+Ctrl/g;s/EXTRAMOD/Ctrl+Shift/g;s/|/+/g;s/ //g;s/XK_ANY_MOD/ANY MOD/g")
+    modkey=$(echo "$line" | awk -F',' '{print $1}' | sed "s/\b0//g;s/MODKEY\(\d*\)/MOD\1/g;s/\([Shift|Contrl]\)Mask/\1/g;s/Control/Ctrl/g;s/WINMOD2/MOD2+Ctrl/g;s/WINMOD/MOD+Shift/g;s/TERMMOD2/MOD2+Ctrl/g;s/TERMMOD/MOD+Shift/g;s/ULTRAMOD2/MOD2+Ctrl+Shift/g;s/ULTRAMOD/MOD+Ctrl+Shift/g;s/EXTRAMOD/Ctrl+Shift/g;s/|/+/g;s/ //g;s/XK_ANY_MOD/ANY MOD/g")
     key=$(echo "$line" | awk -F',' '{print $2}' | sed "s/\b0//g;s/XF86XK_//g;s/XK_//g;s/\s*\(.*\)_R$/Right_\1/g;s/\s*\(.*\)_L$/Left_\1/g;s/MODKEY\(\d*\)/MOD\1/g;s/\([Shift|Contrl]\)Mask/\1/g;s/Control/Ctrl/g;s/|/+/g;s/ //g")
     func=$(echo "$line" | awk -F',' '{print $3}' | grep -v "spawn" | sed "s/ //g")
     args=$(echo "$line" | cut -d',' -f4- | sed -E 's/.*\.v\s*=\s*\(const\s*char\s*\*\[\]\)\s*\{\s*([^}]*)\s*\}.*/\1/g;
