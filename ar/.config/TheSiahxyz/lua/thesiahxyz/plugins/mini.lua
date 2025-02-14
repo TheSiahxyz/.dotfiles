@@ -1139,19 +1139,19 @@ return {
 				"n",
 				"<leader>zj",
 				":lua MiniSplitjoin.toggle()<cr>",
-				{ noremap = true, silent = true, desc = "Trim trailing whitespace" }
+				{ noremap = true, silent = true, desc = "Toggle split-join" }
 			)
 			vim.keymap.set(
 				"n",
 				"<leader>J",
 				":lua MiniSplitjoin.join()<cr>",
-				{ noremap = true, silent = true, desc = "Trim trailing whitespace" }
+				{ noremap = true, silent = true, desc = "Join" }
 			)
 			vim.keymap.set(
 				"n",
 				"<leader><cr>",
 				":lua MiniSplitjoin.split()<cr>",
-				{ noremap = true, silent = true, desc = "Trim trailing whitespace" }
+				{ noremap = true, silent = true, desc = "Split" }
 			)
 		end,
 	},

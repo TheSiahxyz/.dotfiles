@@ -178,6 +178,17 @@ vim.keymap.set("n", "<leader>oq", "<cmd>copen<cr>", { desc = "Open quickfix list
 -- Formats
 vim.keymap.set("n", "<leader>cF", vim.lsp.buf.format, { desc = "Format buffer by default lsp" })
 
+-- Full path
+vim.keymap.set("n", "<leader>zf", function()
+	local word = vim.fn.expand("<cWORD>") -- Get full text under the cursor (handles paths with slashes)
+	if word:match("%$") then
+		local expanded_path = vim.fn.expand(word)
+		if expanded_path ~= word then
+			vim.cmd("normal! ciW" .. expanded_path) -- Replace entire word under cursor
+		end
+	end
+end, { desc = "Expand and replace path under cursor" })
+
 -- Git
 -- create repository
 vim.keymap.set("n", "<leader>gR", function()

@@ -931,7 +931,7 @@ c.content.javascript.log_message.excludes = {
     "userscript:_qute_stylesheet": [
         "*Refused to apply inline style because it violates the following Content Security Policy directive: *"
     ],
-    "userscript:_qute_js": ["*TrustedHTML*"],
+    "userscript:_qute_js": ["*TrustedHTML*", "*default-src*"],
 }
 
 ## Javascript message sources/levels to show in the qutebrowser UI. When
@@ -1085,7 +1085,7 @@ c.content.prefers_reduced_motion = True
 ## Valid values:
 ##   - system: Use the system wide proxy.
 ##   - none: Don't use any proxy
-# c.content.proxy = 'socks://localhost:9050/' # for tor to access .onion
+c.content.proxy = "system"  # for tor to access .onion
 
 ## Send DNS requests over the configured proxy.
 ## Type: Bool
@@ -1152,7 +1152,7 @@ c.content.tls.certificate_errors = "ask"
 ##   - default-public-and-private-interfaces: WebRTC should only use the default route used by http. This also exposes the associated default private address. Default route is the route chosen by the OS on a multi-homed endpoint.
 ##   - default-public-interface-only: WebRTC should only use the default route used by http. This doesn't expose any local addresses.
 ##   - disable-non-proxied-udp: WebRTC should only use TCP to contact peers or servers unless the proxy server supports UDP. This doesn't expose any local addresses either.
-# c.content.webrtc_ip_handling_policy = 'all-interfaces'
+c.content.webrtc_ip_handling_policy = "default-public-interface-only"
 
 ## Monitor load requests for cross-site scripting attempts. Suspicious
 ## scripts will be blocked and reported in the devtools JavaScript
@@ -1165,7 +1165,7 @@ c.content.tls.certificate_errors = "ask"
 ## Directory to save downloads to. If unset, a sensible OS-specific
 ## default is used.
 ## Type: Directory
-# c.downloads.location.directory = None
+c.downloads.location.directory = "~/Downloads"
 
 ## Prompt the user for the download location. If set to false,
 ## `downloads.location.directory` will be used.
@@ -1182,7 +1182,7 @@ c.content.tls.certificate_errors = "ask"
 ##   - path: Show only the download path.
 ##   - filename: Show only download filename.
 ##   - both: Show download path and filename.
-# c.downloads.location.suggestion = 'path'
+c.downloads.location.suggestion = "both"
 
 ## Default program used to open downloads. If null, the default internal
 ## handler is used. Any `{}` in the string will be expanded to the
@@ -1858,7 +1858,7 @@ c.session.lazy_restore = True
 ##   - tr-TR: Turkish (Turkey)
 ##   - uk-UA: Ukrainian (Ukraine)
 ##   - vi-VN: Vietnamese (Viet Nam)
-# c.spellcheck.languages = []
+c.spellcheck.languages = ["en-US", "ko"]
 
 ## Padding (in pixels) for the statusbar.
 ## Type: Padding
@@ -2556,19 +2556,15 @@ config.bind("<Ctrl-]>", "command-history-prev", mode="command")
 # config.bind('y', 'prompt-accept yes', mode='yesno')
 
 ## userscripts
-config.bind(",b", "spawn --userscript add-nextcloud-bookmarks")
-config.bind(",B", "hint links userscript add-nextcloud-bookmarks")
-config.bind(",c", "spawn --userscript add-nextcloud-cookbook")
-config.bind(",C", "hint links userscript add-nextcloud-cookbook")
-config.bind(",d", "spawn qndl -v {url}")
-config.bind(",D", "hint links spawn qndl -v {hint-url}")
 config.bind(",gd", "spawn --userscript translate")
 config.bind(",gk", "spawn --userscript translate --target_lang ko")
 config.bind(",gd", "spawn --userscript translate", mode="caret")
 config.bind(",gk", "spawn --userscript translate --target_lang ko", mode="caret")
-config.bind(",help", "open -t qute://help/index.html")
 config.bind(",msg", "open -t qute://log/?level=info")
-config.bind(",oc", "open -t qute://help/commands.html#cmd-repeat")
+config.bind(",nb", "spawn --userscript add-nextcloud-bookmarks")
+config.bind(",nB", "hint links userscript add-nextcloud-bookmarks")
+config.bind(",nc", "spawn --userscript add-nextcloud-cookbook")
+config.bind(",nC", "hint links userscript add-nextcloud-cookbook")
 config.bind(
     ",pp",
     "spawn --userscript qute-pass --dmenu-invocation passmenu2 --unfiltered",
@@ -2577,6 +2573,43 @@ config.bind(
     ",pn",
     'spawn --userscript qute-pass --dmenu-invocation passmenu2 --unfiltered --username-pattern "name: (.+)"',
 )
+config.bind(",qh", "open -t qute://help/index.html")
+config.bind(",qc", "open -t qute://help/commands.html#cmd-repeat")
 config.bind(",rs", "restart")
-config.bind(",v", "spawn mpv --quiet --loop {url}")
-config.bind(",V", "hint links spawn mpv --quiet --loop {hint-url}")
+config.bind(",vd", "spawn qndl -v {url}")
+config.bind(",vD", "hint links spawn qndl -v {hint-url}")
+config.bind(",vv", "spawn mpv --quiet --detach --loop {url}")
+config.bind(",vV", "hint links spawn --detach mpv --quiet --loop {hint-url}")
+config.bind(
+    "za",
+    "config-cycle statusbar.show always never;; config-cycle tabs.show always never",
+)
+config.bind("zb", "config-cycle statusbar.show always never")
+config.bind("zt", "config-cycle tabs.show always never")
+
+## Theme
+# https://github.com/alphapapa/solarized-everything-css
+config.bind(
+    ",tap",
+    'config-cycle content.user_stylesheets ~/.config/qutebrowser/css/apprentice/apprentice-all-sites.css ""',
+)
+config.bind(
+    ",tdr",
+    'config-cycle content.user_stylesheets ~/.config/qutebrowser/css/darculized/darculized-all-sites.css ""',
+)
+config.bind(
+    ",tgr",
+    'config-cycle content.user_stylesheets ~/.config/qutebrowser/css/gruvbox/gruvbox-all-sites.css ""',
+)
+config.bind(
+    ",tsd",
+    'config-cycle content.user_stylesheets ~/.config/qutebrowser/css/solarized-dark/solarized-dark-all-sites.css ""',
+)
+config.bind(
+    ",tsl",
+    'config-cycle content.user_stylesheets ~/.config/qutebrowser/css/solarized-light/solarized-light-all-sites.css ""',
+)
+config.bind(
+    ",tcp",
+    'config-cycle content.user_stylesheets ~/.config/qutebrowser/css/catppuccin/searxng/catppuccin.user.css ""',
+)

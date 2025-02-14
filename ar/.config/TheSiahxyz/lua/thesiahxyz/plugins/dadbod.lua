@@ -18,6 +18,7 @@ return {
 			firefox = "sqlite://" .. home .. "/.mozilla/firefox/si.default/places.sqlite",
 			mysql = "mariadb://user:password@localhost/mysql",
 			postsql = "postgresql://postgres:mypassword@localhost:5432/postgresql",
+			qutebrowser = "sqlite://" .. home .. "/.local/share/qutebrowser/history.sqlite",
 			sqlite = "sqlite://" .. home .. "/.local/share/db/sqlite.db",
 		}
 		local wk = require("which-key")

@@ -26,3 +26,4 @@ video/x-matroska=video.desktop;
 x-scheme-handler/lbry=lbry.desktop;
 x-scheme-handler/mailto=mail.desktop;
 x-scheme-handler/magnet=torrent.desktop;
+image/webp=nsxiv.desktop;

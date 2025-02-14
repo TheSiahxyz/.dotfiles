@@ -318,7 +318,7 @@ local suckless_config = vim.api.nvim_create_augroup("suckless_config", { clear =
 
 vim.api.nvim_create_autocmd("BufWritePost", {
 	group = suckless_config,
-	pattern = home .. "/.local/src/suckless/dmenu/config.h",
+	pattern = home .. "/.local/src/suckless/dmenu/config.def.h",
 	callback = function()
 		vim.cmd("silent !cd " .. home .. "/.local/src/suckless/dmenu/ && sudo make install")
 	end,
@@ -326,7 +326,7 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 
 vim.api.nvim_create_autocmd("BufWritePost", {
 	group = suckless_config,
-	pattern = home .. "/.local/src/suckless/dwmblocks/config.h",
+	pattern = home .. "/.local/src/suckless/dwmblocks/config.def.h",
 	callback = function()
 		vim.cmd(
 			"silent !cd "
@@ -338,7 +338,7 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 
 vim.api.nvim_create_autocmd("BufWritePost", {
 	group = suckless_config,
-	pattern = home .. "/.local/src/suckless/slock/config.h",
+	pattern = home .. "/.local/src/suckless/slock/config.def.h",
 	callback = function()
 		vim.cmd("silent !cd " .. home .. "/.local/src/suckless/slock/ && sudo make install")
 	end,
@@ -347,7 +347,7 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 local suckless_keys = augroup("suckless_keys")
 vim.api.nvim_create_autocmd("BufWritePost", {
 	group = suckless_keys,
-	pattern = home .. "/.local/src/suckless/dwm/config.h",
+	pattern = home .. "/.local/src/suckless/dwm/config.def.h",
 	callback = function()
 		vim.cmd("silent !" .. home .. "/.local/bin/extractkeys")
 	end,
@@ -355,7 +355,7 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 
 vim.api.nvim_create_autocmd("BufWritePost", {
 	group = suckless_keys,
-	pattern = home .. "/.local/src/suckless/st/config.h",
+	pattern = home .. "/.local/src/suckless/st/config.def.h",
 	callback = function()
 		vim.cmd("silent !" .. home .. "/.local/bin/extractkeys")
 	end,
