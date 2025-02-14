@@ -2586,30 +2586,3 @@ config.bind(
 )
 config.bind("zb", "config-cycle statusbar.show always never")
 config.bind("zt", "config-cycle tabs.show always never")
-
-## Theme
-# https://github.com/alphapapa/solarized-everything-css
-config.bind(
-    ",tap",
-    'config-cycle content.user_stylesheets ~/.config/qutebrowser/css/apprentice/apprentice-all-sites.css ""',
-)
-config.bind(
-    ",tdr",
-    'config-cycle content.user_stylesheets ~/.config/qutebrowser/css/darculized/darculized-all-sites.css ""',
-)
-config.bind(
-    ",tgr",
-    'config-cycle content.user_stylesheets ~/.config/qutebrowser/css/gruvbox/gruvbox-all-sites.css ""',
-)
-config.bind(
-    ",tsd",
-    'config-cycle content.user_stylesheets ~/.config/qutebrowser/css/solarized-dark/solarized-dark-all-sites.css ""',
-)
-config.bind(
-    ",tsl",
-    'config-cycle content.user_stylesheets ~/.config/qutebrowser/css/solarized-light/solarized-light-all-sites.css ""',
-)
-config.bind(
-    ",tcp",
-    'config-cycle content.user_stylesheets ~/.config/qutebrowser/css/catppuccin/searxng/catppuccin.user.css ""',
-)
