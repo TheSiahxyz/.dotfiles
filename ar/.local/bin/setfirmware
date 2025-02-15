@@ -1,0 +1,17 @@
+#!/bin/sh
+
+lsblk
+drive=$(lsblk | grep -E '3[0-9].*M' | cut -d' ' -f1)
+drive="/dev/$drive"
+printf "\n%s\n" "Target drive: $drive"
+firmwarepath="${XDG_CONFIG_HOME:-${HOME}/.config}/glove80"
+firmware="$(find "$firmwarepath" -type f -iname '*.uf2' | fzf --prompt "Choose a firmware: ")"
+mp="/media/$USER/firmware"
+[ -d "$mp" ] || mkdir -p "$mp"
+sudo -A mount "$drive" "$mp"
+sudo -A cp "$firmware" "$mp/"
+[ -f "$firmware" ] || exit 1
+ls "$mp"
+sudo -A umount "$mp"
+[ -e "$mp" ] && [ ! -s "$mp" ] && sudo -A rm -rf "$mp"
+echo "Done!"
