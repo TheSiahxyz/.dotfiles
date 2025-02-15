@@ -30,13 +30,13 @@ case $type in
 -m | --music | m | music)
   DOWNLOAD_TYPE="music"
   OUTPUT_DIR="${XDG_MUSIC_DIR:-${HOME}/Music}"
-  ARCHIVE_FILE="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/default/Music/.music.txt"
+  ARCHIVE_FILE="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/global/Music/.music.txt"
   YTDL_OUTPUT_FORMAT="${OUTPUT_DIR}/%(artist|)s%(artist& - |)s%(title)s.%(ext)s"
   YTDL_CMD_BASE="$YTDL_CMD_BASE --audio-format best --audio-quality 0 --download-archive \"$ARCHIVE_FILE\" --extract-audio --recode-video mp3"
   ;;
 -r | --restore | r | restore)
   OUTPUT_DIR="${XDG_MUSIC_DIR:-${HOME}/Music}"
-  ARCHIVE_FILE="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/default/Music/.music.txt"
+  ARCHIVE_FILE="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/global/Music/.music.txt"
   YTDL_OUTPUT_FORMAT="${OUTPUT_DIR}/%(artist|)s%(artist& - |)s%(title)s.%(ext)s"
   YTDL_CMD_BASE="$YTDL_CMD_BASE --audio-format best --audio-quality 0 --extract-audio --recode-video mp3"
   YTDL_CMD="$YTDL_CMD_BASE --output \"$YTDL_OUTPUT_FORMAT\""
