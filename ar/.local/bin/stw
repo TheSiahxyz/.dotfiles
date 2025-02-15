@@ -5,7 +5,7 @@ stowdir="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}"
 
 # Function to list and select stow packages using dmenu
 select_stow_package() {
-  find "$stowdir" -mindepth 1 -maxdepth 1 -type d -not -name ".*" -not -name "default" | while read -r dir; do
+  find "$stowdir" -mindepth 1 -maxdepth 1 -type d -not -name ".*" -not -name "global" | while read -r dir; do
     if [ -n "$(find "$dir" -mindepth 1 -maxdepth 1)" ]; then
       basename "$dir"
     fi
@@ -62,7 +62,7 @@ targetdir=$(select_stow_package) || exit 1
 resolve=$(ask_resolution_strategy) || exit 1
 
 # Stow
-stow_package "$targetdir" "$resolve" && stow_package "default" "$resolve" || exit
+stow_package "$targetdir" "$resolve" && stow_package "global" "$resolve" || exit
 
 # Link for profile
 ln -sf "$stowdir/$targetdir/.config/shell/profile" "$HOME/.zprofile"
