@@ -13,7 +13,7 @@ for connected in $(xrandr -q | grep -w "connected" | cut -d ' ' -f 1); do
 done
 
 # If the lid is closed, turn off the laptop's screen
-if grep -q "disabled" /sys/class/drm/card0-eDP-1/enabled || grep -q "closed" /proc/acpi/button/lid/LID/state; then
+if grep -q "closed" /proc/acpi/button/lid/LID/state; then
   if [ -n "$hdmi" ] && [ -z "$dp" ] && [ -n "$edp" ]; then
     xrandr --output "$edp" --off --output "$hdmi" --primary $default
   elif [ -z "$hdmi" ] && [ -n "$dp" ] && [ -n "$edp" ]; then
