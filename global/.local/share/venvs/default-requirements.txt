@@ -19,6 +19,7 @@ pynvim
 pyperclip
 requests
 stig
+torch
 trash-cli
 urlscan
 websocket-client

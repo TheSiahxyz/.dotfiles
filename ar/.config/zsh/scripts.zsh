@@ -791,6 +791,7 @@ function active_venv() {
     source "$XDG_DATA_HOME/venvs/$venv/bin/activate"
     python -m ensurepip --upgrade >/dev/null 2>&1
     python -m pip install --upgrade pip >/dev/null 2>&1
+    jupyter kernel --kernel=$venv
 }
 
 # list venvs
