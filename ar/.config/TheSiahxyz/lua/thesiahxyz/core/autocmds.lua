@@ -94,15 +94,6 @@ autocmd("FileType", {
 	end,
 })
 
--- Start insert mode in terminal
-autocmd("TermOpen", {
-	group = augroup("terminal"),
-	pattern = "*",
-	callback = function()
-		vim.cmd("startinsert")
-	end,
-})
-
 -- Make it easier to close man-files when opened inline
 autocmd("FileType", {
 	group = augroup("man_close"),

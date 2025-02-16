@@ -400,8 +400,7 @@ cmd alt-paste &{{
     read root
     [ $root = "y" ] && sudo lf -remote "send $id paste"
   }
-  lf -remote "send $id clear"
-  lf -remote "send $id reload"
+  lf -remote "send $id :clear; reload"
 }}
 
 # Traversal

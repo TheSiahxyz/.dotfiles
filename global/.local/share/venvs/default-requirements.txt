@@ -6,6 +6,7 @@ jupyter_client
 jupyter_core
 jupytext
 kaleido
+matplotlib
 nbformat
 notebook
 pillow

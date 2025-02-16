@@ -315,8 +315,10 @@ return {
 		command = "QuartoActivate",
 		config = function()
 			require("quarto").setup({
+				debug = false,
+				closePreviewOnExit = true,
 				lspFeatures = {
-					languages = { "r", "python", "rust", "lua" },
+					languages = { "r", "python", "rust" },
 					chunks = "all",
 					diagnostics = {
 						enabled = true,
@@ -348,10 +350,13 @@ return {
 			vim.keymap.set("n", "<leader>jC", runner.run_above, { silent = true, desc = "Run above cell" })
 			vim.keymap.set("n", "<leader>jl", runner.run_line, { silent = true, desc = "Run line" })
 			vim.keymap.set("v", "<leader>jv", runner.run_range, { silent = true, desc = "Run block" })
-			vim.keymap.set("n", "<leader>jA", runner.run_all, { silent = true, desc = "Run all" })
+			vim.keymap.set("n", "<leader>ja", runner.run_all, { silent = true, desc = "Run all" })
+			vim.keymap.set("n", "<leader>jA", function()
+				runner.run_all(true)
+			end, { desc = "run all cells of all languages", silent = true })
 			vim.keymap.set(
 				"n",
-				"<leader>qp",
+				"<leader>jp",
 				require("quarto").quartoPreview,
 				{ noremap = true, silent = true, desc = "Preview the quarto document" }
 			)
