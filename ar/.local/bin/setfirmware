@@ -4,8 +4,10 @@ lsblk
 drive=$(lsblk | grep -E '3[0-9].*M' | cut -d' ' -f1)
 drive="/dev/$drive"
 printf "\n%s\n" "Target drive: $drive"
-firmwarepath="${XDG_CONFIG_HOME:-${HOME}/.config}/glove80"
-firmware="$(find "$firmwarepath" \( -type f -o -type l \) -iname '*.uf2' | fzf --prompt "Choose a firmware: ")"
+firmwarepath="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/$(whereami)/.config/glove80"
+newfirmware="$(find "${XDG_DOWNLOAD_DIR:-${HOME}/Downloads}" -type f -iname '*.uf2')"
+cp "$newfirmware" "$firmwarepath/"
+firmware="$(find "$firmwarepath" -type f -iname '*.uf2' | fzf --prompt "Choose a firmware: ")"
 mp="/media/$USER/firmware"
 [ -d "$mp" ] || mkdir -p "$mp"
 sudo -A mount "$drive" "$mp"
