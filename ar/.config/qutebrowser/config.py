@@ -1057,7 +1057,7 @@ c.content.pdfjs = True
 
 ## Enable plugins in Web pages.
 ## Type: Bool
-# c.content.plugins = False
+c.content.plugins = True
 
 ## Request websites to minimize non-essentials animations and motion.
 ## This results in the `prefers-reduced-motion` CSS media query to
