@@ -376,29 +376,31 @@ cmd on-select &{{
   lf -remote "send $id set statfmt \"$(eza -ld --color=always "$f")\""
 }}
 cmd load-select &{{
-  [ "$1" = "$id" ] && exit 0
-  lf -remote "send $id unselect"
-  if [ -s ~/.local/share/lf/select ]; then
-    files=$(tr '\n' '\0' < ~/.local/share/lf/select | xargs -0 printf ' %q')
-    lf -remote "send $id toggle $files"
-  fi
+    if [ $# -eq 1 ] && [ "$1" = "$id" ]; then
+        exit
+    fi
+    lf -remote "send $id unselect"
+    if [ -s ~/.local/share/lf/select ]; then
+        files="$(sed 's/\\/\\\\/g;s/"/\\"/g;s/^/"/;s/$/"/' ~/.local/share/lf/select | tr '\n' ' ')"
+        lf -remote "send $id toggle $files"
+    fi
 }}
 cmd save-select &{{
   printf "%s" "$fs" > ~/.local/share/lf/select
   lf -remote "send load-select $id"
 }}
 cmd alt-paste &{{
-  if [ -n "$fs" ]; then
-    lf -remote "send $id :$1; save-select"
-  fi
+  [ -n "$fs" ] && lf -remote "send $id :$1; save-select"
   lf -remote "send $id paste" || {
+    clear; tput cup $(($(tput lines)/3)); tput bold
+    set -f
     printf "%s\n\t" "$fx"
     printf "Permissions needs.\n"
     printf "Continue in root?[y/N]"
     read root
     [ $root = "y" ] && sudo lf -remote "send $id paste"
   }
-  lf -remote "send clear"
+  lf -remote "send $id clear"
   lf -remote "send $id reload"
 }}
 
@@ -578,7 +580,6 @@ map sp select-images
 map su :unselect; save-select
 map sU :glob-unselect; save-select
 map sv select-videos
-load-select
 
 # Sort
 map sa :set sortby atime; set info atime
@@ -607,3 +608,5 @@ map bl $setlock "$f"
 
 # Wine
 map wi wine-run
+
+load-select

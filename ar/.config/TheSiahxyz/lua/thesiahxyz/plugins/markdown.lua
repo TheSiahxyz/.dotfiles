@@ -441,10 +441,10 @@ return {
 			vim.keymap.set("n", "<leader>ji", ":MoltenImagePopup<CR>", { silent = true, desc = "Pop-up image" })
 			vim.keymap.set("n", "<leader>jw", ":MoltenOpenInBrowser<CR>", { silent = true, desc = "Open in browser" })
 			vim.keymap.set("n", "<leader>jj", function()
-				local venv = os.getenv("WORKON_HOME")
-				if venv ~= nil then
-					venv = string.match(venv, "/.+/(.+)")
-					vim.cmd(("MoltenInit %s"):format(venv))
+				local venv_path = os.getenv("VIRTUAL_ENV")
+				if venv_path then
+					local venv_name = vim.fn.fnamemodify(venv_path, ":t")
+					vim.cmd(("MoltenInit %s"):format(venv_name))
 				else
 					vim.cmd("MoltenInit python3")
 				end
