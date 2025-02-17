@@ -661,7 +661,7 @@ c.completion.use_best_match = True
 
 ## Automatically start playing `<video>` elements.
 ## Type: Bool
-c.content.autoplay = False
+# c.content.autoplay = True
 
 ## List of URLs to ABP-style adblocking rulesets.  Only used when Brave's
 ## ABP-style adblocker is used (see `content.blocking.method`).  You can
@@ -1606,7 +1606,7 @@ c.hints.chars = "asdfghjklweiovnb"
 ##   - tab-bg-silent: Open a new background tab in the existing window without activating the window.
 ##   - window: Open in a new window.
 ##   - private-window: Open in a new private window.
-# c.new_instance_open_target = 'tab'
+c.new_instance_open_target = "tab-silent"
 
 ## Which window to choose when opening links as new tabs. When
 ## `new_instance_open_target` is set to `window`, this is ignored.
