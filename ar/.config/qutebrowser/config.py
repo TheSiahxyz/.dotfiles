@@ -526,7 +526,7 @@ c.colors.webpage.darkmode.enabled = True
 ##   - never: Never apply dark mode filter to any images.
 ##   - smart: Apply dark mode based on image content. Not available with Qt 5.15.0.
 ##   - smart-simple: On QtWebEngine 6.6, use a simpler algorithm for smart mode (based on numbers of colors and transparency), rather than an ML-based model. Same as 'smart' on older QtWebEnigne versions.
-# c.colors.webpage.darkmode.policy.images = 'smart'
+c.colors.webpage.darkmode.policy.images = "never"
 
 ## Which pages to apply dark mode to. The underlying Chromium setting has
 ## been removed in QtWebEngine 5.15.3, thus this setting is ignored
@@ -1127,7 +1127,7 @@ c.content.proxy = "system"  # for tor to access .onion
 ##   - ask-block-thirdparty: Ask how to proceed for normal page loads, but silently block resource loads.
 ##   - block: Automatically block loading on certificate errors.
 ##   - load-insecurely: Force loading pages despite certificate errors. This is *insecure* and should be avoided. Instead of using this, consider fixing the underlying issue or importing a self-signed certificate via `certutil` (or Chromium) instead.
-c.content.tls.certificate_errors = "ask"
+c.content.tls.certificate_errors = "block"
 
 ## How navigation requests to URLs with unknown schemes are handled.
 ## Type: String
@@ -1152,7 +1152,7 @@ c.content.tls.certificate_errors = "ask"
 ##   - default-public-and-private-interfaces: WebRTC should only use the default route used by http. This also exposes the associated default private address. Default route is the route chosen by the OS on a multi-homed endpoint.
 ##   - default-public-interface-only: WebRTC should only use the default route used by http. This doesn't expose any local addresses.
 ##   - disable-non-proxied-udp: WebRTC should only use TCP to contact peers or servers unless the proxy server supports UDP. This doesn't expose any local addresses either.
-c.content.webrtc_ip_handling_policy = "default-public-interface-only"
+c.content.webrtc_ip_handling_policy = "disable-non-proxied-udp"
 
 ## Monitor load requests for cross-site scripting attempts. Suspicious
 ## scripts will be blocked and reported in the devtools JavaScript
@@ -2123,7 +2123,7 @@ c.tabs.show = "multiple"
 ## Page to open if :open -t/-b/-w is used without URL. Use `about:blank`
 ## for a blank page.
 ## Type: FuzzyUrl
-c.url.default_page = "https://searx.thesiah.xyz/"
+c.url.default_page = "https://searx.thesiah.xyz"
 
 ## URL segments where `:navigate increment/decrement` will search for a
 ## number.
