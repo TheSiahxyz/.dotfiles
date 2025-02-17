@@ -14,6 +14,7 @@ cff             ${XDG_CONFIG_HOME:-${HOME}/.config}/fastfetch
 cfg             ${XDG_CONFIG_HOME:-${HOME}/.config}
 cfx             ${XDG_CONFIG_HOME:-${HOME}/.config}/firefox
 cgc             ${XDG_CONFIG_HOME:-${HOME}/.config}/git
+cgv             ${XDG_CONFIG_HOME:-${HOME}/.config}/glove80
 clf             ${XDG_CONFIG_HOME:-${HOME}/.config}/lf
 clg             ${XDG_CONFIG_HOME:-${HOME}/.config}/lazygit
 clv             ${XDG_CONFIG_HOME:-${HOME}/.config}/LazyVim
