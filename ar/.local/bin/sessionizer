@@ -2,10 +2,11 @@
 
 sessionizer() {
   path="$(
-    sesh list -c -H | fzf-tmux -p 80%,70% \
-      --no-sort --cycle --ignore-case --ansi --border=sharp --multi --border-label "╢ TheSiahxyz ╟" --prompt "💡  " \
+    sesh list -c -H | fzf-tmux \
+      -p 80%,70% --no-sort --cycle --ignore-case --ansi --border=sharp --multi --reverse \
+      --border-label "╢ TheSiahxyz ╟" \
       --header "^a all ^e sesh ^f zoxide ^g git ^t tmux ^u staged files ^x tmux kill M-cr open in editor ^/ help" \
-      --reverse \
+      --prompt "💡  " \
       --bind "ctrl-a:change-prompt(💡  )+reload(sesh list -d -H)" \
       --bind "ctrl-e:change-prompt(📑  )+reload(sesh list -c -H)" \
       --bind "ctrl-f:change-prompt(🔎  )+reload(sesh list -d -z -H)" \
