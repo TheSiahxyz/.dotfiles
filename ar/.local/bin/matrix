@@ -1,0 +1,7 @@
+#!/bin/sh
+
+echo "*.alpha: 1.0
+*.background: #000000
+*.color0: #000000" | xrdb -load
+st -e tmatrix --background=black
+xrdb ~/.local/src/suckless/st/Xdefaults
