@@ -13,7 +13,7 @@ mp="/media/$USER/firmware"
 sudo -A mount "$drive" "$mp"
 sudo -A cp "$firmware" "$mp/"
 [ -f "$firmware" ] || exit 1
-ls "$mp"
+ls -la "$mp"
 sudo -A umount "$mp"
-[ -e "$mp" ] && [ ! -s "$mp" ] && sudo -A rm -rf "$mp"
+[ -e "$mp" ] && [ ! -s "$mp" ] && sudo -A rm -rf "$mp" || exit 1
 echo "Done!"

@@ -227,7 +227,7 @@ alias grepr='grep -r'
 alias grepri='grep -ri'
 alias grepw='grep -R -i --include="*"'
 alias grepb='grep -R -i --include="*" --exclude-dir="zsh"'
-alias -g G='| grep'
+alias -g Gg='| grep'
 alias -g Gi='| grep -i'
 alias -g GH='| grep HTTP'
 
