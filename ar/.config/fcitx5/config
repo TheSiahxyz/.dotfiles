@@ -11,7 +11,7 @@ EnumerateSkipFirst=False
 TogglePreedit=
 
 [Hotkey/TriggerKeys]
-0=Alt+Alt_R
+0=
 1=
 
 [Hotkey/AltTriggerKeys]
@@ -76,4 +76,3 @@ AllowInputMethodForPassword=False
 ShowPreeditForPassword=False
 # Interval of saving user data in minutes
 AutoSavePeriod=30
-
