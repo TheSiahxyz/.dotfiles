@@ -184,7 +184,7 @@ config.load_autoconfig(True)
 
 ## Color gradient start for download backgrounds.
 ## Type: QtColor
-c.colors.downloads.start.bg = "#458588"
+c.colors.downloads.start.bg = "#689d6a"
 
 ## Color gradient start for download text.
 ## Type: QtColor
@@ -192,7 +192,7 @@ c.colors.downloads.start.fg = "#ebdbb2"
 
 ## Color gradient stop for download backgrounds.
 ## Type: QtColor
-c.colors.downloads.stop.bg = "#689d6a"
+c.colors.downloads.stop.bg = "#458588"
 
 ## Color gradient end for download text.
 ## Type: QtColor
