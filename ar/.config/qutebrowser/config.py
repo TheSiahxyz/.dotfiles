@@ -2163,7 +2163,8 @@ c.url.default_page = "https://searx.thesiah.xyz"
 c.url.searchengines = {
     "DEFAULT": "https://searx.thesiah.xyz/search?q={}",  # default
     "a": "https://www.amazon.com/s/?field-keywords={}",  # amazon
-    "ar": "https://wiki.archlinux.org/index.php?search={}",  # arch wiki
+    "aw": "https://wiki.archlinux.org/index.php?search={}",  # arch wiki
+    "ap": "https://archlinux.org/packages/{}",  # arch wiki
     "b": "https://search.brave.com/search?q={}",  # brave
     "cp": "https://www.coupang.com/np/search?component=&q={}",  # coupang
     "d": "https://duckduckgo.com/?q={}",  # duckduckgo
