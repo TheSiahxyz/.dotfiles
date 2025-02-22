@@ -1,6 +1,6 @@
 #!/bin/sh
 
-sleep 1
+sleep 3
 xrandr --dpi 96 # adjust the number based on your resolution and size of the screen
 setmonitor
 
