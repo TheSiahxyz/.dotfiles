@@ -21,17 +21,18 @@ chosen="$(echo "$allunmountable" | dmenu -i -p "Unmount which drive?")"
 chosen="${chosen%% *}"
 test -n "$chosen"
 
-label=$(sudo lsblk -no "label" "$(df "/${chosen#*/}" | tail -n 1 | awk '{print $1}')")
+label=$(df "/${chosen#*/}" | tail -n 1 | awk '{print $1}' | xargs -I {} sudo blkid {} | awk -F '\"' '{print $2}')
 if [ -n "$label" ]; then
   mountpath="$(sudo lsblk -no "mountpoints" "$(df "/${chosen#*/}" | tail -n 1 | awk '{print $1}')")"
   sudo -A umount -l "/${chosen#*/}"
   notify-send "⏏️ Device unmounted." "$chosen has been unmounted."
-  if [ "${chosen#*/}" = "${chosen}" ] &&
+  if [ "/media/$USER/${chosen##*/}" = "/${chosen#*/}" ] &&
     [ "${chosen##*/}" = "$label" ] &&
     [ "/media/$USER/${chosen##*/}" = "$mountpath" ] &&
     [ -e "/${chosen#*/}" ] &&
     [ ! -s "/${chosen#*/}" ]; then
-    rm -rf "/${chosen#*/}" >/dev/null 2>&1 || sudo rm -rf "/${chosen#*/}"
+    chosen="/${chosen#*/}"
+    rm -r "${chosen:?}" >/dev/null 2>&1 || sudo -A rm -r "${chosen:?}"
     notify-send "🚮 Mounted path removed." "$chosen has been removed."
   fi
 else
@@ -42,8 +43,9 @@ else
     sudo -A umount "/${chosen#*/}"
     notify-send "⏏️ IOS Drive unmounted." "/${chosen#*/} has been unmounted."
   fi
-  [ -e "/${chosen#*/}" ] && [ ! -s "/${chosen#*/}" ] &&
-    sudo -A rm -r "/${chosen#*/}" &&
+  chosen="/${chosen#*/}"
+  [ -e "$chosen" ] && [ ! -s "$chosen" ] &&
+    sudo -A rm -r "${chosen:?}" &&
     notify-send "🚮 Mounted path removed." "$chosen has been removed."
 fi
 

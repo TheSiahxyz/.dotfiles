@@ -37,6 +37,8 @@ attemptmount() {
   fi
 }
 
+notify-send -t 10000 "🔎 Searching drives to mount..."
+
 # Check for phones.
 phones="$(simple-mtpfs -l 2>/dev/null | sed "s/^/📱/")"
 mountedphones="$(grep "simple-mtpfs" /etc/mtab)"
@@ -82,34 +84,45 @@ done | filter)"
 normalparts="$(echo "$lsblkoutput" | grep -v crypto_LUKS | grep 'part\|rom\|crypt' | sed "s/^/💾 /" | filter)"
 
 # Get all available IP addresses with open Samba shares in the wlan0 subnet, excluding eth0 IP
-smbips="$(sudo arp-scan --interface=wlan0 --localnet | grep -vEi '(EFM Networks|locally administered|DUP:)' | awk '/^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/{print $1}')"
+smbips="$(sudo arp-scan --interface=eth0 --interface=wlan0 --localnet | grep -vEi '(EFM Networks|DUP:)' | awk '/^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/{print $1}')"
 
 # Get currently mounted CIFS shares
 mountedsmbs="$(grep 'cifs' /etc/mtab)"
 
 for smbip in $smbips; do
-  smb=$(
-    smbclient -L "$smbip" -U% -A /dev/stdin <<EOF 2>/dev/null | awk '/Disk/ {print $1}' | grep -vEi '(ADMIN|\w)\$'
-username=$(whoami)
-password=$(pass show default/default)
-EOF
-  )
   win=$(
     smbclient -L "$smbip" -U% -A /dev/stdin <<EOF 2>/dev/null | awk '/Disk/ {print $1}' | grep -vEi '(ADMIN|\w)\$'
 username=$(whoami)
 password=$(pass show default/windows)
 EOF
   )
-  while IFS= read -r share; do
-    if ! echo "$smbshares" | grep -q "$share"; then
-      smbshares+="//$smbip/$share"$'\n'
-    fi
-  done <<<"$smb"
+  mac=$(
+    smbclient -L "$smbip" -U% -A /dev/stdin <<EOF 2>/dev/null | awk '/Disk/ {print $1}' | grep -vEi '(ADMIN|\w)\$|Macintosh'
+username=$(whoami)
+password=$(pass show default/default)
+EOF
+  )
+  smb=$(
+    smbclient -L "$smbip" -U% -A /dev/stdin <<EOF 2>/dev/null | awk '/Disk/ {print $1}' | grep -vEi '(ADMIN|\w)\$'
+username=$(whoami)
+password=$(pass show default/default)
+EOF
+  )
   while IFS= read -r share; do
     if ! echo "$smbshares" | grep -q "$share"; then
       smbshares+="//$smbip/$share"$'\n'
     fi
   done <<<"$win"
+  while IFS= read -r share; do
+    if ! echo "$smbshares" | grep -q "$share"; then
+      smbshares+="//$smbip/$share"$'\n'
+    fi
+  done <<<"$mac"
+  while IFS= read -r share; do
+    if ! echo "$smbshares" | grep -q "$share"; then
+      smbshares+="//$smbip/$share"$'\n'
+    fi
+  done <<<"$smb"
 done
 
 smbshares="$(echo "$smbshares" | sed '/^$/d')"

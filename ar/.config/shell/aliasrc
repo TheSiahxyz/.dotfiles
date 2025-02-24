@@ -340,8 +340,9 @@ alias rscr='rsync -vrazPlu --remove-source-files'
 alias rrr='sudo udevadm control --reload-rules'
 
 # samba
-alias winip="sudo mount -t cifs //192.168.0.1/HDD1 /media/$USER/hdd -o username=si,vers=2.0"
-alias win10="sudo mount -t cifs //192.168.0.3/Share /media/$USER/win10 -o username=THESIAHXYZ-WIN1"
+alias winip="[ ! -d /media/$USER/hdd >/dev/null 2>&1 ] && mkdir -p /media/$USER/hdd >/dev/null 2>&1; sudo mount -t cifs //$(pass show smb/hdd) /media/$USER/hdd -o username=\"si\",password=\"$(pass show default/default)vers=2.0\""
+alias win10="[ ! -d /media/$USER/win10 >/dev/null 2>&1 ] && mkdir -p /media/$USER/win10 >/dev/null 2>&1; sudo mount -t cifs //$(pass show smb/share) /media/$USER/win10 -o username=\"THESIAHXYZ-WIN1\",password=\"$(pass show default/default)\""
+alias macair="[ ! -d /media/$USER/macair >/dev/null 2>&1 ] && mkdir -p /media/$USER/macair >/dev/null 2>&1; sudo mount -t cifs //$(pass show smb/macair)/si /media/$USER/macair -o username=\"Soomin Im\",password=\"$(pass show default/default)\""
 
 # sc-im
 alias scim='sc-im'
