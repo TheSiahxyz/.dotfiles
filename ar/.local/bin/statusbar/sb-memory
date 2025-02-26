@@ -13,6 +13,10 @@ case $BLOCK_BUTTON in
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
-[ $(xrandr | grep "\*" | awk '{print $1}' | sed 's/x[0-9]*//g') -lt 1920 ] &&
-  free --mebi | sed -n '2{p;q}' | awk '{printf ("🐏%d%%\n", ($3/$2)*100+0.5 )}' ||
-  free --mebi | sed -n '2{p;q}' | awk '{printf ("🐏%dGB/%dGB", $3/1000+0.5,$2/1000+0.5)}'
+width=$(xrandr | grep "\*" | awk '{print $1}' | sed 's/x[0-9]*//g' | head -n1)
+
+if [ -n "$width" ] && [ "$width" -eq "$width" ] 2>/dev/null; then
+  [ "$width" -lt 1920 ] &&
+    free --mebi | sed -n '2{p;q}' | awk '{printf ("🐏%d%%\n", ($3/$2)*100+0.5 )}' ||
+    free --mebi | sed -n '2{p;q}' | awk '{printf ("🐏%dGB/%dGB", $3/1000+0.5,$2/1000+0.5)}'
+fi

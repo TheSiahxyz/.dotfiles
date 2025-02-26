@@ -37,4 +37,4 @@ case $BLOCK_BUTTON in
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
-cat /tmp/qplaylist 2>/dev/null || ([ "$num" != "0|0" ] && echo "🤖$num")
+[ -f /tmp/qplaylist ] && cat /tmp/qplaylist 2>/dev/null || ([ "$num" != "0|0" ] && echo "🤖$num" || echo "")
