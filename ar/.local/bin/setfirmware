@@ -1,13 +1,15 @@
 #!/bin/sh
 
-lsblk
-drive=$(lsblk | grep -E '3[0-9].*M' | cut -d' ' -f1)
+drives=$(lsblk -n -r -o NAME,SIZE,MOUNTPOINT | grep -E --color=always '3[0-9].*M')
+drive=$(echo "$drives" | awk '{print $1}' | head -n1)
+[ -z "$drive" ] && exit
+echo "$drives"
 drive="/dev/$drive"
 printf "\n%s\n" "Target drive: $drive"
 firmwarepath="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/$(whereami)/.config/glove80"
-newfirmware="$(find "${XDG_DOWNLOAD_DIR:-${HOME}/Downloads}" -type f -iname '*.uf2')"
-cp "$newfirmware" "$firmwarepath/"
-firmware="$(find "$firmwarepath" -type f -iname '*.uf2' | sort | fzf --prompt "Choose a firmware: ")"
+firmware="$(find "$firmwarepath" "${XDG_DOWNLOAD_DIR:-${HOME}/Downloads}" -type f -iname '*.uf2' | sort | fzf --prompt "Choose a firmware: ")"
+[ -f "$firmware" ] || exit
+[ -f "$firmwarepath/$(basename "$firmware")" ] || mv "$firmware" "$firmwarepath/"
 mp="/media/$USER/firmware"
 [ -d "$mp" ] || mkdir -p "$mp"
 sudo -A mount "$drive" "$mp"
