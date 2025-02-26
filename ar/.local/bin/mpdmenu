@@ -93,12 +93,14 @@ case "$mode" in
   *) exit ;;
   esac
   mpc random on
+  mpc repeat on
   mpc play 2>/dev/null
   ;;
 "playlist")
   mpc clear
   mpc load "$(d_playlist)" 2>/dev/null || exit
   mpc random on
+  mpc repeat on
   mpc play 2>/dev/null
   ;;
 "queue")
