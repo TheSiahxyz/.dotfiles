@@ -23,8 +23,8 @@ play_url() {
   url=$(xclip -selection clipboard -o)
   [ -n "$url" ] && echo "$url" | grep -E '^https?://' >/dev/null || return 1
   if yt-dlp --simulate --dump-json "$url" >/dev/null 2>&1; then
-    mpv "$url"
     notify-send "📽️ Playing video from URL:" "$url"
+    mpv "$url"
   else
     loginurl
   fi
