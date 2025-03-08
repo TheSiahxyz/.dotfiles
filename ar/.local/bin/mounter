@@ -99,11 +99,11 @@ EOF
   mac=$(
     smbclient -L "$smbip" -U% -A /dev/stdin <<EOF 2>/dev/null | awk '/Disk/ {print $1}' | grep -vEi '(ADMIN|\w)\$|Macintosh'
 username=$(whoami)
-password=$(pass show default/default)
+password=$(pass show default/mac)
 EOF
   )
   smb=$(
-    smbclient -L "$smbip" -U% -A /dev/stdin <<EOF 2>/dev/null | awk '/Disk/ {print $1}' | grep -vEi '(ADMIN|\w)\$'
+    smbclient -L "$smbip" -U% -A /dev/stdin <<EOF 2>/dev/null | awk '/Disk/ {print $1}' | grep -vEi '(ADMIN|\w)\$|Macintosh'
 username=$(whoami)
 password=$(pass show default/default)
 EOF

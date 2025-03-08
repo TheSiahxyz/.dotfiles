@@ -1,6 +1,6 @@
 #!/bin/bash
 
-pidof transmission-daemon >/dev/null && exit 1
+pidof transmission-daemon >/dev/null && exit
 
 # Directories containing Git repositories
 DOTFILES_REPOS="$HOME/.dotfiles"
@@ -35,7 +35,7 @@ get_git_status_symbols() {
 get_unpushed_commits() { git cherry -v 2>/dev/null | wc -l; }
 
 # Function to check for unpulled commits
-get_unpulled_commits() { git rev-list --count HEAD..@{upstream} 2>/dev/null; }
+get_unpulled_commits() { git rev-list --count HEAD..@{upstream}; }
 
 # Function to check Git repository status for multiple repos
 check_multi_repo_status() {

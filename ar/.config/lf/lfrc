@@ -261,6 +261,8 @@ cmd mpvdir ${{
     done
     [ -n "$1" ] && setsid -f mpv --really-quiet -- "$@"
   fi
+
+  lf -remote "send $id unselect"
 }}
 
 # Open
@@ -292,7 +294,7 @@ cmd open ${{
   text/html|text/xml) lynx $fx;;
   text/troff) groff -mom $fx -Tpdf | zathura - ;;
   text/*|application/json|inode/x-empty|application/x-subrip) $EDITOR $fx;;
-  video/*) setsid -f mpv $f -quiet >/dev/null 2>&1 ;;
+  video/*) setsid -f mpv -quiet $f >/dev/null 2>&1 ;;
 	*) for f in $fx; do setsid -f $OPENER $f >/dev/null 2>&1; done;;
   esac
 }}
@@ -400,7 +402,8 @@ cmd alt-paste &{{
     read root
     [ $root = "y" ] && sudo lf -remote "send $id paste"
   }
-  lf -remote "send $id :clear; reload"
+
+  lf -remote "send $id :clear"
 }}
 
 # Traversal
@@ -476,17 +479,17 @@ source ~/.config/lf/shortcutrc
 map zx chmods
 
 # Clear && Unselect
-map <c-l> :clear; unselect
+map <c-l> :clear; unselect; save-select
 
 # Compress
 map C compress
 
 # Copy
 # map yy %cp -ri -- $fs .; clear
-map Y $printf "%s" "$fx" | xclip -selection clipboard; clear
+map Y $printf "%s" "$fx" | xclip -selection clipboard; clear; save-select
 map yb yank-basename
 map yd yank-dirname
-map ye copyto; clear
+map ye copyto; clear; save-select
 map yl $printf "%s" "$fx" | sed -E 's/^.+\[/https:\/\/piped.video\/watch?v=/' | sed -E 's/\]\..+//' | xclip -selection clipboard
 map yn yank-basename-without-extension
 map yp yank-path
@@ -503,8 +506,8 @@ map dd cut-add
 map dr cut-remove
 
 # Delete
-map D trash; clear
-map <delete> delete; clear
+map D trash; clear; save-select
+map <delete> delete; clear; save-select
 
 # Editor
 map <enter> $$EDITOR "$f"
@@ -514,16 +517,16 @@ map vll lastnvim
 map vln $$EDITOR "$(nvim -u NONE --headless +'lua io.write(vim.v.oldfiles[1] .. "\n")' +qa)"
 
 # Extract
-map E extract; clear
+map E extract; clear; save-select
 
 # iPython
 map Mi create-ipynb
 
 # Move
-map Mt moveto; clear
+map Mt moveto; clear; save-select
 
 # MPV
-map Mpv mpvdir; unselect
+map Mpv mpvdir
 
 # Nsxiv
 map th $nsxiv -apt "$(pwd)"

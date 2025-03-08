@@ -7,18 +7,26 @@ check_mount() { findmnt "$HOME/Private" >/dev/null || $MOUNT_SCRIPT; }
 
 check_unmount() { findmnt "$HOME/Private" >/dev/null && $MOUNT_SCRIPT; }
 
+loginurl() {
+  notify-send "🔑 Authentication required"
+  username="$(echo | dmenu -i -p "Enter a username:")"
+  password="$(echo | dmenu -i -P -p "Enter a password:")"
+  if [ -n "$username" ] && [ -n "$password" ]; then
+    mpv --ytdl-raw-options=username="$username",password="$password" "$url"
+  else
+    notify-send "❌ Failed to play $url" "❗ Check your username or password"
+    exit 1
+  fi
+}
+
 play_url() {
   url=$(xclip -selection clipboard -o)
   [ -n "$url" ] && echo "$url" | grep -E '^https?://' >/dev/null || return 1
-  notify-send "📽️ Playing video from URL:" "$url"
-  if ! mpv "$url"; then
-    notify-send "🔑 Authentication required"
-    username="$(echo | dmenu -i -p "Enter a username:")"
-    [ -z "$username" ] && exit 1
-    password="$(echo | dmenu -i -P -p "Enter a password:")"
-    [ -z "$password" ] && exit 1
-    [ -n "$username" ] && [ -n "$password" ] && mpv --ytdl-raw-options=username="$username",password="$password" "$url" ||
-      notify-send "❌ Failed to play $url" "❗ Check your username or password"
+  if yt-dlp --simulate --dump-json "$url" >/dev/null 2>&1; then
+    mpv "$url"
+    notify-send "📽️ Playing video from URL:" "$url"
+  else
+    loginurl
   fi
 }
 
