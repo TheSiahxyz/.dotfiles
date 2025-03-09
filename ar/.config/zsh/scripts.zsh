@@ -293,8 +293,9 @@ function fzf_directory() {
 # search scripts in ~/.local/bin
 alias sscs=search_scripts
 function search_scripts() {
-    choice="$(find ~/.local/bin -mindepth 1 \( -type f -o -type l \) -not -name '*.md' -not -path '*/zsh/*' -printf '%P\n' | fzf --cycle)"
-    ([ -n "$choice" ] && [ -f "$HOME/.local/bin/$choice" ]) && ${EDITOR:-nvim} "$HOME/.local/bin/$choice"
+    scripts=("${HOME}/.local/bin/"**/*(.))
+    choice="$(print -lnr ${scripts:t:r} | fzf)"
+    [[ "${choice}" ]] && "${EDITOR}" ${${(M)scripts:#*/${choice}*}[1]}
 }
 
 # check git status by directories in specific path

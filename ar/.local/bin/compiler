@@ -36,6 +36,7 @@ case "${ext}" in
 [0-9]) preconv "$file" | refer -PS -e | groff -mandoc -T pdf >"$base".pdf ;;
 apl) apl -f "$file" ;;
 c) compilec ;;
+cob) cobc -x -o "$base" "$file" && "$base" ;;
 config.h) make && sudo make install ;;
 cpp) g++ "$file" -o "$base" && "$base" ;;
 cs) mcs "$file" && mono "$base".exe ;;
@@ -68,21 +69,13 @@ ps) ps2pdf "$file" ;;
 py) python "$file" ;;
 [rR]md) Rscript -e "rmarkdown::render('$file', quiet=TRUE)" ;;
 r) R -f "$file" ;;
+rink) rink -f "${file}" ;;
 rkt) racket "$file" ;;
 rs) cargo build ;;
 sass) sassc -a "$file" "$base".css ;;
 scad) openscad -o "$base".stl "$file" ;;
 sent) setsid -f sent "$file" 2>/dev/null & ;;
-tex)
-  textarget="$(getcomproot "${file}" || echo "${file}")"
-  command="pdflatex"
-  head -n5 "${textarget}" | grep -qi "xelatex" && command="xelatex"
-  ${command} --output-directory="${textarget%/*}" "${textarget%.*}" &&
-    grep -qi addbibresource "${textarget}" &&
-    biber --input-directory "${textarget%/*}" "${textarget%.*}" &&
-    ${command} --output-directory="${textarget%/*}" "${textarget%.*}" &&
-    ${command} --output-directory="${textarget%/*}" "${textarget%.*}"
-  ;;
+tex) latexmk ;;
 tcl) tclsh "$file" ;;
 vim*) vint "$file" ;;
 *) chmod +x "$file" && sed 1q "$file" | grep "^#!/" | sed "s/^#!//" | xargs -r -I % "$file" ;;

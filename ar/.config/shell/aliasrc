@@ -6,10 +6,10 @@
 [ -x "$(command -v nvim)" ] && alias vimdiff="nvim -d"
 
 # Use $XINITRC variable if file exists.
-[ -f "$XINITRC" ] && alias startx="startx $XINITRC"
+[ -f "$XINITRC" ] && alias startx='startx $XINITRC'
 
 # Use $MBSYNCRC variable if file exists to sync mailbox.
-[ -f "$MBSYNCRC" ] && alias mbsync="mbsync -c $MBSYNCRC"
+[ -f "$MBSYNCRC" ] && alias mbsync='mbsync -c $MBSYNCRC'
 
 # sudo not required for some system commands
 for command in blkid lsblk mount umount pacman poweroff reboot shutdown su sv updatedb; do
@@ -277,9 +277,9 @@ alias p8='ping 8.8.8.8'
 alias p9='ping 9.9.9.9'
 
 # nvim
-alias v="$EDITOR"
-alias v.="$EDITOR ."
-alias ve="$EDITOR -c enew"
+alias v'"$EDITOR'
+alias v.='$EDITOR .'
+alias ve='$EDITOR -c enew'
 alias nv.='nvim .'
 alias nve='nvim -c enew'
 alias nts='NVIM_APPNAME=TheSiahxyz nvim'
@@ -369,7 +369,7 @@ alias tofish="sudo chsh $USER -s /bin/fish && 'Now log out.'"
 alias shck='shellcheck --color=always'
 
 # shortcut
-alias ref="shortcuts >/dev/null; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutrc ; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutenvrc ; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/zshnameddirrc"
+alias ref='shortcuts >/dev/null; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutrc; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutenvrc; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/zshnameddirrc'
 
 # skype
 alias skype='skypeforlinux'

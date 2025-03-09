@@ -1,11 +1,7 @@
 #!/bin/sh
 
 case $BLOCK_BUTTON in
-1) notify-send "🐏 Memory hogs" "$(
-  ps axch -o cmd:15,%mem --sort=-%mem | head
-  echo
-  free --mebi | sed -n '2{p;q}' | awk '{printf ("👟%2.2fGB/%2.2fGB\n", ( $3 / 1024), ($2 / 1024))}'
-)" ;;
+1) notify-send "🐏 Memory hogs" "$(ps axch -o cmd,%mem | awk '{cmd[$1]+=$2} END {for (i in cmd) print i, cmd[i]}' | sort -nrk2 | head)" ;;
 2) setsid -f "$TERMINAL" -e htop ;;
 3) notify-send "🐏 Memory module" "\- Shows Memory used/total
 - Left click to show memory hogs

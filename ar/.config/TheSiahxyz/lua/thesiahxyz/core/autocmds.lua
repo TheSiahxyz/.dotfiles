@@ -256,9 +256,9 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
 })
 
 -- TeX for .tex files
-vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
-	pattern = { "*.tex" },
-	command = "set filetype=tex",
+vim.api.nvim_create_autocmd("VimLeavePre", {
+	pattern = "*.tex",
+	command = "!latexmk -c %",
 })
 
 -- When shortcut files are updated, renew bash and lf configs with new material:

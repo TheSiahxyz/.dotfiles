@@ -7,6 +7,16 @@ case "$(readlink -f /sbin/init)" in
 *) ctl='loginctl' ;;
 esac
 
+lock() {
+  mpc pause
+  pauseallmpv
+  wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
+  kill -39 "$(pidof dwmblocks)"
+  slock
+  wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
+  kill -39 "$(pidof dwmblocks)"
+}
+
 wmpid() { # This function is needed if there are multiple instances of the window manager.
   tree="$(pstree -ps $$)"
   tree="${tree#*$WM(}"
@@ -14,7 +24,7 @@ wmpid() { # This function is needed if there are multiple instances of the windo
 }
 
 case "$(printf "🔒 lock\n🚪 leave $WM\n♻️ renew $WM\n🐻 hibernate\n🔃 reboot\n🖥️shutdown\n💤 sleep\n📺 display off" | dmenu -i -p 'Action: ')" in
-'🔒 lock') slock ;;
+'🔒 lock') lock ;;
 "🚪 leave $WM") kill -TERM "$(wmpid)" ;;
 "♻️ renew $WM") kill -HUP "$(wmpid)" ;;
 '🐻 hibernate') slock $ctl hibernate -i ;;
