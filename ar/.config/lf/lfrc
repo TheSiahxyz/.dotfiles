@@ -298,7 +298,7 @@ cmd open ${{
   text/troff) groff -mom $fx -Tpdf | zathura - ;;
   text/*|application/json|inode/x-empty|application/x-subrip) $EDITOR $fx;;
   video/*) setsid -f mpv -quiet $f >/dev/null 2>&1 ;;
-	*) for f in $fx; do setsid -f $OPENER $f >/dev/null 2>&1; done;;
+	*) for f in $fx; do setsid -f ${OPENER:-xdg-open} $f >/dev/null 2>&1; done;;
   esac
 }}
 
