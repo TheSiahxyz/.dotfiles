@@ -277,7 +277,7 @@ alias p8='ping 8.8.8.8'
 alias p9='ping 9.9.9.9'
 
 # nvim
-alias v'"$EDITOR'
+alias v='$EDITOR'
 alias v.='$EDITOR .'
 alias ve='$EDITOR -c enew'
 alias nv.='nvim .'

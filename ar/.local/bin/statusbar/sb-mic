@@ -1,0 +1,54 @@
+#!/bin/sh
+
+clean_line() {
+  echo "$1" | sed -e 's/^[[:space:]│]*//;s/[[:space:]]*$//;s/[[:space:]]*\[vol:.*\]//'
+}
+
+change() {
+  # Extract Audio Sources (POSIX-compliant)
+  audio_sources=$(wpctl status | awk '
+  /^Audio$/ {audio=1}
+  /^Video$/ {audio=0}
+  audio && /^ ├─ Sources:/ {flag=1; next}
+  flag && /^ ├─ Filters:/ {flag=0}
+  flag
+')
+
+  # Extract default source (marked with '*') and remove '*'
+  default_source=$(echo "$audio_sources" | awk '/\*/ {sub(/\*/, ""); print}')
+  default_source=$(clean_line "$default_source")
+
+  # Extract other sources (excluding default) and format them cleanly
+  other_sources=$(echo "$audio_sources" | grep -v '\*' | while IFS= read -r line; do
+    clean_line "$line"
+  done)
+
+  # Combine and let user choose via dmenu
+  chosen_source=$(printf "%s\n" "$other_sources" | dmenu -i -p "Change default input from \"${default_source#* }\" to:")
+
+  # Extract the ID from the chosen source
+  chosen_id=$(echo "$chosen_source" | awk '{print $1}')
+
+  # Set the new default input source
+  if [ -n "$chosen_id" ]; then
+    wpctl set-default "$chosen_id"
+    notify-send "Input Source Changed" "Now using: $chosen_source"
+  fi
+}
+
+if wpctl get-volume @DEFAULT_AUDIO_SOURCE@ 2>/dev/null | grep -q "MUTED"; then
+  echo "😷"
+else
+  echo "😲"
+fi
+
+case $BLOCK_BUTTON in
+1) change ;;
+2) wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle ;;
+3)
+  notify-send "🎤 Microphone module" "\- Show current input source
+- Left click to change input source
+- Middle click to toggle mic"
+  ;;
+6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
+esac
