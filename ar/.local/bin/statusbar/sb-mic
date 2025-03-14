@@ -1,10 +1,21 @@
 #!/bin/sh
 
+case $BLOCK_BUTTON in
+1) input_source ;;
+2) wpctl set-mute @DEFAULT_SOURCE@ toggle ;;
+3)
+  notify-send "🎤 Microphone module" "\- Show current input source
+- Left click to change input source
+- Middle click to toggle mic"
+  ;;
+6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
+esac
+
 clean_line() {
   echo "$1" | sed -e 's/^[[:space:]│]*//;s/[[:space:]]*$//;s/[[:space:]]*\[vol:.*\]//'
 }
 
-change() {
+input_source() {
   # Extract Audio Sources (POSIX-compliant)
   audio_sources=$(wpctl status | awk '
   /^Audio$/ {audio=1}
@@ -32,23 +43,14 @@ change() {
   # Set the new default input source
   if [ -n "$chosen_id" ]; then
     wpctl set-default "$chosen_id"
-    notify-send "Input Source Changed" "Now using: $chosen_source"
+    notify-send "🎤Input Source Changed" "Now using: $chosen_source"
   fi
 }
 
-if wpctl get-volume @DEFAULT_AUDIO_SOURCE@ 2>/dev/null | grep -q "MUTED"; then
+mic="$(wpctl get-volume @DEFAULT_AUDIO_SOURCE@)"
+
+if [ "$mic" != "${mic%\[MUTED\]}" ]; then
   echo "😷"
 else
   echo "😲"
 fi
-
-case $BLOCK_BUTTON in
-1) change ;;
-2) wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle ;;
-3)
-  notify-send "🎤 Microphone module" "\- Show current input source
-- Left click to change input source
-- Middle click to toggle mic"
-  ;;
-6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
-esac
