@@ -12,10 +12,10 @@ loginurl() {
   username="$(echo | dmenu -i -p "Enter a username:")"
   password="$(echo | dmenu -i -P -p "Enter a password:")"
   if [ -n "$username" ] && [ -n "$password" ]; then
-    mpv --ytdl-raw-options=username="$username",password="$password" "$url"
-  else
-    notify-send "❌ Failed to play $url" "❗ Check your username or password"
-    exit 1
+    if ! mpv --ytdl-raw-options=username="$username",password="$password" "$url"; then
+      notify-send "❌ Failed to play $url" "❗ Check your username or password"
+      exit 1
+    fi
   fi
 }
 
