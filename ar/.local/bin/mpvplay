@@ -10,7 +10,7 @@ check_unmount() { findmnt "$HOME/Private" >/dev/null && $MOUNT_SCRIPT; }
 loginurl() {
   notify-send "🔑 Authentication required"
   username="$(echo | dmenu -i -p "Enter a username:")"
-  password="$(echo | dmenu -i -P -p "Enter a password:")"
+  [ -n "$username" ] && password="$(echo | dmenu -i -P -p "Enter a password:")" || exit
   if [ -n "$username" ] && [ -n "$password" ]; then
     if ! mpv --ytdl-raw-options=username="$username",password="$password" "$url"; then
       notify-send "❌ Failed to play $url" "❗ Check your username or password"
