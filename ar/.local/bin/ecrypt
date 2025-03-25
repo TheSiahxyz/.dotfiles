@@ -7,7 +7,11 @@ mount_encrypted() {
 
 attempt_mount() {
   if mount | grep -q " $2 "; then
-    sudo umount "$2" && notify-send "🔒 Locked: $3" || notify-send "❗ Unable to lock" "Mounted: $3"
+    if sudo umount "$2"; then
+      notify-send "🔒 Locked: $3"
+    else
+      notify-send "❗ Unable to lock" "Mounted: $3"
+    fi
   else
     ECRYPTFS_SIG=$(pass show encryption/ecryptfs-sig-"$4")
     FNEK_SIG=$ECRYPTFS_SIG
