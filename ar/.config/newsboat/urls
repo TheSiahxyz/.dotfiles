@@ -24,6 +24,7 @@ https://lukesmith.xyz/rss.xml "~Luke Smith" Blog
 "--- Git ---"
 https://github.com/LukeSmithxyz/voidrice/commits/master.atom          "~Luke Smith dotfiles"      Git
 https://github.com/LukeSmithxyz/mutt-wizard/commits/master.atom       "~Luke Smith mutt-wizard"   Git
+https://github.com/LukeSmithxyz/emailwiz/commits/master.atom          "~Luke Smith email-wizard"  Git
 https://github.com/Piotr1215/dotfiles/commits/master.atom             "~Piotr1215 dotfiles"       Git
 https://github.com/linkarzu/dotfiles-latest/commits/main.atom         "~Linkarzu dotfiles"        Git
 https://github.com/Gavinok/scripts/commits/master.atom                "~Gavin scripts"            Git
