@@ -43,12 +43,15 @@ else
 fi
 
 # Shows the current moon phase.
+LOCATION=$(curl -s http://ip-api.com/json | jq -r '[.regionName, .countryCode] | join(",")')
 moonfile="${XDG_DATA_HOME:-${HOME}/.local/share}/wallpapers/moonphase"
 
-[ -s "$moonfile" ] && [ "$(stat -c %y "$moonfile" 2>/dev/null | cut -d' ' -f1)" = "$(date '+%Y-%m-%d')" ] ||
-  { curl -sf "wttr.in/?format=%m" >"$moonfile" || exit 1; }
+if [ ! -s "$moonfile" ] || [ "$(stat -c %y "$moonfile" 2>/dev/null | cut -d' ' -f1)" != "$(date '+%Y-%m-%d')" ]; then
+  moon=$(curl -sf "wttr.in/$LOCATION?format=%m")
+  [ -n "$moon" ] && echo "$moon" >"$moonfile"
+fi
 
-moon="$(cat "$moonfile")"
+moonicon="$(cat "$moonfile")"
 
 case $BLOCK_BUTTON in
 1)
@@ -74,4 +77,4 @@ case $BLOCK_BUTTON in
 esac
 
 # Output the formatted date and time
-date "+${moon-$calendar}%a,%d $icon%H:%M"
+date "+${moonicon-$calendar}%a,%d $icon%H:%M"

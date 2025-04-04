@@ -469,6 +469,9 @@ alias w3m="w3m -config ${XDG_CONFIG_HOME:-${HOME}/.config}/w3m/config"
 # xrandr
 alias xauto='xrandr --auto'
 
+# xset
+alias xoff='xset s off -dpms'
+
 # zathura
 alias za='zathura'
 
