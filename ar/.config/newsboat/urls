@@ -29,6 +29,8 @@ https://github.com/Piotr1215/dotfiles/commits/master.atom             "~Piotr121
 https://github.com/linkarzu/dotfiles-latest/commits/main.atom         "~Linkarzu dotfiles"        Git
 https://github.com/Gavinok/scripts/commits/master.atom                "~Gavin scripts"            Git
 https://gitlab.com/rwxrob/dotfiles.atom                               "~Rob Muhlestein dotfiles"  Git
+https://github.com/sunaku/glove80-keymaps/commits/main.atom           "~Glove80 keymaps"
+
 " "
 "--- Odysee ---"
 https://odysee.com/$/rss/@Odysee:8          "~Odysee"
