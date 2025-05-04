@@ -65,7 +65,7 @@ endif
 
 if filereadable(expand("~/.config/vim/plugins.vim"))
     silent !mkdir -p ${XDG_CONFIG_HOME:-$HOME/.config}/vim/plugged/
-    source ~/.config/vim/plugins.vim
+    source ${XDG_CONFIG_HOME:-$HOME/.config}/vim/plugins.vim
 endif
 
 " goyo

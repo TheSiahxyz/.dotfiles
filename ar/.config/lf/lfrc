@@ -5,7 +5,7 @@ set dircache false
 set drawbox true
 set dupfilefmt '%f_%n'
 set hidden false
-set hiddenfiles ".*:*.aux:*.log:*.bbl:*.bcf:*.blg:*.run.xml"
+set hiddenfiles ".*:*.aux:*.log:*.bbl:*.bcf:*.blg:*.run.xml:*.smi:*.srt:*.ass"
 set history false
 set icons true
 set ifs "\n"
