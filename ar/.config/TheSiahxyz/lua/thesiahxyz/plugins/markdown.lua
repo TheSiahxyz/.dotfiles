@@ -134,7 +134,7 @@ return {
 	-- 	end,
 	-- },
 	{
-		"MeanderingProgrammer/render-markdown.nvim",
+		"meanderingprogrammer/render-markdown.nvim",
 		enabled = true,
 		-- dependencies = { "nvim-treesitter/nvim-treesitter", "echasnovski/mini.nvim" }, -- if you use the mini.nvim suite
 		dependencies = { "nvim-treesitter/nvim-treesitter", "echasnovski/mini.icons" }, -- if you use standalone mini plugins
@@ -143,12 +143,19 @@ return {
 		---@type render.md.UserConfig
 		opts = {},
 		config = function()
+			local filename = vim.api.nvim_buf_get_name(0)
+			local is_ipynb = filename:sub(-6) == ".ipynb"
+
 			-- require("obsidian").get_client().opts.ui.enable = false
 			-- vim.api.nvim_buf_clear_namespace(0, vim.api.nvim_get_namespaces()["ObsidianUI"], 0, -1)
 			require("render-markdown").setup({
 				bullet = {
 					-- Turn on / off list bullet rendering
 					enabled = true,
+				},
+				code = {
+					enabled = not is_ipynb, -- disable code rendering for .ipynb files
+					sign = not is_ipynb,
 				},
 				heading = {
 					sign = false,
@@ -386,7 +393,7 @@ return {
 			vim.g.molten_auto_open_html_in_browser = false
 			-- I find auto open annoying, keep in mind setting this option will require setting
 			-- a keybind for `:noautocmd MoltenEnterOutput` to open the output again
-			vim.g.molten_auto_open_output = true
+			vim.g.molten_auto_open_output = false
 			vim.g.molten_cover_empty_lines = false
 			vim.g.molten_cover_lines_starting_with = {}
 			vim.g.molten_copy_output = false
@@ -415,6 +422,8 @@ return {
 		config = function()
 			-- image nvim options table. Pass to `require('image').setup`
 			vim.keymap.set("n", "<leader>jJ", ":MoltenInit<CR>", { silent = true, desc = "Init molten" })
+			vim.keymap.set("n", "<leader>j[", ":MoltenNext<CR>", { silent = true, desc = "Go to next code cell" })
+			vim.keymap.set("n", "<leader>j]", ":MoltenPrev<CR>", { silent = true, desc = "Go to prev code cell" })
 			vim.keymap.set(
 				"n",
 				"<leader>jo",
@@ -430,6 +439,7 @@ return {
 				{ silent = true, desc = "Evaluate visual block" }
 			)
 			vim.keymap.set("n", "<leader>jd", ":MoltenDelete<CR>", { silent = true, desc = "Delete molten" })
+			vim.keymap.set("n", "<leader>js", ":MoltenShowOutput<CR>", { silent = true, desc = "Show output" })
 			vim.keymap.set("n", "<leader>jh", ":MoltenHideOutput<CR>", { silent = true, desc = "Hide output" })
 			vim.keymap.set(
 				"n",
