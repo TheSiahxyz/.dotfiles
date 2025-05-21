@@ -37,8 +37,8 @@ status() {
     esac
 
     indicators=""
-    [ "$(mpc status %single%)" = "on" ] && indicators="${indicators}🔀"
-    [ "$(mpc status %random%)" = "on" ] && indicators="${indicators}🔂"
+    [ "$(mpc status %single%)" = "on" ] && indicators="${indicators}🔂"
+    [ "$(mpc status %random%)" = "on" ] && indicators="${indicators}🔀"
     [ "$(mpc status %repeat%)" = "on" ] && indicators="${indicators}🔁"
 
     case "$signal" in
