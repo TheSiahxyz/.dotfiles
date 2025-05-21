@@ -29,6 +29,15 @@ usage() {
   echo "  ${0##*/} -v         # Opens browser boomark in private browser window"
 }
 
+addurls() {
+  url=$(echo | dmenu -i -p "Enter a url: ")
+  [ -z "$url" ] && printf "Error: url must be provided\n\n" && exit 0
+
+  description=$(echo | dmenu -i -p "Enter a description of the url: ")
+  [ -z "$description" ] && echo "https://$url" >>~/.local/share/thesiah/snippets
+  [ -n "$description" ] && echo "$description https://$url" >>~/.local/share/thesiah/snippets
+}
+
 opentool() {
   available_tools=""
   command -v xdg-open 2>/dev/null | grep -v "alias" -q && available_tools="$available_tools xdg-open"
@@ -187,8 +196,9 @@ copytoclipboard() {
 
 [ $# -eq 0 ] && usage && exit 1
 
-while getopts "bchopstv" opt; do
+while getopts "abchopstv" opt; do
   case $opt in
+  a) addurls ;;
   b) openinbrowser "bookmark" ;;
   c) geturls "to copy" && copytoclipboard ;;
   o) geturls "to open in $BROWSER" && openwindow ;;
