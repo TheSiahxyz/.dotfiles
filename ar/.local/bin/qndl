@@ -113,7 +113,7 @@ done
 
 # Enqueue the download task with tsp
 FILENAME=$($SIMULATION_CMD 2>/dev/null)
-rm -rf /tmp/qplaylist
+[ -f /tmp/qplaylist ] && rm -rf /tmp/qplaylist
 notify-send "⏳ Downloading $DOWNLOAD_TYPE:" "$FILENAME"
 idnum=$(tsp bash -c "$YTDL_CMD")
 pkill -RTMIN+21 "${STATUSBAR:-dwmblocks}"
