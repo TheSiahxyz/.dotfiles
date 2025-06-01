@@ -190,9 +190,35 @@ return {
 			})
 		end,
 		keys = {
-			{ "<leader>mp", "<cmd>MarkdownPreview<CR>", desc = "Markdown Preview" },
-			{ "<leader>mx", "<cmd>MarkdownPreviewStop<CR>", desc = "Markdown Stop" },
-			{ "<leader>md", "<cmd>MarkdownPreviewToggle<CR>", desc = "Markdown Toggle" },
+			{ "<leader>mp", "<cmd>MarkdownPreview<CR>", desc = "Markdown preview" },
+			{ "<leader>mx", "<cmd>MarkdownPreviewStop<CR>", desc = "Markdown stop" },
+			{ "<leader>md", "<cmd>MarkdownPreviewToggle<CR>", desc = "Markdown toggle" },
+		},
+	},
+	{
+		"brianhuster/live-preview.nvim",
+		dependencies = {
+			-- You can choose one of the following pickers
+			"nvim-telescope/telescope.nvim",
+			-- "ibhagwan/fzf-lua",
+			-- "echasnovski/mini.pick",
+		},
+		cmd = { "LivePreview start", "LivePreview close", "LivePreview pick", "LivePreview help" },
+		init = function()
+			if vim.fn.executable("npx") then
+				vim.g.mkdp_filetypes = { "markdown" }
+			end
+			local wk = require("which-key")
+			wk.add({
+				mode = { "n", "v" },
+				{ "<leader>ml", group = "Markdown live" },
+			})
+		end,
+		keys = {
+			{ "<leader>mlp", "<cmd>LivePreview start<CR>", desc = "Markdown live preview" },
+			{ "<leader>mlx", "<cmd>LivePreview close<CR>", desc = "Markdown live close" },
+			{ "<leader>mlc", "<cmd>LivePreview pick<CR>", desc = "Markdown live pick" },
+			{ "<leader>mlh", "<cmd>LivePreview help<CR>", desc = "Markdown live help" },
 		},
 	},
 	{
