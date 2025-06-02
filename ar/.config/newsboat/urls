@@ -30,7 +30,14 @@ https://github.com/linkarzu/dotfiles-latest/commits/main.atom         "~Linkarzu
 https://github.com/Gavinok/scripts/commits/master.atom                "~Gavin scripts"            Git
 https://gitlab.com/rwxrob/dotfiles.atom                               "~Rob Muhlestein dotfiles"  Git
 https://github.com/sunaku/glove80-keymaps/commits/main.atom           "~Glove80 keymaps"
-
+" "
+"--- Suckless ---"
+https://git.suckless.org/dmenu/atom.xml                               "~Dmenu"                    Suckless
+https://git.suckless.org/dwm/atom.xml                                 "~Dwm"                      Suckless
+https://git.suckless.org/slock/atom.xml                               "~Slock"                    Suckless
+https://git.suckless.org/st/atom.xml                                  "~St"                       Suckless
+https://git.suckless.org/surf/atom.xml                                "~Surf"                     Suckless
+https://git.suckless.org/tabbed/atom.xml                              "~Tabbed"                   Suckless
 " "
 "--- Odysee ---"
 https://odysee.com/$/rss/@Odysee:8          "~Odysee"
