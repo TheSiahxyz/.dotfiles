@@ -2,7 +2,7 @@
 
 sessionizer() {
   path="$(
-    sesh list -c -H | fzf-tmux \
+    sesh list --icons | fzf-tmux \
       -p 80%,70% --no-sort --cycle --ignore-case --ansi --border=sharp --multi --reverse \
       --border-label "╢ TheSiahxyz ╟" \
       --header "^a all ^e sesh ^f zoxide ^g git ^t tmux ^u staged files ^x tmux kill M-cr open in editor ^/ help" \

@@ -1,3 +1,10 @@
+sort_order = [
+  "tmuxinator", # show first
+  "tmux",
+  "config",
+  "zoxide", # show last
+]
+
 [default_session]
 startup_command = "if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then git status; else clear && ls -I .git; fi"
 preview_command = "eza -glaa --icons --group-directories-first --color=always {}"
@@ -41,3 +48,7 @@ path = "~/.local/bin"
 [[session]]
 name = "suckless"
 path = "~/.local/src/suckless"
+
+[[window]]
+name = "git"
+startup_script = "git pull"
