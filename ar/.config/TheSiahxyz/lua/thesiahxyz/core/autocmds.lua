@@ -142,10 +142,10 @@ autocmd("BufWritePre", {
 	group = file_save,
 	pattern = "*",
 	callback = function()
-		-- Remove trailing spaces
-		vim.cmd([[ %s/\s\+$//e ]])
-		-- Remove trailing newlines
-		vim.cmd([[ %s/\n\+\%$//e ]])
+		local cursor_pos = vim.api.nvim_win_get_cursor(0)
+		vim.cmd([[ %s/\s\+$//e ]]) -- Remove trailing spaces
+		vim.cmd([[ %s/\n\+\%$//e ]]) -- Remove trailing newlines
+		vim.api.nvim_win_set_cursor(0, cursor_pos)
 	end,
 })
 
@@ -256,9 +256,9 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
 })
 
 -- TeX for .tex files
-vim.api.nvim_create_autocmd("VimLeavePre", {
-	pattern = "*.tex",
-	command = "!latexmk -c %",
+vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+	pattern = { "*.tex" },
+	command = "set filetype=tex",
 })
 
 -- When shortcut files are updated, renew bash and lf configs with new material:

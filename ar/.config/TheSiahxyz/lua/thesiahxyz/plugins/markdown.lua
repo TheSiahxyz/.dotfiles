@@ -11,7 +11,7 @@ local function select_cell()
 	-- Find the start of the cell (looking for opening markers or headers)
 	for line = current_row, 1, -1 do
 		local line_content = vim.api.nvim_buf_get_lines(bufnr, line - 1, line, false)[1]
-		if line_content:match("^```%s*[%w_%-]+") or line_content:match("^%s*#+%s") then
+		if line_content:match("^```%s*[%w_%-]+") then
 			start_line = line
 			break
 		end
@@ -25,7 +25,7 @@ local function select_cell()
 	-- Find the end of the cell (looking for the next opening marker or header)
 	for line = start_line + 1, line_count do
 		local line_content = vim.api.nvim_buf_get_lines(bufnr, line - 1, line, false)[1]
-		if line_content:match("^```%s*[%w_%-]+") or line_content:match("^%s*#+%s") then
+		if line_content:match("^```%s*[%w_%-]+") then
 			end_line = line - 1
 			break
 		end
@@ -143,9 +143,6 @@ return {
 		---@type render.md.UserConfig
 		opts = {},
 		config = function()
-			local filename = vim.api.nvim_buf_get_name(0)
-			local is_ipynb = filename:sub(-6) == ".ipynb"
-
 			-- require("obsidian").get_client().opts.ui.enable = false
 			-- vim.api.nvim_buf_clear_namespace(0, vim.api.nvim_get_namespaces()["ObsidianUI"], 0, -1)
 			require("render-markdown").setup({
@@ -154,16 +151,45 @@ return {
 					enabled = true,
 				},
 				code = {
-					enabled = not is_ipynb, -- disable code rendering for .ipynb files
-					sign = not is_ipynb,
+					enabled = true, -- disable code rendering for .ipynb files
+					sign = true,
 				},
+				file_types = { "markdown", "vimwiki" },
 				heading = {
 					sign = false,
 					icons = { "󰎤 ", "󰎧 ", "󰎪 ", "󰎭 ", "󰎱 ", "󰎳 " },
 				},
-				file_types = { "markdown", "vimwiki" },
+				ignore = function(bufnr)
+					local name = vim.api.nvim_buf_get_name(bufnr)
+					return name:lower():match("%.ipynb$") ~= nil
+				end,
 			})
 			vim.treesitter.language.register("markdown", "vimwiki")
+
+			vim.keymap.set("n", "<leader>mrt", function()
+				require("render-markdown").buf_toggle()
+			end, { desc = "Toggle render-markdown" })
+			vim.keymap.set("n", "<leader>mre", function()
+				require("render-markdown").buf_enable()
+			end, { desc = "Enable render-markdown" })
+			vim.keymap.set("n", "<leader>mrx", function()
+				require("render-markdown").buf_disable()
+			end, { desc = "Disable render-markdown" })
+			vim.keymap.set("n", "<leader>mr+", function()
+				require("render-markdown").expand()
+			end, { desc = "Expand conceal margin" })
+			vim.keymap.set("n", "<leader>mr-", function()
+				require("render-markdown").contract()
+			end, { desc = "Contract conceal margin" })
+			vim.keymap.set("n", "<leader>mrl", function()
+				require("render-markdown").log()
+			end, { desc = "Open render-markdown log" })
+			vim.keymap.set("n", "<leader>mrc", function()
+				require("render-markdown").config()
+			end, { desc = "Show render-markdown config diff" })
+			vim.keymap.set("n", "<leader>mrd", function()
+				require("render-markdown").debug()
+			end, { desc = "Debug render-markdown marks" })
 		end,
 	},
 	{
@@ -448,8 +474,8 @@ return {
 		config = function()
 			-- image nvim options table. Pass to `require('image').setup`
 			vim.keymap.set("n", "<leader>jJ", ":MoltenInit<CR>", { silent = true, desc = "Init molten" })
-			vim.keymap.set("n", "<leader>j[", ":MoltenNext<CR>", { silent = true, desc = "Go to next code cell" })
-			vim.keymap.set("n", "<leader>j]", ":MoltenPrev<CR>", { silent = true, desc = "Go to prev code cell" })
+			vim.keymap.set("n", "<leader>j[", ":MoltenPrev<CR>", { silent = true, desc = "Go to prev code cell" })
+			vim.keymap.set("n", "<leader>j]", ":MoltenNext<CR>", { silent = true, desc = "Go to next code cell" })
 			vim.keymap.set(
 				"n",
 				"<leader>jo",
