@@ -180,7 +180,7 @@ uda.taskwarrior-tui.shortcuts.8=~/.local/bin/task/taskwarrior-tui/annotate-with-
 uda.taskwarrior-tui.shortcuts.9=~/.local/bin/task/taskwarrior-tui/toggle-review-label
 uda.taskwarrior-tui.shortcuts.0=~/.local/bin/task/taskwarrior-tui/task-switch-context
 
-#Taskwarrior tui selection
+# Taskwarrior tui selection
 uda.taskwarrior-tui.selection.indicator=->
 uda.taskwarrior-tui.selection.bold=yes
 uda.taskwarrior-tui.selection.italic=no
@@ -188,3 +188,6 @@ uda.taskwarrior-tui.selection.dim=yes
 uda.taskwarrior-tui.selection.blink=no
 uda.taskwarrior-tui.selection.reverse=yes
 uda.taskwarrior-tui.task-report.show-info=false
+
+# Context
+context=home
