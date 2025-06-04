@@ -18,11 +18,9 @@ return {
 			local wk = require("which-key")
 			wk.add({
 				mode = { "n" },
-				{ "<leader>w", group = "Vimwiki" },
+				{ "<leader>w", group = "Vimwiki/Which-key" },
 				{ "<leader>w<leader>", group = "Diary" },
 			})
-		end,
-		config = function()
 			-- Ensure files are read with the desired filetype
 			vim.g.vimwiki_ext2syntax = {
 				[".Rmd"] = "markdown",
@@ -47,6 +45,7 @@ return {
 	{
 		"tools-life/taskwiki",
 		cmd = { "TaskWikiInfo", "TaskWikiSummary", "TaskWikiStart", "TaskWikiMod" },
+		ft = "vimwiki",
 		dependencies = {
 			"vimwiki/vimwiki",
 			"powerman/vim-plugin-AnsiEsc",
@@ -54,11 +53,17 @@ return {
 			"farseer90718/vim-taskwarrior",
 		},
 		config = function()
-			require("taskwiki").setup()
-			vim.keymap.set("n", "<leader>tvi", ":TaskWikiInfo<CR>", { desc = "Task wiki info" })
-			vim.keymap.set("n", "<leader>tvS", ":TaskWikiSummary<CR>", { desc = "Task wiki summary" })
-			vim.keymap.set("n", "<leader>tvm", ":TaskWikiMod<CR>", { desc = "Task wiki modify" })
-			vim.keymap.set("n", "<leader>tvs", ":TaskWikiMod<CR>", { desc = "Task wiki modify" })
+			vim.g.taskwiki_markup_syntax = "markdown"
+			vim.g.taskwiki_data_location = "~/.local/share/task"
+
+			local wk = require("which-key")
+			wk.add({
+				mode = { "n" },
+				{ "<leader>tb", group = "Burndown" },
+				{ "<leader>tc", group = "Choose" },
+				{ "<leader>tG", group = "Ghistory" },
+				{ "<leader>th", group = "History" },
+			})
 		end,
 	},
 }

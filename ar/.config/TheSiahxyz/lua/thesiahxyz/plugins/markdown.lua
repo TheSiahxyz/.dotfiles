@@ -267,19 +267,20 @@ return {
 		end,
 	},
 	{
-		"goerz/jupytext.vim",
+		"goerz/jupytext.nvim",
+		version = "0.2.0",
 		lazy = false,
-		build = "pip install jupytext",
-		dependencies = { "neovim/nvim-lspconfig" },
 		config = function()
-			-- The destination format: 'ipynb', 'markdown' or 'script', or a file extension: 'md', 'Rmd', 'jl', 'py', 'R', ..., 'auto' (script
-			-- extension matching the notebook language), or a combination of an extension and a format name, e.g. md:markdown, md:pandoc,
-			-- md:myst or py:percent, py:light, py:nomarker, py:hydrogen, py:sphinx. The default format for scripts is the 'light' format,
-			-- which uses few cell markers (none when possible). Alternatively, a format compatible with many editors is the 'percent' format,
-			-- which uses '# %%' as cell markers. The main formats (markdown, light, percent) preserve notebooks and text documents in a
-			-- roundtrip. Use the --test and and --test-strict commands to test the roundtrip on your files. Read more about the available
-			-- formats at https://jupytext.readthedocs.io/en/latest/formats.html (default: None)
-			vim.g.jupytext_fmt = "markdown"
+			require("jupytext").setup({
+				jupytext = "jupytext",
+				format = "markdown",
+				update = true,
+				filetype = require("jupytext").get_filetype,
+				new_template = require("jupytext").default_new_template(),
+				sync_patterns = { "*.md", "*.py", "*.jl", "*.R", "*.Rmd", "*.qmd" },
+				autosync = true,
+				handle_url_schemes = true,
+			})
 		end,
 		keys = {
 			{ "<A-i>", insert_code_cell, desc = "Insert Code Cell" },

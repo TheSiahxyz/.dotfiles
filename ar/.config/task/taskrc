@@ -1,5 +1,5 @@
 # [Created by task 3.1.0 10/5/2024 17:27:41]
-news.version=3.2.0
+news.version=3.4.1
 
 # Taskwarrior program configuration file.
 # For more documentation, see https://taskwarrior.org or try 'man task', 'man task-color',
@@ -188,4 +188,3 @@ uda.taskwarrior-tui.selection.dim=yes
 uda.taskwarrior-tui.selection.blink=no
 uda.taskwarrior-tui.selection.reverse=yes
 uda.taskwarrior-tui.task-report.show-info=false
-context=home
