@@ -1,19 +1,6 @@
 return {
 	{
 		"vimwiki/vimwiki",
-		cmd = {
-			"VimwikiIndex",
-			"VimwikiDeleteFile",
-			"Vimwiki2HTML",
-			"VimwikiAll2HTML",
-			"Vimwiki2HTMLBrowse",
-			"VimwikiGoto",
-			"VimwikiRenameFile",
-			"VimwikiSplitLink",
-			"VimwikiVSplitLink",
-			"VimwikiColorize",
-			"VimwikiDiaryGenerateLinks",
-		},
 		init = function()
 			local wk = require("which-key")
 			wk.add({
@@ -21,6 +8,7 @@ return {
 				{ "<leader>w", group = "Vimwiki/Which-key" },
 				{ "<leader>w<leader>", group = "Diary" },
 			})
+
 			-- Ensure files are read with the desired filetype
 			vim.g.vimwiki_ext2syntax = {
 				[".Rmd"] = "markdown",
@@ -29,6 +17,7 @@ return {
 				[".markdown"] = "markdown",
 				[".mdown"] = "markdown",
 			}
+
 			-- Set up Vimwiki list
 			vim.g.vimwiki_list = {
 				{
@@ -44,8 +33,8 @@ return {
 	},
 	{
 		"tools-life/taskwiki",
-		cmd = { "TaskWikiInfo", "TaskWikiSummary", "TaskWikiStart", "TaskWikiMod" },
 		ft = "vimwiki",
+		event = "VeryLazy",
 		dependencies = {
 			"vimwiki/vimwiki",
 			"powerman/vim-plugin-AnsiEsc",
@@ -53,9 +42,6 @@ return {
 			"farseer90718/vim-taskwarrior",
 		},
 		config = function()
-			vim.g.taskwiki_markup_syntax = "markdown"
-			vim.g.taskwiki_data_location = "~/.local/share/task"
-
 			local wk = require("which-key")
 			wk.add({
 				mode = { "n" },
@@ -64,6 +50,9 @@ return {
 				{ "<leader>tG", group = "Ghistory" },
 				{ "<leader>th", group = "History" },
 			})
+
+			vim.g.taskwiki_markup_syntax = "markdown"
+			vim.g.taskwiki_data_location = "~/.local/share/task"
 		end,
 	},
 }

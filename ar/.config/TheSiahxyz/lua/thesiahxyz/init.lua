@@ -1,7 +1,7 @@
 -- Core
-require("thesiahxyz.core.autocmds")
-require("thesiahxyz.core.keymaps")
 require("thesiahxyz.core.options")
+require("thesiahxyz.core.keymaps")
+require("thesiahxyz.core.autocmds")
 require("thesiahxyz.core.lazy")
 
 -- Custom

@@ -1,7 +1,3 @@
--- Init leader Keys
-vim.g.mapleader = " "
-vim.g.maplocalleader = "\\"
-
 -- Ascii
 vim.keymap.set("n", "<leader>a1", ":.!toilet -w 200 -f bfraktur<cr>", { desc = "Ascii art bfraktur" })
 vim.keymap.set("n", "<leader>a2", ":.!toilet -w 200 -f emboss<cr>", { desc = "Ascii art emboss" })

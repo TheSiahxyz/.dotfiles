@@ -286,6 +286,14 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 	end,
 })
 
+-- Set vimwiki's index filetype to vimwiki instead of markdown
+local vimwiki_config = augroup("vimwiki_config")
+vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+	group = vimwiki_config,
+	pattern = vim.fn.expand("~/.local/share/vimwiki/index.md"),
+	command = "setfiletype vimwiki",
+})
+
 -- Run xrdb whenever Xdefaults or Xresources are updated.
 local x_config = augroup("x_config")
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
