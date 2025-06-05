@@ -7,6 +7,9 @@ return {
 		dependencies = {
 			"hrsh7th/cmp-buffer", -- source for text in buffer
 			"hrsh7th/cmp-path", -- source for file system paths
+			"hrsh7th/cmp-cmdline", -- source for cmd
+			"hrsh7th/cmp-vsnip",
+			"hrsh7th/vim-vsnip",
 			{
 				"L3MON4D3/LuaSnip",
 				version = "v2.*", -- Replace <CurrentMajor> by the latest released major (first number of latest release)
