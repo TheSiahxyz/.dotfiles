@@ -53,7 +53,7 @@ return {
 	keys = {
 		{ "<leader>fs", "<cmd>SessionSearch<CR>", desc = "Session search" },
 		{ "<leader>ws", "<cmd>SessionSave<CR>", desc = "Save session" },
-		{ "<leader>wd", "<cmd>SessionDisableAutoSave<CR>", desc = "Disable autosave" },
+		{ "<leader>wx", "<cmd>SessionDisableAutoSave<CR>", desc = "Disable autosave" },
 		{ "<leader>wp", "<cmd>SessionPurgeOrphaned<CR>", desc = "Purge autosave" },
 		{ "<leader>wa", "<cmd>SessionToggleAutoSave<CR>", desc = "Toggle autosave" },
 	},

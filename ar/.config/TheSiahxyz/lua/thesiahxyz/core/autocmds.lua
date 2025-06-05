@@ -290,8 +290,10 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 local vimwiki_config = augroup("vimwiki_config")
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
 	group = vimwiki_config,
-	pattern = vim.fn.expand("~/.local/share/vimwiki/index.md"),
-	command = "setfiletype vimwiki",
+	pattern = vim.fn.expand("~/.local/share/vimwiki") .. "/**/*.md",
+	callback = function(args)
+		vim.bo[args.buf].filetype = "vimwiki"
+	end,
 })
 
 -- Run xrdb whenever Xdefaults or Xresources are updated.

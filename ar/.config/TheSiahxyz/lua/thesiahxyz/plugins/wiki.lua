@@ -9,6 +9,23 @@ return {
 				{ "<leader>w<leader>", group = "Diary" },
 			})
 
+			-- Set up Vimwiki list
+			vim.g.vimwiki_list = {
+				{
+					path = vim.fn.expand("~/.local/share/vimwiki"),
+					template_path = vim.fn.expand("~/.local/share/vimwiki/templates"),
+					auto_toc = 1,
+					syntax = "markdown",
+					nested_syntaxes = {
+						python = "python",
+						["c++"] = "cpp",
+					},
+					ext = ".md",
+				},
+			}
+
+			vim.g.vimwiki_global_ext = 1
+
 			-- Ensure files are read with the desired filetype
 			vim.g.vimwiki_ext2syntax = {
 				[".Rmd"] = "markdown",
@@ -16,15 +33,6 @@ return {
 				[".md"] = "markdown",
 				[".markdown"] = "markdown",
 				[".mdown"] = "markdown",
-			}
-
-			-- Set up Vimwiki list
-			vim.g.vimwiki_list = {
-				{
-					path = vim.fn.expand("~/.local/share/vimwiki"),
-					syntax = "markdown",
-					ext = ".md",
-				},
 			}
 		end,
 		keys = {

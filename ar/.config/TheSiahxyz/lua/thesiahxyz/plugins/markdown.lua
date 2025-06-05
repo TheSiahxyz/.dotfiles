@@ -128,8 +128,7 @@ end
 
 return {
 	{
-		"meanderingprogrammer/render-markdown.nvim",
-		enabled = true,
+		"MeanderingProgrammer/render-markdown.nvim",
 		-- dependencies = { "nvim-treesitter/nvim-treesitter", "echasnovski/mini.nvim" }, -- if you use the mini.nvim suite
 		dependencies = { "nvim-treesitter/nvim-treesitter", "echasnovski/mini.icons" }, -- if you use standalone mini plugins
 		-- dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' }, -- if you prefer nvim-web-devicons
@@ -157,6 +156,7 @@ return {
 				},
 				file_types = { "markdown", "vimwiki" },
 				heading = {
+					enabled = true,
 					sign = false,
 					icons = { "󰎤 ", "󰎧 ", "󰎪 ", "󰎭 ", "󰎱 ", "󰎳 " },
 				},
@@ -167,64 +167,64 @@ return {
 			})
 			vim.treesitter.language.register("markdown", "vimwiki")
 		end,
-		keys = {
-			{
-				"<leader>mrt",
-				function()
-					require("render-markdown").buf_toggle()
-				end,
-				desc = "Toggle render-markdown",
-			},
-			{
-				"<leader>mre",
-				function()
-					require("render-markdown").buf_enable()
-				end,
-				desc = "Enable render-markdown",
-			},
-			{
-				"<leader>mrx",
-				function()
-					require("render-markdown").buf_disable()
-				end,
-				desc = "Disable render-markdown",
-			},
-			{
-				"<leader>mr+",
-				function()
-					require("render-markdown").expand()
-				end,
-				desc = "Expand conceal margin",
-			},
-			{
-				"<leader>mr-",
-				function()
-					require("render-markdown").contract()
-				end,
-				desc = "Contract conceal margin",
-			},
-			{
-				"<leader>mrl",
-				function()
-					require("render-markdown").log()
-				end,
-				desc = "Open render-markdown log",
-			},
-			{
-				"<leader>mrc",
-				function()
-					require("render-markdown").config()
-				end,
-				desc = "Show render-markdown config diff",
-			},
-			{
-				"<leader>mrd",
-				function()
-					require("render-markdown").debug()
-				end,
-				desc = "Debug render-markdown marks",
-			},
-		},
+		-- keys = {
+		-- 	{
+		-- 		"<leader>mrt",
+		-- 		function()
+		-- 			require("render-markdown").buf_toggle()
+		-- 		end,
+		-- 		desc = "Toggle render-markdown",
+		-- 	},
+		-- 	{
+		-- 		"<leader>mre",
+		-- 		function()
+		-- 			require("render-markdown").buf_enable()
+		-- 		end,
+		-- 		desc = "Enable render-markdown",
+		-- 	},
+		-- 	{
+		-- 		"<leader>mrx",
+		-- 		function()
+		-- 			require("render-markdown").buf_disable()
+		-- 		end,
+		-- 		desc = "Disable render-markdown",
+		-- 	},
+		-- 	{
+		-- 		"<leader>mr+",
+		-- 		function()
+		-- 			require("render-markdown").expand()
+		-- 		end,
+		-- 		desc = "Expand conceal margin",
+		-- 	},
+		-- 	{
+		-- 		"<leader>mr-",
+		-- 		function()
+		-- 			require("render-markdown").contract()
+		-- 		end,
+		-- 		desc = "Contract conceal margin",
+		-- 	},
+		-- 	{
+		-- 		"<leader>mrl",
+		-- 		function()
+		-- 			require("render-markdown").log()
+		-- 		end,
+		-- 		desc = "Open render-markdown log",
+		-- 	},
+		-- 	{
+		-- 		"<leader>mrc",
+		-- 		function()
+		-- 			require("render-markdown").config()
+		-- 		end,
+		-- 		desc = "Show render-markdown config diff",
+		-- 	},
+		-- 	{
+		-- 		"<leader>mrd",
+		-- 		function()
+		-- 			require("render-markdown").debug()
+		-- 		end,
+		-- 		desc = "Debug render-markdown marks",
+		-- 	},
+		-- },
 	},
 	{
 		-- Install markdown preview, use npx if available.
