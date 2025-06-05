@@ -1,8 +1,16 @@
 function ColorMyPencils(color)
 	color = color or "catppuccin"
 	vim.cmd.colorscheme(color)
-	vim.api.nvim_set_hl(0, "Normal", { bg = "NONE" })
-	vim.api.nvim_set_hl(0, "NormalFloat", { bg = "NONE" })
+
+	local set = vim.api.nvim_set_hl
+	set(0, "Normal", { bg = "NONE" })
+	set(0, "NormalFloat", { bg = "NONE" })
+	set(0, "@comment.todo", { bg = "NONE" })
+	set(0, "@comment.note", { bg = "NONE" })
+	set(0, "@comment.warning", { bg = "NONE" })
+	set(0, "@comment.error", { bg = "NONE" })
+	set(0, "@number", { bg = "NONE" })
+	set(0, "@string.special.url", { bg = "NONE" })
 end
 
 return {
