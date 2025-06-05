@@ -29,6 +29,7 @@ return {
 		end,
 		keys = {
 			{ "<leader>ww", ":VimwikiIndex<CR>", desc = "Vimwiki index" },
+			{ "<leader>wu", ":VimwikiUISelect<CR>", desc = "Vimwiki UI" },
 		},
 	},
 	{

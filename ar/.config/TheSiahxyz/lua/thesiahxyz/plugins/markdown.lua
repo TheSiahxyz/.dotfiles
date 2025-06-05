@@ -142,6 +142,13 @@ return {
 		---@module 'render-markdown'
 		---@type render.md.UserConfig
 		opts = {},
+		init = function()
+			local wk = require("which-key")
+			wk.add({
+				mode = { "n", "v" },
+				{ "<leader>mr", group = "Markdown render" },
+			})
+		end,
 		config = function()
 			-- require("obsidian").get_client().opts.ui.enable = false
 			-- vim.api.nvim_buf_clear_namespace(0, vim.api.nvim_get_namespaces()["ObsidianUI"], 0, -1)
@@ -165,32 +172,65 @@ return {
 				end,
 			})
 			vim.treesitter.language.register("markdown", "vimwiki")
-
-			vim.keymap.set("n", "<leader>mrt", function()
-				require("render-markdown").buf_toggle()
-			end, { desc = "Toggle render-markdown" })
-			vim.keymap.set("n", "<leader>mre", function()
-				require("render-markdown").buf_enable()
-			end, { desc = "Enable render-markdown" })
-			vim.keymap.set("n", "<leader>mrx", function()
-				require("render-markdown").buf_disable()
-			end, { desc = "Disable render-markdown" })
-			vim.keymap.set("n", "<leader>mr+", function()
-				require("render-markdown").expand()
-			end, { desc = "Expand conceal margin" })
-			vim.keymap.set("n", "<leader>mr-", function()
-				require("render-markdown").contract()
-			end, { desc = "Contract conceal margin" })
-			vim.keymap.set("n", "<leader>mrl", function()
-				require("render-markdown").log()
-			end, { desc = "Open render-markdown log" })
-			vim.keymap.set("n", "<leader>mrc", function()
-				require("render-markdown").config()
-			end, { desc = "Show render-markdown config diff" })
-			vim.keymap.set("n", "<leader>mrd", function()
-				require("render-markdown").debug()
-			end, { desc = "Debug render-markdown marks" })
 		end,
+		keys = {
+			{
+				"<leader>mrt",
+				function()
+					require("render-markdown").buf_toggle()
+				end,
+				desc = "Toggle render-markdown",
+			},
+			{
+				"<leader>mre",
+				function()
+					require("render-markdown").buf_enable()
+				end,
+				desc = "Enable render-markdown",
+			},
+			{
+				"<leader>mrx",
+				function()
+					require("render-markdown").buf_disable()
+				end,
+				desc = "Disable render-markdown",
+			},
+			{
+				"<leader>mr+",
+				function()
+					require("render-markdown").expand()
+				end,
+				desc = "Expand conceal margin",
+			},
+			{
+				"<leader>mr-",
+				function()
+					require("render-markdown").contract()
+				end,
+				desc = "Contract conceal margin",
+			},
+			{
+				"<leader>mrl",
+				function()
+					require("render-markdown").log()
+				end,
+				desc = "Open render-markdown log",
+			},
+			{
+				"<leader>mrc",
+				function()
+					require("render-markdown").config()
+				end,
+				desc = "Show render-markdown config diff",
+			},
+			{
+				"<leader>mrd",
+				function()
+					require("render-markdown").debug()
+				end,
+				desc = "Debug render-markdown marks",
+			},
+		},
 	},
 	{
 		-- Install markdown preview, use npx if available.
@@ -249,8 +289,13 @@ return {
 	},
 	{
 		"ellisonleao/glow.nvim",
-		config = true,
 		cmd = "Glow",
+		config = function()
+			require("glow").setup({
+				border = "single", -- floating window border config
+				style = "dark", -- filled automatically with your current editor background, you can override using glow json style
+			})
+		end,
 		keys = {
 			{ "<leader>mf", "<cmd>Glow<CR>", desc = "Floating markdown preview" },
 		},

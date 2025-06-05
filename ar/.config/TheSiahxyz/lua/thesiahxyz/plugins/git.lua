@@ -133,6 +133,7 @@ return {
 			wk.add({
 				mode = { "n", "v", "x" },
 				{ "<leader>g", group = "Git" },
+				{ "<leader>gt", group = "Toggle" },
 			})
 		end,
 	},
@@ -157,15 +158,8 @@ return {
 	},
 	{
 		"mbbill/undotree",
-		init = function()
-			local wk = require("which-key")
-			wk.add({
-				mode = { "n", "v" },
-				{ "<leader>gt", group = "Toggle" },
-			})
-		end,
 		config = function()
-			vim.keymap.set("n", "<leader>gtu", vim.cmd.UndotreeToggle, { desc = "Toggle undo tree" })
+			vim.keymap.set("n", "<leader>gu", vim.cmd.UndotreeToggle, { desc = "Undo tree" })
 		end,
 	},
 	{

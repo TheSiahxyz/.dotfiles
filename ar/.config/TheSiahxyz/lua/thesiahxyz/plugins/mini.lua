@@ -966,4 +966,193 @@ return {
 			})
 		end,
 	},
+	{
+		"echasnovski/mini.indentscope",
+		version = false, -- wait till new 0.7.0 release to put it back on semver
+		event = "VeryLazy",
+		opts = {
+			mappings = {
+				-- Textobjects
+				object_scope = "i-",
+				object_scope_with_border = "a-",
+
+				-- Motions (jump to respective border line; if not present - body line)
+				goto_top = "g,",
+				goto_bottom = "g;",
+			},
+			draw = {
+				animation = function()
+					return 0
+				end,
+			},
+			options = { try_as_border = true },
+			symbol = "│",
+		},
+		init = function()
+			vim.api.nvim_create_autocmd("FileType", {
+				pattern = {
+					"help",
+					"Trouble",
+					"trouble",
+					"lazy",
+					"mason",
+				},
+				callback = function()
+					vim.b.miniindentscope_disable = true
+				end,
+			})
+		end,
+	},
+	{
+		"echasnovski/mini.map",
+		version = false,
+		config = function()
+			require("mini.map").setup(
+				-- No need to copy this inside `setup()`. Will be used automatically.
+				{
+					-- Highlight integrations (none by default)
+					integrations = nil,
+
+					-- Symbols used to display data
+					symbols = {
+						-- Encode symbols. See `:h MiniMap.config` for specification and
+						-- `:h MiniMap.gen_encode_symbols` for pre-built ones.
+						-- Default: solid blocks with 3x2 resolution.
+						encode = nil,
+
+						-- Scrollbar parts for view and line. Use empty string to disable any.
+						scroll_line = "█",
+						scroll_view = "┃",
+					},
+
+					-- Window options
+					window = {
+						-- Whether window is focusable in normal way (with `wincmd` or mouse)
+						focusable = true,
+
+						-- Side to stick ('left' or 'right')
+						side = "right",
+
+						-- Whether to show count of multiple integration highlights
+						show_integration_count = true,
+
+						-- Total width
+						width = 10,
+
+						-- Value of 'winblend' option
+						winblend = 25,
+
+						-- Z-index
+						zindex = 10,
+					},
+				}
+			)
+		end,
+		init = function()
+			local wk = require("which-key")
+			wk.add({
+				mode = { "n", "v" },
+				{ "<leader>m", group = "Markdown/Map" },
+				{ "<leader>mt", group = "Toggle" },
+			})
+		end,
+		keys = {
+			{ "<leader>mo", "<cmd>lua MiniMap.open()<cr>", desc = "Open map" },
+			{ "<leader>mm", "<cmd>lua MiniMap.refresh()<cr>", desc = "Refresh map" },
+			{ "<leader>mc", "<cmd>lua MiniMap.close()<cr>", desc = "Close map" },
+			{ "<leader>mtm", "<cmd>lua MiniMap.toggle()<cr>", desc = "Toggle map" },
+			{ "<leader>mts", "<cmd>lua MiniMap.toggle_side()<cr>", desc = "Toggle side map" },
+		},
+	},
+	{
+		"echasnovski/mini.move",
+		version = false,
+		config = function()
+			-- No need to copy this inside `setup()`. Will be used automatically.
+			require("mini.move").setup({
+				-- Module mappings. Use `''` (empty string) to disable one.
+				mappings = {
+					-- Move visual selection in Visual mode. Defaults are Alt (Meta) + hjkl.
+					left = "<M-m>",
+					right = "<M-/>",
+					down = "<M-,>",
+					up = "<M-.>",
+
+					-- Move current line in Normal mode
+					line_left = "<M-m>",
+					line_right = "<M-/>",
+					line_down = "<M-,>",
+					line_up = "<M-.>",
+				},
+
+				-- Options which control moving behavior
+				options = {
+					-- Automatically reindent selection during linewise vertical move
+					reindent_linewise = true,
+				},
+			})
+		end,
+	},
+	{
+		"echasnovski/mini.pairs",
+		version = false,
+		event = "VeryLazy",
+		config = function()
+			require("mini.pairs").setup()
+		end,
+		keys = {
+			{
+				"<leader>zp",
+				function()
+					vim.g.minipairs_disable = not vim.g.minipairs_disable
+				end,
+				desc = "Toggle auto pairs",
+			},
+		},
+	},
+	{
+		"echasnovski/mini.splitjoin",
+		version = false,
+		config = function()
+			require("mini.splitjoin").setup()
+
+			vim.keymap.set(
+				"n",
+				"<leader>zj",
+				":lua MiniSplitjoin.toggle()<cr>",
+				{ noremap = true, silent = true, desc = "Toggle split-join" }
+			)
+			vim.keymap.set(
+				"n",
+				"<leader>J",
+				":lua MiniSplitjoin.join()<cr>",
+				{ noremap = true, silent = true, desc = "Join" }
+			)
+			vim.keymap.set(
+				"n",
+				"<leader><cr>",
+				":lua MiniSplitjoin.split()<cr>",
+				{ noremap = true, silent = true, desc = "Split" }
+			)
+		end,
+	},
+	{
+		"echasnovski/mini.trailspace",
+		version = false,
+		config = function()
+			require("mini.trailspace").setup()
+			vim.keymap.set(
+				"n",
+				"<leader>zt",
+				":lua MiniTrailspace.trim()<cr>",
+				{ noremap = true, silent = true, desc = "Trim trailing whitespace" }
+			)
+			vim.keymap.set(
+				"n",
+				"<leader>zl",
+				":lua MiniTrailspace.trim_last_lines()<cr>",
+				{ noremap = true, silent = true, desc = "Trim trailing empty lines" }
+			)
+		end,
+	},
 }
