@@ -19,7 +19,7 @@ vim.keymap.set({ "n", "t" }, "<S-l>", "<cmd>bnext<cr>", { desc = "Next buffer" }
 vim.keymap.set("n", "<leader><leader>", "<cmd>e #<cr>", { desc = "Switch to last buffer" })
 vim.keymap.set({ "n", "v", "x", "t" }, "<leader>bd", "<cmd>:bd<cr>", { desc = "Close buffer" })
 vim.keymap.set({ "n", "v", "x", "t" }, "<leader>BD", "<cmd>:bd!<cr>", { desc = "Force close buffer" })
-vim.keymap.set("n", "<leader>bn", "<cmd>enew<cr>", { desc = "New buffer" })
+vim.keymap.set("n", "<leader>bn", "<cmd>enew<cr>", { desc = "Open new buffer" })
 vim.keymap.set({ "i", "x", "n", "s" }, "<C-s>", "<cmd>w<cr><esc>", { desc = "Save current buffer" })
 vim.keymap.set({ "n", "v" }, "<leader>wq", "<cmd>wq<cr>", { desc = "Save current buffer and quit" })
 vim.keymap.set({ "n", "v" }, "<leader>WQ", "<cmd>wqa<cr>", { desc = "Save all buffers and quit" })
@@ -153,9 +153,6 @@ vim.keymap.set("n", "<leader>qe", function()
 		vim.cmd("bd")
 	end
 end, { desc = "Close explorer (netrw)" })
-
--- Files
-vim.keymap.set("n", "<leader>fn", "<cmd>enew<cr>", { desc = "Open new buffer" })
 
 -- Fix List & Trouble
 vim.keymap.set("n", "[o", "<cmd>lprev<cr>zz", { desc = "Previous location" })

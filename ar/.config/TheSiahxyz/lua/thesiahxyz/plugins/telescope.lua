@@ -304,12 +304,9 @@ return {
 						},
 					})
 					require("telescope").load_extension("live_grep_args")
-					vim.keymap.set(
-						"n",
-						"<leader>flf",
-						":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>",
-						{ desc = "Find live grep args" }
-					)
+					vim.keymap.set("n", "<leader>flf", function()
+						require("telescope").extensions.live_grep_args.live_grep_args()
+					end, { desc = "Find live grep args" })
 
 					local live_grep_args_shortcuts = require("telescope-live-grep-args.shortcuts")
 					vim.keymap.set(
@@ -446,6 +443,52 @@ return {
 				end,
 				keys = {
 					{ "<leader>se", ":Telescope emoji<cr>", desc = "Search emoji" },
+				},
+			},
+			{
+				"nvim-telescope/telescope-bibtex.nvim",
+				requires = {
+					{ "nvim-telescope/telescope.nvim" },
+				},
+				config = function()
+					local bibtex_actions = require("telescope-bibtex.actions")
+					require("telescope").setup({
+						extensions = {
+							bibtex = {
+								-- Use context awareness
+								context = true,
+								-- Use non-contextual behavior if no context found
+								-- This setting has no effect if context = false
+								context_fallback = true,
+								mappings = {
+									i = {
+										["<CR>"] = bibtex_actions.key_append("%s"), -- format is determined by filetype if the user has not set it explictly
+										["<C-e>"] = bibtex_actions.entry_append,
+										["<C-a>"] = bibtex_actions.citation_append("{{author}} ({{year}}), {{title}}."),
+									},
+								},
+							},
+						},
+					})
+					require("telescope").load_extension("bibtex")
+				end,
+				keys = {
+					{
+						"<leader>sB",
+						function()
+							require("telescope").extensions.bibtex.bibtex()
+						end,
+						desc = "Search bibtex",
+					},
+				},
+			},
+			{
+				"mzlogin/vim-markdown-toc",
+				keys = {
+					{ "<leader>tg", "<cmd>GenTocGFM<CR>", desc = "Generate ToC to GFM" },
+					{ "<leader>tr", "<cmd>GenTocRedcarpet<CR>", desc = "Generate ToC to Redcarpet" },
+					{ "<leader>tl", "<cmd>GenTocGitLab<CR>", desc = "Generate ToC to Gitlab" },
+					{ "<leader>tm", "<cmd>GenTocMarked<CR>", desc = "Generate ToC to Marked" },
 				},
 			},
 			{
@@ -720,7 +763,7 @@ return {
 			vim.keymap.set("n", "<leader>fpb", function()
 				require("telescope.builtin").find_files({ cwd = vim.fn.expand("~/Public") })
 			end, { desc = "Find public files" })
-			vim.keymap.set("n", "<leader>fr", function()
+			vim.keymap.set("n", "<leader>fa", function()
 				require("telescope.builtin").find_files({
 					cwd = vim.fn.expand("~/.local/bin"),
 				})
@@ -788,10 +831,10 @@ return {
 			vim.keymap.set("n", "<leader>sa", function()
 				require("telescope.builtin").autocommands({})
 			end, { desc = "Search auto commands" })
-			vim.keymap.set("n", "<leader>sbf", function()
+			vim.keymap.set("n", "<leader>sb", function()
 				require("telescope.builtin").current_buffer_fuzzy_find({})
 			end, { desc = "Search current buffers " })
-			vim.keymap.set("n", "<leader>sbt", function()
+			vim.keymap.set("n", "<leader>st", function()
 				require("telescope.builtin").current_buffer_tags({})
 			end, { desc = "Search current buffer tags" })
 			vim.keymap.set("n", "<leader>sc", function()
@@ -848,7 +891,7 @@ return {
 			vim.keymap.set("n", "<leader>sR", function()
 				require("telescope.builtin").resume({})
 			end, { desc = "Search resume" })
-			vim.keymap.set("n", "<leader>st", function()
+			vim.keymap.set("n", "<leader>sf", function()
 				require("telescope.builtin").filetypes({})
 			end, { desc = "Search file types" })
 			vim.keymap.set("n", "<leader>sw", function()

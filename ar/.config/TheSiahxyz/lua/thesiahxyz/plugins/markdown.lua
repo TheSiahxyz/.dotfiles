@@ -248,6 +248,14 @@ return {
 		},
 	},
 	{
+		"ellisonleao/glow.nvim",
+		config = true,
+		cmd = "Glow",
+		keys = {
+			{ "<leader>mf", "<cmd>Glow<CR>", desc = "Floating markdown preview" },
+		},
+	},
+	{
 		"dhruvasagar/vim-open-url",
 		init = function()
 			local wk = require("which-key")
