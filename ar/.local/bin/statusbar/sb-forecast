@@ -27,7 +27,7 @@ getweatherreportjson() {
   grep -q 'Unknown' "$weatherreportjson" && error "reportjson"
 }
 
-# Forecast should be updated every 3 hours, but set 3600 to check for reliability.
+# Forecast should be updated every 3 hours, but set 86400 to check once a day for reliability.
 checkforecast() {
   [ -s "$1" ] && [ "$(($(date +%s) - $(stat -c %Y "$1")))" -le 86400 ]
 }
