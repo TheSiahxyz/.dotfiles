@@ -7,13 +7,13 @@ sessionizer() {
       --border-label "╢ TheSiahxyz ╟" \
       --header "^a all ^e sesh ^f zoxide ^g git ^t tmux ^u staged files ^x tmux kill M-cr open in editor ^/ help" \
       --prompt "💡  " \
-      --bind "ctrl-a:change-prompt(💡  )+reload(sesh list -d -H)" \
-      --bind "ctrl-e:change-prompt(📑  )+reload(sesh list -c -H)" \
-      --bind "ctrl-f:change-prompt(🔎  )+reload(sesh list -d -z -H)" \
+      --bind "ctrl-a:change-prompt(💡  )+reload(sesh list -d -H --icons)" \
+      --bind "ctrl-e:change-prompt(📑  )+reload(sesh list -c -H --icons)" \
+      --bind "ctrl-f:change-prompt(🔎  )+reload(sesh list -d -z -H --icons)" \
       --bind "ctrl-g:change-prompt(  )+reload(fd -H -d 1 -t d -E .Trash -E .git -E .cache . $HOME/Private/repos $HOME/Public/repos | sed 's|$HOME|~|g')" \
-      --bind "ctrl-t:change-prompt(🪟  )+reload(sesh list -t)" \
+      --bind "ctrl-t:change-prompt(🪟  )+reload(sesh list -t --icons)" \
       --bind "ctrl-v:execute($EDITOR ${0})+abort" \
-      --bind 'ctrl-x:execute(tmux kill-session -t {})+change-prompt(💡  )+reload(sesh list -t)' \
+      --bind 'ctrl-x:execute(tmux kill-session -t "$(echo {} | awk "{ print \$NF }")")+change-prompt(💡  )+reload(sesh list --icons)' \
       --bind "alt-enter:execute($EDITOR {})+abort" \
       --bind 'ctrl-/:change-prompt(❓  )+reload(echo "^a all
 ^e sesh config
