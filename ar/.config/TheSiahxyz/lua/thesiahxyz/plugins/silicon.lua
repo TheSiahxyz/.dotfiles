@@ -111,27 +111,27 @@ return {
 	},
 	keys = {
 		{
-			mode = "v",
 			"<leader>sc",
 			function()
 				require("nvim-silicon").clip()
 			end,
+			mode = "v",
 			desc = "Copy code screenshot to clipboard",
 		},
 		{
-			mode = "v",
 			"<leader>sf",
 			function()
 				require("nvim-silicon").file()
 			end,
+			mode = "v",
 			desc = "Save code screenshot as file",
 		},
 		{
-			mode = "v",
 			"<leader>ss",
 			function()
 				require("nvim-silicon").shoot()
 			end,
+			mode = "v",
 			desc = "Create code screenshot",
 		},
 	},

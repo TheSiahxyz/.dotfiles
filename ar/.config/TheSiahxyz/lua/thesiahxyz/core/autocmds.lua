@@ -64,8 +64,12 @@ autocmd("FileType", {
 	group = augroup("close_with_q"),
 	pattern = {
 		"checkhealth",
+		"dbout",
+		"gitsigns-blame",
+		"grug-far",
 		"help",
 		"lspinfo",
+		"Lazy",
 		"neotest-output",
 		"neotest-output-panel",
 		"neotest-summary",
@@ -91,6 +95,17 @@ autocmd("FileType", {
 		vim.keymap.set("n", "q", function()
 			vim.cmd("bd")
 		end, { buffer = event.buf, silent = true })
+	end,
+})
+
+-- Show LSP diagnostics (inlay hints) in a hover window / popup lamw26wmal
+vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
+	group = augroup("float_diagnostic"),
+	callback = function()
+		vim.diagnostic.open_float(nil, {
+			focus = false,
+			border = "rounded",
+		})
 	end,
 })
 

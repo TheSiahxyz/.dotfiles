@@ -56,7 +56,7 @@ return {
 			end, { desc = "Copy git repository URL to clipboard" })
 
 			-- Function to open a repository from the clipboard
-			vim.keymap.set("n", "<leader>er", function()
+			vim.keymap.set("n", "<leader>eg", function()
 				local url = vim.fn.getreg("+") -- Get URL from clipboard
 				if not url or url == "" then
 					vim.notify("Clipboard is empty. Copy a valid URL first.", vim.log.levels.WARN)

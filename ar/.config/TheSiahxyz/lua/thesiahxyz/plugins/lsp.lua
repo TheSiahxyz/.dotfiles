@@ -3,8 +3,8 @@ return {
 		"neovim/nvim-lspconfig",
 		event = { "BufReadPre", "BufNewFile" },
 		dependencies = {
-			"williamboman/mason.nvim",
-			"williamboman/mason-lspconfig.nvim",
+			"mason-org/mason.nvim",
+			"mason-org/mason-lspconfig.nvim",
 			"WhoIsSethDaniel/mason-tool-installer.nvim",
 			"hrsh7th/cmp-nvim-lsp",
 			"hrsh7th/cmp-buffer",
@@ -90,6 +90,7 @@ return {
 					"bashls",
 					"dockerls",
 					"docker_compose_language_service",
+					"harper_ls",
 					"jdtls",
 					"jsonls",
 					"lua_ls",
@@ -189,6 +190,23 @@ return {
 							-- },
 						})
 					end,
+					["harper_ls"] = function()
+						lspconfig.harper_ls.setup({
+							capabilities = capabilities,
+							filetypes = { "markdown", "python" },
+							settings = {
+								ToDoHyphen = false,
+								-- SentenceCapitalization = true,
+								-- SpellCheck = true,
+								isolateEnglish = true,
+								markdown = {
+									-- [ignores this part]()
+									-- [[ also ignores my marksman links ]]
+									IgnoreLinkTitle = true,
+								},
+							},
+						})
+					end,
 				},
 			})
 
@@ -283,7 +301,7 @@ return {
 			})
 
 			vim.diagnostic.config({
-				-- update_in_insert = true,
+				update_in_insert = true,
 				float = {
 					header = "",
 					border = "rounded",
@@ -381,8 +399,8 @@ return {
 	-- 	"neovim/nvim-lspconfig",
 	-- 	event = { "BufReadPre", "BufNewFile" },
 	-- 	dependencies = {
-	-- 		"williamboman/mason.nvim",
-	-- 		"williamboman/mason-lspconfig.nvim",
+	-- 		"mason-org/mason.nvim",
+	-- 		"mason-org/mason-lspconfig.nvim",
 	-- 		"WhoIsSethDaniel/mason-tool-installer.nvim",
 	-- 		"hrsh7th/cmp-nvim-lsp",
 	-- 		"hrsh7th/cmp-buffer",

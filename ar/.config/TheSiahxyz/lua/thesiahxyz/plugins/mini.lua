@@ -312,7 +312,7 @@ return {
 		},
 		keys = {
 			{
-				"<leader>e",
+				"<leader>ee",
 				function()
 					if not MiniFiles.close() then
 						require("mini.files").open(vim.api.nvim_buf_get_name(0), true)
@@ -321,7 +321,7 @@ return {
 				desc = "Open mini.files",
 			},
 			{
-				"<leader>E",
+				"<leader>eE",
 				function()
 					require("mini.files").open(vim.uv.cwd(), true)
 				end,
