@@ -3,6 +3,13 @@ return {
 	event = "BufReadPre",
 	opts = { -- set to setup table
 	},
+	init = function()
+		local wk = require("which-key")
+		wk.add({
+			mode = { "n" },
+			{ "<leader>zh", group = "Colorizer" },
+		})
+	end,
 	config = function()
 		require("colorizer").setup({
 			filetypes = { "*" }, -- Filetype options.  Accepts table like `user_default_options`

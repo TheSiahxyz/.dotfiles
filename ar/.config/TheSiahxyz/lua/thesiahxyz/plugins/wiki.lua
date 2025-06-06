@@ -68,7 +68,14 @@ return {
 		"renerocksai/telekasten.nvim",
 		dependencies = {
 			"nvim-telescope/telescope.nvim",
-			"nvim-telekasten/calendar-vim",
+			{
+				"nvim-telekasten/calendar-vim",
+				init = function()
+					vim.g.calendar_diary = "~/.local/share/vimwiki/diary"
+					vim.g.calendar_no_mappings = 1
+				end,
+				keys = { { "<leader>cA", "<cmd>CalendarT<CR>", desc = "Open calendar" } },
+			},
 		},
 		init = function()
 			local wk = require("which-key")
@@ -126,7 +133,7 @@ return {
 				desc = "Open new note",
 			},
 			{
-				"<leader>tc",
+				"<leader>ca",
 				function()
 					require("telekasten").show_calendar()
 				end,
