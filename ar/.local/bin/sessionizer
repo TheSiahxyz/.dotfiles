@@ -13,7 +13,7 @@ sessionizer() {
       --bind "ctrl-g:change-prompt(  )+reload(fd -H -d 1 -t d -E .Trash -E .git -E .cache . $HOME/Private/repos $HOME/Public/repos | sed 's|$HOME|~|g')" \
       --bind "ctrl-t:change-prompt(🪟  )+reload(sesh list -t --icons)" \
       --bind "ctrl-v:execute($EDITOR ${0})+abort" \
-      --bind 'ctrl-x:execute(tmux kill-session -t "$(echo {} | awk "{ print \$NF }")")+change-prompt(💡  )+reload(sesh list --icons)' \
+      --bind 'ctrl-x:execute(tmux kill-session -t "$(echo {} | cut -d" " -f2-)")+reload(sesh list --icons)' \
       --bind "alt-enter:execute($EDITOR {})+abort" \
       --bind 'ctrl-/:change-prompt(❓  )+reload(echo "^a all
 ^e sesh config
