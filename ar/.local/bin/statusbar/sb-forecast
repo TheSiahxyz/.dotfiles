@@ -29,7 +29,7 @@ getweatherreportjson() {
 
 # Forecast should be updated every 3 hours, but set 3600 to check for reliability.
 checkforecast() {
-  [ -s "$1" ] && [ "$(($(date +%s) - $(stat -c %Y "$1")))" -le 3600 ]
+  [ -s "$1" ] && [ "$(($(date +%s) - $(stat -c %Y "$1")))" -le 86400 ]
 }
 
 get_current_hour() { date +%H | sed 's/^0*//'; }
