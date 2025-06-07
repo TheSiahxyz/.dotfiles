@@ -101,6 +101,7 @@ autocmd("FileType", {
 -- Show LSP diagnostics (inlay hints) in a hover window / popup lamw26wmal
 vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
 	group = augroup("float_diagnostic"),
+	pattern = "markdown",
 	callback = function()
 		vim.diagnostic.open_float(nil, {
 			focus = false,

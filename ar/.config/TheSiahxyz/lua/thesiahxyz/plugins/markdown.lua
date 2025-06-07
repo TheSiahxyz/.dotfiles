@@ -153,6 +153,10 @@ return {
 				code = {
 					enabled = true, -- disable code rendering for .ipynb files
 					sign = true,
+					-- Width of the code block background.
+					-- | block | width of the code block  |
+					-- | full  | full width of the window |
+					width = "block",
 				},
 				file_types = { "markdown", "vimwiki" },
 				heading = {
@@ -166,65 +170,33 @@ return {
 				end,
 			})
 			vim.treesitter.language.register("markdown", "vimwiki")
+
+			local opts = { noremap = true, silent = true }
+			vim.keymap.set("n", "<leader>mrt", function()
+				require("render-markdown").buf_toggle()
+			end, vim.tbl_extend("force", opts, { desc = "Toggle render-markdown" }))
+			vim.keymap.set("n", "<leader>mre", function()
+				require("render-markdown").buf_enable()
+			end, vim.tbl_extend("force", opts, { desc = "Enable render-markdown" }))
+			vim.keymap.set("n", "<leader>mrx", function()
+				require("render-markdown").buf_disable()
+			end, vim.tbl_extend("force", opts, { desc = "Disable render-markdown" }))
+			vim.keymap.set("n", "<leader>mr+", function()
+				require("render-markdown").expand()
+			end, vim.tbl_extend("force", opts, { desc = "Expand conceal margin" }))
+			vim.keymap.set("n", "<leader>mr-", function()
+				require("render-markdown").contract()
+			end, vim.tbl_extend("force", opts, { desc = "Contract conceal margin" }))
+			vim.keymap.set("n", "<leader>mrl", function()
+				require("render-markdown").log()
+			end, vim.tbl_extend("force", opts, { desc = "Open render-markdown log" }))
+			vim.keymap.set("n", "<leader>mrc", function()
+				require("render-markdown").config()
+			end, vim.tbl_extend("force", opts, { desc = "Show render-markdown config diff" }))
+			vim.keymap.set("n", "<leader>mrd", function()
+				require("render-markdown").debug()
+			end, vim.tbl_extend("force", opts, { desc = "Debug render-markdown marks" }))
 		end,
-		-- keys = {
-		-- 	{
-		-- 		"<leader>mrt",
-		-- 		function()
-		-- 			require("render-markdown").buf_toggle()
-		-- 		end,
-		-- 		desc = "Toggle render-markdown",
-		-- 	},
-		-- 	{
-		-- 		"<leader>mre",
-		-- 		function()
-		-- 			require("render-markdown").buf_enable()
-		-- 		end,
-		-- 		desc = "Enable render-markdown",
-		-- 	},
-		-- 	{
-		-- 		"<leader>mrx",
-		-- 		function()
-		-- 			require("render-markdown").buf_disable()
-		-- 		end,
-		-- 		desc = "Disable render-markdown",
-		-- 	},
-		-- 	{
-		-- 		"<leader>mr+",
-		-- 		function()
-		-- 			require("render-markdown").expand()
-		-- 		end,
-		-- 		desc = "Expand conceal margin",
-		-- 	},
-		-- 	{
-		-- 		"<leader>mr-",
-		-- 		function()
-		-- 			require("render-markdown").contract()
-		-- 		end,
-		-- 		desc = "Contract conceal margin",
-		-- 	},
-		-- 	{
-		-- 		"<leader>mrl",
-		-- 		function()
-		-- 			require("render-markdown").log()
-		-- 		end,
-		-- 		desc = "Open render-markdown log",
-		-- 	},
-		-- 	{
-		-- 		"<leader>mrc",
-		-- 		function()
-		-- 			require("render-markdown").config()
-		-- 		end,
-		-- 		desc = "Show render-markdown config diff",
-		-- 	},
-		-- 	{
-		-- 		"<leader>mrd",
-		-- 		function()
-		-- 			require("render-markdown").debug()
-		-- 		end,
-		-- 		desc = "Debug render-markdown marks",
-		-- 	},
-		-- },
 	},
 	{
 		-- Install markdown preview, use npx if available.

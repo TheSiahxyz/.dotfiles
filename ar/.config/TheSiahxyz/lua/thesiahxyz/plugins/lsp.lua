@@ -327,6 +327,7 @@ return {
 					svelte = { "prettier" },
 					typescript = { "prettier" },
 					typescriptreact = { "prettier" },
+					vimwiki = { "prettier" },
 					yaml = { "prettier" },
 					zsh = { "beautysh" },
 				},
