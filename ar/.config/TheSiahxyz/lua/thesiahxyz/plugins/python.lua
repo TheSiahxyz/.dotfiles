@@ -39,14 +39,10 @@ return {
 		end,
 		config = function()
 			require("venv-selector").setup({
-				settings = {
-					options = {
-						notify_user_on_venv_activation = true,
-					},
-					search = {
-						venvs = {
-							command = "fd /bin/python$ ~/.local/share/venvs --full-path",
-						},
+				notify_user_on_activate = true,
+				search = {
+					venvs = {
+						command = "fd /bin/python$ ~/.local/share/venvs --full-path",
 					},
 				},
 			})

@@ -213,19 +213,31 @@ local function update_markdown_toc(heading2, heading3)
 	vim.cmd("loadview")
 end
 
+-- Show LSP diagnostics (inlay hints) in a hover window / popup lamw26wmal
+vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
+	pattern = "markdown",
+	callback = function()
+		vim.diagnostic.open_float(nil, {
+			focus = false,
+			border = "rounded",
+		})
+	end,
+})
+
 -- FileType autocmd for markdown files
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = { "markdown", "mdx", "mdown", "mkd", "mkdn", "mdwn" },
 	callback = function()
 		-- Local settings
-		vim.opt_local.conceallevel = 0
 		vim.bo.textwidth = is_in_obsidian_repo() and 80 or 175
-		vim.opt_local.spell = true
-		vim.opt_local.spelllang = "en_us"
-		vim.opt_local.expandtab = true
-		vim.opt_local.shiftwidth = 4
-		vim.opt_local.softtabstop = 4
 		vim.opt_local.autoindent = true
+		vim.opt_local.conceallevel = 0
+		vim.opt_local.expandtab = true
+		vim.opt_local.softtabstop = 4
+		vim.opt_local.shiftwidth = 4
+		vim.opt_local.spell = true
+		vim.opt_local.spelllang = { "en", "ko", "cjk" }
+		vim.opt_local.spellsuggest = { "best", "9" }
 
 		local arrows = { [">>"] = "→", ["<<"] = "←", ["^^"] = "↑", ["VV"] = "↓" }
 		for key, val in pairs(arrows) do

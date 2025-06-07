@@ -98,36 +98,12 @@ autocmd("FileType", {
 	end,
 })
 
--- Show LSP diagnostics (inlay hints) in a hover window / popup lamw26wmal
-vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
-	group = augroup("float_diagnostic"),
-	pattern = "markdown",
-	callback = function()
-		vim.diagnostic.open_float(nil, {
-			focus = false,
-			border = "rounded",
-		})
-	end,
-})
-
 -- Make it easier to close man-files when opened inline
 autocmd("FileType", {
 	group = augroup("man_close"),
 	pattern = { "man" },
 	callback = function(event)
 		vim.bo[event.buf].buflisted = false
-	end,
-})
-
--- Wrap and check for spell in text filetypes
-autocmd("FileType", {
-	group = augroup("wrap_spell"),
-	pattern = { "text", "plaintex", "typst", "gitcommit", "markdown" },
-	callback = function()
-		vim.opt_local.wrap = true
-		vim.opt_local.spell = true
-		vim.opt_local.spelllang = { "en", "cjk" }
-		vim.opt_local.spellsuggest = { "best", "9" }
 	end,
 })
 
@@ -261,7 +237,7 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
 	pattern = { "*.ms", "*.me", "*.mom", "*.man" },
 	callback = function()
 		vim.cmd([[
-            set columns=90
+      set columns=90
 			set filetype=groff
 			set linebreak
 			set textwidth=0

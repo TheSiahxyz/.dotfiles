@@ -155,11 +155,13 @@ return {
 			vim.api.nvim_set_hl(0, "CmpItemKindCopilot", { fg = "#6CC644" })
 
 			require("cmp_dictionary").setup({
-				paths = {
-					"/usr/share/dict/words",
-					vim.fn.expand(vim.fn.stdpath("config") .. "/lua/thesiahxyz/spells/en.utf-8.add"),
-				},
+				paths = { "/usr/share/dict/words" },
 				exact_length = 2,
+				first_case_insensitive = true,
+				document = {
+					enable = true,
+					command = { "wn", "${label}", "-over" },
+				},
 			})
 		end,
 	},

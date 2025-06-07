@@ -576,9 +576,9 @@ end
 
 -- Spell
 vim.keymap.set("n", "zp", function()
-	vim.opt.spelllang = { "en", "cjk" }
-	vim.cmd("echo 'Spell language set to English and CJK'")
-end, { desc = "Spelling language English and CJK" })
+	vim.opt.spelllang = { "en", "ko", "cjk" }
+	vim.cmd("echo 'Spell language set to English, Korean, and CJK'")
+end, { desc = "Spelling language English, Korean, and CJK" })
 -- repeat the replacement done by |z=| for all matches with the replaced word in the current window.
 vim.keymap.set("n", "z.", function()
 	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(":spellr\n", true, false, true), "m", true)
