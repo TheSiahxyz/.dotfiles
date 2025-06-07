@@ -132,6 +132,23 @@ return {
 							-- },
 						})
 					end,
+					["harper_ls"] = function()
+						lspconfig.harper_ls.setup({
+							capabilities = capabilities,
+							filetypes = { "markdown", "python" },
+							settings = {
+								ToDoHyphen = false,
+								-- SentenceCapitalization = true,
+								-- SpellCheck = true,
+								isolateEnglish = true,
+								markdown = {
+									-- [ignores this part]()
+									-- [[ also ignores my marksman links ]]
+									IgnoreLinkTitle = true,
+								},
+							},
+						})
+					end,
 					["jdtls"] = function()
 						lspconfig.jdtls.setup({
 							capabilities = capabilities,
@@ -188,23 +205,6 @@ return {
 							-- 		disableOrganizeImports = false,
 							-- 	},
 							-- },
-						})
-					end,
-					["harper_ls"] = function()
-						lspconfig.harper_ls.setup({
-							capabilities = capabilities,
-							filetypes = { "markdown", "python" },
-							settings = {
-								ToDoHyphen = false,
-								-- SentenceCapitalization = true,
-								-- SpellCheck = true,
-								isolateEnglish = true,
-								markdown = {
-									-- [ignores this part]()
-									-- [[ also ignores my marksman links ]]
-									IgnoreLinkTitle = true,
-								},
-							},
 						})
 					end,
 				},
