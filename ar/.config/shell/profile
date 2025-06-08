@@ -160,10 +160,12 @@ export NVM_DIR="$XDG_CONFIG_HOME/nvm"
 
 ### --- PASSWORD STORE --- ###
 export PASSWORD_STORE_DIR="$XDG_DATA_HOME/.password-store"
-export PASSWORD_STORE_CLIP_TIME=180 # Specifies the number of seconds to wait before restoring the clipboard, by default 45 seconds.
-# export PASSWORD_STORE_CHARACTER_SET="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*=[]{}|:,.?/"
-export PASSWORD_STORE_ENABLE_EXTENSIONS="true"                         # This environment variable must be set to "true" for extensions to be enabled.
-# export PASSWORD_STORE_EXTENSIONS_DIR="$PASSWORD_STORE_DIR/.extensions" # The location to look for executable extension files, by default PASSWORD_STORE_DIR/.extensions.
+export PASSWORD_STORE_CLIP_TIME=180   # Specifies the number of seconds to wait before restoring the clipboard, by default 45 seconds.
+# export PASSWORD_STORE_GENERATED_LENGTH=18   # by default 25.
+# export PASSWORD_STORE_CHARACTER_SET='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+[]{};:,.<>?'
+# export PASSWORD_STORE_CHARACTER_SET_NO_SYMBOLS='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+[]{};:,.<>?'
+export PASSWORD_STORE_ENABLE_EXTENSIONS="true"
+# export PASSWORD_STORE_EXTENSIONS_DIR="$PASSWORD_STORE_DIR/.extensions"
 # export BASH_COMPLETION_USER_DIR=$XDG_DATA_HOME/bash-completion/completions
 
 ### --- POWERLEVEL10K --- ###

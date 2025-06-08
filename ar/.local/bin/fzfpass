@@ -40,7 +40,7 @@ PASSFILE=$(
       --reverse \
       --no-mouse \
       --preview="pass {}" \
-      --header="🔑 ^a: Generate | ^e: Edit | ^g: Generate (Insertion) | ^r: Rename | ^x: Delete | tab: Replace" \
+      --header="🔑 ^a: Generate | ^e: Edit | ^g: Generate (no symbol) | ^r: Rename | ^s: Generate (symbol) | ^x: Delete | tab: Replace" \
       --bind="ctrl-a:execute(if [ -z {q} ]; then read -p \"Can't generate empty password. Press enter to continue...\"; else pass generate -n {q} < /dev/tty > /dev/tty 2>&1 && pass edit {q} < /dev/tty > /dev/tty 2>&1; fi)+reload(tree -Ffi | grep '.gpg' | sed 's/.gpg$//g')" \
       --bind="ctrl-e:execute(pass edit {} < /dev/tty > /dev/tty 2>&1)+reload(tree -Ffi | grep '.gpg' | sed 's/.gpg$//g')" \
       --bind="ctrl-r:execute(bash -c '
@@ -52,6 +52,7 @@ else
   echo \"No name entered. Rename aborted.\" > /dev/tty;
 fi' < /dev/tty > /dev/tty 2>&1)+reload(tree -Ffi | grep '.gpg' | sed 's/.gpg$//g')" \
       --bind="ctrl-g:execute(if [ -z {} ]; then read -p \"Can't generate empty password. Press enter to continue...\"; else pass generate -in {} < /dev/tty > /dev/tty 2>&1 && pass edit {} < /dev/tty > /dev/tty 2>&1; fi)+reload(tree -Ffi | grep '.gpg' | sed 's/.gpg$//g')" \
+      --bind="ctrl-s:execute(if [ -z {} ]; then read -p \"Can't generate empty password. Press enter to continue...\"; else pass generate -i {} < /dev/tty > /dev/tty 2>&1 && pass edit {} < /dev/tty > /dev/tty 2>&1; fi)+reload(tree -Ffi | grep '.gpg' | sed 's/.gpg$//g')" \
       --bind="ctrl-x:execute(pass rm {} < /dev/tty > /dev/tty 2>&1)+reload(tree -Ffi | grep '.gpg' | sed 's/.gpg$//g')" \
       --bind="tab:replace-query"
 )
