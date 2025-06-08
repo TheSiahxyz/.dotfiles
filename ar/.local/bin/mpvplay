@@ -12,7 +12,7 @@ loginurl() {
   username="$(echo | dmenu -i -p "Enter a username:")"
   [ -n "$username" ] && password="$(echo | dmenu -i -P -p "Enter a password:")" || exit
   if [ -n "$username" ] && [ -n "$password" ]; then
-    if ! mpv --ytdl-raw-options=username="$username",password="$password" "$url"; then
+    if ! mpv --ytdl-format='bestvideo[height<=1080]+bestaudio/best[height<=1080]' --ytdl-raw-options=username="$username",password="$password" "$url"; then
       notify-send "❌ Failed to play $url" "❗ Check your username or password"
       exit 1
     fi
@@ -24,7 +24,7 @@ play_url() {
   [ -n "$url" ] && echo "$url" | grep -E '^https?://' >/dev/null || return 1
   if yt-dlp --simulate --dump-json "$url" >/dev/null 2>&1; then
     notify-send "📽️ Playing video from URL:" "$url"
-    mpv "$url"
+    mpv --ytdl-format='bestvideo[height<=1080]+bestaudio/best[height<=1080]' "$url"
   else
     loginurl
   fi
