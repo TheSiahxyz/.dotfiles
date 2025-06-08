@@ -9,7 +9,9 @@
   changed = yellow
   untracked = blue
 [credential]
+  helper = cache
   helper = store
+  helper = !type pass-git-helper >/dev/null && pass-git-helper$@
 [delta]
   blame-code-style = syntax
   blame-palette = "#161617" "#1b1b1d" "#2a2a2d" "#3e3e43"
