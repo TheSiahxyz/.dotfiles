@@ -47,7 +47,7 @@ Esm             /etc/samba
 Esv             /etc/runit/sv
 gdc             ${XDG_DOCUMENTS_DIR:-${HOME}/Documents}
 gdk             ${XDG_DESKTOP_DIR:-${HOME}/Desktop}
-gdl             ${XDG_DOWNLOAD_DIR:-${HOME}/Downloads}
+gdn             ${XDG_DOWNLOAD_DIR:-${HOME}/Downloads}
 gfx             $HOME/.mozilla/firefox/si.default
 gkd             ${XDG_DATA_HOME:-${HOME}/.local/share}/kakaotalk/drive_c/users/si/Documents/KakaoTalk-Downloads
 gmu             ${XDG_MUSIC_DIR:-${HOME}/Music}
