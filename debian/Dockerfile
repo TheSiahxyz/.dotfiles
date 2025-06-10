@@ -1,4 +1,4 @@
-FROM debian:latest
+FROM debian:bookwarm
 
 ARG NAME=toolbox
 
@@ -22,7 +22,7 @@ RUN useradd -m -G wheel $BASE_USER
 
 RUN echo "$BASE_USER:$PASSWORD" | chpasswd
 
-RUN echo '%wheel ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 USER $BASE_USER
 
