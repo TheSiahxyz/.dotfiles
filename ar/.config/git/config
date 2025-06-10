@@ -1,6 +1,7 @@
 [advice]
   detachedHead = false
 [core]
+  autocrlf = false
   excludesFile = ~/.config/git/ignore
   pager = delta
 [color "status"]
