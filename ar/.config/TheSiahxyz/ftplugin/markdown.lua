@@ -214,12 +214,17 @@ local function update_markdown_toc(heading2, heading3)
 end
 
 -- Show LSP diagnostics (inlay hints) in a hover window / popup lamw26wmal
-vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
-	pattern = "markdown",
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = { "markdown", "mdx", "mdown", "mkd", "mkdn", "mdwn" },
 	callback = function()
-		vim.diagnostic.open_float(nil, {
-			focus = false,
-			border = "rounded",
+		vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
+			buffer = 0,
+			callback = function()
+				vim.diagnostic.open_float(nil, {
+					focus = false,
+					border = "rounded",
+				})
+			end,
 		})
 	end,
 })
@@ -246,7 +251,7 @@ vim.api.nvim_create_autocmd("FileType", {
 	end,
 })
 
--- this setting makes markdown auto-set the 80 text width limit when typing
+-- This setting makes markdown auto-set the 80 text width limit when typing
 -- vim.cmd('set fo+=a')
 if is_in_obsidian_repo() then
 	vim.bo.textwidth = 175 -- No limit for Obsidian repository
