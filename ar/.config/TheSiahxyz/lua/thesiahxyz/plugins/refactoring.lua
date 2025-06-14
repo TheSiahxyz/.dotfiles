@@ -9,8 +9,10 @@ return {
 		wk.add({
 			mode = { "n", "v", "x" },
 			{ "<leader>r", group = "Compiler/Refactoring" },
+			{ "<leader>rb", group = "Extract block" },
 		})
 	end,
+	lazy = false,
 	config = function()
 		require("refactoring").setup({
 			prompt_func_return_type = {
@@ -39,16 +41,32 @@ return {
 			print_var_statements = {},
 			show_success_message = false,
 		})
-		vim.keymap.set("x", "<leader>re", ":Refactor extract ", { desc = "Extract" })
-		vim.keymap.set("x", "<leader>rf", ":Refactor extract_to_file ", { desc = "Extract to file" })
-		vim.keymap.set("x", "<leader>rv", ":Refactor extract_var ", { desc = "Extract variable" })
-		vim.keymap.set({ "n", "x" }, "<leader>ri", ":Refactor inline_var", { desc = "Refactor inline variable" })
-		vim.keymap.set("n", "<leader>rI", ":Refactor inline_func", { desc = "Refactor inline function" })
-		vim.keymap.set("n", "<leader>rb", ":Refactor extract_block", { desc = "Extract block" })
-		vim.keymap.set("n", "<leader>rbf", ":Refactor extract_block_to_file", { desc = "Extract block to file" })
+		vim.keymap.set({ "n", "x" }, "<leader>re", function()
+			return require("refactoring").refactor("Extract Function")
+		end, { expr = true, desc = "Extract" })
+		vim.keymap.set({ "n", "x" }, "<leader>rf", function()
+			return require("refactoring").refactor("Extract Function To File")
+		end, { expr = true, desc = "Extract to file" })
+		vim.keymap.set({ "n", "x" }, "<leader>rv", function()
+			return require("refactoring").refactor("Extract Variable")
+		end, { expr = true, desc = "Extract variable" })
+		vim.keymap.set({ "n", "x" }, "<leader>rI", function()
+			return require("refactoring").refactor("Inline Function")
+		end, { expr = true, desc = "Refactor inline function" })
+		vim.keymap.set({ "n", "x" }, "<leader>ri", function()
+			return require("refactoring").refactor("Inline Variable")
+		end, { expr = true, desc = "Refactor inline variable" })
+
+		vim.keymap.set({ "n", "x" }, "<leader>rbb", function()
+			return require("refactoring").refactor("Extract Block")
+		end, { expr = true, desc = "Extract block" })
+		vim.keymap.set({ "n", "x" }, "<leader>rbf", function()
+			return require("refactoring").refactor("Extract Block To File")
+		end, { expr = true, desc = "Extract block to file" })
+
 		-- prompt for a refactor to apply when the remap is triggered
 		vim.keymap.set({ "n", "x" }, "<leader>rs", function()
-			require("refactoring").select_refactor()
+			require("refactoring").select_refactor({ prefer_ex_cmd = true })
 		end, { desc = "Refactor selection" })
 		-- Note that not all refactor support both normal and visual mode
 		-- load refactoring Telescope extension
