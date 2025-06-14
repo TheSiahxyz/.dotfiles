@@ -1,38 +1,5 @@
 return {
 	{
-		"cameron-wags/rainbow_csv.nvim",
-		config = function()
-			require("rainbow_csv").setup()
-			-- vim.g.rcsv_colorpairs = {
-			-- 	{ "red", "red" },
-			-- 	{ "blue", "blue" },
-			-- 	{ "green", "green" },
-			-- 	{ "magenta", "magenta" },
-			-- 	{ "NONE", "NONE" },
-			-- 	{ "darkred", "darkred" },
-			-- 	{ "darkblue", "darkblue" },
-			-- 	{ "darkgreen", "darkgreen" },
-			-- 	{ "darkmagenta", "darkmagenta" },
-			-- 	{ "darkcyan", "darkcyan" },
-			-- }
-		end,
-		ft = {
-			"csv",
-			"tsv",
-			"csv_semicolon",
-			"csv_whitespace",
-			"csv_pipe",
-			"rfc_csv",
-			"rfc_semicolon",
-		},
-		cmd = {
-			"RainbowDelim",
-			"RainbowDelimSimple",
-			"RainbowDelimQuoted",
-			"RainbowMultiDelim",
-		},
-	},
-	{
 		"hat0uma/csvview.nvim",
 		cmd = { "CsvViewEnable", "CsvViewDisable", "CsvViewToggle" },
 		event = { "BufReadPre *.csv" }, -- Lazy-load the plugin when a CSV file is about to be read
