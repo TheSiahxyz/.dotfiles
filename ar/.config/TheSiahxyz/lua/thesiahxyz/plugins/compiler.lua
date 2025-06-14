@@ -23,7 +23,7 @@ return {
 			-- Redo last selected option
 			vim.api.nvim_set_keymap(
 				"n",
-				"<leader>rc",
+				"<leader>re",
 				"<cmd>CompilerStop<cr>" -- (Optional, to dispose all tasks before redo)
 					.. "<cmd>CompilerRedo<cr>",
 				{ noremap = true, silent = true, desc = "Recompile" }
