@@ -62,7 +62,7 @@ end
 
 vim.api.nvim_set_keymap(
 	"i",
-	"<M-p>",
+	"<C-v>",
 	"<cmd>lua require('thesiahxyz.utils.utils').insert_file_path()<cr>",
 	{ noremap = true, silent = true }
 )

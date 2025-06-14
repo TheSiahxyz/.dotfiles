@@ -93,6 +93,20 @@ return {
 				},
 				lualine_c = {
 					{
+						function()
+							local has_neocomposer, noice = pcall(require, "NeoComposer")
+							if has_neocomposer then
+								return require("NeoComposer.ui").status_recording
+							else
+								return ""
+							end
+						end,
+						cond = function()
+							local has_neocomposer, noice = pcall(require, "NeoComposer")
+							return has_neocomposer
+						end,
+					},
+					{
 						"filename",
 						file_status = true, -- Displays file status (readonly status, modified status)
 						newfile_status = true, -- Display new file status (new file means no write after created)
