@@ -529,12 +529,10 @@ vim.keymap.set("n", "<leader>rm", function()
 end, { desc = "Remove current file" })
 
 -- Scripts
-vim.api.nvim_set_keymap(
-	"n",
-	"<leader>rr",
-	':w!<cr>:lua vim.cmd("split | resize 10 | terminal compiler " .. vim.fn.expand("%:p"))<cr>',
-	{ noremap = true, silent = true, desc = "Run compiler interactively" }
-)
+vim.keymap.set("n", "<leader>rr", function()
+	vim.cmd("w")
+	vim.cmd("split | resize 10 | terminal compiler " .. vim.fn.expand("%:p"))
+end, { noremap = true, silent = true, desc = "Run compiler interactively" })
 vim.api.nvim_set_keymap(
 	"n",
 	"<leader>RR",
