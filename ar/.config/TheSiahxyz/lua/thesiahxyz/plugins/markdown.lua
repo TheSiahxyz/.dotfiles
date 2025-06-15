@@ -128,6 +128,12 @@ end
 
 return {
 	{
+		"ixru/nvim-markdown",
+		config = function()
+			vim.g.vim_markdown_no_default_key_mappings = 1
+		end,
+	},
+	{
 		"MeanderingProgrammer/render-markdown.nvim",
 		-- dependencies = { "nvim-treesitter/nvim-treesitter", "echasnovski/mini.nvim" }, -- if you use the mini.nvim suite
 		dependencies = { "nvim-treesitter/nvim-treesitter", "echasnovski/mini.icons" }, -- if you use standalone mini plugins
@@ -148,7 +154,7 @@ return {
 			require("render-markdown").setup({
 				bullet = {
 					-- Turn on / off list bullet rendering
-					enabled = true,
+					enabled = false,
 				},
 				code = {
 					enabled = true, -- disable code rendering for .ipynb files

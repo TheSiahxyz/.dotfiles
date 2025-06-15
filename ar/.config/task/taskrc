@@ -190,4 +190,3 @@ uda.taskwarrior-tui.selection.reverse=yes
 uda.taskwarrior-tui.task-report.show-info=false
 
 # Context
-context=home
