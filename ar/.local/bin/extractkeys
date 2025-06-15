@@ -45,8 +45,8 @@ for file_path in "${config_files[@]}"; do
   fi
   echo ".LI" >>"$temp_file_before"
 
-  awk 'BEGIN {flag=0} /static[[:space:]]+(const[[:space:]]+)?(Key|Shortcut|Command|Button)[[:space:]]+(keys|cmdkeys|shortcuts|commands|buttons)[[:space:]]*\[\][[:space:]]*=[[:space:]]*{/ {flag=1} /\};/ {flag=0} flag' "$file_path" | while read -r line; do
-    if [[ "$line" =~ \/\*.*\*\/ || "$line" =~ .*\"\\.* || "$line" =~ ^$ || "$line" =~ STACKKEYS || "$line" =~ TAGKEYS || "$line" =~ static\ Key\ cmdkeys || "$line" =~ ^\#.* ]]; then
+  awk 'BEGIN {flag=0} /static[[:space:]]+(const[[:space:]]+)?(Keychord|Shortcut)[[:space:]]+(*keychords|shortcuts)[[:space:]]*\[\][[:space:]]*=[[:space:]]*{/ {flag=1} /\};/ {flag=0} flag' "$file_path" | while read -r line; do
+    if [[ "$line" =~ \/\*.*\*\/ || "$line" =~ .*\"\\.* || "$line" =~ ^$ || "$line" =~ STACKKEYS || "$line" =~ TAGKEYS || "$line" =~ static\ Keychord\ \*keychords || "$line" =~ static\ Shortcut\ \shortcuts || "$line" =~ ^\#.* ]]; then
       continue
     fi
 
@@ -59,27 +59,45 @@ for file_path in "${config_files[@]}"; do
       continue
     fi
 
-    if [[ "$line" =~ static\ const|static\ Shortcut ]]; then
-      echo ".LIST OFF" >>"$temp_file_before"
-      output_line=".HEADING 4 \"INSERT MODE\""
-      echo "$output_line" >>"$temp_file_before"
-      echo ".LI" >>"$temp_file_before"
-      continue
+    if echo "$line" | grep -q "Keychord"; then
+      line=$(echo "$line" | sed -e "s/&((Keychord){[0-9], {{\(.*\)}),/\1/g;s/^0/MEDIA/g;s/\([MEDIA|WIN|ALT|ULTRA|EXTRA|Shift|Control]\w\+\),\s\(.*\)}},\s\+\(\w\+\),\s\([^,]*\)/\1|\2|\3|\4/g;s/},{[0-9],//g;s/},{//g")
+    else
+      line=$(echo "$line" | sed -e "s/^{ \(.*\) },/\1/g;s/{ \([^, ]*\), \([^, ]*\), \([^, ]*\), \([^}]*\) }/\1 \2 \3 \4/g;s/,/|/g")
     fi
 
-    if [[ "$line" =~ static\ Command ]]; then
-      echo ".LIST OFF" >>"$temp_file_before"
-      output_line=".HEADING 4 \"COMMAND MODE\""
-      echo "$output_line" >>"$temp_file_before"
-      echo ".LI" >>"$temp_file_before"
-      continue
-    fi
+    modkey=$(echo "$line" | awk -F'|' '{print $1}' | sed "s/\b0//g;
+                                                          s/WINKEY/WIN/g;s/WINMODALL/WIN+Ctrl+Shift/g;s/WINMOD2/WIN+Ctrl/g;s/WINMOD/WIN+Shift/g;
+                                                          s/ALTKEY/ALT/g;s/ALTMODALL/ALT+Ctrl+Shift/g;s/ALTMOD2/ALT+Ctrl/g;s/ALTMOD/ALT+Shift/g;
+                                                          s/ULTRAKEY/WIN+ALT/g;s/ULTRAMODALL/WIN+ALT+Ctrl+Shift/g;s/ULTRAMOD2/WIN+ALT+Ctrl/g;s/ULTRAMOD/WIN+ALT+Shift/g;
+                                                          s/EXTRAMOD/Ctrl+Shift/g;
+                                                          s/\([Shift|Control]\)Mask/\1/g;
+                                                          s/ //g;
+                                                          s/XK_NO_MOD/NO MOD/g;
+                                                          s/XK_ANY_MOD/ANY MOD/g")
 
-    line=$(echo "$line" | sed -e "s/^{ \(.*\) },/\1/g;s/{ \([^,]*\), \([^,]*\), \([^,]*\), \([^}]*\) }/\1 \2 \3 \4/g")
-    modkey=$(echo "$line" | awk -F',' '{print $1}' | sed "s/\b0//g;s/MODKEY\(\d*\)/MOD\1/g;s/\([Shift|Contrl]\)Mask/\1/g;s/Control/Ctrl/g;s/WINMOD2/MOD+Ctrl/g;s/WINMOD/MOD+Shift/g;s/TERMMOD2/MOD+Ctrl/g;s/TERMMOD/MOD+Shift/g;s/ULTRAMOD2/MOD2+Ctrl+Shift/g;s/ULTRAMOD/MOD+Ctrl+Shift/g;s/EXTRAMOD/Ctrl+Shift/g;s/|/+/g;s/ //g;s/XK_ANY_MOD/ANY MOD/g")
-    key=$(echo "$line" | awk -F',' '{print $2}' | sed "s/\b0//g;s/XF86XK_//g;s/XK_//g;s/\s*\(.*\)_R$/Right_\1/g;s/\s*\(.*\)_L$/Left_\1/g;s/MODKEY\(\d*\)/MOD\1/g;s/\([Shift|Contrl]\)Mask/\1/g;s/Control/Ctrl/g;s/|/+/g;s/ //g")
-    func=$(echo "$line" | awk -F',' '{print $3}' | grep -v "spawn" | sed "s/ //g")
-    args=$(echo "$line" | cut -d',' -f4- | sed -E 's/.*\.v\s*=\s*\(const\s*char\s*\*\[\]\)\s*\{\s*([^}]*)\s*\}.*/\1/g;
+    key=$(echo "$line" | awk -F'|' '{print $2}' | sed "s/\b0//g;
+                                                       s/XF86XK_//g;
+                                                       s/XK_//g;
+                                                       s/\s*\(.*\)_R$/Right_\1/g;
+                                                       s/\s*\(.*\)_L$/Left_\1/g;
+                                                       s/MODKEY\(\d*\)/MOD\1/g;
+                                                       s/\([Shift|Control]\)Mask/\1/g;
+                                                       s/Control/Ctrl/g;
+                                                       s/space/<space>/g;
+                                                       s/BackSpace/<backspace>/g;
+                                                       s/comma/,/g;
+                                                       s/period/./g;
+                                                       s/semicolon/;/g;
+                                                       s/bracketleft/[/g;
+                                                       s/bracketright/]/g;
+                                                       s/minus/-/g;
+                                                       s/equal/=/g;
+                                                       s/|/+/g;
+                                                       s/ //g")
+
+    func=$(echo "$line" | awk -F'|' '{print $3}' | grep -v "spawn" | sed "s/ //g")
+
+    args=$(echo "$line" | cut -d'|' -f4- | sed -E 's/.*\.v\s*=\s*\(const\s*char\s*\*\[\]\)\s*\{\s*([^}]*)\s*\}.*/\1/g;
                                                        s/.*\.v\s*=\s*\(int\s*\[\]\)\s*\{\s*([^}]*)\s*\}.*/\1/g;
                                                        s/.*SHCMD\((.*)\).*/\1/g;
                                                        s/.*\{\s*\.\w*\s*=\s*(.*)\s*\}.*/\1/g;
