@@ -71,6 +71,7 @@ for file_path in "${config_files[@]}"; do
                                                           s/ULTRAKEY/WIN+ALT/g;s/ULTRAMODALL/WIN+ALT+Ctrl+Shift/g;s/ULTRAMOD2/WIN+ALT+Ctrl/g;s/ULTRAMOD/WIN+ALT+Shift/g;
                                                           s/EXTRAMOD/Ctrl+Shift/g;
                                                           s/\([Shift|Control]\)Mask/\1/g;
+                                                          s/Control/Ctrl/g;
                                                           s/ //g;
                                                           s/XK_NO_MOD/NO MOD/g;
                                                           s/XK_ANY_MOD/ANY MOD/g")
