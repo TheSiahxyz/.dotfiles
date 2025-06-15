@@ -103,9 +103,9 @@ return {
 				desc = "Which-key query lookup",
 			},
 			{
-				mode = { "n", "v", "x" },
 				"<leader>wK",
 				"<cmd>WhichKey<cr>",
+				mode = { "n", "v", "x" },
 				desc = "Which-key all key",
 			},
 		},

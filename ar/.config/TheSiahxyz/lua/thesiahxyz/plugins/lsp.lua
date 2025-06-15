@@ -360,11 +360,11 @@ return {
 		end,
 		keys = {
 			{
-				mode = { "n", "v" },
 				"<leader>lf",
 				function()
 					require("conform").format({ async = true })
 				end,
+				mode = { "n", "v" },
 				desc = "Format buffer by lsp",
 			},
 			{

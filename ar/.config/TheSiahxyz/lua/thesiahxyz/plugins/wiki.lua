@@ -46,7 +46,15 @@ return {
 		event = "VeryLazy",
 		dependencies = {
 			"vimwiki/vimwiki",
-			"powerman/vim-plugin-AnsiEsc",
+			{
+				"powerman/vim-plugin-AnsiEsc",
+				keys = {
+					{ "<leader>swp", false },
+					{ "<leader>rwp", false },
+					{ "<leader>wp", "<Plug>SaveWinPosn", noremap = false, desc = "Save window position" },
+					{ "<leader>rp", "<Plug>RestoreWinPosn", noremap = false, desc = "Restore window position" },
+				},
+			},
 			"majutsushi/tagbar",
 			"farseer90718/vim-taskwarrior",
 		},

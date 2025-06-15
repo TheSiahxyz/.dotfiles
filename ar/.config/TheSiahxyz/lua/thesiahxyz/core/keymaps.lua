@@ -20,6 +20,7 @@ vim.keymap.set("n", "<leader><leader>", "<cmd>e #<cr>", { desc = "Switch to last
 vim.keymap.set({ "n", "v", "x", "t" }, "<leader>bd", "<cmd>:bd<cr>", { desc = "Close buffer" })
 vim.keymap.set({ "n", "v", "x", "t" }, "<leader>BD", "<cmd>:bd!<cr>", { desc = "Force close buffer" })
 vim.keymap.set("n", "<leader>bn", "<cmd>enew<cr>", { desc = "Open new buffer" })
+vim.keymap.set("n", "<leader>bc", "<cmd>e!<cr>", { desc = "Clear edit" })
 vim.keymap.set({ "i", "x", "n", "s" }, "<C-s>", "<cmd>w<cr><esc>", { desc = "Save current buffer" })
 vim.keymap.set({ "n", "v" }, "<leader>wq", "<cmd>wq<cr>", { desc = "Save current buffer and quit" })
 vim.keymap.set({ "n", "v" }, "<leader>WQ", "<cmd>wqa<cr>", { desc = "Save all buffers and quit" })
