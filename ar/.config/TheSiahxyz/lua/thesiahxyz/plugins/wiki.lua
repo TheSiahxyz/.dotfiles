@@ -48,12 +48,10 @@ return {
 			"vimwiki/vimwiki",
 			{
 				"powerman/vim-plugin-AnsiEsc",
-				keys = {
-					{ "<leader>swp", false },
-					{ "<leader>rwp", false },
-					{ "<leader>wp", "<Plug>SaveWinPosn", noremap = false, desc = "Save window position" },
-					{ "<leader>rp", "<Plug>RestoreWinPosn", noremap = false, desc = "Restore window position" },
-				},
+				config = function()
+					pcall(vim.keymap.del, "n", "<leader>swp")
+					pcall(vim.keymap.del, "n", "<leader>rwp")
+				end,
 			},
 			"majutsushi/tagbar",
 			"farseer90718/vim-taskwarrior",
