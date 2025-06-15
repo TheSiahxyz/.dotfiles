@@ -941,6 +941,10 @@ return {
 				pattern = "MiniFilesExplorerOpen",
 				callback = function()
 					local bufnr = vim.api.nvim_get_current_buf()
+					local path = vim.api.nvim_buf_get_name(bufnr)
+					if path:match("^minifiles://") then
+						return
+					end
 					updateGitStatus(bufnr)
 				end,
 			})
