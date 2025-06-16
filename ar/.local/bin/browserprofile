@@ -1,9 +1,9 @@
 #!/bin/sh
 
 # Define the profile paths
-WORK_PROFILE="si.work"
-HOME_PROFILE="si.default"
-TMUX_PROFILE="si.tmux"
+WORK_PROFILE="$USER.work"
+HOME_PROFILE="$USER.default"
+TMUX_PROFILE="$USER.tmux"
 
 usage() {
   echo "Update the default profile in profiles.ini for Firefox or Librewolf."
