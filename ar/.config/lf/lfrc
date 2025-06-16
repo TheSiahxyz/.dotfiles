@@ -483,6 +483,7 @@ map zx chmods
 
 # Clear && Unselect
 map <c-l> :clear; unselect; save-select
+map <c-x> :clear; unselect; save-select
 
 # Compress
 map C compress
