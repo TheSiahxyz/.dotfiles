@@ -123,7 +123,7 @@ vim.keymap.set({ "n", "v", "x" }, "<leader>PP", [["+P]], { desc = "Paste from cl
 vim.keymap.set({ "n", "v", "x" }, "<leader>pP", [["_dP]], { desc = "Paste over and preserve clipboard" })
 vim.keymap.set({ "n", "v" }, "<leader>dd", [["+d]], { desc = "Delete and yank to clipboard" })
 vim.keymap.set({ "n", "v" }, "<leader>DD", [["_d]], { desc = "Delete without storing in clipboard" })
-vim.keymap.set("n", "<leader><C-d>", ":%d_<cr>", { desc = "Delete all to black hole register" })
+vim.keymap.set("n", "<leader><C-d>", ":%d_<cr>", { desc = "Delete all lines to black hole register" })
 
 -- Diagnostic
 local diagnostic_goto = function(next, severity)

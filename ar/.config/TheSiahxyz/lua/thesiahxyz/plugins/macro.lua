@@ -164,9 +164,9 @@ return {
 
 			require("telescope").load_extension("macros")
 
-			vim.keymap.set("n", "<leader>fQ", ":Telescope macros<CR>", { desc = "Search macros" })
-			vim.keymap.set("n", "<leader>eQ", ":EditMacros<CR>", { desc = "Edit macros" })
-			vim.keymap.set("n", "<leader>xQ", ":ClearNeoComposer<CR>", { desc = "Clear macros" })
+			vim.keymap.set("n", "<leader>sm", ":Telescope macros<CR>", { desc = "Search macros" })
+			vim.keymap.set("n", "<leader>em", ":EditMacros<CR>", { desc = "Edit macros" })
+			vim.keymap.set("n", "<leader>xm", ":ClearNeoComposer<CR>", { desc = "Clear macros" })
 		end,
 	},
 }

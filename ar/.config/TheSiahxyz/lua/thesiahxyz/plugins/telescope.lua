@@ -870,7 +870,7 @@ return {
 			vim.keymap.set("n", "<leader>sl", function()
 				require("telescope.builtin").loclist({})
 			end, { desc = "Search location list" })
-			vim.keymap.set("n", "<leader>sm", function()
+			vim.keymap.set("n", "<leader>s'", function()
 				require("telescope.builtin").marks({})
 			end, { desc = "Search marks" })
 			vim.keymap.set("n", "<leader>sM", function()
