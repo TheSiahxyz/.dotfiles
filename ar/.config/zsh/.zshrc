@@ -50,7 +50,7 @@ export GPG_TTY="$(tty)"
 gpg-connect-agent updatestartuptty /bye >/dev/null
 
 # Options
-stty stop undef             # Disable ctrl-s to freeze terminal.
+stty -ixon  # Disable Ctrl+S and Ctrl+Q flow control
 setopt autocd
 setopt extendedglob
 setopt nomatch

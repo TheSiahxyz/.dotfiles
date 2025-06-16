@@ -117,8 +117,8 @@ bindkey '^a' beginning-of-line
 bindkey '^e' end-of-line
 
 # function key bindings
-bindkey '^X^H' clear-tree-2
-bindkey '^X^J' clear-tree-3
+bindkey '^X^E' clear-tree-2
+bindkey '^X^W' clear-tree-3
 bindkey '^X^S' git-status
 bindkey '^X^X^T' print-current-date
 bindkey '^X^X^U' print-unix-timestamp
@@ -164,10 +164,10 @@ if [[ -f "${ZPLUGINDIR:-${HOME}/.local/bin/zsh}/zsh-vi-mode/zsh-vi-mode.plugin.z
         bindkey -s '^D' '^ucdi\n'
         bindkey -s '^F' '^ufzffiles\n'
         bindkey -s '^G' '^ulf\n'
-        bindkey -s '^K' '^uhtop\n'
         bindkey -s '^N' '^ulastnvim\n'
         bindkey -s '^O' '^utmo\n'
         bindkey -s '^P' '^ufzfpass\n'
+        bindkey -s '^Q' '^uhtop\n'
         bindkey -s '^T' '^usessionizer\n'
         bindkey -s '^V' '^uv.\n'
         bindkey -s '^Y' '^ulfcd\n'
@@ -180,10 +180,10 @@ if [[ -f "${ZPLUGINDIR:-${HOME}/.local/bin/zsh}/zsh-vi-mode/zsh-vi-mode.plugin.z
         zvm_bind_script viins '^X^D' 'fD'
         zvm_bind_script viins '^X^F' 'gitfiles'
         zvm_bind_script viins '^X^G' 'rgafiles '
-        zvm_bind_script viins '^X^K' 'fpkill'
         zvm_bind_script viins '^X^L' 'gloac'
         zvm_bind_script viins '^X^N' 'lastnvim -l'
         #  zvm_bind_script viins '^X^O' '^u\n'
+        zvm_bind_script viins '^X^Q' 'fpkill'
         zvm_bind_script viins '^X^R' 'fgst'
         zvm_bind_script viins '^X^T' 'gitstagedfiles'
         zvm_bind_script viins '^X^U' 'gitupdate'
@@ -311,10 +311,10 @@ else
     bindkey -s '^D' '^ucdi\n'
     bindkey -s '^F' '^ufzffiles\n'
     bindkey -s '^G' '^ulf\n'
-    bindkey -s '^K' '^uhtop\n'
     bindkey -s '^N' '^ulastnvim\n'
     bindkey -s '^O' '^utmo\n'
     bindkey -s '^P' '^ufzfpass\n'
+    bindkey -s '^Q' '^uhtop\n'
     bindkey -s '^T' '^usessionizer\n'
     bindkey -s '^V' '^uv.\n'
     bindkey -s '^Y' '^ulfcd\n'
@@ -325,10 +325,10 @@ else
     bindkey -s '^X^D' '^ufD\n'
     bindkey -s '^X^F' '^ugitfiles\n'
     bindkey -s '^X^G' '^urgafiles '
-    bindkey -s '^X^K' '^ufpkill\n'
     bindkey -s '^X^L' '^ugloac\n'
     bindkey -s '^X^N' '^ulastnvim -l\n'
     # bindkey -s '^X^O' '^u\n'
+    bindkey -s '^X^Q' '^ufpkill\n'
     bindkey -s '^X^R' '^ufgst\n'
     bindkey -s '^X^T' '^ugitstagedfiles\n'
     bindkey -s '^X^U' '^ugitupdate\n'
