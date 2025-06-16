@@ -51,15 +51,6 @@ return {
 					},
 				},
 				lualine_b = {
-					{
-						function()
-							local ok, neocomposer = pcall(require, "NeoComposer.ui")
-							if ok and neocomposer and neocomposer.status_recording then
-								return neocomposer.status_recording()
-							end
-							return ""
-						end,
-					},
 					"branch",
 					{
 						"diff",
@@ -103,6 +94,15 @@ return {
 						colored = true, -- Displays diagnostics status in color if set to true.
 						update_in_insert = true, -- Update diagnostics in insert mode.
 						always_visible = false, -- Show diagnostics even if there are none.
+					},
+					{
+						function()
+							local ok, neocomposer = pcall(require, "NeoComposer.ui")
+							if ok and neocomposer and neocomposer.status_recording then
+								return neocomposer.status_recording()
+							end
+							return ""
+						end,
 					},
 				},
 				lualine_c = {
