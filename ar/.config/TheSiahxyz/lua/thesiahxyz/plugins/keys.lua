@@ -64,6 +64,7 @@ return {
 					{ "<leader>p", group = "Paste" },
 					{ "<leader>P", group = "Paste" },
 					{ "<leader>q", group = "Quit" },
+					{ "<leader>rn", group = "Rename" },
 					{ "<leader>sk", group = "Keys" },
 					{ "<leader>S", group = "Save/Source" },
 					{ "<leader>w", group = "Which-key" },

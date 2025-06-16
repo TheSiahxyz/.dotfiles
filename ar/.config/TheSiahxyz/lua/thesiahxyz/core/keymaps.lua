@@ -26,7 +26,7 @@ vim.keymap.set({ "n", "v" }, "<leader>wq", "<cmd>wq<cr>", { desc = "Save current
 vim.keymap.set({ "n", "v" }, "<leader>WQ", "<cmd>wqa<cr>", { desc = "Save all buffers and quit" })
 vim.keymap.set({ "n", "v" }, "<leader>qq", "<cmd>q!<cr>", { desc = "Force quit" })
 vim.keymap.set({ "n", "v" }, "<leader>QQ", "<cmd>qa!<cr>", { desc = "Force quit all" })
-vim.keymap.set("n", "<leader>rn", function()
+vim.keymap.set("n", "<leader>rnf", function()
 	local current_name = vim.fn.expand("%:p") -- Get the full path of the current file
 	local directory = vim.fn.expand("%:p:h") -- Get the directory of the current file
 	local new_name = vim.fn.input("New filename: ", directory .. "/") -- Prompt for the new name
