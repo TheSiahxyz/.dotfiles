@@ -3,7 +3,7 @@
 # ialias    - ignored aliases (not completed)
 
 # Use neovim for vim if present.
-[ -x "$(command -v nvim)" ] && alias vimdiff="nvim -d"
+[ -x "$(command -v nvim)" ] && alias vd="nvim -d"
 
 # Use $XINITRC variable if file exists.
 [ -f "$XINITRC" ] && alias startx='startx $XINITRC'

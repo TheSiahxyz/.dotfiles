@@ -169,7 +169,6 @@ if [[ -f "${ZPLUGINDIR:-${HOME}/.local/bin/zsh}/zsh-vi-mode/zsh-vi-mode.plugin.z
         bindkey -s '^P' '^ufzfpass\n'
         bindkey -s '^Q' '^uhtop\n'
         bindkey -s '^T' '^usessionizer\n'
-        bindkey -s '^V' '^uv.\n'
         bindkey -s '^Y' '^ulfcd\n'
         bindkey -s '^Z' '^upd\n'
         # bindkey -s '^_' '^u\n'
@@ -262,7 +261,7 @@ else
     # edit line in vim with ctrl-v in viins and ctrl-e in vicmd
     autoload edit-command-line
     zle -N edit-command-line
-    bindkey '^x^v' edit-command-line          # ctrl-v
+    bindkey '^X^V' edit-command-line        # ctrl-v
     bindkey -M vicmd '^[[P' vi-delete-char  # delete
     bindkey -M vicmd '^e' edit-command-line # ctrl-e
     bindkey -M visual '^[[P' vi-delete      # delete
@@ -316,7 +315,6 @@ else
     bindkey -s '^P' '^ufzfpass\n'
     bindkey -s '^Q' '^uhtop\n'
     bindkey -s '^T' '^usessionizer\n'
-    bindkey -s '^V' '^uv.\n'
     bindkey -s '^Y' '^ulfcd\n'
     bindkey -s '^Z' '^upd\n'
     bindkey -s '^_' '^ucht\n'
