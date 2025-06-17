@@ -60,7 +60,7 @@ for file_path in "${config_files[@]}"; do
     fi
 
     if echo "$line" | grep -q "Keychord"; then
-      line=$(echo "$line" | sed -e "s/&((Keychord){[0-9], {{\(.*\)}),/\1/g;s/^0/MEDIA/g;s/\([MEDIA|WIN|ALT|ULTRA|EXTRA|Shift|Control]\w\+\),\s\(.*\)}},\s\+\(\w\+\),\s\([^,]*\)/\1|\2|\3|\4/g;s/},{[0-9],//g;s/},{//g")
+      line=$(echo "$line" | sed -e "s/&((Keychord){[0-9], {{\(.*\)}),/\1/g;s/^0/MEDIA/g;s/\([MEDIA\|WIN\|ALT\|ULTRA\|EXTRA\|Shift\|Control]\w\+\),\s\(.*\)}},\s\+\(\w\+\),\s\([^,]*\)/\1|\2|\3|\4/g;s/},{0,//g;s/},{\(Shift\|Ctrl\),/\1/g;s/},{//g")
     else
       line=$(echo "$line" | sed -e "s/^{ \(.*\) },/\1/g;s/{ \([^, ]*\), \([^, ]*\), \([^, ]*\), \([^}]*\) }/\1 \2 \3 \4/g;s/,/|/g")
     fi
@@ -70,7 +70,7 @@ for file_path in "${config_files[@]}"; do
                                                           s/ALTKEY/ALT/g;s/ALTMODALL/ALT+Ctrl+Shift/g;s/ALTMOD2/ALT+Ctrl/g;s/ALTMOD/ALT+Shift/g;
                                                           s/ULTRAKEY/WIN+ALT/g;s/ULTRAMODALL/WIN+ALT+Ctrl+Shift/g;s/ULTRAMOD2/WIN+ALT+Ctrl/g;s/ULTRAMOD/WIN+ALT+Shift/g;
                                                           s/EXTRAMOD/Ctrl+Shift/g;
-                                                          s/\([Shift|Control]\)Mask/\1/g;
+                                                          s/\(Shift\|Control\)Mask/\1/g;
                                                           s/Control/Ctrl/g;
                                                           s/ //g;
                                                           s/XK_NO_MOD/NO_MOD/g;
@@ -82,7 +82,7 @@ for file_path in "${config_files[@]}"; do
                                                        s/\s*\(.*\)_R$/Right_\1/g;
                                                        s/\s*\(.*\)_L$/Left_\1/g;
                                                        s/MODKEY\(\d*\)/MOD\1/g;
-                                                       s/\([Shift|Control]\)Mask/\1/g;
+                                                       s/\(Shift\|Control\)Mask[?,]/\<\1\>/g;
                                                        s/Control/Ctrl/g;
                                                        s/space/<space>/g;
                                                        s/BackSpace/<backspace>/g;
