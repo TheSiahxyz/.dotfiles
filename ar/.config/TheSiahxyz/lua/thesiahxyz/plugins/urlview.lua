@@ -78,13 +78,21 @@ return {
 		end
 
 		local actions = require("urlview.actions")
-		actions["firefox_tmux"] = function(url)
-			vim.fn.jobstart({
-				"firefox",
-				"--profile",
-				vim.fn.expand("~/.mozilla/firefox/si.tmux"),
-				url,
-			}, { detach = true })
+		actions["browser_tmux"] = function(url)
+			local browser = vim.env.BROWSER or "firefox"
+			local cmd = { "setsid", "-f", browser }
+
+			if browser:match("firefox") then
+				table.insert(cmd, "--profile")
+				table.insert(cmd, vim.fn.expand("~/.mozilla/firefox/si.tmux"))
+			elseif browser:match("librewolf") then
+				table.insert(cmd, "--profile")
+				table.insert(cmd, vim.fn.expand("~/.librewolf/si.tmux"))
+			end
+
+			table.insert(cmd, url)
+
+			vim.fn.jobstart(cmd, { detach = true })
 		end
 
 		-- Load urlview

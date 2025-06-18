@@ -31,7 +31,7 @@ autocmd("TextYankPost", {
 	end,
 })
 
--- resize splits if window got resized
+-- Resize splits if window got resized
 autocmd({ "VimResized" }, {
 	group = augroup("window_config"),
 	callback = function()
@@ -41,7 +41,7 @@ autocmd({ "VimResized" }, {
 	end,
 })
 
--- go to last loc when opening a buffer
+-- Go to last loc when opening a buffer
 autocmd("BufReadPost", {
 	group = augroup("last_loc"),
 	callback = function(event)
@@ -59,7 +59,7 @@ autocmd("BufReadPost", {
 	end,
 })
 
--- close some filetypes with <q>
+-- Close some filetypes with <q>
 autocmd("FileType", {
 	group = augroup("close_with_q"),
 	pattern = {
@@ -156,6 +156,17 @@ autocmd("BufWritePre", {
 	end,
 })
 
+-- Go to insert mode in terminal
+local win_enter = augroup("win_enter")
+autocmd("WinEnter", {
+	group = win_enter,
+	callback = function()
+		if vim.bo.buftype == "terminal" then
+			vim.cmd("startinsert")
+		end
+	end,
+})
+
 -- Correct email signature delimiter in neomutt files
 autocmd("BufWritePre", {
 	group = file_save,
@@ -233,13 +244,13 @@ vim.api.nvim_create_user_command("SudoWritequit", function()
 end, {})
 
 -- Markdown for specific files and directories
-vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+autocmd({ "BufRead", "BufNewFile" }, {
 	pattern = { "/tmp/calcurse*", "~/.calcurse/notes/*" },
 	command = "set filetype=markdown",
 })
 
 -- Groff for specific file extensions
-vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+autocmd({ "BufRead", "BufNewFile" }, {
 	pattern = { "*.ms", "*.me", "*.mom", "*.man" },
 	callback = function()
 		vim.cmd([[
@@ -254,13 +265,13 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
 })
 
 -- TeX for .tex files
-vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+autocmd({ "BufRead", "BufNewFile" }, {
 	pattern = { "*.tex" },
 	command = "set filetype=tex",
 })
 
 -- When shortcut files are updated, renew bash and lf configs with new material:
-vim.api.nvim_create_autocmd("BufWritePost", {
+autocmd("BufWritePost", {
 	group = augroup("bookmarks"),
 	pattern = { "bm-files", "bm-dirs" },
 	callback = function()
@@ -276,7 +287,7 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 
 -- Source lfrc if it's edited
 local lf_config = augroup("lf_config")
-vim.api.nvim_create_autocmd("BufWritePost", {
+autocmd("BufWritePost", {
 	group = lf_config,
 	pattern = { "lfrc" },
 	callback = function()
@@ -286,7 +297,7 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 
 -- Set vimwiki's index filetype to vimwiki instead of markdown
 local vimwiki_config = augroup("vimwiki_config")
-vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+autocmd({ "BufRead", "BufNewFile" }, {
 	group = vimwiki_config,
 	pattern = vim.fn.expand("~/.local/share/vimwiki") .. "/**/*.md",
 	callback = function(args)
@@ -296,14 +307,14 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
 
 -- Run xrdb whenever Xdefaults or Xresources are updated.
 local x_config = augroup("x_config")
-vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+autocmd({ "BufRead", "BufNewFile" }, {
 	group = x_config,
 	pattern = { "Xresources", "Xdefaults", "xresources", "xdefaults" },
 	callback = function()
 		vim.bo.filetype = "xdefaults"
 	end,
 })
-vim.api.nvim_create_autocmd("BufWritePost", {
+autocmd("BufWritePost", {
 	group = x_config,
 	pattern = { "Xresources", "Xdefaults", "xresources", "xdefaults" },
 	callback = function()
@@ -315,7 +326,7 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 local home = os.getenv("HOME")
 local suckless_config = vim.api.nvim_create_augroup("suckless_config", { clear = true })
 
-vim.api.nvim_create_autocmd("BufWritePost", {
+autocmd("BufWritePost", {
 	group = suckless_config,
 	pattern = home .. "/.local/src/suckless/dmenu/config.def.h",
 	callback = function()
@@ -323,7 +334,7 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 	end,
 })
 
-vim.api.nvim_create_autocmd("BufWritePost", {
+autocmd("BufWritePost", {
 	group = suckless_config,
 	pattern = home .. "/.local/src/suckless/dwmblocks/config.def.h",
 	callback = function()
@@ -335,7 +346,7 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 	end,
 })
 
-vim.api.nvim_create_autocmd("BufWritePost", {
+autocmd("BufWritePost", {
 	group = suckless_config,
 	pattern = home .. "/.local/src/suckless/slock/config.def.h",
 	callback = function()
@@ -344,7 +355,7 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 })
 
 local suckless_keys = augroup("suckless_keys")
-vim.api.nvim_create_autocmd("BufWritePost", {
+autocmd("BufWritePost", {
 	group = suckless_keys,
 	pattern = home .. "/.local/src/suckless/dwm/config.def.h",
 	callback = function()
@@ -352,7 +363,7 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 	end,
 })
 
-vim.api.nvim_create_autocmd("BufWritePost", {
+autocmd("BufWritePost", {
 	group = suckless_keys,
 	pattern = home .. "/.local/src/suckless/st/config.def.h",
 	callback = function()
@@ -360,7 +371,7 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 	end,
 })
 
-vim.api.nvim_create_autocmd("BufWritePost", {
+autocmd("BufWritePost", {
 	group = augroup("suckless_doc"),
 	pattern = home .. "/.local/src/suckless/dwm/thesiah-default.mom",
 	callback = function()
@@ -368,7 +379,7 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 	end,
 })
 
-vim.api.nvim_create_autocmd({ "BufRead", "BufEnter" }, {
+autocmd({ "BufRead", "BufEnter" }, {
 	pattern = { "*.c", "*.cpp", "*.h", "*.hpp" },
 	callback = function()
 		local suckless_path = vim.fn.expand("~/.local/src/suckless"):gsub("/+$", "")
