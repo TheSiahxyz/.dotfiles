@@ -68,8 +68,8 @@ vim.api.nvim_set_keymap(
 )
 function M.create_floating_scratch(content)
 	-- Get editor dimensions
-	local width = vim.api.nvim_get_option("columns")
-	local height = vim.api.nvim_get_option("lines")
+	local width = vim.api.nvim_get_option_value("columns", {})
+	local height = vim.api.nvim_get_option_value("lines", {})
 
 	-- Calculate the floating window size
 	local win_height = math.ceil(height * 0.8) + 2 -- Adding 2 for the border
@@ -81,9 +81,9 @@ function M.create_floating_scratch(content)
 
 	-- Create a buffer and set it as a scratch buffer
 	local buf = vim.api.nvim_create_buf(false, true)
-	vim.api.nvim_buf_set_option(buf, "buftype", "nofile")
-	vim.api.nvim_buf_set_option(buf, "bufhidden", "wipe")
-	vim.api.nvim_buf_set_option(buf, "filetype", "sh") -- for syntax highlighting
+	vim.api.nvim_set_option_value("buftype", "nofile", { buf = buf })
+	vim.api.nvim_set_option_value("bufhidden", "wipe", { buf = buf })
+	vim.api.nvim_set_option_value("filetype", "sh", { buf = buf }) -- for syntax highlighting
 
 	-- Create the floating window with a border and set some options
 	local win = vim.api.nvim_open_win(buf, true, {
@@ -102,8 +102,8 @@ function M.create_floating_scratch(content)
 		vim.api.nvim_buf_set_lines(buf, 0, -1, true, { "This is a scratch buffer in a floating window." })
 	end
 
-	vim.api.nvim_win_set_option(win, "wrap", false)
-	vim.api.nvim_win_set_option(win, "cursorline", true)
+	vim.api.nvim_set_option_value("wrap", false, { win = win })
+	vim.api.nvim_set_option_value("cursorline", true, { win = win })
 
 	-- Map 'q' to close the buffer in this window
 	vim.api.nvim_buf_set_keymap(buf, "n", "q", ":q!<CR>", { noremap = true, silent = true })

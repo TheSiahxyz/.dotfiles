@@ -78,14 +78,14 @@ return function(buf, win, action)
 
 		-- Highlight ASCII art and title
 		for i = 1, #ascii_header do
-			api.nvim_buf_add_highlight(buf, ns, "ThesiahAsciiHeader", i - 1, 0, -1)
+			vim.hl.range(buf, ns, "ThesiahAsciiHeader", { i - 1, 0 }, { i - 1, -1 }, {})
 		end
-		api.nvim_buf_add_highlight(buf, ns, "Title", #ascii + 1, 0, -1)
+		vim.hl.range(buf, ns, "Title", { #ascii + 1, 0 }, { #ascii + 1, -1 }, {})
 
 		-- Highlight section headers
 		local current_line = #ascii + 3 -- Adjust for blank lines and title
 		for section_name, mappings in pairs(state.mappings_tb) do
-			api.nvim_buf_add_highlight(buf, ns, "ThesiahSection", current_line, 0, -1)
+			vim.hl.range(buf, ns, "TheSiahSection", { current_line, 0 }, { current_line, -1 }, {})
 			current_line = current_line + #mappings + 2 -- Count section header, mappings, and blank line
 		end
 
