@@ -20,13 +20,13 @@ count=$#
 
 case "$count" in
 2)
-  ${EDITOR:-nvim} -O +'silent! normal g;' "$@"
+  ${EDITOR:-nvim} -O +'silent! normal g;' "$@" -c 'wincmd t'
   ;;
 3)
-  ${EDITOR:-nvim} -O "$1" -c 'wincmd j' -c "silent! vsplit $2" -c "silent! split $3"
+  ${EDITOR:-nvim} -O "$1" -c 'wincmd j' -c "silent! vsplit $2" -c "silent! split $3" -c 'wincmd t'
   ;;
 4)
-  ${EDITOR:-nvim} -O "$1" -c "silent! vsplit $2" -c "silent! split $3" -c 'wincmd h' -c "silent! split $4"
+  ${EDITOR:-nvim} -O "$1" -c "silent! vsplit $2" -c "silent! split $3" -c 'wincmd h' -c "silent! split $4" -c 'wincmd t'
   ;;
 *)
   ${EDITOR:-nvim} "$@"

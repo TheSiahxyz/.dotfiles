@@ -1,6 +1,8 @@
 local utils = require("mp.utils")
 local mpopts = require("mp.options")
 local assdraw = require("mp.assdraw")
+local user = os.getenv("USER") or "si"
+local home = os.getenv("HOME") or ("/home/" .. user)
 
 ON_WINDOWS = (package.config:sub(1, 1) ~= "/")
 WINDOWS_ROOTDIR = false
@@ -33,12 +35,12 @@ local settings = {
 	--favorites in format { 'Path to directory, notice trailing /' }
 	--on windows use double backslash c:\\my\\directory\\
 	favorites = {
-		"/media/si",
+		"/media/" .. user,
 		"/mnt/second/videos",
-		"/home/si/Downloads",
-		"/home/si/Torrents/complete",
-		"/home/si/Videos",
-		"/home/si/.config/mpv/playlists",
+		home .. "/Downloads",
+		home .. "/Torrents/complete",
+		home .. "/Videos",
+		home .. "/.config/mpv/playlists",
 	},
 	--list of paths to ignore. the value is anything that returns true for if-statement.
 	--directory ignore entries must end with a trailing slash,

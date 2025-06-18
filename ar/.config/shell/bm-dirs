@@ -48,8 +48,8 @@ Esv             /etc/runit/sv
 gdc             ${XDG_DOCUMENTS_DIR:-${HOME}/Documents}
 gdk             ${XDG_DESKTOP_DIR:-${HOME}/Desktop}
 gdn             ${XDG_DOWNLOAD_DIR:-${HOME}/Downloads}
-gfx             $HOME/.mozilla/firefox/si.default
-gkd             ${XDG_DATA_HOME:-${HOME}/.local/share}/kakaotalk/drive_c/users/si/Documents/KakaoTalk-Downloads
+gfx             $HOME/.mozilla/firefox/$USER.default
+gkd             ${XDG_DATA_HOME:-${HOME}/.local/share}/kakaotalk/drive_c/users/$USER/Documents/KakaoTalk-Downloads
 gmu             ${XDG_MUSIC_DIR:-${HOME}/Music}
 gpb             ${XDG_PUBLICSHARE_DIR:-${HOME}/Public}
 gpp             ${XDG_PICTURES_DIR:-${HOME}/Pictures}
@@ -61,7 +61,7 @@ gti             $HOME/Torrents/incomplete
 gtt             $HOME/Torrents
 gvr             ${XDG_VIDEOS_DIR:-${HOME}/Videos}/recordings
 gvv             ${XDG_VIDEOS_DIR:-${HOME}/Videos}
-gwf             $HOME/.librewolf/si.default
+gwf             $HOME/.librewolf/$USER.default
 gwo             ${XDG_DESKTOP_DIR:-${HOME}/Desktop}/Work
 gww             ${XDG_PICTURES_DIR:-${HOME}/Pictures}/wallpaper
 Hbk             /mnt/second/backup
