@@ -100,10 +100,10 @@ project_mode=0
 # Parse the options
 while getopts "silph" opt; do
   case $opt in
-  s) ignore_case_flag="" ;;              # Case-sensitive
-  i) ignore_case_flag="--ignore-case" ;; # Case-insensitive
-  l) list_mode=1 ;;                      # List mode
-  p) project_mode=1 ;;                   # Project mode
+  s) ignore_case_flag="--case-sensitive" ;; # Case-sensitive
+  i) ignore_case_flag="--ignore-case" ;;    # Case-insensitive
+  l) list_mode=1 ;;                         # List mode
+  p) project_mode=1 ;;                      # Project mode
   h) usage ;;
   *) ;;
   esac
