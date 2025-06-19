@@ -1,0 +1,18 @@
+#!/bin/sh
+
+TMUX_DBUS="$DBUS_SESSION_BUS_ADDRESS"
+BROWSER="${BROWSER:-firefox}"
+BROWSER_NAME=$(basename "$BROWSER")
+BROWSER_PID=$(pgrep -f "$BROWSER_NAME" | head -n1)
+
+if [ -z "$BROWSER_PID" ]; then
+  echo "No browser process found matching: $BROWSER_NAME"
+  exit 1
+fi
+
+BROWSER_DBUS=$(tr '\0' '\n' </proc/"$BROWSER_PID"/environ | grep DBUS_SESSION_BUS_ADDRESS)
+BROWSER_DBUS="${BROWSER_DBUS#DBUS_SESSION_BUS_ADDRESS=}"
+
+if [ "$TMUX_DBUS" != "$BROWSER_DBUS" ]; then
+  export DBUS_SESSION_BUS_ADDRESS="$BROWSER_DBUS"
+fi
