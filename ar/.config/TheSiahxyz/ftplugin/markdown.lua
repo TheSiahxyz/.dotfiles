@@ -55,11 +55,11 @@ local function set_foldmethod_expr()
 	-- doesn't have them set
 	if vim.fn.has("nvim-0.10") == 1 then
 		vim.opt.foldmethod = "expr"
-		vim.wo.foldexpr = "v:lua.require'thesiahxyz.utils.markdown'.foldexpr()"
+		vim.wo.foldexpr = "v:lua.require'TheSiahxyz.utils.markdown'.foldexpr()"
 		vim.opt.foldtext = ""
 	else
 		vim.opt.foldmethod = "indent"
-		vim.wo.foldtext = "v:lua.require'thesiahxyz.utils.markdown'.foldexpr()"
+		vim.wo.foldtext = "v:lua.require'TheSiahxyz.utils.markdown'.foldexpr()"
 	end
 	vim.opt.foldlevel = 99
 end
@@ -251,7 +251,7 @@ vim.api.nvim_create_autocmd("FileType", {
 	end,
 })
 
--- This setting makes markdown auto-set the 80 text width limit when typing
+-- this setting makes markdown auto-set the 80 text width limit when typing
 -- vim.cmd('set fo+=a')
 if is_in_obsidian_repo() then
 	vim.bo.textwidth = 175 -- No limit for Obsidian repository
@@ -436,13 +436,13 @@ end, { desc = "Fold all headings level 4 or above" })
 vim.keymap.set(
 	{ "o", "x" },
 	"il",
-	"<cmd>lua require('various-textobjs').mdlink('inner')<CR>",
+	"<Cmd>lua require('various-textobjs').mdlink('inner')<CR>",
 	{ buffer = true, desc = "Link" }
 )
 vim.keymap.set(
 	{ "o", "x" },
 	"al",
-	"<cmd>lua require('various-textobjs').mdlink('outer')<CR>",
+	"<Cmd>lua require('various-textobjs').mdlink('outer')<CR>",
 	{ buffer = true, desc = "Link" }
 )
 
