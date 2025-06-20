@@ -3,7 +3,7 @@
 YTDL_CMD_BASE="yt-dlp --continue --embed-metadata --ignore-errors --no-force-overwrites --no-playlist --verbose"
 
 case "$BROWSER" in
-*firefox* | *qutebrowser*) cookies="firefox" ;;
+*firefox*) cookies="firefox" ;;
 esac
 
 [ -n "$cookies" ] && YTDL_CMD_BASE="$YTDL_CMD_BASE --cookies-from-browser $cookies"
