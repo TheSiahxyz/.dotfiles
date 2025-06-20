@@ -23,7 +23,7 @@ sessionizer() {
 ^x tmux kill
 M-cr open in editor
 ^/ help")' \
-      --preview-window 'right:60%' \
+      --preview-window 'right:45%' \
       --preview 'sesh preview {}'
   )" 2>/dev/null
 

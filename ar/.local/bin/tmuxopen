@@ -42,7 +42,7 @@ get_fzf_output() {
       --reverse \
       --print-query \
       --preview 'bat --style=numbers --color=always --highlight-line {2} {1} 2>/dev/null || echo "Preview not available"' \
-      --preview-window 'up,60%,border-bottom,+{2}+3/3,~3' \
+      --preview-window 'right,45%,border-bottom,+{2}+3/3,~3' \
       --bind "$FILE_BIND" \
       --bind "$RG_BIND" \
       --bind "$DIR_BIND" \
