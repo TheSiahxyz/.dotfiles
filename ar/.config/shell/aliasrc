@@ -308,6 +308,7 @@ command -v pacman > /dev/null 2>&1 && {
   alias -g pcr='pacman -R'
   alias -g pcrs='pacman -Rs'
   alias -g pcclean='pacman -Rsn $(pacman -Qqdt)'
+  alias -g pcky='pacman -Sy archlinux-keyring artix-keyring'
 }
 
 # pass
