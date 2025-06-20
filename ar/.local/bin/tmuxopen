@@ -28,15 +28,15 @@ debug() {
 }
 
 get_fzf_output() {
-  RG_BIND="ctrl-g:reload:rg --line-number --no-heading --color=always --smart-case --glob '!**/.git/**' --glob '!node_modules/**' '' 2>/dev/null || true"
-  FILE_BIND="ctrl-f:reload:rg --files --glob '!**/.git/**' --glob '!node_modules/**' 2>/dev/null || true"
+  RG_BIND="ctrl-g:reload:rg --line-number --follow --no-heading --color=always --smart-case --glob '!**/.git/**' --glob '!node_modules/**' '' 2>/dev/null || true"
+  FILE_BIND="ctrl-f:reload:rg --follow --files --glob '!**/.git/**' --glob '!node_modules/**' 2>/dev/null || true"
   if command -v fd >/dev/null 2>&1; then
-    DIR_BIND="ctrl-d:change-prompt(directory> )+reload(cd \"$HOME\" && echo \"$HOME\"; fd --type d --hidden --absolute-path --color never --exclude .git --exclude node_modules)"
+    DIR_BIND="ctrl-d:change-prompt(directory> )+reload(cd \"$HOME\" && echo \"$HOME\"; fd --follow --type d --hidden --absolute-path --color never --exclude .git --exclude node_modules)"
   else
-    DIR_BIND="ctrl-d:change-prompt(directory> )+reload(cd \"$HOME\" && find \"$HOME\" -type d -name node_modules -prune -o -name .git -prune -o -type d -print)"
+    DIR_BIND="ctrl-d:change-prompt(directory> )+reload(cd \"$HOME\" && find \"$HOME\" -L -type d -name node_modules -prune -o -name .git -prune -o -type d -print)"
   fi
 
-  rg --line-number --no-heading --color=always --smart-case --glob '!**/.git/**' --glob '!LICENSE' '' 2>/dev/null |
+  rg --line-number --follow --no-heading --color=always --smart-case --glob '!**/.git/**' --glob '!LICENSE' '' 2>/dev/null |
     fzf-tmux \
       --ansi --multi --delimiter : \
       --reverse \
