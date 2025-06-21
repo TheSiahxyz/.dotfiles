@@ -63,9 +63,10 @@ endif
 
 " PLUGINS INIT ----------------------------------------------------------- {{{
 
-if filereadable(expand("~/.config/vim/plugins.vim"))
-    silent !mkdir -p ${XDG_CONFIG_HOME:-$HOME/.config}/vim/plugged/
-    source ${XDG_CONFIG_HOME:-$HOME/.config}/vim/plugins.vim
+let config_path = empty($XDG_CONFIG_HOME) ? expand("$HOME/.config") : expand("$XDG_CONFIG_HOME")
+if filereadable(config_path . "/vim/plugins.vim")
+    silent! call mkdir(config_path . "/vim/plugged", "p")
+    execute "source " . config_path . "/vim/plugins.vim"
 endif
 
 " goyo

@@ -160,11 +160,11 @@ return {
 				desc = "Insert image link",
 			},
 			{
-				mode = "i",
 				"]]",
 				function()
 					require("telekasten").insert_link()
 				end,
+				mode = "i",
 				desc = "Insert link",
 			},
 		},

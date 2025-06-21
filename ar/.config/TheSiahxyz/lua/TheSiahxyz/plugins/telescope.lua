@@ -641,7 +641,7 @@ return {
 			})
 
 			-- find
-			vim.keymap.set({ "i", "n" }, "<C-g>", function()
+			vim.keymap.set({ "i", "n" }, "<C-b>", function()
 				require("telescope.builtin").buffers({
 					sort_mru = true,
 					sort_lastused = true,
@@ -661,6 +661,9 @@ return {
 			vim.keymap.set("n", "<leader>fd", function()
 				require("telescope.builtin").find_files({ cwd = vim.fn.expand("~/.dotfiles") })
 			end, { desc = "Find dotfiles files" })
+			vim.keymap.set({ "n", "i" }, "<C-f>", function()
+				require("telescope.builtin").find_files()
+			end, { desc = "Find files" })
 			vim.keymap.set("n", "<leader>ff", function()
 				require("telescope.builtin").find_files()
 			end, { desc = "Find files" })
@@ -981,7 +984,7 @@ return {
 
 			require("telescope").load_extension("frecency")
 
-			vim.keymap.set("n", "<leader>fq", function()
+			vim.keymap.set("n", "<leader>fr", function()
 				require("telescope").extensions.frecency.frecency({
 					workspace = "CWD",
 				})

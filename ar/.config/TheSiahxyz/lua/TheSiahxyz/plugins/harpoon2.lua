@@ -51,29 +51,30 @@ return {
 				desc = "Add buffer to harpoon list",
 			},
 			{
-				"<leader>hi",
+				"<leader>ht",
 				function()
 					require("harpoon"):list():prepend()
 				end,
 				desc = "Prepend buffer to harpoon list",
 			},
 			{
-				"<C-q>",
+				"<C-g>",
 				function()
 					local harpoon = require("harpoon")
 					harpoon.ui:toggle_quick_menu(harpoon:list())
 				end,
+				mode = { "n", "i" },
 				desc = "Open harpoon list menu",
 			},
 			{
-				"<C-S-P>",
+				"<C-p>",
 				function()
 					require("harpoon"):list():prev({ ui_nav_wrap = false })
 				end,
 				desc = "Previous harpoon list",
 			},
 			{
-				"<C-S-N>",
+				"<C-n>",
 				function()
 					require("harpoon"):list():next({ ui_nav_wrap = false })
 				end,

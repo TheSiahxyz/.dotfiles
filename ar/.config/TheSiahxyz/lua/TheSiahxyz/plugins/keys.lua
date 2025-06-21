@@ -83,6 +83,11 @@ return {
 					{ "g;", desc = "Last change" },
 					{ "<leader>Q", group = "Quit all" },
 				},
+				{
+					mode = { "i" },
+					{ "<C-o>", desc = "Execute one command" },
+					{ "<C-r>", desc = "Paste from registers" },
+				},
 			})
 		end,
 		keys = {

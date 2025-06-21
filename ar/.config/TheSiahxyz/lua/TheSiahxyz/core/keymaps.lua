@@ -12,18 +12,26 @@ vim.keymap.set("n", "<leader>a0", ":.!figlet -w 200 -f shadow<cr>", { desc = "As
 
 -- Buffers
 vim.keymap.set({ "n", "v", "x", "t" }, "<A-x>", "<Cmd>bd!<cr>", { desc = "Delete buffer" })
-vim.keymap.set({ "i", "n", "t" }, "<C-p>", "<Cmd>bprevious<cr>", { desc = "Previous buffer" })
-vim.keymap.set({ "i", "n", "t" }, "<C-n>", "<Cmd>bnext<cr>", { desc = "Next buffer" })
+-- vim.keymap.set({ "i", "n", "t" }, "<C-p>", "<Cmd>bprevious<cr>", { desc = "Previous buffer" })
+-- vim.keymap.set({ "i", "n", "t" }, "<C-n>", "<Cmd>bnext<cr>", { desc = "Next buffer" })
 vim.keymap.set({ "n", "t" }, "<S-h>", "<Cmd>bprevious<cr>", { desc = "Previous buffer" })
 vim.keymap.set({ "n", "t" }, "<S-l>", "<Cmd>bnext<cr>", { desc = "Next buffer" })
 vim.keymap.set("n", "<leader><leader>", "<Cmd>e #<cr>", { desc = "Switch to last buffer" })
 vim.keymap.set({ "n", "v", "x", "t" }, "<leader>bd", "<Cmd>:bd<cr>", { desc = "Close buffer" })
 vim.keymap.set({ "n", "v", "x", "t" }, "<leader>BD", "<Cmd>:bd!<cr>", { desc = "Force close buffer" })
 vim.keymap.set("n", "<leader>bn", "<Cmd>enew<cr>", { desc = "Open new buffer" })
-vim.keymap.set("n", "<leader>bc", "<Cmd>e!<cr>", { desc = "Clear edit" })
+vim.keymap.set({ "n", "i" }, "<C-z>", function()
+	if not vim.bo.modified then
+		return
+	end
+	local choice = vim.fn.confirm("Discard changes and reload file?", "&Yes\n&No", 2)
+	if choice == 1 then
+		vim.cmd("e!")
+	end
+end, { desc = "Confirm and reload file" })
 vim.keymap.set({ "i", "x", "n", "s" }, "<C-s>", "<Cmd>w<cr><esc>", { desc = "Save current buffer" })
-vim.keymap.set({ "n", "v" }, "<leader>wq", "<Cmd>wq<cr>", { desc = "Save current buffer and quit" })
-vim.keymap.set({ "n", "v" }, "<leader>WQ", "<Cmd>wqa<cr>", { desc = "Save all buffers and quit" })
+vim.keymap.set({ "n", "v" }, "<leader>ZZ", "<Cmd>wq<cr>", { desc = "Save current buffer and quit" })
+vim.keymap.set({ "n", "v" }, "<leader>ZA", "<Cmd>wqa<cr>", { desc = "Save all buffers and quit" })
 vim.keymap.set({ "n", "v" }, "<leader>qq", "<Cmd>q!<cr>", { desc = "Force quit" })
 vim.keymap.set({ "n", "v" }, "<leader>QQ", "<Cmd>qa!<cr>", { desc = "Force quit all" })
 vim.keymap.set("n", "<leader>rnf", function()
@@ -369,15 +377,6 @@ vim.keymap.set("n", "<leader>cx", "<Cmd>!chmod +x %<cr>", { silent = true, desc 
 
 -- Remap Default
 vim.keymap.set("i", "jk", "<esc>", { noremap = true, silent = true, desc = "Escape to normal mode" })
-vim.keymap.set("i", "<C-c>", "<esc>", { noremap = true, silent = true, desc = "Escape to normal mode" })
-vim.keymap.set("i", "<C-a>", "<home>", { noremap = true, silent = true, desc = "Insert at beginning of line" })
-vim.keymap.set("i", "<C-e>", "<end>", { noremap = true, silent = true, desc = "Move to end of line" })
-vim.keymap.set("i", "<C-h>", "<left>", { noremap = true, silent = true, desc = "Move left" })
-vim.keymap.set("i", "<C-l>", "<right>", { noremap = true, silent = true, desc = "Move right" })
-vim.keymap.set("i", "<C-j>", "<down>", { noremap = true, silent = true, desc = "Move down" })
-vim.keymap.set("i", "<C-k>", "<up>", { noremap = true, silent = true, desc = "Move up" })
-vim.keymap.set("i", "<C-b>", "<up><end><cr>", { noremap = true, silent = true, desc = "New line above" })
-vim.keymap.set("i", "<C-f>", "<end><cr>", { noremap = true, silent = true, desc = "New line below" })
 vim.keymap.set("n", "<C-c>", ":", { noremap = true, desc = "Enter command mode" })
 vim.keymap.set("n", "J", "mzJ`z", { noremap = true, desc = "Join lines and keep cursor position" })
 vim.keymap.set("n", "n", "'Nn'[v:searchforward].'zv'", { expr = true, desc = "Next search result and center" })
@@ -403,8 +402,8 @@ vim.keymap.set("n", "<C-u>", function()
 end, { noremap = true, silent = true, desc = "Scroll up and center" })
 -- vim.keymap.set("n", "<C-d>", "<C-d>zz", { noremap = true, silent = true, desc = "Scroll down and center" })
 -- vim.keymap.set("n", "<C-u>", "<C-u>zz", { noremap = true, silent = true, desc = "Scroll up and center" })
-vim.keymap.set("n", "<C-b>", "<C-b>zz", { noremap = true, silent = true, desc = "Page up and center" })
-vim.keymap.set("n", "<C-f>", "<C-f>zz", { noremap = true, silent = true, desc = "Page down and center" })
+-- vim.keymap.set("n", "<C-b>", "<C-b>zz", { noremap = true, silent = true, desc = "Page up and center" })
+-- vim.keymap.set("n", "<C-f>", "<C-f>zz", { noremap = true, silent = true, desc = "Page down and center" })
 vim.keymap.set("n", "{", "{zz", { noremap = true, silent = true, desc = "Move to previous paragraph and center" })
 vim.keymap.set("n", "}", "}zz", { noremap = true, silent = true, desc = "Move to next paragraph and center" })
 vim.keymap.set("n", "G", "Gzz", { noremap = true, silent = true, desc = "Go to bottom of file and center" })

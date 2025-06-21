@@ -30,7 +30,7 @@ function M.insert_file_path()
 	local action_state = require("telescope.actions.state")
 
 	require("telescope.builtin").find_files({
-		cwd = "~/.config", -- Set the directory to search
+		cwd = vim.fn.getcwd(), -- Set the directory to search
 		attach_mappings = function(_, map)
 			map("i", "<CR>", function(prompt_bufnr)
 				local selected_file = action_state.get_selected_entry(prompt_bufnr).path
@@ -64,7 +64,13 @@ vim.api.nvim_set_keymap(
 	"i",
 	"<C-v>",
 	"<Cmd>lua require('TheSiahxyz.utils.utils').insert_file_path()<cr>",
-	{ noremap = true, silent = true }
+	{ noremap = true, silent = true, desc = "Insert file path/name" }
+)
+vim.api.nvim_set_keymap(
+	"n",
+	"<leader>vf",
+	"<Cmd>lua require('TheSiahxyz.utils.utils').insert_file_path()<cr>",
+	{ noremap = true, silent = true, desc = "Insert file path/name" }
 )
 function M.create_floating_scratch(content)
 	-- Get editor dimensions
