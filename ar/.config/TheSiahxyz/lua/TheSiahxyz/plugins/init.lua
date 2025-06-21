@@ -66,8 +66,8 @@ return {
 				},
 			})
 
-			vim.keymap.set("i", "<C-l>", "<cmd>lua require('tmux').move_left()<cr>", { desc = "Move to left" })
-			vim.keymap.set("i", "<C-h>", "<cmd>lua require('tmux').move_right()<cr>", { desc = "Move to right" })
+			vim.keymap.set("i", "<C-h>", "<cmd>lua require('tmux').move_left()<cr>", { desc = "Move to left" })
+			vim.keymap.set("i", "<C-l>", "<cmd>lua require('tmux').move_right()<cr>", { desc = "Move to right" })
 			vim.keymap.set("i", "<C-j>", "<cmd>lua require('tmux').move_bottom()<cr>", { desc = "Move to bottom" })
 			vim.keymap.set("i", "<C-k>", "<cmd>lua require('tmux').move_top()<cr>", { desc = "Move to top" })
 			vim.keymap.set("n", "<C-left>", function()
