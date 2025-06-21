@@ -357,17 +357,12 @@ autocmd("BufWritePost", {
 local suckless_keys = augroup("suckless_keys")
 autocmd("BufWritePost", {
 	group = suckless_keys,
-	pattern = home .. "/.local/src/suckless/dwm/config.def.h",
+	pattern = { home .. "/.local/src/suckless/dwm/config.def.h", home .. "/.local/src/suckless/st/config.def.h" },
 	callback = function()
-		vim.cmd("silent !" .. home .. "/.local/bin/extractkeys")
-	end,
-})
-
-autocmd("BufWritePost", {
-	group = suckless_keys,
-	pattern = home .. "/.local/src/suckless/st/config.def.h",
-	callback = function()
-		vim.cmd("silent !" .. home .. "/.local/bin/extractkeys")
+		local choice = vim.fn.confirm("Extract key bindings?", "&Yes\n&No", 2)
+		if choice == 1 then
+			vim.cmd("silent !" .. home .. "/.local/bin/extractkeys")
+		end
 	end,
 })
 
