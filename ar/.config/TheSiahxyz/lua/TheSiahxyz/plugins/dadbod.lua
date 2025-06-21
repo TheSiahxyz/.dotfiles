@@ -12,13 +12,13 @@ return {
 	},
 	init = function()
 		-- Your DBUI configuration
-		vim.g.db_ui_use_nerd_fonts = 1
 		local home = vim.fn.expand("~")
+		vim.g.db_ui_use_nerd_fonts = 1
 		vim.g.dbs = {
 			-- firefox = "sqlite://" .. home .. "/.mozilla/firefox/si.default/places.sqlite",
 			-- librewolf = "sqlite://" .. home .. "/.librewolf/si.default/places.sqlite",
-			mysql = "mariadb://ms:password@localhost/mysql",
-			postsql = "postgresql://ps:password@localhost/postgresql",
+			mysql = "mariadb://ms:password@localhost:5432/mysql",
+			postsql = "postgresql://ps:password@localhost:5432/postgresql",
 			-- qutebrowser = "sqlite://" .. home .. "/.local/share/qutebrowser/history.sqlite",
 			-- sqlite = "sqlite://" .. home .. "/.local/share/db/sqlite.db",
 		}
