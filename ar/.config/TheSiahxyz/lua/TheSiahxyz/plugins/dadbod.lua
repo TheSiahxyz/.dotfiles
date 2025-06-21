@@ -16,6 +16,7 @@ return {
 		local home = vim.fn.expand("~")
 		vim.g.dbs = {
 			firefox = "sqlite://" .. home .. "/.mozilla/firefox/si.default/places.sqlite",
+			librewolf = "sqlite://" .. home .. "/.librewolf/si.default/places.sqlite",
 			mysql = "mariadb://user:password@localhost/mysql",
 			postsql = "postgresql://postgres:mypassword@localhost:5432/postgresql",
 			qutebrowser = "sqlite://" .. home .. "/.local/share/qutebrowser/history.sqlite",
