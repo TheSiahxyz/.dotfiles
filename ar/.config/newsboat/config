@@ -1,8 +1,8 @@
-# show-read-feeds no
+# Options
 auto-reload yes
-
 external-url-viewer "urlscan -dc -r 'linkhandler {}'"
 
+# Keys
 bind-key j down
 bind-key k up
 bind-key j next articlelist
@@ -22,6 +22,7 @@ bind-key D pb-download
 bind-key U show-urls
 bind-key x pb-delete
 
+# Macros
 browser linkhandler
 macro a set browser "tsp yt-dlp --embed-metadata -xic -f bestvideo*+bestaudio/best -O after_move:'%(title)s [%(id)s].%(ext)s'" ; open-in-browser ; set browser linkhandler ; -- "Download a file via yt-dlp"
 macro c set browser "clonerepo" ; open-in-browser ; set browser linkhandler ; -- "Clone a git repo"
@@ -39,6 +40,7 @@ macro w set browser "setsid -f $BROWSER" ; open-in-browser ; set browser linkhan
 macro y set browser "echo %u | xclip -r -sel c" ; open-in-browser ; set browser linkhandler ; -- "Copy url to clipboard"
 macro Y set browser "pipe-viewer --comments=%u" ; open-in-browser ; set browser linkhandler -- "Open youtube comments via pipe-viewer"
 
+# Colors
 color listnormal cyan default
 color listfocus black yellow standout bold
 color listnormal_unread blue default
@@ -46,6 +48,7 @@ color listfocus_unread yellow default bold
 color info red black bold
 color article white default bold
 
+# Highlights
 highlight all "---.*---" yellow
 highlight feedlist ".*(0/0))" black
 highlight article "(^Feed:.*|^Title:.*|^Author:.*)" cyan default bold
