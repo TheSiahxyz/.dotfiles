@@ -103,7 +103,7 @@ sk              ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless
 slr             ${XDG_DATA_HOME:-${HOME}/.local/share}/lyrics
 sr              ${XDG_SOURCES_HOME:-${HOME}/.local/src}
 tk              ${XDG_DATA_HOME:-${HOME}/.local/share}/thesiah/keys
-tr              ${XDG_DATA_HOME:-${HOME}/.local/share}/Trash/files
+trs             ${XDG_DATA_HOME:-${HOME}/.local/share}/Trash/files
 ts              ${XDG_DATA_HOME:-${HOME}/.local/share}/thesiah
 tt              ${XDG_STATE_HOME:-${HOME}/.local/state}
 web             ${THESIAH_WWW:-${HOME}/Private/repos/THESIAH}
