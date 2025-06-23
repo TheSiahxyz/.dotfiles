@@ -28,6 +28,7 @@ return {
 					{ "g", group = "Goto" },
 					{ "g`", group = "Marks" },
 					{ "g'", group = "Marks" },
+					{ "gw", group = "Lsp buf" },
 					{ "gs", group = "Search/Surround" },
 					{ "gx", desc = "Open with system app" },
 					{ "s", group = "Surround/Search & replace on line" },
