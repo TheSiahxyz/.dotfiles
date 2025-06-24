@@ -4,5 +4,5 @@ ifinstalled stig transmission-cli || exit 1
 
 ! pidof transmission-daemon >/dev/null && transmission-daemon && notify-send "Starting torrent daemon..."
 
-$TERMINAL -e stig
+"${TERMINAL:-st}" -n stig -e stig
 pkill -RTMIN+22 "${STATUSBAR:-dwmblocks}"
