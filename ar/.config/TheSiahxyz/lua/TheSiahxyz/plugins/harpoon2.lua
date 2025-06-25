@@ -7,6 +7,10 @@ return {
 		},
 		settings = {
 			save_on_toggle = true,
+			sync_on_ui_close = false, -- save over session
+			key = function() -- define how to identify list
+				return vim.loop.cwd()
+			end,
 		},
 	},
 	init = function()
@@ -20,6 +24,7 @@ return {
 	end,
 	config = function(_, opts)
 		local harpoon = require("harpoon")
+		local extensions = require("harpoon.extensions")
 
 		-- Apply the base configuration
 		harpoon.setup(opts)
@@ -40,6 +45,10 @@ return {
 				end, { buffer = cx.bufnr })
 			end,
 		})
+
+		-- Highlight current file
+		harpoon:extend(extensions.builtins.highlight_current_file())
+		harpoon:extend(extensions.builtins.navigate_with_number())
 	end,
 	keys = function()
 		local keys = {
@@ -48,6 +57,7 @@ return {
 				function()
 					require("harpoon"):list():add()
 				end,
+				mode = { "n", "i", "v", "x" },
 				desc = "Add buffer to harpoon list",
 			},
 			{
@@ -55,6 +65,7 @@ return {
 				function()
 					require("harpoon"):list():prepend()
 				end,
+				mode = { "n", "i", "v", "x" },
 				desc = "Prepend buffer to harpoon list",
 			},
 			{
@@ -71,6 +82,7 @@ return {
 				function()
 					require("harpoon"):list():prev({ ui_nav_wrap = false })
 				end,
+				mode = { "n", "i", "v", "x" },
 				desc = "Previous harpoon list",
 			},
 			{
@@ -78,6 +90,7 @@ return {
 				function()
 					require("harpoon"):list():next({ ui_nav_wrap = false })
 				end,
+				mode = { "n", "i", "v", "x" },
 				desc = "Next harpoon list",
 			},
 		}
