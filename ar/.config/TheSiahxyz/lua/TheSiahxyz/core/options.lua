@@ -35,6 +35,7 @@ vim.opt.smartcase = true
 vim.opt.smartindent = true
 vim.opt.softtabstop = 2
 vim.opt.spell = false
+vim.opt.spellfile = vim.fn.stdpath("config") .. "/spell/en.utf-8.add"
 vim.opt.splitbelow = true
 vim.opt.splitright = true
 vim.opt.swapfile = false
