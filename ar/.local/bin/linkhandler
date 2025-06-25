@@ -13,7 +13,7 @@ else
 fi
 
 case "$url" in
-*mkv | *webm | *mp4 | *youtube.com/watch* | *youtube.com/playlist* | *youtube.com/shorts* | *youtu.be* | *hooktube.com* | *bitchute.com* | *videos.lukesmith.xyz* | *odysee.com*)
+*mkv | *webm | *mp4 | *youtube.com/watch* | *youtube.com/playlist* | *youtube.com/shorts* | *youtu.be* | *hooktube.com* | *bitchute.com* | *videos.thesiah.xyz* | *odysee.com*)
   setsid -f mpv -quiet "$url" >/dev/null 2>&1
   ;;
 *png | *jpg | *jpe | *jpeg | *gif | *webp)
@@ -26,6 +26,17 @@ case "$url" in
   qndl "$url" 'curl -LO' >/dev/null 2>&1
   ;;
 *)
-  [ -f "$url" ] && setsid -f "$TERMINAL" -e "$EDITOR" "$url" >/dev/null 2>&1 || setsid -f "$BROWSER" "$url" >/dev/null 2>&1
+  [ -f "$url" ] && setsid -f "${TERMINAL:-st}" -e "$EDITOR" "$url" >/dev/null 2>&1 || {
+    if command -v w3m >/dev/null 2>&1; then
+      w3m "$url"
+      exit
+    elif command -v lynx >/dev/null 2>&1; then
+      lynx "$url"
+      exit
+    else
+      setsid -f "${BROWSER:-firefox}" "$url" >/dev/null 2>&1
+      exit
+    fi
+  }
   ;;
 esac

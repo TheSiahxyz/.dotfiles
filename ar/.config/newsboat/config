@@ -1,5 +1,6 @@
 # Options
 auto-reload yes
+browser linkhandler
 external-url-viewer "urlscan -dc -r 'linkhandler {}'"
 
 # Keys
@@ -23,7 +24,6 @@ bind-key U show-urls
 bind-key x pb-delete
 
 # Macros
-browser linkhandler
 macro a set browser "tsp yt-dlp --embed-metadata -xic -f bestvideo*+bestaudio/best -O after_move:'%(title)s [%(id)s].%(ext)s'" ; open-in-browser ; set browser linkhandler ; -- "Download a file via yt-dlp"
 macro c set browser "clonerepo" ; open-in-browser ; set browser linkhandler ; -- "Clone a git repo"
 macro d set browser "dmenuhandler" ; open-in-browser ; set browser linkhandler ; -- "Open dmenu handler"
