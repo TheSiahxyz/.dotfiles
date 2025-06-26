@@ -56,7 +56,7 @@ xinput list | grep 'id=' | while read -r line; do
       [ -z "$1" ] && xinput set-prop "$mouse" "Coordinate Transformation Matrix" 3, 0, 0, 0, 3, 0, 0, 0, 1 || xinput set-prop "$mouse" "Coordinate Transformation Matrix" $1, 0, 0, 0, $1, 0, 0, 0, 1
       ;;
     *"Glove80 Mouse"*)
-      [ -z "$1" ] && xinput set-prop "$mouse" "Coordinate Transformation Matrix" 3, 0, 0, 0, 3, 0, 0, 0, 1 || xinput set-prop "$mouse" "Coordinate Transformation Matrix" $1, 0, 0, 0, $1, 0, 0, 0, 1
+      [ -z "$1" ] && xinput set-prop "$mouse" "Coordinate Transformation Matrix" 2, 0, 0, 0, 2, 0, 0, 0, 1 || xinput set-prop "$mouse" "Coordinate Transformation Matrix" $1, 0, 0, 0, $1, 0, 0, 0, 1
       ;;
     esac
   }
