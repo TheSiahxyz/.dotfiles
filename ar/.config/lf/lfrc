@@ -473,7 +473,6 @@ map v
 map w
 map y
 map z
-map ,
 
 # Shortcuts
 source ~/.config/lf/shortcutrc
