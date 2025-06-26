@@ -5,18 +5,28 @@
 |_| |_|\___| \_/\_/ |___/_.__/ \___/ \__,_|\__|
 
 newsboat is the RSS reader.
-	j/k - Move down/up
-	l - Open entry
-	h/q - Back/quit
-	Q - Quit immediately
-	J/K - Previous/next feed
-	n - Next unread
-	N - Previous unread
-	a - Toggle article read/unread
-	A - Mark all as read
-	U - Show all URLs
-	,, - Open main link with linkhandler
-	,p - Pick which program to open link with
-	,v - Open video link in mpv
-	,w - Open link in w3m
-	,c - Copy link to clipboard
+    j/k - Move down/up
+    l - Open entry
+    h/q - Back/quit
+    Q - Quit immediately
+    J/K - Previous/next feed
+    n - Next unread
+    N - Previous unread
+    a - Toggle article read/unread
+    A - Mark all as read
+    U - Show all URLs
+    ,a - Download a file via yt-dlp
+    ,c - Clone a git repo
+    ,d - Open dmenu handler
+    ,e - Open newsboat config
+    ,l - Open link in lynx
+    ,m - Play link in mpc
+    ,M - Download a music file via taskspooler
+    ,o - Open link based on types
+    ,t - Peertube torrent 480p
+    ,T - Peertube torrent 1080p
+    ,v - Play a video
+    ,V - Download a video file via taskspooler
+    ,w - Open link in w3m
+    ,y - Copy link to clipboard
+    ,Y - Open youtube comments via pipe-viewer
