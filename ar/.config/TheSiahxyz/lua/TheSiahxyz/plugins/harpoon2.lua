@@ -78,7 +78,7 @@ return {
 				desc = "Open harpoon list menu",
 			},
 			{
-				"<C-p>",
+				"<C-S-P>",
 				function()
 					require("harpoon"):list():prev({ ui_nav_wrap = false })
 				end,
@@ -86,7 +86,7 @@ return {
 				desc = "Previous harpoon list",
 			},
 			{
-				"<C-n>",
+				"<C-S-N>",
 				function()
 					require("harpoon"):list():next({ ui_nav_wrap = false })
 				end,

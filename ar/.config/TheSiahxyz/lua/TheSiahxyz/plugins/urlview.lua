@@ -77,24 +77,6 @@ return {
 			return urls
 		end
 
-		local actions = require("urlview.actions")
-		actions["browser_tmux"] = function(url)
-			local cmd
-
-			if vim.env.TMUX then
-				local dbus_script = vim.fn.expand("~/.local/bin/tmuxdbussync")
-				cmd = {
-					"zsh",
-					"-lc",
-					string.format("source %s && setsid -f xdg-open %q", dbus_script, url),
-				}
-			else
-				cmd = { "setsid", "-f", "xdg-open", url }
-			end
-
-			vim.fn.jobstart(cmd, { detach = true })
-		end
-
 		-- Load urlview
 		require("urlview").setup({
 			-- Prompt title (`<context> <default_title>`, e.g. `Buffer Links:`)
@@ -107,7 +89,7 @@ return {
 			-- Command or method to open links with
 			-- Options: "netrw", "system" (default OS browser), "clipboard"; or "firefox", "chromium" etc.
 			-- By default, this is "netrw", or "system" if netrw is disabled
-			default_action = actions.browser_tmux,
+			default_action = "netrw",
 			-- Set the register to use when yanking
 			-- Default: + (system clipboard)
 			default_register = "+",

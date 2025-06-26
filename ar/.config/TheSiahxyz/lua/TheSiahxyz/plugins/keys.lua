@@ -71,6 +71,7 @@ return {
 					{ "<leader>w", group = "Which-key" },
 					{ "<leader>W", group = "Save all" },
 					{ "<leader>z", group = "Toggle" },
+					{ "<leader>Z", group = "All buffer" },
 					{ "<leader><tab>", group = "Tabs" },
 					{ "<localleader>", group = "Local Leader (bookmarks)" },
 					{ "<localleader><leader>", group = "Bookmarks (explorer)" },

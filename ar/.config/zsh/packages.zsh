@@ -6,6 +6,7 @@ packages=(
     atuin "--disable-up-arrow"
     batman "--export-env"
     zoxide "--cmd cd --hook prompt"
+    tmuxdbussync ""
 )
 
 ### --- Eval Function --- ###
