@@ -12,10 +12,8 @@ vim.keymap.set("n", "<leader>a0", ":.!figlet -w 200 -f shadow<cr>", { desc = "As
 
 -- Buffers
 vim.keymap.set({ "n", "v", "x", "t" }, "<A-x>", "<Cmd>bd!<cr>", { desc = "Delete buffer" })
--- vim.keymap.set({ "i", "n", "t" }, "<C-p>", "<Cmd>bprevious<cr>", { desc = "Previous buffer" })
--- vim.keymap.set({ "i", "n", "t" }, "<C-n>", "<Cmd>bnext<cr>", { desc = "Next buffer" })
-vim.keymap.set({ "n", "t" }, "<S-h>", "<Cmd>bprevious<cr>", { desc = "Previous buffer" })
-vim.keymap.set({ "n", "t" }, "<S-l>", "<Cmd>bnext<cr>", { desc = "Next buffer" })
+vim.keymap.set({ "i", "n", "t" }, "<C-p>", "<Cmd>bprevious<cr>", { desc = "Previous buffer" })
+vim.keymap.set({ "i", "n", "t" }, "<C-n>", "<Cmd>bnext<cr>", { desc = "Next buffer" })
 vim.keymap.set("n", "<leader><leader>", "<Cmd>e #<cr>", { desc = "Switch to last buffer" })
 vim.keymap.set({ "n", "v", "x", "t" }, "<leader>bd", "<Cmd>:bd<cr>", { desc = "Close buffer" })
 vim.keymap.set({ "n", "v", "x", "t" }, "<leader>BD", "<Cmd>:bd!<cr>", { desc = "Force close buffer" })
