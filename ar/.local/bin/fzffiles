@@ -10,7 +10,14 @@ IFS='
 # Get the list of selected files with key bindings for specific paths
 files=$(fzf-tmux \
   --header "^a pwd ^b public ^d .dotfiles ^f configs ^g git ^h home ^k desktop ^r scripts ^s suckless ^u staged files ^v private ^/ help" \
-  --preview 'if [ -d {} ]; then exa --color=always --long --all --header --icons --git {}; elif [ -L {} ]; then file -h {}; else bat --color=always --style=header,grid --line-range=:500 {}; fi' \
+  --preview "target=\$(readlink -f {}) &&
+    if [ -d \"\$target\" ]; then
+      exa --color=always --long --all --header --icons --git \"\$target\"
+    elif [ -f \"\$target\" ]; then
+      bat --color=always --style=header,grid --line-range=:500 \"\$target\"
+    else
+      file -h {}
+    fi" \
   --reverse \
   --query="$1" \
   --multi \

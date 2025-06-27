@@ -1,5 +1,5 @@
 #!/bin/sh
 
-if [ -n "$FIFO_UEBERZUG" ]; then
-  printf '{"action": "remove", "identifier": "PREVIEW"}\n' >"$FIFO_UEBERZUG"
+if [ -n "$FIFO_UEBERZUGPP" ]; then
+  printf '{"action": "remove", "identifier": "PREVIEW"}\n' >"$FIFO_UEBERZUGPP"
 fi
