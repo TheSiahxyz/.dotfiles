@@ -132,7 +132,7 @@ smbshares="$(echo "$smbshares" | sed '/^$/d')"
     mountedsmb="${mountedsmb%% *}"
     [[ "$mountedsmb" =~ $smb ]] && break 1
   done && continue 1
-  echo "📡 $smb"
+  echo "📡 ${smb#//*}"
 done)"
 
 # Add all to one variable. If no mountable drives found, exit.
@@ -196,14 +196,14 @@ case "$chosen" in
   notify-send "🍎 iPhone Mounted." "$chosen mounted to $mp."
   ;;
 📡*)
-  chosen="${chosen##* }"
+  chosen="//${chosen##* }"
   path="${chosen##*/}"
   if getmount "/media/$USER/$path"; then
     sudo -A mount -t cifs -o username="$(whoami)",password="$(pass show default/default)" "$chosen" "$mp" 2>/dev/null ||
       sudo -A mount -t cifs -o username="$(whoami)",password="$(pass show default/windows)" "$chosen" "$mp" 2>/dev/null
   else
     notify-send "❌ Failed to mount samba" "$chosen
-Check if $(whoami) is added to samba user list."
+  Check if $(whoami) is added to samba user list."
     sudo rm -rf "$mp"
     exit
   fi
