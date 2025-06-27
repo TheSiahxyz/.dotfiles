@@ -2,9 +2,9 @@
 
 # Define input and output files
 URL="https://unicode.org/Public/emoji/latest/emoji-test.txt"
-INPUT_FILE="${XDG_DATA_HOME:-${HOME}/.local/share}/thesiah/char/emoji_raw"
-TEMP_FILE="${XDG_DATA_HOME:-${HOME}/.local/share}/thesiah/char/emoji_temp"
-OUTPUT_FILE="${XDG_DATA_HOME:-${HOME}/.local/share}/thesiah/char/emoji"
+INPUT_FILE="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/global/.local/share/thesiah/chars/emoji_raw"
+TEMP_FILE="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/global/.local/share/thesiah/chars/emoji_temp"
+OUTPUT_FILE="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/global/.local/share/thesiah/chars/emoji"
 
 # Create the directory for output files if it doesn't exist
 mkdir -p "$(dirname "$INPUT_FILE")"
@@ -39,7 +39,7 @@ awk '
 awk -F'#' '
     {
         if (NF >= 2) {
-            full_data = $2                                 # Extract the emoji and description (after #)
+            full_data = $2                                # Extract the emoji and description (after #)
             gsub(/^[[:space:]]+|[[:space:]]+$/, "", full_data)  # Trim spaces around the entire field
 
             split(full_data, parts, " ")                  # Split into parts by spaces
