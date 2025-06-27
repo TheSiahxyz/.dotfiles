@@ -475,8 +475,7 @@ function lfcd () {
 ###########################################################################################
 ### --- MAN --- ###
 # color man page
-# alias man=batman
-function man() {
+function van() {
     if [[ -z "$@" ]]; then
         if command -v fzf >/dev/null 2>&1; then
             local page=$(command man -k . | fzf --prompt='Man> ' --exit-0 | awk '{print $1}')
@@ -485,10 +484,10 @@ function man() {
             fi
         fi
     else
-        batman "$@"
+        nvim +"Man $@ | only"
     fi
 }
-function batman() {
+function ban() {
     BAT_THEME="ansi" command batman "$@"
     return $?
 }
