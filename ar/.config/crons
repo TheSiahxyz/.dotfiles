@@ -11,4 +11,4 @@
 0 * * * * export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u $USER)/bus; export DISPLAY=:0; . $HOME/.zprofile; /usr/bin/nvim --headless "+MasonUpdate" +qa
 @daily export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u $USER)/bus; export DISPLAY=:0; . $HOME/.zprofile; /usr/bin/trash-empty 30
 @daily export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u $USER)/bus; export DISPLAY=:0; . $HOME/.zprofile; $HOME/.local/bin/cron/mediaup
-@daily export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u $USER)/bus; export DISPLAY=:0; . $HOME/.zprofile; $HOME/.local/bin/taskwarrior-tui/tasks-sync
+@daily export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u $USER)/bus; export DISPLAY=:0; . $HOME/.zprofile; $HOME/.local/bin/task/taskwarrior-tui/tasks-sync
