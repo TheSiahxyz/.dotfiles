@@ -9,7 +9,7 @@ usage() {
   echo "Options:"
   echo "  -d, --ddgr, ddgr    : Use ddgr to search and open the result in a terminal"
   echo "  -h, --help, help    : Display this help message"
-  echo "  <search_engine>     : (Optional) Search engine to use (google, bing, yahoo, duckduckgo, youtube)"
+  echo "  <search_engine>     : (Optional) Search engine to use (bing, duckduckgo, google, naver, yahoo, youtube)"
   echo "  <search_query>      : The search term or query to use"
 }
 
@@ -41,7 +41,7 @@ case "$1" in
 -h | --help | help)
   usage && exit 0
   ;;
-bing | duckduckgo | google | yahoo | youtube)
+bing | duckduckgo | google | naver | yahoo | youtube)
   SEARCH_ENGINE="$1"
   shift # Remove the search engine from the list
   ;;
@@ -67,6 +67,9 @@ web)
     ;;
   duckduckgo)
     base_url="https://duckduckgo.com/?q="
+    ;;
+  naver)
+    base_url="https://search.naver.com/search.naver?query="
     ;;
   searx | *)
     base_url="https://www.searx.thesiah.xyz/search?q="
