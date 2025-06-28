@@ -2,7 +2,7 @@
 "query:0-3 Days:unread = \"yes\" and age between 0:3" "Query"
 "query:Unread:unread = \"yes\" and age >=8" "Query"
 # "query:Read:unread = \"no\"" "Query"
-# "query:Flagged:flags != \"\"" "Query"
+"query:Flagged:flags != \"\"" "Query"
 "query:Media:enclosure_url != \"\" and enclosure_type =~ \"^(audio|video)/\"" "Query"
 "query:Content:content != \"\"" "Query"
 "query:No Content:content = \"\"" "Query"
@@ -12,11 +12,12 @@ https://github.com/TheSiahxyz/.dotfiles/commits/master.atom   "~TheSiahxyz dotfi
 https://github.com/TheSiahxyz/suckless/commits/master.atom    "~TheSiahxyz suckless"  Git
 " "
 "--- News ---"
-http://rss.cnn.com/rss/edition_us.rss               "~US"         News
-http://rss.cnn.com/rss/edition_world.rss            "~World"      News
-https://feeds.bbci.co.uk/news/technology/rss.xml    "~AI"         AI      News
-https://www.archlinux.org/feeds/news/               "~Arch"       Distro  Linux   Tech
-https://artixlinux.org/feed.php                     "~Artix"      Distro  Linux   Tech
+http://rss.cnn.com/rss/edition_us.rss               "~US"                 News
+http://rss.cnn.com/rss/edition_world.rss            "~World"              News
+https://feeds.bbci.co.uk/news/technology/rss.xml    "~AI"                 AI        News
+https://www.koreaherald.com/rss/kh_Business         "~Korean Business"    Business  News
+https://www.archlinux.org/feeds/news/               "~Arch"               Distro    Linux   Tech
+https://artixlinux.org/feed.php                     "~Artix"              Distro    Linux   Tech
 " "
 "--- Blog ---"
 https://lukesmith.xyz/rss.xml "~Luke Smith" Blog
