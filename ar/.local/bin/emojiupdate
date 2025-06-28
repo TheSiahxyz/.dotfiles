@@ -1,5 +1,21 @@
 #!/bin/sh
 
+##
+## For fontawesome icons update, run the command block in terminal.
+##
+# curl -sSL -o icons_raw.json "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/metadata/icons.json" &&
+# jq -r 'to_entries[] | select(.value.unicode) | .value.unicode + " " + .key' "icons_raw.json" |
+# while read -r hex name; do
+#   hex_uc=$(printf '%s' "$hex" | tr '[:lower:]' '[:upper:]')
+#   if [ "${#hex_uc}" -le 4 ]; then
+#     unicode="\\u$hex_uc"
+#   else
+#     unicode="\\U$(printf '%08X' "0x$hex_uc")"
+#   fi
+#
+#   printf "%b  %s; %s\n" "$unicode" "$name" "$hex"
+# done > "${XDG_DOTFILES_DIR:-$HOME/.dotfiles}/global/.local/share/thesiah/chars/icons"
+
 # Define input and output files
 URL="https://unicode.org/Public/emoji/latest/emoji-test.txt"
 INPUT_FILE="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/global/.local/share/thesiah/chars/emoji_raw"
