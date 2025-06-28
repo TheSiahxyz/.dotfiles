@@ -1,11 +1,11 @@
 #!/bin/sh
 
-SSH_KEY_DIR="${PASSWORD_STORE_DIR:-${HOME}/.local/share/.password-store}"
+ssh_key_dir="${PASSWORD_STORE_DIR:-${HOME}/.local/share/.password-store}"
 
 temp_private_keys_list=$(mktemp)
 
 # Ensure that filenames with spaces or other special characters are handled correctly.
-find "$SSH_KEY_DIR" -name "*.pub" | while IFS= read -r pub_file_path; do
+find "$ssh_key_dir" -name "*.pub" | while IFS= read -r pub_file_path; do
   private_key_path="${pub_file_path%.pub}"
   if [ -f "$private_key_path" ]; then
     echo "$(basename "$private_key_path")" >>"$temp_private_keys_list"

@@ -6,7 +6,7 @@ dot_path="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}"
 git_path="$HOME/Private/repos"
 pass_path="${PASSWORD_STORE_DIR:-${XDG_DATA_HOME:-${HOME}/.local/share}/.password-store}/exported_keys"
 suck_path="${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless"
-USER_HOME=$(eval echo ~"$USER")
+user_home=$(eval echo ~"$USER")
 
 # targets
 bash_path="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/ar/.config/bash"
@@ -37,10 +37,10 @@ error() {
 
 mount_luks() {
   if ! mount | grep -q " /mnt/second "; then
-    SIZE_NVME0=$(sudo blockdev --getsize64 /dev/nvme0n1p1)
-    SIZE_NVME1=$(sudo blockdev --getsize64 /dev/nvme1n1p1)
-    [ "$SIZE_NVME1" -lt "$SIZE_NVME0" ] && TARGET_DEVICE="/dev/nvme0n1p1" || TARGET_DEVICE="/dev/nvme1n1p1"
-    ${TERMINAL:-st} -n floatterm -g 60x1 -e sudo cryptsetup open "$TARGET_DEVICE" "second"
+    size_nvme0=$(sudo blockdev --getsize64 /dev/nvme0n1p1)
+    size_nvme1=$(sudo blockdev --getsize64 /dev/nvme1n1p1)
+    [ "$size_nvme1" -lt "$size_nvme0" ] && target_device="/dev/nvme0n1p1" || target_device="/dev/nvme1n1p1"
+    ${TERMINAL:-st} -n floatterm -g 60x1 -e sudo cryptsetup open "$target_device" "second"
     sudo -A mount "/dev/mapper/second" "/mnt/second" -o uid="$(id -u)",gid="$(id -g)" 2>/dev/null || sudo -A mount "/dev/mapper/second" "/mnt/second"
   fi
 }
@@ -70,11 +70,11 @@ sync_root() {
   shortcuts >/dev/null 2>&1
 
   # Modify root's Bash and LF configuration to include user-specific settings
-  echo "[ -f \"$USER_HOME/.config/shell/shortcutrc\" ] && source \"$USER_HOME/.config/shell/shortcutrc\"" | sudo tee -a /root/.config/bash/bashrc >/dev/null 2>&1
-  echo "[ -f \"$USER_HOME/.config/shell/zshnameddirrc\" ] && source \"$USER_HOME/.config/shell/zshnameddirrc\"" | sudo tee -a /root/.config/bash/bashrc >/dev/null 2>&1
-  sudo sed -i "s|source[[:space:]]*\"\?~/.config/lf/shortcutrc\"\?|source \"$USER_HOME/.config/lf/shortcutrc\"|" /root/.config/lf/lfrc >/dev/null 2>&1
+  echo "[ -f \"$user_home/.config/shell/shortcutrc\" ] && source \"$user_home/.config/shell/shortcutrc\"" | sudo tee -a /root/.config/bash/bashrc >/dev/null 2>&1
+  echo "[ -f \"$user_home/.config/shell/zshnameddirrc\" ] && source \"$user_home/.config/shell/zshnameddirrc\"" | sudo tee -a /root/.config/bash/bashrc >/dev/null 2>&1
+  sudo sed -i "s|source[[:space:]]*\"\?~/.config/lf/shortcutrc\"\?|source \"$user_home/.config/lf/shortcutrc\"|" /root/.config/lf/lfrc >/dev/null 2>&1
   sudo grep -q "source \"\?/root/.config/lf/rootshortcutrc\"\?" /root/.config/lf/lfrc ||
-    sudo sed -i "\|source \"\?$USER_HOME/.config/lf/shortcutrc\"\?|a source \"/root/.config/lf/rootshortcutrc\"" /root/.config/lf/lfrc
+    sudo sed -i "\|source \"\?$user_home/.config/lf/shortcutrc\"\?|a source \"/root/.config/lf/rootshortcutrc\"" /root/.config/lf/lfrc
 
   # Final ownership and link adjustments
   sudo chown -R root:root /root/.config/ >/dev/null 2>&1

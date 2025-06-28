@@ -43,11 +43,11 @@ else
 fi
 
 # Shows the current moon phase.
-LOCATION=$(curl -s http://ip-api.com/json | jq -r '[.regionName, .countryCode] | join(",")')
+location=$(curl -s http://ip-api.com/json | jq -r '[.regionName, .countryCode] | join(",")')
 moonfile="${XDG_DATA_HOME:-${HOME}/.local/share}/wallpapers/moonphase"
 
 if [ ! -s "$moonfile" ] || [ "$(stat -c %y "$moonfile" 2>/dev/null | cut -d' ' -f1)" != "$(date '+%Y-%m-%d')" ]; then
-  moon=$(curl -sf "wttr.in/$LOCATION?format=%m")
+  moon=$(curl -sf "wttr.in/$location?format=%m")
   [ -n "$moon" ] && grep -vq 'Unknown location' "$moon" && echo "$moon" >"$moonfile"
 fi
 

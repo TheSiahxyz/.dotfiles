@@ -3,7 +3,7 @@
 # Toggles all cronjobs off/on.
 # Stores disabled crontabs in ~/.config/crons until restored.
 
-CRON_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/crons"
+cron_file="${XDG_CONFIG_HOME:-$HOME/.config}/crons"
 
 # Check if there are any active cronjobs
 if crontab -l 2>/dev/null | grep -q '^[^#[:space:]]'; then
@@ -13,9 +13,9 @@ if crontab -l 2>/dev/null | grep -q '^[^#[:space:]]'; then
   notify-send "⏰ Cronjobs saved and disabled."
 else
   # If no active cronjobs are found, try re-enabling from saved file
-  if [ -f "$CRON_FILE" ]; then
-    crontab - <"$CRON_FILE"
-    rm "$CRON_FILE"
+  if [ -f "$cron_file" ]; then
+    crontab - <"$cron_file"
+    rm "$cron_file"
     notify-send "🕓 Cronjobs re-enabled."
   else
     notify-send "🕰️ No saved cronjobs to re-enable."

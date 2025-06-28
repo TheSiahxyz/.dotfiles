@@ -7,43 +7,43 @@ current_session=$(tmux display-message -p '#S')
 sleep 0.1
 
 # Extract the line number and file path from the input string
-LINE_NUMBER=$(echo "$1" | awk -F ':' '{print $2}')
-FILE_PATH=$(echo "$1" | awk -F ':' '{print $3}')
+line_number=$(echo "$1" | awk -F ':' '{print $2}')
+file_path=$(echo "$1" | awk -F ':' '{print $3}')
 
 # Resolve the file path if it's a symlink
-if [ -L "$FILE_PATH" ]; then
-  FILE_PATH=$(readlink -f "$FILE_PATH")
+if [ -L "$file_path" ]; then
+  file_path=$(readlink -f "$file_path")
 fi
 
-# Use all arguments beyond the first one as the TASK_DESCRIPTION
+# Use all arguments beyond the first one as the task_description
 shift
-TASK_DESCRIPTION="$*"
+task_description="$*"
 
 # If a task description is provided, search for the line number containing that description
-if [ -n "$TASK_DESCRIPTION" ]; then
-  NEW_LINE_NUMBER=$(grep -n -F "$TASK_DESCRIPTION" "$FILE_PATH" | awk -F ':' '{print $1}' | head -n 1)
-  if [ -n "$NEW_LINE_NUMBER" ]; then
-    LINE_NUMBER=$NEW_LINE_NUMBER
+if [ -n "$task_description" ]; then
+  new_line_number=$(grep -n -F "$task_description" "$file_path" | awk -F ':' '{print $1}' | head -n 1)
+  if [ -n "$new_line_number" ]; then
+    line_number=$new_line_number
   fi
 fi
 
 # Capture the file name from the file path without the extension
-FILE_NAME=$(basename "$FILE_PATH" | awk -F '.' '{print $1}')
-DIR_NAME=$(dirname "$FILE_PATH")
+file_name=$(basename "$file_path" | awk -F '.' '{print $1}')
+dir_name=$(dirname "$file_path")
 
 # Check if directory exists
-if [ ! -d "$DIR_NAME" ]; then
+if [ ! -d "$dir_name" ]; then
   exit 1
 fi
 
 # Create a new tmux session which opens the file with neovim at the specific line number
-cd "$DIR_NAME" && tmux new-session -d -s "$FILE_NAME" "nvim +$LINE_NUMBER $FILE_PATH"
+cd "$dir_name" && tmux new-session -d -s "$file_name" "nvim +$line_number $file_path"
 
 # Attach to the new session
-tmux switch-client -t "$FILE_NAME"
+tmux switch-client -t "$file_name"
 
 # Wait for the session to be closed, either by the user or some other way
-while tmux has-session -t "$FILE_NAME" 2>/dev/null; do
+while tmux has-session -t "$file_name" 2>/dev/null; do
   sleep 1
 done
 

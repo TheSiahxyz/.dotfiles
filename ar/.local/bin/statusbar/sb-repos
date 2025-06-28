@@ -3,16 +3,16 @@
 pidof transmission-daemon >/dev/null && exit
 
 # Directories containing Git repositories
-DOTFILES_REPOS="$HOME/.dotfiles"
-SUCKLESS_REPOS="$HOME/.local/src/suckless"
-PRIVATE_REPOS="$HOME/Private/repos"
-PUBLIC_REPOS="$HOME/Public/repos"
+dotfiles_repos="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}"
+suckless_repos="${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless"
+private_repos="$HOME/Private/repos"
+public_repos="${XDG_PUBLICSHARE_DIR:-${HOME}/Public}/repos"
 
 # Icon indicators
-DOTFILES_ICON="⚙️"
-SUCKLESS_ICON="🛠"
-PRIVATE_ICON="🏠"
-PUBLIC_ICON="🏢"
+dotfiles_icon="⚙️"
+suckless_icon="🛠"
+private_icon="🏠"
+public_icon="🏢"
 
 # Function to parse Git status and format symbols
 get_git_status_symbols() {
@@ -91,17 +91,17 @@ check_single_repo_status() {
 }
 
 # Check statuses for repositories
-dotfiles_status=$(check_single_repo_status "$DOTFILES_REPOS" "$DOTFILES_ICON" | awk -F' ' '{print $1}')
-dotfiles_changes=$(check_single_repo_status "$DOTFILES_REPOS" "$DOTFILES_ICON" | awk -F' ' '{print $2}')
+dotfiles_status=$(check_single_repo_status "$dotfiles_repos" "$dotfiles_icon" | awk -F' ' '{print $1}')
+dotfiles_changes=$(check_single_repo_status "$dotfiles_repos" "$dotfiles_icon" | awk -F' ' '{print $2}')
 
-suckless_status=$(check_single_repo_status "$SUCKLESS_REPOS" "$SUCKLESS_ICON" | awk -F' ' '{print $1}')
-suckless_changes=$(check_single_repo_status "$SUCKLESS_REPOS" "$SUCKLESS_ICON" | awk -F' ' '{print $2}')
+suckless_status=$(check_single_repo_status "$suckless_repos" "$suckless_icon" | awk -F' ' '{print $1}')
+suckless_changes=$(check_single_repo_status "$suckless_repos" "$suckless_icon" | awk -F' ' '{print $2}')
 
-private_status=$(check_multi_repo_status "$PRIVATE_REPOS" "$PRIVATE_ICON" | awk -F' ' '{print $1}')
-private_changes=$(check_multi_repo_status "$PRIVATE_REPOS" "$PRIVATE_ICON" | awk -F' ' '{print $2}')
+private_status=$(check_multi_repo_status "$private_repos" "$private_icon" | awk -F' ' '{print $1}')
+private_changes=$(check_multi_repo_status "$private_repos" "$private_icon" | awk -F' ' '{print $2}')
 
-public_status=$(check_multi_repo_status "$PUBLIC_REPOS" "$PUBLIC_ICON" | awk -F' ' '{print $1}')
-public_changes=$(check_multi_repo_status "$PUBLIC_REPOS" "$PUBLIC_ICON" | awk -F' ' '{print $1}')
+public_status=$(check_multi_repo_status "$public_repos" "$public_icon" | awk -F' ' '{print $1}')
+public_changes=$(check_multi_repo_status "$public_repos" "$public_icon" | awk -F' ' '{print $1}')
 
 [ -f /tmp/gitsync ] && rm -f /tmp/gitsync
 

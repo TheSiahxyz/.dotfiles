@@ -4,7 +4,7 @@
 current_session=$(tmux display-message -p '#S')
 
 # Parse the task description from the argument
-TASK_DESCRIPTION="$1"
+task_description="$1"
 
 # Create a new tmux session named 'new-task-session' and run 'tui -r current'
 tmux new-session -d -s new-task-session "taskwarrior-tui -r current"
@@ -13,7 +13,7 @@ tmux new-session -d -s new-task-session "taskwarrior-tui -r current"
 sleep 0.1
 
 # Send the keystrokes needed to filter tasks by description to the target pane
-tmux send-keys -t new-task-session:1.1 "/description:$TASK_DESCRIPTION" C-m
+tmux send-keys -t new-task-session:1.1 "/description:$task_description" C-m
 
 # Attach to the new session
 tmux switch-client -t new-task-session

@@ -30,14 +30,14 @@ wrapper() {
     # Cleanup on exit
     trap "rm -f $tmp_files $tmp_content_query" EXIT
 
-    RG_FIXED_BIND="ctrl-g:transform-query(
+    rg_fixed_bind="ctrl-g:transform-query(
       echo {q} > $tmp_content_query;
       echo {q}
     )+reload(
       rm -f $tmp_files;
       rg --line-number --follow --fixed-strings --hidden --no-heading --color=always --smart-case --glob '!**/.git/**' --glob '!node_modules/**' {q} 2>/dev/null || true
     )"
-    FILE_BIND="ctrl-f:transform-query(
+    file_bind="ctrl-f:transform-query(
       current_query={q};
       if [ ! -s $tmp_content_query ]; then
         echo \$current_query > $tmp_content_query;
@@ -59,9 +59,9 @@ wrapper() {
       fi
     )"
     if command -v fd >/dev/null 2>&1; then
-      DIR_BIND="ctrl-d:change-prompt(📁 )+reload(fd --follow --type d --hidden --absolute-path --color never --exclude .git --exclude node_modules --search-path \"\$PWD\")"
+      dir_bind="ctrl-d:change-prompt(📁 )+reload(fd --follow --type d --hidden --absolute-path --color never --exclude .git --exclude node_modules --search-path \"\$PWD\")"
     else
-      DIR_BIND="ctrl-d:change-prompt(📁 )+reload(find \"\$PWD\" -L -type d -name node_modules -prune -o -name .git -prune -o -type d -print)"
+      dir_bind="ctrl-d:change-prompt(📁 )+reload(find \"\$PWD\" -L -type d -name node_modules -prune -o -name .git -prune -o -type d -print)"
     fi
 
     rg --line-number --follow --no-heading --color=always --smart-case --glob '!**/.git/**' --glob '!LICENSE' '' 2>/dev/null |
@@ -71,9 +71,9 @@ wrapper() {
         --print-query \
         --preview 'bat --style=numbers --color=always --highlight-line {2} {1} 2>/dev/null || bat --color=always {} 2>/dev/null || ls -la {} 2>/dev/null || echo "Preview is not available."' \
         --preview-window 'right,55%,border-bottom,+{2}+3/3,~3' \
-        --bind "$FILE_BIND" \
-        --bind "$RG_FIXED_BIND" \
-        --bind "$DIR_BIND" \
+        --bind "$file_bind" \
+        --bind "$rg_fixed_bind" \
+        --bind "$dir_bind" \
         --bind 'ctrl-c:abort' \
         --header "^f filenames | ^g contents | ^d directories" \
         --prompt "🔎 "

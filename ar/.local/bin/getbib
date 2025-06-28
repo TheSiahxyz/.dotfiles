@@ -1,10 +1,10 @@
 #!/bin/sh
 
-BIB_FILE="${HOME}/latex/uni.bib"
-[ -f "${BIB_FILE}" ] || BIB_FILE="${2:-$(find "${HOME}" -path "${HOME}/.*" \
+bib_file="${HOME}/latex/uni.bib"
+[ -f "${bib_file}" ] || bib_file="${2:-$(find "${HOME}" -path "${HOME}/.*" \
   -prune -o -type "f" -name "*.bib" -print -quit)}"
 
-{ [ -f "${BIB_FILE}" ] || [ "${2}" ]; } || {
+{ [ -f "${bib_file}" ] || [ "${2}" ]; } || {
   printf "%s\n" "Create a .bib file or provide as \$2." && exit "1"
 }
 
@@ -50,11 +50,11 @@ doi2bib() {
     return "1"
   }
 
-  grep -iFq "doi = {${doi}}" "${BIB_FILE}" 2>"/dev/null" && {
+  grep -iFq "doi = {${doi}}" "${bib_file}" 2>"/dev/null" && {
     printf "%s\n" "Bibtex entry for DOI: ${doi} already exists in the file."
   } || {
-    [ -s "${BIB_FILE}" ] && printf "\n" >>"${BIB_FILE}"
-    printf "%s\n" "${entry}" >>"${BIB_FILE}"
+    [ -s "${bib_file}" ] && printf "\n" >>"${bib_file}"
+    printf "%s\n" "${entry}" >>"${bib_file}"
     printf "%s\n" "Added bibtex entry for DOI: ${doi}"
   }
 }

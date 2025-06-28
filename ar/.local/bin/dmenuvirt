@@ -1,28 +1,28 @@
 #!/bin/sh
 
 # Select action
-CHOICE=$(printf "virt-manager\nstart\nshutdown" | dmenu -i -p "Choose an action:")
-[ -z "$CHOICE" ] && exit 1
+choice=$(printf "virt-manager\nstart\nshutdown" | dmenu -i -p "Choose an action:")
+[ -z "$choice" ] && exit 1
 
 # Get list of VMs based on state
-case "$CHOICE" in
+case "$choice" in
 virt-manager) setsid -f virt-manager && exit ;;
-start) VMLIST=$(virsh --connect qemu:///system list --all | awk '/shut off/ {print $2}') ;;
-shutdown) VMLIST=$(virsh --connect qemu:///system list --all | awk '/running/ {print $2}') ;;
+start) vmlist=$(virsh --connect qemu:///system list --all | awk '/shut off/ {print $2}') ;;
+shutdown) vmlist=$(virsh --connect qemu:///system list --all | awk '/running/ {print $2}') ;;
 *) exit 1 ;;
 esac
 
 # Select a VM from the list
-VM=$(printf "%s\n" "$VMLIST" | dmenu -i -p "$CHOICE which VM?")
-[ -z "$VM" ] && exit 1
+vm=$(printf "%s\n" "$vmlist" | dmenu -i -p "$choice which VM?")
+[ -z "$vm" ] && exit 1
 
 # Perform the action
-case "$CHOICE" in
+case "$choice" in
 start)
-  virsh --connect qemu:///system start "$VM" &&
-    setsid -f virt-viewer --connect qemu:///system "$VM" >/dev/null 2>&1
+  virsh --connect qemu:///system start "$vm" &&
+    setsid -f virt-viewer --connect qemu:///system "$vm" >/dev/null 2>&1
   ;;
 shutdown)
-  virsh --connect qemu:///system shutdown "$VM"
+  virsh --connect qemu:///system shutdown "$vm"
   ;;
 esac

@@ -1,9 +1,9 @@
 #!/bin/sh
 
 # Define the profile paths
-WORK_PROFILE="$USER.work"
-HOME_PROFILE="$USER.default"
-TMUX_PROFILE="$USER.tmux"
+work_profile="$USER.work"
+home_profile="$USER.default"
+tmux_profile="$USER.tmux"
 
 usage() {
   echo "Update the default profile in profiles.ini for Firefox or Librewolf."
@@ -18,9 +18,9 @@ usage() {
   echo "                      -l/librewolf"
   echo "  <profile_type>  : (Optional) If not specified, the default profile will be used."
   echo "                    Accepted values:"
-  echo "                      work: Sets the work profile ($WORK_PROFILE)"
-  echo "                      default: Sets the home profile ($HOME_PROFILE)"
-  echo "                      tmux: Sets the home profile ($TMUX_PROFILE)"
+  echo "                      work: Sets the work profile ($work_profile)"
+  echo "                      default: Sets the home profile ($home_profile)"
+  echo "                      tmux: Sets the home profile ($tmux_profile)"
   echo ""
   echo "Examples:"
   echo "  ${0##*/} -f -w    # Set the work profile for Firefox"
@@ -84,13 +84,13 @@ update_profile() {
   # Set the profile based on the input
   case "$profile_type" in
   -w | --work | work)
-    update_profiles_ini "$browser" "$WORK_PROFILE"
+    update_profiles_ini "$browser" "$work_profile"
     ;;
   -d | --default | default)
-    update_profiles_ini "$browser" "$HOME_PROFILE"
+    update_profiles_ini "$browser" "$home_profile"
     ;;
   -t | --tmux | tmux)
-    update_profiles_ini "$browser" "$TMUX_PROFILE"
+    update_profiles_ini "$browser" "$tmux_profile"
     ;;
   *)
     echo "Invalid profile type. Please use 'work' or 'default'."

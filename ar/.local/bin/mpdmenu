@@ -1,7 +1,7 @@
 #!/bin/bash
 
 all_name='[ALL]'
-PLAYLIST_DIR="${XDG_CONFIG_HOME:-${HOME}/.config}/mpd/playlists"
+playlist_dir="${XDG_CONFIG_HOME:-${HOME}/.config}/mpd/playlists"
 
 # Functions
 d_artist() {
@@ -31,7 +31,7 @@ d_title() {
 }
 
 d_playlist() {
-  playlists=$(find "$PLAYLIST_DIR" \( -type f -o -type l \) -name "*.m3u" -exec basename {} .m3u \;)
+  playlists=$(find "$playlist_dir" \( -type f -o -type l \) -name "*.m3u" -exec basename {} .m3u \;)
 
   selected_playlist=$(echo "$playlists" | sort | dmenu -i -p "Select Playlist:" "${dmenu_args[@]}")
 

@@ -26,14 +26,14 @@ if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
   usage
 fi
 
-PASSDIR=${PASSWORD_STORE_DIR:-$HOME/.local/share/.password-store}
-cd "$PASSDIR"
+passdir=${PASSWORD_STORE_DIR:-$HOME/.local/share/.password-store}
+cd "$passdir"
 
 # Unlock the password for this session
 pass show "$(tree -Ffi | grep '.gpg' | sed 's/.gpg$//g' | sed 's/^..//' | head -n 1)" >/dev/null
 
 # Main fzf session
-PASSFILE=$(
+passfile=$(
   tree -Ffi | grep '.gpg' | sed 's/.gpg$//g' | sed 's/^..//' |
     fzf-tmux \
       --header="🔑 Password Manager" \
@@ -57,27 +57,27 @@ fi' < /dev/tty > /dev/tty 2>&1)+reload(tree -Ffi | grep '.gpg' | sed 's/.gpg$//g
       --bind="tab:replace-query"
 )
 
-SHOW_PASSDATA=false
+show_passdata=false
 
 if [ "$1" = "-i" ]; then
-  SHOW_PASSDATA=true
+  show_passdata=true
   shift
 fi
 
-if [ "$SHOW_PASSDATA" = true ]; then
-  PASSDATA="$(pass "$PASSFILE")"
-  echo "$PASSDATA"
+if [ "$show_passdata" = true ]; then
+  passdata="$(pass "$passfile")"
+  echo "$passdata"
 else
-  PASSWORD="$(pass show "$PASSFILE" | head -n 1)"
-  echo "$PASSWORD"
+  password="$(pass show "$passfile" | head -n 1)"
+  echo "$password"
 
-  if [ -n "$PASSWORD" ]; then
+  if [ -n "$password" ]; then
     case "$(uname)" in
     Darwin*)
-      printf "%s" "$PASSWORD" | pbcopy # Use pbcopy on macOS
+      printf "%s" "$password" | pbcopy # Use pbcopy on macOS
       ;;
     Linux*)
-      printf "%s" "$PASSWORD" | xclip -selection clipboard # Use xclip on Linux
+      printf "%s" "$password" | xclip -selection clipboard # Use xclip on Linux
       ;;
     *)
       echo "Unsupported operating system"

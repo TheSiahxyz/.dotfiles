@@ -163,16 +163,16 @@ openinbrowser() {
 }
 
 geturls() {
-  URLS=$(cat ~/.config/qutebrowser/quickmarks ~/.config/qutebrowser/bookmarks/urls ~/.local/share/thesiah/snippets ~/.local/share/thesiah/urls 2>/dev/null)
-  CHOICE=$(echo "$URLS" | grep -v -e '^#' -e '^$' | awk '
+  urls=$(cat ~/.config/qutebrowser/quickmarks ~/.config/qutebrowser/bookmarks/urls ~/.local/share/thesiah/snippets ~/.local/share/thesiah/urls 2>/dev/null)
+  CHOICE=$(echo "$urls" | grep -v -e '^#' -e '^$' | awk '
     {
       if ($1 ~ /^https?:\/\//) { alias = substr($0, index($0, $2)) }  # Case 2: URL first
       else { alias = substr($0, 1, length($0) - length($NF) - 1) }    # Case 1: URL last
       print alias
     }' | dmenu -i -l 50 -p "Choose an alias $1:")
 
-  [ -z "$CHOICE" ] && exit
-  URL=$(echo "$URLS" | grep -v -e '^#' -e '^$' | awk -v choice="$CHOICE" '
+  [ -z "$choice" ] && exit
+  url=$(echo "$urls" | grep -v -e '^#' -e '^$' | awk -v choice="$choice" '
     {
       if ($1 ~ /^https?:\/\//) { url = $1; alias = substr($0, index($0, $2)) }  # Case 2
       else { alias = substr($0, 1, length($0) - length($NF) - 1); url = $NF }    # Case 1
@@ -182,16 +182,16 @@ geturls() {
 
 copytoclipboard() {
   if command -v xclip >/dev/null 2>&1; then
-    printf "%s" "$URL" | xclip -selection clipboard
+    printf "%s" "$url" | xclip -selection clipboard
   elif command -v clipcopy >/dev/null 2>&1; then
-    printf "%s" "$URL" | clipcopy
+    printf "%s" "$url" | clipcopy
   elif command -v xsel >/dev/null 2>&1; then
-    printf "%s" "$URL" | xsel --clipboard --input
+    printf "%s" "$url" | xsel --clipboard --input
   else
     echo "Clipboard utility not found. Install xclip, clipcopy, or xsel." >&2
     exit 1
   fi
-  notify-send "'$CHOICE' copied in clipbaord" "$URL"
+  notify-send "'$choice' copied in clipbaord" "$url"
 }
 
 [ $# -eq 0 ] && usage && exit 1
@@ -204,7 +204,7 @@ while getopts "abchopstv" opt; do
   o) geturls "to open in $BROWSER" && openwindow ;;
   p) geturls "to open in private $BROWSER" && openwindow private ;;
   s) openinbrowser "history" ;;
-  t) geturls "to type under cursor" && xdotool type "$URL" ;;
+  t) geturls "to type under cursor" && xdotool type "$url" ;;
   v) openinbrowser "private bookmark" ;;
   h | *) usage && exit 0 ;;
   esac

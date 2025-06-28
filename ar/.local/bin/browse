@@ -14,8 +14,8 @@ usage() {
 }
 
 # Set default values
-SEARCH_TOOL="web"
-SEARCH_ENGINE="searx"
+search_tool="web"
+search_engine="searx"
 
 # Determine the open command based on the operating system
 case "$(uname -s)" in
@@ -35,35 +35,35 @@ case "$1" in
     echo "Error: ddgr is not installed." >&2
     exit 1
   fi
-  SEARCH_TOOL="ddgr"
+  search_tool="ddgr"
   shift # Remove this argument from the list
   ;;
 -h | --help | help)
   usage && exit 0
   ;;
 bing | duckduckgo | google | naver | yahoo | youtube)
-  SEARCH_ENGINE="$1"
+  search_engine="$1"
   shift # Remove the search engine from the list
   ;;
 esac
 
 # Store the remaining arguments as the search query
-SEARCH_QUERY="$*"
+search_query="$*"
 
 # Ensure a search query is provided; if not, show usage
-[ -z "$SEARCH_QUERY" ] && usage && exit 1
+[ -z "$search_query" ] && usage && exit 1
 
 # Execute the corresponding search tool using case
-case $SEARCH_TOOL in
+case $search_tool in
 ddgr)
   # Run DuckDuckGo search in the terminal
-  setsid -f "$TERMINAL" -e ddgr "$SEARCH_QUERY"
+  setsid -f "$TERMINAL" -e ddgr "$search_query"
   ;;
 web)
   # Construct the URL based on the search engine
-  case "$SEARCH_ENGINE" in
+  case "$search_engine" in
   bing | google | yahoo | youtube)
-    base_url="https://www.${SEARCH_ENGINE}.com/search?q="
+    base_url="https://www.${search_engine}.com/search?q="
     ;;
   duckduckgo)
     base_url="https://duckduckgo.com/?q="
@@ -77,10 +77,10 @@ web)
   esac
 
   # Encode the search query
-  SEARCH_QUERY_ENCODED=$(echo "$SEARCH_QUERY" | sed 's/ /+/g')
+  search_query_encoded=$(echo "$search_query" | sed 's/ /+/g')
 
   # Open the search URL in the default browser
-  $open_cmd "${base_url}${SEARCH_QUERY_ENCODED}"
+  $open_cmd "${base_url}${search_query_encoded}"
   ;;
 *)
   usage && exit 1

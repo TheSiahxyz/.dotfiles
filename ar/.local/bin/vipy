@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Create a new notebook JSON structure
-NOTEBOOK='{
+notebook='{
  "cells": [
   {
    "cell_type": "code",
@@ -36,7 +36,7 @@ NOTEBOOK='{
 [ -z "$1" ] && echo "Enter a file name!" && exit
 
 # Write the JSON to a new .ipynb file
-echo "$NOTEBOOK" >"$1.ipynb"
+echo "$notebook" >"$1.ipynb"
 
 # Check if the file was created successfully
 [ -f "$1.ipynb" ] && echo "$1.ipynb created successfully." || echo "Failed to create a Jupyter Notebook."

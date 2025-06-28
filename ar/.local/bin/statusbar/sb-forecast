@@ -3,7 +3,7 @@
 # Displays today's snow chance (🏂), precipication chance (☔), humidity (💧), wind speed (🎐), and current (feel like) temperature (🌞).
 # Usually intended for the statusbar.
 
-LOCATION=$(curl -s http://ip-api.com/json | jq -r '[.regionName, .countryCode] | join(",")')
+location=$(curl -s http://ip-api.com/json | jq -r '[.regionName, .countryCode] | join(",")')
 
 url="${WTTRURL:-wttr.in}"
 weatherreport="${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport"
@@ -17,13 +17,13 @@ error() {
 
 # Get a weather report from 'wttr.in' and save it locally.
 getweatherreport() {
-  (timeout --signal=1 10s curl -sf "$url/$LOCATION" >"$weatherreport" &&
+  (timeout --signal=1 10s curl -sf "$url/$location" >"$weatherreport" &&
     printf "\nUpdated: %s\n" "$(date '+%Y-%m-%d %H:%M:%S')" >>"$weatherreport") ||
     error "report"
 }
 
 getweatherreportjson() {
-  timeout --signal=1 10s curl -sf "$url/$LOCATION?format=j1" >"$weatherreportjson" ||
+  timeout --signal=1 10s curl -sf "$url/$location?format=j1" >"$weatherreportjson" ||
     error "reportjson"
 }
 

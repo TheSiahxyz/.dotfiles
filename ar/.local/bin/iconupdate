@@ -1,0 +1,19 @@
+#!/bin/bash
+
+icons="${XDG_DOTFILES_DIR:-$HOME/.dotfiles}/global/.local/share/thesiah/chars/icons"
+tmpfile="$(mktemp)"
+
+curl -sSL -o "$tmpfile" "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/metadata/icons.json" || exit 1
+
+while read -r hex name; do
+  hex_uc=$(printf '%s' "$hex" | tr '[:lower:]' '[:upper:]')
+  if [[ ${#hex_uc} -le 4 ]]; then
+    unicode="\\u$hex_uc"
+  else
+    unicode="\\U$(printf '%08X' "0x$hex_uc")"
+  fi
+  printf "%b  %s; %s\n" "$unicode" "$name" "$hex"
+done < <(jq -r 'to_entries[] | select(.value.unicode) | .value.unicode + " " + .key' "$tmpfile") >"$icons"
+
+rm -f "$tmpfile"
+echo "Processing complete! icons saved to: $icons"

@@ -1,44 +1,44 @@
 #!/bin/sh
 
 # Use dmenu to choose a search option
-SEARCH_TOOL=$(printf "Searx\nDuckDuckGo\nWebsite\nYouTube" | dmenu -i -p "Which option?")
+search_tool=$(printf "Searx\nDuckDuckGo\nWebsite\nYouTube" | dmenu -i -p "Which option?")
 
 # Exit if no option is selected
-[ -z "$SEARCH_TOOL" ] && exit 1
+[ -z "$search_tool" ] && exit 1
 
 # Determine the command to execute based on the search tool
-case "$SEARCH_TOOL" in
+case "$search_tool" in
 "Searx")
   # Searx can be run directly in the browser
-  TOOL="browse"
+  tool="browse"
   ;;
 "DuckDuckGo")
   # For DuckDuckGo, run ddgr in the terminal
-  TOOL="$TERMINAL -e browse -d"
+  tool="$TERMINAL -e browse -d"
   ;;
 "Website")
   # Ask the user for the website
-  SITE=$(printf "bing\ngoogle\nnaver\nyahoo\nyoutube" | dmenu -i -p "Which site?")
+  site=$(printf "bing\ngoogle\nnaver\nyahoo\nyoutube" | dmenu -i -p "Which site?")
 
   # Exit if no site is provided
-  [ -z "$SITE" ] && exit 1
+  [ -z "$site" ] && exit 1
 
   # For website searches, run ddgr in the terminal with the website option
-  TOOL="$TERMINAL -e browse $SITE"
+  tool="$TERMINAL -e browse $site"
   ;;
 "YouTube")
-  TOOL="browse -y"
+  tool="browse -y"
   ;;
 *)
-  TOOL="browse"
+  tool="browse"
   ;;
 esac
 
 # Get the search query from the user
-SEARCH_QUERY=$(echo | dmenu -i -p "Search: ")
+search_query=$(echo | dmenu -i -p "Search: ")
 
 # Exit if no search query is provided
-[ -z "$SEARCH_QUERY" ] && exit 1
+[ -z "$search_query" ] && exit 1
 
 # Execute the command
-$TOOL "$SEARCH_QUERY"
+$tool "$search_query"

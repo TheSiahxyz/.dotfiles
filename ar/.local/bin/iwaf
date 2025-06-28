@@ -1,38 +1,38 @@
 #!/bin/sh
 
 _check_wine() {
-  WINE_EXE="$1"
+  wine_exe="$1"
 
-  ls "${WINE_EXE}" >/dev/null 2>/dev/null
+  ls "${wine_exe}" >/dev/null 2>/dev/null
 }
 
 _exec_wine() {
-  WINE_EXE="$1"
-  WINE_EXE2="${WINE_EXE%/*}"
-  WINE_EXE2="${WINE_EXE2}/SOOPStreamer.exe"
+  wine_exe="$1"
+  wine_exe2="${wine_exe%/*}"
+  wine_exe2="${wine_exe2}/SOOPStreamer.exe"
 
   echo 'Executing Soop...'
-  wine "${WINE_EXE}"
-  # wine "${WINE_EXE2}"
+  wine "${wine_exe}"
+  # wine "${wine_exe2}"
 }
 
 _install_wine() {
   # Source URL for the SOOPStreamer installer
-  SRC_URL='https://creatorup.sooplive.co.kr/SOOPStreamer_installer.exe'
+  src_url='https://creatorup.sooplive.co.kr/SOOPStreamer_installer.exe'
 
   # Create a temporary file for the installer
-  DST_FILE="$(mktemp)"
+  dst_file="$(mktemp)"
   # Ensure the temporary file is removed after the script finishes
-  trap 'rm -f "$DST_FILE"' EXIT
+  trap 'rm -f "$dst_file"' EXIT
 
   # Set a temporary HOME for the Wine process to avoid conflicts
-  HOME_ORIGIN="$HOME"
-  HOME_PATCH="$WINEPREFIX/tmp"
-  export HOME="$HOME_PATCH"
+  home_origin="$HOME"
+  home_patch="$WINEPREFIX/tmp"
+  export HOME="$home_patch"
 
   # Download the installer
   echo 'Downloading SOOP Streamer installer...'
-  curl -s "$SRC_URL" -o "$DST_FILE" || {
+  curl -s "$src_url" -o "$dst_file" || {
     echo "Failed to download installer!"
     exit 1
   }
@@ -58,14 +58,14 @@ _install_wine() {
 
   # Run the SOOP Streamer installer without sudo
   echo 'Running the SOOP Streamer installer...'
-  wine "$DST_FILE" /S >/dev/null 2>&1 && success=true || success=false
+  wine "$dst_file" /S >/dev/null 2>&1 && success=true || success=false
 
   # Clean up temporary Wine HOME directory
   echo 'Cleaning up...'
-  rm -rf "$HOME_PATCH"
+  rm -rf "$home_patch"
 
   # Restore original HOME and WINEARCH variables
-  export HOME="$HOME_ORIGIN"
+  export HOME="$home_origin"
 
   # Check success status and print the result
   if $success; then
@@ -84,13 +84,13 @@ main() {
   export WINEPREFIX="${WINEPREFIX:-${XDG_DATA_HOME:-${HOME}/.local/share}/wine}/soop"
 
   # Install
-  WINE_EXE="${WINEPREFIX}/drive_c/users/$(whoami)/AppData/Local/SOOP/SOOPPackage.exe"
-  if ! _check_wine "${WINE_EXE}"; then
-    _install_wine "${WINE_EXE}"
+  wine_exe="${WINEPREFIX}/drive_c/users/$(whoami)/AppData/Local/SOOP/SOOPPackage.exe"
+  if ! _check_wine "${wine_exe}"; then
+    _install_wine "${wine_exe}"
   fi
 
   # Exec
-  _exec_wine "${WINE_EXE}"
+  _exec_wine "${wine_exe}"
 }
 
 main
