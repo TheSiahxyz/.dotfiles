@@ -265,7 +265,7 @@ cmd mpvdir ${{
     [ -n "$1" ] && setsid -f mpv --really-quiet -- "$@"
   fi
 
-  lf -remote "send $id unselect"
+  lf -remote "send $id :clear; unselect; save-select"
 }}
 
 # Open
