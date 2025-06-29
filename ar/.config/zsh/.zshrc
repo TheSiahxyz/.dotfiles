@@ -114,7 +114,7 @@ zstyle ':fzf-tab:*' switch-group ',' '.'    # switch group using `,` and `.`
 [ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/zshnameddirrc" ] && source "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/zshnameddirrc"
 
 if command -v tmux >/dev/null 2>&1 && [ -z "$TMUX" ]; then
-    terminal_count=$(pgrep -u "$USER" -ax "${TERMINAL:-st}" | grep -Ev 'spterm|splf|spcalc|vimwikitodo' | wc -l)
+    terminal_count=$(pgrep -u "$USER" -ax "${TERMINAL:-st}" | grep -Ev 'ncmpcpp|newsboat|pulsemixer|spterm|splf|spcalc|stig|vimwikitodo' | wc -l)
     if [ "$terminal_count" -le 1 ]; then
         if ! tmux has-session 2>/dev/null; then
             exec tmux new-session -s code
