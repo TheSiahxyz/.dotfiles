@@ -859,7 +859,7 @@ return {
 			vim.keymap.set("n", "<leader>sj", function()
 				require("telescope.builtin").jumplist({})
 			end, { desc = "Search jump list" })
-			vim.keymap.set("n", "<leader>skb", function()
+			vim.keymap.set({ "n", "v", "x" }, "<leader>skb", function()
 				require("telescope.builtin").keymaps({})
 			end, { desc = "Search key bindings" })
 			vim.keymap.set("n", "<leader>skk", function()
