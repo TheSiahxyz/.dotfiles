@@ -106,7 +106,14 @@ return {
 			local timestamp = os.date("!%Y-%m-%d_%H-%M-%S") -- Get timestamp
 			local file_name = vim.fn.expand("%:t:r") -- Get the file name without extension
 			local file_extension = vim.fn.expand("%:e")
-			return home_dir .. "/" .. timestamp .. "_" .. file_name .. "_" .. file_extension .. ".png"
+			return home_dir
+				.. "/Pictures/screenshots"
+				.. timestamp
+				.. "_"
+				.. file_name
+				.. "_"
+				.. file_extension
+				.. ".png"
 		end,
 	},
 	keys = {
