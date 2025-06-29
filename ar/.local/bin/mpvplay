@@ -12,7 +12,7 @@ loginurl() {
   username="$(echo | dmenu -i -p "Enter a username:")"
   [ -n "$username" ] && password="$(echo | dmenu -i -P -p "Enter a password:")" || exit
   if [ -n "$username" ] && [ -n "$password" ]; then
-    if ! mpv --ytdl-format='bestvideo[height<=1080]+bestaudio/best[height<=1080]' --ytdl-raw-options=username="$username",password="$password" "$url"; then
+    if ! mpv --x11-name=video --ytdl-format='bestvideo[height<=1080]+bestaudio/best[height<=1080]' --ytdl-raw-options=username="$username",password="$password" "$url"; then
       notify-send "❌ Failed to play $url" "❗ Check your username or password"
       exit 1
     fi
@@ -24,7 +24,7 @@ play_url() {
   [ -n "$url" ] && echo "$url" | grep -E '^https?://' >/dev/null || return 1
   if yt-dlp --simulate --dump-json "$url" >/dev/null 2>&1; then
     notify-send "📽️ Playing video from URL:" "$url"
-    mpv --ytdl-format='bestvideo[height<=1080]+bestaudio/best[height<=1080]' "$url"
+    mpv --x11-name=video --ytdl-format='bestvideo[height<=1080]+bestaudio/best[height<=1080]' "$url"
   else
     loginurl
   fi
@@ -34,14 +34,14 @@ play_media() {
   if echo "$1" | grep -q ".*\.m3u$"; then
     playlist_file="${1#--playlist=}"
     if grep -q "/home/$USER/Private" "$playlist_file"; then
-      mpv "$@" && check_unmount || exit
+      mpv --x11-name=video "$@" && check_unmount || exit
     else
-      $mount_script && mpv "$@" || exit
+      $mount_script && mpv --x11-name=video "$@" || exit
     fi
   elif echo "$1" | grep -q "/home/$USER/Private"; then
-    mpv "$@" && check_unmount || exit
+    mpv --x11-name=video "$@" && check_unmount || exit
   else
-    $mount_script && mpv "$@" || exit
+    $mount_script && mpv --x11-name=video "$@" || exit
   fi
 }
 
@@ -172,9 +172,9 @@ EOF
 
   # Play the file with mpv, resuming from the saved time position
   if [ "$time_pos" -gt 0 ]; then
-    mpv --start="$time_pos" "$file_path"
+    mpv --x11-name=video --start="$time_pos" "$file_path"
   else
-    mpv "$file_path"
+    mpv --x11-name=video "$file_path"
   fi
 }
 

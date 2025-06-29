@@ -44,4 +44,5 @@ mpv --untimed \
   --profile=low-latency \
   --input-conf=/dev/null \
   --title=webcam \
+  --x11-name=webcam \
   $flip "$camera"

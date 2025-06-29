@@ -56,10 +56,34 @@ video() {
   updateicon "⏺️"
 }
 
+webcamselect() {
+  cameras=$(
+    v4l2-ctl --list-devices | awk '
+  BEGIN { RS=""; FS="\n" }
+  {
+    name = $1;
+    sub(/ \(.*$/, "", name);
+    gsub(/^[ \t]+|[ \t]+$/, "", name);
+    for (i=2; i<=NF; i++) {
+      if ($i ~ /\/dev\/video/) {
+        gsub(/^[ \t]+/, "", $i);
+        print name "|" $i;
+        break;
+      }
+    }
+  }'
+  )
+  names=$(echo "$cameras" | cut -d '|' -f1)
+  choice=$(echo "$names" | dmenu -i -p 'Choose a camera:')
+  camera=$(echo "$cameras" | awk -F '|' -v sel="$choice" '$1 == sel {print $2}')
+}
+
 webcamhidef() {
+  [ -z "$camera" ] && exit
   ffmpeg \
+    -display_hflip \
     -f v4l2 \
-    -i /dev/video0 \
+    -i "$camera" \
     -video_size 1920x1080 \
     "$recordings/webcam-$(date '+%y%m%d-%H%M-%S').mkv" &
   echo $! >/tmp/recordingpid
@@ -67,9 +91,11 @@ webcamhidef() {
 }
 
 webcam() {
+  [ -z "$camera" ] && exit
   ffmpeg \
+    -display_hflip \
     -f v4l2 \
-    -i /dev/video0 \
+    -i "$camera" \
     -video_size 640x480 \
     "$recordings/webcam-$(date '+%y%m%d-%H%M-%S').mkv" &
   echo $! >/tmp/recordingpid
@@ -92,8 +118,9 @@ askrecording() {
   audio) audio ;;
   video) video ;;
   *selected) videoselected ;;
-  webcam) webcam ;;
-  "webcam (hi-def)") webcamhidef ;;
+  webcam) webcamselect && webcam ;;
+  "webcam (hi-def)") webcamselect && webcamhidef ;;
+  *) exit ;;
   esac
 }
 

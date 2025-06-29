@@ -257,12 +257,12 @@ cmd moveto ${{
 cmd mpvdir ${{
   if [ -n "$fx" ]; then
     set -- $fx
-    setsid -f mpv --really-quiet -- "$@"
+    setsid -f mpv --x11-name=video --really-quiet -- "$@"
   else
     for file in $(printf '%s\n' *.mp4 *.mkv *.avi *.flv *.webm *.mov *.mpg *.3gp *.ts *.rmvb | sort); do
       [ -e "$file" ] && set -- "$@" "$file"
     done
-    [ -n "$1" ] && setsid -f mpv --really-quiet -- "$@"
+    [ -n "$1" ] && setsid -f mpv --x11-name=video --really-quiet -- "$@"
   fi
 
   lf -remote "send $id :clear; unselect; save-select"
@@ -275,7 +275,7 @@ cmd open ${{
     case ${f##*.} in
     doc|docx|xls|xlsx|odt|ppt|pptx) setsid -f libreoffice $fx >/dev/null 2>&1 ;;
     ghw) setsid -f gtkwave $f >/dev/null 2>&1 ;;
-    ts) setsid -f mpv $f -quiet >/dev/null 2>&1 ;;
+    ts) setsid -f mpv --x11-name=video $f -quiet >/dev/null 2>&1 ;;
     *) setsid -f zathura $fx >/dev/null 2>&1 ;;
     esac
     ;;
@@ -283,7 +283,7 @@ cmd open ${{
   application/pgp-encrypted) $EDITOR $fx ;;
   application/vnd.oasis.opendocument.text|application/vnd.oasis.opendocument.spreadsheet|application/vnd.oasis.opendocument.spreadsheet-template|application/vnd.oasis.opendocument.presentation-template|application/vnd.oasis.opendocument.presentation|application/vnd.ms-powerpoint|application/vnd.oasis.opendocument.graphics|application/vnd.oasis.opendocument.graphics-template|application/vnd.oasis.opendocument.formula|application/vnd.oasis.opendocument.database) setsid -f firefox $fx >/dev/null 2>&1 ;;
   application/x-hwp|application/vnd.openxmlformats-officedocument.presentationml.presentation|application/vnd.openxmlformats-officedocument.wordprocessingml.document) libreoffice $fx ;;
-  audio/*|video/x-ms-asf) mpv --audio-display=no $f ;;
+  audio/*|video/x-ms-asf) mpv --x11-name=music --audio-display=no $f ;;
   image/x-xcf) setsid -f gimp $f >/dev/null 2>&1 ;;
   image/svg+xml) display -- $f ;;
   image/*) rotdir $f | grep -i "\.\(png\|jpg\|jpeg\|gif\|webp\|avif\|tif\|ico\)\(_large\)*$" |
@@ -297,7 +297,7 @@ cmd open ${{
   text/html|text/xml) w3m $fx;;
   text/troff) groff -mom $fx -Tpdf | zathura - ;;
   text/*|application/json|inode/x-empty|application/x-subrip) $EDITOR $fx;;
-  video/*) setsid -f mpv -quiet $f >/dev/null 2>&1 ;;
+  video/*) setsid -f mpv --x11-name=video -quiet $f >/dev/null 2>&1 ;;
 	*) for f in $fx; do setsid -f ${OPENER:-xdg-open} $f >/dev/null 2>&1; done;;
   esac
 }}
