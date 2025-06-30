@@ -530,7 +530,7 @@ c.colors.webpage.darkmode.enabled = True
 ##   - never: Never apply dark mode filter to any images.
 ##   - smart: Apply dark mode based on image content. Not available with Qt 5.15.0.
 ##   - smart-simple: On QtWebEngine 6.6, use a simpler algorithm for smart mode (based on numbers of colors and transparency), rather than an ML-based model. Same as 'smart' on older QtWebEnigne versions.
-c.colors.webpage.darkmode.policy.images = "never"
+c.colors.webpage.darkmode.policy.images = "smart-simple"
 
 ## Which pages to apply dark mode to. The underlying Chromium setting has
 ## been removed in QtWebEngine 5.15.3, thus this setting is ignored
@@ -775,7 +775,7 @@ c.content.blocking.method = "both"
 ##   - no-3rdparty: Accept cookies from the same origin only. This is known to break some sites, such as GMail.
 ##   - no-unknown-3rdparty: Accept cookies from the same origin only, unless a cookie is already set for the domain. On QtWebEngine, this is the same as no-3rdparty.
 ##   - never: Don't accept cookies at all.
-# c.content.cookies.accept = 'all'
+c.content.cookies.accept = "no-3rdparty"
 
 ## Store cookies.
 ## Type: Bool
@@ -2593,4 +2593,4 @@ config.bind(
 config.bind("zs", "config-cycle statusbar.show always never")
 config.bind("zt", "config-cycle tabs.show always never")
 
-config.source("themes/catppuccin.py")
+config.source("themes/gruvbox.py")
