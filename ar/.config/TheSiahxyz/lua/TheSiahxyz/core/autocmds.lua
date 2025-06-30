@@ -330,7 +330,7 @@ autocmd("BufWritePost", {
 	group = suckless_config,
 	pattern = home .. "/.local/src/suckless/dmenu/config.def.h",
 	callback = function()
-		vim.cmd("silent !cd " .. home .. "/.local/src/suckless/dmenu/ && sudo make clean install")
+		vim.cmd("silent !cd " .. home .. "/.local/src/suckless/dmenu/ && sudo make clean install && rm -f config.h")
 	end,
 })
 
@@ -341,7 +341,7 @@ autocmd("BufWritePost", {
 		vim.cmd(
 			"silent !cd "
 				.. home
-				.. "/.local/src/suckless/dwmblocks/ && sudo make clean install && { killall -q dwmblocks; setsid -f dwmblocks; }"
+				.. "/.local/src/suckless/dwmblocks/ && sudo make clean install && rm -f config.h && { killall -q dwmblocks; setsid -f dwmblocks; }"
 		)
 	end,
 })
@@ -350,7 +350,7 @@ autocmd("BufWritePost", {
 	group = suckless_config,
 	pattern = home .. "/.local/src/suckless/slock/config.def.h",
 	callback = function()
-		vim.cmd("silent !cd " .. home .. "/.local/src/suckless/slock/ && sudo make clean install")
+		vim.cmd("silent !cd " .. home .. "/.local/src/suckless/slock/ && sudo make clean install && rm -f config.h")
 	end,
 })
 
