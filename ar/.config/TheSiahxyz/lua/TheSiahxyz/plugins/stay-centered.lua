@@ -7,7 +7,7 @@ return {
 			-- :lua print(vim.bo.filetype)
 			skip_filetypes = {},
 			-- Set to false to disable by default
-			enabled = true,
+			enabled = false,
 			-- allows scrolling to move the cursor without centering, default recommended
 			allow_scroll_move = true,
 			-- temporarily disables plugin on left-mouse down, allows natural mouse selection
@@ -22,7 +22,7 @@ return {
 				require("stay-centered").toggle()
 			end,
 			mode = { "n", "v" },
-			desc = "Toggle stay-centered.nvim",
+			desc = "Toggle stay center",
 		},
 	},
 }
