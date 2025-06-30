@@ -49,7 +49,6 @@ gdc             ${XDG_DOCUMENTS_DIR:-${HOME}/Documents}
 gdk             ${XDG_DESKTOP_DIR:-${HOME}/Desktop}
 gdn             ${XDG_DOWNLOAD_DIR:-${HOME}/Downloads}
 gfx             $HOME/.mozilla/firefox/$USER.default
-gkd             ${XDG_DATA_HOME:-${HOME}/.local/share}/kakaotalk/drive_c/users/$USER/Documents/KakaoTalk-Downloads
 gmu             ${XDG_MUSIC_DIR:-${HOME}/Music}
 gpb             ${XDG_PUBLICSHARE_DIR:-${HOME}/Public}
 gpp             ${XDG_PICTURES_DIR:-${HOME}/Pictures}

@@ -10,6 +10,10 @@
 ##   qute://help/configuring.html
 ##   qute://help/settings.html
 
+# pylint: disable=C0111
+c = c  # noqa: F821 pylint: disable=E0602,C0103
+config = config  # noqa: F821 pylint: disable=E0602,C0103
+
 ## This is here so configs done via the GUI are still loaded.
 ## Remove it to not load settings done via the GUI.
 config.load_autoconfig(True)
@@ -1877,7 +1881,7 @@ c.spellcheck.languages = ["en-US", "ko"]
 ##   - always: Always show the statusbar.
 ##   - never: Always hide the statusbar.
 ##   - in-mode: Show the statusbar when in modes other than normal mode.
-c.statusbar.show = "always"
+c.statusbar.show = "never"
 
 ## List of widgets displayed in the statusbar.
 ## Type: List of StatusbarWidget
@@ -2586,5 +2590,7 @@ config.bind(
     "za",
     "config-cycle statusbar.show always never;; config-cycle tabs.show always never",
 )
-config.bind("zb", "config-cycle statusbar.show always never")
+config.bind("zs", "config-cycle statusbar.show always never")
 config.bind("zt", "config-cycle tabs.show always never")
+
+config.source("themes/catppuccin.py")
