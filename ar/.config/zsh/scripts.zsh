@@ -450,8 +450,10 @@ function fzf_kill_process() {
     awk '{print $2}' |
     xargs -r bash -c '
         if ! kill "$1" 2>/dev/null; then
-            echo "Regular kill failed. Attempting with sudo..."
-            sudo kill "$1" || echo "Failed to kill process $1" >&2
+            if ! kill -9 "$1"; then
+                echo "Regular kill failed. Attempting with sudo..."
+                sudo kill "$1" || echo "Failed to kill process $1" >&2
+            fi
         fi
     ' --
 }

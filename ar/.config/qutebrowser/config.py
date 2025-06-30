@@ -10,6 +10,8 @@
 ##   qute://help/configuring.html
 ##   qute://help/settings.html
 
+import os
+
 # pylint: disable=C0111
 c = c  # noqa: F821 pylint: disable=E0602,C0103
 config = config  # noqa: F821 pylint: disable=E0602,C0103
@@ -2325,7 +2327,7 @@ config.bind("<Ctrl-C>", "cmd-set-text :")
 # config.bind('[[', 'navigate prev')
 # config.bind(']]', 'navigate next')
 # config.bind('`', 'mode-enter set_mark')
-# config.bind('ad', 'download-cancel')
+config.bind("xd", "download-cancel")
 # config.bind('b', 'cmd-set-text -s :quickmark-load')
 # config.bind('cd', 'download-clear')
 # config.bind('co', 'tab-only')
@@ -2423,16 +2425,16 @@ config.bind("<Ctrl-C>", "cmd-set-text :")
 # config.bind('yp', 'yank pretty-url')
 # config.bind('yt', 'yank title')
 # config.bind('yy', 'yank')
-config.bind("YD", "hint yank domain -s")
-config.bind("YM", "hint yank inline [{title}]({url:yank}) -s")
-config.bind("YP", "hint yank pretty-url -s")
-config.bind("YT", "hint yank title -s")
-config.bind("YY", "hint yank -s")
-config.bind("Yd", "hint yank domain")
-config.bind("Ym", "hint yank inline [{title}]({url:yank})")
-config.bind("Yp", "hint yank pretty-url")
-config.bind("Yt", "hint yank title")
-config.bind("Yy", "hint yank")
+config.bind("YD", "hint links yank domain -s")
+config.bind("YM", "hint links yank inline [{title}]({url:yank}) -s")
+config.bind("YP", "hint links yank pretty-url -s")
+config.bind("YT", "hint links yank title -s")
+config.bind("YY", "hint links yank -s")
+config.bind("Yd", "hint links yank domain")
+config.bind("Ym", "hint links yank inline [{title}]({url:yank})")
+config.bind("Yp", "hint links yank pretty-url")
+config.bind("Yt", "hint links yank title")
+config.bind("Yy", "hint links yank")
 # config.bind('{{', 'navigate prev -t')
 # config.bind('}}', 'navigate next -t')
 
@@ -2561,6 +2563,8 @@ config.bind("<Ctrl-]>", "command-history-prev", mode="command")
 # config.bind('y', 'prompt-accept yes', mode='yesno')
 
 ## userscripts
+os.environ["QUTE_POST_CLONE"] = 'notify-send "cloned!" "${QUTE_URL}"'
+config.bind("gc", "spawn -u -- gitclone")
 config.bind(",msg", "open -t qute://log/?level=info")
 config.bind(",nb", "spawn --userscript add-nextcloud-bookmarks")
 config.bind(",nB", "hint links userscript add-nextcloud-bookmarks")
@@ -2579,8 +2583,8 @@ config.bind(",qc", "open -t qute://help/commands.html#cmd-repeat")
 config.bind(",qr", "spawn --userscript qr")
 config.bind(",rs", "restart")
 config.bind(",tk", "spawn --userscript translate --target_lang ko")
-config.bind(",tw", "spawn --userscript translate")
 config.bind(",tk", "spawn --userscript translate --target_lang ko", mode="caret")
+config.bind(",tw", "spawn --userscript translate")
 config.bind(",tw", "spawn --userscript translate", mode="caret")
 config.bind(",vd", "spawn qndl -v {url}")
 config.bind(",vD", "hint links spawn qndl -v {hint-url}")
@@ -2590,7 +2594,92 @@ config.bind(
     "za",
     "config-cycle statusbar.show always never;; config-cycle tabs.show always never",
 )
+c.hints.selectors["code"] = [
+    # Selects all code tags whose direct parent is not a pre tag
+    ":not(pre) > code",
+    "pre",
+]
+config.bind("yc", "hint code userscript code_select")
 config.bind("zs", "config-cycle statusbar.show always never")
 config.bind("zt", "config-cycle tabs.show always never")
+
+session_path = os.path.join(os.environ["HOME"], ".local/share/qutebrowser/sessions/")
+
+# general bind, to manually enter commands, flags and arguments
+config.bind(
+    ",sg",
+    f"cmd-set-text -s :spawn --userscript tab-manager {session_path}",
+)
+
+# append current focused tab to specified session
+config.bind(
+    ",ss",
+    f"cmd-set-text -s :spawn --userscript tab-manager  {session_path} save -f",
+)
+
+# remove
+config.bind(
+    ",sd",
+    f"cmd-set-text -s :spawn --userscript tab-manager {session_path} remove -f",
+)
+
+# save all and overwrite specified session (update session, don't append):
+config.bind(
+    ",sa",
+    f"cmd-set-text -s :spawn --userscript tab-manager  {session_path} save-all -o -f",
+)
+
+# open one or more sessions as HTML, or open index
+config.bind(
+    ",so",
+    f"cmd-set-text -s :spawn --userscript tab-manager  {session_path} open -f",
+)
+
+# restore specified sessions, or the current open HTML file if it is a valid session
+config.bind(
+    ",sr",
+    f"cmd-set-text -s :spawn --userscript tab-manager  {session_path} restore -f",
+)
+
+# restore, same as above but close all open tabs first
+config.bind(
+    ",sR",
+    f"cmd-set-text -s :spawn --userscript tab-manager  {session_path} restore -c -f",
+)
+
+# merge
+config.bind(
+    ",sm",
+    f"cmd-set-text -s :spawn --userscript tab-manager {session_path} merge -f",
+)
+
+# delete session
+config.bind(
+    ",sx",
+    f"cmd-set-text -s :spawn --userscript tab-manager  {session_path} delete -f",
+)
+
+# rename
+config.bind(
+    ",sn",
+    f"cmd-set-text -s :spawn --userscript tab-manager  {session_path} rename -f",
+)
+config.bind(
+    ",sN",
+    f"cmd-set-text -s :spawn --userscript tab-manager  {session_path} rename -f -n",
+)
+
+# export
+config.bind(
+    ",se",
+    f"cmd-set-text -s :spawn --userscript tab-manager  {session_path} export -f",
+)
+config.bind(
+    ",sE",
+    f"cmd-set-text -s :spawn --userscript tab-manager  {session_path} export -f -w",
+)
+
+# open help file
+config.bind(",sh", f"spawn --userscript tab-manager {session_path} help")
 
 config.source("themes/gruvbox.py")

@@ -14,5 +14,5 @@ rssfile="${XDG_CONFIG_HOME:-${HOME}/.config}/newsboat/urls"
 if awk '{print $1}' "$rssfile" | grep "^$url$" >/dev/null; then
   notify-send "You already have this RSS feed."
 else
-  echo "$url" >>"$rssfile" && notify-send "RSS feed added."
+  echo "$url $2" >>"$rssfile" && notify-send "RSS feed added."
 fi
