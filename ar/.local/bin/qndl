@@ -1,12 +1,17 @@
 #!/bin/sh
 
 ytdl_cmd_base="yt-dlp --continue --embed-metadata --ignore-errors --no-force-overwrites --no-playlist --verbose"
+simulation_cmd="yt-dlp --simulate --print %(filename)s"
 
 case "$BROWSER" in
 *firefox*) cookies="firefox" ;;
+*librewolf*) cookies="firefox:~/.librewolf/$USER.default" ;;
+*qutebrowser*) cookies="chromium:~/.local/share/qutebrowser" ;;
 esac
 
-[ -n "$cookies" ] && ytdl_cmd_base="$ytdl_cmd_base --cookies-from-browser $cookies"
+[ -n "$cookies" ] &&
+  ytdl_cmd_base="$ytdl_cmd_base --cookies-from-browser $cookies" &&
+  simulation_cmd="$simulation_cmd --cookies-from-browser $cookies"
 
 shift $((OPTIND - 1))
 
@@ -101,7 +106,7 @@ case $url in
   ;;
 esac
 
-simulation_cmd="yt-dlp --simulate --print %(filename)s $url"
+simulation_cmd="$simulation_cmd $url"
 ytdl_cmd="$ytdl_cmd_base --output \"$ytdl_output_format\" \"$url\""
 
 # Notify and perform simulation to get filename (feedback to user)
