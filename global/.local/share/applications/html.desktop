@@ -1,4 +1,4 @@
 [Desktop Entry]
 Type=Application
 Name=Html Viewer
-Exec=/usr/bin/w3m %u
+Exec=/usr/bin/lynx %u

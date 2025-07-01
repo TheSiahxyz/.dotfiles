@@ -2,6 +2,8 @@
 
 # xdg-open will use these settings to determine how to open filetypes.
 # These .desktop entries can also be seen and changed in ~/.local/share/applications/
+# To add options for mimeopen, add MimeType in .desktop
+# eg. MimeType=text/markdown;text/x-markdown;
 
 application/json=librewolf.desktop;firefox.desktop;
 application/pdf=pdf.desktop;
@@ -20,7 +22,7 @@ image/png=img.desktop;
 image/webp=nsxiv.desktop;
 text/csv=csv.desktop;
 text/html=html.desktop;
-text/markdown=slide.desktop;
+text/markdown=slides.desktop;
 text/plain=text.desktop;
 text/troff=roff.desktop;
 text/x-shellscript=text.desktop;

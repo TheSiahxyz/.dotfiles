@@ -2,6 +2,7 @@
 auto-reload yes
 browser linkhandler
 external-url-viewer "urlscan -dc -r 'linkhandler {}'"
+text-width 80
 
 # Keys
 bind-key j down

@@ -294,7 +294,7 @@ cmd open ${{
     done &
     ;;
   text/csv|application/vnd.openxmlformats-officedocument.spreadsheetml.sheet) sc-im $fx;;
-  text/html|text/xml) w3m $fx;;
+  text/html|text/xml) lynx $fx;;
   text/troff) groff -mom $fx -Tpdf | zathura - ;;
   text/*|application/json|inode/x-empty|application/x-subrip) $EDITOR $fx;;
   video/*) setsid -f mpv --x11-name=video -quiet $f >/dev/null 2>&1 ;;

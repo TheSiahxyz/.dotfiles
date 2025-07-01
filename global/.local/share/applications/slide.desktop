@@ -1,4 +1,5 @@
 [Desktop Entry]
 Type=Application
 Name=Slides Viewer
+MimeType=text/markdown;text/x-markdown;
 Exec=/usr/local/bin/st -e slides %f
