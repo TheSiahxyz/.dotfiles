@@ -148,7 +148,7 @@ def update_index_file(session_path):
 
 # inform of an error, open the usage.txt file in browser, exit the program
 def inform_error(toast):
-    usage_file_path = script_path.replace("tab-manager.py", "usage.txt")
+    usage_file_path = script_path.replace("tab-manager", "usage.txt")
     run_command("open -t file://" + usage_file_path)
     run_command("message-error '" + toast + "'")
     exit()

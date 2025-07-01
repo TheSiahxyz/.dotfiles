@@ -60,7 +60,7 @@ alias pcol=print_col
 function print_col() {
     awk 'BEGIN{
 s="/\\/\\/\\/\\/\\"; s=s s s s s s s s;
-function for (colnum = 0; colnum<77; colnum++) {
+for (colnum = 0; colnum<77; colnum++) {
     r = 255-(colnum*255/76);
     g = (colnum*510/76);
     b = (colnum*255/76);
@@ -71,6 +71,9 @@ function for (colnum = 0; colnum<77; colnum++) {
 }
 printf "\n";
     }'
+}
+function colors() {
+    curl -s https://gist.githubusercontent.com/HaleTom/89ffe32783f89f403bba96bd7bcd1263/raw/ | zsh
 }
 
 
