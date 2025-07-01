@@ -11,12 +11,12 @@ https://github.com/TheSiahxyz/.dotfiles/commits/master.atom           "~TheSiahx
 https://github.com/TheSiahxyz/suckless/commits/master.atom            "~TheSiahxyz suckless"  Git
 " "
 "--- News ---"
-http://rss.cnn.com/rss/edition_us.rss                                 "~US"                   News
-http://rss.cnn.com/rss/edition_world.rss                              "~World"                News
-https://feeds.bbci.co.uk/news/technology/rss.xml                      "~AI"                   AI        News
-https://www.koreaherald.com/rss/kh_Business                           "~Business (KOR)"       Business  News
 https://www.archlinux.org/feeds/news/                                 "~Arch"                 Distro    Linux   Tech
 https://artixlinux.org/feed.php                                       "~Artix"                Distro    Linux   Tech
+https://ftr.thesiah.xyz/makefulltextfeed.php?url=rss.cnn.com%2Frss%2Fedition_us.rss&max=200&links=preserve&exc=&submit=Create+Feed                          "~US"             News
+https://ftr.thesiah.xyz/makefulltextfeed.php?url=rss.cnn.com%2Frss%2Fedition_world.rss&max=200&links=preserve&exc=&submit=Create+Feed                       "~World"          News
+https://ftr.thesiah.xyz/makefulltextfeed.php?url=sec%3A%2F%2Ffeeds.bbci.co.uk%2Fnews%2Ftechnology%2Frss.xml&max=200&links=preserve&exc=&submit=Create+Feed  "~AI"             AI        News
+https://ftr.thesiah.xyz/makefulltextfeed.php?url=sec%3A%2F%2Fwww.koreaherald.com%2Frss%2Fkh_Business&max=200&links=preserve&exc=&submit=Create+Feed         "~Business (KOR)" Business  News
 " "
 "--- Blog ---"
 https://lukesmith.xyz/rss.xml                                         "~Luke Smith"           Blog

@@ -220,7 +220,7 @@ alias gu="gitupdate"
 alias ggg="ssh $THESIAH_GIT"
 alias gis="githubissuesync"
 
-# greb
+# grep
 ialias -g grep='grep --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn}'
 alias grepi='grep -i'
 alias grepr='grep -r'
