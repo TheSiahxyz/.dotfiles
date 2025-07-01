@@ -3,6 +3,7 @@ local function augroup(name)
 end
 
 local autocmd = vim.api.nvim_create_autocmd
+local home = os.getenv("HOME")
 
 -- Change the color of symlink files to distinguish between directory and symlink files
 autocmd("FileType", {
@@ -181,7 +182,10 @@ local function organize_imports()
 		command = "pyright.organizeimports",
 		arguments = { vim.uri_from_bufnr(0) },
 	}
-	vim.lsp.buf.execute_command(params)
+	local clients = vim.lsp.get_clients({ bufnr = 0 })
+	for _, client in ipairs(clients) do
+		client:exec_cmd(params, { bufnr = 0 })
+	end
 end
 
 autocmd("LspAttach", {
@@ -323,9 +327,7 @@ autocmd("BufWritePost", {
 })
 
 -- Recompile suckless programs on config edit.
-local home = os.getenv("HOME")
 local suckless_config = vim.api.nvim_create_augroup("suckless_config", { clear = true })
-
 autocmd("BufWritePost", {
 	group = suckless_config,
 	pattern = home .. "/.local/src/suckless/dmenu/config.def.h",

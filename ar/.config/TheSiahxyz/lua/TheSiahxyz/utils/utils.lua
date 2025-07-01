@@ -115,4 +115,33 @@ function M.create_floating_scratch(content)
 	vim.api.nvim_buf_set_keymap(buf, "n", "q", ":q!<CR>", { noremap = true, silent = true })
 end
 
+function M.scrollRight(cols)
+	cols = cols or 10
+	vim.wo.wrap = false
+	for _ = 1, cols do
+		vim.cmd("normal! zl")
+	end
+end
+
+function M.scrollLeft(cols)
+	cols = cols or 10
+	vim.wo.wrap = false
+	for _ = 1, cols do
+		vim.cmd("normal! zh")
+	end
+end
+
+vim.api.nvim_set_keymap(
+	"n",
+	"H",
+	"<Cmd>lua require('TheSiahxyz.utils.utils').scrollLeft()<cr>",
+	{ noremap = true, silent = true, desc = "Scroll left" }
+)
+vim.api.nvim_set_keymap(
+	"n",
+	"L",
+	"<Cmd>lua require('TheSiahxyz.utils.utils').scrollRight()<cr>",
+	{ noremap = true, silent = true, desc = "Scroll right" }
+)
+
 return M
