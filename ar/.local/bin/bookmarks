@@ -8,11 +8,11 @@ usage() {
   echo "Options:"
   echo "  -h        : Show this message"
   echo "  -b        : Open a browser bookmark"
-  echo "  -c        : Copy a URL from snippets/URLs to the clipboard"
-  echo "  -o        : Get a URL from snippets/URLs and open it in a new browser window"
-  echo "  -p        : Get a URL from snippets/URLs and open it in a private browser window"
+  echo "  -c        : Copy a URL from snippets/urls to the clipboard"
+  echo "  -o        : Get a URL from snippets/urls and open it in a new browser window"
+  echo "  -p        : Get a URL from snippets/urls and open it in a private browser window"
   echo "  -s        : Open browser history"
-  echo "  -t        : Get a URL from snippets/URLs and type it using xdotool"
+  echo "  -t        : Get a URL from snippets/urls and type it using xdotool"
   echo "  -v        : Open a browser bookmark in private browser window"
   echo ""
   echo "Programs:"
@@ -22,8 +22,8 @@ usage() {
   echo ""
   echo "Examples:"
   echo "  ${0##*/} -b         # Opens a browser bookmark in a program"
-  echo "  ${0##*/} -c         # Copies a URL from snippets/URLs to the clipboard"
-  echo "  ${0##*/} -o         # Opens a URL from snippets/URLs in a new browser window"
+  echo "  ${0##*/} -c         # Copies a URL from snippets/urls to the clipboard"
+  echo "  ${0##*/} -o         # Opens a URL from snippets/urls in a new browser window"
   echo "  ${0##*/} -p         # Opens a URL in a private browser window"
   echo "  ${0##*/} -s         # Opens browser history in a program"
   echo "  ${0##*/} -v         # Opens browser boomark in private browser window"
@@ -70,13 +70,13 @@ opentool() {
 openwindow() {
   if [ "$1" = "private" ]; then
     case "$BROWSER" in
-    *qutebrowser*) "$BROWSER" --target private-window "$URL" ;;
-    *firefox* | *librewolf*) "$BROWSER" --private-window "$URL" ;;
+    *qutebrowser*) "$BROWSER" --target private-window "$url" ;;
+    *firefox* | *librewolf*) "$BROWSER" --private-window "$url" ;;
     esac
   else
     case "$BROWSER" in
-    *qutebrowser*) "$BROWSER" --target window "$URL" ;;
-    *firefox* | *librewolf*) "$BROWSER" --new-window "$URL" ;;
+    *qutebrowser*) "$BROWSER" --target window "$url" ;;
+    *firefox* | *librewolf*) "$BROWSER" --new-window "$url" ;;
     esac
   fi
 }
@@ -164,7 +164,7 @@ openinbrowser() {
 
 geturls() {
   urls=$(cat ~/.config/qutebrowser/quickmarks ~/.config/qutebrowser/bookmarks/urls ~/.local/share/thesiah/snippets ~/.local/share/thesiah/urls 2>/dev/null)
-  CHOICE=$(echo "$urls" | grep -v -e '^#' -e '^$' | awk '
+  choice=$(echo "$urls" | grep -v -e '^#' -e '^$' | awk '
     {
       if ($1 ~ /^https?:\/\//) { alias = substr($0, index($0, $2)) }  # Case 2: URL first
       else { alias = substr($0, 1, length($0) - length($NF) - 1) }    # Case 1: URL last
