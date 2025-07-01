@@ -283,7 +283,7 @@ cmd open ${{
   application/pgp-encrypted) $EDITOR $fx ;;
   application/vnd.oasis.opendocument.text|application/vnd.oasis.opendocument.spreadsheet|application/vnd.oasis.opendocument.spreadsheet-template|application/vnd.oasis.opendocument.presentation-template|application/vnd.oasis.opendocument.presentation|application/vnd.ms-powerpoint|application/vnd.oasis.opendocument.graphics|application/vnd.oasis.opendocument.graphics-template|application/vnd.oasis.opendocument.formula|application/vnd.oasis.opendocument.database) setsid -f firefox $fx >/dev/null 2>&1 ;;
   application/x-hwp|application/vnd.openxmlformats-officedocument.presentationml.presentation|application/vnd.openxmlformats-officedocument.wordprocessingml.document) libreoffice $fx ;;
-  audio/*|video/x-ms-asf) mpv --x11-name=music --audio-display=no $f ;;
+  audio/*|video/x-ms-asf) setsid -f mpv --volume=50 --x11-name=music --force-window=yes --audio-display=embedded-first $f >/dev/null 2>&1 ;;
   image/x-xcf) setsid -f gimp $f >/dev/null 2>&1 ;;
   image/svg+xml) display -- $f ;;
   image/*) rotdir $f | grep -i "\.\(png\|jpg\|jpeg\|gif\|webp\|avif\|tif\|ico\)\(_large\)*$" |

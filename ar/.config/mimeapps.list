@@ -5,6 +5,7 @@
 # To add options for mimeopen, add MimeType in .desktop
 # eg. MimeType=text/markdown;text/x-markdown;
 
+audio/flac=music.desktop;
 application/json=librewolf.desktop;firefox.desktop;
 application/pdf=pdf.desktop;
 application/postscript=pdf.desktop;

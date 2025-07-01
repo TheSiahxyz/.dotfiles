@@ -28,6 +28,43 @@ killrecording() {
   pkill -RTMIN+24 "${STATUSBAR:-dwmblocks}"
 }
 
+getmonitor() {
+  xrandr | awk '
+    /^[^ ]+ connected/ {
+      name=$1
+      if (match($0, /([0-9]+)x([0-9]+)\+([0-9]+)\+([0-9]+)/, a)) {
+        printf "%s %s %s+%s\n", name, a[1] "x" a[2], a[3], a[4]
+      }
+    }
+  '
+}
+
+selectmonitor() {
+  map=$(getmonitor)
+  [ -n "$map" ] || exit 1
+
+  names=$(printf "%s\n" "$map" | awk '{print $1}')
+  monitor_count=$(printf "%s\n" "$names" | wc -l)
+
+  if [ "$monitor_count" -ge 2 ]; then
+    options=$(printf "%s\nall" "$names")
+    choice=$(printf "%s\n" "$options" | dmenu -p "Select monitor to record:")
+    [ -n "$choice" ] || exit 1
+
+    if [ "$choice" = "all" ]; then
+      echo "all"
+    else
+      line=$(printf "%s\n" "$map" | awk -v mon="$choice" '$1 == mon')
+      [ -n "$line" ] || exit 1
+      res=$(echo "$line" | awk '{print $2}')
+      pos=$(echo "$line" | awk '{print $3}')
+      echo "$res+$pos"
+    fi
+  else
+    echo "all"
+  fi
+}
+
 screencast() {
   ffmpeg -y \
     -f x11grab \
@@ -44,6 +81,27 @@ screencast() {
   updateicon "⏺️🎙️"
 }
 
+screencastselected() {
+  geometry=$(selectmonitor) || exit 1
+  if [ "$geometry" = "all" ]; then
+    screencast
+  else
+    ffmpeg -y \
+      -f x11grab \
+      -framerate 30 \
+      -video_size "${geometry%%+*}" \
+      -i "$DISPLAY+${geometry#*+}" \
+      -r 24 \
+      -use_wallclock_as_timestamps 1 \
+      -f alsa -thread_queue_size 1024 -i default \
+      -c:v h264 \
+      -crf 0 -preset ultrafast -c:a aac \
+      "$recordings/screencast-$(date '+%y%m%d-%H%M-%S').mp4" &
+    echo $! >/tmp/recordingpid
+    updateicon "⏺️🎙️"
+  fi
+}
+
 video() {
   ffmpeg \
     -f x11grab \
@@ -52,6 +110,22 @@ video() {
     -i "$DISPLAY" \
     -c:v libx264 -qp 0 -r 30 \
     "$recordings/video-$(date '+%y%m%d-%H%M-%S').mkv" &
+  echo $! >/tmp/recordingpid
+  updateicon "⏺️"
+}
+
+videoselected() {
+  slop -f "%x %y %w %h" >/tmp/slop
+  read -r X Y W H </tmp/slop
+  rm /tmp/slop
+
+  ffmpeg \
+    -f x11grab \
+    -framerate 30 \
+    -video_size "$W"x"$H" \
+    -i :0.0+"$X,$Y" \
+    -c:v libx264 -qp 0 -r 30 \
+    "$recordings/box-$(date '+%y%m%d-%H%M-%S').mkv" &
   echo $! >/tmp/recordingpid
   updateicon "⏺️"
 }
@@ -112,12 +186,13 @@ audio() {
 }
 
 askrecording() {
-  choice=$(printf "screencast\\nvideo\\nvideo selected\\naudio\\nwebcam\\nwebcam (hi-def)" | dmenu -i -p "Select recording style:")
+  choice=$(printf "screencast\\nscreencast selected\\nvideo\\nvideo selected\\naudio\\nwebcam\\nwebcam (hi-def)" | dmenu -i -p "Select recording style:")
   case "$choice" in
   screencast) screencast ;;
+  "screencast selected") screencastselected ;;
   audio) audio ;;
   video) video ;;
-  *selected) videoselected ;;
+  "video selected") videoselected ;;
   webcam) webcamselect && webcam ;;
   "webcam (hi-def)") webcamselect && webcamhidef ;;
   *) exit ;;
@@ -125,24 +200,9 @@ askrecording() {
 }
 
 asktoend() {
-  response=$(printf "No\\nYes" | dmenu -i -p "Recording still active. End recording?") &&
-    [ "$response" = "Yes" ] && killrecording
-}
-
-videoselected() {
-  slop -f "%x %y %w %h" >/tmp/slop
-  read -r X Y W H </tmp/slop
-  rm /tmp/slop
-
-  ffmpeg \
-    -f x11grab \
-    -framerate 30 \
-    -video_size "$W"x"$H" \
-    -i :0.0+"$X,$Y" \
-    -c:v libx264 -qp 0 -r 30 \
-    "$recordings/box-$(date '+%y%m%d-%H%M-%S').mkv" &
-  echo $! >/tmp/recordingpid
-  updateicon "⏺️"
+  response=$(printf "No\\nYes" | dmenu -i -p "Recording still active. End recording?")
+  [ -z "$response" ] && exit
+  [ "$response" = "Yes" ] && killrecording
 }
 
 recordings="${XDG_VIDEOS_DIR:-$HOME/Videos}/recordings"
@@ -153,7 +213,8 @@ case "$1" in
 -a | --audio | audio) audio ;;
 -k | --kill | kill) killrecording ;;
 -s | --screencast | screencast) screencast ;;
+-ss | --screencast-selected | "screencast selected") screencastselected ;;
 -v | --video | video) video ;;
-*selected) videoselected ;;
+-vs | --video-selected | "video selected") videoselected ;;
 *) ([ -f /tmp/recordingpid ] && asktoend && exit) || askrecording ;;
 esac
