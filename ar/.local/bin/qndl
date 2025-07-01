@@ -106,7 +106,7 @@ case $url in
   ;;
 esac
 
-simulation_cmd="$simulation_cmd $url"
+simulation_cmd="$simulation_cmd --cookies-from-browser $cookies $url"
 ytdl_cmd="$ytdl_cmd_base --output \"$ytdl_output_format\" \"$url\""
 
 # Notify and perform simulation to get filename (feedback to user)
