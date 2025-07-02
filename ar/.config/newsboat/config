@@ -65,6 +65,6 @@ highlight article "^Feed:.*$" color13 default
 highlight article "^Title:.*$" color11 default bold
 highlight article "^Author:.*$" color14 default
 highlight article "^Date:.*$" default default
-highlight article "^Links:\\ $" color5 default
+highlight article "^Links:\\ *$" color5 default
 highlight article "^Link:.*$" color12 default
 highlight article "(mailto|ftp)?:?\\ ?[a-zA-Z0-9]+@[a-zA-Z0-9]+.?[a-zA-Z0-9]*.?[a-zA-Z0-9]*" color3 default
