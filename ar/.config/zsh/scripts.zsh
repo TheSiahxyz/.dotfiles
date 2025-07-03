@@ -543,7 +543,7 @@ function change_nvim_config_dir() {
     local target_cache="${XDG_CACHE_HOME:-$HOME/.cache}/nvim"             # Neovim"s cache directory
 
     # Explicitly list your configuration options
-    local configs=("Default" "TheSiahxyz" "NvChad" "LazyVim")
+    local configs=("Default" "TheSiahxyz" "AstroNvim" "LazyVim" "LunarVim" "NvChad")
     local selected_dir=$(printf "%s\n" "${configs[@]}" | fzf --cycle --prompt=" Neovim Config  " --height 50% --layout=reverse --border --exit-0)
 
     # Check if a configuration was selected
@@ -551,6 +551,7 @@ function change_nvim_config_dir() {
 
     # Default configuration
     if [[ $selected_dir == "Default" ]]; then
+        selected_dir="kickstart"
         echo "Clearing the Neovim configuration directory..."
         rm -rf "$target_dir" "$target_share" "$target_state" "$target_cache" &>/dev/null
         echo "Switched to the base Neovim configuration."
@@ -583,17 +584,18 @@ function change_nvim_config_dir() {
         return 3
     fi
 
-    if [ "$whereami" = "artix" ]; then
+    if [ "$whereami" = "ar" ]; then
         chown -R "$USER:wheel" "/home/$USER/.config/nvim"
     fi
 }
 
 # run nvim with target config
-alias vtc=nvim_target_config
+alias vnf=nvim_target_config
 function nvim_target_config() {
-    items=("Default" "TheSiahxyz" "LazyVim" "NvChad")
+    items=("Default" "TheSiahxyz" "AstroNvim" "LazyVim" "LunarVim" "NvChad")
     config=$(printf "%s\n" "${items[@]}" | fzf --cycle --prompt=" Neovim Config  " --height=~50% --layout=reverse --border --exit-0)
     [[ -z $config ]] && return 0
+    [[ $config == "Default" ]] && config="kickstart"
     NVIM_APPNAME=$config nvim $@
 }
 
