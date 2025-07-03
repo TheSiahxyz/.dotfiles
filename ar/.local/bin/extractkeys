@@ -60,7 +60,7 @@ for file_path in "${config_files[@]}"; do
     fi
 
     if echo "$line" | grep -q "Keychord"; then
-      line=$(echo "$line" | sed -e "s/&((Keychord){[0-9], {{\(.*\)}),/\1/g;s/^0/MEDIA/g;s/\([MEDIA\|WIN\|ALT\|ULTRA\|EXTRA\|Shift\|Control]\w\+\),\s\(.*\)}},\s\+\(\w\+\),\s\([^,]*\)/\1|\2|\3|\4/g;s/},{0,//g;s/},{\(Shift\|Ctrl\),/\1/g;s/},{//g")
+      line=$(echo "$line" | sed -e "s/&((Keychord){[0-9], {{\(.*\)}),/\1/g;s/^0\(.*XF86XK_.*\)/MEDIA\1/g;/XF86XK_/!s/^0/Null/;s/\([MEDIA\|WIN\|ALT\|ULTRA\|EXTRA\|Shift\|Control]\w\+\),\s\(.*\)}},\s\+\(\w\+\),\s\([^,]*\)/\1|\2|\3|\4/g;s/},{0,//g;s/},{\(Shift\|Ctrl\),/\1/g;s/},{//g;s/Null//g")
     else
       line=$(echo "$line" | sed -e "s/^{ \(.*\) },/\1/g;s/{ \([^, ]*\), \([^, ]*\), \([^, ]*\), \([^}]*\) }/\1 \2 \3 \4/g;s/,/|/g")
     fi
