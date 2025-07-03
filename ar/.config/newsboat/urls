@@ -15,7 +15,6 @@ https://www.archlinux.org/feeds/news/                                           
 https://artixlinux.org/feed.php                                                 "~Artix"                Distro      Linux     Tech
 filter:~/.local/bin/decodetitle:https://ftr.thesiah.xyz/makefulltextfeed.php?url=sec%3A%2F%2Ffeeds.bbci.co.uk%2Fnews%2Ftechnology%2Frss.xml&max=200&links=preserve&exc=&submit=Create+Feed          "~AI"               AI        News
 filter:~/.local/bin/decodetitle:https://ftr.thesiah.xyz/makefulltextfeed.php?url=sec%3A%2F%2Fwww.koreaherald.com%2Frss%2Fkh_Business&max=200&links=preserve&exc=&submit=Create+Feed                 "~Business (KOR)"   Business  News
-filter:~/.local/bin/decodetitle:https://ftr.thesiah.xyz/makefulltextfeed.php?url=www.yonhapnewstv.co.kr%2Fbrowse%2Ffeed%2F&max=200&links=preserve&exc=&submit=Create+Feed                           "~Newsflesh (KOR)"  News
 filter:~/.local/bin/decodetitle:https://ftr.thesiah.xyz/makefulltextfeed.php?url=www.yonhapnewstv.co.kr%2Fcategory%2Fnews%2Fpolitics%2Ffeed%2F&max=200&links=preserve&exc=&submit=Create+Feed       "~Politics (KOR)"   News      Politics
 filter:~/.local/bin/decodetitle:https://ftr.thesiah.xyz/makefulltextfeed.php?url=www.yonhapnewstv.co.kr%2Fcategory%2Fnews%2Feconomy%2Ffeed%2F&max=200&links=preserve&exc=&submit=Create+Feed        "~Economy (KOR)"    Economy   News
 filter:~/.local/bin/decodetitle:https://ftr.thesiah.xyz/makefulltextfeed.php?url=www.yonhapnewstv.co.kr%2Fcategory%2Fnews%2Fsociety%2Ffeed%2F&max=200&links=preserve&exc=&submit=Create+Feed        "~Society (KOR)"    News      Society
@@ -35,7 +34,7 @@ https://github.com/linkarzu/dotfiles-latest/commits/main.atom                   
 https://github.com/Gavinok/scripts/commits/master.atom                          "~Gavin scripts"                    Git
 https://gitlab.com/rwxrob/dotfiles.atom                                         "~Rob Muhlestein dotfiles"          Git
 https://github.com/sunaku/glove80-keymaps/commits/main.atom                     "~Glove80 keymaps"                  Git
-https://github.com/rothgar/awesome-tmux?tab=readme-ov-file/commits.atom         "~Tmux awesome"                     Git
+https://github.com/rothgar/awesome-tmux/commits.atom                            "~Tmux awesome"                     Git
 " "
 "--- Suckless ---"
 https://git.suckless.org/dmenu/atom.xml                                         "~Dmenu"                Suckless
