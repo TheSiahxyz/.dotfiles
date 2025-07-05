@@ -529,7 +529,8 @@ end, { desc = "Remove current file" })
 -- Scripts
 vim.keymap.set("n", "<leader>rr", function()
 	vim.cmd("w")
-	vim.cmd("split | resize 10 | terminal compiler " .. vim.fn.expand("%:p"))
+	local file = vim.fn.shellescape(vim.fn.expand("%:p"))
+	vim.cmd("split | resize 10 | terminal compiler " .. file)
 end, { noremap = true, silent = true, desc = "Run compiler interactively" })
 vim.api.nvim_set_keymap(
 	"n",

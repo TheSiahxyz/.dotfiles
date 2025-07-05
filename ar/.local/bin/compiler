@@ -53,11 +53,13 @@ java) javac "$file" && echo "${base##*/}" | xargs java ;;
 js) node "$file" ;;
 m) octave "$file" ;;
 md)
-  { [ -x "$(command -v lowdown)" ] && [ -x "$(command -v groff)" ]; } &&
-    lowdown --parse-no-intraemph "${file}" -Tms | groff -mpdfmark -ms -kept -T pdf >"${base}.pdf" ||
-    { [ -x "$(command -v groffdown)" ] && [ -x "$(command -v groff)" ]; } &&
-    groffdown -i "${file}" | groff -T pdf >"${base}.pdf" ||
-    pandoc -t ms --highlight-style="kate" -s -o "${base}.pdf" "${file}"
+  pandoc "$file" -s --pdf-engine=xelatex -V geometry:margin=2cm -o "${base}.pdf" || {
+    [ -x "$(command -v lowdown)" ] &&
+      lowdown --parse-no-intraemph "${file}" -Tms | groff -mpdfmark -ms -kept -T pdf >"${base}.pdf" ||
+      [ -x "$(command -v groffdown)" ] &&
+      groffdown -i "${file}" | groff -T pdf >"${base}.pdf" ||
+      pandoc -t ms --highlight-style="kate" -s -o "${base}.pdf" "${file}"
+  }
   ;;
 me) groff -Gktes -b -w w -me -T ps "$file" | ps2pdf - >"$base".pdf ;;
 mm) groff -Gktes -b -w w -mm -mpic -T ps "$file" | ps2pdf - >"$base".pdf ;;

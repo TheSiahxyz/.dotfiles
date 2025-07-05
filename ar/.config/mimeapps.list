@@ -35,3 +35,4 @@ x-scheme-handler/https=librewolf.desktop;firefox.desktop;
 x-scheme-handler/lbry=lbry.desktop;
 x-scheme-handler/mailto=mail.desktop;
 x-scheme-handler/magnet=torrent.desktop;
+x-scheme-handler/msteams=teams.desktop
