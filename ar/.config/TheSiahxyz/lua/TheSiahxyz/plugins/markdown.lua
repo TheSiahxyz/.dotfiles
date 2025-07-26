@@ -168,7 +168,8 @@ return {
 				heading = {
 					enabled = true,
 					sign = false,
-					icons = { "󰎤 ", "󰎧 ", "󰎪 ", "󰎭 ", "󰎱 ", "󰎳 " },
+					icons = { "", "", "", "", "", "" },
+					-- icons = { "󰎤 ", "󰎧 ", "󰎪 ", "󰎭 ", "󰎱 ", "󰎳 " },
 				},
 				ignore = function(bufnr)
 					local name = vim.api.nvim_buf_get_name(bufnr)

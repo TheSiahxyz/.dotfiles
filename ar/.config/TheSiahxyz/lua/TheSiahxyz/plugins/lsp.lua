@@ -97,6 +97,7 @@ return {
 					"mutt_ls",
 					"pyright",
 					"ruff",
+					"ts_ls",
 				},
 				automatic_installation = true,
 				handlers = {
@@ -205,6 +206,11 @@ return {
 							-- 		disableOrganizeImports = false,
 							-- 	},
 							-- },
+						})
+					end,
+					["ts_ls"] = function()
+						lspconfig.ruff.setup({
+							capabilities = capabilities,
 						})
 					end,
 				},
