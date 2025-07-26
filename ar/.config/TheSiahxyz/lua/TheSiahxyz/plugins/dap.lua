@@ -26,8 +26,8 @@ return {
 			local wk = require("which-key")
 			wk.add({
 				mode = { "n" },
-				{ "<localleader>dp", group = "Debug" },
-				{ "<localleader>dP", group = "Debug (Python)" },
+				{ "<localleader>db", group = "Debug" },
+				{ "<localleader>dB", group = "Debug (Python)" },
 			})
 		end,
 		config = function()
@@ -35,6 +35,21 @@ return {
 			vim.api.nvim_set_hl(0, "DapStoppedLine", { default = true, link = "Visual" })
 
 			local dap = require("dap")
+
+			dap.adapters["pwa-node"] = {
+				type = "server",
+				host = "localhost",
+				port = "${port}",
+				executable = {
+					command = "node",
+					-- 💀 Make sure to update this path to point to your installation
+					args = {
+						vim.fn.stdpath("data") .. "/mason/packages/js-debug-adapter/js-debug/src/dapDebugServer.js",
+						"${port}",
+					},
+				},
+			}
+
 			dap.configurations.java = {
 				{
 					type = "java",
@@ -44,6 +59,18 @@ return {
 					port = 5005,
 				},
 			}
+
+			for _, language in ipairs({ "javascript", "typescript" }) do
+				dap.configurations[language] = {
+					{
+						type = "pwa-node",
+						request = "launch",
+						name = "Launch file",
+						program = "${file}",
+						cwd = "${workspaceFolder}",
+					},
+				}
+			end
 
 			local dap_icons = {
 				Stopped = { "󰁕 ", "DiagnosticWarn", "DapStoppedLine" },
@@ -70,126 +97,126 @@ return {
 		end,
 		keys = {
 			{
-				"<localleader>dpB",
+				"<localleader>dbB",
 				function()
 					require("dap").set_breakpoint(vim.fn.input("Breakpoint condition: "))
 				end,
 				desc = "Dap breakpoint condition",
 			},
 			{
-				"<localleader>dpb",
+				"<localleader>dbb",
 				function()
 					require("dap").toggle_breakpoint()
 				end,
 				desc = "Dap toggle breakpoint",
 			},
 			{
-				"<localleader>dpc",
+				"<localleader>dbc",
 				function()
 					require("dap").continue()
 				end,
 				desc = "Dap continue",
 			},
 			{
-				"<localleader>dpa",
+				"<localleader>dba",
 				function()
 					require("dap").continue({ before = get_args })
 				end,
 				desc = "Dap run with args",
 			},
 			{
-				"<localleader>dpC",
+				"<localleader>dbC",
 				function()
 					require("dap").run_to_cursor()
 				end,
 				desc = "Dap run to cursor",
 			},
 			{
-				"<localleader>dpg",
+				"<localleader>dbg",
 				function()
 					require("dap").goto_()
 				end,
 				desc = "Dap go to line (no execute)",
 			},
 			{
-				"<localleader>dpi",
+				"<localleader>dbi",
 				function()
 					require("dap").step_into()
 				end,
 				desc = "Dap step into",
 			},
 			{
-				"<localleader>dpj",
+				"<localleader>dbj",
 				function()
 					require("dap").down()
 				end,
 				desc = "Dap down",
 			},
 			{
-				"<localleader>dpk",
+				"<localleader>dbk",
 				function()
 					require("dap").up()
 				end,
 				desc = "Dap up",
 			},
 			{
-				"<localleader>dpl",
+				"<localleader>dbl",
 				function()
 					require("dap").run_last()
 				end,
 				desc = "Dap run last",
 			},
 			{
-				"<localleader>dpo",
+				"<localleader>dbo",
 				function()
 					require("dap").step_out()
 				end,
 				desc = "Dap step out",
 			},
 			{
-				"<localleader>dpO",
+				"<localleader>dbO",
 				function()
 					require("dap").step_over()
 				end,
 				desc = "Dap step over",
 			},
 			{
-				"<localleader>dpp",
+				"<localleader>dbp",
 				function()
 					require("dap").pause()
 				end,
 				desc = "Dap pause",
 			},
 			{
-				"<localleader>dpr",
+				"<localleader>dbr",
 				function()
 					require("dap").repl.toggle()
 				end,
 				desc = "Dap toggle repl",
 			},
 			{
-				"<localleader>dps",
+				"<localleader>dbs",
 				function()
 					require("dap").session()
 				end,
 				desc = "Dap session",
 			},
 			{
-				"<localleader>dpt",
+				"<localleader>dbt",
 				function()
 					require("dap").terminate()
 				end,
 				desc = "Dap terminate",
 			},
 			{
-				"<localleader>dpw",
+				"<localleader>dbw",
 				function()
 					require("dap.ui.widgets").hover()
 				end,
 				desc = "Dap widgets",
 			},
 			{
-				"<localleader>dpR",
+				"<localleader>dbR",
 				"<Cmd>lua require('dapui').open({ reset = true })<cr>",
 				desc = "Dap UI reset",
 			},
@@ -205,7 +232,7 @@ return {
 		end,
 		keys = {
 			{
-				"<localleader>dPt",
+				"<localleader>dBt",
 				function()
 					require("dap-python").test_method()
 				end,
@@ -213,7 +240,7 @@ return {
 				ft = "python",
 			},
 			{
-				"<localleader>dPc",
+				"<localleader>dBc",
 				function()
 					require("dap-python").test_class()
 				end,
@@ -270,14 +297,14 @@ return {
 		end,
 		keys = {
 			{
-				"<localleader>dpu",
+				"<localleader>dbu",
 				function()
 					require("dapui").toggle()
 				end,
 				desc = "Dap UI",
 			},
 			{
-				"<localleader>dpe",
+				"<localleader>dbe",
 				function()
 					require("dapui").eval()
 				end,

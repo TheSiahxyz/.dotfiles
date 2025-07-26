@@ -246,6 +246,7 @@ return {
 					"isort", -- python formatter
 					"java-debug-adapter", -- java debugger
 					"java-test", -- java test
+					"js-debug-adapter", -- javascript debugger
 					"markdown-toc", -- markdown toc
 					"prettier", -- prettier formatter
 					"pylint", -- python linter
