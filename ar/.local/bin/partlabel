@@ -10,6 +10,28 @@ label_luks() { sudo cryptsetup config "$1" --label "$2"; }
 label_parted() { sudo parted "$1" name "$2" "$3"; }
 print_label() { sudo lsblk -o NAME,LABEL; }
 
+getfs() {
+  print_label
+  echo -n "\nEnter the partition (e.g., /dev/sda1): "
+  read partition
+
+  fs_type=$(get_fs_type "$partition")
+
+  if [ -z "$fs_type" ]; then
+    echo "Unable to determine file system type for $partition. Please ensure the partition exists and has a valid file system."
+    echo "Debugging information:"
+    echo "blkid output for $partition:"
+    sudo blkid "$partition"
+    echo "Raw blkid output:"
+    sudo blkid
+    exit 1
+  fi
+
+  echo "Detected file system type: $fs_type"
+  echo -n "Enter the label: "
+  read label
+}
+
 echo "Partition Labeling Script"
 for cmd in blkid e2label fatlabel ntfslabel btrfs parted lsblk cryptsetup; do
   if ! command_exists "$cmd"; then
@@ -45,25 +67,7 @@ for cmd in blkid e2label fatlabel ntfslabel btrfs parted lsblk cryptsetup; do
   fi
 done
 
-print_label
-echo -n "\nEnter the partition (e.g., /dev/sda1): "
-read partition
-
-fs_type=$(get_fs_type "$partition")
-
-if [ -z "$fs_type" ]; then
-  echo "Unable to determine file system type for $partition. Please ensure the partition exists and has a valid file system."
-  echo "Debugging information:"
-  echo "blkid output for $partition:"
-  sudo blkid "$partition"
-  echo "Raw blkid output:"
-  sudo blkid
-  exit 1
-fi
-
-echo "Detected file system type: $fs_type"
-echo -n "Enter the label: "
-read label
+getfs
 
 case "$fs_type" in
 ext2 | ext3 | ext4) label_ext "$partition" "$label" ;;
@@ -73,6 +77,7 @@ btrfs) label_btrfs "$partition" "$label" ;;
 crypto_LUKS)
   echo "Labeling LUKS partition using cryptsetup."
   label_luks "$partition" "$label"
+  getfs
   ;;
 *)
   echo "File system type $fs_type is not directly supported by this script. Attempting to label with parted."
