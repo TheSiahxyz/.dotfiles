@@ -81,7 +81,7 @@ unopenedluks="$(for drive in $allluks; do
 done | filter)"
 
 # Get all normal, non-encrypted or decrypted partitions that are not mounted.
-normalparts="$(echo "$lsblkoutput" | grep -v crypto_LUKS | grep 'part\|rom\|crypt' | sed "s/^/💾 /" | filter)"
+normalparts="$(echo "$lsblkoutput" | grep -v crypto_LUKS | grep -v 'part 1M' | grep 'part\|rom\|crypt' | sed "s/^/💾 /" | filter)"
 
 # Get all available IP addresses with open Samba shares in the wlan0 subnet, excluding eth0 IP
 smbips="$(sudo arp-scan --interface=eth0 --interface=wlan0 --localnet | grep -vEi '(EFM Networks|DUP:)' | awk '/^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/{print $1}')"
