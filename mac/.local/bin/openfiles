@@ -1,0 +1,34 @@
+#!/bin/sh
+
+if ! command -v nvim >/dev/null 2>&1; then
+  echo "Error: 'nvim' is not installed." >&2
+  exit 1
+fi
+
+IFS='
+'
+
+files=$*
+
+for file in $files; do
+  files_list="$files_list \"$(realpath "$file")\""
+done
+
+eval "set -- $files_list"
+
+count=$#
+
+case "$count" in
+2)
+  ${EDITOR:-nvim} -O +'silent! normal g;' "$@" -c 'wincmd t'
+  ;;
+3)
+  ${EDITOR:-nvim} -O "$1" -c 'wincmd j' -c "silent! vsplit $2" -c "silent! split $3" -c 'wincmd t'
+  ;;
+4)
+  ${EDITOR:-nvim} -O "$1" -c "silent! vsplit $2" -c "silent! split $3" -c 'wincmd h' -c "silent! split $4" -c 'wincmd t'
+  ;;
+*)
+  ${EDITOR:-nvim} "$@"
+  ;;
+esac

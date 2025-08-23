@@ -1,0 +1,61 @@
+#!/bin/sh
+
+# The set -e option instructs sh to immediately exit if any command has a non-zero exit status
+set -e
+
+# Set new line and tab for word splitting
+IFS='
+'
+
+# Get the list of selected files with key bindings for specific paths
+files=$(fzf-tmux \
+  --header "^a pwd ^b public ^d .dotfiles ^f configs ^g git ^h home ^k desktop ^r scripts ^s suckless ^u staged files ^v private ^/ help" \
+  --preview "target=\$(readlink -f {}) &&
+    if [ -d \"\$target\" ]; then
+      exa --color=always --long --all --header --icons --git \"\$target\"
+    elif [ -f \"\$target\" ]; then
+      bat --color=always --style=header,grid --line-range=:500 \"\$target\"
+    else
+      file -h {}
+    fi" \
+  --reverse \
+  --query="$1" \
+  --multi \
+  --exit-0 \
+  --prompt " 💡 " \
+  --bind "ctrl-a:change-prompt( ⚡ )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . $PWD)" \
+  --bind "ctrl-b:change-prompt( 🌎 )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . ${XDG_PUBLICSHARE_DIR:-${HOME}/Public})" \
+  --bind "ctrl-d:change-prompt( ⚙️ )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . ${XDG_DOTFILES_DIR:-${HOME}/.dotfiles})" \
+  --bind "ctrl-f:change-prompt( 🗂️ )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . ${XDG_CONFIG_HOME:-${HOME}/.config})" \
+  --bind "ctrl-g:change-prompt(   )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . $HOME/Private/repos $HOME/Public/repos)" \
+  --bind "ctrl-h:change-prompt( 🏠 )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . $HOME)" \
+  --bind "ctrl-k:change-prompt( 🖥️ )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . ${XDG_DESKTOP_DIR:-${HOME}/Desktop})" \
+  --bind "ctrl-r:change-prompt( 👟 )+reload(fd -H -L -t f -E .Trash -E .git -E .cache -E zsh . ${XDG_BIN_HOME:-${HOME}/.local/bin})" \
+  --bind "ctrl-s:change-prompt( 🛠  )+reload(find ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless -maxdepth 2 -type f -not -path '*/.git/*')" \
+  --bind "ctrl-u:change-prompt( 📝 )+reload(if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then git -C $(git rev-parse --show-toplevel 2>/dev/null) status -s | awk -v pwd=\"$PWD\" '{print pwd \"\/\" \$2}' | grep -v '^$'; else echo 'This is not a git repository.'; fi)" \
+  --bind "ctrl-v:change-prompt( 🔒 )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . $HOME/Private)" \
+  --bind 'ctrl-/:change-prompt( ❓ )+reload(echo "^a all
+^b public
+^c configs
+^d .dotfiles
+^g git
+^k desktop
+^r scripts
+^s suckless
+^u staged files
+^v private
+^/ help")')
+
+# Check if any files were selected, and exit if not
+[ -z "$files" ] && exit 0
+
+if [ -d "$files" ]; then
+  absolute_files=$(realpath $files)
+  if echo "$absolute_files" | while read -r file; do file --mime-type "$file" | grep -q 'video/'; done; then
+    mpv --quiet --loop $absolute_files
+  else
+    openfiles "$absolute_files"
+  fi
+else
+  openfiles "$files"
+fi

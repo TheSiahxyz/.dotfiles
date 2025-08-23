@@ -95,10 +95,10 @@ cmd copyto ${{
   done &&
   notify-send "📋 File(s) copied." "File(s) copied to $destpath."
 }}
-cmd yank-dirname $dirname -- "$f" | head -c-1 | xclip -i -selection clipboard
-cmd yank-path $printf '%s' "$fx" | xclip -i -selection clipboard
-cmd yank-basename $basename -a -- $fx | head -c-1 | xclip -i -selection clipboard
-cmd yank-basename-without-extension &basename -a -- $fx | cut -d. -f1 | head -c-1 | xclip -i -selection clipboard
+cmd yank-dirname $dirname -- "$f" | head -c-1 | pbcopy clipboard
+cmd yank-path $printf '%s' "$fx" | pbcopy clipboard
+cmd yank-basename $basename -a -- $fx | head -c-1 | pbcopy clipboard
+cmd yank-basename-without-extension &basename -a -- $fx | cut -d. -f1 | head -c-1 | pbcopy clipboard
 
 # Create
 cmd mkdir ${{ clear; tput cup $(($(tput lines)/3)); tput bold
@@ -489,14 +489,14 @@ map C compress
 
 # Copy
 # map yy %cp -ri -- $fs .; clear
-map Y $printf "%s" "$fx" | xclip -selection clipboard; clear; save-select
+map Y $printf "%s" "$fx" | pbcopy clipboard; clear; save-select
 map yb yank-basename
 map yd yank-dirname
 map ye copyto; clear; save-select
-map yl $printf "%s" "$fx" | sed -E 's/^.+\[/https:\/\/piped.video\/watch?v=/' | sed -E 's/\]\..+//' | xclip -selection clipboard
+map yl $printf "%s" "$fx" | sed -E 's/^.+\[/https:\/\/piped.video\/watch?v=/' | sed -E 's/\]\..+//' | pbcopy clipboard
 map yn yank-basename-without-extension
 map yp yank-path
-map yt $printf "%s" "$fx" | sed -E 's/^.+\[/https:\/\/www.youtube.com\/watch?v=/' | sed -E 's/\]\..+//' | xclip -selection clipboard
+map yt $printf "%s" "$fx" | sed -E 's/^.+\[/https:\/\/www.youtube.com\/watch?v=/' | sed -E 's/\]\..+//' | pbcopy clipboard
 map yy copy
 
 # Create

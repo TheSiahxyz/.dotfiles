@@ -1,0 +1,211 @@
+#!/bin/sh
+
+usage() {
+  echo "Open bookmarks, URLs, or browser history in a program."
+  echo ""
+  echo "Usage: ${0##*/} [OPTIONS]"
+  echo ""
+  echo "Options:"
+  echo "  -h        : Show this message"
+  echo "  -b        : Open a browser bookmark"
+  echo "  -c        : Copy a URL from snippets/urls to the clipboard"
+  echo "  -o        : Get a URL from snippets/urls and open it in a new browser window"
+  echo "  -p        : Get a URL from snippets/urls and open it in a private browser window"
+  echo "  -s        : Open browser history"
+  echo "  -t        : Get a URL from snippets/urls and type it using xdotool"
+  echo "  -v        : Open a browser bookmark in private browser window"
+  echo ""
+  echo "Programs:"
+  echo "  browser     : System default browser"
+  echo "  lynx        : A text browser for World Wide Web"
+  echo "  w3m         : A text WWW browser, similar to lynx"
+  echo ""
+  echo "Examples:"
+  echo "  ${0##*/} -b         # Opens a browser bookmark in a program"
+  echo "  ${0##*/} -c         # Copies a URL from snippets/urls to the clipboard"
+  echo "  ${0##*/} -o         # Opens a URL from snippets/urls in a new browser window"
+  echo "  ${0##*/} -p         # Opens a URL in a private browser window"
+  echo "  ${0##*/} -s         # Opens browser history in a program"
+  echo "  ${0##*/} -v         # Opens browser boomark in private browser window"
+}
+
+addurls() {
+  url=$(echo | dmenu -i -p "Enter a url: ")
+  [ -z "$url" ] && printf "Error: url must be provided\n\n" && exit 0
+
+  description=$(echo | dmenu -i -p "Enter a description of the url: ")
+  [ -z "$description" ] && echo "https://$url" >>~/.local/share/thesiah/snippets
+  [ -n "$description" ] && echo "$description https://$url" >>~/.local/share/thesiah/snippets
+}
+
+opentool() {
+  available_tools=""
+  command -v xdg-open 2>/dev/null | grep -v "alias" -q && available_tools="$available_tools xdg-open"
+  command -v open 2>/dev/null | grep -v "alias" -q && available_tools="$available_tools open"
+  command -v lynx 2>/dev/null | grep -v "alias" -q && available_tools="$available_tools lynx"
+  command -v w3m 2>/dev/null | grep -v "alias" -q && available_tools="$available_tools w3m"
+  available_tools=$(printf "%s" "$available_tools" | awk '{$1=$1; print}' | tr ' ' '\n')
+  if [ -z "$available_tools" ]; then
+    printf "No browser found\n" >&2
+    exit 1
+  fi
+
+  opentool=$(printf "%s\n" "$available_tools" | dmenu -i -p "Choose an open tool:")
+
+  # Set the selected tool to the variable 'open'
+  case "$opentool" in
+  xdg-open) xdg-open "$1" ;;
+  open)
+    case "$(uname -s)" in
+    Darwin) open "$1" ;;
+    *) xdg-open "$1" ;;
+    esac
+    ;;
+  lynx) setsid -f "$TERMINAL" -e lynx "$1" ;;
+  w3m) setsid -f "$TERMINAL" -e w3m "$1" ;;
+  *) echo "Invalid selection" >&2 && exit 1 ;;
+  esac
+}
+
+openwindow() {
+  if [ "$1" = "private" ]; then
+    case "$BROWSER" in
+    *qutebrowser*) "$BROWSER" --target private-window "$url" ;;
+    *firefox* | *librewolf*) "$BROWSER" --private-window "$url" ;;
+    esac
+  else
+    case "$BROWSER" in
+    *qutebrowser*) "$BROWSER" --target window "$url" ;;
+    *firefox* | *librewolf*) "$BROWSER" --new-window "$url" ;;
+    esac
+  fi
+}
+
+openinbrowser() {
+  # Extract only the default part of the profile name
+  case $BROWSER in
+  *firefox*)
+    profiles_ini_path="$HOME/.mozilla/firefox/profiles.ini"
+    profile=$(awk '/\[Install/ {found=1} found && /^Default=/ {split($0, arr, "."); print arr[2]; exit}' "$profiles_ini_path")
+    profile_dir=$(find ~/.mozilla/firefox -type d -name "*.$profile*" | head -n 1)
+    db_path="$profile_dir/places.sqlite"
+    ;;
+  *librewolf*)
+    profiles_ini_path="$HOME/.librewolf/profiles.ini"
+    profile=$(awk '/\[Install/ {found=1} found && /^Default=/ {split($0, arr, "."); print arr[2]; exit}' "$profiles_ini_path")
+    profile_dir=$(find ~/.librewolf -type d -name "*.$profile*" | head -n 1)
+    db_path="$profile_dir/places.sqlite"
+    ;;
+  *qutebrowser*)
+    profile_dir="${XDG_DATA_HOME:-${HOME}/.local/share}/qutebrowser"
+    db_path="$profile_dir/history.sqlite"
+    ;;
+  *) echo "Default browser path is needed." && exit ;;
+  esac
+
+  tmp_file="$(mktemp)"
+  cp -f "$db_path" "$tmp_file"
+
+  type dmenu >/dev/null 2>&1 &&
+    selection="dmenu -i -l 20 -p \"Choose a $1 to open:\"" ||
+    selection="fzf-tmux --reverse --cycle --ansi --delimiter='|' --with-nth=1..-2"
+
+  cols=$((${COLUMNS:-90} / 3))
+  case "$1" in
+  *bookmark*)
+    case "$BROWSER" in
+    qutebrowser) bookmarks -o ;;
+    *firefox* | *librewolf*)
+      sqlite_query="
+      SELECT substr(b.title, 1, $cols) || ' | ' || p.url AS bookmark
+      FROM moz_bookmarks b
+      JOIN moz_places p ON b.fk = p.id
+      WHERE b.type = 1 AND p.url LIKE 'http%' AND b.title NOT NULL
+      ORDER BY b.title;
+      "
+      ;;
+    *qutebrowser*) geturls && openwindow && exit ;;
+    esac
+    ;;
+  *history*)
+    case "$BROWSER" in
+    *qutebrowser*)
+      sqlite_query="
+      SELECT substr(h.title, 1, $cols) || ' | ' || h.url AS bookmark
+      FROM CompletionHistory h
+      ORDER BY h.last_atime DESC
+      LIMIT 100;
+      "
+      ;;
+    *firefox* | *librewolf*)
+      sqlite_query="
+      SELECT substr(p.title, 1, $cols) || ' | ' || p.url
+      FROM moz_places p
+      JOIN moz_historyvisits hv ON hv.place_id = p.id
+      ORDER BY hv.visit_date DESC
+      LIMIT 100;
+      "
+      ;;
+    esac
+    ;;
+  esac
+  choice=$(sqlite3 "$tmp_file" "$sqlite_query" | eval "$selection" | cut -d'|' -f2 | sed 's|.*\(https://\)|\1|' | xargs)
+  if [ -n "$choice" ]; then
+    if echo "$1" | grep -q "private"; then
+      "$BROWSER" --private-window "$choice"
+    else
+      opentool "$choice"
+    fi
+  else
+    exit
+  fi
+  rm "$tmp_file"
+}
+
+geturls() {
+  urls=$(cat ~/.config/qutebrowser/quickmarks ~/.config/qutebrowser/bookmarks/urls ~/.local/share/thesiah/snippets ~/.local/share/thesiah/urls 2>/dev/null)
+  choice=$(echo "$urls" | grep -v -e '^#' -e '^$' | awk '
+    {
+      if ($1 ~ /^https?:\/\//) { alias = substr($0, index($0, $2)) }  # Case 2: URL first
+      else { alias = substr($0, 1, length($0) - length($NF) - 1) }    # Case 1: URL last
+      print alias
+    }' | dmenu -i -l 50 -p "Choose an alias $1:")
+
+  [ -z "$choice" ] && exit
+  url=$(echo "$urls" | grep -v -e '^#' -e '^$' | awk -v choice="$choice" '
+    {
+      if ($1 ~ /^https?:\/\//) { url = $1; alias = substr($0, index($0, $2)) }  # Case 2
+      else { alias = substr($0, 1, length($0) - length($NF) - 1); url = $NF }    # Case 1
+      if (alias == choice) print url
+    }')
+}
+
+copytoclipboard() {
+  if command -v xclip >/dev/null 2>&1; then
+    printf "%s" "$url" | xclip -selection clipboard
+  elif command -v clipcopy >/dev/null 2>&1; then
+    printf "%s" "$url" | clipcopy
+  elif command -v xsel >/dev/null 2>&1; then
+    printf "%s" "$url" | xsel --clipboard --input
+  else
+    echo "Clipboard utility not found. Install xclip, clipcopy, or xsel." >&2
+    exit 1
+  fi
+  notify-send "'$choice' copied in clipbaord" "$url"
+}
+
+[ $# -eq 0 ] && usage && exit 1
+
+while getopts "abchopstv" opt; do
+  case $opt in
+  a) addurls ;;
+  b) openinbrowser "bookmark" ;;
+  c) geturls "to copy" && copytoclipboard ;;
+  o) geturls "to open in $BROWSER" && openwindow ;;
+  p) geturls "to open in private $BROWSER" && openwindow private ;;
+  s) openinbrowser "history" ;;
+  t) geturls "to type under cursor" && xdotool type "$url" ;;
+  v) openinbrowser "private bookmark" ;;
+  h | *) usage && exit 0 ;;
+  esac
+done

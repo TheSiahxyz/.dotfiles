@@ -1,0 +1,61 @@
+#!/bin/sh
+
+usage() {
+  echo "Clone a git repo in XDG_PUBLICSHARE_DIR if it's set or ~/Public"
+  echo ""
+  echo "Usage: ${0##*/} [-b <branch>] [-d <destination>] [-n <name>] <url>"
+  echo ""
+  echo "Options:"
+  echo "  -h                  : Show this help message"
+  echo "  -b <branch>         : Specify the branch to clone"
+  echo "  -d <destination>    : Specify the destination of directory"
+  echo "  -n <name>           : Specify the directory name to clone into"
+  echo ""
+  echo "Example:"
+  echo "  ${0##*/} -b master <url>        # Clone master branch"
+  echo "  ${0##*/} -d ~/.local/bin <url>  # Clone the url into ~/.local/bin"
+  echo "  ${0##*/} -n myrepo <url>        # Clone url named with myrepo"
+  exit 1
+}
+
+# Default values
+path="${XDG_PUBLICSHARE_DIR:-$HOME/Public}"
+
+# Parse options
+while getopts ":b:d:n:" opt; do
+  case $opt in
+  b) branch="$OPTARG" ;;
+  d) path="$OPTARG" ;;
+  n) dirname="$OPTARG" ;;
+  *) usage ;;
+  esac
+done
+
+shift $((OPTIND - 1))
+
+[ -z "$1" ] && usage
+
+repo="$1"
+
+# Validate the URL (supports HTTPS and SSH Git URLs)
+if ! echo "$repo" | grep -Eq '^(https://github\.com/[^/]+/[^/]+(\.git)?|git@github\.com:[^/]+/[^/]+(\.git)?)$'; then
+  echo "Error: Invalid Git URL."
+  exit 1
+fi
+
+# Extract the base URL for the repository (removes any trailing .git)
+url="$(echo "$repo" | grep -Eo 'https://github.com/[^/]+/[^/]+' | sed 's/\.git$//')"
+
+# Determine the directory name for cloning
+if [ -n "$dirname" ]; then
+  dest="$path/$dirname"
+else
+  dest="$path/$(basename "$url")"
+fi
+
+# Determine the clone command
+if [ -n "$branch" ]; then
+  git clone --branch "$branch" "$url" "$dest"
+else
+  git clone "$url" "$dest"
+fi

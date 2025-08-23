@@ -1,0 +1,16 @@
+#!/bin/bash
+
+ext="${1##*.}"
+mpvfiles="avi flv mkv mov mpeg mpg mp4 rmvb webm wmv w3m ogv ts 3gp"
+nsxivfiles="png jpg jpeg jpe gif bmp tiff tif"
+wgetfiles="mp3 flac opus wav aac wma m4a mp3?source=feed"
+
+if echo $mpvfiles | grep -w $ext >/dev/null; then
+  nohup mpv --loop --quiet "$1" >/dev/null 2>&1 &
+elif echo $nsxivfiles | grep -w $ext >/dev/null; then
+  nohup nsxiv "$1" >/dev/null 2>&1 &
+elif echo $wgetfiles | grep -w $ext >/dev/null; then
+  nohup wget "$1" >/dev/null 2>&1 &
+else
+  nohup "$BROWSER" "$1" >/dev/null 2>&1 &
+fi

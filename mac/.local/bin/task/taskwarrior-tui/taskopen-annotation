@@ -1,0 +1,11 @@
+#!/bin/sh
+
+set -eu
+
+if [ -z "$2" ]; then
+  echo "Second argument is unset" >>/tmp/taskopen_debug.log
+else
+  echo "Second argument is set to '$2'" >>/tmp/taskopen_debug.log
+fi
+
+taskopen "$1"

@@ -1,0 +1,82 @@
+#!/bin/sh
+
+# Interop functions for Taskwarrior
+
+# Create a new task in Taskwarrior with a given description and optional additional attributes.
+# Properly handle special characters in the description and other arguments.
+create_task() {
+  description="$1"
+  shift # Now $@ contains the rest of the arguments
+
+  # Use a variable to hold arguments to prevent word splitting
+  task_args=""
+  for arg in "$@"; do
+    task_args="$task_args $arg"
+  done
+
+  # Use -- to indicate the end of options, and pass the description safely
+  output=$(task add $task_args -- "$description")
+
+  # Extract the UUID from the output using a reliable method
+  task_uuid=$(echo "$output" | grep -o 'Created task [a-z0-9\-]*' | awk '{print $3}')
+
+  echo "$task_uuid"
+}
+
+# Get task UUID from description with specific tags (+github or +linear)
+get_task_id_by_description() {
+  description="$1"
+  # Use task export with tags +github or +linear and status:pending to find the task by description
+  task +github or +linear status:pending export | jq -r --arg desc "$description" '.[] | select(.description == $desc) | .uuid'
+}
+
+# Annotate an existing task
+annotate_task() {
+  task_uuid="$1"
+  annotation="$2"
+  task "$task_uuid" annotate -- "$annotation"
+}
+
+# Mark a task as completed
+mark_task_completed() {
+  task_uuid="$1"
+  echo "Attempting to mark task $task_uuid as completed..."
+  task "$task_uuid" done || {
+    echo "Failed to mark task $task_uuid as completed" >&2
+    exit 1
+  }
+}
+
+# Mark a task as pending
+mark_task_pending() {
+  task_uuid="$1"
+  task "$task_uuid" modify status:pending
+}
+
+# Get task labels (tags)
+get_task_labels() {
+  task_uuid="$1"
+  echo "Getting labels for task $task_uuid"
+  task _get "$task_uuid".tags
+}
+
+# Add a label (tag) to a task
+add_task_label() {
+  task_uuid="$1"
+  label="$2"
+  task "$task_uuid" modify +"$label"
+}
+
+# Remove a label (tag) from a task
+remove_task_label() {
+  task_uuid="$1"
+  label="$2"
+  task "$task_uuid" modify -"$label"
+}
+
+# Set or change a task's project
+change_task_project() {
+  task_uuid="$1"
+  project_name="$2"
+  task "$task_uuid" modify project:"$project_name"
+}

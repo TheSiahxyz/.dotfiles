@@ -1,0 +1,56 @@
+#!/bin/sh
+
+usage() {
+  echo "Combine multiple video files that share the same pattern and extension"
+  echo "into a single video file."
+  echo ""
+  echo "Usage: ${0##*/} <base filename>"
+  echo ""
+  echo "Arguments:"
+  echo "  <base filename>: The name of one of the video files to use as a pattern."
+  echo "                   For example, if your files are named video_cut1.mp4,"
+  echo "                   video_cut2.mp4, you can provide video_cut1.mp4."
+  echo ""
+  echo "Example:"
+  echo "  ${0##*/} video_cut.mp4"
+  echo "  This will combine all files matching video_cut*.mp4 into a single file."
+  exit 1
+}
+
+# Check if the correct number of arguments are provided
+if [ $# -ne 1 ]; then
+  usage
+fi
+
+# Extract the pattern and extension from the input filename
+input_file="$1"
+pattern="${input_file%.*}"    # This removes the extension
+extension="${input_file##*.}" # This extracts the extension
+
+# Find all video files matching the generated pattern and extension
+video_files=$(ls "${pattern}"*."${extension}" 2>/dev/null)
+
+# Check if any files are found
+if [ -z "$video_files" ]; then
+  echo "No video files found with the pattern '${pattern}*.${extension}'."
+  exit 1
+fi
+
+# Create a temporary file list for ffmpeg
+file_list=$(mktemp)
+
+# Populate the file list with the found video files, properly quoting each full path
+for video in "${pattern}"*."${extension}"; do
+  full_path=$(realpath "$video")
+  echo "file '$full_path'" >>"$file_list"
+done
+
+# Combine the videos into a single file using ffmpeg
+output_file="${pattern}_combine.${extension}"
+ffmpeg -f concat -safe 0 -i "$file_list" -c copy "$output_file" 2>/dev/null
+
+# Clean up the temporary file
+cat "$file_list"
+rm -f "$file_list"
+
+echo "All videos combined into '$output_file'."

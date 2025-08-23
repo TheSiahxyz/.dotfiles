@@ -1,0 +1,25 @@
+#!/bin/sh
+
+set -e
+
+# Set new line and tab for word splitting
+IFS="
+	"
+
+# Check if the script is running inside a tmux session
+if [ -z "$TMUX" ]; then
+  echo "This script must be run from inside a tmux session."
+  exit 1
+fi
+
+# Get the current tmux pane ID
+tmux_pane=$(tmux display-message -p '#D')
+
+# Send Escape, :wq, and Enter to Neovim in the tmux pane
+tmux send-keys -t "$tmux_pane" Escape C-m ':wq' C-m
+
+# Wait to ensure Neovim exits
+sleep 0.5
+
+# Detach the script from Neovim and wait a bit to ensure Neovim exits
+(nohup sh -c "sleep 0.5; tmux send-keys -t \"$tmux_pane\" 'nvim -c \"execute \\\"edit \\\" . v:oldfiles[0] | normal '\''0\"' C-m" >/dev/null 2>&1 &)

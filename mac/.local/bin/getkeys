@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# Print available keys from thesiah
+[ -n "$1" ] && cat "${XDG_DATA_HOME:-${HOME}/.local/share}"/thesiah/keys/"$1" 2>/dev/null && exit
+keys_dir="${XDG_DATA_HOME:-${HOME}/.local/share}/thesiah/keys"
+selected_file=$(du -a "$keys_dir" | cut -f2- | sed "s|$keys_dir/||" | fzf)
+[ -n "$selected_file" ] && cat "$keys_dir/$selected_file"

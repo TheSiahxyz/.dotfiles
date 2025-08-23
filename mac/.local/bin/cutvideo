@@ -1,0 +1,41 @@
+#!/bin/sh
+
+usage() {
+  echo "Crop a video file using ffmpeg."
+  echo ""
+  echo "Usage: cutvideo [file_name] [position] [duration]"
+  echo ""
+  echo "Arguments:"
+  echo "  file_name:   The name of the video file (e.g., video.mp4)."
+  echo "  position:    The start position in the format HH:MM:SS (e.g., 00:00:00)."
+  echo "  duration:    The duration in seconds from the start position (e.g., 10)."
+  echo ""
+  echo "Example:"
+  echo "  cutvideo ~/Video/video.mp4 00:01:00 10"
+  echo "  This will create a 10-second cut starting at 00:01:00 in the video.mp4 file."
+  exit 1
+}
+
+[ -z "$1" ] && echo "Target file missing" && usage
+[ -z "$2" ] && echo "Target position missing" && usage
+[ -z "$3" ] && echo "Target duration missing" && usage
+
+file="$1"
+filename="${file%%.*}"
+ext="${file##*.}"
+num=1
+
+# Find a unique filename by incrementing num
+if [ -f "${filename}_cut.${ext}" ]; then
+  while [ -f "${filename}_cut_$(printf "%02d" "$num").${ext}" ]; do
+    num=$((num + 1))
+  done
+  new_filename="${filename}_cut_$(printf "%02d" "$num").${ext}"
+else
+  new_filename="${filename}_cut.${ext}"
+fi
+
+# Perform the cut using ffmpeg
+ffmpeg -hide_banner -ss "$2" -to "$3" -i "$file" -c copy "$new_filename"
+
+echo "Created file: $new_filename"
