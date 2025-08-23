@@ -9,10 +9,10 @@ case "${os_type},${arch}" in
     grep PRETTY_NAME /etc/os-release | cut -d'=' -f2- | sed 's/"//g' | awk -F' ' '{print $1}' | tr '[:upper:]' '[:lower:]' | sed 's/\(arch\|artix\)/ar/g'
   ;;
 "darwin,arm64")
-  echo "m1"
+  echo "mac"
   ;;
 "darwin,x86_64")
-  echo "mac"
+  echo "intel mac"
   ;;
 "msys,"* | "cygwin,"* | "windows,"*)
   echo "windows"
