@@ -1,6 +1,7 @@
 #!/bin/sh
 
 # This script is called on startup to remap keys.
+xoff
 # Decrease key repeat delay to 200ms and increase key repeat rate to 50 per second.
 xset r rate 200 50
 # Map the caps lock key to control, and map the menu key to right super.

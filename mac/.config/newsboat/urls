@@ -1,0 +1,42 @@
+"--- Query ---"
+"query:0-3 Days:unread = \"yes\" and age between 0:3"                           "Query"
+"query:Unread:unread = \"yes\" and age >=8"                                     "Query"
+"query:Flagged:flags != \"\""                                                   "Query"
+"query:Media:enclosure_url != \"\" and enclosure_type =~ \"^(audio|video)/\""   "Query"
+"query:Content:content != \"\""                                                 "Query"
+"query:No Content:content = \"\""                                               "Query"
+" "
+"--- TheSiahxyz ---"
+https://github.com/TheSiahxyz/.dotfiles/commits/master.atom                     "~TheSiahxyz dotfiles"  Git
+https://github.com/TheSiahxyz/suckless/commits/master.atom                      "~TheSiahxyz suckless"  Git
+" "
+"--- News ---"
+https://www.archlinux.org/feeds/news/                                           "~Arch"                 Distro      Linux     Tech
+https://artixlinux.org/feed.php                                                 "~Artix"                Distro      Linux     Tech
+" "
+"--- Blog ---"
+https://lukesmith.xyz/rss.xml                                                   "~Luke Smith"           Blog
+" "
+"--- Git ---"
+https://github.com/LukeSmithxyz/voidrice/commits/master.atom                    "~Luke Smith dotfiles"              Git
+https://github.com/LukeSmithxyz/mutt-wizard/commits/master.atom                 "~Luke Smith mutt-wizard"           Git
+https://github.com/LukeSmithxyz/emailwiz/commits/master.atom                    "~Luke Smith email-wizard"          Git
+https://github.com/LukeSmithxyz/landchad/commits.atom                           "~Luke Smith landchad"              Git
+https://github.com/BreadOnPenguins/dots/commits.atom                            "~Bread on Penguins dotfiles"       Git
+https://github.com/sunaku/glove80-keymaps/commits/main.atom                     "~Glove80 keymaps"                  Git
+https://github.com/rothgar/awesome-tmux/commits.atom                            "~Tmux awesome"                     Git
+" "
+"--- Suckless ---"
+https://git.suckless.org/dmenu/atom.xml                                         "~Dmenu"                Suckless
+https://git.suckless.org/dwm/atom.xml                                           "~Dwm"                  Suckless
+https://git.suckless.org/slock/atom.xml                                         "~Slock"                Suckless
+https://git.suckless.org/st/atom.xml                                            "~St"                   Suckless
+https://git.suckless.org/surf/atom.xml                                          "~Surf"                 Suckless
+https://git.suckless.org/tabbed/atom.xml                                        "~Tabbed"               Suckless
+" "
+"--- Odysee ---"
+https://odysee.com/$/rss/@Odysee:8                                              "~Odysee"               Odysee
+https://odysee.com/$/rss/@Luke:7                                                "~Luke Smith"           Odysee
+" "
+"--- Youtube ---"
+https://www.youtube.com/feeds/videos.xml?channel_id=UCwHwDuNd9lCdA7chyyquDXw    "~Bread on Penguins"    Linux       Shell     Tech        Youtube

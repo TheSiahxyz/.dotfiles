@@ -1,0 +1,116 @@
+# Api/Keys
+api.json
+credentials
+
+# Backup files
+*~
+*.swp
+
+# Bookmakrs
+.vim-bookmarks
+
+# Compiled files
+*.class
+*.com
+*.dll
+*.exe
+*.o
+*.out
+*.so
+
+# Compressed
+*.7z
+*.dmg
+*.gz
+*.iso
+*.rar
+*.tar
+*.zip
+
+# Cookie
+cookie
+
+# Database
+*.db
+*.sql
+*.sqlite
+
+# Env
+.direnv/
+.envrc
+.env
+.local.application.conf
+
+# Git
+*.orig
+
+# GTK
+gtkfilechooser.ini
+
+# History
+.zcompdump
+
+# Hugo
+public/*
+
+# IDE directories
+.idea/
+
+# Lock
+*lock*.json
+
+# Log
+*.log
+
+# Mac
+**/.DS_Store
+**/._.DS_Store
+.DS_Store
+._.DS_Store
+
+# Nvim
+*vim/*.json
+
+# OS
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Private
+*personal*
+
+# Shortcuts
+shortcutrc
+zshnameddirrc
+
+# Suckless
+dmenu/dmenu
+dmenu/stest
+dwm/dwm
+dwmblocks/dwmblocks
+slock/slock
+st/st
+surf/surf
+
+# Tmux
+*/tmux/plugins/
+
+# Transmission
+*/transmission-daemon/*/
+*/transmission-daemon/bandwidth-groups.json
+*/transmission-daemon/stats.json
+dht.dat
+
+# TheSiahxyz
+thesiah.mom
+
+# Vim
+*/vim/*/
+
+# VS code
+.vscode/
+
+# thesiah.mom
+*/thesiah/thesiah.mom
