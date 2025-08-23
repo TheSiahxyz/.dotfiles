@@ -1,5 +1,9 @@
 #!/bin/zsh
 
+[[ "$XDG_SCRIPTS_HOME" == "$HOME/.local/bin" ]] || return
+[[ "$ZDOTDIR" == "$HOME/.config/zsh" ]] || return
+[[ "$ZPLUGINDIR" == "$XDG_SCRIPTS_HOME/zsh" ]] || return
+
 ### --- Plugins --- ###
 plugins=(
     "Aloxaf/fzf-tab"
