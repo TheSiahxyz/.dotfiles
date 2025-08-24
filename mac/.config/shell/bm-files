@@ -14,6 +14,7 @@ vff     ${XDG_CONFIG_HOME:-${HOME}/.config}/fastfetch/config.jsonc              
 vga     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/git-aliasrc                   # Git aliases
 vgc     ${XDG_CONFIG_HOME:-${HOME}/.config}/git/config                          # Git config
 vgi     ${XDG_CONFIG_HOME:-${HOME}/.config}/git/ignore                          # Git ignore
+vkk     ${XDG_CONFIG_HOME:-${HOME}/.config}/kitty/kitty.conf                    # Kitty config
 vlf     ${XDG_CONFIG_HOME:-${HOME}/.config}/lf/lfrc                             # LF (file browser) config
 vlg     ${XDG_CONFIG_HOME:-${HOME}/.config}/lazygit/config.yml                  # Lazygit config
 vls     ${XDG_CONFIG_HOME:-${HOME}/.config}/lf/scope                            # LF's scope/preview file
@@ -27,6 +28,7 @@ vns     ${XDG_CONFIG_HOME:-${HOME}/.config}/newsboat/config                     
 vnu     ${XDG_CONFIG_HOME:-${HOME}/.config}/newsboat/urls                       # Newsboat url (RSS reader)
 vqt     ${XDG_CONFIG_HOME:-${HOME}/.config}/qutebrowser/config.py               # Qutebrowser config
 Vsm     /etc/samba/smb.conf                                                     # Samba config
+vsc     $HOME/.ssh/config                                                       # SSH config
 vse     ${XDG_CONFIG_HOME:-${HOME}/.config}/sesh/sesh.toml                      # Sesh config
 vsf     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/surf/config.def.h      # Surf: a simple browser
 vsk     ${XDG_CONFIG_HOME:-${HOME}/.config}/sketchybar/sketchybarrc             # Sketchybar config

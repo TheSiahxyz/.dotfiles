@@ -173,7 +173,8 @@ on-focus-changed = ['move-mouse window-lazy-center']
     alt-shift-f = 'fullscreen'
 
     # disabled hide window
-    # cmd-h = []
+    cmd-h = []
+
     # rotate hangul and english
 
 # 'service' binding mode declaration.
