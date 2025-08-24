@@ -552,7 +552,7 @@ return {
 					local venv_name = vim.fn.fnamemodify(venv_path, ":t")
 					vim.cmd(("MoltenInit %s"):format(venv_name))
 				else
-					vim.cmd("MoltenInit python3")
+					vim.cmd("MoltenInit /opt/homebrew/bin/python@3.13")
 				end
 			end, { desc = "Init default molten" })
 		end,

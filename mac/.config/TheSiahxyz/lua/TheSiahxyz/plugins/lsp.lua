@@ -84,7 +84,11 @@ return {
 				},
 			})
 
-			require("mason").setup()
+			require("mason").setup({
+				pip = {
+					use_python3_host_prog = true,
+				},
+			})
 			require("mason-lspconfig").setup({
 				ensure_installed = {
 					"bashls",
@@ -94,12 +98,12 @@ return {
 					"jdtls",
 					"jsonls",
 					"lua_ls",
-					"mutt_ls",
+					-- "mutt_ls",
 					"pyright",
 					"ruff",
 					"ts_ls",
 				},
-				automatic_installation = true,
+				automatic_enable = true,
 				handlers = {
 					function(server_name) -- default handler (optional)
 						require("lspconfig")[server_name].setup({
@@ -242,7 +246,7 @@ return {
 					"black", -- python formatter
 					"debugpy", -- python debuger
 					"eslint_d", -- eslint linter
-					"hadolint", -- docker linter
+					-- "hadolint", -- docker linter
 					"isort", -- python formatter
 					"java-debug-adapter", -- java debugger
 					"java-test", -- java test

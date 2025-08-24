@@ -106,7 +106,14 @@ on-focus-changed = ['move-mouse window-lazy-center']
     # You can uncomment this line to open up terminal with alt + enter shortcut
     # See: https://nikitabobko.github.io/AeroSpace/commands#exec-and-forget
     # alt-enter = 'exec-and-forget open -n /System/Applications/Utilities/Terminal.app'
-    alt-enter = 'exec-and-forget open -n /Applications/kitty.app'
+    alt-enter = 'exec-and-forget open -n /Applications/Kitty.app'
+    alt-c = 'exec-and-forget /Applications/kitty.app/Contents/MacOS/kitty --title "calcurse" -e calcurse'
+    alt-d = 'exec-and-forget open -na Dbeaver'
+    alt-e = 'exec-and-forget /Applications/kitty.app/Contents/MacOS/kitty --title "neomutt" -e neomutt'
+    alt-n = 'exec-and-forget /Applications/kitty.app/Contents/MacOS/kitty --title "newsboat" -e newsboat'
+    alt-r = 'exec-and-forget /Applications/kitty.app/Contents/MacOS/kitty --title "htop" -e htop'
+    alt-t = 'exec-and-forget open -na "Microsoft Teams"'
+    alt-w = 'exec-and-forget open -na Firefox'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#layout
     alt-slash = 'layout tiles horizontal vertical'
@@ -226,16 +233,24 @@ if.app-id = 'com.microsoft.VSCode'
 run = ['move-node-to-workspace 4']
 
 [[on-window-detected]]
+if.app-id = 'org.jkiss.dbeaver.core.product'
+run = ['move-node-to-workspace 5']
+
+[[on-window-detected]]
 if.app-id = 'com.clickup.desktop-app'
 run = ['move-node-to-workspace 5']
 
 [[on-window-detected]]
+if.app-name-regex-substring = 'vimwiki'
+run = ['move-node-to-workspace 6']
+
+[[on-window-detected]]
 if.app-id = "md.obsidian"
-run = ['move-node-to-workspace 5']
+run = ['move-node-to-workspace 6']
 
 [[on-window-detected]]
 if.app-id = 'com.colliderli.iina'
-run = ['move-node-to-workspace 6']
+run = ['move-node-to-workspace 7']
 
 [[on-window-detected]]
 if.app-id = 'com.apple.Music'
