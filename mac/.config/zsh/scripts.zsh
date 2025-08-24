@@ -305,7 +305,7 @@ alias fgst=fetch_git_repos_status
 function fetch_git_repos_status() {
     SELECTED_DIRS=$(bash << 'EOF'
         # Source the Git prompt script to get access to __git_ps1
-        source /usr/share/git/completion/git-prompt.sh
+        source /opt/homebrew/etc/bash_completion.d/git-prompt.sh
 
         # Enable symbols for dirty state, untracked files, and branch ahead/behind
         export GIT_PS1_SHOWDIRTYSTATE="auto"
