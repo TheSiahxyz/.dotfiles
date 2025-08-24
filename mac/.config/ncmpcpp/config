@@ -335,7 +335,7 @@ song_columns_list_format = (20)[cyan]{a} (40)[yellow]{t} (30)[blue]{b} (10)[mage
 ## Note: Custom command that will be executed each time song changes. Useful for
 ## notifications etc.
 ##
-execute_on_song_change="pkill -RTMIN+11 dwmblocks"
+# execute_on_song_change="pkill -RTMIN+11 dwmblocks"
 #
 ##
 ## Note: Custom command that will be executed each time player state
@@ -343,7 +343,7 @@ execute_on_song_change="pkill -RTMIN+11 dwmblocks"
 ## state (either unknown, play, pause, or stop) for its duration.
 ##
 #
-execute_on_player_state_change="pkill -RTMIN+11 dwmblocks"
+# execute_on_player_state_change="pkill -RTMIN+11 dwmblocks"
 #
 #playlist_show_mpd_host = no
 #
