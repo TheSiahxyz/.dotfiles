@@ -19,6 +19,6 @@ else
   mkfifo "$FIFO_UEBERZUGPP"
   ueberzugpp layer -s -p json <"$FIFO_UEBERZUGPP" &
   exec 3>"$FIFO_UEBERZUGPP"
-  trap cleanup HUP INT QUIT TERM PWR EXIT
+  trap cleanup HUP INT QUIT TERM EXIT
   lf "$@" 3>&-
 fi

@@ -3,6 +3,7 @@
 ###################################################
 # Add all directories in each subdirectory to $PATH
 export PATH="$PATH:/opt/homebrew/bin"
+export PATH="$PATH:$(find -L /opt/homebrew/opt -name bin -type d -print 2>/dev/null | sort -u | paste -s -d ':' -)"
 export PATH="$PATH:$(find ~/.local/bin -path '*/.git*' -prune -o \( -type f -o -type l \) -perm -u=x -exec dirname {} \; | sort -u | paste -sd ':' -)"
 export PATH="$PATH:$(find ~/.local/share/.password-store -type d -name '.extensions' | paste -sd ':' -)"
 
@@ -113,19 +114,19 @@ export LYNX_CFG_PATH="$XDG_CONFIG_HOME/lynx"
 
 ### --- MANPAGER --- ###
 ([ -x "$(command -v batcat)" ] || [ -x "$(command -v batman)" ]) && {
-  export MANPAGER="sh -c 'col -bx | bat -l man -p'"
-  export MANROFFOPT="-c"
-} || {
-  export MANPAGER='less -s'
-  export LESS="R"
-  export LESS_TERMCAP_mb="$(printf '%b' '[1;31m')"
-  export LESS_TERMCAP_md="$(printf '%b' '[1;36m')"
-  export LESS_TERMCAP_me="$(printf '%b' '[0m')"
-  export LESS_TERMCAP_so="$(printf '%b' '[01;44;33m')"
-  export LESS_TERMCAP_se="$(printf '%b' '[0m')"
-  export LESS_TERMCAP_us="$(printf '%b' '[1;32m')"
-  export LESS_TERMCAP_ue="$(printf '%b' '[0m')"
-  export LESSOPEN="| lesspipe.sh %s"
+    export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+    export MANROFFOPT="-c"
+    } || {
+    export MANPAGER='less -s'
+    export LESS="R"
+    export LESS_TERMCAP_mb="$(printf '%b' '[1;31m')"
+    export LESS_TERMCAP_md="$(printf '%b' '[1;36m')"
+    export LESS_TERMCAP_me="$(printf '%b' '[0m')"
+    export LESS_TERMCAP_so="$(printf '%b' '[01;44;33m')"
+    export LESS_TERMCAP_se="$(printf '%b' '[0m')"
+    export LESS_TERMCAP_us="$(printf '%b' '[1;32m')"
+    export LESS_TERMCAP_ue="$(printf '%b' '[0m')"
+    export LESSOPEN="| lesspipe.sh %s"
 }
 
 ### --- MOZILLA --- ###
@@ -159,6 +160,8 @@ export POWERLEVEL9K_INSTALLATION_DIR="/usr/share/zsh-theme-powerlevel10k"
 ### --- PYTHON --- ###
 export PYTHONPYCACHEPREFIX=$XDG_CACHE_HOME/python
 export PYTHONSTARTUP="$XDG_CONFIG_HOME/python/pythonrc"
+export PIPX_BIN_DIR="$XDG_SCRIPTS_HOME"
+export PIPX_MAN_DIR="$XDG_DATA_HOME/man"
 
 ### --- RUST --- ###
 export RUSTUP_HOME="$XDG_DATA_HOME/rustup"

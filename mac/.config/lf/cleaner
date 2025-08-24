@@ -1,5 +1,5 @@
 #!/bin/sh
 
-if [ -n "$FIFO_UEBERZUGPP" ]; then
-  printf '{"action": "remove", "identifier": "PREVIEW"}\n' >"$FIFO_UEBERZUGPP"
+if command -v kitty >/dev/null 2>&1; then
+  kitty +kitten icat --silent --stdin no --transfer-mode file --clear >/dev/tty
 fi

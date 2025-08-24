@@ -2,7 +2,7 @@
 
 ifinstalled stig transmission-cli || exit 1
 
-! pidof transmission-daemon >/dev/null && transmission-daemon && notify-send "Starting torrent daemon..."
+! pgrep -x transmission-daemon >/dev/null 2>&1 && transmission-daemon && osascript -e 'display notification "Starting torrent daemon..." with title "transmission-daemon"'
 
 "${TERMINAL:-st}" -n stig -e stig
 pkill -RTMIN+22 "${STATUSBAR:-dwmblocks}"

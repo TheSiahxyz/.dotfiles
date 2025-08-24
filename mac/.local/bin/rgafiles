@@ -29,10 +29,6 @@ search_term() {
     echo "Error: 'rga' is not installed." >&2
     exit 1
   fi
-  if ! command -v xclip >/dev/null 2>&1; then
-    echo "Error: 'xclip' is not installed." >&2
-    exit 1
-  fi
 
   # Construct the preview command
   preview_cmd=$(printf "rga %s --pretty --context 10 '%s' {}" "$case_flag" "$*")
@@ -48,7 +44,7 @@ search_term() {
   fi
 
   # copy target to the clipboard
-  echo "$@" | xclip -selection clipboard 2>/dev/null
+  echo "$@" | pbcopy 2>/dev/null
 
   openfiles "$files"
 
