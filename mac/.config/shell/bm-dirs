@@ -6,6 +6,7 @@ btw             ${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/task/taskwarrior-tui
 bz              ${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/zsh
 cab             ${XDG_CONFIG_HOME:-${HOME}/.config}/abook
 cac             ${XDG_CACHE_HOME:-${HOME}/.cache}
+cae             ${XDG_CONFIG_HOME:-${HOME}/.config}/aerospace
 cbc             ${XDG_CONFIG_HOME:-${HOME}/.config}/bash
 cdb             ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwmblocks
 cdm             ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dmenu
@@ -31,6 +32,7 @@ cr              ${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/cron
 cse             ${XDG_CONFIG_HOME:-${HOME}/.config}/sesh
 csf             ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/surf
 csh             ${XDG_CONFIG_HOME:-${HOME}/.config}/shell
+csk             ${XDG_CONFIG_HOME:-${HOME}/.config}/sketchybar
 csl             ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/slock
 cst             ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/st
 ctc             ${XDG_CONFIG_HOME:-${HOME}/.config}/task

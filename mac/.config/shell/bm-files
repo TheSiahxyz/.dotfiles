@@ -2,6 +2,7 @@
 vab     ${XDG_CONFIG_HOME:-${HOME}/.config}/abook/addressbook                   # Address book config
 vbc     ${XDG_CONFIG_HOME:-${HOME}/.config}/bash/bashrc                         # Bash (shell) config
 vbd     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/bm-dirs                       # A list of bookmarked directories similar to this file
+vae     ${XDG_CONFIG_HOME:-${HOME}/.config}/aerospace/aerospace.toml            # Aerospace config
 vbf     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/bm-files                      # This file, a list of bookmarked files
 vbi     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/inputrc                       # This file is for gnu readline
 vbp     ${XDG_CONFIG_HOME:-${HOME}/.config}/bash/bash_profile                   # Bash profile
@@ -28,6 +29,7 @@ vqt     ${XDG_CONFIG_HOME:-${HOME}/.config}/qutebrowser/config.py               
 Vsm     /etc/samba/smb.conf                                                     # Samba config
 vse     ${XDG_CONFIG_HOME:-${HOME}/.config}/sesh/sesh.toml                      # Sesh config
 vsf     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/surf/config.def.h      # Surf: a simple browser
+vsk     ${XDG_CONFIG_HOME:-${HOME}/.config}/sketchybar/sketchybarrc             # Sketchybar config
 vsl     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/slock/config.def.h     # Slock: lock screen
 vsp     ${XDG_DATA_HOME:-${HOME}/.local/share}/thesiah/snippets                 # Snippets
 vss     ${XDG_CONFIG_HOME:-${HOME}/.config}/starship/starship.toml              # Starship
