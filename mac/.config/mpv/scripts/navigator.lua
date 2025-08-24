@@ -35,11 +35,9 @@ local settings = {
 	--favorites in format { 'Path to directory, notice trailing /' }
 	--on windows use double backslash c:\\my\\directory\\
 	favorites = {
-		"/media/" .. user,
-		"/mnt/second/videos",
 		home .. "/Downloads",
 		home .. "/Torrents/complete",
-		home .. "/Videos",
+		home .. "/Movies",
 		home .. "/.config/mpv/playlists",
 	},
 	--list of paths to ignore. the value is anything that returns true for if-statement.

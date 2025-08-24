@@ -60,8 +60,8 @@ gss             ${XDG_PICTURES_DIR:-${HOME}/Pictures}/screenshots
 gtc             $HOME/Torrents/complete
 gti             $HOME/Torrents/incomplete
 gtt             $HOME/Torrents
-gvr             ${XDG_VIDEOS_DIR:-${HOME}/Videos}/recordings
-gvv             ${XDG_VIDEOS_DIR:-${HOME}/Videos}
+gvr             ${XDG_VIDEOS_DIR:-${HOME}/Movies}/recordings
+gvv             ${XDG_VIDEOS_DIR:-${HOME}/Movies}
 gwf             $HOME/.librewolf/$USER.default
 gwo             ${XDG_DESKTOP_DIR:-${HOME}/Desktop}/Work
 gww             ${XDG_PICTURES_DIR:-${HOME}/Pictures}/wallpaper
