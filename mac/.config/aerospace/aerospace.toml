@@ -110,8 +110,8 @@ on-focus-changed = ['move-mouse window-lazy-center']
     alt-c = 'exec-and-forget /Applications/kitty.app/Contents/MacOS/kitty --title "calcurse" -e calcurse'
     alt-d = 'exec-and-forget open -na Dbeaver'
     alt-e = 'exec-and-forget /Applications/kitty.app/Contents/MacOS/kitty --title "neomutt" -e neomutt'
-    alt-n = 'exec-and-forget /Applications/kitty.app/Contents/MacOS/kitty --title "newsboat" -e newsboat'
     alt-r = 'exec-and-forget /Applications/kitty.app/Contents/MacOS/kitty --title "htop" -e htop'
+    alt-s = 'exec-and-forget /Applications/kitty.app/Contents/MacOS/kitty --title "newsboat" -e newsboat'
     alt-t = 'exec-and-forget open -na "Microsoft Teams"'
     alt-w = 'exec-and-forget open -na Firefox'
 
