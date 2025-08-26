@@ -82,3 +82,6 @@
 [user]
   name = TheSiahxyz
   email = 164138827+TheSiahxyz@users.noreply.github.com
+  signingkey = 67BE7AD056C803BA
+[commit]
+  gpgsign = true
