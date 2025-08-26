@@ -460,9 +460,6 @@ alias uzl='unzip -l'
 alias vi='vim'
 alias vi.='vim .'
 
-# vpn
-alias ovpn='sudo openvpn --config ~/.config/openvpn/thesiah.ovpn'
-
 # watch
 alias w1='watch -n 1'
 

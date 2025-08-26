@@ -28,9 +28,9 @@ vns     ${XDG_CONFIG_HOME:-${HOME}/.config}/newsboat/config                     
 vnu     ${XDG_CONFIG_HOME:-${HOME}/.config}/newsboat/urls                       # Newsboat url (RSS reader)
 vqt     ${XDG_CONFIG_HOME:-${HOME}/.config}/qutebrowser/config.py               # Qutebrowser config
 Vsm     /etc/samba/smb.conf                                                     # Samba config
+vsc     $HOME/.ssh/config                                                       # SSH config
 vse     ${XDG_CONFIG_HOME:-${HOME}/.config}/sesh/sesh.toml                      # Sesh config
 vsf     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/surf/config.def.h      # Surf: a simple browser
-vsh     $HOME/.ssh/config                                                       # SSH config
 vsk     ${XDG_CONFIG_HOME:-${HOME}/.config}/sketchybar/sketchybarrc             # Sketchybar config
 vsl     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/slock/config.def.h     # Slock: lock screen
 vsp     ${XDG_DATA_HOME:-${HOME}/.local/share}/thesiah/snippets                 # Snippets

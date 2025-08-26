@@ -129,9 +129,6 @@ export LYNX_CFG_PATH="$XDG_CONFIG_HOME/lynx"
     export LESSOPEN="| lesspipe.sh %s"
 }
 
-### --- MBSYNC --- ###
-export MBSYNCRC="$XDG_CONFIG_HOME/mbsync/config"
-
 ### --- MOZILLA --- ###
 export MOZ_USE_XINPUT2=1 # Mozilla smooth scrolling/touchpads.
 

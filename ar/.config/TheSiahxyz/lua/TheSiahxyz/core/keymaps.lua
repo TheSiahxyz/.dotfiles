@@ -68,7 +68,7 @@ vim.keymap.set("n", "gcD", function()
 	vim.cmd("cd " .. vim.fn.fnameescape(vim.fn.fnamemodify(realpath, ":h")))
 	vim.cmd("pwd")
 end, { desc = "Go to real path of current file" })
-vim.keymap.set("n", "gc.", ":cd ..<cr>:pwd<cr>", { desc = "Go to parent file path" })
+vim.keymap.set("n", "gc.", ":cd ..<cr>:pwd<cr>", { desc = "Go to current file path" })
 
 -- Check health
 vim.keymap.set("n", "<leader>ch", ":checkhealth<cr>", { desc = "Check neovim health" })

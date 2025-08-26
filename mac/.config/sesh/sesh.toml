@@ -42,10 +42,6 @@ name = "public"
 path = "~/Public"
 
 [[session]]
-name = "work"
-path = "~/Desktop/work"
-
-[[session]]
 name = "scripts"
 path = "~/.local/bin"
 
