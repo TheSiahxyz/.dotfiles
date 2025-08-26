@@ -107,11 +107,12 @@ on-focus-changed = ['move-mouse window-lazy-center']
     # See: https://nikitabobko.github.io/AeroSpace/commands#exec-and-forget
     # alt-enter = 'exec-and-forget open -n /System/Applications/Utilities/Terminal.app'
     alt-enter = 'exec-and-forget open -n /Applications/Kitty.app'
-    alt-c = 'exec-and-forget /Applications/kitty.app/Contents/MacOS/kitty --title "calcurse" -e calcurse'
+    alt-c = 'exec-and-forget kitty --title "calcurse" -e calcurse'
     alt-d = 'exec-and-forget open -na Dbeaver'
-    alt-e = 'exec-and-forget /Applications/kitty.app/Contents/MacOS/kitty --title "neomutt" -e neomutt'
-    alt-r = 'exec-and-forget /Applications/kitty.app/Contents/MacOS/kitty --title "htop" -e htop'
-    alt-s = 'exec-and-forget /Applications/kitty.app/Contents/MacOS/kitty --title "newsboat" -e newsboat'
+    alt-e = 'exec-and-forget kitty --title "neomutt" -e env EDITOR="nvim -u ~/.config/nvim/init.lua" neomutt'
+    alt-shift-e = 'exec-and-forget open -na "Microsoft Outlook"'
+    alt-r = 'exec-and-forget kitty --title "htop" -e htop'
+    alt-s = 'exec-and-forget kitty --title "newsboat" -e newsboat'
     alt-t = 'exec-and-forget open -na "Microsoft Teams"'
     alt-w = 'exec-and-forget open -na Firefox'
 

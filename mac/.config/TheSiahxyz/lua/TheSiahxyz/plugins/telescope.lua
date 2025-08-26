@@ -645,7 +645,7 @@ return {
 				require("telescope.builtin").buffers({
 					sort_mru = true,
 					sort_lastused = true,
-					initial_mode = "normal",
+					-- initial_mode = "normal",
 				})
 			end, { desc = "Find buffer files" })
 			vim.keymap.set("n", "<leader>fb", function()
