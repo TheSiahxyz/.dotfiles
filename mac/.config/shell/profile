@@ -3,9 +3,10 @@
 ###################################################
 # Add all directories in each subdirectory to $PATH
 export PATH="$PATH:/opt/homebrew/bin"
-export PATH="$PATH:$(find -L /opt/homebrew/opt -name bin -type d -print 2>/dev/null | sort -u | paste -s -d ':' -)"
+export PATH="$PATH:$(find -L ~/.local/share/asdf/installs -name bin -type d -print 2>/dev/null | sort -u | paste -s -d ':' -)"
 export PATH="$PATH:$(find ~/.local/bin -path '*/.git*' -prune -o \( -type f -o -type l \) -perm -u=x -exec dirname {} \; | sort -u | paste -sd ':' -)"
 export PATH="$PATH:$(find ~/.local/share/.password-store -type d -name '.extensions' | paste -sd ':' -)"
+command -v asdf >/dev/null 2>&1 && export PATH="$PATH:$(find -L /opt/homebrew/opt -name bin -type d -print 2>/dev/null | sort -u | paste -s -d ':' -)"
 
 unsetopt PROMPT_SP 2>/dev/null
 
@@ -54,6 +55,10 @@ export ANDROID_SDK_HOME="$XDG_CONFIG_HOME/android"
 ### --- ANSIBLE --- ###
 export ANSIBLE_CONFIG="$XDG_CONFIG_HOME/ansible/ansible.cfg"
 
+### --- ASDF --- ###
+export ASDF_CONFIG_FILE="$XDG_CONFIG_HOME/asdf/asdfrc"
+export ASDF_DATA_DIR="$XDG_DATA_HOME/asdf"
+
 ### --- BAT --- ###
 export BAT_CONFIG_PATH="$XDG_CONFIG_HOME/bat/config"
 
@@ -62,6 +67,10 @@ export CARGO_HOME="$XDG_DATA_HOME/cargo"
 
 ### --- DICS --- ###
 export DICS="/usr/share/stardict/dic/"
+
+### --- DOCKER --- ###
+export DOCKER_CONFIG="$XDG_CONFIG_HOME"/docker
+export MACHINE_STORAGE_PATH="$XDG_DATA_HOME"/docker-machine
 
 ### --- ELECTRUM --- ###
 export ELECTRUMDIR="$XDG_DATA_HOME/electrum"

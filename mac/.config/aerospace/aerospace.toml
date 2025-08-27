@@ -106,13 +106,16 @@ on-focus-changed = ['move-mouse window-lazy-center']
     # You can uncomment this line to open up terminal with alt + enter shortcut
     # See: https://nikitabobko.github.io/AeroSpace/commands#exec-and-forget
     # alt-enter = 'exec-and-forget open -n /System/Applications/Utilities/Terminal.app'
-    alt-enter = 'exec-and-forget open -n /Applications/Kitty.app'
-    alt-c = 'exec-and-forget kitty --title "calcurse" -e calcurse'
+    alt-enter = 'exec-and-forget open -na Kitty'
+    alt-shift-enter = 'exec-and-forget open -na Cursor'
+    alt-ctrl-enter = 'exec-and-forget open -na "Visual Studio Code"'
+    alt-c = 'exec-and-forget kitty --title -o close_on_child_death=yes -o confirm_os_window_close=0 "calcurse" -e calcurse'
     alt-d = 'exec-and-forget open -na Dbeaver'
-    alt-e = 'exec-and-forget kitty --title "neomutt" -e env EDITOR="nvim -u ~/.config/nvim/init.lua" neomutt'
+    alt-e = 'exec-and-forget kitty --title -o close_on_child_death=yes -o confirm_os_window_close=0 "neomutt" -e env EDITOR="nvim -u ~/.config/nvim/init.lua" neomutt'
     alt-shift-e = 'exec-and-forget open -na "Microsoft Outlook"'
-    alt-r = 'exec-and-forget kitty --title "htop" -e htop'
-    alt-s = 'exec-and-forget kitty --title "newsboat" -e newsboat'
+    alt-o = 'exec-and-forget open -na Docker'
+    alt-r = 'exec-and-forget kitty --title -o close_on_child_death=yes -o confirm_os_window_close=0 "htop" -e htop'
+    alt-s = 'exec-and-forget kitty --title -o close_on_child_death=yes -o confirm_os_window_close=0 "newsboat" -e newsboat'
     alt-t = 'exec-and-forget open -na "Microsoft Teams"'
     alt-w = 'exec-and-forget open -na Firefox'
 
@@ -146,6 +149,7 @@ on-focus-changed = ['move-mouse window-lazy-center']
     alt-7 = 'workspace 7'
     alt-8 = 'workspace 8'
     alt-9 = 'workspace 9'
+    alt-0 = 'workspace 10'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#move-node-to-workspace
     alt-shift-1 = 'move-node-to-workspace 1'
@@ -157,6 +161,7 @@ on-focus-changed = ['move-mouse window-lazy-center']
     alt-shift-7 = 'move-node-to-workspace 7'
     alt-shift-8 = 'move-node-to-workspace 8'
     alt-shift-9 = 'move-node-to-workspace 9'
+    alt-shift-0 = 'move-node-to-workspace 10'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#move-node-to-workspace
     alt-ctrl-1 = ['move-node-to-workspace 1', 'workspace 1']
@@ -168,6 +173,7 @@ on-focus-changed = ['move-mouse window-lazy-center']
     alt-ctrl-7 = ['move-node-to-workspace 7', 'workspace 7']
     alt-ctrl-8 = ['move-node-to-workspace 8', 'workspace 8']
     alt-ctrl-9 = ['move-node-to-workspace 9', 'workspace 9']
+    alt-ctrl-0 = ['move-node-to-workspace 10', 'workspace 10']
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#workspace-back-and-forth
     alt-tab = 'workspace-back-and-forth'
@@ -242,6 +248,10 @@ if.app-id = 'com.clickup.desktop-app'
 run = ['move-node-to-workspace 5']
 
 [[on-window-detected]]
+if.app-id = 'com.electron.dockerdesktop'
+run = ['move-node-to-workspace 6']
+
+[[on-window-detected]]
 if.app-name-regex-substring = 'vimwiki'
 run = ['move-node-to-workspace 6']
 
@@ -262,17 +272,21 @@ if.app-id = 'com.apple.iCal'
 run = ['move-node-to-workspace 8']
 
 [[on-window-detected]]
-if.app-id = 'com.kakao.KakaoTalkMac'
-run = ['move-node-to-workspace 9']
-
-[[on-window-detected]]
-if.app-id = 'com.tdesktop.Telegram'
-run = ['move-node-to-workspace 9']
-
-[[on-window-detected]]
-if.app-id = 'com.hnc.Discord'
+if.app-id = 'com.microsoft.Outlook'
 run = ['move-node-to-workspace 9']
 
 [[on-window-detected]]
 if.app-id = 'com.microsoft.teams2'
 run = ['move-node-to-workspace 9']
+
+[[on-window-detected]]
+if.app-id = 'com.kakao.KakaoTalkMac'
+run = ['move-node-to-workspace 10']
+
+[[on-window-detected]]
+if.app-id = 'com.hnc.Discord'
+run = ['move-node-to-workspace 10']
+
+[[on-window-detected]]
+if.app-id = 'com.tdesktop.Telegram'
+run = ['move-node-to-workspace 10']

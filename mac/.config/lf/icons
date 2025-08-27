@@ -23,9 +23,9 @@ Vagrantfile                 
 *.ejs                       
 *.css                       
 *.less                      
-*.md                        
+*.md                        
 *.mdx                       
-*.markdown                  
+*.markdown                  
 *.rmd                       
 *.json                      
 *.webmanifest               
