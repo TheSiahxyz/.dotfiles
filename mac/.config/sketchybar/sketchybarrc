@@ -140,7 +140,7 @@ sketchybar --add item calendar right \
   label.padding_left=4 \
   label.padding_right=8 \
   label.max_chars=25 \
-  update_freq=300 \
+  update_freq=86400 \
   script="$PLUGIN_DIR/calendar.sh" \
   background.color=$BACKGROUND_1 \
   background.drawing=on \
