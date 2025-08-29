@@ -7,6 +7,7 @@ source "$CONFIG_DIR/colors.sh"
 source "$CONFIG_DIR/icons.sh"
 
 PLUGIN_DIR="$CONFIG_DIR/plugins"
+ITEM_DIR="$CONFIG_DIR/items"
 
 ##### Bar Appearance #####
 sketchybar --bar position=top height=42 \
@@ -148,6 +149,58 @@ sketchybar --add item calendar right \
   padding_left=4 \
   padding_right=4
 
+# Clock
+sketchybar --add item clock right \
+  --set clock icon="󰅐" \
+  icon.font="SF Pro:Semibold:15.0" \
+  icon.color=$YELLOW \
+  icon.padding_left=8 \
+  icon.padding_right=6 \
+  label.font="SF Pro:Medium:12.0" \
+  label.color=$WHITE \
+  label.padding_left=4 \
+  label.padding_right=8 \
+  update_freq=10 \
+  script="$PLUGIN_DIR/clock.sh" \
+  background.color=$BACKGROUND_1 \
+  background.drawing=on \
+  padding_left=4 \
+  padding_right=4 \
+  click_script="$PLUGIN_DIR/clock_click.sh"
+
+source "$ITEM_DIR/music.sh"
+
+sketchybar --add item music center \
+  --set music icon=􁁒 \
+  icon.padding_left=8 \
+  icon.padding_right=8 \
+  label.padding_right=8 \
+  label.font="Hack Nerd Font:Bold:17.0" \
+  label="Loading…" \
+  label.align=left \
+  label.max_chars=40 \
+  update_freq=10 \
+  script="$PLUGIN_DIR/youtube-music.sh" \
+  background.image.scale=0.9 \
+  background.image.corner_radius=8 \
+  background.image.border_color="$TRANSPARENT" \
+  background.color="$TRANSPARENT" \
+  scroll_texts=on \
+  padding_right=0 \
+  click_script="curl -s -X POST 0.0.0.0:26538/api/v1/toggle-play && $PLUGIN_DIR/youtube-music.sh"
+
+sketchybar --add item music_artwork center \
+  label.padding_right=8 \
+  label="" \
+  width=40 \
+  background.image.scale=0.07 \
+  background.image.corner_radius=8 \
+  background.image.border_color="$TRANSPARENT" \
+  background.color="$TRANSPARENT" \
+  display=1 \
+  padding_right=16 \
+  click_script="curl -s -X POST 0.0.0.0:26538/api/v1/toggle-play && $PLUGIN_DIR/youtube-music.sh"
+
 # Now Playing
 sketchybar --add item now_playing right \
   --set now_playing icon.font="SF Pro:Semibold:15.0" \
@@ -203,25 +256,6 @@ sketchybar --add item input_source right \
   background.drawing=on \
   padding_left=4 \
   padding_right=4
-
-# Clock
-sketchybar --add item clock right \
-  --set clock icon="󰅐" \
-  icon.font="SF Pro:Semibold:15.0" \
-  icon.color=$YELLOW \
-  icon.padding_left=8 \
-  icon.padding_right=6 \
-  label.font="SF Pro:Medium:12.0" \
-  label.color=$WHITE \
-  label.padding_left=4 \
-  label.padding_right=8 \
-  update_freq=10 \
-  script="$PLUGIN_DIR/clock.sh" \
-  background.color=$BACKGROUND_1 \
-  background.drawing=on \
-  padding_left=4 \
-  padding_right=4 \
-  click_script="$PLUGIN_DIR/clock_click.sh"
 
 # Volume
 sketchybar --add item volume right \
