@@ -130,19 +130,6 @@ sketchybar --add item front_app left \
   script="$PLUGIN_DIR/front_app.sh" \
   --subscribe front_app front_app_switched
 
-# YouTube Music Album
-sketchybar --add item music-artwork left \
-  label.padding_right=8 \
-  label="" \
-  width=20 \
-  background.image.scale=0.09 \
-  background.image.corner_radius=8 \
-  background.image.border_color="$TRANSPARENT" \
-  background.color="$TRANSPARENT" \
-  display=1 \
-  padding_right=16 \
-  click_script="curl -s -X POST 0.0.0.0:26538/api/v1/toggle-play && $PLUGIN_DIR/youtube-music.sh"
-
 # YouTube Music
 sketchybar --add item music left \
   --set music icon=􁁒 \
@@ -161,6 +148,19 @@ sketchybar --add item music left \
   background.color="$TRANSPARENT" \
   scroll_texts=on \
   padding_right=0 \
+  click_script="curl -s -X POST 0.0.0.0:26538/api/v1/toggle-play && $PLUGIN_DIR/youtube-music.sh"
+
+# YouTube Music Album
+sketchybar --add item music-artwork left \
+  label.padding_right=8 \
+  label="" \
+  width=20 \
+  background.image.scale=0.09 \
+  background.image.corner_radius=8 \
+  background.image.border_color="$TRANSPARENT" \
+  background.color="$TRANSPARENT" \
+  display=1 \
+  padding_right=16 \
   click_script="curl -s -X POST 0.0.0.0:26538/api/v1/toggle-play && $PLUGIN_DIR/youtube-music.sh"
 
 # Now Playing
