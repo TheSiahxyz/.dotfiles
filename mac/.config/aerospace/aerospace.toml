@@ -119,6 +119,7 @@ on-focus-changed = ['move-mouse window-lazy-center']
     alt-r = 'exec-and-forget kitty -o close_on_child_death=yes -o confirm_os_window_close=0 --title "htop" -e htop'
     alt-s = 'exec-and-forget kitty -o close_on_child_death=yes -o confirm_os_window_close=0 --title "newsboat" -e newsboat'
     alt-t = 'exec-and-forget open -na "Microsoft Teams"'
+    alt-v = 'exec-and-forget kitty -o close_on_child_death=yes -o confirm_os_window_close=0 --title "vimwiki" -e env EDITOR="nvim -u ~/.config/nvim/init.lua" nvim -c VimwikiIndex 1'
     alt-w = 'exec-and-forget open -na Firefox'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#layout
