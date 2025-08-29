@@ -242,6 +242,10 @@ if.app-id = 'com.microsoft.VSCode'
 run = ['move-node-to-workspace 4']
 
 [[on-window-detected]]
+if.app-name-regex-substring = 'vimwiki'
+run = ['move-node-to-workspace 5']
+
+[[on-window-detected]]
 if.app-id = 'com.microsoft.Excel'
 run = ['move-node-to-workspace 5']
 
@@ -259,10 +263,6 @@ run = ['move-node-to-workspace 6']
 
 [[on-window-detected]]
 if.app-id = 'com.clickup.desktop-app'
-run = ['move-node-to-workspace 6']
-
-[[on-window-detected]]
-if.app-name-regex-substring = 'vimwiki'
 run = ['move-node-to-workspace 6']
 
 [[on-window-detected]]
