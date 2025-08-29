@@ -130,6 +130,55 @@ sketchybar --add item front_app left \
   script="$PLUGIN_DIR/front_app.sh" \
   --subscribe front_app front_app_switched
 
+# YouTube Music
+sketchybar --add item music left \
+  --set music icon=􁁒 \
+  icon.padding_left=8 \
+  icon.padding_right=8 \
+  label.padding_right=8 \
+  label.font="Hack Nerd Font:Bold:12.0" \
+  label="Loading…" \
+  label.align=left \
+  label.max_chars=40 \
+  update_freq=1 \
+  script="$PLUGIN_DIR/youtube-music.sh" \
+  background.image.scale=0.9 \
+  background.image.corner_radius=8 \
+  background.image.border_color="$TRANSPARENT" \
+  background.color="$TRANSPARENT" \
+  scroll_texts=on \
+  padding_right=0 \
+  click_script="curl -s -X POST 0.0.0.0:26538/api/v1/toggle-play && $PLUGIN_DIR/youtube-music.sh"
+
+# YouTube Music Info
+sketchybar --add item music_artwork left \
+  label.padding_right=8 \
+  label="" \
+  width=40 \
+  background.image.scale=0.07 \
+  background.image.corner_radius=8 \
+  background.image.border_color="$TRANSPARENT" \
+  background.color="$TRANSPARENT" \
+  display=1 \
+  padding_right=16 \
+  click_script="curl -s -X POST 0.0.0.0:26538/api/v1/toggle-play && $PLUGIN_DIR/youtube-music.sh"
+
+# Now Playing
+# sketchybar --add item now_playing right \
+#   --set now_playing icon.font="SF Pro:Semibold:12.0" \
+#   icon.padding_left=8 \
+#   icon.padding_right=6 \
+#   label.font="SF Pro:Medium:12.0" \
+#   label.padding_left=4 \
+#   label.padding_right=8 \
+#   update_freq=2 \
+#   script="$PLUGIN_DIR/now_playing.sh" \
+#   background.color=$BACKGROUND_1 \
+#   background.drawing=on \
+#   drawing=off \
+#   padding_left=4 \
+#   padding_right=4
+
 ##### Right Side Items #####
 
 # Calendar Events
@@ -167,53 +216,6 @@ sketchybar --add item clock right \
   padding_left=4 \
   padding_right=4 \
   click_script="$PLUGIN_DIR/clock_click.sh"
-
-sketchybar --add item music center \
-  --set music icon=􁁒 \
-  icon.padding_left=8 \
-  icon.padding_right=8 \
-  label.padding_right=8 \
-  label.font="Hack Nerd Font:Bold:17.0" \
-  label="Loading…" \
-  label.align=left \
-  label.max_chars=40 \
-  update_freq=1 \
-  script="$PLUGIN_DIR/youtube-music.sh" \
-  background.image.scale=0.9 \
-  background.image.corner_radius=8 \
-  background.image.border_color="$TRANSPARENT" \
-  background.color="$TRANSPARENT" \
-  scroll_texts=on \
-  padding_right=0 \
-  click_script="curl -s -X POST 0.0.0.0:26538/api/v1/toggle-play && $PLUGIN_DIR/youtube-music.sh"
-
-sketchybar --add item music_artwork center \
-  label.padding_right=8 \
-  label="" \
-  width=40 \
-  background.image.scale=0.07 \
-  background.image.corner_radius=8 \
-  background.image.border_color="$TRANSPARENT" \
-  background.color="$TRANSPARENT" \
-  display=1 \
-  padding_right=16 \
-  click_script="curl -s -X POST 0.0.0.0:26538/api/v1/toggle-play && $PLUGIN_DIR/youtube-music.sh"
-
-# Now Playing
-sketchybar --add item now_playing right \
-  --set now_playing icon.font="SF Pro:Semibold:15.0" \
-  icon.padding_left=8 \
-  icon.padding_right=6 \
-  label.font="SF Pro:Medium:12.0" \
-  label.padding_left=4 \
-  label.padding_right=8 \
-  update_freq=2 \
-  script="$PLUGIN_DIR/now_playing.sh" \
-  background.color=$BACKGROUND_1 \
-  background.drawing=on \
-  drawing=off \
-  padding_left=4 \
-  padding_right=4
 
 # WiFi Status
 sketchybar --add item wifi right \
@@ -309,19 +311,19 @@ sketchybar --add item pritunl right \
 
 # Weather
 # sketchybar --add item weather right \
-#            --set weather icon="󰖕" \
-#                         icon.font="SF Pro:Semibold:15.0" \
-#                         icon.color=$BLUE \
-#                         icon.padding_left=8 \
-#                         icon.padding_right=6 \
-#                         label.padding_left=4 \
-#                         label.padding_right=8 \
-#                         update_freq=1800 \
-#                         script="$PLUGIN_DIR/weather.sh" \
-#                         background.color=$BACKGROUND_1 \
-#                         background.drawing=on \
-#                         padding_left=4 \
-#                         padding_right=4
+#   --set weather icon="󰖕" \
+#   icon.font="SF Pro:Semibold:15.0" \
+#   icon.color=$BLUE \
+#   icon.padding_left=8 \
+#   icon.padding_right=6 \
+#   label.padding_left=4 \
+#   label.padding_right=8 \
+#   update_freq=1800 \
+#   script="$PLUGIN_DIR/weather.sh" \
+#   background.color=$BACKGROUND_1 \
+#   background.drawing=on \
+#   padding_left=4 \
+#   padding_right=4
 
 ##### Finalize Setup #####
 sketchybar --update
