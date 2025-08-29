@@ -168,8 +168,6 @@ sketchybar --add item clock right \
   padding_right=4 \
   click_script="$PLUGIN_DIR/clock_click.sh"
 
-source "$ITEM_DIR/music.sh"
-
 sketchybar --add item music center \
   --set music icon=􁁒 \
   icon.padding_left=8 \
