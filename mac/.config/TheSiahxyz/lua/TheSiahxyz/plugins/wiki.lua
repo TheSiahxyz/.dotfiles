@@ -1,6 +1,7 @@
 return {
 	{
 		"vimwiki/vimwiki",
+		cmd = { "VimwikiIndex" },
 		init = function()
 			local wk = require("which-key")
 			wk.add({

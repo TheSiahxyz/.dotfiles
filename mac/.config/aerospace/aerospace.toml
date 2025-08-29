@@ -115,7 +115,7 @@ on-focus-changed = ['move-mouse window-lazy-center']
     alt-e = 'exec-and-forget kitty -o close_on_child_death=yes -o confirm_os_window_close=0 --title "neomutt" -e env EDITOR="nvim -u ~/.config/nvim/init.lua" neomutt'
     alt-shift-e = 'exec-and-forget open -na "Microsoft Outlook"'
     alt-m = 'exec-and-forget open -na "YouTube Music"'
-    alt-o = 'exec-and-forget open -na Docker'
+    alt-o = 'exec-and-forget open -na Docker Desktop'
     alt-r = 'exec-and-forget kitty -o close_on_child_death=yes -o confirm_os_window_close=0 --title "htop" -e htop'
     alt-s = 'exec-and-forget kitty -o close_on_child_death=yes -o confirm_os_window_close=0 --title "newsboat" -e newsboat'
     alt-t = 'exec-and-forget open -na "Microsoft Teams"'

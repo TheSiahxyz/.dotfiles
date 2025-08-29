@@ -9,6 +9,7 @@ vim.g.have_nerd_font = true
 -- vim.g.loaded_netrwPlugin = 1
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
+vim.g.python3_host_prog = vim.fn.expand("~/.local/share/venvs/nvim/bin/python")
 vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions"
 vim.opt.backup = false
 vim.opt.breakindent = true
