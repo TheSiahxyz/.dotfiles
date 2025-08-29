@@ -2,7 +2,7 @@
 
 options=(
   style=square
-  width=6.0
+  width=8.0
   hidpi=on
   active_color=0xff770000
   # active_color="gradient(top_left=0xffebeb99,bottom_right=0xfff57f17)"

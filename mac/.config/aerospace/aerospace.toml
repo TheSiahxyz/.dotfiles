@@ -73,9 +73,9 @@ on-focus-changed = ['move-mouse window-lazy-center']
     inner.horizontal =  15
     inner.vertical =    15
     outer.top =         [{ monitor."main" = 12 }, {monitor."secondary" = 40}, 10]
-    outer.left =        8
-    outer.bottom =      8
-    outer.right =       8
+    outer.left =        10
+    outer.bottom =      10
+    outer.right =       10
 
 # See https://nikitabobko.github.io/AeroSpace/guide#exec-env-vars
 [exec] # Again, you don't need to copy all config sections to your config.
@@ -109,13 +109,14 @@ on-focus-changed = ['move-mouse window-lazy-center']
     alt-enter = 'exec-and-forget open -na Kitty'
     alt-shift-enter = 'exec-and-forget open -na Cursor'
     alt-ctrl-enter = 'exec-and-forget open -na "Visual Studio Code"'
-    alt-c = 'exec-and-forget kitty --title -o close_on_child_death=yes -o confirm_os_window_close=0 "calcurse" -e calcurse'
+    alt-a = 'exec-and-forget open -na KakaoTalk'
+    alt-c = 'exec-and-forget kitty -o close_on_child_death=yes -o confirm_os_window_close=0 --title "calcurse" -e calcurse'
     alt-d = 'exec-and-forget open -na Dbeaver'
-    alt-e = 'exec-and-forget kitty --title -o close_on_child_death=yes -o confirm_os_window_close=0 "neomutt" -e env EDITOR="nvim -u ~/.config/nvim/init.lua" neomutt'
+    alt-e = 'exec-and-forget kitty -o close_on_child_death=yes -o confirm_os_window_close=0 --title "neomutt" -e env EDITOR="nvim -u ~/.config/nvim/init.lua" neomutt'
     alt-shift-e = 'exec-and-forget open -na "Microsoft Outlook"'
     alt-o = 'exec-and-forget open -na Docker'
-    alt-r = 'exec-and-forget kitty --title -o close_on_child_death=yes -o confirm_os_window_close=0 "htop" -e htop'
-    alt-s = 'exec-and-forget kitty --title -o close_on_child_death=yes -o confirm_os_window_close=0 "newsboat" -e newsboat'
+    alt-r = 'exec-and-forget kitty -o close_on_child_death=yes -o confirm_os_window_close=0 --title "htop" -e htop'
+    alt-s = 'exec-and-forget kitty -o close_on_child_death=yes -o confirm_os_window_close=0 --title "newsboat" -e newsboat'
     alt-t = 'exec-and-forget open -na "Microsoft Teams"'
     alt-w = 'exec-and-forget open -na Firefox'
 

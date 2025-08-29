@@ -31,6 +31,30 @@ local function find_nvim_plugin_files(prompt_bufnr)
 	end
 end
 
+local function telescope_open_single_or_multi(bufnr)
+	local actions = require("telescope.actions")
+	local actions_state = require("telescope.actions.state")
+
+	local picker = actions_state.get_current_picker(bufnr)
+	local multi_selection = picker:get_multi_selection()
+
+	if not vim.tbl_isempty(multi_selection) then
+		actions.close(bufnr)
+		for _, entry in ipairs(multi_selection) do
+			if entry.path then
+				vim.cmd(string.format("edit %s", entry.path))
+			end
+		end
+	else
+		-- Only open the file under the cursor if nothing is selected
+		local entry = actions_state.get_selected_entry()
+		if entry and entry.path then
+			actions.close(bufnr)
+			vim.cmd(string.format("edit %s", entry.path))
+		end
+	end
+end
+
 return {
 	{
 		"nvim-telescope/telescope-file-browser.nvim",
@@ -549,6 +573,7 @@ return {
 							["<C-o><C-l>"] = actions.insert_original_cline,
 							["<M-f>"] = actions.nop,
 							["<M-k>"] = actions.nop,
+							["<CR>"] = telescope_open_single_or_multi,
 						},
 						n = {
 							["q"] = actions.close,
