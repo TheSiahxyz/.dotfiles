@@ -114,6 +114,7 @@ on-focus-changed = ['move-mouse window-lazy-center']
     alt-d = 'exec-and-forget open -na Dbeaver'
     alt-e = 'exec-and-forget kitty -o close_on_child_death=yes -o confirm_os_window_close=0 --title "neomutt" -e env EDITOR="nvim -u ~/.config/nvim/init.lua" neomutt'
     alt-shift-e = 'exec-and-forget open -na "Microsoft Outlook"'
+    alt-m = 'exec-and-forget open -na "YouTube Music"'
     alt-o = 'exec-and-forget open -na Docker'
     alt-r = 'exec-and-forget kitty -o close_on_child_death=yes -o confirm_os_window_close=0 --title "htop" -e htop'
     alt-s = 'exec-and-forget kitty -o close_on_child_death=yes -o confirm_os_window_close=0 --title "newsboat" -e newsboat'
@@ -278,6 +279,10 @@ run = ['move-node-to-workspace 7']
 
 [[on-window-detected]]
 if.app-id = 'com.apple.Music'
+run = ['move-node-to-workspace 7']
+
+[[on-window-detected]]
+if.app-id = 'com.github.th-ch.youtube-music'
 run = ['move-node-to-workspace 7']
 
 [[on-window-detected]]

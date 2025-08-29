@@ -179,7 +179,7 @@ sketchybar --add item music center \
   label="Loading…" \
   label.align=left \
   label.max_chars=40 \
-  update_freq=10 \
+  update_freq=1 \
   script="$PLUGIN_DIR/youtube-music.sh" \
   background.image.scale=0.9 \
   background.image.corner_radius=8 \
