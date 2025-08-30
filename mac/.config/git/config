@@ -4,6 +4,7 @@
   autocrlf = input
   excludesFile = ~/.config/git/ignore
   pager = delta
+	quotepath = false
 [color "status"]
   added = green
   branch = bold magenta
