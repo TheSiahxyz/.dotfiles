@@ -110,15 +110,15 @@ on-focus-changed = ['move-mouse window-lazy-center']
     alt-shift-enter = 'exec-and-forget open -na Cursor'
     alt-ctrl-enter = 'exec-and-forget open -na "Visual Studio Code"'
     alt-a = 'exec-and-forget open -na KakaoTalk'
-    alt-c = 'exec-and-forget /Applications/kitty.app/Contents/MacOS/kitty -o close_on_child_death=yes -o confirm_os_window_close=0 --title "calcurse" /bin/zsh -lc "exec calcurse"'
+    alt-c = 'exec-and-forget /Applications/kitty.app/Contents/MacOS/kitty -o allow_remote_control=yes -o confirm_os_window_close=0 --title "calcurse" /bin/zsh -lc "calcurse; /Applications/kitty.app/Contents/MacOS/kitten @ close-window --self"'
     alt-d = 'exec-and-forget open -na Dbeaver'
-    alt-e = 'exec-and-forget /Applications/kitty.app/Contents/MacOS/kitty -o close_on_child_death=yes -o confirm_os_window_close=0 --title "neomutt" /bin/zsh -lc "EDITOR=\"nvim -u ~/.config/nvim/init.lua\" exec neomutt"'
+    alt-e = 'exec-and-forget /Applications/kitty.app/Contents/MacOS/kitty -o allow_remote_control=yes -o confirm_os_window_close=0 --title "neomutt" /bin/zsh -lc "EDITOR=\"nvim -u ~/.config/nvim/init.lua\" neomutt; /Applications/kitty.app/Contents/MacOS/kitten @ close-window --self"'
     alt-shift-e = 'exec-and-forget open -na "Microsoft Outlook"'
+    alt-i = 'exec-and-forget /Applications/kitty.app/Contents/MacOS/kitty -o allow_remote_control=yes -o confirm_os_window_close=0 --title "vimwiki" /bin/zsh -lc "nvim -c VimwikiIndex 1; /Applications/kitty.app/Contents/MacOS/kitten @ close-window --self"'
     alt-m = 'exec-and-forget open -na "YouTube Music"'
-    alt-n = 'exec-and-forget /Applications/kitty.app/Contents/MacOS/kitty -o close_on_child_death=yes -o confirm_os_window_close=0 --title "vimwiki" /bin/zsh -lc "EDITOR=\"nvim -u ~/.config/nvim/init.lua\" exec nvim -c VimwikiIndex 1"'
     alt-o = 'exec-and-forget open -na Docker Desktop'
-    alt-r = 'exec-and-forget /Applications/kitty.app/Contents/MacOS/kitty -o close_on_child_death=yes -o confirm_os_window_close=0 --title "htop" /bin/zsh -lc "exec htop"'
-    alt-s = 'exec-and-forget /Applications/kitty.app/Contents/MacOS/kitty -o close_on_child_death=yes -o confirm_os_window_close=0 --title "newsboat" /bin/zsh -lc "exec newsboat"'
+    alt-r = 'exec-and-forget /Applications/kitty.app/Contents/MacOS/kitty -o allow_remote_control=yes -o confirm_os_window_close=0 --title "htop" /bin/zsh -lc "htop; /Applications/kitty.app/Contents/MacOS/kitten @ close-window --self"'
+    alt-s = 'exec-and-forget /Applications/kitty.app/Contents/MacOS/kitty -o allow_remote_control=yes -o confirm_os_window_close=0 --title "newsboat" /bin/zsh -lc "newsboat; /Applications/kitty.app/Contents/MacOS/kitten @ close-window --self"'
     alt-t = 'exec-and-forget open -na "Microsoft Teams"'
     alt-w = 'exec-and-forget open -na Firefox'
 
@@ -191,8 +191,6 @@ on-focus-changed = ['move-mouse window-lazy-center']
 
     # disabled hide window
     cmd-h = []
-
-    # rotate hangul and english
 
 # 'service' binding mode declaration.
 # See: https://nikitabobko.github.io/AeroSpace/guide#binding-modes
