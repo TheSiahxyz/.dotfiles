@@ -81,7 +81,7 @@ return {
 			escape_quit = true, -- Map escape to the quit command
 			focus_on_open = true, -- Focus the current file when opening Lf
 			mappings = true, -- Enable terminal buffer mapping
-			tmux = true, -- Tmux statusline can be disabled
+			tmux = false, -- Tmux statusline can be disabled
 			disable_netrw_warning = true, -- Don't display a message when opening a directory
 			highlights = {
 				Normal = { link = "Normal" }, -- Use normal highlighting

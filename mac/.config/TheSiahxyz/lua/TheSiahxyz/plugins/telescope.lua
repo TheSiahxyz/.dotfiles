@@ -33,25 +33,43 @@ end
 
 local function telescope_open_single_or_multi(bufnr)
 	local actions = require("telescope.actions")
-	local actions_state = require("telescope.actions.state")
+	local action_state = require("telescope.actions.state")
 
-	local picker = actions_state.get_current_picker(bufnr)
-	local multi_selection = picker:get_multi_selection()
+	local picker = action_state.get_current_picker(bufnr)
+	local multi = picker:get_multi_selection()
 
-	if not vim.tbl_isempty(multi_selection) then
-		actions.close(bufnr)
-		for _, entry in ipairs(multi_selection) do
-			if entry.path then
-				vim.cmd(string.format("edit %s", entry.path))
+	local function open_path(p)
+		vim.cmd("edit " .. vim.fn.fnameescape(p))
+	end
+
+	-- If there are multiple selections and at least one has a path, open those.
+	if multi and #multi > 0 then
+		local opened_any = false
+		for _, entry in ipairs(multi) do
+			if entry and entry.path then
+				if not opened_any then
+					actions.close(bufnr)
+				end
+				opened_any = true
+				open_path(entry.path)
 			end
 		end
-	else
-		-- Only open the file under the cursor if nothing is selected
-		local entry = actions_state.get_selected_entry()
-		if entry and entry.path then
-			actions.close(bufnr)
-			vim.cmd(string.format("edit %s", entry.path))
+		if opened_any then
+			return
+		else
+			-- Nothing had a path → fall back (e.g. ui-select)
+			return actions.select_default(bufnr)
 		end
+	end
+
+	-- Single selection
+	local entry = action_state.get_selected_entry()
+	if entry and entry.path then
+		actions.close(bufnr)
+		open_path(entry.path)
+	else
+		-- No path → let Telescope / ui-select handle Enter normally
+		return actions.select_default(bufnr)
 	end
 end
 
