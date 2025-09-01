@@ -178,6 +178,9 @@ on-focus-changed = ['move-mouse window-lazy-center']
     alt-ctrl-9 = ['move-node-to-workspace 9', 'workspace 9']
     alt-ctrl-0 = ['move-node-to-workspace 10', 'workspace 10']
 
+    alt-leftSquareBracket = 'focus-monitor prev'
+    alt-rightSquareBracket = 'focus-monitor next'
+
     # See: https://nikitabobko.github.io/AeroSpace/commands#workspace-back-and-forth
     alt-tab = 'workspace-back-and-forth'
     # See: https://nikitabobko.github.io/AeroSpace/commands#move-workspace-to-monitor
