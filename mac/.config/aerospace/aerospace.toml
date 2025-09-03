@@ -116,7 +116,7 @@ on-focus-changed = ['move-mouse window-lazy-center']
     alt-shift-e = 'exec-and-forget open -na "Microsoft Outlook"'
     alt-i = 'exec-and-forget /Applications/kitty.app/Contents/MacOS/kitty -o allow_remote_control=yes -o confirm_os_window_close=0 --title "vimwiki" /bin/zsh -lc "nvim -c VimwikiIndex 1; /Applications/kitty.app/Contents/MacOS/kitten @ close-window --self"'
     alt-m = 'exec-and-forget open -na "YouTube Music"'
-    alt-o = 'exec-and-forget open -na Docker Desktop'
+    alt-o = 'exec-and-forget open -na "Docker Desktop"'
     alt-r = 'exec-and-forget /Applications/kitty.app/Contents/MacOS/kitty -o allow_remote_control=yes -o confirm_os_window_close=0 --title "htop" /bin/zsh -lc "htop; /Applications/kitty.app/Contents/MacOS/kitten @ close-window --self"'
     alt-s = 'exec-and-forget /Applications/kitty.app/Contents/MacOS/kitty -o allow_remote_control=yes -o confirm_os_window_close=0 --title "newsboat" /bin/zsh -lc "newsboat; /Applications/kitty.app/Contents/MacOS/kitten @ close-window --self"'
     alt-t = 'exec-and-forget open -na "Microsoft Teams"'
@@ -178,8 +178,8 @@ on-focus-changed = ['move-mouse window-lazy-center']
     alt-ctrl-9 = ['move-node-to-workspace 9', 'workspace 9']
     alt-ctrl-0 = ['move-node-to-workspace 10', 'workspace 10']
 
-    alt-leftSquareBracket = 'focus-monitor prev'
-    alt-rightSquareBracket = 'focus-monitor next'
+    alt-leftSquareBracket = 'focus-monitor next'
+    alt-rightSquareBracket = 'focus-monitor prev'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#workspace-back-and-forth
     alt-tab = 'workspace-back-and-forth'
@@ -194,6 +194,8 @@ on-focus-changed = ['move-mouse window-lazy-center']
 
     # disabled hide window
     cmd-h = []
+
+    alt-q = 'close'
 
 # 'service' binding mode declaration.
 # See: https://nikitabobko.github.io/AeroSpace/guide#binding-modes
