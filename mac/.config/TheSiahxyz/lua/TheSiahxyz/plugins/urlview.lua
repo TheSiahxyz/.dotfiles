@@ -95,11 +95,11 @@ return {
 			-- Default: + (system clipboard)
 			default_register = "+",
 			-- Whether plugin URLs should link to the branch used by your package manager
-			default_include_branch = false,
+			default_include_branch = true,
 			-- Ensure links shown in the picker are unique (no duplicates)
-			unique = false,
+			unique = true,
 			-- Ensure links shown in the picker are sorted alphabetically
-			sorted = false,
+			sorted = true,
 			-- Minimum log level (recommended at least `vim.log.levels.WARN` for error detection warnings)
 			log_level_min = vim.log.levels.INFO,
 			-- Keymaps for jumping to previous / next URL in buffer

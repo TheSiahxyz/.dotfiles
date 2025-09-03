@@ -31,48 +31,6 @@ local function find_nvim_plugin_files(prompt_bufnr)
 	end
 end
 
-local function telescope_open_single_or_multi(bufnr)
-	local actions = require("telescope.actions")
-	local action_state = require("telescope.actions.state")
-
-	local picker = action_state.get_current_picker(bufnr)
-	local multi = picker:get_multi_selection()
-
-	local function open_path(p)
-		vim.cmd("edit " .. vim.fn.fnameescape(p))
-	end
-
-	-- If there are multiple selections and at least one has a path, open those.
-	if multi and #multi > 0 then
-		local opened_any = false
-		for _, entry in ipairs(multi) do
-			if entry and entry.path then
-				if not opened_any then
-					actions.close(bufnr)
-				end
-				opened_any = true
-				open_path(entry.path)
-			end
-		end
-		if opened_any then
-			return
-		else
-			-- Nothing had a path → fall back (e.g. ui-select)
-			return actions.select_default(bufnr)
-		end
-	end
-
-	-- Single selection
-	local entry = action_state.get_selected_entry()
-	if entry and entry.path then
-		actions.close(bufnr)
-		open_path(entry.path)
-	else
-		-- No path → let Telescope / ui-select handle Enter normally
-		return actions.select_default(bufnr)
-	end
-end
-
 return {
 	{
 		"nvim-telescope/telescope-file-browser.nvim",
@@ -559,6 +517,42 @@ return {
 			local open_with_trouble = require("trouble.sources.telescope").open
 			local add_to_trouble = require("trouble.sources.telescope").add
 
+			local function telescope_open_single_or_multi(prompt_bufnr)
+				local picker = actions_state.get_current_picker(prompt_bufnr)
+				local multi = picker:get_multi_selection()
+
+				-- If you selected multiple (with <Tab>), open them all.
+				if not vim.tbl_isempty(multi) then
+					actions.close(prompt_bufnr)
+
+					for _, entry in ipairs(multi) do
+						-- Try to get a filepath across different pickers
+						local path = entry.path -- find_files, oldfiles, etc.
+							or entry.filename -- live_grep/grep_string
+							or (type(entry.value) == "string" and entry.value)
+							or (entry.value and entry.value.path)
+
+						if path then
+							vim.cmd("edit " .. vim.fn.fnameescape(path))
+
+							-- (Optional) jump to the matched line/col for grep results
+							local lnum = entry.lnum or entry.row
+							local col = entry.col
+							if lnum then
+								vim.api.nvim_win_set_cursor(0, { lnum, math.max((col or 1) - 1, 0) })
+							end
+						elseif entry.bufnr then
+							-- buffers picker
+							vim.cmd("buffer " .. entry.bufnr)
+						end
+					end
+					return
+				end
+
+				-- Single selection → let Telescope handle it
+				-- This respects picker-specific behavior (e.g. jumping to lnum for grep).
+				actions.select_default(prompt_bufnr)
+			end
 			require("telescope").setup({
 				defaults = {
 					mappings = {

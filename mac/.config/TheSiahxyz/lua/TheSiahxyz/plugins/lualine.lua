@@ -51,6 +51,11 @@ return {
 					},
 				},
 				lualine_b = {
+					{
+						function()
+							return vim.g.remote_neovim_host and ("Remote: %s"):format(vim.uv.os_gethostname()) or ""
+						end,
+					},
 					"branch",
 					{
 						"diff",

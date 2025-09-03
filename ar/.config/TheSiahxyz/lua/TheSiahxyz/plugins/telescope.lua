@@ -517,6 +517,42 @@ return {
 			local open_with_trouble = require("trouble.sources.telescope").open
 			local add_to_trouble = require("trouble.sources.telescope").add
 
+			local function telescope_open_single_or_multi(prompt_bufnr)
+				local picker = actions_state.get_current_picker(prompt_bufnr)
+				local multi = picker:get_multi_selection()
+
+				-- If you selected multiple (with <Tab>), open them all.
+				if not vim.tbl_isempty(multi) then
+					actions.close(prompt_bufnr)
+
+					for _, entry in ipairs(multi) do
+						-- Try to get a filepath across different pickers
+						local path = entry.path -- find_files, oldfiles, etc.
+							or entry.filename -- live_grep/grep_string
+							or (type(entry.value) == "string" and entry.value)
+							or (entry.value and entry.value.path)
+
+						if path then
+							vim.cmd("edit " .. vim.fn.fnameescape(path))
+
+							-- (Optional) jump to the matched line/col for grep results
+							local lnum = entry.lnum or entry.row
+							local col = entry.col
+							if lnum then
+								vim.api.nvim_win_set_cursor(0, { lnum, math.max((col or 1) - 1, 0) })
+							end
+						elseif entry.bufnr then
+							-- buffers picker
+							vim.cmd("buffer " .. entry.bufnr)
+						end
+					end
+					return
+				end
+
+				-- Single selection → let Telescope handle it
+				-- This respects picker-specific behavior (e.g. jumping to lnum for grep).
+				actions.select_default(prompt_bufnr)
+			end
 			require("telescope").setup({
 				defaults = {
 					mappings = {
@@ -549,6 +585,7 @@ return {
 							["<C-o><C-l>"] = actions.insert_original_cline,
 							["<M-f>"] = actions.nop,
 							["<M-k>"] = actions.nop,
+							["<CR>"] = telescope_open_single_or_multi,
 						},
 						n = {
 							["q"] = actions.close,
@@ -635,6 +672,14 @@ return {
 							"--follow",
 							"--hidden",
 							"--sortr=modified",
+							"--glob",
+							"!**/.cache/*/*/*",
+							"--glob",
+							"!**/.git/*/*/*",
+							"--glob",
+							"!**/.next/*/*/*",
+							"--glob",
+							"!**/node_modules/*/*/*",
 						},
 					},
 				},
@@ -645,14 +690,14 @@ return {
 				require("telescope.builtin").buffers({
 					sort_mru = true,
 					sort_lastused = true,
-					initial_mode = "normal",
+					-- initial_mode = "normal",
 				})
 			end, { desc = "Find buffer files" })
 			vim.keymap.set("n", "<leader>fb", function()
 				require("telescope.builtin").buffers({
 					sort_mru = true,
 					sort_lastused = true,
-					initial_mode = "normal",
+					-- initial_mode = "normal",
 				})
 			end, { desc = "Find buffer files" })
 			vim.keymap.set("n", "<leader>fc", function()
