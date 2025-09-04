@@ -139,8 +139,8 @@ on-focus-changed = ['move-mouse window-lazy-center']
     alt-shift-l = 'move right'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#resize
-    alt-shift-minus = 'resize smart -50'
-    alt-shift-equal = 'resize smart +50'
+    alt-minus = 'resize smart -50'
+    alt-equal = 'resize smart +50'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#workspace
     alt-1 = 'workspace 1'
@@ -153,6 +153,8 @@ on-focus-changed = ['move-mouse window-lazy-center']
     alt-8 = 'workspace 8'
     alt-9 = 'workspace 9'
     alt-0 = 'workspace 10'
+    alt-leftSquareBracket = 'focus-monitor next'
+    alt-rightSquareBracket = 'focus-monitor prev'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#move-node-to-workspace
     alt-shift-1 = 'move-node-to-workspace 1'
@@ -165,6 +167,8 @@ on-focus-changed = ['move-mouse window-lazy-center']
     alt-shift-8 = 'move-node-to-workspace 8'
     alt-shift-9 = 'move-node-to-workspace 9'
     alt-shift-0 = 'move-node-to-workspace 10'
+    alt-shift-leftSquareBracket = 'move-node-to-monitor prev'
+    alt-shift-rightSquareBracket = 'move-node-to-monitor next'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#move-node-to-workspace
     alt-ctrl-1 = ['move-node-to-workspace 1', 'workspace 1']
@@ -177,9 +181,6 @@ on-focus-changed = ['move-mouse window-lazy-center']
     alt-ctrl-8 = ['move-node-to-workspace 8', 'workspace 8']
     alt-ctrl-9 = ['move-node-to-workspace 9', 'workspace 9']
     alt-ctrl-0 = ['move-node-to-workspace 10', 'workspace 10']
-
-    alt-leftSquareBracket = 'focus-monitor next'
-    alt-rightSquareBracket = 'focus-monitor prev'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#workspace-back-and-forth
     alt-tab = 'workspace-back-and-forth'
@@ -195,6 +196,7 @@ on-focus-changed = ['move-mouse window-lazy-center']
     # disabled hide window
     cmd-h = []
 
+    # close focused window
     alt-q = 'close'
 
 # 'service' binding mode declaration.
