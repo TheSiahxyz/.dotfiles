@@ -1,0 +1,7 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+CLI 명령 중 변경사항을 적용하기 위한 drizzle-kit, npm run dev, npm run build 명령은 실행하지 마세요.
+유저에게 확인을 부탁하세요.
