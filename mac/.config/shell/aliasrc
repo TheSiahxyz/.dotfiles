@@ -408,6 +408,9 @@ alias tsc='task-switch-context'
 alias twt='taskwarrior-tui'
 alias tasksync='task sync && command pkill -RTMIN+25 ${STATUSBAR:-dwmblocks} && task'
 
+# tldr
+alias an='tldr'
+
 # tmux
 alias sts='tmux source $XDG_CONFIG_HOME/tmux/tmux.conf'
 alias ta='tmux a'
