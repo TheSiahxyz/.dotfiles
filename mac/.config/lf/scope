@@ -13,7 +13,7 @@ image() {
     h=$3
     x=$4
     y=$5
-    kitty +kitten icat --silent --stdin no --transfer-mode file --place "${w}x${h}@${x}x${y}" "$file" </dev/null >/dev/tty
+    kitty +kitten icat --stdin no --transfer-mode file --place "${w}x${h}@${x}x${y}" "$file" </dev/null >/dev/tty
     mediainfo --Output="Video;%Duration/String%" "$6"
   else
     chafa "$1" -s "$4x"
@@ -53,8 +53,8 @@ text/* | */xml | application/json | application/x-ndjson) bat -p --theme ansi --
 audio/*) mediainfo "$1" || exit 1 ;;
 video/* | application/octet-stream | application/vnd.rn-realmedia)
   CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/thumb.$(stat --printf '%n\0%i\0%F\0%s\0%W\0%Y' -- "$(readlink -f "$1")" | sha256sum | cut -d' ' -f1)"
-  [ ! -f "$CACHE" ] && ffmpegthumbnailer -i "$1" -o "$CACHE" -s 0
-  image "$CACHE" "$2" "$3" "$4" "$5" "$1"
+  [ ! -f "$CACHE" ] && ffmpegthumbnailer -i "$1" -o "$CACHE.jpg" -s 0 -q 5
+  image "$CACHE.jpg" "$2" "$3" "$4" "$5" "$1"
   ;;
 */pdf)
   CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/thumb.$(stat --printf '%n\0%i\0%F\0%s\0%W\0%Y' -- "$(readlink -f "$1")" | sha256sum | cut -d' ' -f1)"
