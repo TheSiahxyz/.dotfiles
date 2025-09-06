@@ -1,0 +1,134 @@
+#!/bin/sh
+
+# Usage:
+#   ./appify-zathura.sh /path/to/executable "App Name" [bundle_id] [--set-default]
+# Example:
+#   ./appify-zathura.sh /opt/homebrew/bin/zathura "Zathura" com.siah.Zathura --set-default
+
+set -eu
+
+if [ $# -lt 2 ]; then
+  echo "Usage: $(basename "$0") /path/to/executable \"App Name\" [bundle_id] [--set-default]" >&2
+  exit 1
+fi
+
+EXEC="$1"
+APPNAME="$2"
+APPID="${3:-}"
+
+SET_DEFAULT="no"
+if [ "${4:-}" = "--set-default" ]; then
+  SET_DEFAULT="yes"
+fi
+
+if [ ! -x "$EXEC" ]; then
+  echo "Error: executable not found or not executable: $EXEC" >&2
+  exit 1
+fi
+
+# Bundle ID 없으면 AppName을 알파뉴메릭만 추려서 기본값 생성
+if [ -z "$APPID" ]; then
+  SANAME=$(printf "%s" "$APPNAME" | tr -cd '[:alnum:]')
+  [ -z "$SANAME" ] && SANAME="App"
+  APPID="com.local.${SANAME}"
+fi
+
+APPROOT="${APPNAME}.app"
+APPDIR="${APPROOT}/Contents"
+MACOSDIR="${APPDIR}/MacOS"
+RESOURCEDIR="${APPDIR}/Resources"
+
+# 기존 .app 있으면 교체
+if [ -e "$APPROOT" ]; then
+  echo "Removing existing ${APPROOT}..."
+  rm -rf "$APPROOT"
+fi
+
+echo "Creating app bundle..."
+mkdir -p "$MACOSDIR" "$RESOURCEDIR"
+
+# 실행 래퍼
+cat >"${MACOSDIR}/${APPNAME}" <<SH
+#!/bin/sh
+exec "${EXEC}" "\$@"
+SH
+chmod +x "${MACOSDIR}/${APPNAME}"
+
+# Info.plist (Bundle ID + PDF 뷰어로 선언)
+cat >"${APPDIR}/Info.plist" <<PLIST
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleName</key><string>${APPNAME}</string>
+  <key>CFBundleDisplayName</key><string>${APPNAME}</string>
+  <key>CFBundleIdentifier</key><string>${APPID}</string>
+  <key>CFBundleVersion</key><string>1.0</string>
+  <key>CFBundleShortVersionString</key><string>1.0</string>
+  <key>CFBundlePackageType</key><string>APPL</string>
+  <key>CFBundleExecutable</key><string>${APPNAME}</string>
+
+  <!-- PDF를 이 앱으로 열 수 있게 선언 -->
+  <key>CFBundleDocumentTypes</key>
+  <array>
+    <dict>
+      <key>CFBundleTypeName</key><string>PDF document</string>
+      <key>LSItemContentTypes</key>
+      <array>
+        <string>com.adobe.pdf</string>
+      </array>
+      <key>CFBundleTypeRole</key><string>Viewer</string>
+    </dict>
+  </array>
+</dict>
+</plist>
+PLIST
+
+echo "Validating Info.plist..."
+if ! /usr/bin/plutil -lint "${APPDIR}/Info.plist" >/dev/null 2>&1; then
+  echo "Error: Info.plist validation failed." >&2
+  exit 1
+fi
+
+# /Applications 로 이동 (권한 필요시 sudo 사용)
+TARGET="/Applications/${APPROOT}"
+echo "Installing to /Applications..."
+if ! mv "${APPROOT}" /Applications/ 2>/dev/null; then
+  echo "mv needs admin rights; trying sudo..."
+  rm -r /Applications/"$APPROOT"
+  sudo mv "${APPROOT}" /Applications/
+fi
+
+# Launch Services에 등록
+LSREG="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
+if [ -x "$LSREG" ]; then
+  echo "Registering with Launch Services..."
+  "$LSREG" -f "$TARGET" >/dev/null 2>&1 || true
+fi
+
+# mdls로 Bundle ID 확인
+echo "Checking bundle id..."
+FOUND_ID=$(mdls -name kMDItemCFBundleIdentifier "$TARGET" 2>/dev/null | awk -F'=' '{gsub(/^[ \t"]+|[ \t"]+$/,"",$2); print $2}')
+if [ -z "$FOUND_ID" ] || [ "$FOUND_ID" = "(null)" ]; then
+  echo "Warning: mdls didn't return a bundle id. Using ${APPID} for duti operations." >&2
+  FOUND_ID="$APPID"
+fi
+
+# (옵션) duti로 기본앱 설정
+if [ "$SET_DEFAULT" = "yes" ]; then
+  if ! command -v duti >/dev/null 2>&1; then
+    echo "duti not found. Installing hint: brew install duti" >&2
+    exit 1
+  fi
+  echo "Setting ${FOUND_ID} as default app for PDF..."
+  # UTI 기준(권장)
+  duti -s "${FOUND_ID}" com.adobe.pdf all
+  # 확장자 기준(추가)
+  duti -s "${FOUND_ID}" .pdf all
+fi
+
+echo "Done."
+echo "App:            ${TARGET}"
+echo "Bundle ID:      ${FOUND_ID}"
+echo "Set default?:   ${SET_DEFAULT}"
+echo "Test: open -a \"${APPNAME}\" /path/to/file.pdf"
