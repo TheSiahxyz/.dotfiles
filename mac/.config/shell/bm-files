@@ -23,6 +23,7 @@ vmi     ${XDG_CONFIG_HOME:-${HOME}/.config}/mpv/input.conf                      
 vmc     ${XDG_CONFIG_HOME:-${HOME}/.config}/mpv/mpv.conf                        # Mpv config
 vmt     ${XDG_CONFIG_HOME:-${HOME}/.config}/mutt/muttrc                         # Mutt (email client) config
 vnb     ${XDG_CONFIG_HOME:-${HOME}/.config}/ncmpcpp/bindings                    # Ncmpcpp (music player) keybinds file
+vnc     ${XDG_CONFIG_HOME:-${HOME}/.config}/nvim/init.lua                       # Nvim init.lua
 vnp     ${XDG_CONFIG_HOME:-${HOME}/.config}/ncmpcpp/config                      # Ncmpcpp (music player) config
 vns     ${XDG_CONFIG_HOME:-${HOME}/.config}/newsboat/config                     # Newsboat config (RSS reader)
 vnu     ${XDG_CONFIG_HOME:-${HOME}/.config}/newsboat/urls                       # Newsboat url (RSS reader)
