@@ -1,5 +1,5 @@
 #!/bin/sh
 
 if command -v kitty >/dev/null 2>&1; then
-  kitty +kitten icat --silent --stdin no --transfer-mode file --clear >/dev/tty
+  kitty +kitten icat --silent --stdin no --transfer-mode file --clear </dev/null >/dev/tty
 fi

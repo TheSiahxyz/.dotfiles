@@ -43,7 +43,7 @@ image/svg+xml | image/png)
   ;;
 image/x-xcf | image/jpg | image/jpeg)
   CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/thumb.$(stat --printf '%n\0%i\0%F\0%s\0%W\0%Y' -- "$(readlink -f "$1")" | sha256sum | awk '{print $1}')"
-  [ ! -f "$CACHE.jpg" ] && magick "$1[0]" "$CACHE.jpg"
+  [ ! -f "$CACHE" ] && magick "$1[0]" "$CACHE.jpg"
   image "$CACHE.jpg" "$2" "$3" "$4" "$5" "$1"
   ;;
 image/*) image "$1" "$2" "$3" "$4" "$5" "$1" ;;
@@ -53,29 +53,28 @@ text/* | */xml | application/json | application/x-ndjson) bat -p --theme ansi --
 audio/*) mediainfo "$1" || exit 1 ;;
 video/* | application/octet-stream | application/vnd.rn-realmedia)
   # CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/thumb.$(stat --printf '%n\0%i\0%F\0%s\0%W\0%Y' -- "$(readlink -f "$1")" | sha256sum | cut -d' ' -f1)"
-  # [ ! -f "$CACHE" ] &&
-  ffmpegthumbnailer -i "$1" -o "$CACHE.jpg" -s 0 -q 5
+  [ ! -f "$CACHE" ] && ffmpegthumbnailer -i "$1" -o "$CACHE.jpg" -s 0 -q 5
   image "$CACHE.jpg" "$2" "$3" "$4" "$5" "$1"
   ;;
 */pdf)
   CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/thumb.$(stat --printf '%n\0%i\0%F\0%s\0%W\0%Y' -- "$(readlink -f "$1")" | sha256sum | cut -d' ' -f1)"
-  [ ! -f "$CACHE.jpg" ] && pdftoppm -jpeg -f 1 -singlefile "$1" "$CACHE"
+  [ ! -f "$CACHE" ] && pdftoppm -jpeg -f 1 -singlefile "$1" "$CACHE"
   image "$CACHE.jpg" "$2" "$3" "$4" "$5" "$1"
   ;;
 application/vnd.openxmlformats-officedocument.presentationml.presentation)
   CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/thumb.$(stat --printf '%n\0%i\0%F\0%s\0%W\0%Y' -- "$(readlink -f "$1")" | sha256sum | cut -d' ' -f1)"
-  [ ! -f "$CACHE.jpg" ] && unoconv -f jpg -o "$CACHE.jpg" "$1"
+  [ ! -f "$CACHE" ] && unoconv -f jpg -o "$CACHE.jpg" "$1"
   image "$CACHE.jpg" "$2" "$3" "$4" "$5" "$1"
   ;;
 application/x-hwp)
   CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/thumb.$(stat --printf '%n\0%i\0%F\0%s\0%W\0%Y' -- "$(readlink -f "$1")" | sha256sum | cut -d' ' -f1)"
   OUT_DIR="$(dirname "$CACHE")"
-  [ ! -f "$CACHE.jpg" ] && libreoffice --headless --convert-to jpg --outdir "$OUT_DIR" "$1" && mv "$OUT_DIR/$(basename "$1" .hwp).jpg" "$CACHE.jpg"
+  [ ! -f "$CACHE" ] && libreoffice --headless --convert-to jpg --outdir "$OUT_DIR" "$1" && mv "$OUT_DIR/$(basename "$1" .hwp).jpg" "$CACHE.jpg"
   image "$CACHE.jpg" "$2" "$3" "$4" "$5" "$1"
   ;;
 */epub+zip | */mobi*)
   CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/thumb.$(stat --printf '%n\0%i\0%F\0%s\0%W\0%Y' -- "$(readlink -f "$1")" | sha256sum | cut -d' ' -f1)"
-  [ ! -f "$CACHE.jpg" ] && gnome-epub-thumbnailer "$1" "$CACHE.jpg"
+  [ ! -f "$CACHE" ] && gnome-epub-thumbnailer "$1" "$CACHE.jpg"
   image "$CACHE.jpg" "$2" "$3" "$4" "$5" "$1"
   ;;
 application/*zip) atool --list -- "$1" ;;
