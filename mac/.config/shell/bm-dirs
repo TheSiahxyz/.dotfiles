@@ -27,7 +27,6 @@ cnc             ${XDG_CONFIG_HOME:-${HOME}/.config}/NvChad
 cnp             ${XDG_CONFIG_HOME:-${HOME}/.config}/ncmpcpp
 cns             ${XDG_CONFIG_HOME:-${HOME}/.config}/newsboat
 cnv             ${XDG_CONFIG_HOME:-${HOME}/.config}/nvim
-cqt             ${XDG_CONFIG_HOME:-${HOME}/.config}/qutebrowser
 cr              ${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/cron
 cse             ${XDG_CONFIG_HOME:-${HOME}/.config}/sesh
 csf             ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/surf
@@ -56,6 +55,7 @@ gnu             $HOME/.gnupg
 gpb             ${XDG_PUBLICSHARE_DIR:-${HOME}/Public}
 gpp             ${XDG_PICTURES_DIR:-${HOME}/Pictures}
 gpv             $HOME/Private
+gqt             $HOME/.qutebrowser
 grr             ${XDG_PICTURES_DIR:-${HOME}/Pictures}/resources
 gsh             $HOME/.ssh
 gss             ${XDG_PICTURES_DIR:-${HOME}/Pictures}/screenshots

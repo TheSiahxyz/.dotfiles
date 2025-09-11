@@ -71,11 +71,21 @@ on-focus-changed = ['move-mouse window-lazy-center']
     8 = 'main'
     9 = 'main'
     10 = 'main'
+    11 = '1'
+    12 = '1'
+    13 = '1'
+    14 = '1'
+    15 = '1'
+    16 = '1'
+    17 = '1'
+    18 = '1'
+    19 = '1'
+    20 = '1'
 
 [gaps]
     inner.horizontal =  15
     inner.vertical =    15
-    outer.top =         [{ monitor."main" = 44 }, { monitor."secondary" = 10 }, 10]
+    outer.top =         [{ monitor."main" = 44 }, { monitor."secondary" = 44 }, { monitor."1" = 44 }, { monitor."2" = 44 }, 10]
     outer.left =        10
     outer.bottom =      10
     outer.right =       10
@@ -123,7 +133,9 @@ on-focus-changed = ['move-mouse window-lazy-center']
     alt-r = 'exec-and-forget /Applications/kitty.app/Contents/MacOS/kitty -o allow_remote_control=yes -o confirm_os_window_close=0 --title "htop" /bin/zsh -lc "htop; /Applications/kitty.app/Contents/MacOS/kitten @ close-window --self"'
     alt-s = 'exec-and-forget /Applications/kitty.app/Contents/MacOS/kitty -o allow_remote_control=yes -o confirm_os_window_close=0 --title "newsboat" /bin/zsh -lc "newsboat; /Applications/kitty.app/Contents/MacOS/kitten @ close-window --self"'
     alt-t = 'exec-and-forget open -na "Microsoft Teams"'
-    alt-w = 'exec-and-forget open -na Firefox'
+    alt-w = 'exec-and-forget open -na qutebrowser'
+    alt-shift-w = 'exec-and-forget open -na Firefox'
+    alt-ctrl-w = 'exec-and-forget open -na "Brave Browser"'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#layout
     alt-slash = 'layout tiles horizontal vertical'
@@ -159,6 +171,17 @@ on-focus-changed = ['move-mouse window-lazy-center']
     alt-leftSquareBracket = 'focus-monitor next'
     alt-rightSquareBracket = 'focus-monitor prev'
 
+    ctrl-shift-1 = 'workspace 11'
+    ctrl-shift-2 = 'workspace 12'
+    ctrl-shift-3 = 'workspace 13'
+    ctrl-shift-4 = 'workspace 14'
+    ctrl-shift-5 = 'workspace 15'
+    ctrl-shift-6 = 'workspace 16'
+    ctrl-shift-7 = 'workspace 17'
+    ctrl-shift-8 = 'workspace 18'
+    ctrl-shift-9 = 'workspace 19'
+    ctrl-shift-0 = 'workspace 20'
+
     # See: https://nikitabobko.github.io/AeroSpace/commands#move-node-to-workspace
     alt-shift-1 = 'move-node-to-workspace 1'
     alt-shift-2 = 'move-node-to-workspace 2'
@@ -172,6 +195,17 @@ on-focus-changed = ['move-mouse window-lazy-center']
     alt-shift-0 = 'move-node-to-workspace 10'
     alt-shift-leftSquareBracket = 'move-node-to-monitor prev'
     alt-shift-rightSquareBracket = 'move-node-to-monitor next'
+
+    alt-ctrl-shift-1 = 'move-node-to-workspace 11'
+    alt-ctrl-shift-2 = 'move-node-to-workspace 12'
+    alt-ctrl-shift-3 = 'move-node-to-workspace 13'
+    alt-ctrl-shift-4 = 'move-node-to-workspace 14'
+    alt-ctrl-shift-5 = 'move-node-to-workspace 15'
+    alt-ctrl-shift-6 = 'move-node-to-workspace 16'
+    alt-ctrl-shift-7 = 'move-node-to-workspace 17'
+    alt-ctrl-shift-8 = 'move-node-to-workspace 18'
+    alt-ctrl-shift-9 = 'move-node-to-workspace 19'
+    alt-ctrl-shift-0 = 'move-node-to-workspace 20'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#move-node-to-workspace
     alt-ctrl-1 = ['move-node-to-workspace 1', 'workspace 1']
@@ -245,77 +279,81 @@ if.app-id = 'org.mozilla.firefox'
 run = ['move-node-to-workspace 2']
 
 [[on-window-detected]]
-if.app-name-regex-substring = 'cursor'
+if.app-id = 'com.brave.Browser'
 run = ['move-node-to-workspace 3']
 
 [[on-window-detected]]
-if.app-id = 'com.microsoft.VSCode'
+if.app-name-regex-substring = 'cursor'
 run = ['move-node-to-workspace 4']
 
 [[on-window-detected]]
-if.app-name-regex-substring = 'vimwiki'
+if.app-id = 'com.microsoft.VSCode'
 run = ['move-node-to-workspace 5']
 
 [[on-window-detected]]
 if.app-id = 'com.microsoft.Excel'
-run = ['move-node-to-workspace 5']
+run = ['move-node-to-workspace 6']
 
 [[on-window-detected]]
 if.app-id = 'com.microsoft.Word'
-run = ['move-node-to-workspace 5']
+run = ['move-node-to-workspace 6']
 
 [[on-window-detected]]
 if.app-id = 'com.microsoft.Powerpoint'
-run = ['move-node-to-workspace 5']
+run = ['move-node-to-workspace 6']
 
 [[on-window-detected]]
 if.app-id = 'org.jkiss.dbeaver.core.product'
-run = ['move-node-to-workspace 6']
-
-[[on-window-detected]]
-if.app-id = 'com.clickup.desktop-app'
-run = ['move-node-to-workspace 6']
-
-[[on-window-detected]]
-if.app-id = "md.obsidian"
-run = ['move-node-to-workspace 6']
+run = ['move-node-to-workspace 7']
 
 [[on-window-detected]]
 if.app-id = 'com.electron.dockerdesktop'
-run = ['move-node-to-workspace 7']
-
-[[on-window-detected]]
-if.app-id = 'com.colliderli.iina'
-run = ['move-node-to-workspace 7']
-
-[[on-window-detected]]
-if.app-id = 'com.apple.Music'
-run = ['move-node-to-workspace 7']
-
-[[on-window-detected]]
-if.app-id = 'com.github.th-ch.youtube-music'
-run = ['move-node-to-workspace 7']
-
-[[on-window-detected]]
-if.app-id = 'com.apple.iCal'
 run = ['move-node-to-workspace 8']
 
 [[on-window-detected]]
 if.app-id = 'com.microsoft.Outlook'
-run = ['move-node-to-workspace 8']
-
-[[on-window-detected]]
-if.app-id = 'com.microsoft.teams2'
 run = ['move-node-to-workspace 9']
 
 [[on-window-detected]]
-if.app-id = 'com.kakao.KakaoTalkMac'
+if.app-id = 'com.microsoft.teams2'
 run = ['move-node-to-workspace 10']
+
+[[on-window-detected]]
+if.app-id = 'org.qutebrowser.qutebrowser'
+run = ['move-node-to-workspace 11']
+
+[[on-window-detected]]
+if.app-id = 'com.colliderli.iina'
+run = ['move-node-to-workspace 14']
+
+[[on-window-detected]]
+if.app-id = 'com.apple.Music'
+run = ['move-node-to-workspace 15']
+
+[[on-window-detected]]
+if.app-id = 'com.github.th-ch.youtube-music'
+run = ['move-node-to-workspace 15']
+
+[[on-window-detected]]
+if.app-name-regex-substring = 'vimwiki'
+run = ['move-node-to-workspace 16']
+
+[[on-window-detected]]
+if.app-id = 'com.apple.iCal'
+run = ['move-node-to-workspace 17']
+
+[[on-window-detected]]
+if.app-id = 'com.clickup.desktop-app'
+run = ['move-node-to-workspace 17']
+
+[[on-window-detected]]
+if.app-id = 'com.kakao.KakaoTalkMac'
+run = ['move-node-to-workspace 20']
 
 [[on-window-detected]]
 if.app-id = 'com.hnc.Discord'
-run = ['move-node-to-workspace 10']
+run = ['move-node-to-workspace 20']
 
 [[on-window-detected]]
 if.app-id = 'com.tdesktop.Telegram'
-run = ['move-node-to-workspace 10']
+run = ['move-node-to-workspace 20']
