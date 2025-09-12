@@ -572,7 +572,7 @@ if file then
 end
 
 -- Spell
-vim.keymap.set("n", "zp", function()
+vim.keymap.set("n", "zl", function()
 	vim.opt.spelllang = { "en", "ko", "cjk" }
 	vim.cmd("echo 'Spell language set to English, Korean, and CJK'")
 end, { desc = "Spelling language English, Korean, and CJK" })

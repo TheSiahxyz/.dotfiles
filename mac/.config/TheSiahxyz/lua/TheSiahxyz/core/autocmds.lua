@@ -130,23 +130,23 @@ autocmd({ "BufWritePre" }, {
 })
 
 -- Automatically delete all trailing whitespace and newlines at end of file on save
-local file_save = augroup("file_save")
-autocmd("BufWritePre", {
-	group = file_save,
-	pattern = "*",
-	callback = function()
-		local cursor_pos = vim.api.nvim_win_get_cursor(0)
-		vim.cmd([[ %s/\s\+$//e ]]) -- Remove trailing spaces
-		vim.cmd([[ %s/\n\+\%$//e ]]) -- Remove trailing newlines
-		local line_count = vim.api.nvim_buf_line_count(0)
-		local line = math.min(cursor_pos[1], line_count)
-		local col = cursor_pos[2]
-		-- Optional: clamp column if line got shorter
-		local line_text = vim.api.nvim_buf_get_lines(0, line - 1, line, false)[1] or ""
-		col = math.min(col, #line_text)
-		vim.api.nvim_win_set_cursor(0, { line, col })
-	end,
-})
+-- local file_save = augroup("file_save")
+-- autocmd("BufWritePre", {
+-- 	group = file_save,
+-- 	pattern = "*",
+-- 	callback = function()
+-- 		local cursor_pos = vim.api.nvim_win_get_cursor(0)
+-- 		vim.cmd([[ %s/\s\+$//e ]]) -- Remove trailing spaces
+-- 		vim.cmd([[ %s/\n\+\%$//e ]]) -- Remove trailing newlines
+-- 		local line_count = vim.api.nvim_buf_line_count(0)
+-- 		local line = math.min(cursor_pos[1], line_count)
+-- 		local col = cursor_pos[2]
+-- 		-- Optional: clamp column if line got shorter
+-- 		local line_text = vim.api.nvim_buf_get_lines(0, line - 1, line, false)[1] or ""
+-- 		col = math.min(col, #line_text)
+-- 		vim.api.nvim_win_set_cursor(0, { line, col })
+-- 	end,
+-- })
 
 -- Add a trailing newline for C files
 autocmd("BufWritePre", {

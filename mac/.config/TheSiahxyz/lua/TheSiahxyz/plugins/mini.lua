@@ -1079,14 +1079,14 @@ return {
 					-- Move visual selection in Visual mode. Defaults are Alt (Meta) + hjkl.
 					left = "<M-m>",
 					right = "<M-/>",
-					down = "<M-,>",
-					up = "<M-.>",
+					-- down = "<M-,>",
+					-- up = "<M-.>",
 
 					-- Move current line in Normal mode
 					line_left = "<M-m>",
 					line_right = "<M-/>",
-					line_down = "<M-,>",
-					line_up = "<M-.>",
+					-- line_down = "<M-,>",
+					-- line_up = "<M-.>",
 				},
 
 				-- Options which control moving behavior
@@ -1147,13 +1147,13 @@ return {
 			require("mini.trailspace").setup()
 			vim.keymap.set(
 				"n",
-				"<leader>zt",
+				"<leader>zW",
 				":lua MiniTrailspace.trim()<cr>",
 				{ noremap = true, silent = true, desc = "Trim trailing whitespace" }
 			)
 			vim.keymap.set(
 				"n",
-				"<leader>zl",
+				"<leader>zL",
 				":lua MiniTrailspace.trim_last_lines()<cr>",
 				{ noremap = true, silent = true, desc = "Trim trailing empty lines" }
 			)

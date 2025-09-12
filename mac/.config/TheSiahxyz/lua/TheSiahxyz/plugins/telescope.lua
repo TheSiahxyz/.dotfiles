@@ -264,6 +264,7 @@ return {
 					wk.add({
 						mode = { "n", "v" },
 						{ "<leader>f", group = "Find" },
+						{ "<leader>F", group = "Find (root)" },
 						{ "<leader>fl", group = "Live grep" },
 					})
 				end,
@@ -761,7 +762,7 @@ return {
 					:find()
 			end, { desc = "Find files with open markers" })
 
-			vim.keymap.set("n", "<leader>fF", function()
+			vim.keymap.set("n", "<leader>FF", function()
 				require("telescope.builtin").find_files({
 					cwd = vim.fn.expand("~"),
 					find_command = {

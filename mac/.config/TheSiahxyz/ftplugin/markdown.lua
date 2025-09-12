@@ -1,8 +1,8 @@
 -- Function to check if the current file is in the Obsidian repository
 local function is_in_obsidian_repo()
 	local current_file_path = vim.fn.expand("%:p:h")
-	local user = os.getenv("USER") -- Get the current user's name from the environment variable
-	local obsidian_path = "/home/" .. user .. "/Private/repos/Obsidian/"
+	local home = os.getenv("HOME")
+	local obsidian_path = home .. "/Private/repos/Obsidian/"
 
 	return string.find(current_file_path, obsidian_path) ~= nil
 end
@@ -231,31 +231,44 @@ vim.api.nvim_create_autocmd("FileType", {
 
 -- FileType autocmd for markdown files
 vim.api.nvim_create_autocmd("FileType", {
-	pattern = { "markdown", "mdx", "mdown", "mkd", "mkdn", "mdwn" },
+	pattern = {
+		"markdown",
+		"markdown.mdx",
+		"vimwiki",
+		"quarto",
+		"mdx",
+		"mdown",
+		"mkd",
+		"mkdn",
+		"mdwn",
+	},
 	callback = function()
-		-- Local settings
-		vim.bo.textwidth = is_in_obsidian_repo() and 80 or 175
-		vim.opt_local.autoindent = true
-		vim.opt_local.conceallevel = 0
+		local ok, in_obsidian = pcall(function()
+			return is_in_obsidian_repo()
+		end)
+		local tw = (ok and in_obsidian) and 175 or 80
+
+		-- 로컬 옵션
+		vim.bo.textwidth = tw
+		vim.bo.formatoptions = vim.bo.formatoptions .. "a" -- 자동 줄바꿈 활성화
+		vim.opt_local.wrap = true
+		vim.opt_local.linebreak = true
+		vim.opt_local.breakindent = true
 		vim.opt_local.expandtab = true
-		vim.opt_local.softtabstop = 4
 		vim.opt_local.shiftwidth = 4
+		vim.opt_local.softtabstop = 4
+		vim.opt_local.showbreak = "…"
 		vim.opt_local.spell = true
 		vim.opt_local.spelllang = { "en", "ko", "cjk" }
-		vim.opt_local.spellsuggest = { "best", "9" }
+		vim.opt_local.spellsuggest = "best,9"
 
-		local arrows = { [">>"] = "→", ["<<"] = "←", ["^^"] = "↑", ["VV"] = "↓" }
-		for key, val in pairs(arrows) do
-			vim.cmd(string.format("iabbrev %s %s", key, val))
-		end
+		-- 버퍼 로컬 약어로 등록 (전역 오염 방지)
+		vim.cmd([[iabbrev <buffer> >> →]])
+		vim.cmd([[iabbrev <buffer> << ←]])
+		vim.cmd([[iabbrev <buffer> ^^ ↑]])
+		vim.cmd([[iabbrev <buffer> VV ↓]])
 	end,
 })
-
--- this setting makes markdown auto-set the 80 text width limit when typing
--- vim.cmd('set fo+=a')
-if is_in_obsidian_repo() then
-	vim.bo.textwidth = 175 -- No limit for Obsidian repository
-end
 
 -- Makrdown.nvim settings
 local markdown_settings = {

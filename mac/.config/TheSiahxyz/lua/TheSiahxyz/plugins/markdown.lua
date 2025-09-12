@@ -189,6 +189,7 @@ return {
 					return name:lower():match("%.ipynb$") ~= nil
 				end,
 			})
+
 			vim.treesitter.language.register("markdown", "vimwiki")
 
 			local opts = { noremap = true, silent = true }
