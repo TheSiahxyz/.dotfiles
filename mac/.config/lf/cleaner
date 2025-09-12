@@ -1,5 +1,6 @@
 #!/bin/sh
 
 if command -v kitty >/dev/null 2>&1; then
-  kitty +kitten icat --silent --stdin no --transfer-mode file --clear </dev/null >/dev/tty
+  printf '\033_Ga=d,d=a\033\\' >/dev/tty 2>/dev/null
+  kitty +kitten icat --silent --stdin no --transfer-mode file --clear </dev/null >/dev/tty 2>/dev/null
 fi
