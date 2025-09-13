@@ -2659,3 +2659,8 @@ config.bind("yc", "hint code userscript code_select")
 config.bind("zs", "config-cycle statusbar.show always never")
 config.bind("zt", "config-cycle tabs.show always never")
 config.source("themes/gruvbox.py")
+
+base = os.path.dirname(__file__)
+shortcuts = os.path.join(base, "shortcuts.py")
+if os.path.isfile(shortcuts):
+    config.source(shortcuts)
