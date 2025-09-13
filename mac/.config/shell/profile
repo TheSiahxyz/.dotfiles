@@ -1,6 +1,9 @@
 ###################################################
 ### --- ENV PATH --- ###
 ###################################################
+export LANG=ko_KR.UTF-8
+export LC_CTYPE=ko_KR.UTF-8
+
 # Add all directories in each subdirectory to $PATH
 export PATH="$PATH:$(find ~/.local/bin -path '*/.git*' -prune -o \( -type f -o -type l \) -perm -u=x -exec dirname {} \; | sort -u | paste -sd ':' -)"
 export PATH="$PATH:$(find ~/.local/share/.password-store -type d -name '.extensions' | paste -sd ':' -)"

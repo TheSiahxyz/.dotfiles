@@ -278,7 +278,75 @@ run  = 'piper -- bat -p --color=always "$1"'
 
 [[plugin.prepend_previewers]]
 name = "*.md"
-run  = 'piper -- CLICOLOR_FORCE=1 glow -w=$w -s=dark "$1"'
+run  = 'piper -- env CLICOLOR_FORCE=1 glow -w=$w -s=dark "$1"'
+
+[[plugin.prepend_previewers]]
+mime = "text/html"
+run  = 'piper -- lynx -width="$w" -display_charset=utf-8 -dump "$1"'
+
+[[plugin.prepend_previewers]]
+name = "*.{xls,xlsx}"
+run  = 'piper -- in2csv "$1" | head -n 200'
+
+[[plugin.prepend_previewers]]
+mime = "text/troff"
+run  = 'piper -- man ./ "$1" | col -b'
+
+[[plugin.prepend_previewers]]
+mime = "text/*"
+run  = 'piper -- bat -p --theme ansi --terminal-width "$w" -f "$1"'
+
+[[plugin.prepend_previewers]]
+mime = "*/xml"
+run  = 'piper -- bat -p --theme ansi --terminal-width "$w" -f "$1"'
+
+[[plugin.prepend_previewers]]
+mime = "application/json"
+run  = 'piper -- bat -p --theme ansi --terminal-width "$w" -f "$1"'
+
+[[plugin.prepend_previewers]]
+mime = "application/x-ndjson"
+run  = 'piper -- bat -p --theme ansi --terminal-width "$w" -f "$1"'
+
+[[plugin.prepend_previewers]]
+mime = "audio/*"
+run  = 'piper -- mediainfo "$1"'
+
+[[plugin.prepend_previewers]]
+mime = "video/*"
+run  = 'piper -- mediainfo "$1"'
+
+[[plugin.prepend_previewers]]
+mime = "application/octet-stream"
+run  = 'piper -- mediainfo "$1"'
+
+[[plugin.prepend_previewers]]
+mime = "application/vnd.rn-realmedia"
+run  = 'piper -- mediainfo "$1"'
+
+[[plugin.prepend_previewers]]
+mime = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+run  = 'piper -- pandoc "$1" -t plain'
+
+[[plugin.prepend_previewers]]
+name = "*.{odt,ods,odp,odg,ott,ots,otp}"
+run  = 'piper -- odt2txt "$1"'
+
+[[plugin.prepend_previewers]]
+mime = "application/pgp-encrypted"
+run  = 'piper -- gpg -d -- "$1"'
+
+[[plugin.prepend_previewers]]
+mime = "application/epub+zip"
+run  = 'piper -- pandoc "$1" -t plain'
+
+[[plugin.prepend_previewers]]
+mime = "application/x-mobipocket-ebook"
+run  = 'piper -- pandoc "$1" -t plain'
+
+[[plugin.prepend_previewers]]
+mime = "application/*zip"
+run  = 'piper -- atool --list -- "$1"'
 
 [[plugin.prepend_previewers]]
 name = "*/"

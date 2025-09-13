@@ -235,10 +235,6 @@ on  = "J"
 run = "plugin parent-arrow 1"
 
 [[mgr.prepend_keymap]]
-on  = "q"
-run = "plugin confirm-quit"
-
-[[mgr.prepend_keymap]]
 on = "<C-p>"
 run = 'shell -- qlmanage -p "$@"'
 
