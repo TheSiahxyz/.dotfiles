@@ -21,8 +21,8 @@ keymap = [
 
 	{ on = "<C-u>", run = "arrow -50%",  desc = "Move cursor up half page" },
 	{ on = "<C-d>", run = "arrow 50%",   desc = "Move cursor down half page" },
-	{ on = "<C-b>", run = "arrow -100%", desc = "Move cursor up one page" },
-	{ on = "<C-f>", run = "arrow 100%",  desc = "Move cursor down one page" },
+	# { on = "<C-b>", run = "arrow -100%", desc = "Move cursor up one page" },
+	# { on = "<C-f>", run = "arrow 100%",  desc = "Move cursor down one page" },
 
 	{ on = "<S-PageUp>",   run = "arrow -50%",  desc = "Move cursor up half page" },
 	{ on = "<S-PageDown>", run = "arrow 50%",   desc = "Move cursor down half page" },
@@ -52,8 +52,8 @@ keymap = [
 	{ on = "V", run = "visual_mode --unset", desc = "Enter visual mode (unset mode)" },
 
 	# Seeking
-	{ on = "K", run = "seek -5", desc = "Seek up 5 units in the preview" },
-	{ on = "J", run = "seek 5",  desc = "Seek down 5 units in the preview" },
+	{ on = "<C-k>", run = "seek -5", desc = "Seek up 5 units in the preview" },
+	{ on = "<C-j>", run = "seek 5",  desc = "Seek down 5 units in the preview" },
 
 	# Spotting
 	{ on = "<Tab>", run = "spot", desc = "Spot hovered file" },
@@ -94,10 +94,10 @@ keymap = [
 	{ on = [ "m", "n" ], run = "linemode none",        desc = "Linemode: none" },
 
 	# Copy
-	{ on = [ "c", "c" ], run = "copy path",             desc = "Copy the file path" },
-	{ on = [ "c", "d" ], run = "copy dirname",          desc = "Copy the directory path" },
-	{ on = [ "c", "f" ], run = "copy filename",         desc = "Copy the filename" },
-	{ on = [ "c", "n" ], run = "copy name_without_ext", desc = "Copy the filename without extension" },
+	{ on = [ "y", "y" ], run = "copy path",             desc = "Copy the file path" },
+	{ on = [ "y", "d" ], run = "copy dirname",          desc = "Copy the directory path" },
+	{ on = [ "y", "f" ], run = "copy filename",         desc = "Copy the filename" },
+	{ on = [ "y", "n" ], run = "copy name_without_ext", desc = "Copy the filename without extension" },
 
 	# Filter
 	{ on = "f", run = "filter --smart", desc = "Filter files" },
@@ -125,10 +125,10 @@ keymap = [
 
 	# Goto
 	{ on = [ "g", "h" ],       run = "cd ~",             desc = "Go home" },
-	{ on = [ "g", "c" ],       run = "cd ~/.config",     desc = "Go ~/.config" },
-	{ on = [ "g", "d" ],       run = "cd ~/Downloads",   desc = "Go ~/Downloads" },
+	# { on = [ "g", "c" ],       run = "cd ~/.config",     desc = "Go ~/.config" },
+	# { on = [ "g", "d" ],       run = "cd ~/Downloads",   desc = "Go ~/Downloads" },
 	{ on = [ "g", "<Space>" ], run = "cd --interactive", desc = "Jump interactively" },
-	{ on = [ "g", "f" ],       run = "follow",           desc = "Follow hovered symlink" },
+	{ on = [ "g", "l" ],       run = "follow",           desc = "Follow hovered symlink" },
 
 	# Tabs
 	{ on = "t", run = "tab_create --current", desc = "Create a new tab with CWD" },
@@ -335,8 +335,8 @@ keymap = [
 	{ on = "l",       run = "move 1",  desc = "Move forward a character" },
 	{ on = "<Left>",  run = "move -1", desc = "Move back a character" },
 	{ on = "<Right>", run = "move 1",  desc = "Move forward a character" },
-	# { on = "<C-b>",   run = "move -1", desc = "Move back a character" },
-	# { on = "<C-f>",   run = "move 1",  desc = "Move forward a character" },
+	{ on = "<C-b>",   run = "move -1", desc = "Move back a character" },
+	{ on = "<C-f>",   run = "move 1",  desc = "Move forward a character" },
 
 	# Word-wise movement
 	{ on = "b",     run = "backward",                    desc = "Move back to the start of the current or previous word" },
