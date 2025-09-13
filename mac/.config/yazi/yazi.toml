@@ -57,6 +57,13 @@ play = [
 	{ run = '''mediainfo "$1"; echo "Press enter to exit"; read _''', block = true, desc = "Show media info", for = "unix" },
 ]
 
+[[opener.set-wallpaper]]
+run = '''
+	osascript -e 'on run {img}' -e 'tell application "System Events" to set picture of every desktop to img' -e 'end run' "$0"
+'''
+for  = "macos"
+desc = "Set as wallpaper"
+
 [open]
 rules = [
 	# Folder
@@ -77,6 +84,10 @@ rules = [
 	# Fallback
 	{ name = "*", use = [ "open", "reveal" ] },
 ]
+
+[[open.prepend_rules]]
+mime = "image/*"
+use  = [ "set-wallpaper", "open" ]
 
 [tasks]
 micro_workers    = 10

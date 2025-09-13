@@ -474,6 +474,7 @@ function lfcd () {
     fi
 }
 
+
 ###########################################################################################
 ###########################################################################################
 ### --- MAN --- ###
@@ -861,5 +862,20 @@ function delete_venv() {
     else
         rm -rf "$env_dir/$venv"
         echo "$venv deleted"
+    fi
+}
+
+
+###########################################################################################
+###########################################################################################
+### --- YAZI --- ###
+# open yazi and cd to the file path
+function yazicd () {
+    tmp="$(mktemp -uq)"
+    trap 'rm -f $tmp >/dev/null 2>&1 && trap - HUP INT QUIT TERM EXIT' HUP INT QUIT TERM EXIT
+    yazi --cwd-file="$tmp" "$@"
+    if [ -f "$tmp" ]; then
+        dir="$(cat "$tmp")"
+        [ -d "$dir" ] && [ "$dir" != "$(pwd)" ] && cd "$dir"
     fi
 }

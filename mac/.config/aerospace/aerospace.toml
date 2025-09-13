@@ -101,7 +101,7 @@ on-focus-changed = ['move-mouse window-lazy-center']
 # See: https://nikitabobko.github.io/AeroSpace/guide#binding-modes
 # 'main' binding mode must be always presented
 [mode.main.binding]
-    # All possible keys:
+    # All possible keys
     # - Letters.        a, b, c, ..., z
     # - Numbers.        0, 1, 2, ..., 9
     # - Keypad numbers. keypad0, keypad1, keypad2, ..., keypad9
