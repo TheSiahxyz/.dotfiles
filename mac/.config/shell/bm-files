@@ -47,9 +47,6 @@ vvc     ${XDG_CONFIG_HOME:-${HOME}/.config}/vim/vimrc                           
 vvi     ${XDG_CONFIG_HOME:-${HOME}/.config}/vim/init.vim                        # Vim init
 vvp     ${XDG_CONFIG_HOME:-${HOME}/.config}/vim/plugins.vim                     # Vim plugins
 vvw     ${XDG_DATA_HOME:-${HOME}/.local/share}/vimwiki/index.md                 # Vimwiki
-vxc     ${XDG_CONFIG_HOME:-${HOME}/.config}/x11/xinitrc                         # X11 config
-vxp     ${XDG_CONFIG_HOME:-${HOME}/.config}/x11/xprofile                        # Start up - X11 profile
-vxr     ${XDG_CONFIG_HOME:-${HOME}/.config}/x11/xresources                      # Colors, themes and variables for X11
 vyc     ${XDG_CONFIG_HOME:-${HOME}/.config}/yazi/yazi.toml                      # Yazi config
 vyi     ${XDG_CONFIG_HOME:-${HOME}/.config}/yazi/init.lua                       # Yazi init for plugins
 vyk     ${XDG_CONFIG_HOME:-${HOME}/.config}/yazi/keymap-default.toml            # Yazi key config
