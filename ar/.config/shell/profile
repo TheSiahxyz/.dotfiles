@@ -18,6 +18,8 @@ unsetopt PROMPT_SP 2>/dev/null
 export BROWSER=$(command -v librewolf || command -v firefox || command -v qutebrowser)
 export EDITOR="nvim"
 export EDITOR2="vim"
+# export FILE_MANAGER="lf $(lf -version)"
+export FILE_MANAGER="yazi $(yazi -version)"
 export KEYTIMEOUT=10
 export SUDO_EDITOR=$EDITOR
 export SUDO_ASKPASS="$HOME/.local/bin/dmenupass"
@@ -114,9 +116,6 @@ export JUPYTER_PLATFORM_DIRS="1"
 
 ### --- KODI --- ###
 export KODI_DATA="$XDG_DATA_HOME/kodi"
-
-### --- LF --- ###
-export FILE_MANAGER="lf $(lf -version)"
 
 ### --- LYNX --- ###
 export LYNX_CFG="$HOME/.config/lynx/lynx.cfg"

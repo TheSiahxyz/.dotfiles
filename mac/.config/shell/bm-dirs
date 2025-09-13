@@ -42,7 +42,8 @@ cvc             ${XDG_CONFIG_HOME:-${HOME}/.config}/vim
 cvp             ${XDG_CONFIG_HOME:-${HOME}/.config}/openvpn
 cvw             ${XDG_DATA_HOME:-${HOME}/.local/share}/vimwiki
 cxc             ${XDG_CONFIG_HOME:-${HOME}/.config}/x11
-cya             ${XDG_CONFIG_HOME:-${HOME}/.config}/yazi
+cyb             ${XDG_CONFIG_HOME:-${HOME}/.config}/yabai
+cyz             ${XDG_CONFIG_HOME:-${HOME}/.config}/yazi
 czc             ${XDG_CONFIG_HOME:-${HOME}/.config}/zsh
 dot             ${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}
 Esm             /etc/samba
