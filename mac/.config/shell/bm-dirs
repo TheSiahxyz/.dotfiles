@@ -51,7 +51,8 @@ Cme             /media/$USER
 Cmt             /mnt
 Cmw             /usr/local/share/mutt-wizard
 Crr             /run/runit/service
-Csc             /mnt/second
+Csc             /etc/samba
+Csd             /mnt/second
 Csg             /media/$USER/storage/G
 Csm             /media/$USER/samba
 Css             /media/$USER/ssd
@@ -59,11 +60,9 @@ Cst             /media/$USER/storage
 Cvt             /media/$USER/Ventoy
 Cvv             /mnt/second/videos
 Cwv             /media/$USER/win10/Videos
-dot             ${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}
-Esm             /etc/samba
-Esv             /etc/runit/sv
 gdc             ${XDG_DOCUMENTS_DIR:-${HOME}/Documents}
 gdk             ${XDG_DESKTOP_DIR:-${HOME}/Desktop}
+gdt             ${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}
 gdn             ${XDG_DOWNLOAD_DIR:-${HOME}/Downloads}
 gfx             $HOME/.mozilla/firefox/$USER.default
 gmu             ${XDG_MUSIC_DIR:-${HOME}/Music}

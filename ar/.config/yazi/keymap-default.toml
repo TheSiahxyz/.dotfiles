@@ -81,8 +81,8 @@ keymap = [
 	{ on = ";",         run = "shell --interactive",         desc = "Run a shell command" },
 	{ on = ":",         run = "shell --block --interactive", desc = "Run a shell command (block until finishes)" },
 	{ on = ".",         run = "hidden toggle",               desc = "Toggle the visibility of hidden files" },
-	{ on = "s",         run = "search --via=fd",             desc = "Search files by name via fd" },
-	{ on = "S",         run = "search --via=rg",             desc = "Search files by content via ripgrep" },
+	{ on = [ "s", "f" ],run = "search --via=fd",             desc = "Search files by name via fd" },
+	{ on = [ "S", "f" ],run = "search --via=rg",             desc = "Search files by content via ripgrep" },
 	{ on = "<C-s>",     run = "escape --search",             desc = "Cancel the ongoing search" },
 	{ on = "z",         run = "plugin fzf",                  desc = "Jump to a file/directory via fzf" },
 	{ on = "Z",         run = "plugin zoxide",               desc = "Jump to a directory via zoxide" },
@@ -133,7 +133,7 @@ keymap = [
 	{ on = [ "g", "l" ],       run = "follow",           desc = "Follow hovered symlink" },
 
 	# Tabs
-	{ on = "t", run = "tab_create --current", desc = "Create a new tab with CWD" },
+	{ on = "<C-t>", run = "tab_create --current", desc = "Create a new tab with CWD" },
 
 	{ on = "1", run = "tab_switch 0", desc = "Switch to first tab" },
 	{ on = "2", run = "tab_switch 1", desc = "Switch to second tab" },
@@ -152,7 +152,7 @@ keymap = [
 	{ on = "}", run = "tab_swap 1",  desc = "Swap current tab with next tab" },
 
 	# Tasks
-	{ on = "w", run = "tasks:show", desc = "Show task manager" },
+	{ on = [ "t", "a" ], run = "tasks:show", desc = "Show task manager" },
 
 	# Help
 	{ on = "~",    run = "help", desc = "Open help" },
@@ -215,7 +215,7 @@ run  = "plugin smart-paste"
 desc = "Paste into the hovered directory or CWD"
 
 [[mgr.prepend_keymap]]
-on  = "<C-t>"
+on  = [ "s", "d" ]
 run = "plugin sudo-demo"
 
 [[mgr.prepend_keymap]]
@@ -250,7 +250,7 @@ keymap = [
 	{ on = "<Esc>", run = "close", desc = "Close task manager" },
 	{ on = "<C-[>", run = "close", desc = "Close task manager" },
 	{ on = "<C-c>", run = "close", desc = "Close task manager" },
-	{ on = "w",     run = "close", desc = "Close task manager" },
+	{ on = [ "t", "a" ], run = "close", desc = "Close task manager" },
 
 	{ on = "k", run = "arrow prev", desc = "Previous task" },
 	{ on = "j", run = "arrow next", desc = "Next task" },
