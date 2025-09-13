@@ -372,7 +372,7 @@ alias tofish="sudo chsh $USER -s /bin/fish && 'Now log out.'"
 alias shck='shellcheck --color=always'
 
 # shortcut
-alias ref='localshortcuts >/dev/null; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutrc; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutenvrc; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/zshnameddirrc'
+alias ref='bmshortcuts >/dev/null; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutrc; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutenvrc; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/zshnameddirrc'
 
 # skype
 alias skype='skypeforlinux'
