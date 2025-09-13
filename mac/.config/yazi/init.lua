@@ -7,8 +7,7 @@ require("smart-enter"):setup({
 })
 
 require("full-border"):setup({
-	-- Available values: ui.Border.PLAIN, ui.Border.ROUNDED
-	type = ui.Border.PLAIN,
+	type = ui.Border.PLAIN, -- or ui.Border.ROUNDED
 })
 
 th.git = th.git or {}
