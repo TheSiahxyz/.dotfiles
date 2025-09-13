@@ -10,21 +10,23 @@ zsh_named_dirs="${XDG_CONFIG_HOME:-${HOME}/.config}/shell/zshnameddirrc"
 lf_shortcuts="${XDG_CONFIG_HOME:-${HOME}/.config}/lf/shortcutrc"
 vim_shortcuts="${XDG_CONFIG_HOME:-${HOME}/.config}/vim/shortcuts.vim"
 nvim_shortcuts="${XDG_CONFIG_HOME:-${HOME}/.config}/nvim/shortcuts.lua"
+yazi_shortcuts="${XDG_CONFIG_HOME:-${HOME}/.config}/yazi/keymap.toml"
 ranger_shortcuts="/dev/null"
 qute_shortcuts="/dev/null"
 fish_shortcuts="/dev/null"
 vifm_shortcuts="/dev/null"
 
 # Remove, prepare files
-rm -f "$lf_shortcuts" "$ranger_shortcuts" "$qute_shortcuts" "$zsh_named_dirs" "$vim_shortcuts" "$nvim_shortcuts" 2>/dev/null
+rm -f "$lf_shortcuts" "$ranger_shortcuts" "$qute_shortcuts" "$zsh_named_dirs" "$vim_shortcuts" "$nvim_shortcuts" "$yazi_shortcuts" 2>/dev/null
 printf "# vim: filetype=sh\\n" >"$fish_shortcuts"
 printf "# vim: filetype=sh\\nalias " >"$shell_shortcuts"
 printf "# vim: filetype=sh\\n" >"$shell_env_shortcuts"
 printf "\" vim: filetype=vim\\n" >"$vifm_shortcuts"
+cp "$HOME/.config/yazi/keymap-default.toml" "$yazi_shortcuts"
 
 # Format the `directories` file in the correct syntax and sent it to all three configs.
 eval "echo \"$(cat "$bmdirs")\"" |
-  gawk "!/^\s*#/ && !/^\s*\$/ {gsub(\"\\\s*#.*$\",\"\");
+  awk "!/^\s*#/ && !/^\s*\$/ {gsub(\"\\\s*#.*$\",\"\");
     printf(\"%s=\42cd %s && ls -A\42 \\\\\n\",\$1,\$2)   >> \"$shell_shortcuts\" ;
     printf(\"[ -n \42%s\42 ] && export %s=\42%s\42 \n\",\$1,\$1,\$2)   >> \"$shell_env_shortcuts\" ;
     printf(\"hash -d %s=%s \n\",\$1,\$2)                 >> \"$zsh_named_dirs\"  ;
@@ -35,13 +37,17 @@ eval "echo \"$(cat "$bmdirs")\"" |
     printf(\"map %s cd \42%s\42 \n\",\$1,\$2)           >> \"$lf_shortcuts\" ;
     printf(\"cmap ;%s %s\n\",\$1,\$2)      >> \"$vim_shortcuts\" ;
     printf(\"nmap <localleader><localleader>%s :Explore %s<cr>\n\",\$1,\$2)      >> \"$vim_shortcuts\" ;
-    printf(\"vim.keymap.set('c', ';%s', '%s<cr>', { noremap = true, silent = true, desc = '%s' })\n\", \$1, \$2, gensub(\"^/home/$USER/\",\"~/\",\"g\",\$2)) >> \"$nvim_shortcuts\" ;
-    printf(\"vim.keymap.set('n', '<localleader><leader>%s', '<cmd>Explore %s<cr>', { noremap = true, silent = true, desc = '%s' })\n\", \$1, \$2, gensub(\"^/home/$USER/\",\"~/\",\"g\",\$2)) >> \"$nvim_shortcuts\" ;
-    printf(\"vim.keymap.set('n', '<localleader><localleader>%s', function() require('mini.files').open('%s') end, { noremap = true, silent = true, desc = '%s' })\n\", \$1, \$2, gensub(\"^/home/$USER/\",\"~/\",\"g\",\$2)) >> \"$nvim_shortcuts\"}"
+    desc_path = \$2; gsub(\"^/home/$USER/\",\"~/\",desc_path);
+    printf(\"vim.keymap.set('c', ';%s', '%s<cr>', { noremap = true, silent = true, desc = '%s' })\n\", \$1, \$2, desc_path) >> \"$nvim_shortcuts\" ;
+    printf(\"vim.keymap.set('n', '<localleader><leader>%s', '<cmd>Explore %s<cr>', { noremap = true, silent = true, desc = '%s' })\n\", \$1, \$2, desc_path) >> \"$nvim_shortcuts\" ;
+    printf(\"vim.keymap.set('n', '<localleader><localleader>%s', function() require('mini.files').open('%s') end, { noremap = true, silent = true, desc = '%s' })\n\", \$1, \$2, desc_path) >> \"$nvim_shortcuts\" ;
+    desc_path = \$2; gsub(\"^/home/$USER/\",\"~/\",desc_path);
+    key_array = \"\\\"\\\\\\\\\\\"\"; for(i=1; i<=length(\$1); i++) { key_array = key_array \", \\\"\" substr(\$1,i,1) \"\\\"\" }
+    printf(\"\\t{ on = [ %s ], run = \\\"cd %s\\\", desc = \\\"Go to %s\\\" },\\n\",key_array,\$2,desc_path) >> \"$yazi_shortcuts.tmp\"}"
 
 # Format the `files` file in the correct syntax and sent it to both configs.
 eval "echo \"$(cat "$bmfiles")\"" |
-  gawk "!/^\s*#/ && !/^\s*\$/ {gsub(\"\\\s*#.*$\",\"\");
+  awk "!/^\s*#/ && !/^\s*\$/ {gsub(\"\\\s*#.*$\",\"\");
     printf(\"%s=\42\$EDITOR %s\42 \\\\\n\",\$1,\$2)  >> \"$shell_shortcuts\" ;
     printf(\"[ -n \42%s\42 ] && export %s=\42%s\42 \n\",\$1,\$1,\$2)   >> \"$shell_env_shortcuts\" ;
     printf(\"v%s=\42\$EDITOR2 %s\42 \\\\\n\",\$1,\$2)  >> \"$shell_shortcuts\" ;
@@ -55,5 +61,27 @@ eval "echo \"$(cat "$bmfiles")\"" |
     printf(\"map v%s \$\$EDITOR2 \42%s\42 \n\",\$1,\$2)   >> \"$lf_shortcuts\" ;
     printf(\"cmap ;%s %s\n\",\$1,\$2)        >> \"$vim_shortcuts\" ;
     printf(\"nmap <localleader><localleader>%s :e %s<cr>\n\",\$1,\$2)        >> \"$vim_shortcuts\" ;
-    printf(\"vim.keymap.set('c', ';%s', '%s<cr>', { noremap = true, silent = true, desc = '%s' })\n\", \$1, \$2, gensub(\"^/home/$USER/\",\"~/\",\"g\",\$2)) >> \"$nvim_shortcuts\" ;
-    printf(\"vim.keymap.set('n', '<localleader><localleader>%s', '<cmd>e %s<cr>', { noremap = true, silent = true, desc = '%s' })\n\", \$1, \$2, gensub(\"^/home/$USER/\",\"~/\",\"g\",\$2)) >> \"$nvim_shortcuts\"}"
+    desc_path = \$2; gsub(\"^/home/$USER/\",\"~/\",desc_path);
+    printf(\"vim.keymap.set('c', ';%s', '%s<cr>', { noremap = true, silent = true, desc = '%s' })\n\", \$1, \$2, desc_path) >> \"$nvim_shortcuts\" ;
+    printf(\"vim.keymap.set('n', '<localleader><localleader>%s', '<cmd>e %s<cr>', { noremap = true, silent = true, desc = '%s' })\n\", \$1, \$2, desc_path) >> \"$nvim_shortcuts\" ;
+    desc_path = \$2; gsub(\"^/home/$USER/\",\"~/\",desc_path);
+    key_array = \"\\\"\\\\\\\\\\\"\"; for(i=1; i<=length(\$1); i++) { key_array = key_array \", \\\"\" substr(\$1,i,1) \"\\\"\" }
+    printf(\"\\t{ on = [ %s ], run = \\\"open %s\\\", desc = \\\"Open %s\\\" },\\n\",key_array,\$2,desc_path) >> \"$yazi_shortcuts.tmp\"}"
+
+# Merge bookmarks into keymap-default.toml
+if [ -f "$yazi_shortcuts.tmp" ]; then
+  # Find the line with the closing bracket in the [mgr] section
+  line_num=$(grep -n "^]" "$yazi_shortcuts" | head -1 | cut -d: -f1)
+
+  # Create the merged file
+  head -n $((line_num - 1)) "$yazi_shortcuts" >"$yazi_shortcuts.new"
+  echo "" >>"$yazi_shortcuts.new"
+  echo "	# Custom bookmarks" >>"$yazi_shortcuts.new"
+  cat "$yazi_shortcuts.tmp" >>"$yazi_shortcuts.new"
+  echo "]" >>"$yazi_shortcuts.new"
+  tail -n +$((line_num + 1)) "$yazi_shortcuts" >>"$yazi_shortcuts.new"
+
+  # Replace the original file
+  mv "$yazi_shortcuts.new" "$yazi_shortcuts"
+  rm -f "$yazi_shortcuts.tmp"
+fi
