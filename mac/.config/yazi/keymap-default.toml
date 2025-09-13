@@ -48,7 +48,7 @@ keymap = [
 	{ on = "<C-r>",   run = "toggle_all",               desc = "Invert selection of all files" },
 
 	# Visual mode
-	{ on = "v", run = "visual_mode",         desc = "Enter visual mode (selection mode)" },
+	{ on = "<C-v>", run = "visual_mode",         desc = "Enter visual mode (selection mode)" },
 	{ on = "V", run = "visual_mode --unset", desc = "Enter visual mode (unset mode)" },
 
 	# Seeking
@@ -174,7 +174,7 @@ run  = "plugin smart-enter"
 desc = "Enter the child directory, or open the file"
 
 [[mgr.prepend_keymap]]
-on   = [ "c", "m" ]
+on   = [ "c", "h", "m" ]
 run  = "plugin chmod"
 desc = "Chmod on selected files"
 
