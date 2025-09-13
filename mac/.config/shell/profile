@@ -232,4 +232,4 @@ export STARDICT_HISTFILE="$XDG_DATA_HOME/history/dic"
 export SDCV_PAGER='less --quit-if-one-screen -RX'
 
 ### --- SHORTCUTS --- ###
-[ ! -f "$XDG_CONFIG_HOME/shell/shortcutrc" ] && setsid -f shortcuts >/dev/null 2>&1
+[ ! -f "$XDG_CONFIG_HOME/shell/shortcutrc" ] && nohup bmshortcuts >/dev/null 2>&1 &
