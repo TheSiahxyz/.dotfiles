@@ -56,6 +56,21 @@ return {
 							return vim.g.remote_neovim_host and ("Remote: %s"):format(vim.uv.os_gethostname()) or ""
 						end,
 					},
+					{
+						function()
+							local build_status_last = require("devcontainer.status").find_build({ running = true })
+							if build_status_last then
+								return string.format(
+									"[%s/%s]%s",
+									build_status_last.current_step or "",
+									build_status_last.step_count or "",
+									build_status_last.progress and ("(" .. build_status_last.progress .. "%%)") or ""
+								)
+							else
+								return ""
+							end
+						end,
+					},
 					"branch",
 					{
 						"diff",
