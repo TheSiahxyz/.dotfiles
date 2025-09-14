@@ -330,6 +330,15 @@ return {
 							max_tokens = 20480,
 						},
 					},
+					openai = {
+						endpoint = "https://api.openai.com/v1", -- The LLM API endpoint
+						model = "gpt-5",
+						timeout = 30000,
+						extra = {
+							temperature = 0.7,
+							max_tokens = 20480,
+						},
+					},
 					moonshot = {
 						endpoint = "https://api.moonshot.ai/v1",
 						model = "kimi-k2-0711-preview",
