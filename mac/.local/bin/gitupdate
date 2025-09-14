@@ -66,10 +66,6 @@ if [ -n "$changes" ] && [ "$unpushed" -eq 0 ]; then
     done | tr '\n' ',' | sed 's/,$//;s/,/, /g;s/"$//')
   fi
   message="${1:-$default}"
-
-  # Add and commit changes
-  git add --all .
-  git commit -m "$message"
 else
   message=$(git cherry -v | awk '{$1=$2=""; print $0}' | sed 's/^ *//' | tail -n 1)
 fi
@@ -77,6 +73,9 @@ fi
 if [ "$repo_root" = "${PASSWORD_STORE_DIR:-${HOME}/.password-store}" ]; then
   pass git remote | xargs -L1 pass git push --all
 else
+  # Add and commit changes
+  git add --all .
+  git commit -m "$message"
   git pull --rebase origin "$branch"
   git remote | xargs -L1 git push --all
 fi
