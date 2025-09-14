@@ -85,7 +85,7 @@ on-focus-changed = ['move-mouse window-lazy-center']
 [gaps]
     inner.horizontal =  15
     inner.vertical =    15
-    outer.top =         [{ monitor."main" = 44 }, { monitor."secondary" = 44 }, { monitor."1" = 44 }, { monitor."2" = 44 }, 10]
+    outer.top =         [{ monitor."built-in" = 10 }, { monitor."main" = 44 }, { monitor."secondary" = 44 }, { monitor."1" = 44 }, { monitor."2" = 44 }, 10]
     outer.left =        10
     outer.bottom =      10
     outer.right =       10
