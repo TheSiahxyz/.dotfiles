@@ -43,6 +43,9 @@ alias .....='../../../..'
 # abook
 alias abook='abook -f ~/.config/abook/addressbook'
 
+# avante
+alias avt='nvim -c "lua vim.defer_fn(function()require(\"avante.api\").zen_mode()end, 100)"'
+
 # bat
 alias bath='bat cache --build'
 alias can='bat -n'
@@ -485,7 +488,7 @@ alias xauto='xrandr --auto'
 alias xoff='xset s off -dpms'
 
 # yazi
-alias y='yazi'
+alias i='yazi'
 
 # zathura
 alias za='zathura'

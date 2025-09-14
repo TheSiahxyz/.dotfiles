@@ -62,8 +62,8 @@ Cvv             /mnt/second/videos
 Cwv             /media/$USER/win10/Videos
 gdc             ${XDG_DOCUMENTS_DIR:-${HOME}/Documents}
 gdk             ${XDG_DESKTOP_DIR:-${HOME}/Desktop}
-gdt             ${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}
 gdn             ${XDG_DOWNLOAD_DIR:-${HOME}/Downloads}
+gdo             ${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}
 gfx             $HOME/.mozilla/firefox/$USER.default
 gmu             ${XDG_MUSIC_DIR:-${HOME}/Music}
 gnu             $HOME/.gnupg
