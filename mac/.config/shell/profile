@@ -12,6 +12,7 @@ export PATH="$PATH:$(find -L /opt/homebrew/Caskroom \( -name bin -o -name MacOS 
 export PATH="$PATH:$(find -L /opt/homebrew/Cellar -name bin -type d -print 2>/dev/null | sort -u | paste -s -d ':' -)"
 export PATH="$PATH:$(find -L /opt/homebrew/opt -name bin -type d -print 2>/dev/null | sort -u | paste -s -d ':' -)"
 command -v asdf >/dev/null 2>&1 && export PATH="$PATH:$(find -L ~/.local/share/asdf/installs -name bin -type d -print 2>/dev/null | sort -u | paste -s -d ':' -)"
+command -v npm >/dev/null 2>&1 && export PATH="$PATH:$(find -L ~/.local/share/npm -name bin -type d -print 2>/dev/null | sort -u | paste -s -d ':' -)"
 
 unsetopt PROMPT_SP 2>/dev/null
 

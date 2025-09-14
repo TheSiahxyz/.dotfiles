@@ -1080,7 +1080,7 @@ return {
 		keys = {
 			{ "<leader>mo", "<Cmd>lua MiniMap.open()<cr>", desc = "Open map" },
 			{ "<leader>mm", "<Cmd>lua MiniMap.refresh()<cr>", desc = "Refresh map" },
-			{ "<leader>mc", "<Cmd>lua MiniMap.close()<cr>", desc = "Close map" },
+			{ "<leader>mq", "<Cmd>lua MiniMap.close()<cr>", desc = "Close map" },
 			{ "<leader>mtm", "<Cmd>lua MiniMap.toggle()<cr>", desc = "Toggle map" },
 			{ "<leader>mts", "<Cmd>lua MiniMap.toggle_side()<cr>", desc = "Toggle side map" },
 		},
