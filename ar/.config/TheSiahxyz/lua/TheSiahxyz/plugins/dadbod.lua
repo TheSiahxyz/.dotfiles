@@ -19,6 +19,8 @@ return {
 			-- librewolf = "sqlite://" .. home .. "/.librewolf/si.default/places.sqlite",
 			mysql = "mariadb://ms:password@localhost:5432/mysql",
 			postsql = "postgresql://ps:password@localhost:5432/postgresql",
+			dts = "postgresql://dts:dujinDTS2@localhost:5432/evcp",
+			dts_aws = "postgresql://dts:dujinDTS2@127.0.0.1:15432/evcp",
 			-- qutebrowser = "sqlite://" .. home .. "/.local/share/qutebrowser/history.sqlite",
 			-- sqlite = "sqlite://" .. home .. "/.local/share/db/sqlite.db",
 		}

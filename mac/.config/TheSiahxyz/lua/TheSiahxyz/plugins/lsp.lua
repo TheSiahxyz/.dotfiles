@@ -101,6 +101,7 @@ return {
 					-- "mutt_ls",
 					"pyright",
 					"ruff",
+					"sqls",
 					"ts_ls",
 				},
 				automatic_enable = true,
@@ -212,6 +213,11 @@ return {
 							-- },
 						})
 					end,
+					["sqls"] = function()
+						lspconfig.sqls.setup({
+							capabilities = capabilities,
+						})
+					end,
 					["ts_ls"] = function()
 						lspconfig.ruff.setup({
 							capabilities = capabilities,
@@ -224,12 +230,13 @@ return {
 			lint.linters_by_ft = {
 				dockerfile = { "hadolint" },
 				javascript = { "eslint_d" },
-				typescript = { "eslint_d" },
 				javascriptreact = { "eslint_d" },
-				typescriptreact = { "eslint_d" },
-				svelte = { "eslint_d" },
 				python = { "pylint" },
 				sh = { "shellcheck" },
+				sql = { "sqlfluff" },
+				svelte = { "eslint_d" },
+				typescript = { "eslint_d" },
+				typescriptreact = { "eslint_d" },
 			}
 
 			local lint_augroup = vim.api.nvim_create_augroup("lint", { clear = true })
@@ -257,6 +264,8 @@ return {
 					"ruff", -- python formatter
 					"shellcheck", -- bash lint
 					"shfmt", -- sh formatter
+					"sqlfluff", -- sql linter
+					"sql-formatter", -- sql formatter
 					"stylua", -- lua formatter
 				},
 				integrations = {
@@ -324,20 +333,21 @@ return {
 			require("conform").setup({
 				formatters_by_ft = {
 					bash = { "shfmt" },
-					-- css = { "prettier" },
+					css = { "prettier" },
 					graphql = { "prettier" },
 					html = { "prettier" },
-					-- javascript = { "prettier" },
-					-- javascriptreact = { "prettier" },
-					-- json = { "prettier" },
+					javascript = { "prettier" },
+					javascriptreact = { "prettier" },
+					json = { "prettier" },
 					liquid = { "prettier" },
 					lua = { "stylua" },
 					markdown = { "prettier" },
 					python = { "ruff", "isort", "black" },
 					sh = { "shfmt" },
+					sql = { "sql-formatter" },
 					svelte = { "prettier" },
-					-- typescript = { "prettier" },
-					-- typescriptreact = { "prettier" },
+					typescript = { "prettier" },
+					typescriptreact = { "prettier" },
 					vimwiki = { "prettier" },
 					yaml = { "prettier" },
 					zsh = { "beautysh" },
@@ -348,7 +358,19 @@ return {
 					if vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat then
 						return
 					end
-					return { lsp_format = "fallback", timeout_ms = 1000, async = false }
+					local ft = vim.bo[bufnr].filetype
+					local off = {
+						javascript = true,
+						typescript = true,
+						javascriptreact = true,
+						typescriptreact = true,
+						json = true,
+						css = true,
+					}
+					if off[ft] then
+						return false
+					end
+					return { lsp_fallback = true, timeout_ms = 1000, async = false }
 				end,
 			})
 
