@@ -128,11 +128,11 @@ config.load_autoconfig(True)
 
 ## Foreground color of the matched text in the selected completion item.
 ## Type: QtColor
-# c.colors.completion.item.selected.match.fg = '#ff4444'
+# c.colors.completion.item.selected.match.fg = '#770000'
 
 ## Foreground color of the matched text in the completion.
 ## Type: QtColor
-# c.colors.completion.match.fg = '#ff4444'
+# c.colors.completion.match.fg = '#770000'
 
 ## Background color of the completion widget for odd rows.
 ## Type: QssColor
@@ -182,7 +182,7 @@ config.load_autoconfig(True)
 
 ## Background color for downloads with errors.
 ## Type: QtColor
-# c.colors.downloads.error.bg = 'red'
+c.colors.downloads.error.bg = "#770000"
 
 ## Foreground color for downloads with errors.
 ## Type: QtColor
@@ -249,11 +249,11 @@ c.colors.downloads.stop.fg = "#ebdbb2"
 
 ## Background color of an error message.
 ## Type: QssColor
-# c.colors.messages.error.bg = 'red'
+# c.colors.messages.error.bg = '#770000'
 
 ## Border color of an error message.
 ## Type: QssColor
-# c.colors.messages.error.border = '#bb0000'
+# c.colors.messages.error.border = '#770000'
 
 ## Foreground color of an error message.
 ## Type: QssColor
@@ -273,7 +273,7 @@ c.colors.downloads.stop.fg = "#ebdbb2"
 
 ## Background color of a warning message.
 ## Type: QssColor
-# c.colors.messages.warning.bg = 'darkorange'
+c.colors.messages.warning.bg = "#550000"
 
 ## Border color of a warning message.
 ## Type: QssColor
@@ -373,7 +373,7 @@ c.colors.downloads.stop.fg = "#ebdbb2"
 
 ## Foreground color of the URL in the statusbar on error.
 ## Type: QssColor
-# c.colors.statusbar.url.error.fg = 'orange'
+c.colors.statusbar.url.error.fg = "#770000"
 
 ## Default foreground color of the URL in the statusbar.
 ## Type: QssColor
@@ -391,7 +391,7 @@ c.colors.downloads.stop.fg = "#ebdbb2"
 ## Foreground color of the URL in the statusbar on successful load
 ## (https).
 ## Type: QssColor
-# c.colors.statusbar.url.success.https.fg = 'lime'
+c.colors.statusbar.url.success.https.fg = "white"
 
 ## Foreground color of the URL in the statusbar when there's a warning.
 ## Type: QssColor
@@ -411,7 +411,7 @@ c.colors.tabs.even.bg = "#333333"
 
 ## Color for the tab indicator on errors.
 ## Type: QtColor
-# c.colors.tabs.indicator.error = '#ff0000'
+# c.colors.tabs.indicator.error = '#770000'
 
 ## Color gradient start for the tab indicator.
 ## Type: QtColor
