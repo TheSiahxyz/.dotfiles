@@ -15,6 +15,10 @@ light = "catppuccin-mocha"
 
 # : }}}
 
+[status]
+sep_left  = { open = "", close = "" }
+sep_right = { open = "", close = "" }
+
 # ayu-dark
 # catppuccin-frappe
 # catppuccin-latte
