@@ -6,7 +6,7 @@
 ratio          = [ 1, 2, 4 ]
 sort_by        = "alphabetical"
 sort_sensitive = false
-sort_reverse 	 = false
+sort_reverse   = false
 sort_dir_first = true
 sort_translit  = false
 linemode       = "none"
@@ -101,6 +101,11 @@ suppress_preload = false
 fetchers = [
 	# Mimetype
 	{ id = "mime", name = "*", run = "mime", prio = "high" },
+  { id = "git", name = "*", run = "git" },
+  { id = "git", name = "*/", run = "git" },
+  { id = "mactag", name = "*", run = "mactag" },
+  { id = "mactag", name = "*/", run = "mactag" },
+  { id = "mime", name = "*", run = "mime-ext", prio = "high" },
 ]
 spotters = [
 	{ name = "*/", run = "folder" },
@@ -159,6 +164,43 @@ previewers = [
 	{ mime = "inode/empty", run = "empty" },
 	# Fallback
 	{ name = "*", run = "file" },
+]
+prepend_preloaders = [
+    { mime = "application/openxmlformats-officedocument.*", run = "office" },
+    { mime = "application/oasis.opendocument.*", run = "office" },
+    { mime = "application/ms-*", run = "office" },
+    { mime = "application/msword", run = "office" },
+    { name = "*.docx", run = "office" },
+]
+prepend_previewers = [
+    { mime = "*/xml", run  = 'piper -- bat -p --theme ansi --terminal-width "$w" -f "$1"' },
+    { mime = "application/*zip", run  = 'piper -- atool --list -- "$1"' },
+    { mime = "application/epub+zip", run  = 'piper -- pandoc "$1" -t plain' },
+    { mime = "application/json", run  = 'piper -- bat -p --theme ansi --terminal-width "$w" -f "$1"' },
+    { mime = "application/ms-*", run = "office" },
+    { mime = "application/msword", run = "office" },
+    { mime = "application/oasis.opendocument.*", run = "office" },
+    { mime = "application/octet-stream", run  = 'piper -- mediainfo "$1"' },
+    { mime = "application/openxmlformats-officedocument.*", run = "office" },
+    { mime = "application/pgp-encrypted", run  = 'piper -- gpg -d -- "$1"' },
+    { mime = "application/vnd.openxmlformats-officedocument.wordprocessingml.document", run  = 'piper -- pandoc "$1" -t plain' },
+    { mime = "application/vnd.rn-realmedia", run  = 'piper -- mediainfo "$1"' },
+    { mime = "application/x-mobipocket-ebook", run  = 'piper -- pandoc "$1" -t plain' },
+    { mime = "application/x-ndjson", run  = 'piper -- bat -p --theme ansi --terminal-width "$w" -f "$1"' },
+    { mime = "application/x-{tar,bzip*,7z-compressed,xz,rar}", run  = "lsar" },
+    { mime = "application/{,g}zip", run  = "lsar" },
+    { mime = "audio/*", run  = 'piper -- mediainfo "$1"' },
+    # { mime = "image/{jpeg,png,webp}", run  = "zoom 5" },
+    { mime = "text/*", run  = 'piper -- bat -p --theme ansi --terminal-width "$w" -f "$1"' },
+    { mime = "text/html", run  = 'piper -- lynx -width="$w" -display_charset=utf-8 -dump "$1"' },
+    { mime = "text/troff", run  = 'piper -- man ./ "$1" | col -b' },
+    { mime = "video/*", run  = 'piper -- mediainfo "$1"' },
+    { name = "*.csv", run  = 'piper -- bat -p --color=always "$1"' },
+    { name = "*.docx", run = "office" },
+    { name = "*.md", run  = 'piper -- env CLICOLOR_FORCE=1 glow -w=$w -s=dark "$1"' },
+    { name = "*.{odt,ods,odp,odg,ott,ots,otp}", run  = 'piper -- odt2txt "$1"' },
+    { name = "*.{tar,tar.gz,tar.bz2,tar.xz,zip,7z,rar,iso}", run  = 'piper --format=url -- 7z l "$1"' },
+    { name = "*/", run  = 'piper -- eza -TL=3 --color=always --icons=always --group-directories-first --no-quotes "$1"' },
 ]
 
 [input]
@@ -232,126 +274,3 @@ sort_by      	 = "none"
 sort_sensitive = false
 sort_reverse 	 = false
 sort_translit  = false
-
-# plugins
-[[plugin.prepend_fetchers]]
-id   = "git"
-name = "*"
-run  = "git"
-
-[[plugin.prepend_fetchers]]
-id   = "git"
-name = "*/"
-run  = "git"
-
-[[plugin.prepend_previewers]]
-mime = "application/{,g}zip"
-run  = "lsar"
-
-[[plugin.prepend_previewers]]
-mime = "application/x-{tar,bzip*,7z-compressed,xz,rar}"
-run  = "lsar"
-
-[[plugin.prepend_fetchers]]
-id   = "mactag"
-name = "*"
-run  = "mactag"
-
-[[plugin.prepend_fetchers]]
-id   = "mactag"
-name = "*/"
-run  = "mactag"
-
-[[plugin.prepend_fetchers]]
-id   = "mime"
-name = "*"
-run  = "mime-ext"
-prio = "high"
-
-[[plugin.prepend_previewers]]
-name = "*.{tar,tar.gz,tar.bz2,tar.xz,zip,7z,rar,iso}"
-run  = 'piper --format=url -- 7z l "$1"'
-
-[[plugin.prepend_previewers]]
-name = "*.csv"
-run  = 'piper -- bat -p --color=always "$1"'
-
-[[plugin.prepend_previewers]]
-name = "*.md"
-run  = 'piper -- env CLICOLOR_FORCE=1 glow -w=$w -s=dark "$1"'
-
-[[plugin.prepend_previewers]]
-mime = "text/html"
-run  = 'piper -- lynx -width="$w" -display_charset=utf-8 -dump "$1"'
-
-[[plugin.prepend_previewers]]
-name = "*.{xls,xlsx}"
-run  = 'piper -- in2csv "$1" | head -n 200'
-
-[[plugin.prepend_previewers]]
-mime = "text/troff"
-run  = 'piper -- man ./ "$1" | col -b'
-
-[[plugin.prepend_previewers]]
-mime = "text/*"
-run  = 'piper -- bat -p --theme ansi --terminal-width "$w" -f "$1"'
-
-[[plugin.prepend_previewers]]
-mime = "*/xml"
-run  = 'piper -- bat -p --theme ansi --terminal-width "$w" -f "$1"'
-
-[[plugin.prepend_previewers]]
-mime = "application/json"
-run  = 'piper -- bat -p --theme ansi --terminal-width "$w" -f "$1"'
-
-[[plugin.prepend_previewers]]
-mime = "application/x-ndjson"
-run  = 'piper -- bat -p --theme ansi --terminal-width "$w" -f "$1"'
-
-[[plugin.prepend_previewers]]
-mime = "audio/*"
-run  = 'piper -- mediainfo "$1"'
-
-[[plugin.prepend_previewers]]
-mime = "video/*"
-run  = 'piper -- mediainfo "$1"'
-
-[[plugin.prepend_previewers]]
-mime = "application/octet-stream"
-run  = 'piper -- mediainfo "$1"'
-
-[[plugin.prepend_previewers]]
-mime = "application/vnd.rn-realmedia"
-run  = 'piper -- mediainfo "$1"'
-
-[[plugin.prepend_previewers]]
-mime = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-run  = 'piper -- pandoc "$1" -t plain'
-
-[[plugin.prepend_previewers]]
-name = "*.{odt,ods,odp,odg,ott,ots,otp}"
-run  = 'piper -- odt2txt "$1"'
-
-[[plugin.prepend_previewers]]
-mime = "application/pgp-encrypted"
-run  = 'piper -- gpg -d -- "$1"'
-
-[[plugin.prepend_previewers]]
-mime = "application/epub+zip"
-run  = 'piper -- pandoc "$1" -t plain'
-
-[[plugin.prepend_previewers]]
-mime = "application/x-mobipocket-ebook"
-run  = 'piper -- pandoc "$1" -t plain'
-
-[[plugin.prepend_previewers]]
-mime = "application/*zip"
-run  = 'piper -- atool --list -- "$1"'
-
-[[plugin.prepend_previewers]]
-name = "*/"
-run  = 'piper -- eza -TL=3 --color=always --icons=always --group-directories-first --no-quotes "$1"'
-
-# [[plugin.prepend_previewers]]
-# mime = "image/{jpeg,png,webp}"
-# run  = "zoom 5"

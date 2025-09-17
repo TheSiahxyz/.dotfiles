@@ -116,8 +116,11 @@ zstyle ':fzf-tab:*' switch-group ',' '.'    # switch group using `,` and `.`
 ### --- AVANTE --- ###
 export AVANTE_ANTHROPIC_API_KEY="$(pass show api/claude/nvim | head -n1)"
 export AVANTE_OPENAI_API_KEY="$(pass show api/chatGPT/nvim | head -n1)"
-# export AVANTE_AZURE_OPENAI_API_KEY=your-azure-api-key
-# export AVANTE_GEMINI_API_KEY=your-gemini-api-key
-# export AVANTE_CO_API_KEY=your-cohere-api-key
-# export AVANTE_AIHUBMIX_API_KEY=your-aihubmix-api-key
-# export AVANTE_MOONSHOT_API_KEY=your-moonshot-api-key
+# export AVANTE_AZURE_OPENAI_API_KEY="$(pass show api/azure/nvim | head -n1)"
+# export AVANTE_GEMINI_API_KEY="$(pass show api/gemini/nvim | head -n1)"
+# export AVANTE_CO_API_KEY="$(pass show api/cohere/nvim | head -n1)"
+# export AVANTE_AIHUBMIX_API_KEY="$(pass show api/aihubmix/nvim | head -n1)"
+# export AVANTE_MOONSHOT_API_KEY="$(pass show api/moonshot/nvim | head -n1)"
+
+### --- OPENAI --- ###
+export OPENAI_API_KEY="$(pass show api/chatGPT/nvim | head -n1)"
