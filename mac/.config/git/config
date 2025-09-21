@@ -62,11 +62,11 @@
   diffFilter = delta --color-only
 [merge]
   tool = vscode
-  conflictstyle = diff3
+	conflictstyle = zdiff3
 [mergetool]
   keepBackup = false
 [mergetool "vscode"]
-  cmd = code --wait $MERGED
+	cmd = code --wait --merge $LOCAL $REMOTE $BASE $MERGED
 [pager]
   branch = false
   diff = delta
