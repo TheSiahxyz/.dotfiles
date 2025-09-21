@@ -106,6 +106,10 @@ dht.dat
 # TheSiahxyz
 thesiah.mom
 
+# Video
+*.mp4
+*.mov
+
 # Vim
 */vim/*/
 
