@@ -243,6 +243,7 @@ alias hx='hexdump -C'
 # hugo
 alias hss='hugo server --noHTTPCache'
 alias hcl='hugo --cleanDestinationDir'
+alias crl="ssh $THESIAH_SERVER 'cat /var/log/nginx/recordings.access.log'"
 
 # ip
 ialias ip='ip -color=auto'
