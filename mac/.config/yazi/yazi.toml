@@ -104,8 +104,8 @@ fetchers = [
 	{ id = "mime", name = "*", run = "mime", prio = "high" },
   { id = "git", name = "*", run = "git" },
   { id = "git", name = "*/", run = "git" },
-  { id = "mactag", name = "*", run = "mactag" },
-  { id = "mactag", name = "*/", run = "mactag" },
+  # { id = "mactag", name = "*", run = "mactag" },
+  # { id = "mactag", name = "*/", run = "mactag" },
   { id = "mime", name = "*", run = "mime-ext", prio = "high" },
 ]
 spotters = [
@@ -147,7 +147,8 @@ previewers = [
 	{ mime = "image/svg+xml", run = "svg" },
 	{ mime = "image/*", run = "image" },
 	# Video
-	{ mime = "video/*", run = "video" },
+	{ mime = "application/{octet-stream,vnd.rn-realmedia}", run = "video" },
+	{ mime = "{audio,video}/*", run = "video" },
 	# PDF
 	{ mime = "application/pdf", run = "pdf" },
 	# Archive
@@ -181,11 +182,11 @@ prepend_previewers = [
     { mime = "application/ms-*", run = "office" },
     { mime = "application/msword", run = "office" },
     { mime = "application/oasis.opendocument.*", run = "office" },
-    { mime = "application/octet-stream", run  = 'piper -- mediainfo "$1"' },
+    # { mime = "application/octet-stream", run  = 'piper -- mediainfo "$1"' },
     { mime = "application/openxmlformats-officedocument.*", run = "office" },
     { mime = "application/pgp-encrypted", run  = 'piper -- gpg -d -- "$1"' },
     { mime = "application/vnd.openxmlformats-officedocument.wordprocessingml.document", run  = 'piper -- pandoc "$1" -t plain' },
-    { mime = "application/vnd.rn-realmedia", run  = 'piper -- mediainfo "$1"' },
+    # { mime = "application/vnd.rn-realmedia", run  = 'piper -- mediainfo "$1"' },
     { mime = "application/x-mobipocket-ebook", run  = 'piper -- pandoc "$1" -t plain' },
     { mime = "application/x-ndjson", run  = 'piper -- bat -p --theme ansi --terminal-width "$w" -f "$1"' },
     { mime = "application/x-{tar,bzip*,7z-compressed,xz,rar}", run  = "lsar" },
@@ -195,7 +196,7 @@ prepend_previewers = [
     { mime = "text/*", run  = 'piper -- bat -p --theme ansi --terminal-width "$w" -f "$1"' },
     { mime = "text/html", run  = 'piper -- lynx -width="$w" -display_charset=utf-8 -dump "$1"' },
     { mime = "text/troff", run  = 'piper -- man ./ "$1" | col -b' },
-    { mime = "video/*", run  = 'piper -- mediainfo "$1"' },
+    # { mime = "video/*", run  = 'piper -- mediainfo "$1"' },
     { name = "*.csv", run  = 'piper -- bat -p --color=always "$1"' },
     { name = "*.docx", run = "office" },
     { name = "*.md", run  = 'piper -- env CLICOLOR_FORCE=1 glow -w=$w -s=dark "$1"' },

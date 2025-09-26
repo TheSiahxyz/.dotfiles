@@ -80,7 +80,7 @@ Thumbs.db
 
 # Private
 *personal*
-content/recordings
+/content/recordings/**
 
 # Shortcuts
 shortcutrc
