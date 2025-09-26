@@ -324,9 +324,9 @@ alias potp='pass otp totp-secret'
 alias yt='pipe-viewer'
 
 # ps
-ialias ps='ps auxf'
+ialias ps='ps aux'
 alias psj='ps aux | grep "[j]ava"'
-balias psg='ps auxf | grep'
+balias psg='ps aux | grep'
 alias topcpu='/bin/ps -eo pcpu,pid,user,args | sort -k 1 -r | head -10'
 
 # python
