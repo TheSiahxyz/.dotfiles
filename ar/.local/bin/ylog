@@ -1,0 +1,25 @@
+#!/bin/sh
+
+HOST="root@thesiah.xyz"
+LOG_DIR="/var/log/nginx"
+target="${1:-207.96.105.230}"
+
+esc_target=$(printf '%s' "$target" | sed -E 's/[][^$.*/+?(){}|\\]/\\&/g')
+
+ssh "$HOST" "
+  for f in $LOG_DIR/recordings* $LOG_DIR/access*; do
+    [ -e \"\$f\" ] || continue
+    case \"\$f\" in
+      *.gz)
+        zgrep -E \"${esc_target}[[:space:]]\" \"\$f\" \
+          | grep -v '59.19.56.8' \
+          | grep -vi 'firefox'
+        ;;
+      *)
+        grep -E \"${esc_target}[[:space:]]\" \"\$f\" \
+          | grep -v '59.19.56.8' \
+          | grep -vi 'firefox'
+        ;;
+    esac
+  done
+"
