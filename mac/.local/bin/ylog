@@ -107,13 +107,24 @@ pick_files() {
 # build exclude regex
 build_exre() {
   EXRE=""
+  TEMP_FILE="/tmp/.ylog_exre_$$"
+  rm -f "$TEMP_FILE"
+  
   { printf "%s\n" "${EXCLUDES:-}"; printf "%s\n" "${ADD_EXCLUDES:-}"; } | sed "/^$/d" | while IFS= read -r pat
   do
     esc=$(printf "%s" "$pat" | sed -E "s/[][^$.*/+?(){}|\\]/\\\\&/g")
-    if [ -z "$EXRE" ]; then EXRE="$esc"; else EXRE="$EXRE|$esc"; fi
-    printf "%s\n" "$EXRE" > "/tmp/.ylog_exre_$$"
+    if [ -s "$TEMP_FILE" ]; then
+      EXRE="$(cat "$TEMP_FILE")|$esc"
+    else
+      EXRE="$esc"
+    fi
+    printf "%s" "$EXRE" > "$TEMP_FILE"
   done
-  if [ -f "/tmp/.ylog_exre_$$" ]; then cat "/tmp/.ylog_exre_$$"; rm -f "/tmp/.ylog_exre_$$"; fi
+  
+  if [ -f "$TEMP_FILE" ]; then 
+    cat "$TEMP_FILE"
+    rm -f "$TEMP_FILE"
+  fi
 }
 
 FILES_TMP="/tmp/.ylog_files_$$"
