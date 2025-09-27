@@ -18,6 +18,7 @@ Usage: ylog [options]
 Options:
   -t TARGET    Search IP or string (default: all → no filter, show all lines)
                 e.g. -t 207.96.105.230
+                e.g. -t si
                 e.g. -t all
 
   -c COUNTRY   Select country logs (default: all)
