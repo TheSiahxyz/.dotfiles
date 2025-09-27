@@ -250,7 +250,7 @@ vim.api.nvim_create_autocmd("FileType", {
 
 		-- 로컬 옵션
 		vim.bo.textwidth = tw
-		vim.bo.formatoptions = vim.bo.formatoptions .. "a" -- 자동 줄바꿈 활성화
+		vim.bo.formatoptions = vim.bo.formatoptions:gsub("a", "")
 		vim.opt_local.wrap = true
 		vim.opt_local.linebreak = true
 		vim.opt_local.breakindent = true
@@ -461,6 +461,21 @@ vim.keymap.set(
 
 -- preview
 vim.keymap.set("n", "<leader>mp", ":MarkdownPreview<CR>", { desc = "Markdown preview" })
+
+-- snippet
+local ls = require("luasnip")
+
+vim.keymap.set({ "i", "s" }, "<C-n>", function()
+	if ls.choice_active() then
+		ls.change_choice(1)
+	end
+end, { silent = true, desc = "LuaSnip next choice" })
+
+vim.keymap.set({ "i", "s" }, "<C-p>", function()
+	if ls.choice_active() then
+		ls.change_choice(-1)
+	end
+end, { silent = true, desc = "LuaSnip prev choice" })
 
 -- traversal
 vim.keymap.set("n", "<Tab>", "<Plug>Markdown_Fold", { desc = "Tab is for moving around only" })
