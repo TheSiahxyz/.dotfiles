@@ -76,8 +76,17 @@ keymap = [
 	{ on = "X",         run = "unyank",                      desc = "Cancel the yank status" },
 	{ on = "d",         run = "remove",                      desc = "Trash selected files" },
 	{ on = "D",         run = "remove --permanently",        desc = "Permanently delete selected files" },
-	{ on = "a",         run = "create",                      desc = "Create a file (ends with / for directories)" },
-	{ on = "r",         run = "rename --cursor=before_ext",  desc = "Rename selected file(s)" },
+	{ on = ["M", "f"],  run = "create",                      desc = "Create a file (ends with / for directories)" },
+	{ on = ["M", "d"],  run = "create --dir",                desc = "Create directories" },
+	{ on = ["M", "o"],  run = "create --force",              desc = "Create/overwrite a file" },
+  { on = "i",         run = "rename --cursor=before_ext",  desc = "Rename selected file(s) with cursor before extension" },
+  { on = "I",         run = "rename --cursor=start",       desc = "Rename selected file(s) with cursor at start" },
+  { on = "w",         run = "rename --empty=ext",          desc = "Rename selected file(s) extension only" },
+  { on = "a",         run = "rename --empty=dot_ext",      desc = "Rename selected file(s) dot extension only" },
+  { on = "A",         run = "rename --cursor=end",         desc = "Rename selected file(s) with cursor at end" },
+  { on = "r",         run = "rename --empty=stem",         desc = "Rename selected file(s) stem only" },
+  { on = "R",         run = "rename --empty=all",          desc = "Rename selected file(s) full name" },
+  { on = "B",         run = [ "escape --select", "toggle_all", "rename", "escape --select --search" ], desc = "Bulk reanme files/folders in cwd" },
 	{ on = ";",         run = "shell --interactive",         desc = "Run a shell command" },
 	{ on = ":",         run = "shell --block --interactive", desc = "Run a shell command (block until finishes)" },
 	{ on = ".",         run = "hidden toggle",               desc = "Toggle the visibility of hidden files" },
@@ -201,8 +210,9 @@ run  = "plugin mactag remove"
 desc = "Untag selected files"
 
 [[mgr.prepend_keymap]]
-on  = "M"
+on  = [ "M", "t" ]
 run = "plugin mount"
+desc = "Mount"
 
 [[mgr.prepend_keymap]]
 on   = "F"
