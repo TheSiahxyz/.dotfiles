@@ -111,4 +111,5 @@ ts              ${XDG_DATA_HOME:-${HOME}/.local/share}/thesiah
 tt              ${XDG_STATE_HOME:-${HOME}/.local/state}
 web             ${THESIAH_WWW:-${HOME}/Private/repos/THESIAH}
 wep             ${THESIAH_WWW:-${HOME}/Private/repos/THESIAH}/public
+wer             ${THESIAH_WWW:-${HOME}/Private/repos/THESIAH}/content/recordings
 wes             ${THESIAH_WWW:-${HOME}/Private/repos/THESIAH}/static
