@@ -44,13 +44,9 @@ th.git = th.git or {}
 th.git.modified_sign = "M"
 th.git.deleted_sign = "D"
 th.git.added_sign = "A"
-th.git.renamed_sign = "R"
-th.git.copied_sign = "C"
 th.git.untracked_sign = "?"
-th.git.ignored_sign = "!"
-th.git.conflicted_sign = "U"
-th.git.typechange_sign = "T"
-th.git.staged_sign = "+"
+th.git.ignored_sign = "X"
+th.git.updated_sign = "U"
 
 require("git"):setup()
 
