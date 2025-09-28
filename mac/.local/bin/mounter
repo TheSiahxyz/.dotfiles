@@ -1,0 +1,307 @@
+#!/bin/bash
+
+# Mounts Android Phones and USB drives (encrypted or not). This script will
+# replace the older `dmenumount` which had extra steps and couldn't handle
+# encrypted drives.
+# TODO: Try decrypt for drives in crtypttab
+# TODO: Add some support for connecting iPhones (although they are annoying).
+
+# Set UTF-8 locale for proper emoji handling on macOS
+export LC_ALL=en_US.UTF-8
+export LANG=en_US.UTF-8
+
+IFS='
+'
+# Function for escaping cell-phone names.
+escape() { echo "$@" | iconv -cf UTF-8 -t ASCII//TRANSLIT | tr -d '[:punct:]' | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | sed "s/-\+/-/g;s/\(^-\|-\$\)//g"; }
+
+# Function for prompting user for a mountpoint.
+getmount() {
+  if [ -z "$1" ]; then
+    echo "Available mount points:"
+    mountpoints="$(find "$HOME/Media" "$HOME/mnt" -mindepth 1 -maxdepth 1 -type d 2>/dev/null)"
+    if [ -n "$mountpoints" ]; then
+      echo "$mountpoints" | nl -nln
+      echo "Enter the number of the mount point, or type a custom path:"
+      read -r choice
+      if [[ "$choice" =~ ^[0-9]+$ ]]; then
+        mp="$(echo "$mountpoints" | sed -n "${choice}p")"
+      else
+        mp="$choice"
+      fi
+    else
+      echo "No existing mount points found. Enter a custom path:"
+      read -r mp
+    fi
+  else
+    mp="$1"
+  fi
+  test -n "$mp"
+  if [ ! -d "$mp" ]; then
+    echo "$mp does not exist. Create it? (y/n):"
+    read -r mkdiryn
+    [ "$mkdiryn" = "y" ] || [ "$mkdiryn" = "Y" ] && (mkdir -p "$mp" 2>/dev/null || sudo -A mkdir -p "$mp")
+  fi
+}
+
+attemptmount() {
+  # Attempt to mount using diskutil (macOS)
+  if command -v diskutil >/dev/null 2>&1; then
+    # Try to get volume name
+    mplabel=$(diskutil info "$chosen" 2>/dev/null | grep "Volume Name" | sed 's/.*: *//' | tr ' ' '-')
+    [ -z "$mplabel" ] && mplabel="disk-$(basename "$chosen")"
+    mp="$HOME/Media/$mplabel"
+
+    if [ ! -d "$mp" ] && [ ! -d "$HOME/mnt/$mplabel" ]; then
+      getmount "$mp" && diskutil mount -mountPoint "$mp" "$chosen" >/dev/null 2>&1 || return 1
+    elif [ -d "$mp" ] && [ ! -d "$HOME/mnt/$mplabel" ]; then
+      diskutil mount -mountPoint "$mp" "$chosen" >/dev/null 2>&1 || return 1
+    elif [ -d "$HOME/mnt/$mplabel" ]; then
+      getmount "$HOME/mnt/$mplabel" && diskutil mount -mountPoint "$HOME/mnt/$mplabel" "$chosen" >/dev/null 2>&1 || return 1
+    else
+      diskutil mount "$chosen" >/dev/null 2>&1 || return 1
+    fi
+  else
+    return 1
+  fi
+}
+
+osascript -e 'display notification "🔎 Searching drives to mount..." with title "Mounter"'
+
+# Check for phones (Android MTP).
+phones=""
+if command -v simple-mtpfs >/dev/null 2>&1; then
+  phones="$(simple-mtpfs -l 2>/dev/null | awk '{print "📱" $0}')"
+  mountedphones="$(mount | grep "simple-mtpfs")"
+  # If there are already mounted phones, remove them from the list of mountables.
+  [ -n "$mountedphones" ] && phones="$(for phone in $phones; do
+    for mounted in $mountedphones; do
+      escphone="$(escape "$phone")"
+      [[ "$mounted" =~ $escphone ]] && break 1
+    done && continue 1
+    echo "$phone"
+  done)"
+fi
+
+iphones=""
+if command -v ideviceinfo >/dev/null 2>&1; then
+  iphones="$(ideviceinfo 2>/dev/null | grep -E "^DeviceName" | awk -F': ' '{print "🍎" $2}')"
+  mountediphones="$(mount | grep "ifuse")"
+  [ -n "$mountediphones" ] && iphones="$(for iphone in $iphones; do
+    for mounted in $mountediphones; do
+      esciphone="$(escape "$iphone")"
+      [[ "$mounted" =~ $esciphone ]] && break 1
+    done && continue 1
+    echo "$iphone"
+  done)"
+fi
+
+# Check for drives using diskutil (macOS)
+unmounteddrives=""
+if command -v diskutil >/dev/null 2>&1; then
+  # Get all external disks
+  external_disks="$(diskutil list external | grep -E '^/dev/disk[0-9]+' | awk '{print $1}')"
+  for disk in $external_disks; do
+    # Check if disk is mounted
+    if ! diskutil info "$disk" 2>/dev/null | grep -q "Mounted.*Yes"; then
+      diskname="$(diskutil info "$disk" 2>/dev/null | grep "Device / Media Name" | sed 's/.*: *//')"
+      # Only include if it's truly removable/external
+      if diskutil info "$disk" 2>/dev/null | grep -qE "Protocol.*USB\|Protocol.*FireWire\|Protocol.*Thunderbolt\|Removable Media.*Yes"; then
+        [ -n "$diskname" ] && unmounteddrives="${unmounteddrives}💾 $disk ($diskname)\n"
+      fi
+    fi
+  done
+  # Also check for removable volumes that are unmounted
+  volumes="$(diskutil list | grep -E '^   [0-9]+:' | grep -v 'disk image' | awk '{print $NF}' | grep '^disk')"
+  for vol in $volumes; do
+    vol_path="/dev/$vol"
+    if ! mount | grep -q "$vol_path"; then
+      volname="$(diskutil info "$vol_path" 2>/dev/null | grep "Volume Name" | sed 's/.*: *//' | head -1)"
+      voltype="$(diskutil info "$vol_path" 2>/dev/null | grep "File System Personality" | sed 's/.*: *//')"
+      # Skip system partitions
+      case "$volname" in
+      "Recovery" | "EFI" | "Preboot" | "VM" | "Update" | "Data" | "" | *"Recovery"* | *"EFI"* | *"Preboot"* | *"VM"* | *"Update"* | *"Data"*)
+        continue
+        ;;
+      esac
+      # Skip APFS system containers and snapshots
+      if diskutil info "$vol_path" 2>/dev/null | grep -q "APFS.*Container\|Snapshot"; then
+        continue
+      fi
+      # Only include external or removable drives
+      if diskutil info "$vol_path" 2>/dev/null | grep -qE "Protocol.*USB\|Protocol.*FireWire\|Protocol.*Thunderbolt\|Removable Media.*Yes\|External.*Yes"; then
+        [ -n "$volname" ] && [ "$voltype" != "" ] && unmounteddrives="${unmounteddrives}💾 $vol_path ($volname - $voltype)\n"
+      fi
+    fi
+  done
+fi
+normalparts="$(printf "%b" "$unmounteddrives" | grep -v '^$')"
+
+# LUKS encryption is not common on macOS, so we'll skip it
+unopenedluks=""
+
+# Get network shares (simplified for macOS)
+smbips=""
+if [ -x "/opt/homebrew/bin/arp-scan" ]; then
+  # Get local network IPs from ARP table
+  smbips="$(sudo /opt/homebrew/bin/arp-scan --interface=en0 --localnet 2>/dev/null | awk '/^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/{print $1}' | sort -u)"
+fi
+
+# Get currently mounted SMB/CIFS shares
+mountedsmbs="$(mount | grep 'smbfs\|cifs')"
+
+smbshares=""
+# Limit to first 3 IPs to avoid hanging
+count=0
+for smbip in $smbips; do
+  count=$((count + 1))
+  if [ $count -gt 3 ]; then
+    break
+  fi
+
+  # Try to discover shares using smbutil (macOS native) or smbclient
+  if command -v smbutil >/dev/null 2>&1; then
+    # Try with guest access first, then with current user if needed
+    shares=$(smbutil view "//$smbip" 2>/dev/null | awk '/Disk/ && !/\$/ && !/ADMIN/ && !/IPC/ {print $1}' | grep -v '^$' ||
+      smbutil view "//guest@$smbip" 2>/dev/null | awk '/Disk/ && !/\$/ && !/ADMIN/ && !/IPC/ {print $1}' | grep -v '^$' ||
+      smbutil view "//$USER@$smbip" 2>/dev/null | awk '/Disk/ && !/\$/ && !/ADMIN/ && !/IPC/ {print $1}' | grep -v '^$' || true)
+    for share in $shares; do
+      if [ -n "$share" ]; then
+        smbshares="${smbshares}//$smbip/$share"$'\n'
+      fi
+    done
+  elif command -v smbclient >/dev/null 2>&1; then
+    # Try smbclient if available
+    shares=$(smbclient -L "$smbip" -N 2>/dev/null | awk '/Disk/ && !/\$/ && !/ADMIN/ && !/IPC/ {print $1}' | grep -v '^$' || true)
+    for share in $shares; do
+      if [ -n "$share" ]; then
+        smbshares="${smbshares}//$smbip/$share"$'\n'
+      fi
+    done
+  fi
+done
+
+# Remove empty lines
+smbshares="$(printf "%s" "$smbshares" | grep -v '^$')"
+
+# Filter out already mounted shares and format for display
+smbs=""
+if [ -n "$smbshares" ]; then
+  smbs="$(printf "%s" "$smbshares" | while IFS= read -r smb; do
+    if [ -n "$smb" ] && [ "$smb" != "SMB_AVAILABLE" ]; then
+      # Check if already mounted
+      mounted=false
+      if [ -n "$mountedsmbs" ]; then
+        for mountedsmb in $mountedsmbs; do
+          mountedpath="${mountedsmb%% *}"
+          if [[ "$mountedpath" =~ $(printf "%s" "$smb" | sed 's/[[\.*^$()+?{|]/\\&/g') ]]; then
+            mounted=true
+            break
+          fi
+        done
+      fi
+      if [ "$mounted" = "false" ]; then
+        printf "📡 %s\n" "$smb"
+      fi
+    fi
+  done)"
+fi
+
+# No manual SMB option - only show discovered shares
+
+# Add all to one variable. If no mountable drives found, exit.
+alldrives="$(echo "$phones
+$iphones
+$unopenedluks
+$normalparts
+$smbs" | sed "/^$/d;s/ *$//")"
+
+# Debug output
+if [ "$1" = "-d" ] || [ "$1" = "--debug" ]; then
+  echo "Debug: phones='$phones'"
+  echo "Debug: iphones='$iphones'"
+  echo "Debug: normalparts='$normalparts'"
+  echo "Debug: smbs='$smbs'"
+  echo "Debug: alldrives='$alldrives'"
+fi
+
+# Quit the script if a sequential command fails.
+set -e
+test -n "$alldrives" || { echo "No mountable drives found. Use -d for debug info." && exit; }
+
+# Feed all found drives to terminal menu and get user choice.
+echo "Available drives to mount:"
+echo "$alldrives" | nl -nln
+echo "Enter the number of the drive you want to mount:"
+read -r drivenum
+chosen="$(echo "$alldrives" | sed -n "${drivenum}p")"
+case "$chosen" in
+💾*)
+  chosen="${chosen%% *}"
+  chosen="${chosen:1}" # This is a bashism.
+  attemptmount || {
+    getmount
+    # Use diskutil for mounting on macOS
+    if [ -n "$mp" ]; then
+      mkdir -p "$mp" 2>/dev/null
+      diskutil mount -mountPoint "$mp" "$chosen" 2>/dev/null || diskutil mount "$chosen"
+    else
+      diskutil mount "$chosen"
+    fi
+  }
+  osascript -e "display notification \"$chosen mounted to $mp.\" with title \"💾 Drive Mounted\""
+  ;;
+🔒*)
+  # LUKS encryption is not common on macOS, show message
+  osascript -e 'display notification "Encrypted drives not supported on macOS" with title "🔒 Encryption Not Supported"'
+  ;;
+📱*)
+  if command -v simple-mtpfs >/dev/null 2>&1; then
+    osascript -e 'display notification "Remember to allow file access on your phone now." with title "❗ Note"'
+    getmount
+    number="${chosen%%:*}"
+    number="${chosen:1}" # This is a bashism.
+    mkdir -p "$mp" 2>/dev/null
+    simple-mtpfs -o allow_other -o fsname="simple-mtpfs-$(escape "$chosen")" --device "$number" "$mp" 2>/dev/null
+    osascript -e "display notification \"Android device mounted to $mp.\" with title \"🤖 Android Mounted\""
+  else
+    osascript -e 'display notification "simple-mtpfs not installed. Install with: brew install simple-mtpfs" with title "❗ MTP Not Available"'
+  fi
+  ;;
+🍎*)
+  if command -v ifuse >/dev/null 2>&1; then
+    getmount
+    mkdir -p "$mp" 2>/dev/null
+    ifuse "$mp" 2>/dev/null
+    osascript -e "display notification \"$chosen mounted to $mp.\" with title \"🍎 iPhone Mounted\""
+  else
+    osascript -e 'display notification "ifuse not installed. Install with: brew install ifuse" with title "❗ iPhone Support Not Available"'
+  fi
+  ;;
+📡*)
+  # Extract the SMB path from the selected item
+  chosen="${chosen#📡 }"
+  # If it doesn't start with //, add it
+  if [[ "$chosen" != //* ]]; then
+    chosen="//$chosen"
+  fi
+  path="${chosen##*/}"
+
+  if getmount "$HOME/Media/$path"; then
+    mkdir -p "$mp" 2>/dev/null
+    # Use macOS mount_smbfs command
+    if command -v mount_smbfs >/dev/null 2>&1; then
+      echo "Attempting to mount $chosen to $mp"
+      mount_smbfs -o soft "$chosen" "$mp" 2>/dev/null
+    else
+      osascript -e 'display notification "SMB mounting not available" with title "❌ SMB Not Supported"'
+      exit
+    fi
+  else
+    osascript -e "display notification \"Failed to create mount point\" with title \"❌ Failed to mount samba\""
+    exit
+  fi
+  osascript -e "display notification \"$mp\" with title \"📡 Samba successfully mounted to\""
+  ;;
+esac
+
