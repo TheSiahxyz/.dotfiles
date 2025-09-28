@@ -5,7 +5,7 @@ return {
 		-- Enable Goyo by default for mutt writing
 		vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
 			group = vim.api.nvim_create_augroup("TheSiahxyz_goyo_config", { clear = true }),
-			pattern = "/private/var/folders/rz/*/T/neomutt*",
+			pattern = "/private/var/folders/*/*/*/neomutt*",
 			callback = function()
 				vim.g.goyo_width = 80
 				vim.g.seoul256_background = 235
