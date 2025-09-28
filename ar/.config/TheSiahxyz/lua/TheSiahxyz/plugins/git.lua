@@ -212,4 +212,17 @@ return {
 			{ mode = "n", "go", "<Cmd>diffget //3<cr>", desc = "Git diff on their side" },
 		},
 	},
+	{
+		"pwntester/octo.nvim",
+		requires = {
+			"nvim-lua/plenary.nvim",
+			"nvim-telescope/telescope.nvim",
+			-- OR 'ibhagwan/fzf-lua',
+			-- OR 'folke/snacks.nvim',
+			"nvim-tree/nvim-web-devicons",
+		},
+		config = function()
+			require("octo").setup()
+		end,
+	},
 }

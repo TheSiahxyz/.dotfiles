@@ -1,6 +1,7 @@
 return {
 	"axieax/urlview.nvim",
 	dependencies = "nvim-telescope/telescope.nvim",
+	event = "VeryLazy",
 	init = function()
 		local wk = require("which-key")
 		wk.add({
@@ -89,12 +90,12 @@ return {
 			-- Command or method to open links with
 			-- Options: "netrw", "system" (default OS browser), "clipboard"; or "firefox", "chromium" etc.
 			-- By default, this is "netrw", or "system" if netrw is disabled
-			default_action = "netrw",
+			default_action = "system",
 			-- Set the register to use when yanking
 			-- Default: + (system clipboard)
 			default_register = "+",
 			-- Whether plugin URLs should link to the branch used by your package manager
-			default_include_branch = false,
+			default_include_branch = true,
 			-- Ensure links shown in the picker are unique (no duplicates)
 			unique = true,
 			-- Ensure links shown in the picker are sorted alphabetically
@@ -109,9 +110,9 @@ return {
 		})
 
 		-- Add a keymap for the Tmux plugins search context
-		vim.keymap.set("n", "<leader>ub", "<Cmd>UrlView thesiah_urls<cr>", { desc = "Bookmarks URLs" })
+		vim.keymap.set("n", "<leader>ub", "<Cmd>UrlView<cr>", { desc = "Buffer URLs" })
 		vim.keymap.set("n", "<leader>ul", "<Cmd>UrlView lazy<cr>", { desc = "Lazy plugin URLs" })
-		vim.keymap.set("n", "<leader>ur", "<Cmd>UrlView<cr>", { desc = "Buffer URLs" })
+		vim.keymap.set("n", "<leader>us", "<Cmd>UrlView thesiah_urls<cr>", { desc = "Bookmarks URLs" })
 		vim.keymap.set("n", "<leader>ut", "<Cmd>UrlView tmux_plugins<cr>", { desc = "Tmux plugin URLs" })
 		vim.keymap.set(
 			"n",

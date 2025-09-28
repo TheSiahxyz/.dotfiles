@@ -475,16 +475,16 @@ return {
 					or vim.fn.fnamemodify(curr_entry.path, ":h") -- Use parent directory if entry is a file
 				-- vim.notify("Current directory: " .. curr_dir, vim.log.levels.INFO)
 				local script = [[
-            tell application "System Events"
-              try
-                set theFile to the clipboard as alias
-                set posixPath to POSIX path of theFile
-                return posixPath
-              on error
-                return "error"
-              end try
-            end tell
-            ]]
+tell application "System Events"
+  try
+    set theFile to the clipboard as alias
+    set posixPath to POSIX path of theFile
+    return posixPath
+  on error
+    return "error"
+  end try
+end tell
+]]
 				local output = vim.fn.has("mac") == 1 and vim.fn.system("osascript -e " .. vim.fn.shellescape(script))
 					or vim.fn.system("xclip -o -selection clipboard")
 				if vim.v.shell_error ~= 0 or output:find("error") then
@@ -786,31 +786,46 @@ return {
 			local gitStatusCache = {}
 			local cacheTimeout = 2000 -- Cache timeout in milliseconds
 
+			local function isSymlink(path)
+				local stat = vim.loop.fs_lstat(path)
+				return stat and stat.type == "link"
+			end
+
 			---@type table<string, {symbol: string, hlGroup: string}>
 			---@param status string
 			---@return string symbol, string hlGroup
-			local function mapSymbols(status)
+			local function mapSymbols(status, is_symlink)
 				local statusMap = {
-                    -- stylua: ignore start
-                    [" M"] = { symbol = "•", hlGroup  = "GitSignsChange"}, -- Modified in the working directory
-                    ["M "] = { symbol = "✹", hlGroup  = "GitSignsChange"}, -- modified in index
-                    ["MM"] = { symbol = "≠", hlGroup  = "GitSignsChange"}, -- modified in both working tree and index
-                    ["A "] = { symbol = "+", hlGroup  = "GitSignsAdd"   }, -- Added to the staging area, new file
-                    ["AA"] = { symbol = "≈", hlGroup  = "GitSignsAdd"   }, -- file is added in both working tree and index
-                    ["D "] = { symbol = "-", hlGroup  = "GitSignsDelete"}, -- Deleted from the staging area
-                    ["AM"] = { symbol = "⊕", hlGroup  = "GitSignsChange"}, -- added in working tree, modified in index
-                    ["AD"] = { symbol = "-•", hlGroup = "GitSignsChange"}, -- Added in the index and deleted in the working directory
-                    ["R "] = { symbol = "→", hlGroup  = "GitSignsChange"}, -- Renamed in the index
-                    ["U "] = { symbol = "‖", hlGroup  = "GitSignsChange"}, -- Unmerged path
-                    ["UU"] = { symbol = "⇄", hlGroup  = "GitSignsAdd"   }, -- file is unmerged
-                    ["UA"] = { symbol = "⊕", hlGroup  = "GitSignsAdd"   }, -- file is unmerged and added in working tree
-                    ["??"] = { symbol = "?", hlGroup  = "GitSignsDelete"}, -- Untracked files
-                    ["!!"] = { symbol = "!", hlGroup  = "GitSignsChange"}, -- Ignored files
+-- stylua: ignore start
+[" M"] = { symbol = "✹", hlGroup  = "MiniDiffSignChange"}, -- Modified in the working directory
+["M "] = { symbol = "•", hlGroup  = "MiniDiffSignChange"}, -- modified in index
+["MM"] = { symbol = "≠", hlGroup  = "MiniDiffSignChange"}, -- modified in both working tree and index
+["A "] = { symbol = "+", hlGroup  = "MiniDiffSignAdd"   }, -- Added to the staging area, new file
+["AA"] = { symbol = "≈", hlGroup  = "MiniDiffSignAdd"   }, -- file is added in both working tree and index
+["D "] = { symbol = "-", hlGroup  = "MiniDiffSignDelete"}, -- Deleted from the staging area
+["AM"] = { symbol = "⊕", hlGroup  = "MiniDiffSignChange"}, -- added in working tree, modified in index
+["AD"] = { symbol = "-•", hlGroup = "MiniDiffSignChange"}, -- Added in the index and deleted in the working directory
+["R "] = { symbol = "→", hlGroup  = "MiniDiffSignChange"}, -- Renamed in the index
+["U "] = { symbol = "‖", hlGroup  = "MiniDiffSignChange"}, -- Unmerged path
+["UU"] = { symbol = "⇄", hlGroup  = "MiniDiffSignAdd"   }, -- file is unmerged
+["UA"] = { symbol = "⊕", hlGroup  = "MiniDiffSignAdd"   }, -- file is unmerged and added in working tree
+["??"] = { symbol = "?", hlGroup  = "MiniDiffSignDelete"}, -- Untracked files
+["!!"] = { symbol = "!", hlGroup  = "MiniDiffSignChange"}, -- Ignored files
 					-- stylua: ignore end
 				}
 
 				local result = statusMap[status] or { symbol = "?", hlGroup = "NonText" }
-				return result.symbol, result.hlGroup
+				local gitSymbol = result.symbol
+				local gitHlGroup = result.hlGroup
+
+				local symlinkSymbol = is_symlink and "↩" or ""
+
+				-- Combine symlink symbol with Git status if both exist
+				local combinedSymbol = (symlinkSymbol .. gitSymbol):gsub("^%s+", ""):gsub("%s+$", "")
+				-- Change the color of the symlink icon from "MiniDiffSignDelete" to something else
+				local combinedHlGroup = is_symlink and "MiniDiffSignDelete" or gitHlGroup
+
+				return combinedSymbol, combinedHlGroup
 			end
 
 			---@param cwd string
@@ -826,9 +841,13 @@ return {
 				vim.system({ "git", "status", "--ignored", "--porcelain" }, { text = true, cwd = cwd }, on_exit)
 			end
 
-			---@param str string?
+			---@param str string|nil
+			---@return string
 			local function escapePattern(str)
-				return str:gsub("([%^%$%(%)%%%.%[%]%*%+%-%?])", "%%%1")
+				if not str then
+					return ""
+				end
+				return (str:gsub("([%^%$%(%)%%%.%[%]%*%+%-%?])", "%%%1"))
 			end
 
 			---@param buf_id integer
@@ -852,7 +871,8 @@ return {
 						local status = gitStatusMap[relativePath]
 
 						if status then
-							local symbol, hlGroup = mapSymbols(status)
+							local is_symlink = isSymlink(entry.path)
+							local symbol, hlGroup = mapSymbols(status, is_symlink)
 							vim.api.nvim_buf_set_extmark(buf_id, nsMiniFiles, i - 1, 0, {
 								-- NOTE: if you want the signs on the right uncomment those and comment
 								-- the 3 lines after
@@ -907,11 +927,11 @@ return {
 			---@param buf_id integer
 			---@return nil
 			local function updateGitStatus(buf_id)
-				if not vim.fs.root(vim.uv.cwd(), ".git") then
+				local cwd = vim.uv.cwd()
+				if not cwd or not vim.fs.root(cwd, ".git") then
 					return
 				end
 
-				local cwd = vim.fn.expand("%:p:h")
 				local currentTime = os.time()
 				if gitStatusCache[cwd] and currentTime - gitStatusCache[cwd].time < cacheTimeout then
 					updateMiniWithGit(buf_id, gitStatusCache[cwd].statusMap)
@@ -939,12 +959,9 @@ return {
 			autocmd("User", {
 				group = augroup("start"),
 				pattern = "MiniFilesExplorerOpen",
+				-- pattern = { "minifiles" },
 				callback = function()
 					local bufnr = vim.api.nvim_get_current_buf()
-					local path = vim.api.nvim_buf_get_name(bufnr)
-					if path:match("^minifiles://") then
-						return
-					end
 					updateGitStatus(bufnr)
 				end,
 			})
@@ -1063,7 +1080,7 @@ return {
 		keys = {
 			{ "<leader>mo", "<Cmd>lua MiniMap.open()<cr>", desc = "Open map" },
 			{ "<leader>mm", "<Cmd>lua MiniMap.refresh()<cr>", desc = "Refresh map" },
-			{ "<leader>mc", "<Cmd>lua MiniMap.close()<cr>", desc = "Close map" },
+			{ "<leader>mq", "<Cmd>lua MiniMap.close()<cr>", desc = "Close map" },
 			{ "<leader>mtm", "<Cmd>lua MiniMap.toggle()<cr>", desc = "Toggle map" },
 			{ "<leader>mts", "<Cmd>lua MiniMap.toggle_side()<cr>", desc = "Toggle side map" },
 		},
@@ -1079,14 +1096,14 @@ return {
 					-- Move visual selection in Visual mode. Defaults are Alt (Meta) + hjkl.
 					left = "<M-m>",
 					right = "<M-/>",
-					down = "<M-,>",
-					up = "<M-.>",
+					-- down = "<M-,>",
+					-- up = "<M-.>",
 
 					-- Move current line in Normal mode
 					line_left = "<M-m>",
 					line_right = "<M-/>",
-					line_down = "<M-,>",
-					line_up = "<M-.>",
+					-- line_down = "<M-,>",
+					-- line_up = "<M-.>",
 				},
 
 				-- Options which control moving behavior
@@ -1147,13 +1164,13 @@ return {
 			require("mini.trailspace").setup()
 			vim.keymap.set(
 				"n",
-				"<leader>zt",
+				"<leader>zW",
 				":lua MiniTrailspace.trim()<cr>",
 				{ noremap = true, silent = true, desc = "Trim trailing whitespace" }
 			)
 			vim.keymap.set(
 				"n",
-				"<leader>zl",
+				"<leader>zL",
 				":lua MiniTrailspace.trim_last_lines()<cr>",
 				{ noremap = true, silent = true, desc = "Trim trailing empty lines" }
 			)

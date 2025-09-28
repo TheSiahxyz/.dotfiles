@@ -1,3 +1,16 @@
+local sysname = vim.loop.os_uname().sysname
+local backend, build, processor
+
+if sysname == "Darwin" then
+	backend = "kitty"
+	processor = "magick_cli"
+	build = false
+else
+	backend = "ueberzug"
+	processor = "magick_rock"
+	build = true
+end
+
 -- Select the current cell
 local function select_cell()
 	local bufnr = vim.api.nvim_get_current_buf()
@@ -176,6 +189,7 @@ return {
 					return name:lower():match("%.ipynb$") ~= nil
 				end,
 			})
+
 			vim.treesitter.language.register("markdown", "vimwiki")
 
 			local opts = { noremap = true, silent = true }
@@ -212,7 +226,7 @@ return {
 		ft = { "markdown" },
 		build = function(plugin)
 			if vim.fn.executable("npx") then
-				vim.cmd("!cd " .. plugin.dir .. " && cd app && npx --yes yarn install")
+				vim.cmd("!cd " .. plugin.dir .. " && cd app && npx install")
 			else
 				vim.cmd([[Lazy load markdown-preview.nvim]])
 				vim.fn["mkdp#util#install"]()
@@ -337,11 +351,12 @@ return {
 	{ "benlubas/image-save.nvim", cmd = "SaveImage" },
 	{
 		"3rd/image.nvim",
+		build = build,
 		dependencies = { "leafo/magick", "vhyrro/luarocks.nvim" },
 		config = function()
 			require("image").setup({
-				backend = "ueberzug", -- or "kitty", whatever backend you would like to use
-				processor = "magick_rock", -- or "magick_cli"
+				backend = backend, -- "ueberzug" or "kitty", whatever backend you would like to use
+				processor = processor, -- "magick_rock" or "magick_cli"
 				integrations = {
 					markdown = {
 						enabled = true,
@@ -538,7 +553,7 @@ return {
 					local venv_name = vim.fn.fnamemodify(venv_path, ":t")
 					vim.cmd(("MoltenInit %s"):format(venv_name))
 				else
-					vim.cmd("MoltenInit python3")
+					vim.cmd("MoltenInit /opt/homebrew/bin/python@3.13")
 				end
 			end, { desc = "Init default molten" })
 		end,

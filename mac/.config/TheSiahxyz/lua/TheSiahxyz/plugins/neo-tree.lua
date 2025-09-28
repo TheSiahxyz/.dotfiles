@@ -31,8 +31,8 @@ return {
 		---@module "neo-tree"
 		---@type neotree.Config?
 		opts = {
-			hijack_netrw_behavior = "disabled", -- netrw disabled, opening a directory opens neo-tree
 			filesystem = {
+				hijack_netrw_behavior = "disabled", -- open_default, open_current
 				follow_current_file = { enabled = false },
 				commands = {
 					-- over write default 'delete' command to 'trash'.
