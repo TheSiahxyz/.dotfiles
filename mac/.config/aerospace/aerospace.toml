@@ -71,16 +71,16 @@ on-focus-changed = ['move-mouse window-lazy-center']
     8 = 'main'
     9 = 'main'
     10 = 'main'
-    11 = '1'
-    12 = '1'
-    13 = '1'
-    14 = '1'
-    15 = '1'
-    16 = '1'
-    17 = '1'
-    18 = '1'
-    19 = '1'
-    20 = '1'
+    11 = 'Built-in'
+    12 = 'Built-in'
+    13 = 'Built-in'
+    14 = 'Built-in'
+    15 = 'Built-in'
+    16 = 'Built-in'
+    17 = 'Built-in'
+    18 = 'Built-in'
+    19 = 'Built-in'
+    20 = 'Built-in'
 
 [gaps]
     inner.horizontal =  15
@@ -324,8 +324,12 @@ if.app-id = 'com.microsoft.teams2'
 run = ['move-node-to-workspace 10']
 
 [[on-window-detected]]
-if.app-id = 'org.qutebrowser.qutebrowser'
+if.app-id = 'com.apple.Terminal'
 run = ['move-node-to-workspace 11']
+
+[[on-window-detected]]
+if.app-id = 'org.qutebrowser.qutebrowser'
+run = ['move-node-to-workspace 13']
 
 [[on-window-detected]]
 if.app-id = 'com.colliderli.iina'
