@@ -348,7 +348,19 @@ return {
 					if vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat then
 						return
 					end
-					return { lsp_format = "fallback", timeout_ms = 1000, async = false }
+					local ft = vim.bo[bufnr].filetype
+					local off = {
+						javascript = true,
+						typescript = true,
+						javascriptreact = true,
+						typescriptreact = true,
+						json = true,
+						css = true,
+					}
+					if off[ft] then
+						return false
+					end
+					return { lsp_fallback = true, timeout_ms = 1000, async = false }
 				end,
 			})
 
