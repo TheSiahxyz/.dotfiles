@@ -85,7 +85,7 @@ on-focus-changed = ['move-mouse window-lazy-center']
 [gaps]
     inner.horizontal =  15
     inner.vertical =    15
-    outer.top =         [{ monitor."built-in" = 10 }, { monitor."main" = 44 }, { monitor."secondary" = 44 }, { monitor."1" = 44 }, { monitor."2" = 44 }, 10]
+    outer.top =         [{ monitor."built-in" = 10 }, { monitor."main" = 44 }, { monitor."secondary" = 44 }, { monitor."1" = 44 }, { monitor."2" = 44 }, { monitor."3" = 44 }, 10]
     outer.left =        10
     outer.bottom =      10
     outer.right =       10
@@ -169,8 +169,8 @@ on-focus-changed = ['move-mouse window-lazy-center']
     alt-8 = 'workspace 8'
     alt-9 = 'workspace 9'
     alt-0 = 'workspace 10'
-    alt-leftSquareBracket = 'focus-monitor next'
-    alt-rightSquareBracket = 'focus-monitor prev'
+    alt-leftSquareBracket = 'focus-monitor prev'
+    alt-rightSquareBracket = 'focus-monitor next'
 
     ctrl-shift-1 = 'workspace 11'
     ctrl-shift-2 = 'workspace 12'
