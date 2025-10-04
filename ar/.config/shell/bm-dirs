@@ -42,12 +42,12 @@ cvp             ${XDG_CONFIG_HOME:-${HOME}/.config}/openvpn
 cvw             ${XDG_DATA_HOME:-${HOME}/.local/share}/vimwiki
 cxc             ${XDG_CONFIG_HOME:-${HOME}/.config}/x11
 czc             ${XDG_CONFIG_HOME:-${HOME}/.config}/zsh
-dot             ${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}
 Esm             /etc/samba
 Esv             /etc/runit/sv
 gdc             ${XDG_DOCUMENTS_DIR:-${HOME}/Documents}
 gdk             ${XDG_DESKTOP_DIR:-${HOME}/Desktop}
 gdn             ${XDG_DOWNLOAD_DIR:-${HOME}/Downloads}
+gdo             ${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}
 gfx             $HOME/.mozilla/firefox/$USER.default
 gmu             ${XDG_MUSIC_DIR:-${HOME}/Music}
 gpb             ${XDG_PUBLICSHARE_DIR:-${HOME}/Public}
