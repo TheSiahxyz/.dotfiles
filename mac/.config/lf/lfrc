@@ -1,4 +1,4 @@
-e### --- Basic Settings --- ###
+### --- Basic Settings --- ###
 set autoquit true
 set cleaner '~/.config/lf/cleaner'
 set dircache false
