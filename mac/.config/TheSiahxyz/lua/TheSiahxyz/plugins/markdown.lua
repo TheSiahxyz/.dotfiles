@@ -1,16 +1,3 @@
-local sysname = vim.loop.os_uname().sysname
-local backend, build, processor
-
-if sysname == "Darwin" then
-	backend = "kitty"
-	processor = "magick_cli"
-	build = false
-else
-	backend = "ueberzug"
-	processor = "magick_rock"
-	build = true
-end
-
 -- Select the current cell
 local function select_cell()
 	local bufnr = vim.api.nvim_get_current_buf()
@@ -351,12 +338,12 @@ return {
 	{ "benlubas/image-save.nvim", cmd = "SaveImage" },
 	{
 		"3rd/image.nvim",
-		build = build,
+		build = false,
 		dependencies = { "leafo/magick", "vhyrro/luarocks.nvim" },
 		config = function()
 			require("image").setup({
-				backend = backend, -- "ueberzug" or "kitty", whatever backend you would like to use
-				processor = processor, -- "magick_rock" or "magick_cli"
+				backend = "kitty", -- "ueberzug" or "kitty", whatever backend you would like to use
+				processor = "magick_cli", -- "magick_rock" or "magick_cli"
 				integrations = {
 					markdown = {
 						enabled = true,
