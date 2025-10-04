@@ -2,24 +2,183 @@
 
 HOST="root@thesiah.xyz"
 LOG_DIR="/var/log/nginx"
-target="${1:-207.96.105.230}"
 
-esc_target=$(printf '%s' "$target" | sed -E 's/[][^$.*/+?(){}|\\]/\\&/g')
+TARGET="all"          # "all" means no target filter (show all lines)
+COUNTRY="all"         # all|kr|us
+SCOPE="all"           # all|access|recordings
+EXCL_FIREFOX=1        # 1 = exclude Firefox lines by default
+EXCLUDES="59.19.56.8" # default exclude pattern
+ADD_EXCLUDES=""
+LINE_LIMIT=10 # default number of lines when TARGET=all
 
-ssh "$HOST" "
-  for f in $LOG_DIR/recordings* $LOG_DIR/access*; do
-    [ -e \"\$f\" ] || continue
-    case \"\$f\" in
-      *.gz)
-        zgrep -E \"${esc_target}[[:space:]]\" \"\$f\" \
-          | grep -v '59.19.56.8' \
-          | grep -vi 'firefox'
-        ;;
-      *)
-        grep -E \"${esc_target}[[:space:]]\" \"\$f\" \
-          | grep -v '59.19.56.8' \
-          | grep -vi 'firefox'
+usage() {
+  cat <<'EOF'
+Usage: ylog [options]
+
+Options:
+  -t TARGET    Search IP or string (default: all → no filter, show all lines)
+                e.g. -t 207.96.105.230
+                e.g. -t si
+                e.g. -t all
+
+  -c COUNTRY   Select country logs (default: all)
+                all   : all logs
+                kr    : recordings.kr.log + recordings.access.log
+                us    : recordings.us.log + recordings.access.log
+
+  -s SCOPE     Select log scope (default: all)
+                all        : recordings + access
+                recordings : recordings.* logs only
+                access     : access.* logs only
+
+  -n           Disable Firefox exclusion (by default, Firefox lines are excluded)
+
+  -x PATTERN   Add extra exclude pattern (can be repeated)
+                e.g. -x bot -x '192\.0\.2\.1'
+
+  -l N         Limit number of lines (default: 10)
+                Only applies when TARGET=all
+                e.g. -l 50 → show last 50 lines per file
+
+  -h           Show this help
+
+Examples:
+  ylog                  # All logs, last 10 lines each
+  ylog -s recordings    # Recordings logs only, last 10 lines each
+  ylog -c kr -t 1.2.3.4 # Search specific IP in Korean logs
+  ylog -t all -l 50     # All logs, last 50 lines each
+EOF
+  exit 0
+}
+
+while getopts "t:c:s:nx:l:h" opt; do
+  case "$opt" in
+  t) TARGET="$OPTARG" ;;
+  c) COUNTRY="$OPTARG" ;;
+  s) SCOPE="$OPTARG" ;;
+  n) EXCL_FIREFOX=0 ;;
+  x) ADD_EXCLUDES="${ADD_EXCLUDES}
+$OPTARG" ;;
+  l) LINE_LIMIT="$OPTARG" ;;
+  h) usage ;;
+  *) usage ;;
+  esac
+done
+shift $((OPTIND - 1))
+
+# escape for grep -E
+esc_target=$(printf '%s' "$TARGET" | sed -E 's/[][^$.*/+?(){}|\\]/\\&/g')
+
+remote_sh='
+set -eu
+LOG_DIR="'"$LOG_DIR"'"
+COUNTRY="'"$COUNTRY"'"
+SCOPE="'"$SCOPE"'"
+TARGET="'"$TARGET"'"
+ESC_TARGET="'"$esc_target"'"
+EXCL_FIREFOX='"$EXCL_FIREFOX"'
+LINE_LIMIT='"$LINE_LIMIT"'
+
+# collect files
+pick_files() {
+  # recordings: always include recordings.access.log (old merged logs)
+  if [ "$SCOPE" = "recordings" ] || [ "$SCOPE" = "all" ]; then
+    for q in "$LOG_DIR/recordings.access.log" "$LOG_DIR/recordings.access.log".*; do
+      [ -e "$q" ] && printf "%s\n" "$q"
+    done
+    case "$COUNTRY" in
+      kr) for q in "$LOG_DIR/recordings.kr.log" "$LOG_DIR/recordings.kr.log".*; do [ -e "$q" ] && printf "%s\n" "$q"; done ;;
+      us) for q in "$LOG_DIR/recordings.us.log" "$LOG_DIR/recordings.us.log".*; do [ -e "$q" ] && printf "%s\n" "$q"; done ;;
+      all)
+        for p in recordings.kr.log recordings.us.log; do
+          for q in "$LOG_DIR/$p" "$LOG_DIR/$p".*; do [ -e "$q" ] && printf "%s\n" "$q"; done
+        done
         ;;
     esac
+  fi
+  # access logs
+  if [ "$SCOPE" = "access" ] || [ "$SCOPE" = "all" ]; then
+    for q in "$LOG_DIR/access.log" "$LOG_DIR/access.log".*; do
+      [ -e "$q" ] && printf "%s\n" "$q"
+    done
+  fi
+}
+
+# build exclude regex
+build_exre() {
+  EXRE=""
+  TEMP_FILE="/tmp/.ylog_exre_$$"
+  rm -f "$TEMP_FILE"
+
+  { printf "%s\n" "${EXCLUDES:-}"; printf "%s\n" "${ADD_EXCLUDES:-}"; } | sed "/^$/d" | while IFS= read -r pat
+  do
+    esc=$(printf "%s" "$pat" | sed -E "s/[][^$.*/+?(){}|\\]/\\\\&/g")
+    if [ -s "$TEMP_FILE" ]; then
+      EXRE="$(cat "$TEMP_FILE")|$esc"
+    else
+      EXRE="$esc"
+    fi
+    printf "%s" "$EXRE" > "$TEMP_FILE"
   done
-"
+
+  if [ -f "$TEMP_FILE" ]; then
+    cat "$TEMP_FILE"
+    rm -f "$TEMP_FILE"
+  fi
+}
+
+FILES_TMP="/tmp/.ylog_files_$$"
+pick_files | sed "/^$/d" | sort -u > "$FILES_TMP"
+
+if [ ! -s "$FILES_TMP" ]; then
+  echo "[WARN] No log files found for COUNTRY=$COUNTRY SCOPE=$SCOPE." >&2
+  exit 0
+fi
+
+echo "[SCAN] Target: \"$TARGET\"  Country: $COUNTRY  Scope: $SCOPE"
+echo "[FILES]"
+cat "$FILES_TMP"
+
+EXRE="$(build_exre || true)"
+
+found=0
+for f in $(cat "$FILES_TMP"); do
+  [ -e "$f" ] || continue
+  case "$f" in *.gz) reader="zcat -f -- \"$f\"" ;; *) reader="cat -- \"$f\"" ;; esac
+
+  if [ "$TARGET" = "all" ]; then
+    cmd="$reader"
+  else
+    cmd="$reader | grep -E -- \"${ESC_TARGET}[[:space:]]\""
+  fi
+
+  if [ -n "${EXRE:-}" ]; then
+    cmd="$cmd | grep -v -E -- \"$EXRE\""
+  fi
+  [ "$EXCL_FIREFOX" -eq 1 ] && cmd="$cmd | grep -vi firefox"
+
+  if [ "$TARGET" = "all" ]; then
+    if sh -c "$cmd | tail -n $LINE_LIMIT"; then
+      found=1
+    fi
+  else
+    if sh -c "$cmd"; then
+      found=1
+    fi
+  fi
+done
+
+rm -f "$FILES_TMP"
+
+if [ "$TARGET" != "all" ] && [ "$found" -eq 0 ]; then
+  echo "[INFO] No matches found (or filtered out)." >&2
+fi
+'
+
+# remote execution
+ssh "$HOST" \
+  EXCLUDES="$(printf '%s' "$EXCLUDES")" \
+  ADD_EXCLUDES="$(printf '%s' "$ADD_EXCLUDES")" \
+  /bin/sh <<REMOTE_EOF
+$remote_sh
+REMOTE_EOF
