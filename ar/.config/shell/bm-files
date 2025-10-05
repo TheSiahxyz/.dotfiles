@@ -45,6 +45,8 @@ vvw     ${XDG_DATA_HOME:-${HOME}/.local/share}/vimwiki/index.md                 
 vxc     ${XDG_CONFIG_HOME:-${HOME}/.config}/x11/xinitrc                         # X11 config
 vxp     ${XDG_CONFIG_HOME:-${HOME}/.config}/x11/xprofile                        # Start up - X11 profile
 vxr     ${XDG_CONFIG_HOME:-${HOME}/.config}/x11/xresources                      # Colors, themes and variables for X11
+vyk     ${XDG_CONFIG_HOME:-${HOME}/.config}/yazi/keymap-default.toml            # Yazi keymap
+vyz     ${XDG_CONFIG_HOME:-${HOME}/.config}/yazi/yazi.toml                      # Yazi config
 vza     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/aliasrc                       # Aliases used by zsh (and potentially other shells)
 vzc     ${ZDOTDIR:-${XDG_CONFIG_HOME:-${HOME}/.config}/zsh}/.zshrc              # Zsh config
 vzk     ${ZDOTDIR:-${XDG_CONFIG_HOME:-${HOME}/.config}/zsh}/keymaps.zsh         # Zsh keymaps
