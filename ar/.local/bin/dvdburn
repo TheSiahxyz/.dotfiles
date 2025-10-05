@@ -7,32 +7,37 @@ if [ $# -eq 0 ]; then
 fi
 
 # Check if input file exists
-input_file="$1"
-if [ ! -f "$input_file" ]; then
-  echo "Error: Input file '$input_file' not found."
+input="$1"
+fn="${input%.*}"
+if [ ! -f "$input" ]; then
+  echo "Error: Input file '$input' not found."
   exit 1
 fi
+
+# Set default VIDEO_FORMAT if not provided
+export VIDEO_FORMAT="${VIDEO_FORMAT:-NTSC}"
 
 # Create temporary directory for DVD structure
 tmp_dir=$(mktemp -d)
 echo "Temporary directory created: $tmp_dir"
 
 # Convert MP4 to DVD-compatible MPEG-2 format
-echo "Converting $input_file to DVD-Video format ($VIDEO_FORMAT)..."
-ffmpeg -i "$input_file" -target ntsc-dvd -aspect 16:9 "$tmp_dir/video.mpg"
+echo "Converting $input to DVD-Video format ($VIDEO_FORMAT)..."
+format=$(printf '%s' "$VIDEO_FORMAT" | tr '[:upper:]' '[:lower:]')
+ffmpeg -i "$input" -target "$format-dvd" -aspect 16:9 "$tmp_dir/$fn.mpg"
 
 # Create DVD file structure
 echo "Creating DVD file structure..."
-dvdauthor -o "$tmp_dir/dvd" -t "$tmp_dir/video.mpg"
+dvdauthor -o "$tmp_dir/dvd" -t "$tmp_dir/$fn.mpg"
 dvdauthor -o "$tmp_dir/dvd" -T
 
 # Create ISO image from DVD structure
 echo "Creating ISO image..."
-mkisofs -dvd-video -o "$tmp_dir/dvd.iso" "$tmp_dir/dvd/"
+mkisofs -dvd-video -o "$tmp_dir/$fn.iso" "$tmp_dir/dvd/"
 
 # Burn ISO image to DVD
 echo "Burning DVD..."
-wodim -v dev=/dev/sr0 speed=8 -eject "$tmp_dir/dvd.iso"
+wodim -v dev=/dev/sr0 speed=8 -eject "$tmp_dir/$fn.iso"
 
 # Cleanup
 echo "Cleaning up..."
