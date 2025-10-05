@@ -13,16 +13,13 @@ if [ ! -f "$input_file" ]; then
   exit 1
 fi
 
-# Set default VIDEO_FORMAT if not provided
-VIDEO_FORMAT="${VIDEO_FORMAT:-PAL}"
-
 # Create temporary directory for DVD structure
 tmp_dir=$(mktemp -d)
 echo "Temporary directory created: $tmp_dir"
 
 # Convert MP4 to DVD-compatible MPEG-2 format
 echo "Converting $input_file to DVD-Video format ($VIDEO_FORMAT)..."
-ffmpeg -i "$input_file" -target "$VIDEO_FORMAT"-dvd -vf scale=720:576 -aspect 16:9 "$tmp_dir/video.mpg"
+ffmpeg -i "$input_file" -target ntsc-dvd -aspect 16:9 "$tmp_dir/video.mpg"
 
 # Create DVD file structure
 echo "Creating DVD file structure..."
