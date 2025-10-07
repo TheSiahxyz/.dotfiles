@@ -84,7 +84,7 @@ keymap = [
   { on = "<C-w>",     run = "rename --empty=ext",          desc = "Rename selected file(s) extension only" },
   { on = "a",         run = "rename --empty=dot_ext",      desc = "Rename selected file(s) dot extension only" },
   { on = "A",         run = "rename --cursor=end",         desc = "Rename selected file(s) with cursor at end" },
-  { on = "r",         run = "rename --empty=stem",         desc = "Rename selected file(s) stem only" },
+  { on = "r",         run = "rename --cursor=start --empty=stem", desc = "Rename selected file(s) stem only" },
   { on = "R",         run = "rename --empty=all",          desc = "Rename selected file(s) full name" },
   { on = "B",         run = [ "escape --select", "toggle_all", "rename", "escape --select --search" ], desc = "Bulk reanme files/folders in cwd" },
 	{ on = ";",         run = "shell --interactive",         desc = "Run a shell command" },
