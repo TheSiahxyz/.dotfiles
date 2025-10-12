@@ -497,3 +497,7 @@ alias za='zathura'
 # zsh
 alias sps="source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/profile"
 alias szs="source ${XDG_CONFIG_HOME:-${HOME}/.config}/zsh/.zshrc"
+
+
+alias ylogt='ylog -s recordings -c us | grep $(LC_TIME=C date +%d/%b)'
+alias ylogy='ylog -s recordings -c us | grep $(LC_TIME=C date -v-1d +%d/%b)'

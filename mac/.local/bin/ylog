@@ -9,7 +9,7 @@ SCOPE="all"           # all|access|recordings
 EXCL_FIREFOX=1        # 1 = exclude Firefox lines by default
 EXCLUDES="59.19.56.8" # default exclude pattern
 ADD_EXCLUDES=""
-LINE_LIMIT=10 # default number of lines when TARGET=all
+LINE_LIMIT=30 # default number of lines when TARGET=all
 
 usage() {
   cat <<'EOF'
@@ -81,11 +81,13 @@ LINE_LIMIT='"$LINE_LIMIT"'
 
 # collect files
 pick_files() {
-  # recordings: always include recordings.access.log (old merged logs)
+  # recordings: include recordings.access.log only if COUNTRY=all
   if [ "$SCOPE" = "recordings" ] || [ "$SCOPE" = "all" ]; then
-    for q in "$LOG_DIR/recordings.access.log" "$LOG_DIR/recordings.access.log".*; do
-      [ -e "$q" ] && printf "%s\n" "$q"
-    done
+    if [ "$COUNTRY" = "all" ]; then
+      for q in "$LOG_DIR/recordings.access.log" "$LOG_DIR/recordings.access.log".*; do
+        [ -e "$q" ] && printf "%s\n" "$q"
+      done
+    fi
     case "$COUNTRY" in
       kr) for q in "$LOG_DIR/recordings.kr.log" "$LOG_DIR/recordings.kr.log".*; do [ -e "$q" ] && printf "%s\n" "$q"; done ;;
       us) for q in "$LOG_DIR/recordings.us.log" "$LOG_DIR/recordings.us.log".*; do [ -e "$q" ] && printf "%s\n" "$q"; done ;;
@@ -149,7 +151,7 @@ for f in $(cat "$FILES_TMP"); do
   if [ "$TARGET" = "all" ]; then
     cmd="$reader"
   else
-    cmd="$reader | grep -E -- \"${ESC_TARGET}[[:space:]]\""
+    cmd="$reader | grep -E -- \"${ESC_TARGET}\""
   fi
 
   if [ -n "${EXRE:-}" ]; then
