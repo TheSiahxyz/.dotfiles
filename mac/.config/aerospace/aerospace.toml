@@ -329,6 +329,10 @@ run = ['move-node-to-workspace 11']
 
 [[on-window-detected]]
 if.app-id = 'org.qutebrowser.qutebrowser'
+run = ['move-node-to-workspace 12']
+
+[[on-window-detected]]
+if.app-id = 'com.google.Chrome'
 run = ['move-node-to-workspace 13']
 
 [[on-window-detected]]
