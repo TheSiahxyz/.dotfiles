@@ -58,7 +58,13 @@ fi
 
 if [ -n "${1-}" ]; then
   new="$repodir/content/recordings/$1"
-  [ -f "$new" ] && rsync -az --update "$new" "$server:$dest"
+  if [ -f "$new" ]; then
+    # 개별 파일인 경우
+    rsync -az --update "$new" "$server:$dest"
+  elif [ -d "$new" ]; then
+    # 폴더인 경우, 폴더 전체를 동기화
+    rsync -az --update "$new/" "$server:$dest$(basename "$new")/"
+  fi
 fi
 
 ssh "$THESIAH_SERVER" "chmod 644 $dest/index.html"
