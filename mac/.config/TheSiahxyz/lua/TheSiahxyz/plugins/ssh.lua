@@ -173,7 +173,14 @@ return {
 			})
 			local api = require("remote-sshfs.api")
 			vim.keymap.set("n", "<localleader>rc", api.connect, { desc = "Connect SSH" })
-			vim.keymap.set("n", "<localleader>rd", api.disconnect, { desc = "Disconnect SSH" })
+			vim.keymap.set("n", "<localleader>rd", function()
+				local mountpoint = vim.fn.getcwd()
+				local ok = vim.system({ "diskutil", "unmount", "force", mountpoint }):wait().code == 0
+				if not ok then
+					ok = vim.system({ "umount", "-f", mountpoint }):wait().code == 0
+				end
+				print(ok and ("✅ Unmounted: " .. mountpoint) or ("⚠️ Failed to unmount: " .. mountpoint))
+			end, { desc = "Force unmount macFUSE mount (quiet)" })
 			vim.keymap.set("n", "<localleader>re", api.edit, { desc = "Edit SSH" })
 
 			-- (optional) Override telescope find_files and live_grep to make dynamic based on if connected to host
