@@ -9,8 +9,8 @@ SCOPE="all"           # all|access|recordings
 EXCL_FIREFOX=1        # 1 = exclude Firefox lines by default
 EXCLUDES="59.19.56.8" # default exclude pattern
 ADD_EXCLUDES=""
-LINE_LIMIT=100 # default number of lines when TARGET=all
-DATE_FILTER="" # date filter: "2" = 2 days ago, "~2" = last 2 days to today
+LINE_LIMIT=1000 # default number of lines when TARGET=all
+DATE_FILTER=""  # date filter: "2" = 2 days ago, "~2" = last 2 days to today
 
 usage() {
   cat <<'EOF'
