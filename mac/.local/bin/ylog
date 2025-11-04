@@ -308,14 +308,38 @@ if [ -f "$RESULTS_TMP" ] && [ -s "$RESULTS_TMP" ]; then
       }
     }
     END {
-      # Output: simple approach - print all unique entries
-      # Since we want chronological order, we need to sort by timestamp
-      # For simplicity, just print the unique entries
+      empty_str = \"\"
+      idx = 0
       for (key in latest) {
-        print latest[key]
+        line = latest[key]
+        pos = match(line, /\\[[0-9]{2}\\/[A-Z][a-z]{2}\\/[0-9]{4}:[0-9]{2}:[0-9]{2}:[0-9]{2}/)
+        if (pos > 0) {
+          datetime = substr(line, pos + 1, 20)
+          date_part = substr(datetime, 1, 11)
+          time_part = substr(datetime, 13, 8)
+          gsub(/:/, empty_str, time_part)
+          time_num = time_part + 0
+          split(date_part, d_parts, \"/\")
+          month_names = \"JanFebMarAprMayJunJulAugSepOctNovDec\"
+          month_num = index(month_names, d_parts[2])
+          if (month_num > 0) {
+            month_num = (month_num + 2) / 3
+            sort_key = sprintf(\"%04d%02d%02d%06d%08d\", d_parts[3], month_num, d_parts[1], time_num, idx)
+            sorted_lines[sort_key] = line
+          } else {
+            sorted_lines[sprintf(\"99999999999999999999%08d\", idx)] = line
+          }
+        } else {
+          sorted_lines[sprintf(\"99999999999999999999%08d\", idx)] = line
+        }
+        idx++
+      }
+      n = asorti(sorted_lines, sorted_keys)
+      for (i = 1; i <= n; i++) {
+        print sorted_lines[sorted_keys[i]]
       }
     }
-  " "$RESULTS_TMP" | sort
+  " "$RESULTS_TMP"
   found=1
 fi
 
