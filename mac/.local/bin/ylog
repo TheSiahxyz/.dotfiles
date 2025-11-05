@@ -9,8 +9,8 @@ SCOPE="all"           # all|access|recordings
 EXCL_FIREFOX=1        # 1 = exclude Firefox lines by default
 EXCLUDES="59.19.56.8" # default exclude pattern
 ADD_EXCLUDES=""
-LINE_LIMIT=1000 # default number of lines when TARGET=all
-DATE_FILTER=""  # date filter: "2" = 2 days ago, "~2" = last 2 days to today
+LINE_LIMIT=500 # default number of lines when TARGET=all
+DATE_FILTER="" # date filter: "2" = 2 days ago, "~2" = last 2 days to today
 
 usage() {
   cat <<'EOF'
@@ -126,7 +126,7 @@ build_exre() {
   EXRE=""
   TEMP_FILE="/tmp/.ylog_exre_$$"
   rm -f "$TEMP_FILE"
-  
+
   { printf "%s\n" "${EXCLUDES:-}"; printf "%s\n" "${ADD_EXCLUDES:-}"; } | sed "/^$/d" | while IFS= read -r pat
   do
     esc=$(printf "%s" "$pat" | sed -E "s/[][^$.*/+?(){}|\\]/\\\\&/g")
@@ -137,8 +137,8 @@ build_exre() {
     fi
     printf "%s" "$EXRE" > "$TEMP_FILE"
   done
-  
-  if [ -f "$TEMP_FILE" ]; then 
+
+  if [ -f "$TEMP_FILE" ]; then
     cat "$TEMP_FILE"
     rm -f "$TEMP_FILE"
   fi
@@ -211,7 +211,7 @@ if [ -f "$RESULTS_TMP" ] && [ -s "$RESULTS_TMP" ]; then
       fi
     fi
   fi
-  
+
   awk -v date_filter="${DATE_FILTER:-}" -v target_date="${TARGET_DATE:-}" -v start_date="${START_DATE:-}" "
     function parse_date(date_str,    parts, month_num) {
       # date_str format: \"DD/MMM/YYYY\"
@@ -222,13 +222,13 @@ if [ -f "$RESULTS_TMP" ] && [ -s "$RESULTS_TMP" ]; then
       # Return YYYYMMDD for easy comparison
       return sprintf(\"%04d%02d%02d\", parts[3], month_num, parts[1])
     }
-    
+
     BEGIN {
       today = strftime(\"%Y%m%d\")
       filter_target = \"\"
       date_range_start = \"\"
       date_range_end = \"\"
-      
+
       if (date_filter != \"\" && date_filter ~ /^~/) {
         # Range mode: extract days
         if (start_date != \"\" && split(start_date, sd_parts, \"/\") == 3) {
@@ -256,7 +256,7 @@ if [ -f "$RESULTS_TMP" ] && [ -s "$RESULTS_TMP" ]; then
     }
     {
       line = \$0
-      
+
       # Extract datetime [DD/MMM/YYYY:HH:MM:SS
       datetime = \"\"
       minute_part = \"\"
@@ -265,7 +265,7 @@ if [ -f "$RESULTS_TMP" ] && [ -s "$RESULTS_TMP" ]; then
         datetime = substr(line, pos + 1, 20)
         date_part = substr(datetime, 1, 11)  # DD/MMM/YYYY
         minute_part = substr(datetime, 1, 17)  # DD/MMM/YYYY:HH:MM
-        
+
         # Date filtering
         if (filter_target != \"\" || date_range_start != \"\") {
           line_date_num = parse_date(date_part)
@@ -277,14 +277,14 @@ if [ -f "$RESULTS_TMP" ] && [ -s "$RESULTS_TMP" ]; then
           }
         }
       }
-      
+
       # Extract IP (first field before \" - \")
       ip = \"\"
       pos = match(line, /^[0-9a-fA-F:.]+/)
       if (pos > 0) {
         ip = substr(line, pos, RLENGTH)
       }
-      
+
       # Extract URI (between quotes after method)
       uri = \"\"
       # Find the quoted request part: \"METHOD URI PROTOCOL\"
@@ -297,10 +297,10 @@ if [ -f "$RESULTS_TMP" ] && [ -s "$RESULTS_TMP" ]; then
           uri = req_parts[2]
         }
       }
-      
+
       # Create key: IP + minute + URI
       key = ip \"|\" minute_part \"|\" uri
-      
+
       # Store latest line for each key (compare by full line for latest)
       if (!(key in latest) || line > latest[key]) {
         latest[key] = line
