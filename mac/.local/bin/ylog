@@ -6,7 +6,7 @@ LOG_DIR="/var/log/nginx"
 TARGET="all"          # "all" means no target filter (show all lines)
 COUNTRY="all"         # all|kr|us
 SCOPE="all"           # all|access|recordings
-EXCL_FIREFOX=1        # 1 = exclude Firefox lines by default
+EXCL_FIREFOX=0        # 1 = exclude Firefox lines by default
 EXCLUDES="59.19.56.8" # default exclude pattern
 ADD_EXCLUDES=""
 LINE_LIMIT=500 # default number of lines when TARGET=all
@@ -64,7 +64,7 @@ while getopts "t:c:s:nx:l:d:h" opt; do
   t) TARGET="$OPTARG" ;;
   c) COUNTRY="$OPTARG" ;;
   s) SCOPE="$OPTARG" ;;
-  n) EXCL_FIREFOX=0 ;;
+  n) EXCL_FIREFOX=1 ;;
   x) ADD_EXCLUDES="${ADD_EXCLUDES}
 $OPTARG" ;;
   l) LINE_LIMIT="$OPTARG" ;;
