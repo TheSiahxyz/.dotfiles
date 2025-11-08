@@ -58,7 +58,11 @@ fi
 
 if [ -n "${1-}" ]; then
   new="$repodir/content/recordings/$1"
-  [ -f "$new" ] && rsync -az --update "$new" "$server:$dest"
+  if [ -f "$new" ]; then
+    rsync -az --update "$new" "$server:$dest"
+  elif [ -d "$new" ]; then
+    rsync -az --update "$new/" "$server:$dest$(basename "$new")/"
+  fi
 fi
 
 ssh "$THESIAH_SERVER" "chmod 644 $dest/index.html"
