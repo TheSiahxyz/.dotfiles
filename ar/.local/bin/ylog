@@ -6,10 +6,11 @@ LOG_DIR="/var/log/nginx"
 TARGET="all"          # "all" means no target filter (show all lines)
 COUNTRY="all"         # all|kr|us
 SCOPE="all"           # all|access|recordings
-EXCL_FIREFOX=1        # 1 = exclude Firefox lines by default
+EXCL_FIREFOX=0        # 1 = exclude Firefox lines by default
 EXCLUDES="59.19.56.8" # default exclude pattern
 ADD_EXCLUDES=""
-LINE_LIMIT=10 # default number of lines when TARGET=all
+LINE_LIMIT=500 # default number of lines when TARGET=all
+DATE_FILTER="" # date filter: "2" = 2 days ago, "~2" = last 2 days to today
 
 usage() {
   cat <<'EOF'
@@ -40,6 +41,11 @@ Options:
                 Only applies when TARGET=all
                 e.g. -l 50 → show last 50 lines per file
 
+  -d DATE      Filter by date
+                e.g. -d 2  → logs from 2 days ago only
+                e.g. -d 1  → logs from 1 day ago only
+                e.g. -d ~2 → logs from 2 days ago to today
+
   -h           Show this help
 
 Examples:
@@ -47,19 +53,22 @@ Examples:
   ylog -s recordings    # Recordings logs only, last 10 lines each
   ylog -c kr -t 1.2.3.4 # Search specific IP in Korean logs
   ylog -t all -l 50     # All logs, last 50 lines each
+  ylog -d 1             # Logs from 1 day ago only
+  ylog -d ~2             # Logs from 2 days ago to today
 EOF
   exit 0
 }
 
-while getopts "t:c:s:nx:l:h" opt; do
+while getopts "t:c:s:nx:l:d:h" opt; do
   case "$opt" in
   t) TARGET="$OPTARG" ;;
   c) COUNTRY="$OPTARG" ;;
   s) SCOPE="$OPTARG" ;;
-  n) EXCL_FIREFOX=0 ;;
+  n) EXCL_FIREFOX=1 ;;
   x) ADD_EXCLUDES="${ADD_EXCLUDES}
 $OPTARG" ;;
   l) LINE_LIMIT="$OPTARG" ;;
+  d) DATE_FILTER="$OPTARG" ;;
   h) usage ;;
   *) usage ;;
   esac
@@ -78,14 +87,17 @@ TARGET="'"$TARGET"'"
 ESC_TARGET="'"$esc_target"'"
 EXCL_FIREFOX='"$EXCL_FIREFOX"'
 LINE_LIMIT='"$LINE_LIMIT"'
+DATE_FILTER="'"$DATE_FILTER"'"
 
 # collect files
 pick_files() {
-  # recordings: always include recordings.access.log (old merged logs)
+  # recordings: include recordings.access.log only if COUNTRY=all
   if [ "$SCOPE" = "recordings" ] || [ "$SCOPE" = "all" ]; then
-    for q in "$LOG_DIR/recordings.access.log" "$LOG_DIR/recordings.access.log".*; do
-      [ -e "$q" ] && printf "%s\n" "$q"
-    done
+    if [ "$COUNTRY" = "all" ]; then
+      for q in "$LOG_DIR/recordings.access.log" "$LOG_DIR/recordings.access.log".*; do
+        [ -e "$q" ] && printf "%s\n" "$q"
+      done
+    fi
     case "$COUNTRY" in
       kr) for q in "$LOG_DIR/recordings.kr.log" "$LOG_DIR/recordings.kr.log".*; do [ -e "$q" ] && printf "%s\n" "$q"; done ;;
       us) for q in "$LOG_DIR/recordings.us.log" "$LOG_DIR/recordings.us.log".*; do [ -e "$q" ] && printf "%s\n" "$q"; done ;;
@@ -99,6 +111,11 @@ pick_files() {
   # access logs
   if [ "$SCOPE" = "access" ] || [ "$SCOPE" = "all" ]; then
     for q in "$LOG_DIR/access.log" "$LOG_DIR/access.log".*; do
+      [ -e "$q" ] && printf "%s\n" "$q"
+    done
+  fi
+  if [ "$SCOPE" = "hidden" ] || [ "$SCOPE" = "all" ]; then
+    for q in "$LOG_DIR/hidden.access.log" "$LOG_DIR/hidden.access.log".*; do
       [ -e "$q" ] && printf "%s\n" "$q"
     done
   fi
@@ -135,11 +152,18 @@ if [ ! -s "$FILES_TMP" ]; then
   exit 0
 fi
 
-echo "[SCAN] Target: \"$TARGET\"  Country: $COUNTRY  Scope: $SCOPE"
+if [ -n "$DATE_FILTER" ]; then
+  echo "[SCAN] Target: \"$TARGET\"  Country: $COUNTRY  Scope: $SCOPE  Date: $DATE_FILTER"
+else
+  echo "[SCAN] Target: \"$TARGET\"  Country: $COUNTRY  Scope: $SCOPE"
+fi
 echo "[FILES]"
 cat "$FILES_TMP"
 
 EXRE="$(build_exre || true)"
+
+RESULTS_TMP="/tmp/.ylog_results_$$"
+rm -f "$RESULTS_TMP"
 
 found=0
 for f in $(cat "$FILES_TMP"); do
@@ -149,7 +173,7 @@ for f in $(cat "$FILES_TMP"); do
   if [ "$TARGET" = "all" ]; then
     cmd="$reader"
   else
-    cmd="$reader | grep -E -- \"${ESC_TARGET}[[:space:]]\""
+    cmd="$reader | grep -E -- \"${ESC_TARGET}\""
   fi
 
   if [ -n "${EXRE:-}" ]; then
@@ -158,17 +182,168 @@ for f in $(cat "$FILES_TMP"); do
   [ "$EXCL_FIREFOX" -eq 1 ] && cmd="$cmd | grep -vi firefox"
 
   if [ "$TARGET" = "all" ]; then
-    if sh -c "$cmd | tail -n $LINE_LIMIT"; then
-      found=1
-    fi
+    sh -c "$cmd | tail -n $LINE_LIMIT" >> "$RESULTS_TMP" 2>/dev/null && found=1
   else
-    if sh -c "$cmd"; then
-      found=1
-    fi
+    sh -c "$cmd" >> "$RESULTS_TMP" 2>/dev/null && found=1
   fi
 done
 
-rm -f "$FILES_TMP"
+# Deduplicate: keep only the latest log for same IP+URI within same minute
+# Format: IP - user [datetime] "METHOD URI PROTOCOL" status bytes ...
+if [ -f "$RESULTS_TMP" ] && [ -s "$RESULTS_TMP" ]; then
+  # Date filtering: calculate target dates
+  TARGET_DATE=""
+  START_DATE=""
+  if [ -n "$DATE_FILTER" ]; then
+    if [ "$(printf '%s' "$DATE_FILTER" | cut -c1)" = "~" ]; then
+      # Range mode: ~N means last N days to today
+      DAYS=$(printf '%s' "$DATE_FILTER" | sed 's/^~//')
+      if [ -n "$DAYS" ] && [ "$DAYS" -gt 0 ] 2>/dev/null; then
+        START_DATE=$(date -d "$DAYS days ago" +%d/%b/%Y 2>/dev/null || date -v-${DAYS}d +%d/%b/%Y 2>/dev/null || echo "")
+        [ -z "$START_DATE" ] && START_DATE=""
+      fi
+    else
+      # Single date mode: N means N days ago only
+      DAYS="$DATE_FILTER"
+      if [ -n "$DAYS" ] && [ "$DAYS" -ge 0 ] 2>/dev/null; then
+        TARGET_DATE=$(date -d "$DAYS days ago" +%d/%b/%Y 2>/dev/null || date -v-${DAYS}d +%d/%b/%Y 2>/dev/null || echo "")
+        [ -z "$TARGET_DATE" ] && TARGET_DATE=""
+      fi
+    fi
+  fi
+
+  awk -v date_filter="${DATE_FILTER:-}" -v target_date="${TARGET_DATE:-}" -v start_date="${START_DATE:-}" "
+    function parse_date(date_str,    parts, month_num) {
+      # date_str format: \"DD/MMM/YYYY\"
+      split(date_str, parts, \"/\")
+      month_names = \"JanFebMarAprMayJunJulAugSepOctNovDec\"
+      month_num = index(month_names, parts[2])
+      month_num = (month_num + 2) / 3  # Convert to 1-12
+      # Return YYYYMMDD for easy comparison
+      return sprintf(\"%04d%02d%02d\", parts[3], month_num, parts[1])
+    }
+
+    BEGIN {
+      today = strftime(\"%Y%m%d\")
+      filter_target = \"\"
+      date_range_start = \"\"
+      date_range_end = \"\"
+
+      if (date_filter != \"\" && date_filter ~ /^~/) {
+        # Range mode: extract days
+        if (start_date != \"\" && split(start_date, sd_parts, \"/\") == 3) {
+          month_names = \"JanFebMarAprMayJunJulAugSepOctNovDec\"
+          month_num = index(month_names, sd_parts[2])
+          if (month_num > 0) {
+            month_num = (month_num + 2) / 3
+            start_date_num = sprintf(\"%04d%02d%02d\", sd_parts[3], month_num, sd_parts[1])
+            date_range_start = start_date_num
+            date_range_end = today
+          }
+        }
+      } else if (date_filter != \"\" && target_date != \"\") {
+        # Single date mode
+        if (split(target_date, td_parts, \"/\") == 3) {
+          month_names = \"JanFebMarAprMayJunJulAugSepOctNovDec\"
+          month_num = index(month_names, td_parts[2])
+          if (month_num > 0) {
+            month_num = (month_num + 2) / 3
+            target_date_num = sprintf(\"%04d%02d%02d\", td_parts[3], month_num, td_parts[1])
+            filter_target = target_date_num
+          }
+        }
+      }
+    }
+    {
+      line = \$0
+
+      # Extract datetime [DD/MMM/YYYY:HH:MM:SS
+      datetime = \"\"
+      minute_part = \"\"
+      pos = match(line, /\\[[0-9]{2}\\/[A-Z][a-z]{2}\\/[0-9]{4}:[0-9]{2}:[0-9]{2}:[0-9]{2}/)
+      if (pos > 0) {
+        datetime = substr(line, pos + 1, 20)
+        date_part = substr(datetime, 1, 11)  # DD/MMM/YYYY
+        minute_part = substr(datetime, 1, 17)  # DD/MMM/YYYY:HH:MM
+
+        # Date filtering
+        if (filter_target != \"\" || date_range_start != \"\") {
+          line_date_num = parse_date(date_part)
+          if (filter_target != \"\" && line_date_num != filter_target) {
+            next  # Skip if not matching target date
+          }
+          if (date_range_start != \"\" && (line_date_num < date_range_start || line_date_num > date_range_end)) {
+            next  # Skip if outside date range
+          }
+        }
+      }
+
+      # Extract IP (first field before \" - \")
+      ip = \"\"
+      pos = match(line, /^[0-9a-fA-F:.]+/)
+      if (pos > 0) {
+        ip = substr(line, pos, RLENGTH)
+      }
+
+      # Extract URI (between quotes after method)
+      uri = \"\"
+      # Find the quoted request part: \"METHOD URI PROTOCOL\"
+      # Use split on quotes to find the request section
+      split(line, parts, \"\\\"\")
+      if (length(parts) >= 2) {
+        # parts[2] should be \"METHOD URI PROTOCOL\"
+        n = split(parts[2], req_parts, \" \")
+        if (n >= 2) {
+          uri = req_parts[2]
+        }
+      }
+
+      # Create key: IP + minute + URI
+      key = ip \"|\" minute_part \"|\" uri
+
+      # Store latest line for each key (compare by full line for latest)
+      if (!(key in latest) || line > latest[key]) {
+        latest[key] = line
+        timestamp[key] = datetime
+      }
+    }
+    END {
+      empty_str = \"\"
+      idx = 0
+      for (key in latest) {
+        line = latest[key]
+        pos = match(line, /\\[[0-9]{2}\\/[A-Z][a-z]{2}\\/[0-9]{4}:[0-9]{2}:[0-9]{2}:[0-9]{2}/)
+        if (pos > 0) {
+          datetime = substr(line, pos + 1, 20)
+          date_part = substr(datetime, 1, 11)
+          time_part = substr(datetime, 13, 8)
+          gsub(/:/, empty_str, time_part)
+          time_num = time_part + 0
+          split(date_part, d_parts, \"/\")
+          month_names = \"JanFebMarAprMayJunJulAugSepOctNovDec\"
+          month_num = index(month_names, d_parts[2])
+          if (month_num > 0) {
+            month_num = (month_num + 2) / 3
+            sort_key = sprintf(\"%04d%02d%02d%06d%08d\", d_parts[3], month_num, d_parts[1], time_num, idx)
+            sorted_lines[sort_key] = line
+          } else {
+            sorted_lines[sprintf(\"99999999999999999999%08d\", idx)] = line
+          }
+        } else {
+          sorted_lines[sprintf(\"99999999999999999999%08d\", idx)] = line
+        }
+        idx++
+      }
+      n = asorti(sorted_lines, sorted_keys)
+      for (i = 1; i <= n; i++) {
+        print sorted_lines[sorted_keys[i]]
+      }
+    }
+  " "$RESULTS_TMP"
+  found=1
+fi
+
+rm -f "$FILES_TMP" "$RESULTS_TMP"
 
 if [ "$TARGET" != "all" ] && [ "$found" -eq 0 ]; then
   echo "[INFO] No matches found (or filtered out)." >&2
