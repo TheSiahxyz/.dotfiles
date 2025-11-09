@@ -48,7 +48,7 @@ keymap = [
 	{ on = "<C-r>",   run = "toggle_all",               desc = "Invert selection of all files" },
 
 	# Visual mode
-	{ on = "<C-v>", run = "visual_mode",         desc = "Enter visual mode (selection mode)" },
+	{ on = "<C-v>", run = "visual_mode", desc = "Enter visual mode (selection mode)" },
 	{ on = "V", run = "visual_mode --unset", desc = "Enter visual mode (unset mode)" },
 
 	# Seeking
@@ -65,7 +65,7 @@ keymap = [
 	{ on = "O",         run = "open --interactive",          desc = "Open selected files interactively" },
 	{ on = "<Enter>",   run = "open",                        desc = "Open selected files" },
 	{ on = "<S-Enter>", run = "open --interactive",          desc = "Open selected files interactively" },
-	{ on = "y",         run = "yank",                        desc = "Yank selected files (copy)" },
+	{ on = [ "y", "y" ],run = "yank",                        desc = "Yank selected files (copy)" },
 	{ on = "x",         run = "yank --cut",                  desc = "Yank selected files (cut)" },
 	{ on = [ "p", "p" ],run = "paste",                       desc = "Paste yanked files" },
 	{ on = [ "P", "P" ],run = "paste --force",               desc = "Paste yanked files (overwrite if the destination exists)" },
@@ -81,10 +81,10 @@ keymap = [
 	{ on = ["M", "o"],  run = "create --force",              desc = "Create/overwrite a file" },
   { on = "i",         run = "rename --cursor=before_ext",  desc = "Rename selected file(s) with cursor before extension" },
   { on = "I",         run = "rename --cursor=start",       desc = "Rename selected file(s) with cursor at start" },
-  { on = "<C-w>",     run = "rename --empty=dot_ext",      desc = "Rename selected file(s) dot extension only" },
-  { on = "a",         run = "rename --empty=ext",          desc = "Rename selected file(s) extension only" },
+  { on = "<C-w>",     run = "rename --empty=ext",          desc = "Rename selected file(s) extension only" },
+  { on = "a",         run = "rename --empty=dot_ext",      desc = "Rename selected file(s) dot extension only" },
   { on = "A",         run = "rename --cursor=end",         desc = "Rename selected file(s) with cursor at end" },
-  { on = "r",         run = "rename --empty=stem --cursor=start", desc = "Rename selected file(s) stem only" },
+  { on = "r",         run = "rename --cursor=start --empty=stem", desc = "Rename selected file(s) stem only" },
   { on = "R",         run = "rename --empty=all",          desc = "Rename selected file(s) full name" },
   { on = "B",         run = [ "escape --select", "toggle_all", "rename", "escape --select --search" ], desc = "Bulk reanme files/folders in cwd" },
 	{ on = ";",         run = "shell --interactive",         desc = "Run a shell command" },
@@ -105,7 +105,7 @@ keymap = [
 	{ on = [ "m", "n" ], run = "linemode none",        desc = "Linemode: none" },
 
 	# Copy
-	{ on = [ "y", "y" ], run = "copy path",             desc = "Copy the file path" },
+	{ on = [ "y", "p" ], run = "copy path",             desc = "Copy the file path" },
 	{ on = [ "y", "d" ], run = "copy dirname",          desc = "Copy the directory path" },
 	{ on = [ "y", "f" ], run = "copy filename",         desc = "Copy the filename" },
 	{ on = [ "y", "n" ], run = "copy name_without_ext", desc = "Copy the filename without extension" },
