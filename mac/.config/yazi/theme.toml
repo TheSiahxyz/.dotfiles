@@ -233,8 +233,8 @@ rules = [
   { name = "*", is = "exec",   fg = "#9ccfd8" },
 
   # Symlink fallback
-  { name = "*", is = "link", fg = "#b5e6ee", italic = true },
-  { name = "*/", is = "link", fg = "#6bd3ee", italic = true },
+  # { name = "*", is = "link", fg = "#b5e6ee", italic = true },
+  # { name = "*/", is = "link", fg = "#6bd3ee", italic = true },
 
   # Dummy files
   { name = "*",  is = "dummy", fg = "#232136", bg = "#eb6f92" },
