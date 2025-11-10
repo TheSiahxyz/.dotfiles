@@ -66,7 +66,7 @@ eval "echo \"$(cat "$bmfiles")\"" |
     printf(\"vim.keymap.set('n', '<localleader><localleader>%s', '<cmd>e %s<cr>', { noremap = true, silent = true, desc = '%s' })\n\", \$1, \$2, desc_path) >> \"$nvim_shortcuts\" ;
     desc_path = \$2; gsub(\"^/home/$USER/\",\"~/\",desc_path);
     key_array = \"\"; for(i=1; i<=length(\$1); i++) { if(i==1) key_array = \"\\\"\" substr(\$1,i,1) \"\\\"\"; else key_array = key_array \", \\\"\" substr(\$1,i,1) \"\\\"\" }
-    printf(\"\\t{ on = [ %s ], run = \\\"open %s\\\", desc = \\\"Open %s\\\" },\\n\",key_array,\$2,desc_path) >> \"$yazi_shortcuts.tmp\"}"
+    printf(\"\\t{ on = [ %s ], run = [ 'reveal %s', 'open' ], desc = \\\"Open %s\\\" },\\n\", key_array, \$2, desc_path) >> \"$yazi_shortcuts.tmp\" }"
 
 # Merge bookmarks into keymap-default.toml
 if [ -f "$yazi_shortcuts.tmp" ]; then
