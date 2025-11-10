@@ -113,6 +113,22 @@ zstyle ':fzf-tab:*' switch-group ',' '.'    # switch group using `,` and `.`
 [ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutenvrc" ] && source "${XDG_CONFIG_HOME:-$HOME/.config}/shell/shortcutenvrc"
 [ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/zshnameddirrc" ] && source "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/zshnameddirrc"
 
+
+### --- AVANTE --- ###
+export AVANTE_ANTHROPIC_API_KEY="$(pass show api/claude/nvim | head -n1)"
+export AVANTE_OPENAI_API_KEY="$(pass show api/chatGPT/nvim | head -n1)"
+# export AVANTE_AZURE_OPENAI_API_KEY="$(pass show api/azure/nvim | head -n1)"
+# export AVANTE_GEMINI_API_KEY="$(pass show api/gemini/nvim | head -n1)"
+# export AVANTE_CO_API_KEY="$(pass show api/cohere/nvim | head -n1)"
+# export AVANTE_AIHUBMIX_API_KEY="$(pass show api/aihubmix/nvim | head -n1)"
+# export AVANTE_MOONSHOT_API_KEY="$(pass show api/moonshot/nvim | head -n1)"
+
+
+### --- OPENAI --- ###
+export OPENAI_API_KEY="$(pass show api/chatGPT/nvim | head -n1)"
+
+
+### --- TMUX --- ###
 if command -v tmux >/dev/null 2>&1 && [ -z "$TMUX" ]; then
     terminal_count=$(pgrep -u "$USER" -ax "${TERMINAL:-st}" | grep -Ev 'ncmpcpp|newsboat|pulsemixer|spterm|splf|spcalc|stig|vimwikitodo' | wc -l)
     if [ "$terminal_count" -le 1 ]; then

@@ -865,3 +865,16 @@ function delete_venv() {
         echo "$venv deleted"
     fi
 }
+
+
+###########################################################################################
+###########################################################################################
+### --- YAZI --- ###
+# open yazi and cd to the file path
+function yazicd() {
+    local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+    yazi "$@" --cwd-file="$tmp"
+    IFS= read -r -d '' cwd < "$tmp"
+    [ -n "$cwd" ] && [ "$cwd" != "$PWD" ] && builtin cd -- "$cwd"
+    rm -f -- "$tmp"
+}
