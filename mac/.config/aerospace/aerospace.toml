@@ -139,7 +139,7 @@ on-focus-changed = ['move-mouse window-lazy-center']
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#layout
     alt-ctrl-slash = 'layout tiles horizontal vertical'
-    alt-ctrl-comma = 'layout accordion horizontal vertical'
+    alt-ctrl-quote = 'layout accordion horizontal vertical'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#focus
     alt-h = 'focus left --boundaries all-monitors-outer-frame'
