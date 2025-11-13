@@ -348,7 +348,7 @@ function fetch_git_repos_status() {
         update_time() {
             timestamp_file="${HOME}/.cache/gitreposupdate"
             current_time=$(date +%s)
-            if [[ -f "$timestamp_file" ]] && (($(cat "$timestamp_file") > (current_time - 86400))); then
+            if [[ -f "$timestamp_file" ]] && (($(cat "$timestamp_file") > (current_time - 21600))); then
                 return 1 # No update needed
             else
                 echo "$current_time" >"$timestamp_file"
