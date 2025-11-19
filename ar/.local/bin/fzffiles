@@ -10,13 +10,44 @@ IFS='
 # Get the list of selected files with key bindings for specific paths
 files=$(fzf-tmux \
   --header "^a pwd ^b public ^d .dotfiles ^f configs ^g git ^h home ^k desktop ^r scripts ^s suckless ^u staged files ^v private ^/ help" \
-  --preview "target=\$(readlink -f {}) &&
+  --preview "selection={};
+    clean=\"\$selection\";
+    for icon in 📄 ✏️ ✅ ❌ 🔀 ❓; do
+      case \"\$clean\" in
+        \"\$icon \"*)
+          clean=\${clean#\"\$icon \"}
+          break
+          ;;
+      esac
+    done;
+    [ -z \"\$clean\" ] && { echo 'No selection'; exit 0; }
+    target=\$(readlink -f \"\$clean\" 2>/dev/null || printf '%s' \"\$clean\");
+    if [ -z \"\$target\" ]; then
+      echo 'Could not resolve path';
+      exit 0;
+    fi
+    if [ -f \"\$target\" ]; then
+      dir=\$(dirname \"\$target\");
+      if git_root=\$(git -C \"\$dir\" rev-parse --show-toplevel 2>/dev/null); then
+        rel=\${target#\"\$git_root\"/};
+        diff_output=\$(git -C \"\$git_root\" diff --color -- \"\$rel\");
+        if [ -n \"\$diff_output\" ]; then
+          printf '%s\n' \"\$diff_output\"
+          exit 0
+        fi
+        diff_output=\$(git -C \"\$git_root\" diff --color --cached -- \"\$rel\");
+        if [ -n \"\$diff_output\" ]; then
+          printf '%s\n' \"\$diff_output\"
+          exit 0
+        fi
+      fi
+    fi
     if [ -d \"\$target\" ]; then
       exa --color=always --long --all --header --icons --git \"\$target\"
     elif [ -f \"\$target\" ]; then
       bat --color=always --style=header,grid --line-range=:500 \"\$target\"
     else
-      file -h {}
+      file -h \"\$target\"
     fi" \
   --reverse \
   --query="$1" \
@@ -38,14 +69,14 @@ files=$(fzf-tmux \
     file=substr(\$0,4);
     gsub(/^ +/, \"\", file);
     if (file == \"\") next;
-    if (staged == \"?\" && unstaged == \"?\") icon=\"🆕\";
-    else if (staged == \"!\" && unstaged == \"!\") icon=\"🚫\";
-    else if (staged != \" \" && staged != \"?\" && unstaged != \" \" && unstaged != \"?\") icon=\"🟪\";
-    else if (staged != \" \" && staged != \"?\") icon=\"🟩\";
-    else if (unstaged != \" \") icon=\"🟥\";
+    if (staged == \"?\" && unstaged == \"?\") icon=\"📄\";
+    else if (staged == \"!\" && unstaged == \"!\") icon=\"❌\";
+    else if (staged != \" \" && staged != \"?\" && unstaged != \" \" && unstaged != \"?\") icon=\"🔀\";
+    else if (staged != \" \" && staged != \"?\") icon=\"✅\";
+    else if (unstaged != \" \") icon=\"✏️\";
     else icon=\"❓\";
     print icon \" \" root \"/\" file
-  }'; else echo 'This is not a git repository.'; fi)" \
+      }'; else echo 'This is not a git repository.'; fi)" \
   --bind "ctrl-v:change-prompt( 🔒 )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . $HOME/Private)" \
   --bind 'ctrl-/:change-prompt( ❓ )+reload(echo "^a all
 ^b public
@@ -62,7 +93,20 @@ files=$(fzf-tmux \
 # Check if any files were selected, and exit if not
 [ -z "$files" ] && exit 0
 
-files=$(printf '%s\n' "$files" | sed 's/^[🟩🟥🟪🆕🚫❓] //')
+cleaned_files=$(printf '%s\n' "$files" | while IFS= read -r line; do
+  stripped="$line"
+  for icon in 📄 ✏️ ✅ ❌ 🔀 ❓; do
+    case "$stripped" in
+    "$icon "*)
+      stripped=${stripped#"$icon "}
+      break
+      ;;
+    esac
+  done
+  printf '%s\n' "$stripped"
+done)
+
+files="$cleaned_files"
 
 if [ -d "$files" ]; then
   absolute_files=$(realpath $files)

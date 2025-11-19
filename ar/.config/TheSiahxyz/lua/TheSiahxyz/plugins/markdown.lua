@@ -220,20 +220,20 @@ return {
 		end,
 	},
 	{
-		-- Install markdown preview, use npx if available.
+		-- Install markdown preview, use npm if available.
 		"iamcco/markdown-preview.nvim",
 		cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
 		ft = { "markdown" },
 		build = function(plugin)
-			if vim.fn.executable("npx") then
-				vim.cmd("!cd " .. plugin.dir .. " && cd app && npx install")
+			if vim.fn.executable("npm") then
+				vim.cmd("!cd " .. plugin.dir .. " && cd app && npm install")
 			else
 				vim.cmd([[Lazy load markdown-preview.nvim]])
 				vim.fn["mkdp#util#install"]()
 			end
 		end,
 		init = function()
-			if vim.fn.executable("npx") then
+			if vim.fn.executable("npm") then
 				vim.g.mkdp_filetypes = { "markdown" }
 			end
 			local wk = require("which-key")
@@ -258,7 +258,7 @@ return {
 		},
 		cmd = { "LivePreview start", "LivePreview close", "LivePreview pick", "LivePreview help" },
 		init = function()
-			if vim.fn.executable("npx") then
+			if vim.fn.executable("npm") then
 				vim.g.mkdp_filetypes = { "markdown" }
 			end
 			local wk = require("which-key")
