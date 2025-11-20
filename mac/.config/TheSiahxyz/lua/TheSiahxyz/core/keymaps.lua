@@ -371,7 +371,7 @@ vim.keymap.set("n", "<leader>mD", function()
 end, { desc = "Delete all marks" })
 
 -- Ownerships
-vim.keymap.set("n", "<leader>cx", "<Cmd>!chmod +x %<cr>", { silent = true, desc = "Make file executable" })
+vim.keymap.set("n", "<leader>zx", "<Cmd>!chmod +x %<cr>", { silent = true, desc = "Make file executable" })
 
 -- Remap Default
 vim.keymap.set("i", "jk", "<esc>", { noremap = true, silent = true, desc = "Escape to normal mode" })

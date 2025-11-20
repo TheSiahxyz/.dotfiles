@@ -35,7 +35,7 @@ return {
 	end,
 	keys = {
 		{ "<leader>ce", "<Cmd>CloakEnable<cr>", desc = "Enable cloak" },
-		{ "<leader>cd", "<Cmd>CloakDisable<cr>", desc = "Disable cloak" },
+		{ "<leader>cx", "<Cmd>CloakDisable<cr>", desc = "Disable cloak" },
 		{ "<leader>cl", "<Cmd>CloakPreviewLine<cr>", desc = "Preview line cloak" },
 		{ "<leader>zC", "<Cmd>CloakToggle<cr>", desc = "Toggle cloak" },
 	},
