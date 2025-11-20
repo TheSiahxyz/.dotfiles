@@ -349,6 +349,35 @@ return {
 						},
 					},
 				},
+				acp_providers = {
+					["gemini-cli"] = {
+						command = "gemini",
+						args = { "--experimental-acp" },
+						env = {
+							NODE_NO_WARNINGS = "1",
+							GEMINI_API_KEY = os.getenv("GEMINI_API_KEY"),
+						},
+					},
+					["claude-code"] = {
+						command = "npx",
+						args = { "@zed-industries/claude-code-acp" },
+						env = {
+							NODE_NO_WARNINGS = "1",
+							ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY"),
+						},
+					},
+					["goose"] = {
+						command = "goose",
+						args = { "acp" },
+					},
+					["codex"] = {
+						command = "codex-acp",
+						env = {
+							NODE_NO_WARNINGS = "1",
+							OPENAI_API_KEY = os.getenv("OPENAI_API_KEY"),
+						},
+					},
+				},
 				---Specify the special dual_boost mode
 				---1. enabled: Whether to enable dual_boost mode. Default to false.
 				---2. first_provider: The first provider to generate response. Default to "openai".
