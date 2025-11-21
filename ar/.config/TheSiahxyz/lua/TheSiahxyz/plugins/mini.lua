@@ -1073,15 +1073,15 @@ end tell
 			local wk = require("which-key")
 			wk.add({
 				mode = { "n", "v" },
-				{ "<leader>m", group = "Markdown/Map" },
+				{ "<leader>zm", group = "Map" },
 			})
 		end,
 		keys = {
-			{ "<leader>mo", "<Cmd>lua MiniMap.open()<cr>", desc = "Open map" },
-			{ "<leader>mm", "<Cmd>lua MiniMap.refresh()<cr>", desc = "Refresh map" },
-			{ "<leader>mq", "<Cmd>lua MiniMap.close()<cr>", desc = "Close map" },
-			{ "<leader>zm", "<Cmd>lua MiniMap.toggle()<cr>", desc = "Toggle map" },
-			{ "<leader>zM", "<Cmd>lua MiniMap.toggle_side()<cr>", desc = "Toggle side map" },
+			{ "<leader>zmo", "<Cmd>lua MiniMap.open()<cr>", desc = "Open map" },
+			{ "<leader>zmm", "<Cmd>lua MiniMap.refresh()<cr>", desc = "Refresh map" },
+			{ "<leader>zmq", "<Cmd>lua MiniMap.close()<cr>", desc = "Close map" },
+			{ "<leader>zmm", "<Cmd>lua MiniMap.toggle()<cr>", desc = "Toggle map" },
+			{ "<leader>zms", "<Cmd>lua MiniMap.toggle_side()<cr>", desc = "Toggle side map" },
 		},
 	},
 	{
