@@ -1074,15 +1074,14 @@ return {
 			wk.add({
 				mode = { "n", "v" },
 				{ "<leader>m", group = "Markdown/Map" },
-				{ "<leader>mt", group = "Toggle" },
 			})
 		end,
 		keys = {
 			{ "<leader>mo", "<Cmd>lua MiniMap.open()<cr>", desc = "Open map" },
 			{ "<leader>mm", "<Cmd>lua MiniMap.refresh()<cr>", desc = "Refresh map" },
 			{ "<leader>mq", "<Cmd>lua MiniMap.close()<cr>", desc = "Close map" },
-			{ "<leader>mtm", "<Cmd>lua MiniMap.toggle()<cr>", desc = "Toggle map" },
-			{ "<leader>mts", "<Cmd>lua MiniMap.toggle_side()<cr>", desc = "Toggle side map" },
+			{ "<leader>zm", "<Cmd>lua MiniMap.toggle()<cr>", desc = "Toggle map" },
+			{ "<leader>zM", "<Cmd>lua MiniMap.toggle_side()<cr>", desc = "Toggle side map" },
 		},
 	},
 	{
