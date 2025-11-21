@@ -155,8 +155,6 @@ return {
 							end
 							return ""
 						end,
-						icon = "",
-						color = { fg = "#428890" },
 					},
 					{
 						function()
