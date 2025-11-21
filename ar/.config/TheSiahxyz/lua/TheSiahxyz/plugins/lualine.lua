@@ -149,6 +149,17 @@ return {
 				lualine_x = {
 					{
 						function()
+							local ok, rest = pcall(require, "rest")
+							if ok and rest then
+								return "rest"
+							end
+							return ""
+						end,
+						icon = "",
+						color = { fg = "#428890" },
+					},
+					{
+						function()
 							-- Check if MCPHub is loaded
 							if not vim.g.loaded_mcphub then
 								return "󰐻 -"
