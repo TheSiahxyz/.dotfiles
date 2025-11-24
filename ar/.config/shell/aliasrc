@@ -379,6 +379,7 @@ alias skype='skypeforlinux'
 
 # ssh
 alias gts="ssh $THESIAH_SERVER"
+alias wwr="ssh recordings"
 
 # sudo
 alias su='sudo su -l root'

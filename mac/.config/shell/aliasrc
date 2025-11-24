@@ -222,7 +222,6 @@ alias lg="lazygit"
 alias gu="gitupdate"
 alias ggg="ssh $THESIAH_GIT"
 alias gis="githubissuesync"
-alias wwr="ssh recordings"
 
 # grep
 ialias -g grep='grep --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn}'
@@ -384,6 +383,7 @@ alias skype='skypeforlinux'
 
 # ssh
 alias gts="ssh $THESIAH_SERVER"
+alias wwr="ssh recordings"
 
 # sudo
 alias su='sudo su -l root'
