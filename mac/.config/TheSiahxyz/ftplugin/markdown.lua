@@ -248,7 +248,6 @@ vim.api.nvim_create_autocmd("FileType", {
 		end)
 		local tw = (ok and in_obsidian) and 175 or 80
 
-		-- 로컬 옵션
 		vim.bo.textwidth = tw
 		vim.bo.formatoptions = vim.bo.formatoptions:gsub("a", "")
 		vim.opt_local.wrap = true
@@ -262,7 +261,6 @@ vim.api.nvim_create_autocmd("FileType", {
 		vim.opt_local.spelllang = { "en", "ko", "cjk" }
 		vim.opt_local.spellsuggest = "best,9"
 
-		-- 버퍼 로컬 약어로 등록 (전역 오염 방지)
 		vim.cmd([[iabbrev <buffer> >> →]])
 		vim.cmd([[iabbrev <buffer> << ←]])
 		vim.cmd([[iabbrev <buffer> ^^ ↑]])

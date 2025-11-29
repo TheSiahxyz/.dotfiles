@@ -215,7 +215,17 @@ end
 
 -- Show LSP diagnostics (inlay hints) in a hover window / popup lamw26wmal
 vim.api.nvim_create_autocmd("FileType", {
-	pattern = { "markdown", "mdx", "mdown", "mkd", "mkdn", "mdwn" },
+	pattern = {
+		"markdown",
+		"markdown.mdx",
+		"vimwiki",
+		"quarto",
+		"mdx",
+		"mdown",
+		"mkd",
+		"mkdn",
+		"mdwn",
+	},
 	callback = function()
 		vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
 			buffer = 0,
@@ -233,21 +243,28 @@ vim.api.nvim_create_autocmd("FileType", {
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = { "markdown", "mdx", "mdown", "mkd", "mkdn", "mdwn" },
 	callback = function()
-		-- Local settings
-		vim.bo.textwidth = is_in_obsidian_repo() and 80 or 175
-		vim.opt_local.autoindent = true
-		vim.opt_local.conceallevel = 0
+		local ok, in_obsidian = pcall(function()
+			return is_in_obsidian_repo()
+		end)
+		local tw = (ok and in_obsidian) and 175 or 80
+
+		vim.bo.textwidth = tw
+		vim.bo.formatoptions = vim.bo.formatoptions:gsub("a", "")
+		vim.opt_local.wrap = true
+		vim.opt_local.linebreak = true
+		vim.opt_local.breakindent = true
 		vim.opt_local.expandtab = true
-		vim.opt_local.softtabstop = 4
 		vim.opt_local.shiftwidth = 4
+		vim.opt_local.softtabstop = 4
+		vim.opt_local.showbreak = "…"
 		vim.opt_local.spell = true
 		vim.opt_local.spelllang = { "en", "ko", "cjk" }
-		vim.opt_local.spellsuggest = { "best", "9" }
+		vim.opt_local.spellsuggest = "best,9"
 
-		local arrows = { [">>"] = "→", ["<<"] = "←", ["^^"] = "↑", ["VV"] = "↓" }
-		for key, val in pairs(arrows) do
-			vim.cmd(string.format("iabbrev %s %s", key, val))
-		end
+		vim.cmd([[iabbrev <buffer> >> →]])
+		vim.cmd([[iabbrev <buffer> << ←]])
+		vim.cmd([[iabbrev <buffer> ^^ ↑]])
+		vim.cmd([[iabbrev <buffer> VV ↓]])
 	end,
 })
 
