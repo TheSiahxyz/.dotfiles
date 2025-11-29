@@ -129,13 +129,13 @@ export OPENAI_API_KEY="$(pass show api/chatGPT/nvim | head -n1)"
 
 
 ### --- TMUX --- ###
-if command -v tmux >/dev/null 2>&1 && [ -z "$TMUX" ]; then
-    terminal_count=$(pgrep -u "$USER" -ax "${TERMINAL:-st}" | grep -Ev 'ncmpcpp|newsboat|pulsemixer|spterm|splf|spcalc|stig|vimwikitodo' | wc -l)
-    if [ "$terminal_count" -le 1 ]; then
-        if ! tmux has-session 2>/dev/null; then
-            exec tmux new-session -s code
-        else
-            exec tmux attach-session
-        fi
-    fi
-fi
+# if command -v tmux >/dev/null 2>&1 && [ -z "$TMUX" ]; then
+#     terminal_count=$(pgrep -u "$USER" -ax "${TERMINAL:-st}" | grep -Ev 'ncmpcpp|newsboat|pulsemixer|spterm|splf|spcalc|stig|vimwikitodo' | wc -l)
+#     if [ "$terminal_count" -le 1 ]; then
+#         if ! tmux has-session 2>/dev/null; then
+#             exec tmux new-session -s code
+#         else
+#             exec tmux attach-session
+#         fi
+#     fi
+# fi
