@@ -40,7 +40,7 @@ autocmd BufRead,BufNewFile Xresources,Xdefaults,xresources,xdefaults set filetyp
 autocmd BufWritePost Xresources,Xdefaults,xresources,xdefaults !xrdb %
 
 " Recompile dwmblocks on config edit.
-autocmd BufWritePost ~/.local/src/dwmblocks/config.h !cd ~/.local/src/dwmblocks/; sudo make install && { killall -q dwmblocks;setsid -f dwmblocks }
+autocmd BufWritePost ${XDG_SOURCES_HOME:-$HOME/.local/src}/suckless/dwmblocks/config.h !cd ${XDG_SOURCES_HOME:-$HOME/.local/src}/suckless/dwmblocks/; sudo make install && { killall -q dwmblocks;setsid -f dwmblocks }
 
 " Which key description
 autocmd! User vim-which-key call which_key#register('<Space>', 'g:which_key_map')
@@ -52,7 +52,7 @@ let g:which_key_map = {}
 " BACKUP ----------------------------------------------------------------- {{{
 
 if version >= 703
-    set undodir=~/.config/vim/undodir
+    set undodir=${XDG_CONFIG_HOME:-$HOME/.config}/vim/undodir
     set undofile
     set undoreload=10000
 endif
@@ -231,8 +231,7 @@ augroup END
 
 let g:lsp_fold_enabled = 0
 let g:lsp_log_verbose = 1
-call mkdir(expand('~/.cache/vim'), 'p')
-let g:lsp_log_file          = expand('~/.cache/vim/vim-lsp.log')
+let g:lsp_log_file = expand('~/.cache/vim/vim-lsp.log')
 let g:asyncomplete_log_file = expand('~/.cache/vim/asyncomplete.log')
 let g:lsp_settings_filetype_python = ['pyright-langserver', 'ruff', 'ruff-lsp']
 
@@ -248,7 +247,7 @@ let g:airline_symbols.maxlinenr = ' '
 let g:airline#extensions#whitespace#symbol = '!'
 
 " colorscheme
-if isdirectory(expand("~/.config/vim/plugged/catppuccin"))
+if isdirectory(expand("${XDG_CONFIG_HOME:-$HOME/.config}/vim/plugged/catppuccin"))
     let g:airline_theme = 'catppuccin_mocha'
     colorscheme catppuccin_mocha
 endif
@@ -434,5 +433,14 @@ let g:which_key_map['w']    =   {
             \ '=' : ['<C-W>='     , 'Balance-window']        ,
             \ '?' : ['Windows'    , 'Fzf-window']            ,
             \ }
+
+" }}}
+
+
+" SHORTCUTS ---------------------------------------------------------------- {{{
+
+if filereadable(expand("${XDG_CONFIG_HOME:-$HOME/.config}/nvim/shortcuts.vim"))
+    silent! source ${XDG_CONFIG_HOME:-$HOME/.config}/nvim/shortcuts.vim
+endif
 
 " }}}

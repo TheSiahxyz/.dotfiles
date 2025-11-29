@@ -560,6 +560,8 @@ endif
 set t_Co=256
 if exists('+termguicolors')
     set termguicolors
+else
+    set notermguicolors
 endif
 
 " Cursor
