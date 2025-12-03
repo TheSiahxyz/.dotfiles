@@ -112,6 +112,13 @@ return {
 			_log_level = vim.log.levels.WARN,
 		}
 	end,
+	init = function()
+		local wk = require("which-key")
+		wk.add({
+			mode = { "n" },
+			{ "<localleader>h", group = "HTTP" },
+		})
+	end,
 	keys = {
 		{ "<localleader>ho", ":Rest open<CR>", desc = "Open result pane" },
 		{ "<localleader>hr", ":Rest run<CR>", desc = "Run request under the cursor" },
