@@ -9,9 +9,7 @@ case "$BROWSER" in
 # *qutebrowser*) cookies="chromium:~/.local/share/qutebrowser" ;;
 esac
 
-if [ -n "$cookies" ]; then
-  ytdl_cmd_base="$ytdl_cmd_base --cookies-from-browser \"$cookies\""
-fi
+[ -n "$cookies" ] && ytdl_cmd_base="$ytdl_cmd_base --cookies-from-browser \"$cookies\""
 
 shift $((OPTIND - 1))
 
@@ -106,7 +104,9 @@ case $url in
   ;;
 esac
 
-simulation_cmd="$simulation_cmd --cookies-from-browser $cookies $url"
+[ -n "$cookies" ] && simulation_cmd="$simulation_cmd --cookies-from-browser $cookies $url" ||
+  simulation_cmd="$simulation_cmd $url"
+
 ytdl_cmd="$ytdl_cmd_base --output \"$ytdl_output_format\" \"$url\""
 
 # Notify and perform simulation to get filename (feedback to user)
