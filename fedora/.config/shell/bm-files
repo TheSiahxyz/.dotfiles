@@ -1,0 +1,19 @@
+# Keys                  Filename                                                    Description
+vbc     ${XDG_CONFIG_HOME:-${HOME}/.config}/bash/bashrc                         # Bash (shell) config
+vbd     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/bm-dirs                       # A list of bookmarked directories similar to this file
+vbf     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/bm-files                      # This file, a list of bookmarked files
+vbi     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/inputrc                       # This file is for gnu readline
+vbp     ${XDG_CONFIG_HOME:-${HOME}/.config}/bash/bash_profile                   # Bash profile
+vga     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/git-aliasrc                   # Git aliases
+vgc     ${XDG_CONFIG_HOME:-${HOME}/.config}/git/config                          # Git config
+vgi     ${XDG_CONFIG_HOME:-${HOME}/.config}/git/ignore                          # Git ignore
+Vsm     /etc/samba/smb.conf                                                     # Samba config
+vtm     ${XDG_CONFIG_HOME:-${HOME}/.config}/tmux/tmux.conf                      # Tmux config
+vvc     ${XDG_CONFIG_HOME:-${HOME}/.config}/vim/vimrc                           # Vim config
+vvi     ${XDG_CONFIG_HOME:-${HOME}/.config}/vim/init.vim                        # Vim init
+vvp     ${XDG_CONFIG_HOME:-${HOME}/.config}/vim/plugins.vim                     # Vim plugins
+vza     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/aliasrc                       # Aliases used by zsh (and potentially other shells)
+vzc     ${ZDOTDIR:-${XDG_CONFIG_HOME:-${HOME}/.config}/zsh}/.zshrc              # Zsh config
+vzk     ${ZDOTDIR:-${XDG_CONFIG_HOME:-${HOME}/.config}/zsh}/keymaps.zsh         # Zsh keymaps
+vzp     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/profile                       # Zsh profile used for system
+vzs     ${ZDOTDIR:-${XDG_CONFIG_HOME:-${HOME}/.config}/zsh}/scripts.zsh         # Zsh scripts

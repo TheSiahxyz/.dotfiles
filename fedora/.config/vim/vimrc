@@ -1,0 +1,582 @@
+
+" VIM ENV --------------------------------------------------------------- {{{
+
+if $USER != "root"
+    set runtimepath^=$XDG_CONFIG_HOME/vim
+    set runtimepath+=$XDG_DATA_HOME/vim
+    set runtimepath+=$XDG_CONFIG_HOME/vim/after
+    set viminfofile=$XDG_DATA_HOME/vim/.viminfo
+
+    set packpath^=$XDG_DATA_HOME/vim,$XDG_CONFIG_HOME/vim
+    set packpath+=$XDG_CONFIG_HOME/vim/after,$XDG_DATA_HOME/vim/after
+    let g:netrw_home = $XDG_DATA_HOME."/vim"
+    call mkdir($XDG_DATA_HOME."/vim/spell", 'p')
+
+    set backupdir=$XDG_CONFIG_HOME/vim/backup   | call mkdir(&backupdir, 'p')
+    set directory=$XDG_CONFIG_HOME/vim/swap     | call mkdir(&directory, 'p')
+    set undodir=$XDG_DATA_HOME/history/vim_history  | call mkdir(&undodir,   'p')
+    set viewdir=$XDG_CONFIG_HOME/vim/view       | call mkdir(&viewdir,   'p')
+else
+    set runtimepath^=/root/.config/vim
+    set runtimepath+=/root/.local/share/vim
+    set runtimepath+=/root/.config/vim/after
+    set viminfofile=/root/.local/share/vim/.viminfo
+
+    set packpath^=/root/.local/share/vim,/root/.config/vim
+    set packpath+=/root/.config/vim/after,/root/.local/share/vim/after
+
+    let g:netrw_home = "/root/.local/share/vim"
+    call mkdir("/root/.local/share/vim/spell", 'p')
+
+    set backupdir=/root/.config/vim/backup  | call mkdir(&backupdir, 'p')
+    set directory=/root/.config/vim/swap    | call mkdir(&directory, 'p')
+    set undodir=/root/.local/share/history/vim_history  | call mkdir(&undodir, 'p')
+    set viewdir=/root/.config/vim/view      | call mkdir(&viewdir,   'p')
+endif
+
+" }}}
+
+
+" AUTOCMD ---------------------------------------------------------------- {{{
+
+autocmd VimEnter * silent execute '!echo -ne "\e[2 q"'
+
+" }}}
+
+
+" Hex_Toggle_Functions --------------------------------------------------- {{{
+
+function! DoHex()
+    " Get the current buffer name
+    let current_file = expand('%')
+
+    " New file name
+    let new_file = current_file . '.hex'
+
+    " Save the current buffer as a hex file
+    execute 'w !xxd > ' . new_file
+
+    echo "Hex file created and saved as " . new_file
+endfunction
+
+function! UndoHex()
+    " Get the current buffer name
+    let current_file = expand('%')
+
+    " Name stage 1: Remove the .hex extension if it exists
+    let new_file_stage1 = substitute(current_file, '\.hex$', '', '')
+
+    " Get the file name without extension
+    let file_name = substitute(new_file_stage1, '\(.*\)\.\(\w\+\)$', '\1', '')
+
+    " Get the file extension
+    let file_extension = substitute(new_file_stage1, '\(.*\)\.\(\w\+\)$', '\2', '')
+
+    " Add 'M' before the extension(M = Modded)
+    let new_file = file_name . 'M.' . file_extension
+
+    " Save the current buffer as a reversed hex file
+    execute 'w !xxd -r > ' . new_file
+
+    echo "Reversed Hex file created and saved as " . new_file
+endfunction
+
+" Function to toggle between hex and original states
+function! HexState()
+    " Get user input to choose the operation (0 for DoHex, 1 for UndoHex)
+    let operation = input("Choose operation (0 for DoHex, 1 for UndoHex): ")
+
+    if operation == 0
+        " Execute the DoHex function
+        call DoHex()
+    elseif operation == 1
+        " Execute the UndoHex function
+        call UndoHex()
+    else
+        echo "Invalid choice. Aborting."
+    endif
+endfunction
+
+" }}}
+
+
+" GVIM - GUI VERSION ----------------------------------------------------- {{{
+
+if has('gui_running')
+
+    " Font
+    if has("macvim")
+        set guifont=Menlo\ Regular:h14
+    elseif has("win32")
+        set guifont=Consolas\ 14
+    else
+        set guifont=Consolas\ 18
+    endif
+
+    " Hide the toolbar.
+    set guioptions-=T
+
+    " Hide the right-side scroll bar.
+    set guioptions-=r
+
+    " Start Lex Tree and put the cursor back in the other window.
+    autocmd VimEnter * :Lexplore | wincmd p
+
+endif
+
+" }}}
+
+
+" MAPPINGS --------------------------------------------------------------- {{{
+
+" Set the space  as the leader key.
+let mapleader = " "
+let maplocalleader = "\\"
+
+" Diable
+nnoremap Q <nop>
+
+" Cmd & Esc
+nnoremap <C-C> :
+inoremap <C-C> <Esc>:
+
+" Spell-check on\off to <Leader>o, 'o' for 'orthography':
+map <Leader>og :setlocal spell! spelllang=en_us<CR>
+
+" Type jk to exit insert mode quickly.
+inoremap jk <Esc>
+
+" Format a paragraph into lines
+map <Leader>cf gq<CR>
+
+" Select all the text
+nnoremap <Leader>a ggVG
+
+" Opening a file explore
+map <Leader>le :Lex<CR>
+
+" Opening a file from explorer
+map <Leader>e :Explore<CR>
+
+" Opening a terminal window
+map <C-T> :ter<CR>
+
+" Closing the terminal window
+tnoremap <C-T> exit<CR>
+
+" Buffer
+nnoremap H :bprev<CR>
+nnoremap L :bnext<CR>
+
+" CTRL+I OR Esc to make the terminal scrollable and I to input mode
+tnoremap <C-I> <C-W><S-N>
+tnoremap <Esc> <C-\><C-n>
+
+" You can split the window in Vim. y - in the y access , x - in the x access
+map <Leader>w\- :split<CR>
+map <Leader>w\| :vsplit<CR>
+
+" Better move
+nnoremap <C-U> 11kzz
+nnoremap <C-D> 11jzz
+nnoremap n nzzzv
+nnoremap N Nzzzv
+
+" Navigate the split view easier by pressing CTRL+j, CTRL+k, CTRL+h, or CTRL+l.
+nnoremap <C-J> <C-W>j
+nnoremap <C-K> <C-W>k
+nnoremap <C-H> <C-W>h
+nnoremap <C-L> <C-W>l
+
+" Resize split windows using arrow keys by pressing:
+" CTRL+UP, CTRL+DOWN, CTRL+LEFT, or CTRL+RIGHT.
+noremap <C-Up> <C-W>+
+noremap <C-Down> <C-W>-
+noremap <C-Left> <C-W><
+noremap <C-Right> <C-W>>
+
+" Moving between tabs
+map <Leader>t gt
+
+" Opening/Creating a file in a new tab - write the tab to open
+nnoremap <Leader>bn :tabedit<Space>
+
+" Saving a file using CTRL+S
+map <C-S> :w<CR>
+
+" Quitting and saving a file using CTRL+S
+map <Leader>bd :bd<CR>
+map <Leader>BD :bd!<CR>
+map <Leader>wq :wq<CR>
+nnoremap <Leader>q :q!<CR>
+nnoremap <Leader>Q :qa!<CR>
+
+" Surround word with a wanted character
+nnoremap <Leader>sw <CMD>echo "Press a character: " \| let c = nr2char(getchar()) \| exec "normal viwo\ei" . c . "\eea" . c . "\e" \| redraw<CR>
+
+" Replace all occurrences of a word
+nnoremap <Leader>rw :%s/\<<C-R><C-W>\>//g<Left><Left>
+
+" Toggle between creating a Hex conversion file and reversing the conversion
+nnoremap <Leader>hx <CMD>call HexState()<CR>
+
+" For copy and past if supports clipbard
+if has('gui_running')
+    map p "+P
+    xnoremap <Leader>p "_dP
+    nmap <Leader>Y "+Y
+    nnoremap <Leader>y "*y :let @+=@*<CR>
+    vnoremap <Leader>y "*y :let @+=@*<CR>
+    nmap <Leader>D "+D
+    nnoremap <Leader>d "+d
+    vnoremap <Leader>d "+d
+endif
+
+" Change
+nnoremap c "_c
+
+" Delete
+nnoremap x "_x
+
+" Seeing the registers
+nnoremap <Leader>' <CMD>registers<CR>
+
+" Moving lines in visual mode
+vnoremap J :m '>+1<CR>gv=gv
+vnoremap K :m '>-2<CR>gv=gv
+
+" Join
+nnoremap J mzJ`z
+
+" Perform dot commands over visual blocks:
+vnoremap . :normal .<CR>
+
+" Source file
+nnoremap <Leader>so :so<CR>
+
+" Compiler
+nnoremap <Leader>rr :w<CR>:terminal compiler %<CR>:resize 10<CR>
+
+" Open quickfix/location list"
+nnoremap <silent> <Leader>oq  :copen<CR>
+nnoremap <silent> <Leader>ol  :lopen<CR>
+
+" }}}
+
+
+" SETTINGS --------------------------------------------------------------- {{{
+
+" Cursor shapes
+let &t_SI = "\<Esc>[6 q"
+let &t_SR = "\<Esc>[4 q"
+let &t_EI = "\<Esc>[2 q"
+
+" Clipboard
+set clipboard+=unnamedplus
+
+" Disable auto commenting in a new line
+autocmd Filetype * setlocal formatoptions-=c formatoptions-=r  formatoptions-=o
+
+" Setting the character encoding of Vim to UTF-8
+set encoding=UTF-8
+
+" Enable type file detection. Vim will be able to try to detect the type of file is use.
+filetype on
+
+" Enable spell check
+set nospell
+highlight SpellBad ctermfg=204 guifg=#F28FAD gui=undercurl guisp=#F28FAD
+highlight SpellCap ctermfg=75 guifg=#9D7CD8 gui=undercurl guisp=#9D7CD8
+highlight SpellRare ctermfg=81 guifg=#0DB9D7 gui=undercurl guisp=#0DB9D7
+highlight SpellLocal ctermfg=142 guifg=#FAB387 gui=undercurl guisp=#FAB387
+
+" Avoids updating the screen before commands are completed
+set lazyredraw
+
+" Smart tab
+set smarttab
+
+" Search down to subfolders
+set path+=**
+
+" Enable plugins and load plugin for the detected file type.
+filetype plugin on
+
+" Load an indent file for the detected file type.
+filetype indent on
+
+" Turn syntax highlighting on.
+syntax on
+
+" Turns off highlighting on the bits of code that are changed, so the line that is changed is highlighted but the actual text that has changed stands out on the line and is readable.
+if &diff
+    highlight! link DiffText MatchParen
+endif
+
+" Add numbers to the file.
+set number relativenumber
+
+" Mouse functionality
+set mouse=a
+
+" Background color
+" set bg=light
+
+" Color scheme
+colorscheme desert
+
+" Highlight cursor line underneath the cursor horizontally.
+set cursorline
+
+" Disable highlight cursor line underneath the cursor vertically.
+set nocursorcolumn
+
+" Set shift width to 4 spaces.Set tab width to 4 columns.
+set shiftwidth=4
+set tabstop=4
+
+" If the current file type is HTML, set indentation to 2 spaces.
+autocmd Filetype html setlocal tabstop=2 shiftwidth=2 expandtab
+
+" Do not save backup files.
+set nobackup
+
+" Do wrap lines.
+set wrap
+
+" While searching though a file incrementally highlight matching characters as you type.
+set incsearch
+set hlsearch
+
+" Ignore capital letters during search.
+set ignorecase
+
+" Show partial command you type in the last line of the screen.
+set showcmd
+
+" Show the mode you are on the last line.
+set showmode
+
+" Show matching words during a search.
+set showmatch
+
+" Show title of the file
+set title
+
+" Timeout
+set timeoutlen=300     " Time (in milliseconds) to wait for a mapping
+set ttimeoutlen=10     " Time (in milliseconds) to wait for terminal key codes
+
+" Esc
+set noesckeys
+
+" Set the commands to save in history default number is 20.
+set history=1000
+
+" Setting the split window to open as i like (like in a WM - qtile)
+set splitbelow splitright
+
+" Enable auto completion menu after pressing TAB.
+set wildmenu
+
+" There are certain files that we would never want to edit with Vim.
+" Wild menu will ignore files with these extensions.
+set wildignore=*.docx,*.jpg,*.png,*.gif,*.pdf,*.pyc,*.exe,*.flv,*.img,*.xlsx
+
+" If Vim version is equal to or greater than 7.3 enable undo file.
+" This allows you to undo changes to a file even after saving it.
+if version >= 703
+    set undodir=~/.config/vim/backup
+    set undofile
+    set undoreload=10000
+endif
+
+
+" File Browsing settings
+let g:netrw_banner=0
+let g:netrw_liststyle=3
+let g:netrw_showhide=1
+let g:netrw_winsize=20
+
+
+" Auto Completion - Enable Omni complete features
+set omnifunc=syntaxcomplete#Complete
+
+
+" Enable Spelling Suggestions for Auto-Completion:
+set complete+=k
+set completeopt=menu,menuone,noinsert
+
+
+" Minimalist-Tab Complete
+inoremap <expr> <Tab> TabComplete()
+fun! TabComplete()
+    if getline('.')[col('.') - 2] =~ '\K' || pumvisible()
+        return "\<C-N>"
+    else
+        return "\<Tab>"
+    endif
+endfun
+
+
+" Minimalist-Autocomplete
+inoremap <expr> <CR> pumvisible() ? "\<C-Y>" : "\<CR>"
+autocmd InsertCharPre * call AutoComplete()
+fun! AutoComplete()
+    if v:char =~ '\K'
+                \ && getline('.')[col('.') - 4] !~ '\K'
+                \ && getline('.')[col('.') - 3] =~ '\K'
+                \ && getline('.')[col('.') - 2] =~ '\K' " last char
+                \ && getline('.')[col('.') - 1] !~ '\K'
+
+        call feedkeys("\<C-N>", 'n')
+    end
+endfun
+
+
+" Closing compaction in insert mode
+inoremap [ []<Left>
+inoremap ( ()<Left>
+inoremap { {}<Left>
+inoremap /* /**/<Left><Left>
+
+" }}}
+
+
+" STATUS LINE ------------------------------------------------------------ {{{
+
+set laststatus=2
+set statusline=
+set statusline+=%2*
+set statusline+=%{StatuslineMode()}
+set statusline+=%{SpellCheckStatus()}
+set statusline+=%1*
+set statusline+=%3*
+set statusline+=<
+set statusline+=-
+set statusline+=%f
+set statusline+=-
+set statusline+=>
+set statusline+=%4*
+set statusline+=%m
+set statusline+=%=
+set statusline+=%h
+set statusline+=%r
+set statusline+=%4*
+set statusline+=%c
+set statusline+=/
+set statusline+=%l
+set statusline+=/
+set statusline+=%L
+set statusline+=%1*
+set statusline+=|
+set statusline+=%y
+set statusline+=%4*
+set statusline+=%P
+set statusline+=%3*
+set statusline+=t:
+set statusline+=%n
+
+" }}}
+
+
+" STATUS FUNCTIONS ------------------------------------------------------- {{{
+
+" Mode
+function! StatuslineMode()
+    let l:mode=mode()
+    if l:mode==#"n"
+        return "NORMAL"
+    elseif l:mode==#"V"
+        return "VISUAL LINE"
+    elseif l:mode==?"v"
+        return "VISUAL"
+    elseif l:mode==#"i"
+        return "INSERT"
+    elseif l:mode ==# "\<C-V>"
+        return "V-BLOCK"
+    elseif l:mode==#"R"
+        return "REPLACE"
+    elseif l:mode==?"s"
+        return "SELECT"
+    elseif l:mode==#"t"
+        return "TERMINAL"
+    elseif l:mode==#"c"
+        return "COMMAND"
+    elseif l:mode==#"!"
+        return "SHELL"
+    else
+        return "VIM"
+    endif
+endfunction
+
+" Spell Check Status
+function! SpellCheckStatus()
+    if &spell
+        return " [SPELL]"
+    else
+        return ''
+    endif
+endfunction
+" }}}
+
+
+" VIMSCRIPT -------------------------------------------------------------- {{{
+
+" This will enable code folding.
+" Use the marker method of folding.
+augroup filetype_vim
+    autocmd!
+    autocmd FileType vim setlocal foldmethod=marker
+augroup END
+
+
+
+" INIT VIM --------------------------------------------------------------- {{{
+
+if filereadable(expand("~/.config/vim/init.vim"))
+    source ~/.config/vim/init.vim
+endif
+
+" }}}
+
+
+" SHORTCUTS -------------------------------------------------------------- {{{
+
+if filereadable(expand("~/.config/vim/shortcuts.vim"))
+    silent! source ~/.config/vim/shortcuts.vim
+endif
+
+if filereadable(expand("~/.config/vim/rootshortcuts.vim"))
+    silent! source ~/.config/vim/rootshortcuts.vim
+endif
+
+" }}}
+
+
+" COLORS ----------------------------------------------------------------- {{{
+
+" Terminal color
+set t_Co=256
+if exists('+termguicolors')
+    set termguicolors
+else
+    set notermguicolors
+endif
+
+" Cursor
+hi CursorLine cterm=NONE ctermbg=236 ctermfg=NONE gui=NONE guibg=Grey30 guifg=NONE
+
+" Transparent
+hi Normal ctermbg=NONE guibg=NONE
+hi NonText ctermbg=NONE guibg=NONE
+hi LineNr ctermbg=NONE guibg=NONE
+hi Folded ctermbg=NONE guibg=NONE
+hi EndOfBuffer ctermfg=Grey guifg=Grey
+
+hi User1 ctermbg=brown ctermfg=white guibg=NONE guifg=white
+hi User2 ctermbg=lightgreen ctermfg=black guibg=lightgreen guifg=black
+hi User3 ctermbg=brown ctermfg=lightcyan guibg=NONE guifg=lightblue
+hi User4 ctermbg=brown ctermfg=green guibg=NONE guifg=lightgreen
+
+" }}}
