@@ -80,7 +80,7 @@ main() {
   # Configure environment variables
   export LANG='en_US.UTF-8'
   export LC_ALL='en_US.UTF-8'
-  export WINEARCH='win32'
+  export WINEARCH='win64'
   export WINEPREFIX="${WINEPREFIX:-${XDG_DATA_HOME:-${HOME}/.local/share}/wine}/soop"
 
   # Install
