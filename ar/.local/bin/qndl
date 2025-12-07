@@ -5,8 +5,8 @@ simulation_cmd="yt-dlp --simulate --print %(filename)s"
 
 case "$BROWSER" in
 *firefox*) cookies="firefox" ;;
-*librewolf*) cookies="firefox:~/.librewolf/$USER.default" ;;
-*qutebrowser*) cookies="chromium:~/.local/share/qutebrowser" ;;
+# *librewolf*) cookies="firefox:~/.librewolf/$USER.default" ;;
+# *qutebrowser*) cookies="chromium:~/.local/share/qutebrowser" ;;
 esac
 
 if [ -n "$cookies" ]; then
