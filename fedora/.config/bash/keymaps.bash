@@ -193,7 +193,7 @@ stty -ixon 2>/dev/null || true
 bind -x '"\C-s":sudo_command_line' # ^S  (stty -ixon to avoid flow control)
 
 # tmux left pane (bind ESC + backslash)
-bind -x $'\e\\':tmux_left_pane
+#bind -x '\e\\':tmux_left_pane
 
 # ---------- mappings of the original bindkey -s lines (u removed) ----------
 bind -x '"\C-b":__bc' # will call function __bc below

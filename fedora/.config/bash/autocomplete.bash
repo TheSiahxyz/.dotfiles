@@ -147,7 +147,7 @@ expand_alias_and_accept_line() {
 # Bind Space to our function so pressing space triggers alias-expansion behavior.
 # Use bind -x to call expand_alias_space (it will both expand and insert space when appropriate).
 # WARNING: this overrides normal space key behavior; our function handles insertion.
-bind -x '" "':expand_alias_space
+# bind -x '" "':expand_alias_space
 
 # optional: bind Ctrl-Space to the same (a bypass key like zsh had)
 # Many terminals send "\C-@" for ctrl-space; try both common sequences:
@@ -169,7 +169,7 @@ _bash_accept_line() {
   # (This is a conservative behavior to avoid interfering unexpectedly.)
   return 0
 }
-bind -x '"\C-m":_bash_accept_line'
+#bind -x '"\C-m":_bash_accept_line'
 
 # ---------- helper: background starter ----------
 background() {

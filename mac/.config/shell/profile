@@ -1,18 +1,8 @@
 ###################################################
-### --- ENV PATH --- ###
+### --- LANG --- ###
 ###################################################
 export LANG=ko_KR.UTF-8
 export LC_CTYPE=ko_KR.UTF-8
-
-# Add all directories in each subdirectory to $PATH
-export PATH="$PATH:$(find ~/.local/bin -path '*/.git*' -prune -o \( -type f -o -type l \) -perm -u=x -exec dirname {} \; | sort -u | paste -sd ':' -)"
-export PATH="$PATH:$(find ~/.local/share/.password-store -type d -name '.extensions' | paste -sd ':' -)"
-export PATH="$PATH:/opt/homebrew/bin"
-export PATH="$PATH:$(find -L /opt/homebrew/Caskroom \( -name bin -o -name MacOS \) -type d -print 2>/dev/null | sort -u | paste -s -d ':' -)"
-export PATH="$PATH:$(find -L /opt/homebrew/Cellar -name bin -type d -print 2>/dev/null | sort -u | paste -s -d ':' -)"
-export PATH="$PATH:$(find -L /opt/homebrew/opt -name bin -type d -print 2>/dev/null | sort -u | paste -s -d ':' -)"
-
-unsetopt PROMPT_SP 2>/dev/null
 
 ###################################################
 ### --- DEFAULT PROGRAMS --- ###
@@ -64,7 +54,6 @@ export ANSIBLE_CONFIG="$XDG_CONFIG_HOME/ansible/ansible.cfg"
 ### --- ASDF --- ###
 export ASDF_CONFIG_FILE="$XDG_CONFIG_HOME/asdf/asdfrc"
 export ASDF_DATA_DIR="$XDG_DATA_HOME/asdf"
-export PATH="$ASDF_DATA_DIR/shims:$PATH"
 
 ### --- BAT --- ###
 export BAT_CONFIG_PATH="$XDG_CONFIG_HOME/bat/config"
@@ -236,5 +225,21 @@ export STARDICT_DATA_DIR="$XDG_DATA_HOME/dic"
 export STARDICT_HISTFILE="$XDG_DATA_HOME/history/dic"
 export SDCV_PAGER='less --quit-if-one-screen -RX'
 
+###################################################
+### --- ENV PATH --- ###
+###################################################
+# Add all directories in each subdirectory to $PATH
+export PATH="$(find ~/.local/bin -path '*/.git*' -prune -o \( -type f -o -type l \) -perm -u=x -exec dirname {} \; | sort -u | paste -sd ':' -):$PATH"
+export PATH="$(find ~/.local/share/.password-store -type d -name '.extensions' | paste -sd ':' -):$PATH"
+export PATH="$ASDF_DATA_DIR/shims:$PATH"
+export PATH="/opt/homebrew/bin:$PATH"
+export PATH="$(find -L /opt/homebrew/Caskroom \( -name bin -o -name MacOS \) -type d -print 2>/dev/null | sort -u | paste -s -d ':' -):$PATH"
+export PATH="$(find -L /opt/homebrew/Cellar -name bin -type d -print 2>/dev/null | sort -u | paste -s -d ':' -):$PATH"
+export PATH="$(find -L /opt/homebrew/opt -name bin -type d -print 2>/dev/null | sort -u | paste -s -d ':' -):$PATH"
+
+unsetopt PROMPT_SP 2>/dev/null
+
+###################################################
 ### --- SHORTCUTS --- ###
+###################################################
 [ ! -f "$XDG_CONFIG_HOME/shell/shortcutrc" ] && nohup bmshortcuts >/dev/null 2>&1 &

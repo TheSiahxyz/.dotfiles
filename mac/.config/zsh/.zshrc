@@ -124,3 +124,5 @@ export AVANTE_OPENAI_API_KEY="$(pass show api/chatGPT/nvim | head -n1)"
 
 ### --- OPENAI --- ###
 export OPENAI_API_KEY="$(pass show api/chatGPT/nvim | head -n1)"
+
+. "$(brew --prefix asdf)/libexec/asdf.sh"

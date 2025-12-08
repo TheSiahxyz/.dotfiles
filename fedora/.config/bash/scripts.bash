@@ -155,6 +155,24 @@ mkdt() {
 
 ###########################################################################################
 ###########################################################################################
+### --- CURSOR --- ###
+# vi-mode cursor change
+function update_cursor {
+  if [[ $READLINE_LINE == * ]]; then
+    if [[ $READLINE_POINT -eq 0 ]]; then
+      echo -ne '\e[6 q' # insert mode
+    else
+      echo -ne '\e[2 q' # command mode
+    fi
+  fi
+}
+
+# vi-command, vi-insert 모드 hook 등록
+bind -m vi-insert '":": "\C-o update_cursor"'
+bind -m vi-command '":": "\C-o update_cursor"'
+
+###########################################################################################
+###########################################################################################
 ### --- DISTRIBUTION --- ###
 # Show the current distribution
 distribution() {
