@@ -1,0 +1,78 @@
+#!/bin/sh
+
+# Display help message
+usage() {
+  echo "Open the most recent file or the list of old files in fzf edited by Vim."
+  echo ""
+  echo "Usage: ${0##*/} [OPTION]"
+  echo ""
+  echo "Options:"
+  echo "                  : Open the most recent old file in Vim."
+  echo "  -h, --help      : Show this help message."
+  echo "  -l, --list      : Show all recent files in Vim using fzf."
+  echo ""
+  echo "Examples:"
+  echo "  ${0##*/}        # Open the most recent file."
+  echo "  ${0##*/} -l     # Show all recent files in fzf and select to open."
+  exit 0
+}
+
+# Fetch oldfiles from Vim
+get_oldfiles() {
+  vim -u NONE -es +'silent oldfiles' +qa 2>/dev/null |
+    sed 's/^[0-9]\+\s\+//' |
+    grep -v "^$"
+}
+
+# List and handle oldfiles
+list_oldfiles() {
+  oldfiles=$(get_oldfiles)
+
+  # Exit if no oldfiles are found
+  [ -z "$oldfiles" ] && {
+    echo "No recent files found in Vim." >&2
+    exit 1
+  }
+
+  case "$1" in
+  -h | --help)
+    usage
+    ;;
+  -l | --list)
+    valid_files=$(echo "$oldfiles" | while IFS= read -r file; do
+      [ -f "$file" ] && printf "%s\n" "$file"
+    done)
+
+    [ -z "$valid_files" ] && {
+      echo "No valid files found." >&2
+      exit 1
+    }
+
+    selected_files=$(echo "$valid_files" |
+      fzf-tmux \
+        --multi \
+        --preview 'bat -n --color=always --line-range=:500 {} 2>/dev/null || echo "Error previewing file"' \
+        --height=70% \
+        --reverse)
+
+    [ -z "$selected_files" ] && exit 1
+
+    openfiles $selected_files
+    ;;
+  *)
+    # Open the most recent valid file
+    for file in $oldfiles; do
+      if [ -f "$file" ]; then
+        openfiles "$file"
+        exit 0
+      fi
+    done
+
+    echo "No valid recent files found." >&2
+    exit 1
+    ;;
+  esac
+}
+
+# Parse command-line arguments
+list_oldfiles "$@"

@@ -146,7 +146,7 @@ sudo_command_line() { pre_cmd "sudo"; }
 # ---------- wrappers (u-prefix REMOVED) ----------
 bc() { command -v bc >/dev/null 2>&1 && /usr/bin/env bc "$@" || printf 'bc: not found\n' >&2; }
 cdi() { command -v cdi >/dev/null 2>&1 && cdi "$@" || printf 'cdi: not found\n' >&2; }
-lastvim() { command -v lastvim >/dev/null 2>&1 && lastvim "$@" || printf 'lastvim: not found\n' >&2; }
+lastfiles() { command -v lastfiles >/dev/null 2>&1 && lastfiles "$@" || printf 'lastfiles: not found\n' >&2; }
 htop() { command -v htop >/dev/null 2>&1 && htop "$@" || printf 'htop: not found\n' >&2; }
 sessionizer() { command -v sessionizer >/dev/null 2>&1 && sessionizer "$@" || printf 'sessionizer: not found\n' >&2; }
 upd() { command -v upd >/dev/null 2>&1 && upd "$@" || printf 'upd: not found\n' >&2; }
@@ -154,7 +154,7 @@ cht() { command -v cht >/dev/null 2>&1 && cht "$@" || printf 'cht: not found\n' 
 ali() { command -v ali >/dev/null 2>&1 && ali "$@" || printf 'ali: not found\n' >&2; }
 fD() { command -v fD >/dev/null 2>&1 && fD "$@" || printf 'fD: not found\n' >&2; }
 rgafiles() { command -v rgafiles >/dev/null 2>&1 && rgafiles "$@" || printf 'rgafiles: not found\n' >&2; }
-lastvim_l() { command -v lastvim >/dev/null 2>&1 && lastvim -l || printf 'lastvim: not found\n' >&2; }
+lastfiles_l() { command -v lastfiles >/dev/null 2>&1 && lastfiles -l || printf 'lastfiles: not found\n' >&2; }
 
 # ---------- Readline key bindings (bind -x) ----------
 # basic movement
@@ -202,7 +202,7 @@ __bc() { bc -lq "$@"; }
 bind -x '"\C-d":cdi'
 bind -x '"\C-f":fzffiles'
 bind -x '"\C-g":lf'
-bind -x '"\C-n":lastvim'
+bind -x '"\C-n":lastfiles'
 bind -x '"\C-o":tmo'
 bind -x '"\C-p":fzfpass'
 bind -x '"\C-q":htop'
@@ -219,7 +219,7 @@ bind -x '"\C-x\C-d":fD'
 bind -x '"\C-x\C-f":gitfiles'
 bind -x '"\C-x\C-g":rgafiles'
 bind -x '"\C-x\C-l":gloac'
-bind -x '"\C-x\C-n":lastvim_l'
+bind -x '"\C-x\C-n":lastfiles_l'
 bind -x '"\C-x\C-q":fpkill'
 bind -x '"\C-x\C-r":fgst'
 bind -x '"\C-x\C-t":gitstagedfiles'

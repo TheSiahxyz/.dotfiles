@@ -432,7 +432,7 @@ cmd zi ${{
 cmd follow_link %{{
   lf -remote "send ${id} select '$(readlink $f)'"
 }}
-cmd lastnvim ${{
+cmd lastfiles ${{
   list=$(nvim -u NONE --headless +'lua io.write(table.concat(vim.v.oldfiles, "\n") .. "\n")' +qa)
   file=$(printf "%s" "$list" | while read -r file; do
     [ -f "$file" ] && printf "%s\n" "$file"
@@ -516,7 +516,7 @@ map <delete> delete; clear; save-select
 map <enter> $$EDITOR "$f"
 map <c-v> push :!nvim<space>
 map vlf edit-config
-map vll lastnvim
+map vll lastfiles
 map vln $$EDITOR "$(nvim -u NONE --headless +'lua io.write(vim.v.oldfiles[1] .. "\n")' +qa)"
 
 # Extract

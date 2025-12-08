@@ -240,7 +240,7 @@ alias v='$EDITOR'
 alias v.='$EDITOR .'
 alias ve='$EDITOR -c enew'
 alias vis="$EDITOR '+set si'"
-alias vll='lastvim -l'
+alias vll='lastfiles -l'
 alias vln='$EDITOR -c '\''execute "edit " . v:oldfiles[0] | normal ''0'\'
 
 # ports
