@@ -26,10 +26,12 @@ vns     ${XDG_CONFIG_HOME:-${HOME}/.config}/newsboat/config                     
 vnu     ${XDG_CONFIG_HOME:-${HOME}/.config}/newsboat/urls                       # Newsboat url (RSS reader)
 vqt     ${XDG_CONFIG_HOME:-${HOME}/.config}/qutebrowser/config.py               # Qutebrowser config
 Vsm     /etc/samba/smb.conf                                                     # Samba config
+vsa     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/aliasrc                       # Aliases used by shell (and potentially other shells)
 vse     ${XDG_CONFIG_HOME:-${HOME}/.config}/sesh/sesh.toml                      # Sesh config
 vsf     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/surf/config.def.h      # Surf: a simple browser
 vsl     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/slock/config.def.h     # Slock: lock screen
-vsp     ${XDG_DATA_HOME:-${HOME}/.local/share}/thesiah/snippets                 # Snippets
+vsn     ${XDG_DATA_HOME:-${HOME}/.local/share}/thesiah/snippets                 # Snippets
+vsp     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/profile                       # Shell profile used for system
 vss     ${XDG_CONFIG_HOME:-${HOME}/.config}/starship/starship.toml              # Starship
 vst     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/st/config.def.h        # St: a simple terminal
 vsx     ${XDG_CONFIG_HOME:-${HOME}/.config}/nsxiv/exec/key-handler              # Nsxiv (image viewer) key/script handler
@@ -47,8 +49,6 @@ vxp     ${XDG_CONFIG_HOME:-${HOME}/.config}/x11/xprofile                        
 vxr     ${XDG_CONFIG_HOME:-${HOME}/.config}/x11/xresources                      # Colors, themes and variables for X11
 vyk     ${XDG_CONFIG_HOME:-${HOME}/.config}/yazi/keymap-default.toml            # Yazi keymap
 vyz     ${XDG_CONFIG_HOME:-${HOME}/.config}/yazi/yazi.toml                      # Yazi config
-vza     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/aliasrc                       # Aliases used by zsh (and potentially other shells)
 vzc     ${ZDOTDIR:-${XDG_CONFIG_HOME:-${HOME}/.config}/zsh}/.zshrc              # Zsh config
 vzk     ${ZDOTDIR:-${XDG_CONFIG_HOME:-${HOME}/.config}/zsh}/keymaps.zsh         # Zsh keymaps
-vzp     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/profile                       # Zsh profile used for system
 vzs     ${ZDOTDIR:-${XDG_CONFIG_HOME:-${HOME}/.config}/zsh}/scripts.zsh         # Zsh scripts

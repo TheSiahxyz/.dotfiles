@@ -4,7 +4,7 @@
 
 if [ -n "$BASH_VERSION" ]; then
   # ------------------------------
-  # Bash-compatible aliases & functions
+  # BASH-compatible aliases & functions
   # ------------------------------
 
   # helper: safe alias creation
@@ -260,7 +260,7 @@ if [ -n "$BASH_VERSION" ]; then
   alias shck='shellcheck --color=always'
 
   # ref/shortcut loader (keep as in original)
-  ref() { shortcuts >/dev/null; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutrc; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutenvrc; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/zshnameddirrc; }
+  ref() { bmshortcuts >/dev/null; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutrc; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutenvrc; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/zshnameddirrc; }
 
   # sudo helpers
   alias su='sudo su -l root'
@@ -363,9 +363,10 @@ if [ -n "$BASH_VERSION" ]; then
   # zsh sourcing helpers (just source config)
   sps() { source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/profile; }
   szs() { source ${XDG_CONFIG_HOME:-${HOME}/.config}/zsh/.zshrc; }
-
-  # -------- done bash branch ----------
 else
+  # ------------------------------
+  # ZSH-compatible aliases & functions
+  # ------------------------------
 	# sudo not required for some system commands
   for command in blkid lsblk mount umount dnf poweroff reboot shutdown su updatedb; do
       alias $command="sudo $command"
@@ -648,7 +649,7 @@ else
   alias shck='shellcheck --color=always'
 
 	# shortcut
-  alias ref='shortcuts >/dev/null; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutrc; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutenvrc; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/zshnameddirrc'
+  alias ref='bmshortcuts >/dev/null; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutrc; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutenvrc; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/zshnameddirrc'
 
 	# sudo
   alias su='sudo su -l root'

@@ -163,6 +163,11 @@ bind '"\C-g":"lfcd\n"'
 
 eval "$(dircolors)"
 
+[ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/aliasrc" ] && . "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/aliasrc"
+[ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/git-aliasrc" ] && . "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/git-aliasrc"
+[ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutrc" ] && . "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutrc"
+[ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutenvrc" ] && . "${XDG_CONFIG_HOME:-$HOME/.config}/shell/shortcutenvrc"
+[ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/zshnameddirrc" ] && . "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/zshnameddirrc"
 [ -f "${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/bash-preexec" ] && . "${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/bash-preexec"
 [ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/rootshortcutrc" ] && . "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/rootshortcutrc"
 [ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/rootzshnameddirrc" ] && . "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/rootzshnameddirrc"

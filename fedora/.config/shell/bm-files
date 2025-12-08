@@ -8,12 +8,12 @@ vga     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/git-aliasrc                   
 vgc     ${XDG_CONFIG_HOME:-${HOME}/.config}/git/config                          # Git config
 vgi     ${XDG_CONFIG_HOME:-${HOME}/.config}/git/ignore                          # Git ignore
 Vsm     /etc/samba/smb.conf                                                     # Samba config
+vsa     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/aliasrc                       # Aliases used by shell (and potentially other shells)
+vsp     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/profile                       # Shell profile used for system
 vtm     ${XDG_CONFIG_HOME:-${HOME}/.config}/tmux/tmux.conf                      # Tmux config
 vvc     ${XDG_CONFIG_HOME:-${HOME}/.config}/vim/vimrc                           # Vim config
 vvi     ${XDG_CONFIG_HOME:-${HOME}/.config}/vim/init.vim                        # Vim init
 vvp     ${XDG_CONFIG_HOME:-${HOME}/.config}/vim/plugins.vim                     # Vim plugins
-vza     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/aliasrc                       # Aliases used by zsh (and potentially other shells)
 vzc     ${ZDOTDIR:-${XDG_CONFIG_HOME:-${HOME}/.config}/zsh}/.zshrc              # Zsh config
 vzk     ${ZDOTDIR:-${XDG_CONFIG_HOME:-${HOME}/.config}/zsh}/keymaps.zsh         # Zsh keymaps
-vzp     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/profile                       # Zsh profile used for system
 vzs     ${ZDOTDIR:-${XDG_CONFIG_HOME:-${HOME}/.config}/zsh}/scripts.zsh         # Zsh scripts

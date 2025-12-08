@@ -367,9 +367,6 @@ set title
 set timeoutlen=300     " Time (in milliseconds) to wait for a mapping
 set ttimeoutlen=10     " Time (in milliseconds) to wait for terminal key codes
 
-" Esc
-set noesckeys
-
 " Set the commands to save in history default number is 20.
 set history=1000
 
