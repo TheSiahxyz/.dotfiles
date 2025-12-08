@@ -17,7 +17,7 @@ usage() {
   echo "Examples:"
   echo "  ${0##*/} -p TODO 'KEYWORD'      # Search for 'KEYWORD' in files tagged with 'TODO' in the project directories"
   echo "  ${0##*/} -l -p 'KEYWORD'        # List files associated with the default 'PROJECT' tag and 'KEYWORD'"
-  echo "  ${0##*/} 'KEYWORD'              # Open files containing 'KEYWORD' in nvim"
+  echo "  ${0##*/} 'KEYWORD'              # Open files containing 'KEYWORD' in vim"
   exit 0
 }
 
@@ -86,7 +86,7 @@ list_or_open_project_files() {
   if [ "$list_mode" -eq 1 ]; then
     echo "$rga_output"
   else
-    # Otherwise, open the files with nvim
+    # Otherwise, open the files with vim
     set -- "$(printf "%s\n" "$rga_output")"
     openfiles "$@"
   fi

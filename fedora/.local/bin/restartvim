@@ -15,11 +15,11 @@ fi
 # Get the current tmux pane ID
 tmux_pane=$(tmux display-message -p '#D')
 
-# Send Escape, :wq, and Enter to Neovim in the tmux pane
+# Send Escape, :wq, and Enter to Vim in the tmux pane
 tmux send-keys -t "$tmux_pane" Escape C-m ':wq' C-m
 
-# Wait to ensure Neovim exits
+# Wait to ensure Vim exits
 sleep 0.5
 
-# Detach the script from Neovim and wait a bit to ensure Neovim exits
-(nohup sh -c "sleep 0.5; tmux send-keys -t \"$tmux_pane\" 'nvim -c \"execute \\\"edit \\\" . v:oldfiles[0] | normal '\''0\"' C-m" >/dev/null 2>&1 &)
+# Detach the script from Vim and wait a bit to ensure Vim exits
+(nohup sh -c "sleep 0.5; tmux send-keys -t \"$tmux_pane\" 'vim -c \"execute \\\"edit \\\" . v:oldfiles[0] | normal '\''0\"' C-m" >/dev/null 2>&1 &)

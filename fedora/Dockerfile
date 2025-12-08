@@ -6,7 +6,7 @@ LABEL name="$NAME" \
   summary="Fedora toolbox container" \
   maintainer="TheSiahxyz"
 
-ENV EDITOR=nvim
+ENV EDITOR=vim
 
 ENV NODE_VERSION=21.7.1
 

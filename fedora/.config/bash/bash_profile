@@ -1,34 +1,107 @@
-#!/bin/sh
+#!/bin/bash
 
 umask 022
+
+###################################################
+### --- ENV PATH --- ###
+###################################################
+# Add all directories in each subdirectory to $PATH
+export PATH="$PATH:$(find ~/.local/bin -path '*/.git*' -prune -o \( -type f -o -type l \) -perm -u=x -exec dirname {} \; | sort -u | paste -sd ':' -)"
+export PATH="$PATH:$(find ~/.local/share/.password-store -type d -name '.extensions' | paste -sd ':' -)"
+command -v asdf >/dev/null 2>&1 && export PATH="$PATH:$(find -L ~/.local/share/asdf/installs -name bin -type d -print 2>/dev/null | sort -u | paste -s -d ':' -)"
+command -v npm >/dev/null 2>&1 && export PATH="$PATH:$(find -L ~/.local/share/npm -name bin -type d -print 2>/dev/null | sort -u | paste -s -d ':' -)"
+
+unsetopt PROMPT_SP 2>/dev/null
+
+###################################################
+### --- DEFAULT PROGRAMS --- ###
+###################################################
+if command -v nvim >/dev/null 2>&1; then
+  export EDITOR="nvim"
+elif command -v vim >/dev/null 2>&1; then
+  export EDITOR="vim"
+else
+  export EDITOR="vi"
+fi
+# export FILE_MANAGER="lf $(lf -version)"
+export KEYTIMEOUT=10
+export SUDO_EDITOR=$EDITOR
+export TERM="xterm-256color"
+export VISUAL=$EDITOR
+export TERM="xterm-256color"
+export GVIMINIT='let $MYGVIMRC="$XDG_CONFIG_HOME/vim/gvimrc" | source $MYGVIMRC'
+export VIMINIT='let $MYVIMRC="$XDG_CONFIG_HOME/vim/vimrc" | source $MYVIMRC'
+
+###################################################
+### --- XDG ENV PATHES --- ###
+###################################################
+### --- XDG DEFAULT --- ###
+export XDG_CACHE_HOME="$HOME/.cache"
+export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_DATA_HOME="$HOME/.local/share"
+export XDG_STATE_HOME="$HOME/.local/state"
+
+### --- XDG CUSTOMS --- ###
+export XDG_DOTFILES_DIR="$HOME/.dotfiles"
+export XDG_SCRIPTS_HOME="$HOME/.local/bin"
+export XDG_SOURCES_HOME="$HOME/.local/src"
+export XDG_DESKTOP_DIR="$HOME/Desktop"
+export XDG_DOCUMENTS_DIR="$HOME/Documents"
+export XDG_DOWNLOAD_DIR="$HOME/Downloads"
+export XDG_MUSIC_DIR="$HOME/Music"
+export XDG_PICTURES_DIR="$HOME/Pictures"
+export XDG_PUBLICSHARE_DIR="$HOME/Public"
+export XDG_TEMPLATES_DIR="$HOME/Templates"
+export XDG_VIDEOS_DIR="$HOME/Videos"
 
 #######################################################
 # EXPORTS
 #######################################################
 
-export XDG_CACHE_HOME="$HOME/.cache"
-export XDG_CONFIG_HOME="$HOME/.config"
-export XDG_DATA_HOME="$HOME/.local/share"
-export XDG_STATE_HOME="$HOME/.local/state"
 export CLICOLOR=1
-export EDITOR="vim"
 export HISTFILE="${XDG_DATA_HOME:-${HOME}/.local/share}/history/sh_history"
 export INPUTRC="${XDG_CONFIG_HOME:-${HOME}/.config}/shell/inputrc"
-export LESS="R"
-export LESS_TERMCAP_mb="$(printf '%b' '[1;31m')"
-export LESS_TERMCAP_md="$(printf '%b' '[1;36m')"
-export LESS_TERMCAP_me="$(printf '%b' '[0m')"
-export LESS_TERMCAP_so="$(printf '%b' '[01;44;33m')"
-export LESS_TERMCAP_se="$(printf '%b' '[0m')"
-export LESS_TERMCAP_us="$(printf '%b' '[1;32m')"
-export LESS_TERMCAP_ue="$(printf '%b' '[0m')"
-export LESSOPEN="| /usr/bin/highlight -O ansi %s 2>/dev/null"
+
+### --- MANPAGER --- ###
+([ -x "$(command -v batcat)" ] || [ -x "$(command -v batman)" ]) && {
+  export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+  export MANROFFOPT="-c"
+} || {
+  export MANPAGER='less -s'
+  export LESS="R"
+  export LESS_TERMCAP_mb="$(printf '%b' '[1;31m')"
+  export LESS_TERMCAP_md="$(printf '%b' '[1;36m')"
+  export LESS_TERMCAP_me="$(printf '%b' '[0m')"
+  export LESS_TERMCAP_so="$(printf '%b' '[01;44;33m')"
+  export LESS_TERMCAP_se="$(printf '%b' '[0m')"
+  export LESS_TERMCAP_us="$(printf '%b' '[1;32m')"
+  export LESS_TERMCAP_ue="$(printf '%b' '[0m')"
+  export LESSOPEN="| lesspipe.sh %s"
+}
+
 export LS_COLORS="no=00:fi=00:di=00;34:ln=01;36:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arj=01;31:*.taz=01;31:*.lzh=01;31:*.zip=01;31:*.z=01;31:*.Z=01;31:*.gz=01;31:*.bz2=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.jpg=01;35:*.jpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.avi=01;35:*.fli=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.ogg=01;35:*.mp3=01;35:*.wav=01;35:*.xml=00;31:"
 export LS_OPTIONS="--color=auto"
-export TERM="xterm-256color"
-export GVIMINIT='let $MYGVIMRC="$XDG_CONFIG_HOME/vim/gvimrc" | source $MYGVIMRC'
-export VIMINIT='let $MYVIMRC="$XDG_CONFIG_HOME/vim/vimrc" | source $MYVIMRC'
-export VISUAL=$EDITOR
+
+### --- PASSWORD STORE --- ###
+export PASSWORD_STORE_DIR="$XDG_DATA_HOME/.password-store"
+export PASSWORD_STORE_CLIP_TIME=180 # Specifies the number of seconds to wait before restoring the clipboard, by default 45 seconds.
+# export PASSWORD_STORE_GENERATED_LENGTH=18   # by default 25.
+# export PASSWORD_STORE_CHARACTER_SET='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+[]{};:,.<>?'
+# export PASSWORD_STORE_CHARACTER_SET_NO_SYMBOLS='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+[]{};:,.<>?'
+export PASSWORD_STORE_ENABLE_EXTENSIONS="true"
+# export PASSWORD_STORE_EXTENSIONS_DIR="$PASSWORD_STORE_DIR/.extensions"
+# export BASH_COMPLETION_USER_DIR=$XDG_DATA_HOME/bash-completion/completions
+
+### --- TMUX --- ###
+export TMUX_TMPDIR="$XDG_RUNTIME_DIR"
+
+### --- VIM --- ###
+# export GVIMINIT='let $MYGVIMRC = !has("nvim") ? "$XDG_CONFIG_HOME/vim/gvimrc" : "$XDG_CONFIG_HOME/nvim/init.lua" | so $MYGVIMRC'
+# export VIMINIT='let $MYVIMRC = !has("nvim") ? "$XDG_CONFIG_HOME/vim/vimrc" : "$XDG_CONFIG_HOME/nvim/init.lua" | so $MYVIMRC'
+
+### --- ZSH --- ###
+export ZDOTDIR="$XDG_CONFIG_HOME/zsh"
+export ZPLUGINDIR="$XDG_SCRIPTS_HOME/zsh"
 
 #######################################################
 # Source global/local definitions
@@ -38,3 +111,4 @@ export VISUAL=$EDITOR
 [ -f /usr/share/bash-completion/bash_completion ] && . /usr/share/bash-completion/bash_completion
 [ -f /etc/bash/bashrc ] && . /etc/bash/bashrc
 [ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/bash/bashrc" ] && . "${XDG_CONFIG_HOME:-${HOME}/.config}/bash/bashrc"
+[ ! -f "$XDG_CONFIG_HOME/shell/shortcutrc" ] && setsid -f bmshortcuts >/dev/null 2>&1

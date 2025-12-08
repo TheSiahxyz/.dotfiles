@@ -12,7 +12,7 @@ command -v vim && vim_shortcuts="${XDG_CONFIG_HOME:-${HOME}/.config}/vim/shortcu
 command -v nvim && nvim_shortcuts="${XDG_CONFIG_HOME:-${HOME}/.config}/nvim/shortcuts.lua" || nvim_shortcuts="/dev/null"
 command -v yazi && yazi_shortcuts="${XDG_CONFIG_HOME:-${HOME}/.config}/yazi/keymap.toml" || yazi_shortcuts="/dev/null"
 command -v ranger && ranger_shortcuts="${XDG_CONFIG_HOME:-${HOME}/.config}/ranger/shortcuts.conf" || ranger_shortcuts="/dev/null"
-command -v qutebrowser && qute_shortcuts="${XDG_CONFIG_HOME:-${HOME}/.config}/qutebrowser/shortcuts.py" || qute_shortcuts="/dev/null"
+command -v qutebrowser && qute_shortcuts="$HOME/.qutebrowser/shortcuts.py" || qute_shortcuts="/dev/null"
 command -v fish && fish_shortcuts="${XDG_CONFIG_HOME:-${HOME}/.config}/fish/shortcuts.fish" || fish_shortcuts="/dev/null"
 command -v vifm && vifm_shortcuts="${XDG_CONFIG_HOME:-${HOME}/.config}/vifm/shortcuts.rc" || vifm_shortcuts="/dev/null"
 
@@ -22,7 +22,7 @@ printf "# vim: filetype=sh\\n" >"$fish_shortcuts"
 printf "# vim: filetype=sh\\nalias " >"$shell_shortcuts"
 printf "# vim: filetype=sh\\n" >"$shell_env_shortcuts"
 printf "\" vim: filetype=vim\\n" >"$vifm_shortcuts"
-cp "$HOME/.config/yazi/keymap-default.toml" "$yazi_shortcuts"
+[ -f "$HOME/.config/yazi/keymap-default.toml" ] && cp "$HOME/.config/yazi/keymap-default.toml" "$yazi_shortcuts"
 
 # Format the `directories` file in the correct syntax and sent it to all three configs.
 eval "echo \"$(cat "$bmdirs")\"" |

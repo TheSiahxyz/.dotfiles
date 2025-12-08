@@ -1,68 +1,119 @@
 #!/bin/bash
 
-# Use the best version of pico installed
-edit() {
-  if [ "$(type -t jpico)" = "file" ]; then
-    # Use JOE text editor http://joe-editor.sourceforge.net/
-    jpico -nonotice -linums -nobackups "$@"
-  elif [ "$(type -t nano)" = "file" ]; then
-    nano -c "$@"
-  elif [ "$(type -t pico)" = "file" ]; then
-    pico "$@"
+###########################################################################################
+###########################################################################################
+### --- APACHE --- ###
+# View Apache logs
+apachelog() {
+  if [ -f /etc/httpd/conf/httpd.conf ]; then
+    cd /var/log/httpd && ls -xAh && multitail --no-repeat -c -s 2 /var/log/httpd/*_log
   else
-    vim "$@"
+    cd /var/log/apache2 && ls -xAh && multitail --no-repeat -c -s 2 /var/log/apache2/*.log
   fi
 }
 
-sedit() {
-  if [ "$(type -t jpico)" = "file" ]; then
-    # Use JOE text editor http://joe-editor.sourceforge.net/
-    sudo jpico -nonotice -linums -nobackups "$@"
-  elif [ "$(type -t nano)" = "file" ]; then
-    sudo nano -c "$@"
-  elif [ "$(type -t pico)" = "file" ]; then
-    sudo pico "$@"
+# Edit the Apache configuration
+apacheconfig() {
+  if [ -f /etc/httpd/conf/httpd.conf ]; then
+    sedit /etc/httpd/conf/httpd.conf
+  elif [ -f /etc/apache2/apache2.conf ]; then
+    sedit /etc/apache2/apache2.conf
   else
-    sudo vim "$@"
+    echo "Error: Apache config file could not be found."
+    echo "Searching for possible locations:"
+    sudo updatedb && locate httpd.conf && locate apache2.conf
   fi
 }
 
-# Extracts any archive(s) (if unp isn't installed)
-extract() {
-  for archive in $*; do
-    if [ -f $archive ]; then
-      case $archive in
-      *.tar.bz2) tar xvjf $archive ;;
-      *.tar.gz) tar xvzf $archive ;;
-      *.bz2) bunzip2 $archive ;;
-      *.rar) rar x $archive ;;
-      *.gz) gunzip $archive ;;
-      *.tar) tar xvf $archive ;;
-      *.tbz2) tar xvjf $archive ;;
-      *.tgz) tar xvzf $archive ;;
-      *.zip) unzip $archive ;;
-      *.Z) uncompress $archive ;;
-      *.7z) 7z x $archive ;;
-      *) echo "don't know how to extract '$archive'..." ;;
-      esac
-    else
-      echo "'$archive' is not a valid file!"
-    fi
+###########################################################################################
+###########################################################################################
+### --- BASH --- ###
+# Automatically install the needed support files for this .bashrc file
+install_bashrc_support() {
+  local dtype
+  dtype=$(distribution)
+
+  if [ $dtype == "redhat" ]; then
+    sudo yum install multitail tree joe
+  elif [ $dtype == "suse" ]; then
+    sudo zypper install multitail
+    sudo zypper install tree
+    sudo zypper install joe
+  elif [ $dtype == "debian" ]; then
+    sudo apt-get install multitail tree joe
+  elif [ $dtype == "gentoo" ]; then
+    sudo emerge multitail
+    sudo emerge tree
+    sudo emerge joe
+  elif [ $dtype == "mandriva" ]; then
+    sudo urpmi multitail
+    sudo urpmi tree
+    sudo urpmi joe
+  elif [ $dtype == "slackware" ]; then
+    echo "No install support for Slackware"
+  else
+    echo "Unknown distribution"
+  fi
+}
+
+###########################################################################################
+###########################################################################################
+### --- CD --- ###
+# Move and go to the directory
+mvg() {
+  if [ -d "$2" ]; then
+    mv $1 $2 && cd $2
+  else
+    mv $1 $2
+  fi
+}
+
+# Create and go to the directory
+mc() {
+  mkdir -p $1 && cd $1
+}
+
+# Go up a specified number of directories  (i.e. up 4)
+up() {
+  local d=""
+  limit=$1
+  for ((i = 1; i <= limit; i++)); do
+    d=$d/..
   done
+  d=$(echo $d | sed 's/^\///')
+  if [ -z "$d" ]; then
+    d=..
+  fi
+  cd $d
 }
 
-# Searches for text in all files in the current folder
-ftext() {
-  # -i case-insensitive
-  # -I ignore binary files
-  # -H causes filename to be printed
-  # -r recursive search
-  # -n causes line number to be printed
-  # optional: -F treat search term as a literal, not a regular expression
-  # optional: -l only print filenames and not the matching lines ex. grep -irl "$1" *
-  grep -iIHrn --color=always "$1" . | less -r
+#Automatically do an ls after each cd
+# cd () {
+# 	if [ -n "$1" ]; then
+# 		builtin cd "$@" && ls
+# 	else
+# 		builtin cd ~ && ls
+# 	fi
+# }
+
+# Returns the last 2 fields of the working directory
+pwdtail() {
+  pwd | awk -F/ '{nlast = NF -1;print $nlast"/"$NF}'
 }
 
+###########################################################################################
+###########################################################################################
+### --- COMMAND OUTPUT --- ###
+alias ilco=insert_last_command_output
+insert_last_command_output() {
+  local last_cmd
+  last_cmd=$(history | tail -n 2 | head -n 1 | sed 's/^[ ]*[0-9]\+[ ]*//')
+  eval "$last_cmd"
+}
+
+###########################################################################################
+###########################################################################################
+### --- COPY --- ###
 # Copy file with a progress bar
 cpf() {
   set -e
@@ -92,48 +143,19 @@ cpg() {
   fi
 }
 
-# Move and go to the directory
-mvg() {
-  if [ -d "$2" ]; then
-    mv $1 $2 && cd $2
-  else
-    mv $1 $2
-  fi
+###########################################################################################
+###########################################################################################
+### --- CREATE --- ###
+alias mc=mkcd
+mkcd() { mkdir -p "$1" && cd "$1" || return; }
+
+mkdt() {
+  mkdir -p "${1:+$1/}$(date +%F)"
 }
 
-# Create and go to the directory
-mc() {
-  mkdir -p $1 && cd $1
-}
-
-# Goes up a specified number of directories  (i.e. up 4)
-up() {
-  local d=""
-  limit=$1
-  for ((i = 1; i <= limit; i++)); do
-    d=$d/..
-  done
-  d=$(echo $d | sed 's/^\///')
-  if [ -z "$d" ]; then
-    d=..
-  fi
-  cd $d
-}
-
-#Automatically do an ls after each cd
-# cd () {
-# 	if [ -n "$1" ]; then
-# 		builtin cd "$@" && ls
-# 	else
-# 		builtin cd ~ && ls
-# 	fi
-# }
-
-# Returns the last 2 fields of the working directory
-pwdtail() {
-  pwd | awk -F/ '{nlast = NF -1;print $nlast"/"$NF}'
-}
-
+###########################################################################################
+###########################################################################################
+### --- DISTRIBUTION --- ###
 # Show the current distribution
 distribution() {
   local dtype
@@ -206,34 +228,64 @@ ver() {
   fi
 }
 
-# Automatically install the needed support files for this .bashrc file
-install_bashrc_support() {
-  local dtype
-  dtype=$(distribution)
-
-  if [ $dtype == "redhat" ]; then
-    sudo yum install multitail tree joe
-  elif [ $dtype == "suse" ]; then
-    sudo zypper install multitail
-    sudo zypper install tree
-    sudo zypper install joe
-  elif [ $dtype == "debian" ]; then
-    sudo apt-get install multitail tree joe
-  elif [ $dtype == "gentoo" ]; then
-    sudo emerge multitail
-    sudo emerge tree
-    sudo emerge joe
-  elif [ $dtype == "mandriva" ]; then
-    sudo urpmi multitail
-    sudo urpmi tree
-    sudo urpmi joe
-  elif [ $dtype == "slackware" ]; then
-    echo "No install support for Slackware"
+###########################################################################################
+###########################################################################################
+### --- EDIT --- ###
+edit() {
+  if [ "$(type -t jpico)" = "file" ]; then
+    # Use JOE text editor http://joe-editor.sourceforge.net/
+    jpico -nonotice -linums -nobackups "$@"
+  elif [ "$(type -t nano)" = "file" ]; then
+    nano -c "$@"
+  elif [ "$(type -t pico)" = "file" ]; then
+    pico "$@"
   else
-    echo "Unknown distribution"
+    vim "$@"
   fi
 }
 
+sedit() {
+  if [ "$(type -t jpico)" = "file" ]; then
+    # Use JOE text editor http://joe-editor.sourceforge.net/
+    sudo jpico -nonotice -linums -nobackups "$@"
+  elif [ "$(type -t nano)" = "file" ]; then
+    sudo nano -c "$@"
+  elif [ "$(type -t pico)" = "file" ]; then
+    sudo pico "$@"
+  else
+    sudo vim "$@"
+  fi
+}
+
+###########################################################################################
+###########################################################################################
+### --- EXTRACT --- ###
+extract() {
+  for archive in $*; do
+    if [ -f $archive ]; then
+      case $archive in
+      *.tar.bz2) tar xvjf $archive ;;
+      *.tar.gz) tar xvzf $archive ;;
+      *.bz2) bunzip2 $archive ;;
+      *.rar) rar x $archive ;;
+      *.gz) gunzip $archive ;;
+      *.tar) tar xvf $archive ;;
+      *.tbz2) tar xvjf $archive ;;
+      *.tgz) tar xvzf $archive ;;
+      *.zip) unzip $archive ;;
+      *.Z) uncompress $archive ;;
+      *.7z) 7z x $archive ;;
+      *) echo "don't know how to extract '$archive'..." ;;
+      esac
+    else
+      echo "'$archive' is not a valid file!"
+    fi
+  done
+}
+
+###########################################################################################
+###########################################################################################
+### --- NETWORK --- ###
 # Show current network information
 netinfo() {
   echo "--------------- Network Information ---------------"
@@ -262,28 +314,18 @@ function whatsmyip() {
   wget http://smart-ip.net/myip -O - -q
 }
 
-# View Apache logs
-apachelog() {
-  if [ -f /etc/httpd/conf/httpd.conf ]; then
-    cd /var/log/httpd && ls -xAh && multitail --no-repeat -c -s 2 /var/log/httpd/*_log
-  else
-    cd /var/log/apache2 && ls -xAh && multitail --no-repeat -c -s 2 /var/log/apache2/*.log
-  fi
-}
+###########################################################################################
+###########################################################################################
+### --- PASS --- ###
+pass_otp() { pass otp uri -q "$1"; }
+pass_otp_insert() { pass otp insert "$1"; }
 
-# Edit the Apache configuration
-apacheconfig() {
-  if [ -f /etc/httpd/conf/httpd.conf ]; then
-    sedit /etc/httpd/conf/httpd.conf
-  elif [ -f /etc/apache2/apache2.conf ]; then
-    sedit /etc/apache2/apache2.conf
-  else
-    echo "Error: Apache config file could not be found."
-    echo "Searching for possible locations:"
-    sudo updatedb && locate httpd.conf && locate apache2.conf
-  fi
-}
+alias cpqr=pass_qr
+pass_qr() { qrencode -o "$1.png" -t png -Sv 40 <"$1.pgp"; }
 
+###########################################################################################
+###########################################################################################
+### --- PHP --- ###
 # Edit the PHP configuration file
 phpconfig() {
   if [ -f /etc/php.ini ]; then
@@ -303,6 +345,23 @@ phpconfig() {
   fi
 }
 
+###########################################################################################
+###########################################################################################
+### --- SEARCH --- ###
+ftext() {
+  # -i case-insensitive
+  # -I ignore binary files
+  # -H causes filename to be printed
+  # -r recursive search
+  # -n causes line number to be printed
+  # optional: -F treat search term as a literal, not a regular expression
+  # optional: -l only print filenames and not the matching lines ex. grep -irl "$1" *
+  grep -iIHrn --color=always "$1" . | less -r
+}
+
+###########################################################################################
+###########################################################################################
+### --- SQL --- ###
 # Edit the MySQL configuration file
 mysqlconfig() {
   if [ -f /etc/my.cnf ]; then
@@ -324,16 +383,33 @@ mysqlconfig() {
   fi
 }
 
-# For some reason, rot13 pops up everywhere
-rot13() {
-  if [ $# -eq 0 ]; then
-    tr '[a-m][n-z][A-M][N-Z]' '[n-z][a-m][N-Z][A-M]'
-  else
-    echo $* | tr '[a-m][n-z][A-M][N-Z]' '[n-z][a-m][N-Z][A-M]'
-  fi
+###########################################################################################
+###########################################################################################
+### --- STOW --- ###
+alias dstw=dotfiles_stw
+dotfiles_stw() {
+  "${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/$(whereami)/.local/bin/stw"
 }
 
-# Trim leading and trailing spaces (for scripts)
+###########################################################################################
+###########################################################################################
+### --- SUDO --- ###
+pre_cmd() {
+  local prepend_command="$1"
+  local buffer="${READLINE_LINE:-}"
+
+  if [ -z "$buffer" ]; then
+    buffer=$(history | tail -n 2 | head -n 1 | sed 's/^[ ]*[0-9]\+[ ]*//')
+  fi
+
+  READLINE_LINE="$prepend_command $buffer"
+  READLINE_POINT=${#READLINE_LINE}
+}
+bind -x '"\es":pre_cmd sudo'
+
+###########################################################################################
+###########################################################################################
+### --- TRIM --- ###
 trim() {
   local var=$@
   var='${var#"${var%%[![:space:]]*}"}' # remove leading whitespace characters

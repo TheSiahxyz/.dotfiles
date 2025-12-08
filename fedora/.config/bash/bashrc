@@ -32,7 +32,6 @@ bind "set show-all-if-ambiguous on"
 #######################################################
 # Set command prompt
 #######################################################
-alias cpu="grep 'cpu ' /proc/stat | awk '{usage=(\$2+\$4)*100/(\$2+\$4+\$5)} END {print usage}' | awk '{printf(\"%.1f\n\", \$1)}'"
 function __setprompt {
   local LAST_COMMAND=$? # Must come first!
 

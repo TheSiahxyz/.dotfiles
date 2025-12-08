@@ -16,7 +16,7 @@ wrapper() {
     echo "  Ctrl+d      Search directories"
     echo ""
     echo "Environment Variables:"
-    echo "  NVIM_SEARCH_REGISTRY    Set to the search query, allowing Neovim to highlight matches"
+    echo "  VIM_SEARCH_REGISTRY    Set to the search query, allowing Neovim to highlight matches"
     echo ""
     echo "Example:"
     echo "  tmuxopen             # Run the normal search and open"
@@ -79,32 +79,32 @@ wrapper() {
         --prompt "🔎 "
   }
 
-  set_nvim_search_variable() {
+  set_vim_search_variable() {
     raw_output="$1"
     tmp_content_query="/tmp/search-content-query-$$"
     if [ -f "$tmp_content_query" ]; then
       saved_query=$(cat "$tmp_content_query" 2>/dev/null)
       if [ -n "$saved_query" ]; then
-        export NVIM_SEARCH_REGISTRY="$saved_query"
+        export VIM_SEARCH_REGISTRY="$saved_query"
         return
       fi
     fi
     query=$(echo "$raw_output" | head -n1)
-    export NVIM_SEARCH_REGISTRY="$query"
+    export VIM_SEARCH_REGISTRY="$query"
   }
 
-  open_files_in_nvim() {
+  open_files_in_vim() {
     pane="$1"
     shift
     file_indices="$*"
-    nvim_cmd="nvim"
+    vim_cmd="vim"
     for index in $file_indices; do
       file=$(echo "$files" | awk -v idx="$index" '{print $idx}')
       line=$(echo "$lines" | awk -v idx="$index" '{print $idx}')
-      nvim_cmd="$nvim_cmd +$line $file"
+      vim_cmd="$vim_cmd +$line $file"
     done
-    nvim_cmd="$nvim_cmd -c 'let @/=\"$NVIM_SEARCH_REGISTRY\"'"
-    tmux send-keys -t "$pane" "$nvim_cmd" C-m
+    vim_cmd="$vim_cmd -c 'let @/=\"$VIM_SEARCH_REGISTRY\"'"
+    tmux send-keys -t "$pane" "$vim_cmd" C-m
   }
 
   # Parse command line arguments
@@ -123,7 +123,7 @@ wrapper() {
   done
 
   raw_output=$(get_fzf_output)
-  set_nvim_search_variable "$raw_output"
+  set_vim_search_variable "$raw_output"
 
   # Split the newline-delimited output into an array, skipping the first line (query)
   selections=$(echo "$raw_output" | sed 1d)
@@ -158,42 +158,42 @@ EOF
   fi
 
   if [ "$count" -eq 1 ]; then
-    open_files_in_nvim "$(tmux display-message -p '#P')" 1
+    open_files_in_vim "$(tmux display-message -p '#P')" 1
   else
     window_name="$(date +%s)"
     tmux new-window -n "$window_name"
     case "$count" in
     2)
       tmux split-window -t "$window_name" -h -p 50
-      open_files_in_nvim "$window_name.1" 1
-      open_files_in_nvim "$window_name.2" 2
+      open_files_in_vim "$window_name.1" 1
+      open_files_in_vim "$window_name.2" 2
       tmux select-pane -t "$window_name.1"
       ;;
     3)
       tmux split-window -t "$window_name" -h -p 50
       tmux split-window -t "$window_name.2" -v -p 50
-      open_files_in_nvim "$window_name.1" 1
-      open_files_in_nvim "$window_name.2" 2
-      open_files_in_nvim "$window_name.3" 3
+      open_files_in_vim "$window_name.1" 1
+      open_files_in_vim "$window_name.2" 2
+      open_files_in_vim "$window_name.3" 3
       ;;
     *)
       tmux split-window -t "$window_name" -h -p 50
       tmux split-window -t "$window_name.1" -v -p 50
       tmux split-window -t "$window_name.3" -v -p 50
-      open_files_in_nvim "$window_name.1" 1
-      open_files_in_nvim "$window_name.2" 2
-      open_files_in_nvim "$window_name.3" 3
+      open_files_in_vim "$window_name.1" 1
+      open_files_in_vim "$window_name.2" 2
+      open_files_in_vim "$window_name.3" 3
       remaining_indices=""
       for i in $(seq 4 "$count"); do
         remaining_indices="$remaining_indices $i"
       done
-      open_files_in_nvim "$window_name.4" "$remaining_indices"
+      open_files_in_vim "$window_name.4" "$remaining_indices"
       ;;
     esac
   fi
 }
 
-for cmd in rg fzf bat tmux nvim; do
+for cmd in rg fzf bat tmux vim; do
   if ! command -v $cmd >/dev/null 2>&1; then
     echo "Error: $cmd not found" >&2
     exit 1

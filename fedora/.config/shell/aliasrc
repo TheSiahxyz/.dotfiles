@@ -58,6 +58,9 @@ alias pwdc='pwd | xclip -selection clipboard'
 # count
 alias countfiles="for t in files links directories; do echo \`find . -type \${t:0:1} | wc -l\` \$t; done 2> /dev/null"
 
+# cpu
+alias cpu="grep 'cpu ' /proc/stat | awk '{usage=(\$2+\$4)*100/(\$2+\$4+\$5)} END {print usage}' | awk '{printf(\"%.1f\n\", \$1)}'"
+
 # curl
 ialias curl='curl --silent --show-error'
 balias clh='curl localhost:'
@@ -225,10 +228,6 @@ alias mv="mv -i"
 alias ping="ping -c 10"
 alias ps="ps auxf"
 alias rm="rm -iv"
-alias svi="sudo vi"
-alias v="vim"
-alias vi="vim"
-alias vis="vim '+set si'"
 
 # move
 ialias mv='mv -iv'
@@ -236,19 +235,12 @@ ialias mv='mv -iv'
 # nginx
 alias ngx="cd /etc/nginx"
 
-# nvim
+# vim
 alias v='$EDITOR'
 alias v.='$EDITOR .'
 alias ve='$EDITOR -c enew'
-alias nv.='nvim .'
-alias nve='nvim -c enew'
-alias nts='NVIM_APPNAME=TheSiahxyz nvim'
-alias nav='NVIM_APPNAME=AstroNvim nvim'
-alias nlu='NVIM_APPNAME=LunarVim nvim'
-alias nlv='NVIM_APPNAME=LazyVim nvim'
-alias nnc='NVIM_APPNAME=NvChad nvim'
-alias snv='sudo nvim'
-alias vll='lastnvim -l'
+alias vis="$EDITOR '+set si'"
+alias vll='lastvim -l'
 alias vln='$EDITOR -c '\''execute "edit " . v:oldfiles[0] | normal ''0'\'
 
 # ports
@@ -362,7 +354,7 @@ alias -g C='| xclip -selection clipboard'
 alias -g Fj='| jq .'
 alias -g Fy='| yq .'
 alias -g Fx='| xmllint --format -'
-alias -g V='| nvim -'
+alias -g V='| vim -'
 
 # unzip
 alias uz='unzip'

@@ -6,7 +6,6 @@ cac             ${XDG_CACHE_HOME:-${HOME}/.cache}
 cbc             ${XDG_CONFIG_HOME:-${HOME}/.config}/bash
 cfg             ${XDG_CONFIG_HOME:-${HOME}/.config}
 cgc             ${XDG_CONFIG_HOME:-${HOME}/.config}/git
-cnv             ${XDG_CONFIG_HOME:-${HOME}/.config}/nvim
 csh             ${XDG_CONFIG_HOME:-${HOME}/.config}/shell
 ctm             ${XDG_CONFIG_HOME:-${HOME}/.config}/tmux
 cts             ${XDG_CONFIG_HOME:-${HOME}/.config}/TheSiahxyz

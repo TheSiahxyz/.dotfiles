@@ -1,0 +1,115 @@
+#!/bin/sh
+
+# Display help message
+usage() {
+  echo "Open the most recent file or the list of old files edited by vim."
+  echo ""
+  echo "Usage: ${0##*/} [OPTION]"
+  echo ""
+  echo "Options:"
+  echo "                  : Open the most recent old file in Vim."
+  echo "  -h, --help      : Show this help message."
+  echo "  -l, --list      : Show all recent files and select by number."
+  echo ""
+  echo "Examples:"
+  echo "  ${0##*/}        # Open the most recent file."
+  echo "  ${0##*/} -l     # Show all recent files and select by number."
+  exit 0
+}
+
+# Function to open files in vim
+openfiles() {
+  files="$1"
+  if [ -n "$files" ]; then
+    # Convert newlines to spaces for vim arguments
+    file_args=$(echo "$files" | tr '\n' ' ')
+    vim $file_args
+  fi
+}
+
+# List and handle oldfiles
+list_oldfiles() {
+  # Fetch the oldfiles list from Vim
+  # Use vim's :oldfiles command and capture output
+  temp_file="/tmp/vim_oldfiles_$$.txt"
+  vim -u NONE -c "redir >> $temp_file | oldfiles | redir END | q" 2>/dev/null
+
+  # Parse vim's oldfiles output (format: " 1: /path/to/file")
+  oldfiles=$(cat "$temp_file" 2>/dev/null |
+    sed -n 's/^[[:space:]]*[0-9]*:[[:space:]]*\(.*\)$/\1/p' |
+    grep -v '^$')
+
+  rm -f "$temp_file" 2>/dev/null
+
+  # Exit if no oldfiles are found
+  [ -z "$oldfiles" ] && {
+    echo "No recent files found in Vim." >&2
+    exit 1
+  }
+
+  case "$1" in
+  -h | --help)
+    usage
+    ;;
+  -l | --list)
+    # Filter valid files first
+    paths_file="/tmp/vim_file_paths_$$.txt"
+
+    echo "$oldfiles" | while IFS= read -r file; do
+      [ -f "$file" ] && printf "%s\n" "$file"
+    done >"$paths_file"
+
+    # Count valid files
+    valid_count=$(wc -l <"$paths_file" 2>/dev/null | tr -d ' ')
+
+    # Exit if no valid files exist
+    [ -z "$valid_count" ] || [ "$valid_count" -eq 0 ] && {
+      echo "No valid files found." >&2
+      rm -f "$paths_file" 2>/dev/null
+      exit 1
+    }
+
+    # Display numbered file list
+    file_num=1
+    while IFS= read -r file; do
+      printf "%d: %s\n" "$file_num" "$file"
+      file_num=$((file_num + 1))
+    done <"$paths_file"
+
+    echo ""
+    printf "Select file number (1-%d) or 'q' to quit: " "$valid_count"
+    read selection
+
+    # Handle quit
+    [ "$selection" = "q" ] || [ "$selection" = "Q" ] && {
+      rm -f "$paths_file" 2>/dev/null
+      exit 0
+    }
+
+    # Validate selection
+    if [ -n "$selection" ] && [ "$selection" -ge 1 ] && [ "$selection" -le "$valid_count" ] 2>/dev/null; then
+      selected_file=$(sed -n "${selection}p" "$paths_file")
+      rm -f "$paths_file" 2>/dev/null
+      openfiles "$selected_file"
+    else
+      echo "Invalid selection." >&2
+      rm -f "$paths_file" 2>/dev/null
+      exit 1
+    fi
+    ;;
+  *)
+    # Open the most recent file
+    for file in $oldfiles; do
+      if [ -f "$file" ]; then
+        openfiles "$file"
+        exit 0
+      fi
+    done
+    echo "No valid recent files found." >&2
+    exit 1
+    ;;
+  esac
+}
+
+# Parse command-line arguments
+list_oldfiles "$@"
