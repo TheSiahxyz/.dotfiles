@@ -11,15 +11,15 @@ PROMPT_COMMAND='echo -ne "\e[5 q"'
 
 # ---------- helper: pre_cmd ----------
 pre_cmd() {
-  local txt="$1"
-  if [[ -z "${READLINE_LINE+set}" ]]; then
-    printf '%s ' "$txt"
-    return
+  # history에서 가장 마지막 명령어 가져오기
+  local last_cmd
+  last_cmd=$(history 1 | sed 's/^[ ]*[0-9]*[ ]*//')
+
+  # 이미 sudo로 시작하면 그대로
+  if [[ $last_cmd != sudo* ]]; then
+    READLINE_LINE="sudo $last_cmd"
+    READLINE_POINT=${#READLINE_LINE}
   fi
-  local left=${READLINE_LINE:0:READLINE_POINT}
-  local right=${READLINE_LINE:READLINE_POINT}
-  READLINE_LINE="${left}${txt} ${right}"
-  READLINE_POINT=$((READLINE_POINT + ${#txt} + 1))
 }
 
 # ---------- Clipboard detection ----------
@@ -153,7 +153,6 @@ upd() { command -v upd >/dev/null 2>&1 && upd "$@" || printf 'upd: not found\n' 
 cht() { command -v cht >/dev/null 2>&1 && cht "$@" || printf 'cht: not found\n' >&2; } # from '^ucht' -> 'cht'
 ali() { command -v ali >/dev/null 2>&1 && ali "$@" || printf 'ali: not found\n' >&2; }
 fD() { command -v fD >/dev/null 2>&1 && fD "$@" || printf 'fD: not found\n' >&2; }
-rgafiles() { command -v rgafiles >/dev/null 2>&1 && rgafiles "$@" || printf 'rgafiles: not found\n' >&2; }
 lastfiles_l() { command -v lastfiles >/dev/null 2>&1 && lastfiles -l || printf 'lastfiles: not found\n' >&2; }
 
 # ---------- Readline key bindings (bind -x) ----------
@@ -201,13 +200,11 @@ __bc() { bc -lq "$@"; }
 
 bind -x '"\C-d":cdi'
 bind -x '"\C-f":fzffiles'
-bind -x '"\C-g":lf'
 bind -x '"\C-n":lastfiles'
 bind -x '"\C-o":tmo'
 bind -x '"\C-p":fzfpass'
 bind -x '"\C-q":htop'
 bind -x '"\C-t":sessionizer'
-bind -x '"\C-y":lfcd'
 bind -x '"\C-z":upd'
 # ^_ (Ctrl-_) mapped to cht (from '^ucht' -> 'cht')
 bind -x $'"\C-_":cht'
@@ -217,7 +214,6 @@ bind -x '"\C-x\C-a":ali'
 bind -x '"\C-x\C-b":gitopenbranch'
 bind -x '"\C-x\C-d":fD'
 bind -x '"\C-x\C-f":gitfiles'
-bind -x '"\C-x\C-g":rgafiles'
 bind -x '"\C-x\C-l":gloac'
 bind -x '"\C-x\C-n":lastfiles_l'
 bind -x '"\C-x\C-q":fpkill'
@@ -225,8 +221,3 @@ bind -x '"\C-x\C-r":fgst'
 bind -x '"\C-x\C-t":gitstagedfiles'
 bind -x '"\C-x\C-u":gitupdate'
 bind -x '"\C-x\C-_":fzffns' # ^X^_
-bind -x '"\C-x\C-x\C-b":rbackup'
-bind -x '"\C-x\C-x\C-p":pcyr'
-bind -x '"\C-x\C-x\C-r":rbackup' # rbackup -r not directly supported via bind -x args; call rbackup then ask user for flags if needed
-bind -x '"\C-x\C-x\C-s":sshadd'
-bind -x '"\C-x\C-x\C-y":yay_remaps'
