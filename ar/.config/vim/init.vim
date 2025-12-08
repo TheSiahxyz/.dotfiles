@@ -439,8 +439,8 @@ let g:which_key_map['w']    =   {
 
 " SHORTCUTS ---------------------------------------------------------------- {{{
 
-if filereadable(expand("${XDG_CONFIG_HOME:-$HOME/.config}/nvim/shortcuts.vim"))
-    silent! source ${XDG_CONFIG_HOME:-$HOME/.config}/nvim/shortcuts.vim
+if filereadable(expand("${XDG_CONFIG_HOME:-$HOME/.config}/vim/shortcuts.vim"))
+    silent! source ${XDG_CONFIG_HOME:-$HOME/.config}/vim/shortcuts.vim
 endif
 
 " }}}
