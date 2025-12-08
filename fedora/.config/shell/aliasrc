@@ -2,377 +2,742 @@
 # balias    - blank aliases (completed without space)
 # ialias    - ignored aliases (not completed)
 
-# sudo not required for some system commands
-for command in blkid lsblk mount umount dnf poweroff reboot shutdown su updatedb; do
-    alias $command="sudo $command"
-done
-unset command
+if [ -n "$BASH_VERSION" ]; then
+  # ------------------------------
+  # Bash-compatible aliases & functions
+  # ------------------------------
 
-case "$(readlink -f /sbin/init)" in
-*systemd*)
-  # journal
-  alias -g jctl='journalctl -xe'
-  alias -g jctlou='sudo journalctl -b -n 200 -f'
-  alias -g rpi='systemctl --user restart wireplumber pipewire pipewire-pulse pipewire-jack'
-  alias -g sctl='systemctl'
-  alias -g sctlss='systemctl status'
-  alias -g sctle='systemctl enable'
-  alias -g sctld='systemctl disable'
-  alias -g sctlr='systemctl restart'
-  alias -g sctls='systemctl start'
-  alias -g sctlt='systemctl stop'
-  alias -g sctldr='systemctl daemon-reload'
-  alias -g tctl='timedatectl'
-  ;;
-esac
+  # helper: safe alias creation
+  _a() { alias "$1"="$2"; }
 
-# Go back
-alias ...='../..'
-alias ....='../../..'
-alias .....='../../../..'
+  # sudo not required for some system commands
+  for command in blkid lsblk mount umount dnf poweroff reboot shutdown su updatedb; do
+    alias "$command"="sudo $command"
+  done
 
-# bash
-alias sbp="source ~/.config/bash/bash_profile"
-alias sbs="source ~/.config/bash/bashrc"
+  # systemd checks (keep as in original)
+  case "$(readlink -f /sbin/init)" in
+  *systemd*)
+    # journal-like commands as functions (replaces zsh global aliases)
+    jctl()   { journalctl -xe "$@"; }
+    jctlou() { sudo journalctl -b -n 200 -f "$@"; }
+    rpi()    { systemctl --user restart wireplumber pipewire pipewire-pulse pipewire-jack "$@"; }
 
-# cd
-alias cf='cd "$(dirname "$(readlink -f health.lua)")"'
-alias pd='cd -'
+    # systemctl helpers
+    sctl()   { systemctl "$@"; }            # general wrapper
+    sctlss() { systemctl status "$@"; }
+    sctle()  { systemctl enable "$@"; }
+    sctld()  { systemctl disable "$@"; }
+    sctlr()  { systemctl restart "$@"; }
+    sctls()  { systemctl start "$@"; }
+    sctlt()  { systemctl stop "$@"; }
+    sctldr() { systemctl daemon-reload "$@"; }
 
-# chmod
-alias che='find . -type f -exec chmod +x {};'
-alias chfd='find . -type d -exec chmod 755 {}; -o -type f -exec chmod 644 {};'
-alias cx='chmod a+x'
-alias 000='chmod -R 000'
-alias 600='chmod -R 600'
-alias 644='chmod -R 644'
-alias 666='chmod -R 666'
-alias 755='chmod -R 755'
-alias 777='chmod -R 777'
+    tctl()   { timedatectl "$@"; }
+    ;;
+  esac
 
-# copy
-alias CC='$(fc -l -n -1) | xclip -selection clipboard'
-ialias cp='cp -iv'
-alias pwdc='pwd | xclip -selection clipboard'
+  # navigation
+  alias ...='../..'
+  alias ....='../../..'
+  alias .....='../../../..'
 
-# count
-alias countfiles="for t in files links directories; do echo \`find . -type \${t:0:1} | wc -l\` \$t; done 2> /dev/null"
+  # bash profile helpers
+  alias sbp="source ~/.config/bash/bash_profile"
+  alias sbs="source ~/.config/bash/bashrc"
 
-# cpu
-alias cpu="grep 'cpu ' /proc/stat | awk '{usage=(\$2+\$4)*100/(\$2+\$4+\$5)} END {print usage}' | awk '{printf(\"%.1f\n\", \$1)}'"
+  # cd helpers
+  cf() { cd "$(dirname "$(readlink -f health.lua)")" || return; }
+  alias pd='cd -'
 
-# curl
-ialias curl='curl --silent --show-error'
-balias clh='curl localhost:'
-balias clh8='curl localhost:8080'
-balias clh9='curl localhost:9080'
-balias c100='curl 192.168.99.100:'
+  # chmod helpers (keep behavior)
+  alias che='find . -type f -exec chmod +x {} \;'
+  # chfd: set directories 755, files 644 (safe implementation)
+  chfd() { find . -type d -exec chmod 755 {} \; -o -type f -exec chmod 644 {} \;; }
+  alias cx='chmod a+x'
+  alias 000='chmod -R 000'
+  alias 600='chmod -R 600'
+  alias 644='chmod -R 644'
+  alias 666='chmod -R 666'
+  alias 755='chmod -R 755'
+  alias 777='chmod -R 777'
 
-# date
-alias da="date '+%Y-%m-%d %A %T %Z'"
+  # copy / clipboard
+  # last command copy (approx): copy last history entry to clipboard
+  CC() { eval "$(fc -ln -1)" | xclip -selection clipboard; }
+  alias cp='cp -iv'
+  alias pwdc='pwd | xclip -selection clipboard'
 
-# delete
-alias _fd='find . -type f -name "._*" -print0 | xargs -0 rm -f'
-alias _fp='find . -type f -name "._*" -print'
+  # count files/links/dirs
+  alias countfiles='for t in files links directories; do echo "$(find . -type ${t:0:1} | wc -l) $t"; done 2>/dev/null'
 
-# diff
-ialias diff='diff --color'
+  # cpu usage
+  cpu() { awk '/^cpu /{usage=($2+$4)*100/($2+$4+$5)} END{printf "%.1f\n",usage}' /proc/stat; }
 
-# disk
-alias diskspace="du -S | sort -n -r |more"
-alias folders="du -h --max-depth=1"
-alias folderssort="find . -maxdepth 1 -type d -print0 | xargs -0 du -sk | sort -rn"
-alias tree="tree -CAhF --dirsfirst"
-alias treed="tree -CAFd"
-alias mountedinfo="df -hT"
+  # curl
+  alias curl='curl --silent --show-error'
+  alias clh='curl localhost:'
+  alias clh8='curl localhost:8080'
+  alias clh9='curl localhost:9080'
+  alias c100='curl 192.168.99.100:'
 
-# docker
-alias dk='docker'
-alias dkp='docker ps'
-alias dkpa='docker ps -a'
-alias dkpaq='docker ps -a -q'
-alias dkb='docker build -t'
-alias dkbnc='docker build --no-cache -t'
-alias dkr='docker run --rm'
-alias dkrti='docker run --rm -ti'
-alias dkrd='docker run -d'
-alias dkrp8='docker run --rm -p 8080:8080'
-alias dkrp9='docker run --rm -p 9080:9080'
-alias dks='docker start'
-alias dkt='docker stop'
-alias dktt='docker stop $(docker ps -q)'
-alias dkk='docker kill'
-alias dkkk='docker kill $(docker ps -q)'
-alias dkrm='docker rm'
-alias dkri='docker rmi'
-alias dke='docker exec -ti'
-alias dkl='docker logs -f'
-alias dki='docker images'
-alias dkpu='docker pull'
-alias dkph='docker push'
-alias dkin='docker inspect'
-alias dkn='docker network'
-alias dkc='docker-compose'
-alias dkcu='docker-compose up'
-alias dkclean='docker ps -q -a -f status=exited | xargs -r docker rm && docker images -q -f dangling=true | xargs -r docker rmi'
+  # date
+  alias da="date '+%Y-%m-%d %A %T %Z'"
 
-# find
-balias fdn='find . -name "'
-alias f="find . | grep "
+  # delete helpers
+  alias _fd='find . -type f -name "._*" -print0 | xargs -0 rm -f'
+  alias _fp='find . -type f -name "._*" -print'
 
-# grep
-ialias -g grep='grep --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn}'
-alias grepi='grep -i'
-alias grepr='grep -r'
-alias grepri='grep -ri'
-alias grepw='grep -R -i --include="*"'
-alias grepb='grep -R -i --include="*" --exclude-dir="zsh"'
-alias -g Gg='| grep'
-alias -g Gi='| grep -i'
-alias -g GH='| grep HTTP'
+  # diff
+  alias diff='diff --color'
 
-# hash
-alias h='hash -rf'
+  # disk
+  alias diskspace="du -S | sort -n -r | more"
+  alias folders="du -h --max-depth=1"
+  alias folderssort="find . -maxdepth 1 -type d -print0 | xargs -0 du -sk | sort -rn"
+  alias tree="tree -CAhF --dirsfirst"
+  alias treed="tree -CAFd"
+  alias mountedinfo="df -hT"
 
-# hexdump
-alias hx='hexdump -C'
+  # docker
+  alias dk='docker'
+  alias dkp='docker ps'
+  alias dkpa='docker ps -a'
+  alias dkpaq='docker ps -a -q'
+  alias dkb='docker build -t'
+  alias dkbnc='docker build --no-cache -t'
+  alias dkr='docker run --rm'
+  alias dkrti='docker run --rm -ti'
+  alias dkrd='docker run -d'
+  alias dkrp8='docker run --rm -p 8080:8080'
+  alias dkrp9='docker run --rm -p 9080:9080'
+  alias dks='docker start'
+  alias dkt='docker stop'
+  alias dktt='docker stop $(docker ps -q)'
+  alias dkk='docker kill'
+  alias dkkk='docker kill $(docker ps -q)'
+  alias dkrm='docker rm'
+  alias dkri='docker rmi'
+  alias dke='docker exec -ti'
+  alias dkl='docker logs -f'
+  alias dki='docker images'
+  alias dkpu='docker pull'
+  alias dkph='docker push'
+  alias dkin='docker inspect'
+  alias dkn='docker network'
+  alias dkc='docker-compose'
+  alias dkcu='docker-compose up'
+  alias dkclean='docker ps -q -a -f status=exited | xargs -r docker rm && docker images -q -f dangling=true | xargs -r docker rmi'
 
-# history
-alias h="history | grep "
+  # find
+  alias fdn='find . -name "'
+  f() { find . | grep "$*"; }
 
-# ip
-ialias ip='ip -color=auto'
-alias whatsmyip='curl -s ifconfig.me | xargs'
-alias ipview="netstat -anpl | grep :80 | awk '{print $5}' | cut -d':' -f1 | sort | uniq -c | sort -n | sed -e 's/^ *//' -e 's/ *$//'"
+  # grep: replace zsh global and colored exclude
+  alias grep='grep --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn}'
+  alias grepi='grep -i'
+  alias grepr='grep -r'
+  alias grepri='grep -ri'
+  alias grepw='grep -R -i --include="*"'
+  alias grepb='grep -R -i --include="*" --exclude-dir="zsh"'
+  # global-like helpers implemented as functions that read stdin:
+  Gg() { grep "$@"; }     # usage: somecommand | Gg pattern
+  Gi() { grep -i "$@"; }
+  GH() { grep -i "HTTP" "$@"; }
 
-# killall
-alias ka='killall'
-alias k9='kill -9'
-alias k15='kill -15'
+  # hash
+  alias h='hash -r'
 
-# logs
-alias logs="sudo find /var/log -type f -exec file {} \; | grep 'text' | cut -d' ' -f1 | sed -e's/:$//g' | grep -v '[0-9]$' | xargs tail -f"
+  # hexdump
+  alias hx='hexdump -C'
 
-# ls: eza or built-in
-[ -x "$(command -v eza)" ] && {
-  ialias l='eza --icons --group-directories-first'
-  ialias la='eza --icons -aa --group-directories-first'
-  ialias lh='eza --icons -aa --group-directories-first'
-  ialias ll='eza -gl --icons --group-directories-first'
-  ialias lla='eza -glaa --icons --group-directories-first'
-  ialias lm='eza -glA --group-directories-first | more'
-  ialias lr='eza --icons -R --group-directories-first'
-  ialias ls='eza --icons -A --group-directories-first'
-  ialias lsb='eza --icons -b --group-directories-first'
-  ialias lsby='eza --icons -B --group-directories-first'
-  ialias lld='eza --icons -Dl --group-directories-first'
-  ialias llda='eza --icons -aaDl --group-directories-first'
-  ialias llf='eza --icons -fl'
-  ialias llfa='eza --icons -aafl'
-  ialias llsa='eza --icons -l -s=accessed'
-  ialias llsaa='eza --icons -aal -s=accessed'
-  ialias llsc='eza --icons -l -s=created'
-  ialias llsca='eza --icons -aal -s=created'
-  ialias llse='eza --icons -l -s=extension'
-  ialias llsea='eza --icons -aal -s=extension'
-  ialias llsm='eza --icons -l -s=modified'
-  ialias llsma='eza --icons -aal -s=modified'
-  ialias llsn='eza --icons -l -s=name'
-  ialias llsna='eza --icons -aal -s=name'
-  ialias llss='eza --icons -l -s=size'
-  ialias llssa='eza --icons -aal -s=size'
-  ialias llst='eza --icons -l -s=type'
-  ialias llsta='eza --icons -aal -s=type'
-  ialias lt='eza --icons -T -L'
-  ialias ltd='eza --icons -TD -L'
-  ialias ltdr='eza --icons -TDr -L'
-  ialias ltr='eza --icons -Tr -L'
-} || {
-  ialias l='/usr/bin/ls -h --color=always --group-directories-first'
-  ialias la='/usr/bin/ls -alh --color=always --group-directories-first'
-  ialias ll='/usr/bin/ls -lh --color=always --group-directories-first'
-  ialias lla='/usr/bin/ls -aFls --color=always --group-directories-first'
-  ialias llf='/usr/bin/ls -Fls --color=always --group-directories-first'
-  ialias lm='/usr/bin/ls -alh --color=always --group-directories-first | more'
-  ialias lr='/usr/bin/ls -hlR --color=always --group-directories-first'
-  ialias lra='/usr/bin/ls -ahlR --color=always --group-directories-first'
-  ialias ls='/usr/bin/ls -AFh --color=always --group-directories-first'
-  ialias llsa='/usr/bin/ls -hlru --color=always --group-directories-first'
-  ialias llsc='/usr/bin/ls -hclr --color=always --group-directories-first'
-  ialias lld='/usr/bin/ls -l --color=always | grep "^d"'
-  ialias llda='/usr/bin/ls -la --color=always | grep "^d"'
-  ialias llse='/usr/bin/ls -BhlX --color=always --group-directories-first'
-  ialias llsf='/usr/bin/ls -l --color=always | grep -v "^d"'
-  ialias llsfa='/usr/bin/ls -la --color=always | grep -v "^d"'
-  ialias llsm='/usr/bin/ls -hlr --time=ctime --color=always --group-directories-first'
-  ialias llsn='/usr/bin/ls -alp --color=always --group-directories-first'
-  ialias llss='/usr/bin/ls -hlrS --color=always --group-directories-first'
-  ialias llst='/usr/bin/ls -hlrt --color=always --group-directories-first'
-  ialias lw='/usr/bin/ls -Ahx --color=always --group-directories-first'
-}
+  # history
+  Hgrep() { history | grep "$*"; }   # note: alias h was used earlier; avoid conflict
 
-# mime
-alias mimereset="update-desktop-database ${XDG_DATA_HOME:-${HOME}/.local/share}/applications"
+  # ip
+  alias ip='ip -color=auto'
+  alias whatsmyip='curl -s ifconfig.me | xargs'
+  ipview() { netstat -anpl | grep :80 | awk '{print $5}' | cut -d':' -f1 | sort | uniq -c | sort -n | sed -e 's/^ *//' -e 's/ *$//'; }
 
-# mkdir
-ialias mkdir='mkdir -pv'
+  # killall
+  alias ka='killall'
+  alias k9='kill -9'
+  alias k15='kill -15'
 
-# modified commands
-alias grep="/usr/bin/grep $GREP_OPTIONS"
-alias cp="cp -i"
-alias freshclam="sudo freshclam"
-alias less="less -R"
-alias mkdir="mkdir -p"
-alias multitail="multitail --no-repeat -c"
-alias mv="mv -i"
-alias ping="ping -c 10"
-alias ps="ps auxf"
-alias rm="rm -iv"
+  # logs
+  logs() { sudo find /var/log -type f -exec file {} \; | grep 'text' | cut -d' ' -f1 | sed -e 's/:$//g' | grep -v '[0-9]$' | xargs tail -f; }
 
-# move
-ialias mv='mv -iv'
+  # ls: use eza if available else fallback to ls
+  if command -v eza >/dev/null 2>&1; then
+    alias l='eza --icons --group-directories-first'
+    alias la='eza --icons -aa --group-directories-first'
+    alias lh='eza --icons -aa --group-directories-first'
+    alias ll='eza -gl --icons --group-directories-first'
+    alias lla='eza -glaa --icons --group-directories-first'
+    alias lm='eza -glA --group-directories-first | more'
+    alias lr='eza --icons -R --group-directories-first'
+    alias ls='eza --icons -A --group-directories-first'
+  else
+    alias l='/usr/bin/ls -h --color=always --group-directories-first'
+    alias la='/usr/bin/ls -alh --color=always --group-directories-first'
+    alias ll='/usr/bin/ls -lh --color=always --group-directories-first'
+    alias lla='/usr/bin/ls -aFls --color=always --group-directories-first'
+    alias llf='/usr/bin/ls -Fls --color=always --group-directories-first'
+    alias lm='/usr/bin/ls -alh --color=always --group-directories-first | more'
+    alias lr='/usr/bin/ls -hlR --color=always --group-directories-first'
+    alias ls='/usr/bin/ls -AFh --color=always --group-directories-first'
+  fi
 
-# nginx
-alias ngx="cd /etc/nginx"
+  # mime
+  alias mimereset='update-desktop-database ${XDG_DATA_HOME:-${HOME}/.local/share}/applications'
 
-# vim
-alias v='$EDITOR'
-alias v.='$EDITOR .'
-alias ve='$EDITOR -c enew'
-alias vis="$EDITOR '+set si'"
-alias vll='lastfiles -l'
-alias vln='$EDITOR -c '\''execute "edit " . v:oldfiles[0] | normal ''0'\'
+  # mkdir
+  alias mkdir='mkdir -pv'
+  mkdir() { command mkdir -pv "$@"; }
 
-# ports
-alias openports="netstat -nape --inet"
+  # modified commands (keep cautious variants)
+  alias grep="/usr/bin/grep $GREP_OPTIONS"
+  alias freshclam="sudo freshclam"
+  alias less="less -R"
+  alias multitail="multitail --no-repeat -c"
+  alias mv="mv -i"
+  alias ping="ping -c 10"
+  alias ps="ps auxf"
+  alias rm="rm -iv"
 
-# ps
-ialias ps='ps auxf'
-alias psj='ps aux | grep "[j]ava"'
-balias psg='ps auxf | grep'
-alias topcpu='/bin/ps -eo pcpu,pid,user,args | sort -k 1 -r | head -10'
+  # move
+  alias mv='mv -iv'
 
-# python
-alias py='python3'
+  # nginx
+  alias ngx="cd /etc/nginx"
 
-# realpath
-alias rp='realpath'
+  # vim helpers
+  alias v="$EDITOR"
+  alias 'v.'="$EDITOR ."
+  alias ve="$EDITOR -c enew"
+  vis() { $EDITOR '+set si' "$@"; }
+  vll() { lastfiles -l "$@"; }
+  vln() { $EDITOR -c "execute 'edit ' . v:oldfiles[0] | normal '0'" "$@"; }
 
-# remove
-ialias rm='rm -vI'
+  # ports
+  alias openports="netstat -nape --inet"
 
-# rsync
-alias rsc='rsync -vrazPlu'
-alias rscd='rsync -vrazPlu --delete'
-alias rscr='rsync -vrazPlu --remove-source-files'
+  # ps
+  alias ps='ps auxf'
+  alias psj='ps aux | grep "[j]ava"'
+  psg() { ps auxf | grep "$*"; }
+  alias topcpu='/bin/ps -eo pcpu,pid,user,args | sort -k 1 -r | head -10'
 
-# rules
-alias rrr='sudo udevadm control --reload-rules'
+  # python
+  alias py='python3'
 
-# scp
-ialias scp='scp -r'
+  # realpath
+  alias rp='realpath'
 
-# sha1
-alias sha1='openssl sha1'
+  # remove
+  alias rm='rm -vI'
 
-# shell
-alias tobash="sudo chsh $USER -s /bin/bash && 'Now log out.'"
-alias tozsh="sudo chsh $USER -s /bin/zsh && 'Now log out.'"
-alias tofish="sudo chsh $USER -s /bin/fish && 'Now log out.'"
+  # rsync
+  alias rsc='rsync -vrazPlu'
+  alias rscd='rsync -vrazPlu --delete'
+  alias rscr='rsync -vrazPlu --remove-source-files'
 
-# shellcheck
-alias shck='shellcheck --color=always'
+  # rules
+  alias rrr='sudo udevadm control --reload-rules'
 
-# shortcut
-alias ref='shortcuts >/dev/null; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutrc; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutenvrc; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/zshnameddirrc'
+  # scp
+  alias scp='scp -r'
 
-# sudo
-alias su='sudo su -l root'
-alias sm='setopt no_nomatch && rm -rf *.rej *.orig >/dev/null 2>&1'
-alias smi='setopt no_nomatch && rm -rf *.rej *.orig >/dev/null 2>&1 && unsetopt no_nomatch; sudo make clean install; rm -f config.h'
+  # sha1
+  alias sha1='openssl sha1'
 
-# suffix
-alias -s {pdf,PDF}='background mupdf'
-alias -s {jpg,JPG,png,PNG}='background gpicview'
-alias -s {ods,ODS,odt,ODT,odp,ODP,doc,DOC,docx,DOCX,xls,XLS,xlsx,XLSX,xlsm,XLSM,ppt,PPT,pptx,PPTX,csv,CSV}='background libreoffice'
-alias -s {html,HTML}='background chromium'
-alias -s {mp4,MP4,mov,MOV,mkv,MKV}='background vlc'
-alias -s {zip,ZIP,war,WAR}="unzip -l"
-alias -s {jar,JAR}="java -jar"
-alias -s gz="tar -tf"
-alias -s {tgz,TGZ}="tar -tf"
+  # shell switching helpers (need sudo)
+  alias tobash="sudo chsh $USER -s /bin/bash && echo 'Now log out.'"
+  alias tozsh="sudo chsh $USER -s /bin/zsh && echo 'Now log out.'"
+  alias tofish="sudo chsh $USER -s /bin/fish && echo 'Now log out.'"
 
-# tar
-alias txf='tar -xf'
-alias ttf='tar -tf'
-alias mktar="tar -cvf"
-alias mkbz2="tar -cvjf"
-alias mkgz="tar -cvzf"
-alias untar="tar -xvf"
-alias unbz2="tar -xvjf"
-alias ungz="tar -xvzf"
+  # shellcheck
+  alias shck='shellcheck --color=always'
 
-# tmux
-alias sts='tmux source $XDG_CONFIG_HOME/tmux/tmux.conf'
-alias ta='tmux a'
-alias tmc='tmuxcreate'
-alias tmka='tmux kill-session -a'
-alias tmls='tmux ls'
-alias tmo='tmuxopen'
-alias tmpk='command pkill tmux'
-alias tm.='tmux new -s "$(basename $PWD)"'
+  # ref/shortcut loader (keep as in original)
+  ref() { shortcuts >/dev/null; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutrc; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutenvrc; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/zshnameddirrc; }
 
-# tor
-alias torh="cat /var/lib/tor/hidden_service/hostname"
+  # sudo helpers
+  alias su='sudo su -l root'
+  sm() { rm -rf -- *.rej *.orig >/dev/null 2>&1 || true; }
+  smi() { rm -rf -- *.rej *.orig >/dev/null 2>&1; sudo make clean install; rm -f config.h; }
 
-# trash
-alias trd='trash-rm'
-alias tre='trash-empty'
-alias trl='trash-list'
-alias trp='trash-put'
-alias trr='trash-restore'
+  # -------- suffix alias replacement: provide 'open' function ----------
+  # zsh's "alias -s ext='cmd'" doesn't exist in bash.
+  # Use `open` (or 'of') to open files by extension:
+  openf() {
+    for f in "$@"; do
+      case "${f##*.}" in
+        pdf|PDF) mupdf "$f" & ;;
+        jpg|JPG|png|PNG) gpicview "$f" & ;;
+        ods|ODS|odt|ODT|odp|ODP|doc|DOC|docx|DOCX|xls|XLS|xlsx|XLSX|xlsm|XLSM|ppt|PPT|pptx|PPTX|csv|CSV)
+          libreoffice "$f" & ;;
+        html|HTML) chromium "$f" & ;;
+        mp4|MP4|mov|MOV|mkv|MKV) vlc "$f" & ;;
+        zip|ZIP|war|WAR) unzip -l "$f" ;;
+        jar|JAR) java -jar "$f" ;;
+        gz) tar -tf "$f" ;;
+        tgz|TGZ) tar -tf "$f" ;;
+        *) ${EDITOR:-vi} "$f" ;;
+      esac
+    done
+  }
+  alias of='openf'
+  alias open='openf'
 
-# tree
-ialias tree='tree -a -I ".svn|.git|.hg|.idea"'
-alias tree2='tree -L 2'
-alias tree3='tree -L 3'
+  # tarring helpers
+  alias txf='tar -xf'
+  alias ttf='tar -tf'
+  alias mktar="tar -cvf"
+  alias mkbz2="tar -cvjf"
+  alias mkgz="tar -cvzf"
+  alias untar="tar -xvf"
+  alias unbz2="tar -xvjf"
+  alias ungz="tar -xvzf"
 
-# unix
-alias -g md='mkdir -p'
-alias -g wh='which'
-alias -g wt='while true; do'
-alias -g s1='sleep 1'
-alias -g s2='sleep 2'
-alias -g s01='sleep 0.1'
-alias -g s05='sleep 0.5'
-alias -g A1="| awk '{print \$1}'"
-alias -g L='| less'
-alias -g H='| head'
-alias -g H2='| head -n 20'
-alias -g X='| xargs -I@'
-alias -g C='| xclip -selection clipboard'
-alias -g Fj='| jq .'
-alias -g Fy='| yq .'
-alias -g Fx='| xmllint --format -'
-alias -g V='| vim -'
+  # tmux
+  alias sts='tmux source $XDG_CONFIG_HOME/tmux/tmux.conf'
+  alias ta='tmux a'
+  alias tmc='tmuxcreate'
+  alias tmka='tmux kill-session -a'
+  alias tmls='tmux ls'
+  alias tmo='tmuxopen'
+  alias tmpk='command pkill tmux'
+  tm_new() { tmux new -s "$(basename "$PWD")"; }
+  alias tm.='tm_new'
 
-# unzip
-alias uz='unzip'
-alias uzl='unzip -l'
+  # trash
+  alias trd='trash-rm'
+  alias tre='trash-empty'
+  alias trl='trash-list'
+  alias trp='trash-put'
+  alias trr='trash-restore'
 
-# vim
-alias vi='vim'
-alias vi.='vim .'
+  # tree
+  alias tree='tree -a -I ".svn|.git|.hg|.idea"'
+  alias tree2='tree -L 2'
+  alias tree3='tree -L 3'
 
-# watch
-alias w1='watch -n 1'
+  # small unix helpers (converted global aliases -> functions)
+  md() { mkdir -p "$@"; }
+  wh() { which "$@"; }
+  wt() { while true; do "$@"; done }   # usage differs from zsh's global alias
+  s1() { sleep 1; }
+  s2() { sleep 2; }
+  s01() { sleep 0.1; }
+  s05() { sleep 0.5; }
+  A1() { awk '{print $1}' "$@"; }
+  L() { less "$@"; }
+  H() { head "$@"; }
+  H2() { head -n 20 "$@"; }
+  X() { xargs -I@ "$@"; }   # limited replacement
+  C() { xclip -selection clipboard "$@"; }
+  Fj() { jq . "$@"; }
+  Fy() { yq . "$@"; }
+  Fx() { xmllint --format "$@"; }
+  V() { vim - "$@"; }
 
-# wget
-ialias wget --hsts-file="${XDG_CACHE_HOME:-${HOME}/.cache}/wget-hsts"
+  # unzip
+  alias uz='unzip'
+  alias uzl='unzip -l'
 
-# xprog
-alias progn='xprop | awk '\''/^WM_CLASS/{sub(/.* = /, "instance:"); sub(/, /, "\nclass:"); print} /^WM_NAME/{sub(/.* = /, "title:"); print}'\'''
+  # vim
+  alias vi='vim'
+  alias 'vi.'='vim .'
 
-# zsh
-alias sps="source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/profile"
-alias szs="source ${XDG_CONFIG_HOME:-${HOME}/.config}/zsh/.zshrc"
+  # watch
+  alias w1='watch -n 1'
+
+  # wget
+  # keep hsts path variable
+  alias wget="wget --hsts-file='${XDG_CACHE_HOME:-${HOME}/.cache}/wget-hsts'"
+
+  # xprop helper
+  progn() { xprop | awk '/^WM_CLASS/{sub(/.* = /, "instance:"); sub(/, /, "\nclass:"); print} /^WM_NAME/{sub(/.* = /, "title:"); print}'; }
+
+  # zsh sourcing helpers (just source config)
+  sps() { source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/profile; }
+  szs() { source ${XDG_CONFIG_HOME:-${HOME}/.config}/zsh/.zshrc; }
+
+  # -------- done bash branch ----------
+else
+	# sudo not required for some system commands
+  for command in blkid lsblk mount umount dnf poweroff reboot shutdown su updatedb; do
+      alias $command="sudo $command"
+  done
+  unset command
+
+  case "$(readlink -f /sbin/init)" in
+  *systemd*)
+    # journal
+    alias -g jctl='journalctl -xe'
+    alias -g jctlou='sudo journalctl -b -n 200 -f'
+    alias -g rpi='systemctl --user restart wireplumber pipewire pipewire-pulse pipewire-jack'
+    alias -g sctl='systemctl'
+    alias -g sctlss='systemctl status'
+    alias -g sctle='systemctl enable'
+    alias -g sctld='systemctl disable'
+    alias -g sctlr='systemctl restart'
+    alias -g sctls='systemctl start'
+    alias -g sctlt='systemctl stop'
+    alias -g sctldr='systemctl daemon-reload'
+    alias -g tctl='timedatectl'
+    ;;
+  esac
+
+	# Go back
+  alias ...='../..'
+  alias ....='../../..'
+  alias .....='../../../..'
+
+	# bash
+  alias sbp="source ~/.config/bash/bash_profile"
+  alias sbs="source ~/.config/bash/bashrc"
+
+	# cd
+  alias cf='cd "$(dirname "$(readlink -f health.lua)")"'
+  alias pd='cd -'
+
+	# chmod
+  alias che='find . -type f -exec chmod +x {};'
+  alias chfd='find . -type d -exec chmod 755 {}; -o -type f -exec chmod 644 {};'
+  alias cx='chmod a+x'
+  alias 000='chmod -R 000'
+  alias 600='chmod -R 600'
+  alias 644='chmod -R 644'
+  alias 666='chmod -R 666'
+  alias 755='chmod -R 755'
+  alias 777='chmod -R 777'
+
+	# copy
+  alias CC='$(fc -l -n -1) | xclip -selection clipboard'
+  ialias cp='cp -iv'
+  alias pwdc='pwd | xclip -selection clipboard'
+
+	# count
+  alias countfiles="for t in files links directories; do echo \`find . -type \${t:0:1} | wc -l\` \$t; done 2> /dev/null"
+
+	# cpu
+  alias cpu="grep 'cpu ' /proc/stat | awk '{usage=(\$2+\$4)*100/(\$2+\$4+\$5)} END {print usage}' | awk '{printf(\"%.1f\n\", \$1)}'"
+
+	# curl
+  ialias curl='curl --silent --show-error'
+  balias clh='curl localhost:'
+  balias clh8='curl localhost:8080'
+  balias clh9='curl localhost:9080'
+  balias c100='curl 192.168.99.100:'
+
+	# date
+  alias da="date '+%Y-%m-%d %A %T %Z'"
+
+	# delete
+  alias _fd='find . -type f -name "._*" -print0 | xargs -0 rm -f'
+  alias _fp='find . -type f -name "._*" -print'
+
+	# diff
+  ialias diff='diff --color'
+
+	# disk
+  alias diskspace="du -S | sort -n -r |more"
+  alias folders="du -h --max-depth=1"
+  alias folderssort="find . -maxdepth 1 -type d -print0 | xargs -0 du -sk | sort -rn"
+  alias tree="tree -CAhF --dirsfirst"
+  alias treed="tree -CAFd"
+  alias mountedinfo="df -hT"
+
+	# docker
+  alias dk='docker'
+  alias dkp='docker ps'
+  alias dkpa='docker ps -a'
+  alias dkpaq='docker ps -a -q'
+  alias dkb='docker build -t'
+  alias dkbnc='docker build --no-cache -t'
+  alias dkr='docker run --rm'
+  alias dkrti='docker run --rm -ti'
+  alias dkrd='docker run -d'
+  alias dkrp8='docker run --rm -p 8080:8080'
+  alias dkrp9='docker run --rm -p 9080:9080'
+  alias dks='docker start'
+  alias dkt='docker stop'
+  alias dktt='docker stop $(docker ps -q)'
+  alias dkk='docker kill'
+  alias dkkk='docker kill $(docker ps -q)'
+  alias dkrm='docker rm'
+  alias dkri='docker rmi'
+  alias dke='docker exec -ti'
+  alias dkl='docker logs -f'
+  alias dki='docker images'
+  alias dkpu='docker pull'
+  alias dkph='docker push'
+  alias dkin='docker inspect'
+  alias dkn='docker network'
+  alias dkc='docker-compose'
+  alias dkcu='docker-compose up'
+  alias dkclean='docker ps -q -a -f status=exited | xargs -r docker rm && docker images -q -f dangling=true | xargs -r docker rmi'
+
+	# find
+  balias fdn='find . -name "'
+  alias f="find . | grep "
+
+	# grep
+  ialias -g grep='grep --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn}'
+  alias grepi='grep -i'
+  alias grepr='grep -r'
+  alias grepri='grep -ri'
+  alias grepw='grep -R -i --include="*"'
+  alias grepb='grep -R -i --include="*" --exclude-dir="zsh"'
+  alias -g Gg='| grep'
+  alias -g Gi='| grep -i'
+  alias -g GH='| grep HTTP'
+
+	# hash
+  alias h='hash -rf'
+
+	# hexdump
+  alias hx='hexdump -C'
+
+	# history
+  alias h="history | grep "
+
+	# ip
+  ialias ip='ip -color=auto'
+  alias whatsmyip='curl -s ifconfig.me | xargs'
+  alias ipview="netstat -anpl | grep :80 | awk '{print $5}' | cut -d':' -f1 | sort | uniq -c | sort -n | sed -e 's/^ *//' -e 's/ *$//'"
+
+	# killall
+  alias ka='killall'
+  alias k9='kill -9'
+  alias k15='kill -15'
+
+	# logs
+  alias logs="sudo find /var/log -type f -exec file {} \; | grep 'text' | cut -d' ' -f1 | sed -e's/:$//g' | grep -v '[0-9]$' | xargs tail -f"
+
+	# ls: eza or built-in
+  [ -x "$(command -v eza)" ] && {
+    ialias l='eza --icons --group-directories-first'
+    ialias la='eza --icons -aa --group-directories-first'
+    ialias lh='eza --icons -aa --group-directories-first'
+    ialias ll='eza -gl --icons --group-directories-first'
+    ialias lla='eza -glaa --icons --group-directories-first'
+    ialias lm='eza -glA --group-directories-first | more'
+    ialias lr='eza --icons -R --group-directories-first'
+    ialias ls='eza --icons -A --group-directories-first'
+    ialias lsb='eza --icons -b --group-directories-first'
+    ialias lsby='eza --icons -B --group-directories-first'
+    ialias lld='eza --icons -Dl --group-directories-first'
+    ialias llda='eza --icons -aaDl --group-directories-first'
+    ialias llf='eza --icons -fl'
+    ialias llfa='eza --icons -aafl'
+    ialias llsa='eza --icons -l -s=accessed'
+    ialias llsaa='eza --icons -aal -s=accessed'
+    ialias llsc='eza --icons -l -s=created'
+    ialias llsca='eza --icons -aal -s=created'
+    ialias llse='eza --icons -l -s=extension'
+    ialias llsea='eza --icons -aal -s=extension'
+    ialias llsm='eza --icons -l -s=modified'
+    ialias llsma='eza --icons -aal -s=modified'
+    ialias llsn='eza --icons -l -s=name'
+    ialias llsna='eza --icons -aal -s=name'
+    ialias llss='eza --icons -l -s=size'
+    ialias llssa='eza --icons -aal -s=size'
+    ialias llst='eza --icons -l -s=type'
+    ialias llsta='eza --icons -aal -s=type'
+    ialias lt='eza --icons -T -L'
+    ialias ltd='eza --icons -TD -L'
+    ialias ltdr='eza --icons -TDr -L'
+    ialias ltr='eza --icons -Tr -L'
+  } || {
+    ialias l='/usr/bin/ls -h --color=always --group-directories-first'
+    ialias la='/usr/bin/ls -alh --color=always --group-directories-first'
+    ialias ll='/usr/bin/ls -lh --color=always --group-directories-first'
+    ialias lla='/usr/bin/ls -aFls --color=always --group-directories-first'
+    ialias llf='/usr/bin/ls -Fls --color=always --group-directories-first'
+    ialias lm='/usr/bin/ls -alh --color=always --group-directories-first | more'
+    ialias lr='/usr/bin/ls -hlR --color=always --group-directories-first'
+    ialias lra='/usr/bin/ls -ahlR --color=always --group-directories-first'
+    ialias ls='/usr/bin/ls -AFh --color=always --group-directories-first'
+    ialias llsa='/usr/bin/ls -hlru --color=always --group-directories-first'
+    ialias llsc='/usr/bin/ls -hclr --color=always --group-directories-first'
+    ialias lld='/usr/bin/ls -l --color=always | grep "^d"'
+    ialias llda='/usr/bin/ls -la --color=always | grep "^d"'
+    ialias llse='/usr/bin/ls -BhlX --color=always --group-directories-first'
+    ialias llsf='/usr/bin/ls -l --color=always | grep -v "^d"'
+    ialias llsfa='/usr/bin/ls -la --color=always | grep -v "^d"'
+    ialias llsm='/usr/bin/ls -hlr --time=ctime --color=always --group-directories-first'
+    ialias llsn='/usr/bin/ls -alp --color=always --group-directories-first'
+    ialias llss='/usr/bin/ls -hlrS --color=always --group-directories-first'
+    ialias llst='/usr/bin/ls -hlrt --color=always --group-directories-first'
+    ialias lw='/usr/bin/ls -Ahx --color=always --group-directories-first'
+  }
+
+	# mime
+  alias mimereset="update-desktop-database ${XDG_DATA_HOME:-${HOME}/.local/share}/applications"
+
+	# mkdir
+  ialias mkdir='mkdir -pv'
+
+	# modified commands
+  alias grep="/usr/bin/grep $GREP_OPTIONS"
+  alias cp="cp -i"
+  alias freshclam="sudo freshclam"
+  alias less="less -R"
+  alias mkdir="mkdir -p"
+  alias multitail="multitail --no-repeat -c"
+  alias mv="mv -i"
+  alias ping="ping -c 10"
+  alias ps="ps auxf"
+  alias rm="rm -iv"
+
+	# move
+  ialias mv='mv -iv'
+
+	# nginx
+  alias ngx="cd /etc/nginx"
+
+	# vim
+  alias v='$EDITOR'
+  alias v.='$EDITOR .'
+  alias ve='$EDITOR -c enew'
+  alias vis="$EDITOR '+set si'"
+  alias vll='lastfiles -l'
+  alias vln='$EDITOR -c '\''execute "edit " . v:oldfiles[0] | normal ''0'\'
+
+	# ports
+  alias openports="netstat -nape --inet"
+
+	# ps
+  ialias ps='ps auxf'
+  alias psj='ps aux | grep "[j]ava"'
+  balias psg='ps auxf | grep'
+  alias topcpu='/bin/ps -eo pcpu,pid,user,args | sort -k 1 -r | head -10'
+
+	# python
+  alias py='python3'
+
+	# realpath
+  alias rp='realpath'
+
+	# remove
+  ialias rm='rm -vI'
+
+	# rsync
+  alias rsc='rsync -vrazPlu'
+  alias rscd='rsync -vrazPlu --delete'
+  alias rscr='rsync -vrazPlu --remove-source-files'
+
+	# rules
+  alias rrr='sudo udevadm control --reload-rules'
+
+	# scp
+  ialias scp='scp -r'
+
+	# sha1
+  alias sha1='openssl sha1'
+
+	# shell
+  alias tobash="sudo chsh $USER -s /bin/bash && 'Now log out.'"
+  alias tozsh="sudo chsh $USER -s /bin/zsh && 'Now log out.'"
+  alias tofish="sudo chsh $USER -s /bin/fish && 'Now log out.'"
+
+	# shellcheck
+  alias shck='shellcheck --color=always'
+
+	# shortcut
+  alias ref='shortcuts >/dev/null; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutrc; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutenvrc; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/zshnameddirrc'
+
+	# sudo
+  alias su='sudo su -l root'
+  alias sm='setopt no_nomatch && rm -rf *.rej *.orig >/dev/null 2>&1'
+  alias smi='setopt no_nomatch && rm -rf *.rej *.orig >/dev/null 2>&1 && unsetopt no_nomatch; sudo make clean install; rm -f config.h'
+
+	# suffix
+  alias -s {pdf,PDF}='background mupdf'
+  alias -s {jpg,JPG,png,PNG}='background gpicview'
+  alias -s {ods,ODS,odt,ODT,odp,ODP,doc,DOC,docx,DOCX,xls,XLS,xlsx,XLSX,xlsm,XLSM,ppt,PPT,pptx,PPTX,csv,CSV}='background libreoffice'
+  alias -s {html,HTML}='background chromium'
+  alias -s {mp4,MP4,mov,MOV,mkv,MKV}='background vlc'
+  alias -s {zip,ZIP,war,WAR}="unzip -l"
+  alias -s {jar,JAR}="java -jar"
+  alias -s gz="tar -tf"
+  alias -s {tgz,TGZ}="tar -tf"
+
+	# tar
+  alias txf='tar -xf'
+  alias ttf='tar -tf'
+  alias mktar="tar -cvf"
+  alias mkbz2="tar -cvjf"
+  alias mkgz="tar -cvzf"
+  alias untar="tar -xvf"
+  alias unbz2="tar -xvjf"
+  alias ungz="tar -xvzf"
+
+	# tmux
+  alias sts='tmux source $XDG_CONFIG_HOME/tmux/tmux.conf'
+  alias ta='tmux a'
+  alias tmc='tmuxcreate'
+  alias tmka='tmux kill-session -a'
+  alias tmls='tmux ls'
+  alias tmo='tmuxopen'
+  alias tmpk='command pkill tmux'
+  alias tm.='tmux new -s "$(basename $PWD)"'
+
+	# tor
+  alias torh="cat /var/lib/tor/hidden_service/hostname"
+
+	# trash
+  alias trd='trash-rm'
+  alias tre='trash-empty'
+  alias trl='trash-list'
+  alias trp='trash-put'
+  alias trr='trash-restore'
+
+	# tree
+  ialias tree='tree -a -I ".svn|.git|.hg|.idea"'
+  alias tree2='tree -L 2'
+  alias tree3='tree -L 3'
+
+	# unix
+  alias -g md='mkdir -p'
+  alias -g wh='which'
+  alias -g wt='while true; do'
+  alias -g s1='sleep 1'
+  alias -g s2='sleep 2'
+  alias -g s01='sleep 0.1'
+  alias -g s05='sleep 0.5'
+  alias -g A1="| awk '{print \$1}'"
+  alias -g L='| less'
+  alias -g H='| head'
+  alias -g H2='| head -n 20'
+  alias -g X='| xargs -I@'
+  alias -g C='| xclip -selection clipboard'
+  alias -g Fj='| jq .'
+  alias -g Fy='| yq .'
+  alias -g Fx='| xmllint --format -'
+  alias -g V='| vim -'
+
+	# unzip
+  alias uz='unzip'
+  alias uzl='unzip -l'
+
+	# vim
+  alias vi='vim'
+  alias vi.='vim .'
+
+	# watch
+  alias w1='watch -n 1'
+
+	# wget
+  ialias wget --hsts-file="${XDG_CACHE_HOME:-${HOME}/.cache}/wget-hsts"
+
+	# xprog
+  alias progn='xprop | awk '\''/^WM_CLASS/{sub(/.* = /, "instance:"); sub(/, /, "\nclass:"); print} /^WM_NAME/{sub(/.* = /, "title:"); print}'\'''
+
+	# zsh
+  alias sps="source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/profile"
+  alias szs="source ${XDG_CONFIG_HOME:-${HOME}/.config}/zsh/.zshrc"
+fi
