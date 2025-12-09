@@ -11,11 +11,9 @@ PROMPT_COMMAND='echo -ne "\e[5 q"'
 
 # ---------- helper: pre_cmd ----------
 pre_cmd() {
-  # history에서 가장 마지막 명령어 가져오기
   local last_cmd
   last_cmd=$(history 1 | sed 's/^[ ]*[0-9]*[ ]*//')
 
-  # 이미 sudo로 시작하면 그대로
   if [[ $last_cmd != sudo* ]]; then
     READLINE_LINE="sudo $last_cmd"
     READLINE_POINT=${#READLINE_LINE}
@@ -205,19 +203,16 @@ bind -x '"\C-o":tmo'
 bind -x '"\C-p":fzfpass'
 bind -x '"\C-q":htop'
 bind -x '"\C-t":sessionizer'
-bind -x '"\C-z":upd'
+bind -x '"\C-z":pd'
 # ^_ (Ctrl-_) mapped to cht (from '^ucht' -> 'cht')
 bind -x $'"\C-_":cht'
 
 # ^X^... sequences (Ctrl-X then key)
 bind -x '"\C-x\C-a":ali'
-bind -x '"\C-x\C-b":gitopenbranch'
 bind -x '"\C-x\C-d":fD'
 bind -x '"\C-x\C-f":gitfiles'
+bind -x '"\C-x\C-g":rgafiles'
 bind -x '"\C-x\C-l":gloac'
 bind -x '"\C-x\C-n":lastfiles_l'
 bind -x '"\C-x\C-q":fpkill'
-bind -x '"\C-x\C-r":fgst'
-bind -x '"\C-x\C-t":gitstagedfiles'
-bind -x '"\C-x\C-u":gitupdate'
 bind -x '"\C-x\C-_":fzffns' # ^X^_
