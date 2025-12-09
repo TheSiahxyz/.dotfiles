@@ -33,7 +33,7 @@ autocmd BufWritePre *neomutt* %s/^--$/-- /e " dash-dash-space signature delimite
 autocmd BufWritePre * cal cursor(currPos[1], currPos[2])
 
 " When shortcut files are updated, renew bash and ranger configs with new material:
-autocmd BufWritePost bm-files,bm-dirs !shortcuts
+autocmd BufWritePost bm-files,bm-dirs !bmshortcuts
 
 " Run xrdb whenever Xdefaults or Xresources are updated.
 autocmd BufRead,BufNewFile Xresources,Xdefaults,xresources,xdefaults set filetype=xdefaults
