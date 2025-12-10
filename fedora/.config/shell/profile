@@ -243,8 +243,3 @@ export SDCV_PAGER='less --quit-if-one-screen -RX'
 ### --- SHORTCUTS --- ###
 [ ! -f "$XDG_CONFIG_HOME/shell/shortcutrc" ] && setsid -f shortcuts >/dev/null 2>&1
 
-### --- START GRAPHICAL SERVER ON USER'S CURRENT TTY IF NOT ALREADY RUNNING --- ###
-[ "$(tty)" = "/dev/tty1" ] && ! pidof -s Xorg >/dev/null 2>&1 && exec startx "$XINITRC"
-
-### --- LAPTOP KEYMAP --- ###
-sudo -n loadkeys "$XDG_DATA_HOME/thesiah/ttymaps.kmap" 2>/dev/null
