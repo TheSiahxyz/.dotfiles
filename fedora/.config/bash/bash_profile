@@ -3,15 +3,10 @@
 umask 022
 
 ###################################################
-### --- ENV PATH --- ###
+### --- LANG --- ###
 ###################################################
-# Add all directories in each subdirectory to $PATH
-export PATH="$PATH:$(find ~/.local/bin -path '*/.git*' -prune -o \( -type f -o -type l \) -perm -u=x -exec dirname {} \; | sort -u | paste -sd ':' -)"
-export PATH="$PATH:$(find ~/.local/share/.password-store -type d -name '.extensions' | paste -sd ':' -)"
-command -v asdf >/dev/null 2>&1 && export PATH="$PATH:$(find -L ~/.local/share/asdf/installs -name bin -type d -print 2>/dev/null | sort -u | paste -s -d ':' -)"
-command -v npm >/dev/null 2>&1 && export PATH="$PATH:$(find -L ~/.local/share/npm -name bin -type d -print 2>/dev/null | sort -u | paste -s -d ':' -)"
-
-unsetopt PROMPT_SP 2>/dev/null
+export LANG=ko_KR.UTF-8
+export LC_CTYPE=ko_KR.UTF-8
 
 ###################################################
 ### --- DEFAULT PROGRAMS --- ###
@@ -103,6 +98,18 @@ export TMUX_TMPDIR="$XDG_RUNTIME_DIR"
 export ZDOTDIR="$XDG_CONFIG_HOME/zsh"
 export ZPLUGINDIR="$XDG_SCRIPTS_HOME/zsh"
 
+###################################################
+### --- ENV PATH --- ###
+###################################################
+# Add all directories in each subdirectory to $PATH
+export PATH="$(find ~/.local/bin -path '*/.git*' -prune -o \( -type f -o -type l \) -perm -u=x -exec dirname {} \; | sort -u | paste -sd ':' -):$PATH"
+export PATH="$(find ~/.local/share/.password-store -type d -name '.extensions' | paste -sd ':' -):$PATH"
+export PATH="$ASDF_DATA_DIR/shims:$PATH"
+command -v asdf >/dev/null 2>&1 && export PATH="$(find -L ~/.local/share/asdf/installs -name bin -type d -print 2>/dev/null | sort -u | paste -s -d ':' -):$PATH"
+command -v npm >/dev/null 2>&1 && export PATH="$(find -L ~/.local/share/npm -name bin -type d -print 2>/dev/null | sort -u | paste -s -d ':' -):$PATH"
+
+unsetopt PROMPT_SP 2>/dev/null
+
 #######################################################
 # Source global/local definitions
 #######################################################
@@ -111,4 +118,7 @@ export ZPLUGINDIR="$XDG_SCRIPTS_HOME/zsh"
 [ -f /usr/share/bash-completion/bash_completion ] && . /usr/share/bash-completion/bash_completion
 [ -f /etc/bash/bashrc ] && . /etc/bash/bashrc
 [ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/bash/bashrc" ] && . "${XDG_CONFIG_HOME:-${HOME}/.config}/bash/bashrc"
+for file in "${XDG_CONFIG_HOME:-${HOME}/.config}/bash/completions"/*.bash; do
+  [ -f "$file" ] && . "$file"
+done
 [ ! -f "$XDG_CONFIG_HOME/shell/shortcutrc" ] && setsid -f bmshortcuts >/dev/null 2>&1
