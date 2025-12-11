@@ -193,7 +193,7 @@ if [ -n "$BASH_VERSION" ]; then
 
   # mkdir
   alias mkdir='mkdir -pv'
-  mkdir() { command mkdir -pv "$@"; }
+  function mkdir() { command mkdir -pv "$@"; }
 
   # modified commands (keep cautious variants)
   alias grep="/usr/bin/grep $GREP_OPTIONS"

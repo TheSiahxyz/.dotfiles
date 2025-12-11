@@ -2,7 +2,7 @@
 
 # --- Packages (bash version) ---
 declare -A packages=(
-  [zoxide]="--cmd cd --hook prompt"
+  # [zoxide]="--cmd cd --hook prompt"
 )
 
 eval_packages() {

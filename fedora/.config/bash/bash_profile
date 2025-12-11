@@ -3,12 +3,6 @@
 umask 022
 
 ###################################################
-### --- LANG --- ###
-###################################################
-export LANG=ko_KR.UTF-8
-export LC_CTYPE=ko_KR.UTF-8
-
-###################################################
 ### --- DEFAULT PROGRAMS --- ###
 ###################################################
 if command -v nvim >/dev/null 2>&1; then
@@ -24,8 +18,6 @@ export SUDO_EDITOR=$EDITOR
 export TERM="xterm-256color"
 export VISUAL=$EDITOR
 export TERM="xterm-256color"
-export GVIMINIT='let $MYGVIMRC="$XDG_CONFIG_HOME/vim/gvimrc" | . $MYGVIMRC'
-export VIMINIT='let $MYVIMRC="$XDG_CONFIG_HOME/vim/vimrc" | . $MYVIMRC'
 
 ###################################################
 ### --- XDG ENV PATHES --- ###
@@ -102,8 +94,8 @@ export ZPLUGINDIR="$XDG_SCRIPTS_HOME/zsh"
 ### --- ENV PATH --- ###
 ###################################################
 # Add all directories in each subdirectory to $PATH
-export PATH="$(find ~/.local/bin -path '*/.git*' -prune -o \( -type f -o -type l \) -perm -u=x -exec dirname {} \; | sort -u | paste -sd ':' -):$PATH"
-export PATH="$(find ~/.local/share/.password-store -type d -name '.extensions' | paste -sd ':' -):$PATH"
+[ -d ~/.local/bin ] && export PATH="$(find ~/.local/bin -path '*/.git*' -prune -o \( -type f -o -type l \) -perm -u=x -exec dirname {} \; | sort -u | paste -sd ':' -):$PATH"
+[ -d ~/.local/share/.password-store ] && export PATH="$(find ~/.local/share/.password-store -type d -name '.extensions' | paste -sd ':' -):$PATH"
 export PATH="$ASDF_DATA_DIR/shims:$PATH"
 command -v asdf >/dev/null 2>&1 && export PATH="$(find -L ~/.local/share/asdf/installs -name bin -type d -print 2>/dev/null | sort -u | paste -s -d ':' -):$PATH"
 command -v npm >/dev/null 2>&1 && export PATH="$(find -L ~/.local/share/npm -name bin -type d -print 2>/dev/null | sort -u | paste -s -d ':' -):$PATH"
