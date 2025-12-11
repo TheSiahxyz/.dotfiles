@@ -53,7 +53,7 @@ files=$(fzf-tmux \
   --bind "ctrl-g:change-prompt(   )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . $HOME/Private/repos $HOME/Public/repos)" \
   --bind "ctrl-h:change-prompt( 🏠 )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . $HOME)" \
   --bind "ctrl-k:change-prompt( 🖥️ )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . ${XDG_DESKTOP_DIR:-${HOME}/Desktop})" \
-  --bind "ctrl-r:change-prompt( 👟 )+reload(fd -H -L -t f -E .Trash -E .git -E .cache -E zsh . ${XDG_BIN_HOME:-${HOME}/.local/bin})" \
+  --bind "ctrl-r:change-prompt( 👟 )+reload(fd -H -L -t f -E .Trash -E .git -E .cache -E zsh . ${XDG_SCRIPTS_HOME:-${HOME}/.local/bin})" \
   --bind "ctrl-s:change-prompt( 🛠  )+reload(find ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless -maxdepth 2 -type f -not -path '*/.git/*')" \
   --bind "ctrl-u:change-prompt( 📝 )+reload(if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then top=\$(git rev-parse --show-toplevel 2>/dev/null); git -C \"\$top\" status --porcelain | awk -v root=\"\$top\" '{
     staged=substr(\$0,1,1);
