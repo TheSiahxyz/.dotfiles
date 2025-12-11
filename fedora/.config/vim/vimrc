@@ -335,8 +335,8 @@ set nocursorcolumn
 set shiftwidth=4
 set tabstop=4
 
-" If the current file type is HTML, set indentation to 2 spaces.
-autocmd Filetype html setlocal tabstop=2 shiftwidth=2 expandtab
+" If the current file type is HTML, CSS, JS, JSX, TS, TSX set indentation to 2 spaces.
+autocmd Filetype html,css,js,jsx,ts,tsx setlocal tabstop=2 shiftwidth=2 expandtab
 
 " Do not save backup files.
 set nobackup
