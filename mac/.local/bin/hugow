@@ -18,33 +18,33 @@ fi
 
 tmp="$(mktemp "$out.XXXXXXXX.tmp")"
 
-awk -v defaults="$defaults" '
-BEGIN {
-  n = split(defaults, a, /[[:space:]]+/)
-  insert = ""
-  for (i = 1; i <= n; i++) {
-    if (a[i] == "") continue
-    name = a[i] ".mp4"
-    insert = insert \
-"  <li>\n" \
-"    <a href=\"/recordings/" name "\" data-name=\"" name "\" class=\"vid\">" name "</a>\n" \
-"  </li>\n"
-  }
-  injected = 0
-}
-{
-  print
-  if (!injected && $0 ~ /<ul[^>]*id=["'\''"]list["'\''"][^>]*>/) {
-    printf("%s", insert)
-    injected = 1
-  }
-}
-END { if (!injected) exit 2 }
-' "$out" >"$tmp"
-
-mv "$tmp" "$out"
-echo "Injected defaults into: $out"
-
+# awk -v defaults="$defaults" '
+# BEGIN {
+#   n = split(defaults, a, /[[:space:]]+/)
+#   insert = ""
+#   for (i = 1; i <= n; i++) {
+#     if (a[i] == "") continue
+#     name = a[i] ".mp4"
+#     insert = insert \
+# "  <li>\n" \
+# "    <a href=\"/recordings/" name "\" data-name=\"" name "\" class=\"vid\">" name "</a>\n" \
+# "  </li>\n"
+#   }
+#   injected = 0
+# }
+# {
+#   print
+#   if (!injected && $0 ~ /<ul[^>]*id=["'\''"]list["'\''"][^>]*>/) {
+#     printf("%s", insert)
+#     injected = 1
+#   }
+# }
+# END { if (!injected) exit 2 }
+# ' "$out" >"$tmp"
+#
+# mv "$tmp" "$out"
+# echo "Injected defaults into: $out"
+#
 ssh "$server" "mkdir -p '$dest'"
 
 if [ -n "${THESIAH_SSH_OPTS:-}" ]; then
