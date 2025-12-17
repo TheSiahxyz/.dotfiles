@@ -252,7 +252,7 @@ on-focus-changed = ['move-mouse window-lazy-center']
     alt-shift-semicolon = [
         'fullscreen',
         'mode main',
-    ] # Toggle between floating and tiling layout
+    ] # Toggle between fullscreen and tiling layout
     backspace = ['close-all-windows-but-current', 'mode main']
 
     alt-shift-h = ['join-with left', 'mode main']
