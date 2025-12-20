@@ -26,11 +26,11 @@ startup_command = "nvim tmux.conf"
 preview_command = "bat --plain --wrap character --color=always ~/.config/tmux/tmux.conf"
 
 [[session]]
-name = "config"
+name = "_config"
 path = "~/.config"
 
 [[session]]
-name = "dotfiles"
+name = "_dotfiles"
 path = "~/.dotfiles"
 
 [[session]]
