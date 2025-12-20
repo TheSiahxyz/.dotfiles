@@ -1,0 +1,32 @@
+#!/bin/sh
+
+# Wrapper script for git push that handles content/ directory exclusion
+# Usage: ppts <remote> <branch> [other git push options]
+
+remote="$1"
+shift
+
+# Run git push
+git push "$remote" "$@"
+push_exit_code=$?
+
+# If push was successful and we pushed to origin, restore content/
+if [ "$push_exit_code" -eq 0 ] && [ "$remote" = "origin" ]; then
+  if [ -f .git/hooks/.pre-push-state ]; then
+    echo "Restoring content/ directory..."
+
+    # Read the stored HEAD and temp commit
+    original_head=$(head -n 1 .git/hooks/.pre-push-state)
+
+    # Reset to original HEAD (this will restore content/)
+    if [ -n "$original_head" ] && git rev-parse --verify "$original_head" >/dev/null 2>&1; then
+      git reset --soft "$original_head" >/dev/null 2>&1
+      echo "content/ directory restored to git index"
+    fi
+
+    # Clean up state file
+    rm -f .git/hooks/.pre-push-state
+  fi
+fi
+
+exit "$push_exit_code"
