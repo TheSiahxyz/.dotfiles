@@ -173,7 +173,14 @@ return {
 			})
 			local api = require("remote-sshfs.api")
 			vim.keymap.set("n", "<localleader>rc", api.connect, { desc = "Connect SSH" })
-			vim.keymap.set("n", "<localleader>rd", api.disconnect, { desc = "Disconnect SSH" })
+			vim.keymap.set("n", "<localleader>rd", function()
+				local mountpoint = vim.fn.getcwd()
+				local ok = vim.system({ "diskutil", "unmount", "force", mountpoint }):wait().code == 0
+				if not ok then
+					ok = vim.system({ "umount", "-f", mountpoint }):wait().code == 0
+				end
+				print(ok and ("✅ Unmounted: " .. mountpoint) or ("⚠️ Failed to unmount: " .. mountpoint))
+			end, { desc = "Force unmount macFUSE mount (quiet)" })
 			vim.keymap.set("n", "<localleader>re", api.edit, { desc = "Edit SSH" })
 
 			-- (optional) Override telescope find_files and live_grep to make dynamic based on if connected to host
@@ -194,6 +201,227 @@ return {
 				end
 			end, { desc = "Live SSH grep" })
 			require("telescope").load_extension("remote-sshfs")
+		end,
+	},
+	{
+		"inhesrom/remote-ssh.nvim",
+		branch = "master",
+		dependencies = {
+			"inhesrom/telescope-remote-buffer", --See https://github.com/inhesrom/telescope-remote-buffer for features
+			"nvim-telescope/telescope.nvim",
+			"nvim-lua/plenary.nvim",
+			"neovim/nvim-lspconfig",
+			-- nvim-notify is recommended, but not necessarily required into order to get notifcations during operations - https://github.com/rcarriga/nvim-notify
+			"rcarriga/nvim-notify",
+		},
+		config = function()
+			require("telescope-remote-buffer").setup(
+				-- Default keymaps to open telescope and search open buffers including "remote" open buffers
+				--fzf = "<leader>fz",
+				--match = "<leader>gb",
+				--oldfiles = "<leader>rb"
+			)
+
+			-- setup lsp_config here or import from part of neovim config that sets up LSP
+			require("remote-ssh").setup({
+				-- Optional: Custom on_attach function for LSP clients
+				on_attach = function(client, bufnr)
+					-- Your LSP keybindings and setup
+				end,
+
+				-- Optional: Custom capabilities for LSP clients
+				capabilities = vim.lsp.protocol.make_client_capabilities(),
+
+				-- Custom mapping from filetype to LSP server name
+				filetype_to_server = {
+					-- Example: Use pylsp for Python (default and recommended)
+					python = "pylsp",
+					-- More customizations...
+				},
+
+				-- Custom server configurations
+				server_configs = {
+					-- Custom config for clangd
+					clangd = {
+						filetypes = { "c", "cpp", "objc", "objcpp" },
+						root_patterns = { ".git", "compile_commands.json" },
+						init_options = {
+							usePlaceholders = true,
+							completeUnimported = true,
+						},
+					},
+					-- More server configs...
+				},
+
+				-- Async write configuration
+				async_write_opts = {
+					timeout = 30, -- Timeout in seconds for write operations
+					debug = false, -- Enable debug logging
+					log_level = vim.log.levels.INFO,
+					autosave = true, -- Enable automatic saving on text changes (default: true)
+					-- Set to false to disable auto-save while keeping manual saves (:w) working
+					save_debounce_ms = 3000, -- Delay before initiating auto-save to handle rapid editing (default: 3000)
+				},
+			})
+
+			-- Custom function to parse SSH config and extract Host entries
+			local function parse_ssh_hosts()
+				local ssh_config_path = vim.fn.expand("$HOME") .. "/.ssh/config"
+				local hosts = {}
+				local seen = {}
+
+				-- Check if file exists
+				if vim.fn.filereadable(ssh_config_path) == 0 then
+					return hosts
+				end
+
+				-- Read and parse SSH config file
+				local lines = vim.fn.readfile(ssh_config_path)
+				for _, line in ipairs(lines) do
+					-- Trim whitespace
+					local trimmed = vim.fn.trim(line)
+					-- Skip comments and empty lines
+					if trimmed ~= "" and not vim.startswith(trimmed, "#") then
+						-- Match "Host" keyword exactly (case-insensitive) followed by whitespace
+						-- Use pattern to ensure it's "Host " not "HostName" or other keywords
+						local host_match = string.match(string.lower(trimmed), "^host%s+(.+)$")
+						if host_match then
+							-- Handle multiple hosts on same line (space or comma separated)
+							for host in vim.gsplit(host_match, "[%s,]+") do
+								host = vim.fn.trim(host)
+								-- Skip wildcards and empty strings
+								if host ~= "" and host ~= "*" and not string.match(host, "^%*") and not seen[host] then
+									table.insert(hosts, host)
+									seen[host] = true
+								end
+							end
+						end
+					end
+				end
+
+				return hosts
+			end
+
+			-- Custom function to open RemoteTreeBrowser with selected SSH host
+			local function remote_tree_browser_picker()
+				local hosts = parse_ssh_hosts()
+				if #hosts == 0 then
+					return vim.notify(
+						"No SSH hosts found in ~/.ssh/config",
+						vim.log.levels.WARN,
+						{ title = "Remote SSH" }
+					)
+				end
+
+				-- Use vim.ui.select (default Neovim UI)
+				vim.ui.select(hosts, { prompt = "Select SSH host for RemoteTreeBrowser" }, function(choice)
+					if choice and choice ~= "" then
+						-- Use rsync:// protocol with double slash (//) for SSH config Host aliases
+						-- Format: rsync://host-alias//path (double slash is required for SSH config aliases)
+						-- The plugin automatically detects and handles SSH config settings
+						local rsync_url = "rsync://" .. choice .. "//"
+
+						-- Run RemoteTreeBrowser command
+						-- rsync:// protocol will use SSH config to resolve Host alias
+						vim.schedule(function()
+							-- Step 1: Create browser
+							vim.api.nvim_cmd({ cmd = "RemoteTreeBrowser", args = { rsync_url } }, {})
+							-- Step 2: Hide browser (needed for proper positioning)
+							vim.defer_fn(function()
+								vim.api.nvim_cmd({ cmd = "RemoteTreeBrowserHide" }, {})
+								-- Step 3: Show browser (will open on the right side)
+								vim.defer_fn(function()
+									vim.api.nvim_cmd({ cmd = "RemoteTreeBrowserShow" }, {})
+								end, 50)
+							end, 100)
+						end)
+					end
+				end)
+			end
+
+			-- Toggle function for RemoteTreeBrowser show/hide
+			local function remote_tree_browser_toggle()
+				-- Try to access remote-ssh.nvim's TreeBrowser module
+				local ok, tree_browser = pcall(require, "remote-ssh.tree_browser")
+				if ok and tree_browser then
+					-- Check if browser buffer exists (like show_tree() does)
+					local bufnr = tree_browser.bufnr
+					if not bufnr or not vim.api.nvim_buf_is_valid(bufnr) then
+						-- Browser doesn't exist, show SSH config picker to create one
+						remote_tree_browser_picker()
+						return
+					end
+
+					-- Browser buffer exists, check if window is visible (like hide_tree() does)
+					local win_id = tree_browser.win_id
+					local is_visible = win_id and vim.api.nvim_win_is_valid(win_id)
+
+					if is_visible then
+						-- Browser is visible, hide it
+						if tree_browser.hide_tree then
+							tree_browser.hide_tree()
+						else
+							vim.api.nvim_cmd({ cmd = "RemoteTreeBrowserHide" }, {})
+						end
+						-- After hiding, return early to prevent any further actions
+						return
+					else
+						-- Browser exists but hidden, show it
+						-- Directly use command instead of show_tree() to avoid any callbacks
+						vim.api.nvim_cmd({ cmd = "RemoteTreeBrowserShow" }, {})
+					end
+				else
+					-- Fallback: only use this if module is not accessible
+					-- Check if browser buffer exists (not just visible windows)
+					local browser_buf_found = false
+					local browser_visible = false
+
+					-- Check all buffers, not just visible windows
+					for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+						if vim.api.nvim_buf_is_valid(buf) then
+							local buf_name = vim.api.nvim_buf_get_name(buf)
+							-- Check if it's a remote tree browser buffer
+							if buf_name:match("rsync://") then
+								browser_buf_found = true
+								-- Check if this buffer is visible in any window
+								for _, win in ipairs(vim.api.nvim_list_wins()) do
+									if vim.api.nvim_win_get_buf(win) == buf then
+										browser_visible = true
+										break
+									end
+								end
+								break
+							end
+						end
+					end
+
+					if browser_buf_found then
+						-- Browser buffer exists
+						if browser_visible then
+							-- Browser is visible, hide it
+							vim.api.nvim_cmd({ cmd = "RemoteTreeBrowserHide" }, {})
+						else
+							-- Browser exists but hidden, show it
+							vim.api.nvim_cmd({ cmd = "RemoteTreeBrowserShow" }, {})
+						end
+					else
+						-- Browser not found, show SSH config picker
+						remote_tree_browser_picker()
+					end
+				end
+			end
+
+			-- Keymap for custom RemoteTreeBrowser picker
+			vim.keymap.set("n", "<leader>er", remote_tree_browser_picker, {
+				desc = "RemoteTreeBrowser (pick SSH host)",
+				silent = true,
+			})
+
+			-- Keymap for toggle RemoteTreeBrowser show/hide
+			vim.keymap.set("n", "<leader>ef", remote_tree_browser_toggle, {
+				desc = "Toggle RemoteTreeBrowser",
+				silent = true,
+			})
 		end,
 	},
 }
