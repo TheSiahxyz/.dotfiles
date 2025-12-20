@@ -18,7 +18,7 @@ else
   yazi_shortcuts_tmp="/dev/null"
 fi
 command -v ranger && ranger_shortcuts="${XDG_CONFIG_HOME:-${HOME}/.config}/ranger/shortcuts.conf" || ranger_shortcuts="/dev/null"
-command -v qutebrowser && qute_shortcuts="$HOME/.qutebrowser/shortcuts.py" || qute_shortcuts="/dev/null"
+command -v qutebrowser && qute_shortcuts="$HOME/.config/qutebrowser/shortcuts.py" || qute_shortcuts="/dev/null"
 command -v fish && fish_shortcuts="${XDG_CONFIG_HOME:-${HOME}/.config}/fish/shortcuts.fish" || fish_shortcuts="/dev/null"
 command -v vifm && vifm_shortcuts="${XDG_CONFIG_HOME:-${HOME}/.config}/vifm/shortcuts.rc" || vifm_shortcuts="/dev/null"
 
