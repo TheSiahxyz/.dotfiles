@@ -109,6 +109,12 @@ export JUPYTER_PLATFORM_DIRS="1"
 ### --- KODI --- ###
 export KODI_DATA="$XDG_DATA_HOME/kodi"
 
+### --- LUA --- ###
+export LUA_BIN="/opt/homebrew/bin/lua"
+export LUA_CPATH="/usr/local/lib/lua/5.1/?.so;;"
+export LUA_INTERPRETER=lua5.1
+export LUA_PATH="/usr/local/share/lua/5.1/?.lua;;"
+
 ### --- LYNX --- ###
 export LYNX_CFG="$HOME/.config/lynx/lynx.cfg"
 export LYNX_LSS="$HOME/.config/lynx/lynx.lss"
@@ -245,6 +251,7 @@ export SDCV_PAGER='less --quit-if-one-screen -RX'
 ### --- ENV PATH --- ###
 ###################################################
 # Add all directories in each subdirectory to $PATH
+export PATH="/usr/local/bin:$PATH"
 [ -d ~/.local/bin ] && export PATH="$(find ~/.local/bin -path '*/.git*' -prune -o \( -type f -o -type l \) -perm -u=x -exec dirname {} \; | sort -u | paste -sd ':' -):$PATH"
 [ -d ~/.local/share/.password-store ] && export PATH="$(find ~/.local/share/.password-store -type d -name '.extensions' | paste -sd ':' -):$PATH"
 export PATH="$ASDF_DATA_DIR/shims:$PATH"
@@ -252,6 +259,7 @@ export PATH="/opt/homebrew/bin:$PATH"
 [ -d /opt/homebrew/Caskroom ] && export PATH="$(find -L /opt/homebrew/Caskroom \( -name bin -o -name MacOS \) -type d -print 2>/dev/null | sort -u | paste -s -d ':' -):$PATH"
 [ -d /opt/homebrew/Cellar ] && export PATH="$(find -L /opt/homebrew/Cellar -name bin -type d -print 2>/dev/null | sort -u | paste -s -d ':' -):$PATH"
 [ -d /opt/homebrew/opt ] && export PATH="$(find -L /opt/homebrew/opt -name bin -type d -print 2>/dev/null | sort -u | paste -s -d ':' -):$PATH"
+[ -d /opt/homebrew/opt/coreutils/libexec ] && export PATH="$(find -L /opt/homebrew/opt/coreutils/libexec -name gnubin -type d -print 2>/dev/null | sort -u | paste -s -d ':' -):$PATH"
 
 unsetopt PROMPT_SP 2>/dev/null
 
