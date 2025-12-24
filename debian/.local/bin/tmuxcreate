@@ -1,0 +1,42 @@
+#!/bin/sh
+
+create_new_session() {
+  session_name=$1
+  session_path=${2:-"$PWD"} # Default to current directory if no path is provided
+  [ -z "$session_name" ] && { printf "New session name: " && read -r session_name; }
+  if tmux has-session -t "$session_name" 2>/dev/null; then
+    tmux switch-client -t "$session_name"
+  else
+    if [ -n "$TMUX" ]; then
+      tmux new-session -d -s "$session_name" -c "$session_path"
+      tmux switch-client -t "$session_name"
+    else
+      tmux new -s "$session_name" -c "$session_path"
+    fi
+  fi
+}
+
+if [ $# -gt 0 ]; then
+  if [ -d "$1" ]; then
+    create_new_session "$(basename "$1")" "$1"
+  else
+    create_new_session "$1"
+  fi
+else
+  # Capture the output of tmux ls
+  sessions=$(tmux ls 2>/dev/null)
+  if [ -z "$sessions" ]; then
+    create_new_session
+  else
+    session=$( (
+      echo "$sessions"
+      echo "[new session]"
+    ) | fzf-tmux --reverse | cut -d: -f1)
+    [ -z "$session" ] && exit
+    if [ "$session" = "[new session]" ]; then
+      create_new_session
+    else
+      tmux attach -t "$session"
+    fi
+  fi
+fi

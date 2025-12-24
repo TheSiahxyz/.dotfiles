@@ -1,0 +1,31 @@
+#!/bin/sh
+
+ssh_key_dir="${PASSWORD_STORE_DIR:-${HOME}/.local/share/.password-store}"
+
+temp_private_keys_list=$(mktemp)
+
+# Ensure that filenames with spaces or other special characters are handled correctly.
+find "$ssh_key_dir" -name "*.pub" | while IFS= read -r pub_file_path; do
+  private_key_path="${pub_file_path%.pub}"
+  if [ -f "$private_key_path" ]; then
+    echo "$(basename "$private_key_path")" >>"$temp_private_keys_list"
+    echo "$private_key_path" >>"$temp_private_keys_list"
+  fi
+done
+
+# Use of dmenu is system-specific and not covered by POSIX standards
+selected_key_name=$(awk 'NR % 2 == 1' "$temp_private_keys_list" | dmenu -i -p "Select SSH key:")
+
+if [ -n "$selected_key_name" ]; then
+  selected_key_path=$(awk -v name="$selected_key_name" '$0 == name { getline; print }' "$temp_private_keys_list")
+
+  if [ -n "$selected_key_path" ]; then
+    export SSH_ASKPASS="$HOME/.local/bin/demupass"
+    setsid ssh-add "$selected_key_path" </dev/null
+    ln -sf "$selected_key_path" "$HOME/.ssh/$(basename "$selected_key_path")"
+    ln -sf "${selected_key_path}.pub" "$HOME/.ssh/$(basename "$selected_key_path").pub"
+    notify-send "🔑 SSH key added:" "$selected_key_name"
+  fi
+fi
+
+rm "$temp_private_keys_list"

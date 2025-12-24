@@ -1,0 +1,74 @@
+#!/bin/sh
+
+# Print all functions and comments in a readable format
+# Set the filename of the script containing the functions
+file="${ZDOTDIR:-${XDG_CONFIG_HOME:-${HOME}/.config}/zsh}/scripts.zsh"
+
+# Initialize an empty variable to hold functions, aliases, and comments
+functions=""
+
+# Parse the file for function names, aliases, and comments
+while IFS= read -r line || [ -n "$line" ]; do
+  case "$line" in
+  \#*)
+    if [ "$(printf '%s' "$line" | cut -c 2)" != "#" ] && [ "$(printf '%s' "$line" | cut -c 2)" != "!" ]; then
+      # Remove the '#' from the comment line
+      comment=$(printf '%s' "$line" | sed 's/^# //')
+
+      # Read the next line to check for alias or function definition
+      IFS= read -r next_line || break
+
+      # Check if it's an alias definition
+      if echo "$next_line" | grep -q '^alias '; then
+        alias_name=$(echo "$next_line" | sed -n 's/^alias \([a-zA-Z0-9_]*\)=.*$/\1/p')
+
+        # Read another line to get the function definition
+        IFS= read -r func_line || break
+        f_name=$(printf '%s' "$func_line" | sed -n 's/^function \([^(]*\)().*$/\1/p')
+
+        if [ -n "$f_name" ]; then
+          functions="$functions$f_name|$alias_name|$comment\n"
+        fi
+
+      # Check if it's a function definition
+      elif echo "$next_line" | grep -q '^function '; then
+        f_name=$(printf '%s' "$next_line" | sed -n 's/^function \([^(]*\)().*$/\1/p')
+        if [ -n "$f_name" ]; then
+          functions="$functions$f_name||$comment\n"
+        fi
+      fi
+    fi
+    ;;
+  esac
+done <"$file"
+
+# Sort the functions alphabetically by name
+sorted=$(printf '%b' "$functions" | sort)
+
+# Print out the sorted functions with aliases and comments in a readable format
+formatted=$(printf '%b' "$sorted" | while IFS='|' read -r f_name alias_name comment; do
+  if [ -n "$alias_name" ]; then
+    printf 'fn: %-30s - %s (alias: %s)\n' "$f_name" "$comment" "$alias_name"
+  else
+    printf 'fn: %-30s - %s\n' "$f_name" "$comment"
+  fi
+done)
+
+# Use fzf to select a function
+selected=$(printf '%b' "$formatted" | fzf-tmux --header "Select a function:" --reverse)
+
+# Check if a function was selected
+if [ -n "$selected" ]; then
+  # Extract the function name
+  f_name=$(echo "$selected" | cut -d ' ' -f 2 | sed 's/[[:space:]]\+//g')
+
+  # Get the line number of the function definition
+  line_number=$(grep -n "^function $f_name(" "$file" | cut -d ':' -f 1)
+
+  # Open the function in nvim at the specific line number
+  if [ -n "$line_number" ]; then
+    nvim "+$line_number" "$file"
+  else
+    echo "Function '$f_name' not found in $file."
+  fi
+fi

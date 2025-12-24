@@ -1,0 +1,65 @@
+#!/bin/sh
+
+# Define input and output files
+url="https://unicode.org/Public/emoji/latest/emoji-test.txt"
+input_file="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/global/.local/share/thesiah/chars/emoji_raw"
+temp_file="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/global/.local/share/thesiah/chars/emoji_temp"
+output_file="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/global/.local/share/thesiah/chars/emoji"
+
+# Create the directory for output files if it doesn't exist
+mkdir -p "$(dirname "$input_file")"
+
+# Download the emoji file
+echo "Downloading emoji-test.txt from Unicode..."
+if curl -o "$input_file" -L "$url"; then
+  echo "Download complete! File saved to: $input_file"
+else
+  echo "Failed to download emoji"
+  exit 1
+fi
+
+awk '
+    # Skip empty lines and comments
+    /^[[:space:]]*$/ || /^#/ { next }
+
+    # Keep only fully-qualified lines
+    !/(fully-qualified|component)/ { next }
+
+    # Skip lines containing 200D (zero-width joiner)
+    /200D/ { next }
+
+    # Skip lines containing components
+    $2 ~ /1F3F[BCDEF]/ { next }
+
+    # Print valid lines
+    { print }
+' "$input_file" >"$temp_file"
+
+# Second stage: Extract emoji and description
+awk -F'#' '
+    {
+        if (NF >= 2) {
+            full_data = $2                                # Extract the emoji and description (after #)
+            gsub(/^[[:space:]]+|[[:space:]]+$/, "", full_data)  # Trim spaces around the entire field
+
+            split(full_data, parts, " ")                  # Split into parts by spaces
+            emoji = parts[1]                              # First part is the emoji
+
+            # Reconstruct description from parts[3] onward
+            description = ""
+            for (i = 3; i <= length(parts); i++) {
+                description = description parts[i] " "
+            }
+
+            # Remove excessive internal spaces and trim description
+            gsub(/[[:space:]]+/, " ", description)
+            gsub(/^[[:space:]]+|[[:space:]]+$/, "", description)
+
+            # Print emoji and description
+            print emoji, description
+        }
+    }
+' "$temp_file" >"$output_file"
+
+rm -rf "$input_file" "$temp_file"
+echo "Processing complete! File saved to: $output_file"

@@ -1,0 +1,47 @@
+#!/bin/sh
+
+echo "Usage: ${0##*/} toggles between"
+echo " - usb: plays sound via main usb speaker or"
+echo " - head: plays sound via main headset"
+echo
+
+current_output=$(wpctl status | grep -A 4 'Sinks:' | grep '\*' | grep -oP '\d+(?=\.)' | head -n 1)
+usb_output=$(wpctl status | grep 'USB Audio Analog Stereo' | grep 'vol:' | grep -oP '\d+(?=\.)' | head -n 1)
+headset_output=$(wpctl status | grep 'WH-1000XM3' | grep 'vol:' | grep -oP '\d+(?=\.)' | head -n 1)
+
+echo "Debug: current_output=$current_output"
+echo "Debug: usb_output=$usb_output"
+echo "Debug: headset_output=$headset_output"
+
+if [ -z "$current_output" ] || [ -z "$usb_output" ] || [ -z "$headset_output" ]; then
+  echo "Error: Unable to determine audio outputs"
+  return 1
+fi
+
+if [ "$current_output" = "$usb_output" ]; then
+  new_output=$headset_output
+  echo "Debug: Switching to headset"
+else
+  new_output=$usb_output
+  echo "Debug: Switching to speaker"
+fi
+
+echo "Debug: new_output=$new_output"
+
+wpctl set-default "$new_output"
+
+if [ "$new_output" = "$usb_output" ]; then
+  mic_id=$(wpctl status | grep "Microphone Mono" | grep -oP '\d+(?=\.)' | head -n 1)
+  if [ -n "$mic_id" ]; then
+    wpctl set-mute "$mic_id" 1
+  else
+    echo "Warning: Unable to find microphone ID"
+  fi
+  wpctl set-volume @DEFAULT_AUDIO_SINK@ 50%
+  echo "Sound output set to usb=speaker, mic muted (if found)"
+  echo "Volume 50%"
+else
+  wpctl set-volume @DEFAULT_AUDIO_SINK@ 25%
+  echo "Sound output set to head=headset"
+  echo "Volume 25%"
+fi

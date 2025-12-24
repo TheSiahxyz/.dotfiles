@@ -1,0 +1,54 @@
+# Keys                  Filename                                                    Description
+vab     ${XDG_CONFIG_HOME:-${HOME}/.config}/abook/addressbook                   # Address book config
+vbc     ${XDG_CONFIG_HOME:-${HOME}/.config}/bash/bashrc                         # Bash (shell) config
+vbd     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/bm-dirs                       # A list of bookmarked directories similar to this file
+vbf     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/bm-files                      # This file, a list of bookmarked files
+vbi     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/inputrc                       # This file is for gnu readline
+vbp     ${XDG_CONFIG_HOME:-${HOME}/.config}/bash/bash_profile                   # Bash profile
+vcr     ${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/$(whereami)/.config/crons        # Cron job list
+vdb     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwmblocks/config.def.h # Dwmblocks: the status bar for dwm
+vdm     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dmenu/config.def.h     # Dmenu: a dynamic menu
+vdw     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwm/config.def.h       # Dwm: a dynamic window manager
+vff     ${XDG_CONFIG_HOME:-${HOME}/.config}/fastfetch/config.jsonc              # Fastfetch config
+vga     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/git-aliasrc                   # Git aliases
+vgc     ${XDG_CONFIG_HOME:-${HOME}/.config}/git/config                          # Git config
+vgi     ${XDG_CONFIG_HOME:-${HOME}/.config}/git/ignore                          # Git ignore
+vlf     ${XDG_CONFIG_HOME:-${HOME}/.config}/lf/lfrc                             # LF (file browser) config
+vlg     ${XDG_CONFIG_HOME:-${HOME}/.config}/lazygit/config.yml                  # Lazygit config
+vls     ${XDG_CONFIG_HOME:-${HOME}/.config}/lf/scope                            # LF's scope/preview file
+vly     $HOME/.lynxrc                                                           # Lynx config
+vmi     ${XDG_CONFIG_HOME:-${HOME}/.config}/mpv/input.conf                      # Mpv input config
+vmc     ${XDG_CONFIG_HOME:-${HOME}/.config}/mpv/mpv.conf                        # Mpv config
+vmt     ${XDG_CONFIG_HOME:-${HOME}/.config}/mutt/muttrc                         # Mutt (email client) config
+vnb     ${XDG_CONFIG_HOME:-${HOME}/.config}/ncmpcpp/bindings                    # Ncmpcpp (music player) keybinds file
+vnp     ${XDG_CONFIG_HOME:-${HOME}/.config}/ncmpcpp/config                      # Ncmpcpp (music player) config
+vns     ${XDG_CONFIG_HOME:-${HOME}/.config}/newsboat/config                     # Newsboat config (RSS reader)
+vnu     ${XDG_CONFIG_HOME:-${HOME}/.config}/newsboat/urls                       # Newsboat url (RSS reader)
+vqt     ${XDG_CONFIG_HOME:-${HOME}/.config}/qutebrowser/config.py               # Qutebrowser config
+Vsm     /etc/samba/smb.conf                                                     # Samba config
+vsa     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/aliasrc                       # Aliases used by shell (and potentially other shells)
+vse     ${XDG_CONFIG_HOME:-${HOME}/.config}/sesh/sesh.toml                      # Sesh config
+vsf     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/surf/config.def.h      # Surf: a simple browser
+vsl     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/slock/config.def.h     # Slock: lock screen
+vsn     ${XDG_DATA_HOME:-${HOME}/.local/share}/thesiah/snippets                 # Snippets
+vsp     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/profile                       # Shell profile used for system
+vss     ${XDG_CONFIG_HOME:-${HOME}/.config}/starship/starship.toml              # Starship
+vst     ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/st/config.def.h        # St: a simple terminal
+vsx     ${XDG_CONFIG_HOME:-${HOME}/.config}/nsxiv/exec/key-handler              # Nsxiv (image viewer) key/script handler
+vtc     ${XDG_CONFIG_HOME:-${HOME}/.config}/task/taskrc                         # Task config
+vtm     ${XDG_CONFIG_HOME:-${HOME}/.config}/tmux/tmux.conf                      # Tmux config
+vto     ${XDG_CONFIG_HOME:-${HOME}/.config}/taskopen/taskopenrc                 # Taskopen config
+vtt     ${XDG_CONFIG_HOME:-${HOME}/.config}/transmission-daemon/settings.json   # Transmission-daemon config
+vur     ${XDG_DATA_HOME:-${HOME}/.local/share}/thesiah/urls                     # Custom urls
+vvc     ${XDG_CONFIG_HOME:-${HOME}/.config}/vim/vimrc                           # Vim config
+vvi     ${XDG_CONFIG_HOME:-${HOME}/.config}/vim/init.vim                        # Vim init
+vvp     ${XDG_CONFIG_HOME:-${HOME}/.config}/vim/plugins.vim                     # Vim plugins
+vvw     ${XDG_DATA_HOME:-${HOME}/.local/share}/vimwiki/index.md                 # Vimwiki
+vxc     ${XDG_CONFIG_HOME:-${HOME}/.config}/x11/xinitrc                         # X11 config
+vxp     ${XDG_CONFIG_HOME:-${HOME}/.config}/x11/xprofile                        # Start up - X11 profile
+vxr     ${XDG_CONFIG_HOME:-${HOME}/.config}/x11/xresources                      # Colors, themes and variables for X11
+vyk     ${XDG_CONFIG_HOME:-${HOME}/.config}/yazi/keymap-default.toml            # Yazi keymap
+vyz     ${XDG_CONFIG_HOME:-${HOME}/.config}/yazi/yazi.toml                      # Yazi config
+vzc     ${ZDOTDIR:-${XDG_CONFIG_HOME:-${HOME}/.config}/zsh}/.zshrc              # Zsh config
+vzk     ${ZDOTDIR:-${XDG_CONFIG_HOME:-${HOME}/.config}/zsh}/keymaps.zsh         # Zsh keymaps
+vzs     ${ZDOTDIR:-${XDG_CONFIG_HOME:-${HOME}/.config}/zsh}/scripts.zsh         # Zsh scripts

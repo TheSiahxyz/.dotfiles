@@ -1,0 +1,10 @@
+#!/bin/sh
+
+completed_torrents=$(transmission-remote -n "$USER" -l | grep 100% | awk '{print $1}')
+if [ -n "$completed_torrents" ]; then
+  for torrent_id in $completed_torrents; do
+    transmission-remote -n "$USER" -t "$torrent_id" -r
+  done
+  pkill -RTMIN+22 "${STATUSBAR:-dwmblocks}" && notify-send "✅ Transmission-daemon" "Torrent(s) $TR_TORRENT_NAME has completed downloading. Deleting torrent files."
+  [ -z "$(transmission-remote -n "$USER" -l | grep -v "Sum:")" ] && killall transmission-daemon && notify-send "❌ Transmission-daemon disabled."
+fi

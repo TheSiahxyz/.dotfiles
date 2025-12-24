@@ -10,8 +10,11 @@ export LC_CTYPE=ko_KR.UTF-8
 export BROWSER=$(command -v librewolf || command -v firefox || command -v qutebrowser)
 export EDITOR="nvim"
 export EDITOR2="vim"
-# export FILE_MANAGER="lf $(lf -version)"
-export FILE_MANAGER="yazi $(yazi --version)"
+if command -v lf >/dev/null 2>&1; then
+  export FILE_MANAGER="lf $(lf -version)"
+elif command -v yazi >/dev/null 2>&1; then
+  export FILE_MANAGER="yazi $(yazi --version)"
+fi
 export KEYTIMEOUT=10
 export SUDO_EDITOR=$EDITOR
 # export SUDO_ASKPASS="$HOME/.local/bin/dmenupass"

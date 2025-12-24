@@ -1,0 +1,90 @@
+#!/bin/sh
+
+command_exists() { command -v "$1" >/dev/null 2>&1; }
+get_fs_type() { sudo blkid -o value -s TYPE "$1" 2>/dev/null; }
+label_ext() { sudo e2label "$1" "$2"; }
+label_fat() { sudo fatlabel "$1" "$2"; }
+label_ntfs() { sudo ntfslabel --force --quiet "$1" "$2"; }
+label_btrfs() { sudo btrfs filesystem label "$1" "$2"; }
+label_luks() { sudo cryptsetup config "$1" --label "$2"; }
+label_parted() { sudo parted "$1" name "$2" "$3"; }
+print_label() { sudo lsblk -o NAME,LABEL; }
+
+getfs() {
+  print_label
+  echo -n "\nEnter the partition (e.g., /dev/sda1): "
+  read partition
+
+  fs_type=$(get_fs_type "$partition")
+
+  if [ -z "$fs_type" ]; then
+    echo "Unable to determine file system type for $partition. Please ensure the partition exists and has a valid file system."
+    echo "Debugging information:"
+    echo "blkid output for $partition:"
+    sudo blkid "$partition"
+    echo "Raw blkid output:"
+    sudo blkid
+    exit 1
+  fi
+
+  echo "Detected file system type: $fs_type"
+  echo -n "Enter the label: "
+  read label
+}
+
+echo "Partition Labeling Script"
+for cmd in blkid e2label fatlabel ntfslabel btrfs parted lsblk cryptsetup; do
+  if ! command_exists "$cmd"; then
+    echo "Error: $cmd is not installed or not in PATH."
+    echo "Installing necessary package for $cmd..."
+    case $cmd in
+    blkid | lsblk)
+      sudo apt install -y util-linux
+      ;;
+    e2label)
+      sudo apt install -y e2fsprogs
+      ;;
+    fatlabel)
+      sudo apt install -y dosfstools
+      ;;
+    ntfslabel)
+      sudo apt install -y ntfs-3g
+      ;;
+    btrfs)
+      sudo apt install -y btrfs-progs
+      ;;
+    parted)
+      sudo apt install -y parted
+      ;;
+    cryptsetup)
+      sudo apt install -y cryptsetup
+      ;;
+    *)
+      echo "Unknown command: $cmd"
+      exit 1
+      ;;
+    esac
+  fi
+done
+
+getfs
+
+case "$fs_type" in
+ext2 | ext3 | ext4) label_ext "$partition" "$label" ;;
+vfat) label_fat "$partition" "$label" ;;
+ntfs) label_ntfs "$partition" "$label" ;;
+btrfs) label_btrfs "$partition" "$label" ;;
+crypto_LUKS)
+  echo "Labeling LUKS partition using cryptsetup."
+  label_luks "$partition" "$label"
+  getfs
+  ;;
+*)
+  echo "File system type $fs_type is not directly supported by this script. Attempting to label with parted."
+  label_parted "$partition" "$label"
+  ;;
+esac
+
+echo "Partition labeled successfully. Verifying..."
+print_label
+echo "Done."

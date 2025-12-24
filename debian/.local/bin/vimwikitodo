@@ -1,0 +1,8 @@
+#!/bin/sh
+
+nvim +'setlocal nonumber norelativenumber noruler signcolumn=no' \
+  +'set laststatus=0 showtabline=0' \
+  +'silent lua vim.diagnostic.disable()' \
+  +'silent lua vim.api.nvim_clear_autocmds({ event = { "CursorHold", "CursorHoldI" }, buffer = 0 })' \
+  +'lua vim.defer_fn(function() local ok, lualine = pcall(require, "lualine"); if ok then lualine.hide() end end, 100)' \
+  ~/.local/share/vimwiki/todo.md

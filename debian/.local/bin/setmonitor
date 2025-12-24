@@ -1,0 +1,35 @@
+#!/bin/sh
+
+# Parse connected displays
+default="--mode 1920x1080 --rotate normal --scale 1.0x1.0 --dpi 96"
+
+for connected in $(xrandr -q | grep -w "connected" | cut -d ' ' -f 1); do
+  case $connected in
+  eDP*) edp="$connected" ;;
+  HDMI*) hdmi="$connected" ;;
+  DP*) dp="$connected" ;;
+  *) display="$connected" ;;
+  esac
+done
+
+# If the lid is closed, turn off the laptop's screen
+if grep -q "closed" /proc/acpi/button/lid/LID/state; then
+  if [ -n "$hdmi" ] && [ -z "$dp" ] && [ -n "$edp" ]; then
+    xrandr --output "$edp" --off --output "$hdmi" --primary $default
+  elif [ -z "$hdmi" ] && [ -n "$dp" ] && [ -n "$edp" ]; then
+    xrandr --output "$edp" --off --output "$dp" --primary $default
+  else
+    xrandr --output "$edp" --off --output "$display" --auto --primary $default
+  fi
+else
+  # Apply display settings when lid is open
+  if [ -n "$hdmi" ] && [ -z "$dp" ] && [ -n "$edp" ]; then
+    xrandr --output "$edp" --pos 1920x0 $default --output "$hdmi" --primary --pos 0x0 $default
+  elif [ -z "$hdmi" ] && [ -n "$dp" ] && [ -n "$edp" ]; then
+    xrandr --output "$edp" --pos 1920x0 $default --output "$dp" --primary --pos 0x0 $default
+  elif [ -z "$hdmi" ] && [ -z "$dp" ] && [ -n "$edp" ]; then
+    xrandr --output "$edp" --primary $default
+  else
+    xrandr --output "$display" --primary --auto
+  fi
+fi

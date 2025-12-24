@@ -1,0 +1,15 @@
+#!/bin/sh
+
+fcitx5_pid=$(pgrep -f fcitx5 | head -n1)
+
+if [ -z "$fcitx5_pid" ]; then
+  echo "echo 'No terminal process found matching: fcitx5' >&2"
+  exit 1
+fi
+
+fcitx5_dbus=$(tr '\0' '\n' </proc/"$fcitx5_pid"/environ | grep DBUS_SESSION_BUS_ADDRESS)
+fcitx5_dbus="${fcitx5_dbus#DBUS_SESSION_BUS_ADDRESS=}"
+
+if [ "$DBUS_SESSION_BUS_ADDRESS" != "$fcitx5_dbus" ]; then
+  echo "export DBUS_SESSION_BUS_ADDRESS=$fcitx5_dbus"
+fi

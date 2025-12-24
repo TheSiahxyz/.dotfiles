@@ -1,0 +1,130 @@
+#!/bin/sh
+
+ytdl_cmd_base="yt-dlp --continue --embed-metadata --ignore-errors --no-force-overwrites --no-playlist --verbose"
+simulation_cmd="yt-dlp --simulate --print %(filename)s"
+
+case "$BROWSER" in
+*firefox*) cookies="firefox" ;;
+# *librewolf*) cookies="firefox:~/.librewolf/$USER.default" ;;
+# *qutebrowser*) cookies="chromium:~/.local/share/qutebrowser" ;;
+esac
+
+[ -n "$cookies" ] && ytdl_cmd_base="$ytdl_cmd_base --cookies-from-browser \"$cookies\""
+
+shift $((OPTIND - 1))
+
+# Use the first non-option argument as the URL if provided, else from clipboard
+# [url] [type] [cmd]
+if [ $# -eq 1 ]; then
+  type="$1"
+  url="$(xclip -selection clipboard -o)"
+elif [ $# -eq 2 ]; then
+  if echo "$1" | grep -qE "https?://"; then
+    url="$1"
+  elif echo "$2" | grep -qE "https?://"; then
+    type="$1"
+    url="$2"
+  fi
+fi
+
+# Process command-line options for download type
+case $type in
+-m | --music | m | music)
+  download_type="music"
+  output_dir="${XDG_MUSIC_DIR:-${HOME}/Music}"
+  archive_file="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/global/Music/.music.txt"
+  ytdl_output_format="${output_dir}/%(artist|)s%(artist& - |)s%(title)s.%(ext)s"
+  ytdl_cmd_base="$ytdl_cmd_base --audio-format best --audio-quality 0 --download-archive \"$archive_file\" --extract-audio --recode-video mp3"
+  ;;
+-r | --restore | r | restore)
+  output_dir="${XDG_MUSIC_DIR:-${HOME}/Music}"
+  archive_file="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/global/Music/.music.txt"
+  ytdl_output_format="${output_dir}/%(artist|)s%(artist& - |)s%(title)s.%(ext)s"
+  ytdl_cmd_base="$ytdl_cmd_base --audio-format best --audio-quality 0 --extract-audio --recode-video mp3"
+  ytdl_cmd="$ytdl_cmd_base --output \"$ytdl_output_format\""
+  [ ! -f "$archive_file" ] && exit 1
+  while read -r line; do
+    video_id=$(echo "$line" | awk '{print $2}')
+    ytdl_cmd="$ytdl_cmd_base --output \"$ytdl_output_format\" \"https://www.youtube.com/watch?v=$video_id\""
+    idnum=$(tsp bash -c "$ytdl_cmd")
+    pkill -RTMIN+21 "${STATUSBAR:-dwmblocks}"
+  done <"$archive_file"
+  exit 0
+  ;;
+-v | --video | v | video)
+  download_type="video"
+  output_dir="${XDG_VIDEOS_DIR:-${HOME}/Videos}"
+  ytdl_output_format="${output_dir}/%(title)s [%(id)s].%(ext)s"
+  video_ext=$(printf "best\n60fps\n30fps\nmp4\nmkv" | dmenu -i -p "Choose an encoding (default: 1080p)") || exit
+  case $video_ext in
+  best)
+    video_formats="--format bestvideo+bestaudio/best"
+    ;;
+  60fps)
+    video_formats='--format "((bv*[fps=60]/bv*)[height<=1080]/(wv*[fps=60]/wv*)) + ba / (b[fps=60]/b)[height<=1080]/(w[fps=60]/w)"'
+    ;;
+  30fps)
+    video_formats='--format "((bv*[fps=30]/bv*)[height<=1080]/(wv*[fps=30]/wv*)) + ba / (b[fps=30]/b)[height<=1080]/(w[fps=30]/w)"'
+    ;;
+  *)
+    video_formats="--format bestvideo+bestaudio/best"
+    video_options="--recode-video $video_ext"
+    ;;
+  esac
+  ytdl_cmd_base="$ytdl_cmd_base --buffer-size 1M --embed-thumbnail $video_formats --no-sponsorblock $video_options"
+  ytdl_cmd_base="${ytdl_cmd_base%* }"
+  ;;
+*)
+  notify-send "⛔ Invalid option: -$OPTARG"
+  exit 1
+  ;;
+esac
+
+[ -z "$url" ] && notify-send "⛔ No URL provided and clipboard is empty or does not contain a valid URL." && exit 1
+
+# Validate the URL format
+! echo "$url" | grep -qE '^https?://[a-zA-Z0-9.-]+(/[a-zA-Z0-9./?&%=_-]*)?$' && notify-send "⛔ Invalid URL format: $url" && exit 1
+
+# Validate URL accessibility
+! curl --head --silent --fail "$url" >/dev/null && notify-send "⛔ URL is not accessible: $url" && exit 1
+
+case $url in
+*playlist* | *list=*)
+  pl_download_choice=$(printf "playlist\na content" | dmenu -i -p "Download entire playlist or just this content?")
+  [ "$pl_download_choice" = "playlist" ] &&
+    ytdl_cmd_base=$(echo "$ytdl_cmd_base" | sed 's/ --no-playlist//') &&
+    ytdl_cmd_base="$ytdl_cmd_base --yes-playlist" &&
+    echo 🪏 >/tmp/qplaylist
+  [ "$download_type" = "video" ] &&
+    channel=$(yt-dlp --print "%(channel)s" "$url" | head -n 1 | sed 's/, /,/g;s/[\/:*?"<>| ]/-/g' | tr '[:upper:]' '[:lower:]') &&
+    playlist=$(yt-dlp --print "%(playlist_title)s" "$url" | head -n 1 | sed 's/, /,/g;s/[\/:*?"<>| ]/-/g' | tr '[:upper:]' '[:lower:]') &&
+    subdir="${channel}/${playlist}" &&
+    mkdir -p "${output_dir}/${subdir}" &&
+    ytdl_output_format="${output_dir}/${subdir}/%(playlist_index)02d_%(title)s [%(id)s].%(ext)s"
+  ;;
+esac
+
+[ -n "$cookies" ] && simulation_cmd="$simulation_cmd --cookies-from-browser $cookies $url" ||
+  simulation_cmd="$simulation_cmd $url"
+
+ytdl_cmd="$ytdl_cmd_base --output \"$ytdl_output_format\" \"$url\""
+
+# Notify and perform simulation to get filename (feedback to user)
+echo "$simulation_cmd" | while IFS= read -r line; do
+  filename=$(basename "$line")
+  notify-send "📥 Queuing $download_type to download:" "$filename"
+done
+
+# Enqueue the download task with tsp
+filename=$($simulation_cmd 2>/dev/null)
+[ -f /tmp/qplaylist ] && rm -rf /tmp/qplaylist
+notify-send "⏳ Downloading $download_type:" "$filename"
+idnum=$(tsp bash -c "$ytdl_cmd")
+pkill -RTMIN+21 "${STATUSBAR:-dwmblocks}"
+
+# Notify upon completion
+tsp -D "$idnum" notify-send "✅ $download_type download complete:" "$url" ||
+  notify-send "❌ Faild to download:" "$url"
+
+# Conditionally update the music database if the download type is music
+[ "$download_type" = "music" ] && tsp -D "$idnum" bash -c "mpc update"

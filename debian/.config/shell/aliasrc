@@ -1,0 +1,493 @@
+# alias     - normal aliases (completed with trailing space)
+# balias    - blank aliases (completed without space)
+# ialias    - ignored aliases (not completed)
+
+# Use neovim for vim if present.
+[ -x "$(command -v nvim)" ] && alias vd="nvim -d"
+
+# Use $XINITRC variable if file exists.
+[ -f "$XINITRC" ] && alias startx='startx $XINITRC'
+
+# Use $MBSYNCRC variable if file exists to sync mailbox.
+[ -f "$MBSYNCRC" ] && alias mbsync='mbsync -c $MBSYNCRC'
+
+# sudo not required for some system commands
+for command in blkid lsblk mount umount apt poweroff reboot shutdown su updatedb; do
+    alias $command="sudo $command"
+done
+unset command
+
+case "$(readlink -f /sbin/init)" in
+*systemd*)
+  # journal
+  alias -g jctl='journalctl -xe'
+  alias -g jctlou='sudo journalctl -b -n 200 -f'
+  alias -g rpi='systemctl --user restart wireplumber pipewire pipewire-pulse pipewire-jack'
+  alias -g sctl='systemctl'
+  alias -g sctlss='systemctl status'
+  alias -g sctle='systemctl enable'
+  alias -g sctld='systemctl disable'
+  alias -g sctlr='systemctl restart'
+  alias -g sctls='systemctl start'
+  alias -g sctlt='systemctl stop'
+  alias -g sctldr='systemctl daemon-reload'
+  alias -g tctl='timedatectl'
+  ;;
+esac
+
+# Go back
+alias ...='../..'
+alias ....='../../..'
+alias .....='../../../..'
+
+# abook
+alias abook='abook -f ~/.config/abook/addressbook'
+
+# bat
+alias bath='bat cache --build'
+alias can='bat -n'
+ialias -g cat='bat --plain --wrap character'
+# alias -g -- -h='-h 2>&1 | bat --language=help --style=plain'
+alias -g -- --help='--help 2>&1 | bat --language=help --style=plain'
+
+# bash
+alias sbs='source ~/.bashrc'
+
+# bc
+alias bc='bc -ql'
+
+# bluetooth
+alias bctl='bluetoothctl'
+
+# cal
+ialias cal='cal -y --monday'
+
+# cd
+alias cf='cd "$(dirname "$(readlink -f health.lua)")"'
+alias pd='cd -'
+
+# chmod
+alias che='find . -type f -exec chmod +x {};'
+alias chfd='find . -type d -exec chmod 755 {}; -o -type f -exec chmod 644 {};'
+alias cx='chmod a+x'
+alias 000='chmod -R 000'
+alias 600='chmod -R 600'
+alias 644='chmod -R 644'
+alias 666='chmod -R 666'
+alias 755='chmod -R 755'
+alias 777='chmod -R 777'
+
+# copy
+alias CC='$(fc -l -n -1) | xclip -selection clipboard'
+ialias cp='cp -iv'
+alias pwdc='pwd | xclip -selection clipboard'
+
+# curl
+ialias curl='curl --silent --show-error'
+balias clh='curl localhost:'
+balias clh8='curl localhost:8080'
+balias clh9='curl localhost:9080'
+balias c100='curl 192.168.99.100:'
+
+# delete
+alias _fd='find . -type f -name "._*" -print0 | xargs -0 rm -f'
+alias _fp='find . -type f -name "._*" -print'
+
+# diff
+ialias diff='diff --color'
+
+# docker
+alias dk='docker'
+alias dkp='docker ps'
+alias dkpa='docker ps -a'
+alias dkpaq='docker ps -a -q'
+alias dkb='docker build -t'
+alias dkbnc='docker build --no-cache -t'
+alias dkr='docker run --rm'
+alias dkrti='docker run --rm -ti'
+alias dkrd='docker run -d'
+alias dkrp8='docker run --rm -p 8080:8080'
+alias dkrp9='docker run --rm -p 9080:9080'
+alias dks='docker start'
+alias dkt='docker stop'
+alias dktt='docker stop $(docker ps -q)'
+alias dkk='docker kill'
+alias dkkk='docker kill $(docker ps -q)'
+alias dkrm='docker rm'
+alias dkri='docker rmi'
+alias dke='docker exec -ti'
+alias dkl='docker logs -f'
+alias dki='docker images'
+alias dkpu='docker pull'
+alias dkph='docker push'
+alias dkin='docker inspect'
+alias dkn='docker network'
+alias dkc='docker-compose'
+alias dkcu='docker-compose up'
+alias dkclean='docker ps -q -a -f status=exited | xargs -r docker rm && docker images -q -f dangling=true | xargs -r docker rmi'
+
+# dotbare
+alias dg='dotbare'
+alias dga='dotbare add'
+alias dgaa='dotbare add .'
+alias dgcm='dotbare commit -m'
+alias dgcam='dotbare commit -am'
+alias dgd='dotbare diff'
+alias dgl='dotbare log'
+alias dgp='dotbare push'
+alias dgst='dotbare status'
+
+# # ecryptfs
+# alias emt="echo "$(pass show encryption/ecryptfs)" | sudo mount -t ecryptfs "$1" "$2" \
+#   -o ecryptfs_cipher=aes,ecryptfs_key_bytes=32,ecryptfs_passthrough=no,ecryptfs_enable_filename_crypto=yes, \
+#   ecryptfs_sig="$(sudo cat /root/.ecryptfs/sig-cache.txt)", \
+#   ecryptfs_fnek_sig="$(sudo cat /root/.ecryptfs/sig-cache.txt)", \
+#   passwd="$(printf '%s' "$(pass show encryption/ecryptfs)")""
+
+# ls: eza or built-in
+[ -x "$(command -v eza)" ] && {
+  ialias l='eza --icons --group-directories-first'
+  ialias la='eza --icons -aa --group-directories-first'
+  ialias lh='eza --icons -aa --group-directories-first'
+  ialias ll='eza -gl --icons --group-directories-first'
+  ialias lla='eza -glaa --icons --group-directories-first'
+  ialias lm='eza -glA --group-directories-first | more'
+  ialias lr='eza --icons -R --group-directories-first'
+  ialias ls='eza --icons -A --group-directories-first'
+  ialias lsb='eza --icons -b --group-directories-first'
+  ialias lsby='eza --icons -B --group-directories-first'
+  ialias lld='eza --icons -Dl --group-directories-first'
+  ialias llda='eza --icons -aaDl --group-directories-first'
+  ialias llf='eza --icons -fl'
+  ialias llfa='eza --icons -aafl'
+  ialias llsa='eza --icons -l -s=accessed'
+  ialias llsaa='eza --icons -aal -s=accessed'
+  ialias llsc='eza --icons -l -s=created'
+  ialias llsca='eza --icons -aal -s=created'
+  ialias llse='eza --icons -l -s=extension'
+  ialias llsea='eza --icons -aal -s=extension'
+  ialias llsm='eza --icons -l -s=modified'
+  ialias llsma='eza --icons -aal -s=modified'
+  ialias llsn='eza --icons -l -s=name'
+  ialias llsna='eza --icons -aal -s=name'
+  ialias llss='eza --icons -l -s=size'
+  ialias llssa='eza --icons -aal -s=size'
+  ialias llst='eza --icons -l -s=type'
+  ialias llsta='eza --icons -aal -s=type'
+  ialias lt='eza --icons -T -L'
+  ialias ltd='eza --icons -TD -L'
+  ialias ltdr='eza --icons -TDr -L'
+  ialias ltr='eza --icons -Tr -L'
+} || {
+  ialias l='/usr/bin/ls -h --color=always --group-directories-first'
+  ialias la='/usr/bin/ls -alh --color=always --group-directories-first'
+  ialias ll='/usr/bin/ls -lh --color=always --group-directories-first'
+  ialias lla='/usr/bin/ls -aFls --color=always --group-directories-first'
+  ialias llf='/usr/bin/ls -Fls --color=always --group-directories-first'
+  ialias lm='/usr/bin/ls -alh --color=always --group-directories-first | more'
+  ialias lr='/usr/bin/ls -hlR --color=always --group-directories-first'
+  ialias lra='/usr/bin/ls -ahlR --color=always --group-directories-first'
+  ialias ls='/usr/bin/ls -AFh --color=always --group-directories-first'
+  ialias llsa='/usr/bin/ls -hlru --color=always --group-directories-first'
+  ialias llsc='/usr/bin/ls -hclr --color=always --group-directories-first'
+  ialias lld='/usr/bin/ls -l --color=always | grep "^d"'
+  ialias llda='/usr/bin/ls -la --color=always | grep "^d"'
+  ialias llse='/usr/bin/ls -BhlX --color=always --group-directories-first'
+  ialias llsf='/usr/bin/ls -l --color=always | grep -v "^d"'
+  ialias llsfa='/usr/bin/ls -la --color=always | grep -v "^d"'
+  ialias llsm='/usr/bin/ls -hlr --time=ctime --color=always --group-directories-first'
+  ialias llsn='/usr/bin/ls -alp --color=always --group-directories-first'
+  ialias llss='/usr/bin/ls -hlrS --color=always --group-directories-first'
+  ialias llst='/usr/bin/ls -hlrt --color=always --group-directories-first'
+  ialias lw='/usr/bin/ls -Ahx --color=always --group-directories-first'
+}
+
+# fastfetch
+alias ff='fastfetch'
+
+# fcitx5-remote
+alias fr='fcitx5-remote'
+
+# ffmpeg
+alias ffmpeg='ffmpeg -hide_banner'
+
+# find
+balias fdn='find . -name "'
+
+# git
+alias lg="lazygit"
+alias gu="gitupdate"
+alias ggg="ssh $THESIAH_GIT"
+alias gis="githubissuesync"
+
+# grep
+ialias -g grep='grep --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn}'
+alias grepi='grep -i'
+alias grepr='grep -r'
+alias grepri='grep -ri'
+alias grepw='grep -R -i --include="*"'
+alias grepb='grep -R -i --include="*" --exclude-dir="zsh"'
+alias -g Gg='| grep'
+alias -g Gi='| grep -i'
+alias -g GH='| grep HTTP'
+
+# hash
+alias h='hash -rf'
+
+# hexdump
+alias hx='hexdump -C'
+
+# hugo
+alias hss='hugo server --noHTTPCache'
+alias hcl='hugo --cleanDestinationDir'
+
+# ip
+ialias ip='ip -color=auto'
+alias whatsmyip='curl -s ifconfig.me | xargs'
+
+# jupyter
+alias ji='git clone git@github.com:jupyter/jupyter_client.git'
+alias jn='jupyter notebook'
+
+# killall
+alias ka='killall'
+alias k9='kill -9'
+alias k15='kill -15'
+
+# lf
+alias lf='lfub'
+
+# mime
+alias mimereset="update-desktop-database ${XDG_DATA_HOME:-${HOME}/.local/share}/applications"
+
+# mkdir
+ialias mkdir='mkdir -pv'
+
+# move
+ialias mv='mv -iv'
+
+# mysql
+alias msr='mysql -u si -p'
+
+# network
+alias wi='sudo wifi-menu'
+alias p1='ping 1.1.1.1'
+alias p192='ping 192.168.0.1'
+alias p8='ping 8.8.8.8'
+alias p9='ping 9.9.9.9'
+
+# nvim
+alias v='$EDITOR'
+alias v.='$EDITOR .'
+alias ve='$EDITOR -c enew'
+alias nv.='nvim .'
+alias nve='nvim -c enew'
+alias nts='NVIM_APPNAME=TheSiahxyz nvim'
+alias nav='NVIM_APPNAME=AstroNvim nvim'
+alias nlu='NVIM_APPNAME=LunarVim nvim'
+alias nlv='NVIM_APPNAME=LazyVim nvim'
+alias nnc='NVIM_APPNAME=NvChad nvim'
+alias snv='sudo nvim'
+alias vll='lastfiles -l'
+alias vln='$EDITOR -c '\''execute "edit " . v:oldfiles[0] | normal ''0'\'
+
+# nxsiv
+alias nsxiv='nsxiv -p'
+
+# obsidian
+alias vo="cd $HOME/Obsidian/SI && nvim Dashboard.md"
+
+# open
+alias open='xdg-open'
+
+# pacman
+command -v pacman > /dev/null 2>&1 && {
+  alias -g pcy='pacman -Syu'
+  alias -g pcyr='pacman -Syu && remaps'
+  alias -g pcs='pacman -S'
+  alias -g pcss='pacman -Ss'
+  alias -g pcqs='pacman -Qs'
+  alias -g pcr='pacman -R'
+  alias -g pcrs='pacman -Rs'
+  alias -g pcclean='pacman -Rsn $(pacman -Qqdt)'
+  alias -g pcky='pacman -Sy archlinux-keyring artix-keyring'
+}
+
+# pass
+alias potp='pass otp totp-secret'
+
+# pipe-viewer
+alias yt='pipe-viewer'
+
+# ps
+ialias ps='ps auxf'
+alias psj='ps aux | grep "[j]ava"'
+balias psg='ps auxf | grep'
+alias topcpu='/bin/ps -eo pcpu,pid,user,args | sort -k 1 -r | head -10'
+
+# python
+alias py='python3'
+
+# realpath
+alias rp='realpath'
+
+# remove
+ialias rm='rm -vI'
+
+# rsync
+alias rsc='rsync -vrazPlu'
+alias rscd='rsync -vrazPlu --delete'
+alias rscr='rsync -vrazPlu --remove-source-files'
+
+# rules
+alias rrr='sudo udevadm control --reload-rules'
+
+# samba
+alias winip="[ ! -d /media/$USER/hdd >/dev/null 2>&1 ] && mkdir -p /media/$USER/hdd >/dev/null 2>&1; sudo mount -t cifs //$(pass show smb/hdd) /media/$USER/hdd -o username=\"si\",password=\"$(pass show default/default)vers=2.0\""
+alias win10="[ ! -d /media/$USER/win10 >/dev/null 2>&1 ] && mkdir -p /media/$USER/win10 >/dev/null 2>&1; sudo mount -t cifs //$(pass show smb/share) /media/$USER/win10 -o username=\"THESIAHXYZ-WIN1\",password=\"$(pass show default/default)\""
+alias macair="[ ! -d /media/$USER/macair >/dev/null 2>&1 ] && mkdir -p /media/$USER/macair >/dev/null 2>&1; sudo mount -t cifs //$(pass show smb/macair)/si /media/$USER/macair -o username=\"Soomin Im\",password=\"$(pass show default/default)\""
+
+# sc-im
+alias scim='sc-im'
+
+# scp
+ialias scp='scp -r'
+
+# scripts
+alias cs='createscript'
+alias tmzs='timezones'
+
+# setxkbmap
+alias RM='setxkbmap -option'
+
+# sha1
+alias sha1='openssl sha1'
+
+# shell
+alias tobash="sudo chsh $USER -s /bin/bash && 'Now log out.'"
+alias tozsh="sudo chsh $USER -s /bin/zsh && 'Now log out.'"
+alias tofish="sudo chsh $USER -s /bin/fish && 'Now log out.'"
+
+# shellcheck
+alias shck='shellcheck --color=always'
+
+# shortcut
+alias ref='shortcuts >/dev/null; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutrc; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutenvrc; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/zshnameddirrc'
+
+# skype
+alias skype='skypeforlinux'
+
+# ssh
+alias gts="ssh $THESIAH_SERVER"
+alias wwr="ssh recordings"
+
+# sudo
+alias su='sudo su -l root'
+alias sm='setopt no_nomatch && rm -rf *.rej *.orig >/dev/null 2>&1'
+alias smi='setopt no_nomatch && rm -rf *.rej *.orig >/dev/null 2>&1 && unsetopt no_nomatch; sudo make clean install; rm -f config.h'
+
+# suffix
+alias -s {pdf,PDF}='background mupdf'
+alias -s {jpg,JPG,png,PNG}='background gpicview'
+alias -s {ods,ODS,odt,ODT,odp,ODP,doc,DOC,docx,DOCX,xls,XLS,xlsx,XLSX,xlsm,XLSM,ppt,PPT,pptx,PPTX,csv,CSV}='background libreoffice'
+alias -s {html,HTML}='background chromium'
+alias -s {mp4,MP4,mov,MOV,mkv,MKV}='background vlc'
+alias -s {zip,ZIP,war,WAR}="unzip -l"
+alias -s {jar,JAR}="java -jar"
+alias -s gz="tar -tf"
+alias -s {tgz,TGZ}="tar -tf"
+
+# surf
+alias surf='tabbed surf -e'
+
+# tar
+alias txf='tar -xf'
+alias ttf='tar -tf'
+
+# task
+alias tsc='task-switch-context'
+alias twt='taskwarrior-tui'
+alias tasksync='task sync && command pkill -RTMIN+25 ${STATUSBAR:-dwmblocks} && task'
+
+# tmux
+alias sts='tmux source $XDG_CONFIG_HOME/tmux/tmux.conf'
+alias ta='tmux a'
+alias tmc='tmuxcreate'
+alias tmka='tmux kill-session -a'
+alias tmls='tmux ls'
+alias tmo='tmuxopen'
+alias tmpk='command pkill tmux'
+alias tm.='tmux new -s "$(basename $PWD)"'
+
+# transmission-remote
+alias trem='transmission-remote'
+
+# trash
+alias trd='trash-rm'
+alias tre='trash-empty'
+alias trl='trash-list'
+alias trp='trash-put'
+alias trr='trash-restore'
+
+# tree
+ialias tree='tree -a -I ".svn|.git|.hg|.idea"'
+alias tree2='tree -L 2'
+alias tree3='tree -L 3'
+
+# unix
+alias -g md='mkdir -p'
+alias -g wh='which'
+alias -g wt='while true; do'
+alias -g s1='sleep 1'
+alias -g s2='sleep 2'
+alias -g s01='sleep 0.1'
+alias -g s05='sleep 0.5'
+alias -g A1="| awk '{print \$1}'"
+alias -g L='| less'
+alias -g H='| head'
+alias -g H2='| head -n 20'
+alias -g X='| xargs -I@'
+alias -g C='| xclip -selection clipboard'
+alias -g Fj='| jq .'
+alias -g Fy='| yq .'
+alias -g Fx='| xmllint --format -'
+alias -g V='| nvim -'
+
+# unzip
+alias uz='unzip'
+alias uzl='unzip -l'
+
+# vim
+alias vi='vim'
+alias vi.='vim .'
+
+# watch
+alias w1='watch -n 1'
+
+# wget
+ialias wget --hsts-file="${XDG_CACHE_HOME:-${HOME}/.cache}/wget-hsts"
+
+# w3m
+alias w3m="w3m -config ${XDG_CONFIG_HOME:-${HOME}/.config}/w3m/config"
+
+# xprog
+alias progn='xprop | awk '\''/^WM_CLASS/{sub(/.* = /, "instance:"); sub(/, /, "\nclass:"); print} /^WM_NAME/{sub(/.* = /, "title:"); print}'\'''
+
+# xrandr
+alias xauto='xrandr --auto'
+
+# xset
+alias xoff='xset s off -dpms'
+
+# zathura
+alias za='zathura'
+
+# zsh
+alias sps="source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/profile"
+alias szs="source ${XDG_CONFIG_HOME:-${HOME}/.config}/zsh/.zshrc"
+
+alias ylogh='ylog -s hidden -c us | grep $(LC_TIME=C date +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
+alias ylogi='ylog -s hidden -c us | grep $(LC_TIME=C date -v-1d +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
+alias ylogt='ylog -s recordings -c us | grep $(LC_TIME=C date +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
+alias ylogy='ylog -s recordings -c us | grep $(LC_TIME=C date -v-1d +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
+alias ylogu='ylog -s recordings -c us'

@@ -1,0 +1,31 @@
+#!/bin/sh
+
+check_ethernet() {
+  interfaces=$(ip link | awk '/^[0-9]+: e/ {print substr($2, 1, length($2)-1)}')
+  for iface in $interfaces; do
+    ip link show "$iface" | grep -q 'state UP' && return 0
+  done
+  return 1
+}
+
+toggle_wifi() {
+  wifi_status=$(nmcli radio wifi) # Get current Wi-Fi status
+  if [ "$wifi_status" = "enabled" ]; then
+    nmcli radio wifi off
+    notify-send "📡 wifi: OFF"
+  else
+    nmcli radio wifi on
+    notify-send "📡 wifi: ON"
+  fi
+}
+
+# Check Ethernet and toggle Wi-Fi based on its status
+if check_ethernet; then
+  nmcli radio wifi off
+  notify-send "📡 wifi: OFF (Ethernet connected)"
+else
+  toggle_wifi
+fi
+
+# Refresh status bar
+pkill -RTMIN+7 "${STATUSBAR:-dwmblocks}"

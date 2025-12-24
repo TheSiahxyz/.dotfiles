@@ -1,0 +1,10 @@
+*/3 * * * * export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u $USER)/bus; export DISPLAY=:0; . $HOME/.zprofile; /usr/local/bin/mailsync
+*/15 * * * * export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u $USER)/bus; export DISPLAY=:0; . $HOME/.zprofile; $HOME/.local/bin/cron/newsup
+0 */3 * * * export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u $USER)/bus; export DISPLAY=:0; . $HOME/.zprofile; $HOME/.local/bin/cron/checkup
+0 0 * * * export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u $USER)/bus; export DISPLAY=:0; . $HOME/.zprofile; NVIM_APPNAME=TheSiahxyz nvim --headless "+Lazy! sync" +qa
+0 0 * * * export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u $USER)/bus; export DISPLAY=:0; . $HOME/.zprofile; NVIM_APPNAME=TheSiahxyz nvim --headless "+MasonUpdate" +qa
+0 * * * * export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u $USER)/bus; export DISPLAY=:0; . $HOME/.zprofile; /usr/bin/nvim --headless "+Lazy! sync" +qa
+0 * * * * export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u $USER)/bus; export DISPLAY=:0; . $HOME/.zprofile; /usr/bin/nvim --headless "+MasonUpdate" +qa
+@daily export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u $USER)/bus; export DISPLAY=:0; . $HOME/.zprofile; /usr/bin/trash-empty 30
+@daily export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u $USER)/bus; export DISPLAY=:0; . $HOME/.zprofile; $HOME/.local/bin/cron/mediaup
+@daily export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u $USER)/bus; export DISPLAY=:0; . $HOME/.zprofile; $HOME/.local/bin/task/taskwarrior-tui/tasks-sync

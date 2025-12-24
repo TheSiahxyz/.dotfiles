@@ -1,0 +1,25 @@
+#!/bin/sh
+
+# Clone a repository into the current directory
+clone_repo() {
+  repository=$1
+  if [ -z "${repository}" ]; then
+    echo "ERROR: You need to enter the name of the repository you wish to clone."
+  else
+    git clone "${url}${repository}"
+  fi
+}
+
+# Get all the repositories for the user with curl and GitHub API and filter only
+# the repository name from the output with sed substitution
+all_repos() {
+  curl -s "https://api.github.com/users/${user}/repos?per_page=1000" | grep -o 'git@[^"]*' |
+    sed "s/git@github.com:${user}\///g"
+}
+
+select_repo() { dmenu -p "Select a repository >" -l 10; }
+
+user="${TheSiahxyz:-$1}"
+url="https://github.com/${user}/"
+
+clone_repo "$(all_repos | select_repo)"

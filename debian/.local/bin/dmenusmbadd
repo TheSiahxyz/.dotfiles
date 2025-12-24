@@ -1,0 +1,58 @@
+#!/bin/sh
+
+samba_conf="/etc/samba/smb.conf"
+base_path="/media /mnt /home/$USER"
+os="$(grep '^ID=' /etc/os-release | cut -d= -f2)"
+
+restartinit() {
+  case "$(basename "$(readlink -f /sbin/init)" | sed 's/-init//g')" in
+  *systemd*)
+    sudo systemctl restart smb >/dev/null/ 2>&1 && sudo systemctl restart nmb >/dev/null/ 2>&1
+    ;;
+  *runit*)
+    sudo sv restart smbd >/dev/null 2>&1 && sudo sv restart nmbd >/dev/null 2>&1
+    ;;
+  esac
+}
+
+[ -f "$samba_conf" ] || { sudo touch "$samba_conf" && smbpasswd -a "$USER"; }
+if [ "$#" -eq 1 ]; then
+  folder_path="$1"
+  folder_name=$(basename "$folder_path" | tr '[:upper:]' '[:lower:]')
+  if [ "$folder_path" = "/media/$USER" ]; then
+    folder_name="media"
+  fi
+else
+  folder_name=$(echo | dmenu -p "Enter the name of the folder to share:" | tr '[:upper:]' '[:lower:]') || exit 1
+  [ -z "$folder_name" ] && notify-send "📁No folder name provided." && exit 1
+
+  if [ "$folder_name" = "media" ]; then
+    target_name="$USER"
+  else
+    target_name="$folder_name"
+  fi
+
+  folder_path=$(for path in $base_path; do
+    find "$path" -type d -iname "$target_name" -print 2>/dev/null
+  done | sort -r | dmenu -l 10 -p "Select the folder to share:")
+  [ -z "$folder_path" ] && notify-send "📁Folder not found." && exit 1
+fi
+
+[ -d "$folder_path" ] || exit 1
+
+if grep -qF "[$USER-$os-$folder_name]" "$samba_conf"; then
+  notify-send "📁The folder '$target_name' is already shared."
+  exit 0
+fi
+
+echo | sudo tee -a "$samba_conf" >/dev/null
+sudo tee -a "$samba_conf" >/dev/null <<EOF && restartinit || exit 1
+[$USER-$os-$folder_name]
+    path = $folder_path
+    writable = yes
+    browsable = yes
+    guest ok = yes
+    create mask = 0755
+EOF
+
+notify-send "📁'$USER-$os-$folder_name' starts sharing." "path: '$folder_path'"

@@ -1,0 +1,617 @@
+### --- Basic Settings --- ###
+set autoquit true
+set cleaner '~/.config/lf/cleaner'
+set dircache false
+set drawbox true
+set dupfilefmt '%f_%n'
+set hidden false
+set hiddenfiles ".*:*.aux:*.log:*.bbl:*.bcf:*.blg:*.run.xml:*.smi:*.srt:*.ass"
+set history false
+set icons true
+set ifs "\n"
+set ignorecase true
+set incsearch true
+set incfilter true
+set mouse true
+set number true
+set period 1
+set previewer '~/.config/lf/scope'
+set ratios 1:2:3
+set relativenumber true
+set scrolloff 10
+set shellopts '-eu'
+set tempmarks '123456'
+set truncatepct 50
+
+
+### --- Custom Functions --- ###
+# Chmod
+cmd chmods ${{
+  options=$(printf "x\nu+x\na+x\n000\n644\n666\n755\n777")
+  choice=$(printf "%s" "$options" | fzf)
+  case "$choice" in
+    "x") mod="+x";;
+    "u+x") mod="u+x";;
+    "a+x") mod="a+x";;
+    "000") mod="000";;
+    "644") mod="644";;
+    "666") mod="666";;
+    "755") mod="755";;
+    "777") mod="777";;
+  esac
+  for file in $fx; do
+    chmod -R $mod "$file"
+  done
+  printf "Permissions set to $mod for selected files/directories."
+  lf -remote "send $id reload"
+}}
+
+# Compress
+cmd compress ${{
+  clear; tput cup $(($(tput lines)/3)); tput bold
+  set -f
+  printf "%s\n\t" "$fx"
+  printf "compress?[y/N]"
+  read ans
+  [ $ans = "y" ] && {
+    printf "%s\n\t" "$fx"
+    printf "file name: "
+    read ans
+    mkdir $ans && {
+      cp -r $fx $ans
+      tar czf $ans.tar.gz $ans
+      rm -rf $ans
+    } || {
+      printf "%s\n\t" "$fx"
+      printf "Permissions needs.\n"
+      printf "Continue in root?[y/N]"
+      read root
+      [ $root = "y" ] && {
+        printf "Compressing $ans...\n"
+        sudo mkdir $ans
+        sudo cp -r $fx $ans
+        sudo tar czf $ans.tar.gz $ans
+        sudo rm -rf $ans
+      }
+    }
+  }
+}}
+
+# Copy
+cmd copyto ${{
+  set -f
+  clear; tput cup $(($(tput lines)/3))
+	dest=$(sed -e 's/\s*#.*//' -e '/^$/d' -e 's/^\S*\s*//' "${XDG_CONFIG_HOME:-$HOME/.config}/shell/bm-dirs" | fzf --layout=reverse --height 40% --prompt 'Copy to where? ' | sed 's|~|$HOME|')
+	[ -z "$dest" ] && exit
+	destpath=$(eval printf '%s' \"$dest\")
+	clear; tput cup $(($(tput lines)/3)); tput bold
+	echo "From:"
+	echo "$fx" | sed 's/^/   /'
+	printf "To:\n   %s\n\n\tcopy?[y/N]" "$destpath"
+	read -r ans
+	[ "$ans" != "y" ] && exit
+  for x in $fx; do
+    cp -ivr "$x" "$destpath"
+  done &&
+  notify-send "📋 File(s) copied." "File(s) copied to $destpath."
+}}
+cmd yank-dirname $dirname -- "$f" | head -c-1 | xclip -i -selection clipboard
+cmd yank-path $printf '%s' "$fx" | xclip -i -selection clipboard
+cmd yank-basename $basename -a -- $fx | head -c-1 | xclip -i -selection clipboard
+cmd yank-basename-without-extension &basename -a -- $fx | cut -d. -f1 | head -c-1 | xclip -i -selection clipboard
+
+# Create
+cmd mkdir ${{ clear; tput cup $(($(tput lines)/3)); tput bold
+  printf "Directory Name: "
+  read ans
+  mkdir -p $ans
+}}
+cmd mkfile ${{
+  clear; tput cup $(($(tput lines)/3)); tput bold
+  printf "File Name: "
+  read ans
+  $EDITOR $ans
+}}
+cmd link %{{
+  set -- $(cat ~/.local/share/lf/files)
+  mode="$1"
+  shift
+  if [ "$#" -lt 1 ]; then
+    lf -remote "send $id echo no files to link"
+    exit 0
+  fi
+  case "$mode" in
+    # symbolically copy mode is indicating a soft link
+    copy) ln -sr -t . -- "$@";;
+    # while a move mode is indicating a hard link
+    move) ln -t . -- "$@";;
+  esac
+  rm ~/.local/share/lf/files
+  lf -remote "send clear"
+}}
+
+# Cut
+cmd cut-add %{{
+  sed '1s/.*/move/' "$XDG_DATA_HOME/lf/files" > "$XDG_DATA_HOME/lf/files.tmp"
+  mv "$XDG_DATA_HOME/lf/files.tmp" "$XDG_DATA_HOME/lf/files"
+  echo "$fx" >> "$XDG_DATA_HOME/lf/files"
+  lf -remote "send $id unselect"
+  lf -remote "send $id sync"
+}}
+cmd cut-remove %{{
+  sed '1s/.*/move/' "$XDG_DATA_HOME/lf/files" > "$XDG_DATA_HOME/lf/files.tmp"
+  mv "$XDG_DATA_HOME/lf/files.tmp" "$XDG_DATA_HOME/lf/files"
+  echo "$fx" | while read -r file; do
+    sed "\|$file|d" "$XDG_DATA_HOME/lf/files" > "$XDG_DATA_HOME/lf/files.tmp"
+    mv "$XDG_DATA_HOME/lf/files.tmp" "$XDG_DATA_HOME/lf/files"
+  done
+  lf -remote "send $id unselect"
+  lf -remote "send $id sync"
+}}
+
+# Delete
+cmd delete ${{
+  clear; tput cup $(($(tput lines)/3)); tput bold
+  set -f
+  printf "%s\n\t" "$fx"
+  printf "delete?[y/N]"
+  read ans
+  [ $ans = "y" ] && {
+    rm -rf -- $fx 2>/dev/null || {
+      printf "sudo delete?[y/N]"
+      read ans
+      [ $ans = "y" ] && sudo rm -rf -- $fx
+    }
+  }
+}}
+
+cmd trash ${{
+  files=$(printf "$fx" | tr '\n' ';')
+  while [ "$files" ]; do
+    file=${files%%;*}
+
+    trash-put "$(basename "$file")"
+    if [ "$files" = "$file" ]; then
+      files=''
+    else
+      files="${files#*;}"
+    fi
+  done
+}}
+
+cmd restore_trash ${{
+  trash-restore
+}}
+
+# Extract
+cmd extract ${{
+  clear; tput cup $(($(tput lines)/3)); tput bold
+  set -f
+  printf "%s\n\t" "$fx"
+  printf "extract?[y/N]"
+  read ans
+  [ $ans = "y" ] && {
+    case $fx in
+      *.tar.bz|*.tar.bz2|*.tbz|*.tbz2) tar xjf $fx;;
+      *.tar.gz|*.tgz) tar xzf $fx                 ;;
+      *.tar.xz|*.txz) tar xf $fx                  ;;
+      *.bz2)        bunzip2 $fx                   ;;
+      *.lzma)       unlzma $fx                    ;;
+      *.rar)        unrar e $fx                   ;;
+      *.gz)         gunzip $fx                    ;;
+      *.tar)        tar xf $fx                    ;;
+      *.xz)         unxz $fx                      ;;
+      *.zip|*.jar|*.war|*.7z) 7z x $fx            ;;
+      *.Z)          uncompress $fx                ;;
+      *.exe)        cabextract $fx                ;;
+      *.ace)        unace x $fx                   ;;
+    esac
+  }
+}}
+
+# Git
+cmd on-cd &{{
+  zoxide add "$PWD"
+  bash -c '
+  # display git repository status in your prompt
+  source /usr/share/git/completion/git-prompt.sh
+  GIT_PS1_SHOWDIRTYSTATE=auto
+  GIT_PS1_SHOWSTASHSTATE=auto
+  GIT_PS1_SHOWUNTRACKEDFILES=auto
+  GIT_PS1_SHOWUPSTREAM=auto
+  git=$(__git_ps1 " (%s)")
+
+  fmt="\033[32;1m%u@%h\033[0m:\033[34;1m%d\033[0m\033[1m%f$git\033[0m"
+  lf -remote "send $id set promptfmt \"$fmt\""
+  '
+}}
+
+# iPython
+cmd create-ipynb ${{
+  clear; tput cup $(($(tput lines)/3)); tput bold
+  printf "File Name: "
+  read ans
+  vipy $ans
+}}
+
+# Move
+cmd moveto ${{
+  set -f
+  clear; tput cup $(($(tput lines)/3))
+	dest=$(sed -e 's/\s*#.*//' -e '/^$/d' -e 's/^\S*\s*//' "${XDG_CONFIG_HOME:-$HOME/.config}/shell/bm-dirs" | fzf --layout=reverse --height 40% --prompt 'Move to where? ' | sed 's|~|$HOME|')
+	[ -z "$dest" ] && exit
+	destpath=$(eval printf '%s' \"$dest\")
+	clear; tput cup $(($(tput lines)/3)); tput bold
+	echo "From:"
+	echo "$fx" | sed 's/^/   /'
+	printf "To:\n   %s\n\n\tmove?[y/N]" "$destpath"
+	read -r ans
+	[ "$ans" != "y" ] && exit
+  for x in $fx; do
+    mv -iv "$x" "$destpath"
+  done &&
+  notify-send "🚚 File(s) moved." "File(s) moved to $destpath."
+}}
+
+# MPV
+cmd mpvdir ${{
+  if [ -n "$fx" ]; then
+    set -- $fx
+    setsid -f mpv --x11-name=video --really-quiet -- "$@"
+  else
+    for file in $(printf '%s\n' *.mp4 *.mkv *.avi *.flv *.webm *.mov *.mpg *.3gp *.ts *.rmvb | sort); do
+      [ -e "$file" ] && set -- "$@" "$file"
+    done
+    [ -n "$1" ] && setsid -f mpv --x11-name=video --really-quiet -- "$@"
+  fi
+
+  lf -remote "send $id :clear; unselect; save-select"
+}}
+
+# Open
+cmd open ${{
+  case $(file --mime-type "$(readlink -f $f)" -b) in
+  application/octet-stream)
+    case ${f##*.} in
+    doc|docx|xls|xlsx|odt|ppt|pptx) setsid -f libreoffice $fx >/dev/null 2>&1 ;;
+    ghw) setsid -f gtkwave $f >/dev/null 2>&1 ;;
+    ts) setsid -f mpv --x11-name=video $f -quiet >/dev/null 2>&1 ;;
+    *) setsid -f zathura $fx >/dev/null 2>&1 ;;
+    esac
+    ;;
+  application/epub*|application/pdf|application/postscript|application/vnd.djvu|image/vnd.djvu) setsid -f zathura $fx >/dev/null 2>&1 ;;
+  application/pgp-encrypted) $EDITOR $fx ;;
+  application/vnd.oasis.opendocument.text|application/vnd.oasis.opendocument.spreadsheet|application/vnd.oasis.opendocument.spreadsheet-template|application/vnd.oasis.opendocument.presentation-template|application/vnd.oasis.opendocument.presentation|application/vnd.ms-powerpoint|application/vnd.oasis.opendocument.graphics|application/vnd.oasis.opendocument.graphics-template|application/vnd.oasis.opendocument.formula|application/vnd.oasis.opendocument.database) setsid -f firefox $fx >/dev/null 2>&1 ;;
+  application/x-hwp|application/vnd.openxmlformats-officedocument.presentationml.presentation|application/vnd.openxmlformats-officedocument.wordprocessingml.document) setsid -f libreoffice $fx >/dev/null 2>&1 ;;
+  audio/*|video/x-ms-asf) setsid -f mpv --volume=50 --x11-name=music --force-window=yes --audio-display=embedded-first $f >/dev/null 2>&1 ;;
+  image/x-xcf) setsid -f gimp $f >/dev/null 2>&1 ;;
+  image/svg+xml) display -- $f ;;
+  image/*) rotdir $f | grep -i "\.\(png\|jpg\|jpeg\|gif\|webp\|avif\|tif\|ico\)\(_large\)*$" |
+    setsid -f nsxiv -aiop 2>/dev/null | while read -r file; do
+      [ -z "$file" ] && continue
+      lf -remote "send select \"$file\""
+      lf -remote "send toggle"
+    done &
+    ;;
+  text/csv|application/vnd.openxmlformats-officedocument.spreadsheetml.sheet) sc-im $fx;;
+  text/html|text/xml) lynx $fx;;
+  text/troff) groff -mom $fx -Tpdf | zathura - ;;
+  text/*|application/json|inode/x-empty|application/x-subrip) $EDITOR $fx;;
+  video/*) setsid -f mpv --x11-name=video -quiet $f >/dev/null 2>&1 ;;
+	*) for f in $fx; do setsid -f ${OPENER:-xdg-open} $f >/dev/null 2>&1; done;;
+  esac
+}}
+
+# Rename
+cmd bulkrename ${{
+  tmpfile_old="$(mktemp)"
+  tmpfile_new="$(mktemp)"
+
+  [ -n "$fs" ] && fs=$(basename -a $fs) || fs=$(ls)
+
+  echo "$fs" > "$tmpfile_old"
+  echo "$fs" > "$tmpfile_new"
+  $EDITOR "$tmpfile_new"
+
+  [ "$(wc -l < "$tmpfile_old")" -eq "$(wc -l < "$tmpfile_new")" ] || { rm -f "$tmpfile_old" "$tmpfile_new"; exit 1; }
+
+  paste "$tmpfile_old" "$tmpfile_new" | while IFS="$(printf '\t')" read -r src dst
+  do
+    [ "$src" = "$dst" ] || [ -e "$dst" ] || mv -- "$src" "$dst"
+  done
+
+  rm -f "$tmpfile_old" "$tmpfile_new"
+  lf -remote "send $id unselect"
+}}
+
+# Samba
+cmd share-samba ${{
+  printf "%s\n\t" "$fx"
+  printf "Share this folder?[y/N]"
+  read ans
+  [ $ans = "y" ] && dmenusamba "$f"
+}}
+
+# Select
+cmd select-type &{{
+  set -f
+  [ "$#" -eq 0 ] && exit
+  files="$(
+    find "$PWD" -mindepth 1 -maxdepth 1 \
+    \( \( -type "$1" -o \( -type l -a -exec test -"$1" {} \; \) \) \) \
+    $([ "$lf_hidden" = false ] && printf '%s\n' -not -name '.*') -print0 |
+    sort -z |
+    sed -z 's/\\/\\\\/g;s/"/\\"/g;s/\n/\\n/g;s/^/"/;s/$/"/' |
+    tr '\0' ' ')"
+  [ -n "$files" ] && lf -remote "send $id :unselect; toggle $files"
+}}
+cmd select-dirs select-type d
+cmd select-files select-type f
+cmd select-videos &{{
+  set -f
+  files="$(
+    find "$PWD" -mindepth 1 -maxdepth 1 \( \( -type f -o \( -type l -a -exec test -f {} \; \) \) \) \( -iname '*.mp4' -o -iname '*.mkv' -o -iname '*.flv' -o -iname '*.avi' -o -iname '*.webm' -o -iname '*.mov' -o -iname '*.mpg' -o -iname '*.ts' -o -iname '*.wmv' -o -iname '*.vob' -o -iname '*.3gp' -o -iname '*.rmvb' \) \
+    $([ "$lf_hidden" = false ] && printf '%s\n' ! -name '.*') -print0 |
+    sort -z |
+    sed -z 's/\\/\\\\/g;s/"/\\"/g;s/\n/\\n/g;s/^/"/;s/$/"/' |
+    tr '\0' ' ')"
+  [ -n "$files" ] && lf -remote "send $id :unselect; toggle $files"
+}}
+cmd select-images &{{
+  set -f
+  files="$(
+    find "$PWD" -mindepth 1 -maxdepth 1 \( \( -type f -o \( -type l -a -exec test -f {} \; \) \) \) \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.gif' -o -iname '*.bmp' -o -iname '*.tiff' -o -iname '*.tif' -o -iname '*.svg' -o -iname '*.webp' \) \
+    $([ "$lf_hidden" = false ] && printf '%s\n' ! -name '.*') -print0 |
+    sort -z |
+    sed -z 's/\\/\\\\/g;s/"/\\"/g;s/\n/\\n/g;s/^/"/;s/$/"/' |
+    tr '\0' ' ')"
+  [ -n "$files" ] && lf -remote "send $id :unselect; toggle $files"
+}}
+cmd select-music &{{
+  set -f
+  files="$(
+    find "$PWD" -mindepth 1 -maxdepth 1 \( \( -type f -o \( -type l -a -exec test -f {} \; \) \) \) \( -iname '*.mp3' -o -iname '*.flac' -o -iname '*.wav' -o -iname '*.aac' -o -iname '*.ogg' -o -iname '*.m4a' -o -iname '*.wma' \) \
+    $([ "$lf_hidden" = false ] && printf '%s\n' ! -name '.*') -print0 |
+    sort -z |
+    sed -z 's/\\/\\\\/g;s/"/\\"/g;s/\n/\\n/g;s/^/"/;s/$/"/' |
+    tr '\0' ' ')"
+  [ -n "$files" ] && lf -remote "send $id :unselect; toggle $files"
+}}
+cmd on-select &{{
+  lf -remote "send $id set statfmt \"$(eza -ld --color=always "$f")\""
+}}
+cmd load-select &{{
+    if [ $# -eq 1 ] && [ "$1" = "$id" ]; then
+        exit
+    fi
+    lf -remote "send $id unselect"
+    if [ -s ~/.local/share/lf/select ]; then
+        files="$(sed 's/\\/\\\\/g;s/"/\\"/g;s/^/"/;s/$/"/' ~/.local/share/lf/select | tr '\n' ' ')"
+        lf -remote "send $id toggle $files"
+    fi
+}}
+cmd save-select &{{
+  printf "%s" "$fs" > ~/.local/share/lf/select
+  lf -remote "send load-select $id"
+}}
+cmd alt-paste &{{
+  [ -n "$fs" ] && lf -remote "send $id :$1; save-select"
+  lf -remote "send $id paste" || {
+    clear; tput cup $(($(tput lines)/3)); tput bold
+    set -f
+    printf "%s\n\t" "$fx"
+    printf "Permissions needs.\n"
+    printf "Continue in root?[y/N]"
+    read root
+    [ $root = "y" ] && sudo lf -remote "send $id paste"
+  }
+
+  lf -remote "send $id :clear"
+}}
+
+# Traversal
+cmd fzf $nvim $(find . -name "$1" | fzf)
+cmd fzf_search ${{
+  RG_PREFIX="rg --column --line-number --no-heading --color=always --smart-case "
+  res="$(
+    FZF_DEFAULT_COMMAND="$RG_PREFIX ''" \
+      fzf --bind "change:reload:$RG_PREFIX {q} || true" \
+      --ansi --layout=reverse --header 'Search in files' \
+      | cut -d':' -f1 | sed 's/\\/\\\\/g;s/"/\\"/g'
+  )"
+  [ -n "$res" ] && lf -remote "send $id select \"$res\""
+}}
+cmd z %{{
+	result="$(zoxide query --exclude $PWD $@ | sed 's/\\/\\\\/g;s/"/\\"/g')"
+	lf -remote "send $id cd \"$result\""
+}}
+cmd zi ${{
+	result="$(zoxide query -i | sed 's/\\/\\\\/g;s/"/\\"/g')"
+	lf -remote "send $id cd \"$result\""
+}}
+cmd follow_link %{{
+  lf -remote "send ${id} select '$(readlink $f)'"
+}}
+cmd lastfiles ${{
+  list=$(nvim -u NONE --headless +'lua io.write(table.concat(vim.v.oldfiles, "\n") .. "\n")' +qa)
+  file=$(printf "%s" "$list" | while read -r file; do
+    [ -f "$file" ] && printf "%s\n" "$file"
+  done | fzf --reverse || lf -remote "send $id reload")
+  [ -n "$file" ] && $EDITOR "$file"
+}}
+cmd edit-config ${{
+  $EDITOR ~/.config/lf/lfrc
+  lf -remote "send $id source ~/.config/lf/lfrc"
+}}
+
+cmd wine-run ${{
+  if [ $(file --mime-type "$(readlink -f $f)" -b) = "application/vnd.microsoft.portable-executable" ]; then
+    file="${f##*/}"
+    file="${file%.*}"
+    export WINEPREFIX="${WINEPREFIX:-${XDG_DATA_HOME:-${HOME}/.local/share}/wine}/$file"
+    wine $f
+  fi
+}}
+
+# Wallpaper
+cmd setbg "$1"
+cmd setlock "$1"
+
+### --- Bindings --- ###
+# Unbinding
+map b
+map c
+map d
+map f
+map g
+map H
+map M
+map p
+map s
+map t
+map v
+map w
+map y
+map z
+
+# Shortcuts
+source ~/.config/lf/shortcutrc
+
+# Chmod
+map zx chmods
+
+# Clear && Unselect
+map <c-l> :clear; unselect; save-select
+map <c-x> :clear; unselect; save-select
+
+# Compress
+map C compress
+
+# Copy
+# map yy %cp -ri -- $fs .; clear
+map Y $printf "%s" "$fx" | xclip -selection clipboard; clear; save-select
+map yb yank-basename
+map yd yank-dirname
+map ye copyto; clear; save-select
+map yl $printf "%s" "$fx" | sed -E 's/^.+\[/https:\/\/piped.video\/watch?v=/' | sed -E 's/\]\..+//' | xclip -selection clipboard
+map yn yank-basename-without-extension
+map yp yank-path
+map yt $printf "%s" "$fx" | sed -E 's/^.+\[/https:\/\/www.youtube.com\/watch?v=/' | sed -E 's/\]\..+//' | xclip -selection clipboard
+map yy copy
+
+# Create
+map Md mkdir
+map Mf mkfile
+map Ml link
+
+# Cut
+map dd cut-add
+map dr cut-remove
+
+# Delete
+map D trash; clear; save-select
+map <delete> delete; clear; save-select
+
+# Editor
+map <enter> $$EDITOR "$f"
+map <c-v> push :!nvim<space>
+map vlf edit-config
+map vll lastfiles
+map vln $$EDITOR "$(nvim -u NONE --headless +'lua io.write(vim.v.oldfiles[1] .. "\n")' +qa)"
+
+# Extract
+map E extract; clear; save-select
+
+# iPython
+map Mi create-ipynb
+
+# Move
+map Mt moveto; clear; save-select
+
+# MPV
+map Mpv mpvdir
+
+# Nsxiv
+map th $nsxiv -apt "$(pwd)"
+
+# Open
+map O $mimeopen "$f"
+map o open
+map <c-o> $mimeopen --ask "$f"
+
+# Paste
+map PP alt-paste cut
+map pp alt-paste copy
+
+# Preview
+map zd set dirpreviews!
+map zp set preview!
+
+# Program
+map T $setsid -f $TERMINAL >/dev/null 2>&1
+map x $$f
+map X !$f
+
+# Quit
+map <esc> quit
+map <c-c> quit
+
+# Rename
+map a :rename; cmd-right # after extension
+map A :rename; cmd-end # at the very end
+map B bulkrename
+map r :rename; cmd-delete-home # filename
+map R :rename; cmd-end; cmd-delete-home # entire filename
+map i :rename # before extension
+map I :rename; cmd-home # at the very beginning
+
+# Redraw && Reload
+map <c-r> :redraw; reload
+
+# Restore
+map U restore_trash
+
+# Samba
+map SMB share-samba
+
+# Select
+map <space> :toggle; down; save-select
+map sb :invert-below; save-select
+map sd select-dirs
+map sf select-files
+map si :invert; save-select
+map sm select-music
+map sp select-images
+map su :unselect; save-select
+map sU :glob-unselect; save-select
+map sv select-videos
+
+# Sort
+map sa :set sortby atime; set info atime
+map sc :set sortby ctime; set info ctime
+map se :set sortby ext; set info
+map sn :set sortby natural; set info
+map st :set sortby time; set info time
+map sz :set sortby size; set info size
+
+# Tag
+map tg tag-toggle
+
+# Traversal
+map fa $lf -remote "send $id select \"$(fzf)\""
+map fb $lf -remote "send $id cd $(sed -e 's/\s*#.*//' -e '/^$/d' -e 's/^\S*\s*//' ${XDG_CONFIG_HOME:-$HOME/.config}/shell/bm-dirs | fzf)"
+map fD zi
+map fd $lf -remote "send $id select \"$(find . -type d | fzf)\""
+map ff $lf -remote "send $id select \"$(find . -type f | fzf)\""
+map gl follow_link
+map <c-f> fzf_search
+map <c-z> z
+
+# Wallpaper
+map bg $setbg "$f"
+map bl $setlock "$f"
+
+# Wine
+map wi wine-run
+
+load-select

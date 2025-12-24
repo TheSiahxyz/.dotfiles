@@ -1,0 +1,21 @@
+#!/bin/sh
+
+set -e
+
+[ "$1" != "" ] && time=$1 || time=''
+
+printDate() {
+  [ "$time" != "" ] && message="$(TZ=$2 date +'%a, %d %b %H:%M' -d "$time $(date +%Z)")" || message="$(TZ=$2 date +'%a, %d %b %H:%M')"
+  notify-send "$1" "$message"
+}
+
+printDate "Los Angeles" America/Los_Angeles
+printDate "New York" America/New_York
+printDate "London" Europe/London
+printDate "Berlin" Europe/Berlin
+printDate "Moscow" Europe/Moscow
+printDate "Bangkok" Asia/Bangkok
+printDate "Hong Kong" Asia/Hong_Kong
+printDate "Macau" Asia/Macau
+printDate "Seoul" Asia/Seoul
+printDate "Tokyo" Asia/Tokyo

@@ -1,0 +1,72 @@
+#!/bin/sh
+
+# Exit immediately if any command fails
+set -e
+
+get_full_file_list() {
+  echo "$existing_files" | awk '!seen[$0]++'
+}
+
+handle_fzf_error() {
+  if [ $? -eq 130 ]; then
+    # If fzf-tmux was interrupted by Ctrl+C (exit code 130), exit gracefully
+    exit 0
+  else
+    # Otherwise, re-raise the error
+    return $?
+  fi
+}
+
+# Get the repository root path and change to the repo root directory
+repo_root=$(git rev-parse --show-toplevel 2>/dev/null)
+cd "$repo_root" || {
+  echo "Failed to change to repository root directory"
+  exit 1
+}
+
+# Determine the base branch (main or master)
+if git show-ref --quiet refs/heads/main; then
+  base_branch=main
+elif git show-ref --quiet refs/heads/master; then
+  base_branch=master
+else
+  base_branch=main
+fi
+
+if [ "$(git remote | head -n 1)" = "origin" ]; then
+  remote="origin"
+elif [ "$(git remote | head -n 1)" = "home" ]; then
+  remote="home"
+else
+  remote="origin"
+fi
+
+merge_base=$(git merge-base HEAD "$base_branch")
+file_list=$(git log --pretty=format: --name-only -n 30 | grep . | awk '!seen[$0]++' | head -n 30)
+
+# Generate the file list and verify each file path
+existing_files=$(echo "$file_list" | while IFS= read -r file; do
+  [ -f "$file" ] && echo "$repo_root/$file"
+done)
+
+# Use fzf-tmux to select from the sorted list
+selected_files=$(get_full_file_list | fzf-tmux \
+  --header "^a: all, ^e: edited, ^f: current branch ^r: recent, ^s: staged, ^u: unpushed" \
+  --preview "bat --color=always {}" \
+  --reverse \
+  --multi \
+  --select-1 \
+  --exit-0 \
+  --bind "ctrl-a:reload(git ls-tree -r HEAD --name-only || handle_fzf_error)" \
+  --bind "ctrl-e:reload(git diff --name-only || handle_fzf_error)" \
+  --bind "ctrl-f:reload(git diff-tree --no-commit-id --name-only -r $merge_base..HEAD || handle_fzf_error)" \
+  --bind "ctrl-r:reload(echo \"$existing_files\" | awk '!seen[\$0]++' || handle_fzf_error)" \
+  --bind "ctrl-s:reload(git diff --cached --name-only || handle_fzf_error)" \
+  --bind "ctrl-u:reload(git diff --name-only $remote/$base_branch..HEAD || handle_fzf_error)" \
+  --bind "change:top" ||
+  handle_fzf_error)
+
+# Check if any files were selected, and exit if not
+[ -z "$selected_files" ] && exit 0
+
+openfiles "$selected_files"

@@ -1,0 +1,22 @@
+#!/bin/sh
+
+drives=$(lsblk -n -r -o NAME,SIZE,MOUNTPOINT | grep -E --color=always '3[0-9].*M')
+drive=$(echo "$drives" | awk '{print $1}' | head -n1)
+[ -z "$drive" ] && exit
+echo "$drives"
+drive="/dev/$drive"
+printf "\n%s\n" "Target drive: $drive"
+firmwarepath="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/$(whereami)/.config/glove80"
+firmware="$(find "$firmwarepath" "${XDG_DOWNLOAD_DIR:-${HOME}/Downloads}" -type f -iname '*.uf2' -printf '%T@ %p\n' | sort -n | cut -d' ' -f2- | fzf --prompt "Choose a firmware: ")"
+[ -f "$firmware" ] || exit
+[ -f "$firmwarepath/$(basename "$firmware")" ] || mv "$firmware" "$firmwarepath/"
+mp="/media/$USER/firmware"
+[ -d "$mp" ] || mkdir -p "$mp"
+sudo -A mount "$drive" "$mp"
+sudo -A cp "$firmwarepath/$(basename "$firmware")" "$mp/"
+[ -f "$firmwarepath/$(basename "$firmware")" ] || exit 1
+ls -la "$mp"
+[ -f "$mp/$(basename "$firmware")" ] || exit 1
+sudo -A umount "$mp"
+[ -e "$mp" ] && [ ! -s "$mp" ] && sudo -A rm -rf "$mp" || exit 1
+echo "Done!"

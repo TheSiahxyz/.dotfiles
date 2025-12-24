@@ -1,0 +1,39 @@
+#!/bin/sh
+
+device_name="$(xinput list | grep '↳' | sed 's/.*↳ //g' | fzf)"
+[ -n "$device_name" ] && device_id="$(xinput list | grep -F "↳ $device_name" | sed -n 's/.*id=\([0-9]\+\).*/\1/p')" || exit
+
+show_matrix() {
+  printf "%s\n" "$(xinput list-props "$device_id" | awk '/Coordinate Transformation Matrix/{print $0}' | sed 's/^[[:space:]]*//g')"
+}
+
+# Function to set new speed and scrolling speed values
+set_speeds() {
+  printf "Set trackpoint speed: "
+  read -r speed
+
+  printf "Set trackpoint scrolling speed: "
+  read -r scroll_speed
+
+  prop_id=$(xinput list-props "$device_name" | awk '/Coordinate Transformation Matrix/ {match($0, /\(([0-9]+)\)/, a); print a[1]}')
+
+  if [ -n "$prop_id" ]; then
+    xinput set-prop "$device_name" "$prop_id" "$speed, 0, 0, 0, $scroll_speed, 0, 0, 0, 1"
+    show_matrix
+  else
+    printf "Property ID for Coordinate Transformation Matrix not found.\n" >&2
+    return 1
+  fi
+}
+
+case "$1" in
+-s)
+  set_speeds
+  ;;
+-l | "")
+  show_matrix
+  ;;
+*)
+  echo "Invalid option. Use -s to set speeds or -l to list the matrix."
+  ;;
+esac

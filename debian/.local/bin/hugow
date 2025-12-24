@@ -1,0 +1,70 @@
+#!/bin/sh
+set -eu
+
+repodir="$HOME/Private/repos/THESIAH"
+out="$repodir/public/recordings/index.html"
+server="${THESIAH_SERVER:-root@thesiah.xyz}"
+dest="/var/www/thesiah/recordings/"
+defaults="sy after foramonth"
+src="$repodir/public/recordings/"
+
+cd "$repodir"
+hugo --cleanDestinationDir
+
+if [ ! -f "$out" ]; then
+  echo "error: not found: $out" >&2
+  exit 1
+fi
+
+tmp="$(mktemp "$out.XXXXXXXX.tmp")"
+
+awk -v defaults="$defaults" '
+BEGIN {
+  n = split(defaults, a, /[[:space:]]+/)
+  insert = ""
+  for (i = 1; i <= n; i++) {
+    if (a[i] == "") continue
+    name = a[i] ".mp4"
+    insert = insert \
+"  <li>\n" \
+"    <a href=\"/recordings/" name "\" data-name=\"" name "\" class=\"vid\">" name "</a>\n" \
+"  </li>\n"
+  }
+  injected = 0
+}
+{
+  print
+  if (!injected && $0 ~ /<ul[^>]*id=["'\''"]list["'\''"][^>]*>/) {
+    printf("%s", insert)
+    injected = 1
+  }
+}
+END { if (!injected) exit 2 }
+' "$out" >"$tmp"
+
+mv "$tmp" "$out"
+echo "Injected defaults into: $out"
+
+ssh "$server" "mkdir -p '$dest'"
+
+if [ -n "${THESIAH_SSH_OPTS:-}" ]; then
+  rsync -azv --update --itemize-changes --stats \
+    -e "ssh $THESIAH_SSH_OPTS" \
+    "$src" "$server:$dest"
+else
+  rsync -azv --update --itemize-changes --stats \
+    "$src" "$server:$dest"
+fi
+
+if [ -n "${1-}" ]; then
+  new="$repodir/content/recordings/$1"
+  if [ -f "$new" ]; then
+    rsync -az --update "$new" "$server:$dest"
+  elif [ -d "$new" ]; then
+    rsync -az --update "$new/" "$server:$dest$(basename "$new")/"
+  fi
+fi
+
+ssh "$THESIAH_SERVER" "chmod 644 $dest/index.html"
+
+cd - >/dev/null

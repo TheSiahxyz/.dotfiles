@@ -1,0 +1,51 @@
+#!/bin/sh
+
+# Capture the current session name
+current_session=$(tmux display-message -p '#S')
+
+# Sleep for a bit to allow tui to load
+sleep 0.1
+
+# Extract the line number and file path from the input string
+line_number=$(echo "$1" | awk -F ':' '{print $2}')
+file_path=$(echo "$1" | awk -F ':' '{print $3}')
+
+# Resolve the file path if it's a symlink
+if [ -L "$file_path" ]; then
+  file_path=$(readlink -f "$file_path")
+fi
+
+# Use all arguments beyond the first one as the task_description
+shift
+task_description="$*"
+
+# If a task description is provided, search for the line number containing that description
+if [ -n "$task_description" ]; then
+  new_line_number=$(grep -n -F "$task_description" "$file_path" | awk -F ':' '{print $1}' | head -n 1)
+  if [ -n "$new_line_number" ]; then
+    line_number=$new_line_number
+  fi
+fi
+
+# Capture the file name from the file path without the extension
+file_name=$(basename "$file_path" | awk -F '.' '{print $1}')
+dir_name=$(dirname "$file_path")
+
+# Check if directory exists
+if [ ! -d "$dir_name" ]; then
+  exit 1
+fi
+
+# Create a new tmux session which opens the file with neovim at the specific line number
+cd "$dir_name" && tmux new-session -d -s "$file_name" "nvim +$line_number $file_path"
+
+# Attach to the new session
+tmux switch-client -t "$file_name"
+
+# Wait for the session to be closed, either by the user or some other way
+while tmux has-session -t "$file_name" 2>/dev/null; do
+  sleep 1
+done
+
+# Switch back to the original session
+tmux switch-client -t "$current_session"

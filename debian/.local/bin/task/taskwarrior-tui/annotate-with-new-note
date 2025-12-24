@@ -1,0 +1,41 @@
+#!/bin/sh
+
+# UUID of the task to annotate
+uuid="$*"
+
+# Directory where notes are stored
+notes_dir="$HOME/Private/repos/Obsidian/SI/Notes"
+templates_dir="$HOME/Private/repos/Obsidian/SI/Resources/Templates"
+
+# Prompt for the new note name
+printf "Enter the name for the new note: "
+read -r new_note_name
+
+copy_note="$templates_dir/projects.md"
+filepath="$notes_dir/$new_note_name.md"
+
+# Check if a file with this name already exists
+if [ -f "$filepath" ]; then
+  echo "File with this name already exists. Annotating the task with the existing note."
+else
+  nvim -n -c "ObsidianNew $new_note_name" --headless >/dev/null 2>&1 &
+  if [ -f "$copy_note" ]; then
+    cp "$copy_note" "$filepath"
+    echo "New note created and opened in Neovim."
+  fi
+fi
+
+# Annotate the task with the filepath
+task_output=$(task rc.bulk=0 rc.confirmation=off "$uuid" annotate "$filepath")
+
+# Check if annotation was successful
+case "$task_output" in
+*"Annotated"*)
+  echo "Successfully annotated the task with the note."
+  ;;
+*)
+  echo "Failed to annotate the task."
+  ;;
+esac
+
+${EDITOR:-nvim} "$filepath"

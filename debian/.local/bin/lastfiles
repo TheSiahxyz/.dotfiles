@@ -1,0 +1,77 @@
+#!/bin/sh
+
+# Display help message
+usage() {
+  echo "Open the most recent file or the list of old files in fzf edited by nvim."
+  echo ""
+  echo "Usage: ${0##*/} [OPTION]"
+  echo ""
+  echo "Options:"
+  echo "                  : Open the most recent old file in Neovim."
+  echo "  -h, --help      : Show this help message."
+  echo "  -l, --list      : Show all recent files in Neovim using fzf."
+  echo ""
+  echo "Examples:"
+  echo "  ${0##*/}        # Open the most recent file."
+  echo "  ${0##*/} -l     # Show all recent files in fzf and select to open."
+  exit 0
+}
+
+# List and handle oldfiles
+list_oldfiles() {
+  # Fetch the oldfiles list from Neovim
+  oldfiles=$(nvim -u NONE --headless +'lua io.write(table.concat(vim.v.oldfiles, "\n") .. "\n")' +qa)
+
+  # Exit if no oldfiles are found
+  [ -z "$oldfiles" ] && {
+    echo "No recent files found in Neovim." >&2
+    exit 1
+  }
+
+  case "$1" in
+  -h | --help)
+    usage
+    ;;
+  -l | --list)
+    # Filter valid files
+    valid_files=$(echo "$oldfiles" | while IFS= read -r file; do
+      [ -f "$file" ] && printf "%s\n" "$file"
+    done)
+
+    # Exit if no valid files exist
+    [ -z "$valid_files" ] && {
+      echo "No valid files found." >&2
+      exit 1
+    }
+
+    # Use fzf to select files
+    selected_files=$(echo "$valid_files" |
+      fzf-tmux \
+        --multi \
+        --preview 'bat -n --color=always --line-range=:500 {} 2>/dev/null || echo "Error previewing file"' \
+        --height=70% \
+        --reverse)
+
+    # Exit if no files were selected
+    [ -z "$selected_files" ] && exit 1
+
+    # Open selected files in Neovim
+    openfiles "$selected_files"
+    ;;
+  *)
+    # Open the most recent file
+    for file in $oldfiles; do
+      if [ -f "$file" ]; then
+        openfiles "$file"
+        exit 0
+      fi
+    done
+
+    echo "No valid recent files found." >&2
+    exit 1
+    ;;
+  esac
+}
+
+# Parse command-line arguments
+list_oldfiles "$@"

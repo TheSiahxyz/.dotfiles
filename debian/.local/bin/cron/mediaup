@@ -1,0 +1,34 @@
+#!/bin/sh
+
+timestamp_file="${HOME}/.cache/ytdlpupdate"
+current_time=$(date +%s)
+
+# Create cache directory if it doesn't exist
+mkdir -p "${HOME}/.cache"
+
+# Check if the timestamp file exists and is less than 24 hours old
+if [ -f "$timestamp_file" ] && [ "$(cat "$timestamp_file")" -gt "$((current_time - 86400))" ]; then
+  exit 0
+fi
+
+# Check if pipx is available, install if not
+if ! command -v pipx >/dev/null 2>&1; then
+  python3 -m pip install --user pipx || exit 1
+  python3 -m pipx ensurepath || exit 1
+  if [ -f "${ZDOTDIR:-${HOME}/.config/zsh}/.zshrc" ]; then
+    # shellcheck source=${ZDOTDIR:-${HOME}/.config/zsh}/.zshrc
+    . "${ZDOTDIR:-${HOME}/.config/zsh}/.zshrc"
+  elif [ -f "${HOME}/.zshrc" ]; then
+    # shellcheck source=${HOME}/.zshrc
+    . "${HOME}/.zshrc"
+  fi
+fi
+
+# Check if yt-dlp is installed via pipx, install or upgrade it
+if ! pipx list | grep -q yt-dlp; then
+  pipx install yt-dlp || exit 1
+else
+  pipx upgrade yt-dlp || exit 1
+fi
+
+echo "$current_time" >"$timestamp_file"

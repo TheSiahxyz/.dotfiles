@@ -1,0 +1,26 @@
+#!/bin/sh
+
+set -e
+
+# Check if input is piped
+if [ -t 0 ]; then
+  input="$1"
+else
+  input=$(cat | sed -E "s/\x1b\[[0-9;]*m//g")
+fi
+
+# Use a temporary file for the processed content
+tmpfile=$(mktemp /tmp/nvim_buffer_cleaned.XXXXXX)
+
+# Save the input to the temporary file
+echo "$input" >"$tmpfile"
+
+# Process the input and open Neovim directly, ensuring it doesn't suspend
+nvim -c "GpChatNew" \
+  -c "call append(line('$'), readfile('$tmpfile'))" \
+  -c "normal iKeep your responses short and simple, when asked to provide command, provide only one. Do not provide explanations unless explicitly asked for. When you need to find out something about my system or the environment, rather than asking, provide a one-line command that I can execute and which output would give you the desired information, make sure to provide only one command per answer and wait for me to execute it. When providing commands that save files, make sure to use the /home/decoder/dev path. When providing commands or code always enclose them in tripple backticks with appropriate scope, bash, python etc." \
+  -c "normal 2o" \
+  -c "call timer_start(100, {-> feedkeys('A', 'n')})"
+
+# Remove the temporary file after usage
+rm "$tmpfile"

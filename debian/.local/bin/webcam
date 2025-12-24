@@ -1,0 +1,48 @@
+#!/bin/sh
+
+case "$1" in
+-h | h | hflip) flip="--vf=lavfi=hflip" ;;
+-v | v | vflip) flip="--vf=lavfi=vflip" ;;
+-hv | hv | hvflip) flip="--vf=lavfi=hflip,vflip" ;;
+*) flip="" ;;
+esac
+
+# Extract full camera names and their first /dev/video* device
+cameras=$(
+  v4l2-ctl --list-devices | awk '
+  BEGIN { RS=""; FS="\n" }
+  {
+    name = $1;
+    sub(/ \(.*$/, "", name);
+    gsub(/^[ \t]+|[ \t]+$/, "", name);
+    for (i=2; i<=NF; i++) {
+      if ($i ~ /\/dev\/video/) {
+        gsub(/^[ \t]+/, "", $i);
+        print name "|" $i;
+        break;
+      }
+    }
+  }'
+)
+
+# Extract only camera names for dmenu
+names=$(echo "$cameras" | cut -d '|' -f1)
+
+# Select camera with dmenu
+choice=$(echo "$names" | dmenu -i -p 'Choose a camera:')
+
+# Find corresponding /dev/video* device
+camera=$(echo "$cameras" | awk -F '|' -v sel="$choice" '$1 == sel {print $2}')
+
+# If no selection, exit
+[ -z "$camera" ] && exit 1
+
+mpv --untimed \
+  --no-cache \
+  --no-osc \
+  --no-input-default-bindings \
+  --profile=low-latency \
+  --input-conf=/dev/null \
+  --title=webcam \
+  --x11-name=webcam \
+  $flip "$camera"

@@ -1,0 +1,14 @@
+#!/bin/sh
+
+if [ -z "$1" ]; then
+  echo "Usage: ${0##*/} <mins> [message]"
+  exit 1
+fi
+
+mins=$1
+message=$2
+
+nohup timer_ "$mins" "$message" >/dev/null 2>&1 &
+
+echo "timer started for $mins min"
+logger -t timer "timer started for $mins min, message: '$message'"
