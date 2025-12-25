@@ -81,7 +81,7 @@ else
   else
     remote=$(git remote | head -n 1)
   fi
-  git pull --rebase $remote "$branch"
+  git pull --rebase "$remote" "$branch"
   git remote | xargs -L1 git push --all
 fi
 
