@@ -76,10 +76,10 @@ else
   # Add and commit changes
   git add --all .
   git commit -m "$message"
-  if git remote -v | grep -qx origin; then
+  if git remote | grep -qx origin; then
     remote=origin
   else
-    remote=$(git remote -v | head -n 1)
+    remote=$(git remote | head -n 1)
   fi
   git pull --rebase $remote "$branch"
   git remote | xargs -L1 git push --all
