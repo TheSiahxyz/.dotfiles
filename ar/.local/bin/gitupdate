@@ -73,7 +73,7 @@ else
   # Add and commit changes
   git add --all .
   git commit -m "$message"
-  git pull --rebase origin "$branch"
+  git pull --rebase $git_current_remote "$branch"
   git remote | xargs -L1 git push --all
 fi
 

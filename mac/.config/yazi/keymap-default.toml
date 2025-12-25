@@ -190,7 +190,7 @@ run  = "plugin chmod"
 desc = "Chmod on selected files"
 
 [[mgr.prepend_keymap]]
-on   = "<C-d>"
+on   = [ "g", "f"]
 run  = "plugin diff"
 desc = "Diff the selected with the hovered file"
 
