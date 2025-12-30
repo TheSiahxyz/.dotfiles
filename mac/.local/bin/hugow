@@ -16,7 +16,7 @@ if [ ! -f "$out" ]; then
   exit 1
 fi
 
-tmp="$(mktemp "$out.XXXXXXXX.tmp")"
+# tmp="$(mktemp "$out.XXXXXXXX.tmp")"
 
 # awk -v defaults="$defaults" '
 # BEGIN {
