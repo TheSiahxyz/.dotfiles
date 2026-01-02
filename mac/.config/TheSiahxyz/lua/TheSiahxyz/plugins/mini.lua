@@ -927,18 +927,18 @@ return {
 			---@param buf_id integer
 			---@return nil
 			local function updateGitStatus(buf_id)
-				local cwd = vim.uv.cwd()
-				if not cwd or not vim.fs.root(cwd, ".git") then
+				local git_root = vim.fs.root(buf_id, ".git")
+				if not git_root then
 					return
 				end
 
 				local currentTime = os.time()
-				if gitStatusCache[cwd] and currentTime - gitStatusCache[cwd].time < cacheTimeout then
-					updateMiniWithGit(buf_id, gitStatusCache[cwd].statusMap)
+				if gitStatusCache[git_root] and currentTime - gitStatusCache[git_root].time < cacheTimeout then
+					updateMiniWithGit(buf_id, gitStatusCache[git_root].statusMap)
 				else
-					fetchGitStatus(cwd, function(content)
+					fetchGitStatus(git_root, function(content)
 						local gitStatusMap = parseGitStatus(content)
-						gitStatusCache[cwd] = {
+						gitStatusCache[git_root] = {
 							time = currentTime,
 							statusMap = gitStatusMap,
 						}
@@ -979,9 +979,9 @@ return {
 				pattern = "MiniFilesBufferUpdate",
 				callback = function(sii)
 					local bufnr = sii.data.buf_id
-					local cwd = vim.fn.expand("%:p:h")
-					if gitStatusCache[cwd] then
-						updateMiniWithGit(bufnr, gitStatusCache[cwd].statusMap)
+					local git_root = vim.fs.root(bufnr, ".git")
+					if git_root and gitStatusCache[git_root] then
+						updateMiniWithGit(bufnr, gitStatusCache[git_root].statusMap)
 					end
 				end,
 			})
