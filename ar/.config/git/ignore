@@ -87,13 +87,22 @@ shortcutrc
 zshnameddirrc
 
 # Suckless
+dmenu/config.h
 dmenu/dmenu
 dmenu/stest
+dwm/config.h
 dwm/dwm
+dwmblocks/config.h
 dwmblocks/dwmblocks
+slock/config.h
 slock/slock
+st/config.h
 st/st
+surf/config.h
 surf/surf
+tabbed/config.h
+tabbed/tabbed
+tabbed/xembed
 
 # Tmux
 */tmux/plugins/
