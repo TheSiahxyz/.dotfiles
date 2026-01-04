@@ -6,8 +6,8 @@ local f = ls.function_node
 
 local fmt = require("luasnip.extras.fmt").fmta
 
-local recordings_snippet = s(
-	"recordings",
+local diary_snippet = s(
+	"diary",
 	fmt(
 		[[---
 title: <title>
@@ -26,5 +26,5 @@ date: <date>
 	)
 )
 
-ls.add_snippets("markdown", { recordings_snippet })
-ls.add_snippets("quarto", { recordings_snippet })
+ls.add_snippets("markdown", { diary_snippet })
+ls.add_snippets("quarto", { diary_snippet })
