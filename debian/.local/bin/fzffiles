@@ -35,7 +35,7 @@ files=$(fzf-tmux \
       fi
     fi
     if [ -d \"\$target\" ]; then
-      exa --color=always --long --all --header --icons --git \"\$target\"
+      eza --color=always --long --all --header --icons --git \"\$target\"
     elif [ -f \"\$target\" ]; then
       bat --color=always --style=header,grid --line-range=:500 \"\$target\"
     else
