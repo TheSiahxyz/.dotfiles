@@ -4,18 +4,37 @@
 # Show 🌐 if connected to ethernet or ❎ if none.
 # Show 🛰️ if a vpn connection is active
 
+set_eth() {
+  eth_con="$(nmcli -t -f NAME,TYPE,DEVICE connection show |
+    awk -F: '$2=="ethernet" && $3!="" { print $1; exit }')"
+
+  wifi_con="$(nmcli -t -f NAME,TYPE connection show |
+    awk -F: '$2=="wifi" { print $1; exit }')"
+
+  if [ -n "$eth_con" ]; then
+    nmcli connection modify "$eth_con" connection.autoconnect yes
+    nmcli connection modify "$eth_con" ipv4.route-metric 100
+  fi
+
+  if [ -n "$wifi_con" ]; then
+    nmcli connection modify "$wifi_con" ipv4.route-metric 600
+  fi
+}
+
 case $BLOCK_BUTTON in
 1)
   "$TERMINAL" -e nmtui
   pkill -RTMIN+7 dwmblocks
   ;;
 2)
-  if [ "$(nmcli radio wifi)" = "enabled" ]; then
-    nmcli radio wifi off
-    notify-send "Wi-Fi" "Wi-Fi Turned off"
+  wifi_dev="$(nmcli -t -f DEVICE,TYPE device |
+    awk -F: '$2=="wifi" { print $1; exit }')"
+  if nmcli device status | grep -q "^$wifi_dev.*connected"; then
+    nmcli device disconnect "$wifi_dev"
+    notify-send "Wi-Fi" "Wi-Fi disconnected"
   else
-    nmcli radio wifi on
-    notify-send "Wi-Fi" "Wi-Fi Turned on"
+    nmcli device connect "$wifi_dev"
+    notify-send "Wi-Fi" "Wi-Fi connected"
   fi
   pkill -RTMIN+7 dwmblocks
   ;;
@@ -25,23 +44,27 @@ case $BLOCK_BUTTON in
 🛜: wifi connection with quality
 ❎: no ethernet
 🌐: ethernet working
-🛰️: vpn is active
+🛰: vpn is active
 " ;;
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
 # Wifi
-if grep -q 'up' /sys/class/net/w*/operstate; then
-  wifiicon="$(awk '/^\s*w/ { print "🛜" int($3 * 100 / 70) "%" }' /proc/net/wireless)"
-elif grep -q 'down' /sys/class/net/w*/operstate; then
-  grep -q '0x1003' /sys/class/net/w*/flags && wifiicon="📡" || wifiicon="❌"
+if grep -q 'up' /sys/class/net/w*/operstate 2>/dev/null; then
+  if grep -q '^\s*w' /proc/net/wireless; then
+    wifiicon="$(awk '/^\s*w/ { print "🛜" int($3 * 100 / 70) "%" }' /proc/net/wireless)"
+  else
+    wifiicon="📡"
+  fi
+elif grep -q 'down' /sys/class/net/w*/operstate 2>/dev/null; then
+  wifiicon="❌"
 fi
 
 # Ethernet
 grep -q 'up' /sys/class/net/e*/operstate && ethericon="🌐" || ethericon="❎"
 
 # TUN
-[ -n "$(cat /sys/class/net/tun*/operstate 2>/dev/null)" ] && tunicon="🛰️"
+grep -q 'up' /sys/class/net/tun*/operstate 2>/dev/null && tunicon="🛰"
 
 icons=""
 [ -n "$wifiicon" ] && icons="${icons}$wifiicon "
