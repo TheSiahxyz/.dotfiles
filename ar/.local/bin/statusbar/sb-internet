@@ -4,26 +4,24 @@
 # Show 🌐 if connected to ethernet or ❎ if none.
 # Show 🛰️ if a vpn connection is active
 
-set_eth() {
-  eth_con="$(nmcli -t -f NAME,TYPE,DEVICE connection show |
-    awk -F: '$2=="ethernet" && $3!="" { print $1; exit }')"
+eth_con="$(nmcli -t -f NAME,TYPE,DEVICE connection show |
+  awk -F: '$2=="ethernet" && $3!="" { print $1; exit }')"
 
-  wifi_con="$(nmcli -t -f NAME,TYPE connection show |
-    awk -F: '$2=="wifi" { print $1; exit }')"
+wifi_con="$(nmcli -t -f NAME,TYPE connection show |
+  awk -F: '$2=="wifi" { print $1; exit }')"
 
-  if [ -n "$eth_con" ]; then
-    nmcli connection modify "$eth_con" ipv4.method auto
-    nmcli connection modify "$eth_con" ipv4.never-default no
-    nmcli connection modify "$eth_con" ipv4.dns-priority -42
-    nmcli connection modify "$eth_con" ipv4.route-metric 100
-    nmcli connection modify "$eth_con" connection.autoconnect yes
-  fi
+if [ -n "$eth_con" ]; then
+  nmcli connection modify "$eth_con" ipv4.method auto
+  nmcli connection modify "$eth_con" ipv4.never-default no
+  nmcli connection modify "$eth_con" ipv4.dns-priority -42
+  nmcli connection modify "$eth_con" ipv4.route-metric 100
+  nmcli connection modify "$eth_con" connection.autoconnect yes
+fi
 
-  if [ -n "$wifi_con" ]; then
-    nmcli connection modify "$wifi_con" ipv4.dns-priority 100
-    nmcli connection modify "$wifi_con" ipv4.route-metric 600
-  fi
-}
+if [ -n "$wifi_con" ]; then
+  nmcli connection modify "$wifi_con" ipv4.dns-priority 100
+  nmcli connection modify "$wifi_con" ipv4.route-metric 600
+fi
 
 case $BLOCK_BUTTON in
 1)
