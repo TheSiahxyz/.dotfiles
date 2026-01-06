@@ -10,6 +10,10 @@ xinput list | grep 'id=' | while read -r line; do
   mouse=$(echo "$line" | grep -i '.*id.*pointer' | sed 's/.*id=\([0-9]\+\).*/\1/')
   [ -z "$keyboard" ] || {
     case "$(echo "$line" | grep -oE '.*id=' | sed 's/ id=.*//')" in
+    *"Lenovo TrackPoint Keyboard II"*)
+      setxkbmap -device "$keyboard" -option
+      setxkbmap -device "$keyboard" -option caps:ctrl_modifier,altwin:menu_win,altwin:swap_lalt_lwin
+      ;;
     *"Lite-On Tech Lenovo USB Travel Keyboard with Ultra Nav"*)
       setxkbmap -device "$keyboard" -option
       setxkbmap -device "$keyboard" -option caps:ctrl_modifier,ctrl:swap_lwin_lctl
@@ -42,6 +46,9 @@ xinput list | grep 'id=' | while read -r line; do
       ;;
     *"SynPS/2 Synaptics TouchPad"*)
       xinput set-prop "$mouse" "libinput Tapping Enabled" 0
+      ;;
+    *"Lenovo TrackPoint Keyboard II"*)
+      [ -z "$1" ] && xinput set-prop "$mouse" "Coordinate Transformation Matrix" 5, 0, 0, 0, 5, 0, 0, 0, 1 || xinput set-prop "$mouse" "Coordinate Transformation Matrix" $1, 0, 0, 0, $1, 0, 0, 0, 1
       ;;
     *"Lite-On Tech Lenovo USB Travel Keyboard with Ultra Nav Mouse"*)
       [ -z "$1" ] && xinput set-prop "$mouse" "Coordinate Transformation Matrix" 5, 0, 0, 0, 5, 0, 0, 0, 1 || xinput set-prop "$mouse" "Coordinate Transformation Matrix" $1, 0, 0, 0, $1, 0, 0, 0, 1
