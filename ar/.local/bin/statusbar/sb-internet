@@ -12,11 +12,15 @@ set_eth() {
     awk -F: '$2=="wifi" { print $1; exit }')"
 
   if [ -n "$eth_con" ]; then
-    nmcli connection modify "$eth_con" connection.autoconnect yes
+    nmcli connection modify "$eth_con" ipv4.method auto
+    nmcli connection modify "$eth_con" ipv4.never-default no
+    nmcli connection modify "$eth_con" ipv4.dns-priority -42
     nmcli connection modify "$eth_con" ipv4.route-metric 100
+    nmcli connection modify "$eth_con" connection.autoconnect yes
   fi
 
   if [ -n "$wifi_con" ]; then
+    nmcli connection modify "$wifi_con" ipv4.dns-priority 100
     nmcli connection modify "$wifi_con" ipv4.route-metric 600
   fi
 }
@@ -29,13 +33,18 @@ case $BLOCK_BUTTON in
 2)
   wifi_dev="$(nmcli -t -f DEVICE,TYPE device |
     awk -F: '$2=="wifi" { print $1; exit }')"
-  if nmcli device status | grep -q "^$wifi_dev.*connected"; then
-    nmcli device disconnect "$wifi_dev"
+
+  wifi_state="$(nmcli -t -f DEVICE,STATE device |
+    awk -F: -v dev="$wifi_dev" '$1==dev { print $2 }')"
+
+  if [ "$wifi_state" = "connected" ]; then
+    nmcli radio wifi off
     notify-send "Wi-Fi" "Wi-Fi disconnected"
   else
-    nmcli device connect "$wifi_dev"
+    nmcli radio wifi on
     notify-send "Wi-Fi" "Wi-Fi connected"
   fi
+
   pkill -RTMIN+7 dwmblocks
   ;;
 3) notify-send "🌐 Internet module" "\- Left click to connect
