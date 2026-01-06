@@ -489,5 +489,5 @@ alias szs="source ${XDG_CONFIG_HOME:-${HOME}/.config}/zsh/.zshrc"
 alias ylogh='ylog -s hidden -c us | grep $(LC_TIME=C date +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
 alias ylogi='ylog -s hidden -c us | grep $(LC_TIME=C date -v-1d +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
 alias ylogt='ylog -s diary -c us | grep $(LC_TIME=C date +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
-alias ylogy='ylog -s diary -c us | grep $(LC_TIME=C date -v-1d +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
+alias ylogy='ylog -s diary -c us | grep $(LC_TIME=C date -d "yesterday" +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
 alias ylogu='ylog -s diary -c us'
