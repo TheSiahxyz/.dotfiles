@@ -9,6 +9,16 @@ case $BLOCK_BUTTON in
   "$TERMINAL" -e nmtui
   pkill -RTMIN+7 dwmblocks
   ;;
+2)
+  if [ "$(nmcli radio wifi)" = "enabled" ]; then
+    nmcli radio wifi off
+    notify-send "Wi-Fi" "Wi-Fi Turned off"
+  else
+    nmcli radio wifi on
+    notify-send "Wi-Fi" "Wi-Fi Turned on"
+  fi
+  pkill -RTMIN+7 dwmblocks
+  ;;
 3) notify-send "🌐 Internet module" "\- Left click to connect
 ❌: wifi disabled
 📡: no wifi connection

@@ -5,7 +5,7 @@ LOG_DIR="/var/log/nginx"
 
 TARGET="all"          # "all" means no target filter (show all lines)
 COUNTRY="all"         # all|kr|us
-SCOPE="all"           # all|access|recordings
+SCOPE="all"           # all|access|recordings|hidden|diary|peertube
 EXCL_FIREFOX=0        # 1 = exclude Firefox lines by default
 EXCLUDES="59.19.56.8" # default exclude pattern
 ADD_EXCLUDES=""
@@ -24,13 +24,16 @@ Options:
 
   -c COUNTRY   Select country logs (default: all)
                 all   : all logs
-                kr    : recordings.kr.log + recordings.access.log
-                us    : recordings.us.log + recordings.access.log
+                kr    : recordings.kr.log + recordings.access.log (and diary.kr.log when -s diary)
+                us    : recordings.us.log + recordings.access.log (and diary.us.log when -s diary)
 
   -s SCOPE     Select log scope (default: all)
-                all        : recordings + access
+                all        : recordings + access + hidden + diary + peertube
                 recordings : recordings.* logs only
                 access     : access.* logs only
+                hidden     : hidden.access.* logs only
+                diary      : diary.* logs only
+                peertube   : peertube.* logs only
 
   -n           Disable Firefox exclusion (by default, Firefox lines are excluded)
 
@@ -51,7 +54,10 @@ Options:
 Examples:
   ylog                  # All logs, last 10 lines each
   ylog -s recordings    # Recordings logs only, last 10 lines each
+  ylog -s diary         # Diary logs only, last 10 lines each
+  ylog -s peertube       # Peertube logs only, last 10 lines each
   ylog -c kr -t 1.2.3.4 # Search specific IP in Korean logs
+  ylog -c kr -s diary    # Korean diary logs only
   ylog -t all -l 50     # All logs, last 50 lines each
   ylog -d 1             # Logs from 1 day ago only
   ylog -d ~2             # Logs from 2 days ago to today
@@ -116,6 +122,32 @@ pick_files() {
   fi
   if [ "$SCOPE" = "hidden" ] || [ "$SCOPE" = "all" ]; then
     for q in "$LOG_DIR/hidden.access.log" "$LOG_DIR/hidden.access.log".*; do
+      [ -e "$q" ] && printf "%s\n" "$q"
+    done
+  fi
+  # diary logs: similar structure to recordings
+  if [ "$SCOPE" = "diary" ] || [ "$SCOPE" = "all" ]; then
+    if [ "$COUNTRY" = "all" ]; then
+      for q in "$LOG_DIR/diary.access.log" "$LOG_DIR/diary.access.log".*; do
+        [ -e "$q" ] && printf "%s\n" "$q"
+      done
+    fi
+    case "$COUNTRY" in
+      kr) for q in "$LOG_DIR/diary.kr.log" "$LOG_DIR/diary.kr.log".*; do [ -e "$q" ] && printf "%s\n" "$q"; done ;;
+      us) for q in "$LOG_DIR/diary.us.log" "$LOG_DIR/diary.us.log".*; do [ -e "$q" ] && printf "%s\n" "$q"; done ;;
+      all)
+        for p in diary.kr.log diary.us.log; do
+          for q in "$LOG_DIR/$p" "$LOG_DIR/$p".*; do [ -e "$q" ] && printf "%s\n" "$q"; done
+        done
+        ;;
+    esac
+  fi
+  # peertube logs
+  if [ "$SCOPE" = "peertube" ] || [ "$SCOPE" = "all" ]; then
+    for q in "$LOG_DIR/peertube.access.log" "$LOG_DIR/peertube.access.log".*; do
+      [ -e "$q" ] && printf "%s\n" "$q"
+    done
+    for q in "$LOG_DIR/peertube.error.log" "$LOG_DIR/peertube.error.log".*; do
       [ -e "$q" ] && printf "%s\n" "$q"
     done
   fi
