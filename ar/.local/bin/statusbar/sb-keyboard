@@ -5,7 +5,7 @@
 case $BLOCK_BUTTON in
 1) fcitx5-remote -t && kill -44 "$(pidof "${STATUSBAR:-dwmblocks}")" ;;
 2) remaps ;;
-3) notify-send "⌨️ Input Method module" "\- Shows current input method (defalt US)
+3) notify-send "⌨Input Method module" "\- Shows current input method (defalt US)
 - Left click to switch language (EN/KO)
 - Middle click to change keyboard" ;;
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
@@ -28,4 +28,4 @@ hangul) lang="KO" ;;
 *) lang="??" ;;
 esac
 
-echo "⌨️$lang"
+echo "⌨$lang"

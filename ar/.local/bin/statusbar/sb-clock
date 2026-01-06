@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Get current hour and minute
-calendar="🗓️"
+calendar="🗓"
 hour=$(date '+%I')
 minute=$(date '+%M')
 
