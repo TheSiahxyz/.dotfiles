@@ -51,10 +51,12 @@ gdn             ${XDG_DOWNLOAD_DIR:-${HOME}/Downloads}
 gdo             ${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}
 gfx             $HOME/.mozilla/firefox/$USER.default
 gmu             ${XDG_MUSIC_DIR:-${HOME}/Music}
+gnu             $HOME/.gnupg
 gpb             ${XDG_PUBLICSHARE_DIR:-${HOME}/Public}
 gpp             ${XDG_PICTURES_DIR:-${HOME}/Pictures}
 gpv             $HOME/Private
 grr             ${XDG_PICTURES_DIR:-${HOME}/Pictures}/resources
+gsh             $HOME/.ssh
 gss             ${XDG_PICTURES_DIR:-${HOME}/Pictures}/screenshots
 gtc             $HOME/Torrents/complete
 gti             $HOME/Torrents/incomplete
