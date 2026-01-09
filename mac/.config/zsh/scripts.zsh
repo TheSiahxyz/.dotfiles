@@ -388,9 +388,13 @@ EOF
     )
     [[ -z "${SELECTED_DIRS// }" ]] && return
     if [[ "$(echo "$SELECTED_DIRS" | wc -l)" -eq 1 ]]; then
-        cd "$SELECTED_DIRS"
-        if  [[ -n "$(git -C "$SELECTED_DIRS" status --porcelain)" ]]; then
-            git status --porcelain 2>/dev/null
+        if [[ -n "$TMUX" ]]; then
+            opensessions "$SELECTED_DIRS"
+        else
+            cd "$SELECTED_DIRS" || return
+            if [[ -n "$(git -C "$SELECTED_DIRS" status --porcelain 2>/dev/null)" ]]; then
+                git status --porcelain
+            fi
         fi
     else
         opensessions "$SELECTED_DIRS"
