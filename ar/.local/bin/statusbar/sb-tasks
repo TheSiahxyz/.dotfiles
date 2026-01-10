@@ -67,7 +67,7 @@ $(printf "%b" "$overdue_list")"
   ;;
 2) check_task_sync ;;
 3)
-  notify-send "🗂️ Task Module" "Shows task counts.
+  notify-send "🗂 Task Module" "Shows task counts.
 - Left click: Show tasks due soon.
 - Middle click: Show follow-up tasks."
   ;;

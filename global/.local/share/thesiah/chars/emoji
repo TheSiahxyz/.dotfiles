@@ -17,7 +17,7 @@
 🤩 star-struck
 😘 face blowing a kiss
 😗 kissing face
-☺️ smiling face
+☺ smiling face
 😚 kissing face with closed eyes
 😙 kissing face with smiling eyes
 🥲 smiling face with tear
@@ -73,7 +73,7 @@
 🫤 face with diagonal mouth
 😟 worried face
 🙁 slightly frowning face
-☹️ frowning face
+☹ frowning face
 😮 face with open mouth
 😯 hushed face
 😲 astonished face
@@ -102,7 +102,7 @@
 😈 smiling face with horns
 👿 angry face with horns
 💀 skull
-☠️ skull and crossbones
+☠ skull and crossbones
 💩 pile of poo
 🤡 clown face
 👹 ogre
@@ -132,9 +132,9 @@
 💞 revolving hearts
 💕 two hearts
 💟 heart decoration
-❣️ heart exclamation
+❣ heart exclamation
 💔 broken heart
-❤️ red heart
+❤ red heart
 🩷 pink heart
 🧡 orange heart
 💛 yellow heart
@@ -153,15 +153,15 @@
 💫 dizzy
 💦 sweat droplets
 💨 dashing away
-🕳️ hole
+🕳 hole
 💬 speech balloon
-🗨️ left speech bubble
-🗯️ right anger bubble
+🗨 left speech bubble
+🗯 right anger bubble
 💭 thought balloon
 💤 ZZZ
 👋 waving hand
 🤚 raised back of hand
-🖐️ hand with fingers splayed
+🖐 hand with fingers splayed
 ✋ raised hand
 🖖 vulcan salute
 🫱 rightwards hand
@@ -243,7 +243,7 @@
 🤦 person facepalming
 🤷 person shrugging
 👮 police officer
-🕵️ detective
+🕵 detective
 💂 guard
 🥷 ninja
 👷 construction worker
@@ -280,20 +280,21 @@
 🏃 person running
 💃 woman dancing
 🕺 man dancing
-🕴️ person in suit levitating
+🕴 person in suit levitating
 👯 people with bunny ears
 🧖 person in steamy room
 🧗 person climbing
 🤺 person fencing
 🏇 horse racing
-⛷️ skier
+⛷ skier
 🏂 snowboarder
-🏌️ person golfing
+🏌 person golfing
 🏄 person surfing
+🏚 derelict house
 🚣 person rowing boat
 🏊 person swimming
-⛹️ person bouncing ball
-🏋️ person lifting weights
+⛹ person bouncing ball
+🏋 person lifting weights
 🚴 person biking
 🚵 person mountain biking
 🤸 person cartwheeling
@@ -612,26 +613,26 @@
 🌎 globe showing Americas
 🌏 globe showing Asia-Australia
 🌐 globe with meridians
-🗺️ world map
+🗺 world map
 🗾 map of Japan
 🧭 compass
-🏔️ snow-capped mountain
-⛰️ mountain
+🏔 snow-capped mountain
+⛰ mountain
 🌋 volcano
 🗻 mount fuji
-🏕️ camping
-🏖️ beach with umbrella
-🏜️ desert
-🏝️ desert island
-🏞️ national park
-🏟️ stadium
-🏛️ classical building
-🏗️ building construction
+🏕 camping
+🏖 beach with umbrella
+🏜 desert
+🏝 desert island
+🏞 national park
+🏟 stadium
+🏛 classical building
+🏗 building construction
 🧱 brick
 🪨 rock
 🪵 wood
 🛖 hut
-🏘️ houses
+🏘 houses
 🏚️ derelict house
 🏠 house
 🏡 house with garden
@@ -655,7 +656,8 @@
 🕌 mosque
 🛕 hindu temple
 🕍 synagogue
-⛩️ shinto shrine
+⛩ shinto shrine
+🏙 cityscape
 🕋 kaaba
 ⛲ fountain
 ⛺ tent
@@ -667,7 +669,7 @@
 🌆 cityscape at dusk
 🌇 sunset
 🌉 bridge at night
-♨️ hot springs
+♨ hot springs
 🎠 carousel horse
 🛝 playground slide
 🎡 ferris wheel
@@ -703,8 +705,8 @@
 🚚 delivery truck
 🚛 articulated lorry
 🚜 tractor
-🏎️ racing car
-🏍️ motorcycle
+🏎 racing car
+🏍 motorcycle
 🛵 motor scooter
 🦽 manual wheelchair
 🦼 motorized wheelchair
@@ -714,9 +716,9 @@
 🛹 skateboard
 🛼 roller skate
 🚏 bus stop
-🛣️ motorway
-🛤️ railway track
-🛢️ oil drum
+🛣 motorway
+🛤 railway track
+🛢 oil drum
 ⛽ fuel pump
 🛞 wheel
 🚨 police car light
@@ -729,12 +731,12 @@
 ⛵ sailboat
 🛶 canoe
 🚤 speedboat
-🛳️ passenger ship
-⛴️ ferry
-🛥️ motor boat
+🛳 passenger ship
+⛴ ferry
+🛥 motor boat
 🚢 ship
-✈️ airplane
-🛩️ small airplane
+✈ airplane
+🛩 small airplane
 🛫 airplane departure
 🛬 airplane arrival
 🪂 parachute
@@ -743,18 +745,18 @@
 🚟 suspension railway
 🚠 mountain cableway
 🚡 aerial tramway
-🛰️ satellite
+🛰 satellite
 🚀 rocket
 🛸 flying saucer
-🛎️ bellhop bell
+🛎 bellhop bell
 🧳 luggage
 ⌛ hourglass done
 ⏳ hourglass not done
 ⌚ watch
 ⏰ alarm clock
-⏱️ stopwatch
-⏲️ timer clock
-🕰️ mantelpiece clock
+⏱ stopwatch
+⏲ timer clock
+🕰 mantelpiece clock
 🕛 twelve o’clock
 🕧 twelve-thirty
 🕐 one o’clock
@@ -791,8 +793,8 @@
 🌚 new moon face
 🌛 first quarter moon face
 🌜 last quarter moon face
-🌡️ thermometer
-☀️ sun
+🌡 thermometer
+☀ sun
 🌝 full moon face
 🌞 sun with face
 🪐 ringed planet
@@ -800,29 +802,29 @@
 🌟 glowing star
 🌠 shooting star
 🌌 milky way
-☁️ cloud
+☁ cloud
 ⛅ sun behind cloud
-⛈️ cloud with lightning and rain
-🌤️ sun behind small cloud
-🌥️ sun behind large cloud
-🌦️ sun behind rain cloud
-🌧️ cloud with rain
-🌨️ cloud with snow
-🌩️ cloud with lightning
-🌪️ tornado
-🌫️ fog
-🌬️ wind face
+⛈ cloud with lightning and rain
+🌤 sun behind small cloud
+🌥 sun behind large cloud
+🌦 sun behind rain cloud
+🌧 cloud with rain
+🌨 cloud with snow
+🌩 cloud with lightning
+🌪 tornado
+🌫 fog
+🌬 wind face
 🌀 cyclone
 🌈 rainbow
 🌂 closed umbrella
-☂️ umbrella
+☂ umbrella
 ☔ umbrella with rain drops
-⛱️ umbrella on ground
+⛱ umbrella on ground
 ⚡ high voltage
-❄️ snowflake
-☃️ snowman
+❄ snowflake
+☃ snowman
 ⛄ snowman without snow
-☄️ comet
+☄ comet
 🔥 fire
 💧 droplet
 🌊 water wave
@@ -844,10 +846,10 @@
 🧧 red envelope
 🎀 ribbon
 🎁 wrapped gift
-🎗️ reminder ribbon
-🎟️ admission tickets
+🎗 reminder ribbon
+🎟 admission tickets
 🎫 ticket
-🎖️ military medal
+🎖 military medal
 🏆 trophy
 🏅 sports medal
 🥇 1st place medal
@@ -873,7 +875,7 @@
 🥋 martial arts uniform
 🥅 goal net
 ⛳ flag in hole
-⛸️ ice skate
+⛸ ice skate
 🎣 fishing pole
 🤿 diving mask
 🎽 running shirt
@@ -888,7 +890,7 @@
 🔮 crystal ball
 🪄 magic wand
 🎮 video game
-🕹️ joystick
+🕹 joystick
 🎰 slot machine
 🎲 game die
 🧩 puzzle piece
@@ -896,16 +898,16 @@
 🪅 piñata
 🪩 mirror ball
 🪆 nesting dolls
-♠️ spade suit
-♥️ heart suit
-♦️ diamond suit
-♣️ club suit
-♟️ chess pawn
+♠ spade suit
+♥ heart suit
+♦ diamond suit
+♣ club suit
+♟ chess pawn
 🃏 joker
 🀄 mahjong red dragon
 🎴 flower playing cards
 🎭 performing arts
-🖼️ framed picture
+🖼 framed picture
 🎨 artist palette
 🧵 thread
 🪡 sewing needle
@@ -935,7 +937,7 @@
 👛 purse
 👜 handbag
 👝 clutch bag
-🛍️ shopping bags
+🛍 shopping bags
 🎒 backpack
 🩴 thong sandal
 👞 man’s shoe
@@ -953,7 +955,7 @@
 🎓 graduation cap
 🧢 billed cap
 🪖 military helmet
-⛑️ rescue worker’s helmet
+⛑ rescue worker’s helmet
 📿 prayer beads
 💄 lipstick
 💍 ring
@@ -970,9 +972,9 @@
 🎼 musical score
 🎵 musical note
 🎶 musical notes
-🎙️ studio microphone
-🎚️ level slider
-🎛️ control knobs
+🎙 studio microphone
+🎚 level slider
+🎛 control knobs
 🎤 microphone
 🎧 headphone
 📻 radio
@@ -990,7 +992,7 @@
 🪉 harp
 📱 mobile phone
 📲 mobile phone with arrow
-☎️ telephone
+☎ telephone
 📞 telephone receiver
 📟 pager
 📠 fax machine
@@ -998,19 +1000,19 @@
 🪫 low battery
 🔌 electric plug
 💻 laptop
-🖥️ desktop computer
-🖨️ printer
-⌨️ keyboard
-🖱️ computer mouse
-🖲️ trackball
+🖥 desktop computer
+🖨 printer
+⌨ keyboard
+🖱 computer mouse
+🖲 trackball
 💽 computer disk
 💾 floppy disk
 💿 optical disk
 📀 dvd
 🧮 abacus
 🎥 movie camera
-🎞️ film frames
-📽️ film projector
+🎞 film frames
+📽 film projector
 🎬 clapper board
 📺 television
 📷 camera
@@ -1019,7 +1021,7 @@
 📼 videocassette
 🔍 magnifying glass tilted left
 🔎 magnifying glass tilted right
-🕯️ candle
+🕯 candle
 💡 light bulb
 🔦 flashlight
 🏮 red paper lantern
@@ -1040,7 +1042,7 @@
 🗞️ rolled-up newspaper
 📑 bookmark tabs
 🔖 bookmark
-🏷️ label
+🏷 label
 💰 money bag
 🪙 coin
 💴 yen banknote
@@ -1051,7 +1053,7 @@
 💳 credit card
 🧾 receipt
 💹 chart increasing with yen
-✉️ envelope
+✉ envelope
 📧 e-mail
 📨 incoming envelope
 📩 envelope with arrow
@@ -1063,22 +1065,22 @@
 📬 open mailbox with raised flag
 📭 open mailbox with lowered flag
 📮 postbox
-🗳️ ballot box with ballot
-✏️ pencil
-✒️ black nib
-🖋️ fountain pen
-🖊️ pen
-🖌️ paintbrush
-🖍️ crayon
+🗳 ballot box with ballot
+✏ pencil
+✒ black nib
+🖋 fountain pen
+🖊 pen
+🖌 paintbrush
+🖍 crayon
 📝 memo
 💼 briefcase
 📁 file folder
 📂 open file folder
-🗂️ card index dividers
+🗂 card index dividers
 📅 calendar
 📆 tear-off calendar
-🗒️ spiral notepad
-🗓️ spiral calendar
+🗒 spiral notepad
+🗓 spiral calendar
 📇 card index
 📈 chart increasing
 📉 chart decreasing
@@ -1087,26 +1089,26 @@
 📌 pushpin
 📍 round pushpin
 📎 paperclip
-🖇️ linked paperclips
+🖇 linked paperclips
 📏 straight ruler
 📐 triangular ruler
-✂️ scissors
-🗃️ card file box
-🗄️ file cabinet
-🗑️ wastebasket
+✂ scissors
+🗃 card file box
+🗄 file cabinet
+🗑 wastebasket
 🔒 locked
 🔓 unlocked
 🔏 locked with pen
 🔐 locked with key
 🔑 key
-🗝️ old key
+🗝 old key
 🔨 hammer
 🪓 axe
-⛏️ pick
-⚒️ hammer and pick
-🛠️ hammer and wrench
-🗡️ dagger
-⚔️ crossed swords
+⛏ pick
+⚒ hammer and pick
+🛠 hammer and wrench
+🗡 dagger
+⚔ crossed swords
 💣 bomb
 🪃 boomerang
 🏹 bow and arrow
@@ -1115,18 +1117,18 @@
 🔧 wrench
 🪛 screwdriver
 🔩 nut and bolt
-⚙️ gear
-🗜️ clamp
-⚖️ balance scale
+⚙ gear
+🗜 clamp
+⚖ balance scale
 🦯 white cane
 🔗 link
-⛓️ chains
+⛓ chains
 🪝 hook
 🧰 toolbox
 🧲 magnet
 🪜 ladder
 🪏 shovel
-⚗️ alembic
+⚗ alembic
 🧪 test tube
 🧫 petri dish
 🧬 dna
@@ -1166,9 +1168,9 @@
 🧯 fire extinguisher
 🛒 shopping cart
 🚬 cigarette
-⚰️ coffin
+⚰ coffin
 🪦 headstone
-⚱️ funeral urn
+⚱ funeral urn
 🧿 nazar amulet
 🪬 hamsa
 🗿 moai
@@ -1198,22 +1200,22 @@
 🚷 no pedestrians
 📵 no mobile phones
 🔞 no one under eighteen
-☢️ radioactive
-☣️ biohazard
-⬆️ up arrow
-↗️ up-right arrow
-➡️ right arrow
-↘️ down-right arrow
-⬇️ down arrow
-↙️ down-left arrow
-⬅️ left arrow
-↖️ up-left arrow
-↕️ up-down arrow
-↔️ left-right arrow
-↩️ right arrow curving left
-↪️ left arrow curving right
-⤴️ right arrow curving up
-⤵️ right arrow curving down
+☢ radioactive
+☣ biohazard
+⬆ up arrow
+↗ up-right arrow
+➡ right arrow
+↘ down-right arrow
+⬇ down arrow
+↙ down-left arrow
+⬅ left arrow
+↖ up-left arrow
+↕ up-down arrow
+↔ left-right arrow
+↩ right arrow curving left
+↪ left arrow curving right
+⤴ right arrow curving up
+⤵ right arrow curving down
 🔃 clockwise vertical arrows
 🔄 counterclockwise arrows button
 🔙 BACK arrow
@@ -1250,21 +1252,21 @@
 🔀 shuffle tracks button
 🔁 repeat button
 🔂 repeat single button
-▶️ play button
+▶ play button
 ⏩ fast-forward button
-⏭️ next track button
-⏯️ play or pause button
-◀️ reverse button
+⏭ next track button
+⏯ play or pause button
+◀ reverse button
 ⏪ fast reverse button
-⏮️ last track button
+⏮ last track button
 🔼 upwards button
 ⏫ fast up button
 🔽 downwards button
 ⏬ fast down button
-⏸️ pause button
-⏹️ stop button
-⏺️ record button
-⏏️ eject button
+⏸ pause button
+⏹ stop button
+⏺ record button
+⏏ eject button
 🎦 cinema
 🔅 dim button
 🔆 bright button
@@ -1272,45 +1274,45 @@
 🛜 wireless
 📳 vibration mode
 📴 mobile phone off
-♀️ female sign
-♂️ male sign
-⚧️ transgender symbol
-✖️ multiply
+♀ female sign
+♂ male sign
+⚧ transgender symbol
+✖ multiply
 ➕ plus
 ➖ minus
 ➗ divide
 🟰 heavy equals sign
-♾️ infinity
-‼️ double exclamation mark
-⁉️ exclamation question mark
+♾ infinity
+‼ double exclamation mark
+⁉ exclamation question mark
 ❓ red question mark
 ❔ white question mark
 ❕ white exclamation mark
 ❗ red exclamation mark
-〰️ wavy dash
+〰 wavy dash
 💱 currency exchange
 💲 heavy dollar sign
-⚕️ medical symbol
-♻️ recycling symbol
-⚜️ fleur-de-lis
+⚕ medical symbol
+♻ recycling symbol
+⚜ fleur-de-lis
 🔱 trident emblem
 📛 name badge
 🔰 Japanese symbol for beginner
 ⭕ hollow red circle
 ✅ check mark button
-☑️ check box with check
-✔️ check mark
+☑ check box with check
+✔ check mark
 ❌ cross mark
 ❎ cross mark button
 ➰ curly loop
 ➿ double curly loop
-〽️ part alternation mark
-✳️ eight-spoked asterisk
-✴️ eight-pointed star
-❇️ sparkle
-©️ copyright
-®️ registered
-™️ trade mark
+〽 part alternation mark
+✳ eight-spoked asterisk
+✴ eight-pointed star
+❇ sparkle
+© copyright
+® registered
+™ trade mark
 🫟 splatter
 #️⃣ keycap: #
 *️⃣ keycap: *
@@ -1330,26 +1332,26 @@
 🔢 input numbers
 🔣 input symbols
 🔤 input latin letters
-🅰️ A button (blood type)
+🅰 A button (blood type)
 🆎 AB button (blood type)
-🅱️ B button (blood type)
+🅱 B button (blood type)
 🆑 CL button
 🆒 COOL button
 🆓 FREE button
-ℹ️ information
+ℹ information
 🆔 ID button
-Ⓜ️ circled M
+Ⓜ circled M
 🆕 NEW button
 🆖 NG button
-🅾️ O button (blood type)
+🅾 O button (blood type)
 🆗 OK button
-🅿️ P button
+🅿 P button
 🆘 SOS button
 🆙 UP! button
 🆚 VS button
 🈁 Japanese “here” button
-🈂️ Japanese “service charge” button
-🈷️ Japanese “monthly amount” button
+🈂 Japanese “service charge” button
+🈷 Japanese “monthly amount” button
 🈶 Japanese “not free of charge” button
 🈯 Japanese “reserved” button
 🉐 Japanese “bargain” button
@@ -1360,8 +1362,8 @@
 🈸 Japanese “application” button
 🈴 Japanese “passing grade” button
 🈳 Japanese “vacancy” button
-㊗️ Japanese “congratulations” button
-㊙️ Japanese “secret” button
+㊗ Japanese “congratulations” button
+㊙ Japanese “secret” button
 🈺 Japanese “open for business” button
 🈵 Japanese “no vacancy” button
 🔴 red circle
@@ -1382,12 +1384,12 @@
 🟫 brown square
 ⬛ black large square
 ⬜ white large square
-◼️ black medium square
-◻️ white medium square
+◼ black medium square
+◻ white medium square
 ◾ black medium-small square
 ◽ white medium-small square
-▪️ black small square
-▫️ white small square
+▪ black small square
+▫ white small square
 🔶 large orange diamond
 🔷 large blue diamond
 🔸 small orange diamond
@@ -1402,7 +1404,7 @@
 🚩 triangular flag
 🎌 crossed flags
 🏴 black flag
-🏳️ white flag
+🏳 white flag
 🇦🇨 flag: Ascension Island
 🇦🇩 flag: Andorra
 🇦🇪 flag: United Arab Emirates

@@ -10,9 +10,15 @@ case $BLOCK_BUTTON in
 esac
 
 width=$(xrandr | grep "\*" | awk '{print $1}' | sed 's/x[0-9]*//g' | head -n1)
+nvme_temp=$(sensors 2>/dev/null |
+  awk '/Composite:/ {gsub(/[+°C]/,"",$2); print $2; exit}')
 
 if [ -n "$width" ] && [ "$width" -eq "$width" ] 2>/dev/null; then
-  [ "$width" -lt 1920 ] &&
-    free --mebi | sed -n '2{p;q}' | awk '{printf ("🐏%d%%\n", ($3/$2)*100+0.5 )}' ||
-    free --mebi | sed -n '2{p;q}' | awk '{printf ("🐏%dGB/%dGB", $3/1000+0.5,$2/1000+0.5)}'
+  if [ "$width" -lt 1920 ]; then
+    free --mebi | sed -n '2{p;q}' |
+      awk -v t="$nvme_temp" '{printf "💾%s° 🐏%d%%\n", t, ($3/$2)*100+0.5}'
+  else
+    free --mebi | sed -n '2{p;q}' |
+      awk -v t="$nvme_temp" '{printf "💾%s° 🐏%dGB/%dGB", t, $3/1000+0.5, $2/1000+0.5}'
+  fi
 fi

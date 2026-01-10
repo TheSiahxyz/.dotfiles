@@ -10,7 +10,7 @@ max_brightness=$(cat /sys/class/backlight/*/max_brightness)
 brightness_per=$((100 * curr_brightness / max_brightness))
 
 case $BLOCK_BUTTON in
-3) notify-send "💡 Brightness module" "\- Shows current brightness level ☀️." ;;
+3) notify-send "💡 Brightness module" "\- Shows current brightness level ☀ ." ;;
 4) pkexec brillo -A 5 -q ;;
 5) pkexec brillo -U 5 -q ;;
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
