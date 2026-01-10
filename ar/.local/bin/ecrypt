@@ -27,6 +27,9 @@ attempt_mount() {
 targets="$HOME/.secret"
 mounts="$HOME/Private"
 pw="default"
+[ -d "$targets" ] || mkdir -p "$targets"
+[ -d "$mounts" ] || mkdir -p "$mounts"
+
 set -- $mounts # Set positional parameters to mounts
 i=1
 for target in $targets; do
