@@ -15,10 +15,6 @@ case "$monitor" in
     esac
     new_brightness=$(echo "if ($new_brightness > 1) 1 else if ($new_brightness < 0) 0 else $new_brightness" | bc -l)
     xrandr --output "$monitor" --brightness "$new_brightness"
-    current_brightness=$(echo "$new_brightness * 100" | bc -l)
-  else
-    current_brightness=$(echo "$current_brightness * 100" | bc -l)
   fi
-  printf "🪟%.0f%%\n" "$current_brightness"
   ;;
 esac

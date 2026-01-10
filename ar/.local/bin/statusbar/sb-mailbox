@@ -6,7 +6,7 @@
 case $BLOCK_BUTTON in
 1)
   setsid -w -f "$TERMINAL" -e neomutt
-  pkill -RTMIN+20 "${STATUSBAR:-dwmblocks}"
+  pkill -RTMIN+18 "${STATUSBAR:-dwmblocks}"
   ;;
 2) setsid -f mw -Y >/dev/null ;;
 3) notify-send "📬 Mail module" "\- Shows unread mail

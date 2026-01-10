@@ -360,6 +360,6 @@ After $secs seconds, new clicks will also automatically update the doppler RADAR
 8) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
-checkforecast "$weatherreport" "3600" || { getweatherreport && pkill -RTMIN+15 "${STATUSBAR:-dwmblocks}" && sleep 3; }
-checkforecast "$weatherreportjson" "86400" || { getweatherreportjson && pkill -RTMIN+15 "${STATUSBAR:-dwmblocks}" && sleep 3; }
+checkforecast "$weatherreport" "3600" || { getweatherreport && pkill -RTMIN+13 "${STATUSBAR:-dwmblocks}" && sleep 3; }
+checkforecast "$weatherreportjson" "86400" || { getweatherreportjson && pkill -RTMIN+13 "${STATUSBAR:-dwmblocks}" && sleep 3; }
 showweather

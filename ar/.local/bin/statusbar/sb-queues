@@ -18,7 +18,7 @@ EOF
   if [ -z "$url" ]; then
     notify-send "💤 No active yt-dlp downloads"
   fi
-  pkill -RTMIN+21 "${STATUSBAR:-dwmblocks}"
+  pkill -RTMIN+19 "${STATUSBAR:-dwmblocks}"
 }
 
 # This block displays the number of running and queued background tasks. Requires tsp.

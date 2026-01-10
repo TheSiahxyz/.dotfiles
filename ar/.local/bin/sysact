@@ -11,10 +11,10 @@ lock() {
   mpc pause
   pauseallmpv
   wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
-  kill -39 "$(pidof dwmblocks)"
+  kill -38 "$(pidof dwmblocks)"
   slock
   wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
-  kill -39 "$(pidof dwmblocks)"
+  kill -38 "$(pidof dwmblocks)"
 }
 
 wmpid() { # This function is needed if there are multiple instances of the window manager.

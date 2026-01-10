@@ -26,7 +26,7 @@ fi
 case $BLOCK_BUTTON in
 1)
   "$TERMINAL" -e nmtui
-  pkill -RTMIN+7 dwmblocks
+  pkill -RTMIN+6 dwmblocks
   ;;
 2)
   wifi_dev="$(nmcli -t -f DEVICE,TYPE device |
@@ -43,7 +43,7 @@ case $BLOCK_BUTTON in
     notify-send "Wi-Fi" "Wi-Fi connected"
   fi
 
-  pkill -RTMIN+7 dwmblocks
+  pkill -RTMIN+6 dwmblocks
   ;;
 3) notify-send "🌐 Internet module" "\- Left click to connect
 ❌: wifi disabled
