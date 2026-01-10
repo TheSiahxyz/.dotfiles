@@ -7,7 +7,6 @@ turnonoffvpn() {
     ;;
   *off*)
     nmcli connection down "$THESIAH_VPN" 2>/dev/null && notify-send "✂️ THESIAH_VPN: OFF" || notify-send "✂️ Error to disconnect"
-
     ;;
   esac
 }

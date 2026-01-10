@@ -5,7 +5,7 @@ monitor=$(xrandr --query | grep -i '\sconnected' | grep '[0-9]x[0-9]' | grep -i 
 case "$monitor" in
 *DP* | *HDMI*)
   current_brightness=$(xrandr --verbose | grep -i "^$monitor connected" -A5 | grep -i "Brightness:" | cut -d ' ' -f2)
-  current_brightness=$(echo "$current_brightness * 100" | bc -l)
+  current_brightness=$(printf "%.0f\n" "$(echo "$current_brightness * 100" | bc -l)")
   ;;
 esac
 

@@ -71,7 +71,7 @@ fi
 grep -q 'up' /sys/class/net/e*/operstate && ethericon="🌐" || ethericon="❎"
 
 # TUN
-grep -q 'up' /sys/class/net/tun*/operstate 2>/dev/null && tunicon="🛰"
+[ -n "$(cat /sys/class/net/tun*/operstate 2>/dev/null)" ] && tunicon="🛰"
 
 icons=""
 [ -n "$wifiicon" ] && icons="${icons}$wifiicon "
