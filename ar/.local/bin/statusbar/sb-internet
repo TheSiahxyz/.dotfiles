@@ -2,7 +2,7 @@
 
 # Show wifi 🛜 and percent strength or 📡 if none.
 # Show 🌐 if connected to ethernet or ❎ if none.
-# Show 🛰️ if a vpn connection is active
+# Show 🛰 if a vpn connection is active
 
 eth_con="$(nmcli -t -f NAME,TYPE,DEVICE connection show |
   awk -F: '$2=="ethernet" && $3!="" { print $1; exit }')"

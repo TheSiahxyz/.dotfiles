@@ -5,7 +5,7 @@ status=$(transmission-remote -l | grep % |
 	s/.*Stopped.*/A 🛑/;
 	s/.*Seeding.*/Z 🌱/;
 	s/.*100%.*/N ✅/;
-	s/.*Idle.*/B 🕰️/;
+	s/.*Idle.*/B 🕰/;
 	s/.*Uploading.*/L 🔼/;
 	s/.*Downloading.*/M 🔽/;
   s/.*%.*/Q ❓/" |

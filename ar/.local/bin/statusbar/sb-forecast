@@ -59,7 +59,7 @@ gethightemp() { jq -r '.weather[0].hourly[].tempC' "$weatherreportjson" | sort -
 gethumidity() {
   humidity=$(get_nearest_hourly | jq -r '.humidity')
   case "$humidity" in
-  [0-9] | [1-2][0-9]) echo "🏜️: $humidity%" ;;
+  [0-9] | [1-2][0-9]) echo "🏜: $humidity%" ;;
   [3-4][0-9]) echo "🌲: $humidity%" ;;
   [5-6][0-9]) echo "💧: $humidity%" ;;
   [7-8][0-9]) echo "💦: $humidity%" ;;
@@ -351,7 +351,7 @@ case $BLOCK_BUTTON in
 🥶: Daily lowest temperature
 🥵: Daily highest temperature"
   notify-send "$(todayweather)"
-  notify-send "🗺️ Doppler RADAR module" "\- Middle click for local Doppler RADAR
+  notify-send "🗺 Doppler RADAR module" "\- Middle click for local Doppler RADAR
 - Shift + middle click to update RADAR location
 After $secs seconds, new clicks will also automatically update the doppler RADAR"
   ;;

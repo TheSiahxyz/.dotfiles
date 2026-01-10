@@ -61,7 +61,7 @@ case $BLOCK_BUTTON in
 1) setsid -f "$TERMINAL" -e ncmpcpp ;; # left click, opens ncmpcpp
 2) mpc toggle ;;                       # middle click, pause/unpause
 3)                                     # right click
-  { [ -n "$(mpc current)" ] && [ -n "$(mpc queued)" ]; } && notify-send "🎵 $(mpc current)" "⏭️ $(mpc queued)"
+  { [ -n "$(mpc current)" ] && [ -n "$(mpc queued)" ]; } && notify-send "🎵 $(mpc current)" "⏭  $(mpc queued)"
   notify-send "🎵 Music module" "\- Shows mpd song playing and status
 - 🎵 if playing
 - ⏸ if paused

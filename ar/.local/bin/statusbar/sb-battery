@@ -10,7 +10,7 @@ get_status_icon() {
   Discharging) echo "🔋" ;;
   Charging) echo "🔌" ;;
   "Not charging") echo "🛑" ;;
-  Unknown) echo "♻️" ;;
+  Unknown) echo "♻" ;;
   *) echo "" ;;
   esac
 }
@@ -57,7 +57,7 @@ case "$BLOCK_BUTTON" in
 2) bluetooth && devices "hid*" ;; # Middle click for Bluetooth battery levels
 3) notify-send "🔋 Battery module" "\- 🔋: discharging
 - 🛑: not charging
-- ♻️: stagnant charge
+- ♻: stagnant charge
 - 🔌: charging
 - ⚡: fully charged
 - ❗: battery very low!
