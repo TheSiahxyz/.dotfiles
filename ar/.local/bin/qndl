@@ -47,7 +47,7 @@ case $type in
     video_id=$(echo "$line" | awk '{print $2}')
     ytdl_cmd="$ytdl_cmd_base --output \"$ytdl_output_format\" \"https://www.youtube.com/watch?v=$video_id\""
     idnum=$(tsp bash -c "$ytdl_cmd")
-    pkill -RTMIN+21 "${STATUSBAR:-dwmblocks}"
+    pkill -RTMIN+19 "${STATUSBAR:-dwmblocks}"
   done <"$archive_file"
   exit 0
   ;;
@@ -120,7 +120,7 @@ filename=$($simulation_cmd 2>/dev/null)
 [ -f /tmp/qplaylist ] && rm -rf /tmp/qplaylist
 notify-send "⏳ Downloading $download_type:" "$filename"
 idnum=$(tsp bash -c "$ytdl_cmd")
-pkill -RTMIN+21 "${STATUSBAR:-dwmblocks}"
+pkill -RTMIN+19 "${STATUSBAR:-dwmblocks}"
 
 # Notify upon completion
 tsp -D "$idnum" notify-send "✅ $download_type download complete:" "$url" ||

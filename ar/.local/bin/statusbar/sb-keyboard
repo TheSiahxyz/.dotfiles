@@ -3,7 +3,7 @@
 # works on any init system
 # requirements: dmenu, xorg-setxkbmap
 case $BLOCK_BUTTON in
-1) fcitx5-remote -t && kill -44 "$(pidof "${STATUSBAR:-dwmblocks}")" ;;
+1) fcitx5-remote -t && kill -43 "$(pidof "${STATUSBAR:-dwmblocks}")" ;;
 2) remaps ;;
 3) notify-send "⌨ Input Method module" "\- Shows current input method (defalt US)
 - Left click to switch language (EN/KO)
@@ -14,7 +14,7 @@ case $BLOCK_BUTTON in
   [ -z "$kb_choice" ] && exit 0
   kb="$(echo "$kb_choice" | awk '{print $3}')"
   setxkbmap "$kb"
-  pkill -RTMIN+10 "${STATUSBAR:-dwmblocks}"
+  pkill -RTMIN+9 "${STATUSBAR:-dwmblocks}"
   ;;
 esac
 

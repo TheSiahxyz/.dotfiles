@@ -5,7 +5,7 @@
 case $BLOCK_BUTTON in
 1)
   setsid -w -f "$TERMINAL" -e pulsemixer
-  pkill -RTMIN+5 "${STATUSBAR:-dwmblocks}"
+  pkill -RTMIN+4 "${STATUSBAR:-dwmblocks}"
   ;;
 2) wpctl set-mute @DEFAULT_SINK@ toggle ;;
 3) notify-send "📢 Volume module" "\- Shows volume 🔊, 🔇 if muted

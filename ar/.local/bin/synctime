@@ -19,4 +19,4 @@ sudo hwclock --systohc
 echo "Current timezone: $current_zone"
 date
 
-pkill -RTMIN+3 ${STATUSBAR:-dwmblocks}
+pkill -RTMIN+2 ${STATUSBAR:-dwmblocks}

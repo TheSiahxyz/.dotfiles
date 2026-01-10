@@ -1,11 +1,31 @@
 #!/bin/sh
 
-case $BLOCK_BUTTON in
-3) notify-send "🔆 Backlight module
-- Scroll up & down changes backlight" ;;
-4) monbright -inc 5 ;;
-5) monbright -dec 5 ;;
-6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
+monitor=$(xrandr --query | grep -i '\sconnected' | grep '[0-9]x[0-9]' | grep -i 'primary' | cut -d ' ' -f1)
+[ -z "$monitor" ] && monitor=$(xrandr --query | grep -i '\sconnected' | grep '[0-9]x[0-9]' | cut -d ' ' -f1)
+case "$monitor" in
+*DP* | *HDMI*)
+  current_brightness=$(xrandr --verbose | grep -i "^$monitor connected" -A5 | grep -i "Brightness:" | cut -d ' ' -f2)
+  current_brightness=$(echo "$current_brightness * 100" | bc -l)
+  ;;
 esac
 
-monitorbright
+case $BLOCK_BUTTON in
+3) notify-send "🔆 Backlight module
+- Scroll up & down changes screen brightness
+- Shift + Scroll up & down changes monitor backlight" ;;
+4) pkexec brillo -A 5 -q ;;
+5) pkexec brillo -U 5 -q ;;
+6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
+7) monbright -inc 5 ;;
+8) monbright -dec 5 ;;
+9) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
+esac
+
+if [ -r /sys/class/backlight/*/brightness ]; then
+  curr_brightness=$(cat /sys/class/backlight/*/brightness)
+  max_brightness=$(cat /sys/class/backlight/*/max_brightness)
+  brightness_per=$((100 * curr_brightness / max_brightness))
+  printf "%s %s\n" "💡${brightness_per}%" "🪟$current_brightness"
+else
+  printf "%s\n" "🪟$current_brightness"
+fi

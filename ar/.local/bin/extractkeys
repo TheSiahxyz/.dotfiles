@@ -125,6 +125,7 @@ for file_path in "${config_files[@]}"; do
                                                        s/&layouts\[12\]/"|M|"/g;
                                                        s/&layouts\[13\]/">M>"/g;
                                                        s/^\s*//g;
+                                                       s/pkexec //g;
                                                        /^\s*0\s*$/d
                                                        ')
 

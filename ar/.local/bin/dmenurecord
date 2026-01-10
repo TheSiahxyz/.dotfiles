@@ -17,7 +17,7 @@ getdim() { xrandr | grep -oP '(?<=current ).*(?=,)' | tr -d ' '; }
 
 updateicon() {
   echo "$1" >/tmp/recordingicon
-  pkill -RTMIN+24 "${STATUSBAR:-dwmblocks}"
+  pkill -RTMIN+22 "${STATUSBAR:-dwmblocks}"
 }
 
 killrecording() {
@@ -25,7 +25,7 @@ killrecording() {
   kill -15 "$recpid"
   rm -f /tmp/recordingpid
   updateicon ""
-  pkill -RTMIN+24 "${STATUSBAR:-dwmblocks}"
+  pkill -RTMIN+22 "${STATUSBAR:-dwmblocks}"
 }
 
 getmonitor() {

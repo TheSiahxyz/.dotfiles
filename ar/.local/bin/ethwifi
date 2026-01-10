@@ -28,4 +28,4 @@ else
 fi
 
 # Refresh status bar
-pkill -RTMIN+7 "${STATUSBAR:-dwmblocks}"
+pkill -RTMIN+6 "${STATUSBAR:-dwmblocks}"

@@ -23,4 +23,4 @@ else
 fi
 
 # Notify status bar to update
-pkill -RTMIN+3 "${STATUSBAR:-dwmblocks}"
+pkill -RTMIN+2 "${STATUSBAR:-dwmblocks}"
