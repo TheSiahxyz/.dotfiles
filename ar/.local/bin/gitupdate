@@ -2,8 +2,6 @@
 
 set -eu
 
-pidof transmission-daemon >/dev/null && echo "Turn off transmission-daemon first!" && exit 1
-
 # Check if inside a Git repository
 ! git rev-parse --is-inside-work-tree >/dev/null 2>&1 && echo "Not a git repository." && exit 1
 
