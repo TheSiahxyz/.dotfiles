@@ -101,23 +101,12 @@ cmd yank-basename $basename -a -- $fx | head -c-1 | xclip -i -selection clipboar
 cmd yank-basename-without-extension &basename -a -- $fx | cut -d. -f1 | head -c-1 | xclip -i -selection clipboard
 
 # Create
-#cmd mkdir ${{ clear; tput cup $(($(tput lines)/3)); tput bold
-#  printf "Directory Name: "
-#  read ans
-#  mkdir -p $ans
-#}}
 cmd mkdir %{{
     IFS=" "
     file="$*"
     mkdir -p -- "$file"
     lf -remote "send $id cd \"$(printf '%s' "$file" | sed 's/\\/\\\\/g;s/"/\\"/g')\""
 }}
-#cmd touch ${{
-#  clear; tput cup $(($(tput lines)/3)); tput bold
-#  printf "File Name: "
-#  read ans
-#  $EDITOR $ans
-#}}
 cmd touch %{{
     IFS=" "
     file="$*"
