@@ -110,6 +110,10 @@ cmd mkdir %{{
 cmd touch %{{
     IFS=" "
     file="$*"
+    case "$file" in
+        /*) ;;
+        *) file="$PWD/$file" ;;
+    esac
     dir="${file%/*}"
     [ "$dir" != "$file" ] && mkdir -p -- "$dir"
     touch -- "$file"
