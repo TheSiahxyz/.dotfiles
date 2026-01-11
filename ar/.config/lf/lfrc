@@ -101,16 +101,29 @@ cmd yank-basename $basename -a -- $fx | head -c-1 | xclip -i -selection clipboar
 cmd yank-basename-without-extension &basename -a -- $fx | cut -d. -f1 | head -c-1 | xclip -i -selection clipboard
 
 # Create
-cmd mkdir ${{ clear; tput cup $(($(tput lines)/3)); tput bold
-  printf "Directory Name: "
-  read ans
-  mkdir -p $ans
+#cmd mkdir ${{ clear; tput cup $(($(tput lines)/3)); tput bold
+#  printf "Directory Name: "
+#  read ans
+#  mkdir -p $ans
+#}}
+cmd mkdir %{{
+    IFS=" "
+    file="$*"
+    mkdir -p -- "$file"
+    lf -remote "send $id cd \"$(printf '%s' "$file" | sed 's/\\/\\\\/g;s/"/\\"/g')\""
 }}
-cmd mkfile ${{
-  clear; tput cup $(($(tput lines)/3)); tput bold
-  printf "File Name: "
-  read ans
-  $EDITOR $ans
+#cmd touch ${{
+#  clear; tput cup $(($(tput lines)/3)); tput bold
+#  printf "File Name: "
+#  read ans
+#  $EDITOR $ans
+#}}
+cmd touch %{{
+    IFS=" "
+    file="$*"
+    touch -- "$file"
+    file="$(printf '%s' "$file" | sed 's/\\/\\\\/g;s/"/\\"/g')"
+    lf -remote "send $id :select \"$file\"; \$\$EDITOR \"$file\""
 }}
 cmd link %{{
   set -- $(cat ~/.local/share/lf/files)
@@ -500,8 +513,8 @@ map yt $printf "%s" "$fx" | sed -E 's/^.+\[/https:\/\/www.youtube.com\/watch?v=/
 map yy copy
 
 # Create
-map Md mkdir
-map Mf mkfile
+map Md push :mkdir<space>
+map Mf push :touch<space>
 map Ml link
 
 # Cut
