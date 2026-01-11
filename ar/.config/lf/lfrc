@@ -110,6 +110,8 @@ cmd mkdir %{{
 cmd touch %{{
     IFS=" "
     file="$*"
+    dir="${file%/*}"
+    [ "$dir" != "$file" ] && mkdir -p -- "$dir"
     touch -- "$file"
     file="$(printf '%s' "$file" | sed 's/\\/\\\\/g;s/"/\\"/g')"
     lf -remote "send $id :select \"$file\"; \$\$EDITOR \"$file\""
