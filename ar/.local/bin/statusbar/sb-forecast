@@ -11,7 +11,8 @@ weatherreportjson="${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport.json"
 
 error() {
   rm -f "$weatherreport" "$weatherreportjson"
-  notify-send -u critical "⛔ Failed to update 'weather$1'"
+  notify-send "⛔ Failed to update 'weather$1'"
+  echo "❓"
   exit 1
 }
 
