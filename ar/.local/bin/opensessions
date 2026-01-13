@@ -9,7 +9,7 @@ dirs=$(echo "$dirs" | tr -s ' ' '\n' | sed '/^$/d')
 
 # function to clean and create a valid session name
 get_session_name() {
-  basename "$1" | sed 's/[^a-zA-Z0-9]/_/g'
+  basename "$1" | sed 's/[^a-zA-Z0-9-]/_/g'
 }
 
 set -- $dirs
