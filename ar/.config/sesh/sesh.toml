@@ -30,7 +30,7 @@ name = "config"
 path = "~/.config"
 
 [[session]]
-name = "dotfiles"
+name = "_dotfiles"
 path = "~/.dotfiles"
 
 [[session]]
