@@ -46,6 +46,7 @@ case $BLOCK_BUTTON in
   pkill -RTMIN+6 dwmblocks
   ;;
 3) notify-send "🌐 Internet module" "\- Left click to connect
+- Middle click to toggle wifi
 ❌: wifi disabled
 📡: no wifi connection
 🛜: wifi connection with quality
