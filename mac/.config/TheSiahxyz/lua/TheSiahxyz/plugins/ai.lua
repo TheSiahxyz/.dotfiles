@@ -346,7 +346,7 @@ return {
 			vim.o.autoread = true
 
 			-- Recommended/example keymaps.
-			vim.keymap.set({ "n", "x" }, "<C-q>", function()
+			vim.keymap.set({ "n", "x" }, "<C-a>", function()
 				require("opencode").ask("@this: ", { submit = true })
 			end, { desc = "Ask opencode" })
 			vim.keymap.set({ "n", "x" }, "<C-x>", function()
@@ -456,7 +456,7 @@ return {
 				instructions_file = "avante.md",
 				---@alias Provider "claude" | "openai" | "azure" | "gemini" | "cohere" | "copilot" | string
 				---@type Provider
-				provider = "claude", -- The provider used in Aider mode or in the planning phase of Cursor Planning Mode
+				provider = "openai", -- The provider used in Aider mode or in the planning phase of Cursor Planning Mode
 				---@alias Mode "agentic" | "legacy"
 				---@type Mode
 				mode = "agentic", -- The default mode for interaction. "agentic" uses tools to automatically generate code, "legacy" uses the old planning method to generate code.
@@ -467,7 +467,6 @@ return {
 				providers = {
 					claude = {
 						endpoint = "https://api.anthropic.com",
-						auth_type = "max", -- Set to "max" to sign in with Claude Pro/Max subscription
 						model = "claude-sonnet-4-20250514",
 						timeout = 30000, -- Timeout in milliseconds
 						extra_request_body = {
