@@ -33,25 +33,25 @@ return {
 
 			vim.cmd.runtime({ args = { "lua/TheSiahxyz/snippets/*.lua" }, bang = true }) -- load custom snippets
 
-			vim.keymap.set({ "i", "x" }, "<A-L>", function()
+			vim.keymap.set({ "i", "x" }, "<C-L>", function()
 				if ls.expand_or_jumpable() then
 					ls.expand_or_jump()
 				end
 			end, { silent = true, desc = "Expand snippet or jump to the next snippet node" })
 
-			vim.keymap.set({ "i", "x" }, "<A-H>", function()
+			vim.keymap.set({ "i", "x" }, "<C-H>", function()
 				if ls.jumpable(-1) then
 					ls.jump(-1)
 				end
 			end, { silent = true, desc = "Previous spot in the snippet" })
 
-			vim.keymap.set({ "i", "x" }, "<A-l>", function()
+			vim.keymap.set({ "i", "s" }, "<C-j>", function()
 				if ls.choice_active() then
 					ls.change_choice(1)
 				end
 			end, { silent = true, desc = "Next snippet choice" })
 
-			vim.keymap.set({ "i", "x" }, "<A-h>", function()
+			vim.keymap.set({ "i", "s" }, "<C-k>", function()
 				if ls.choice_active() then
 					ls.change_choice(-1)
 				end
