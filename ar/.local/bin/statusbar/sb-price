@@ -64,4 +64,8 @@ esac
   notify-send "$icon Update complete" "$name price is now
 \$$(cat "$pricefile")"
 
-[ -f "$pricefile" ] && printf "%s%s%0.2f" "$icon" "$symb" "$(cat "$pricefile")"
+[ -f "$pricefile" ] && {
+  price=$(cat "$pricefile")
+  formatted_price=$(printf "%0.2f" "$price" | sed ':a;s/\B[0-9]\{3\}\>/,&/;ta')
+  printf "%s%s%s" "$icon" "$symb" "$formatted_price"
+}
