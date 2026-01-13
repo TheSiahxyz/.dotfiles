@@ -11,7 +11,7 @@ IFS='
 files=$(fzf-tmux \
   --header "^a pwd ^b public ^d .dotfiles ^f configs ^g git ^h home ^k desktop ^r scripts ^s suckless ^u staged files ^v private ^/ help" \
   --preview "selection={};
-    clean=\$(printf '%s' \"\$selection\" | sed -e 's/^📄 //' -e 's/^✏️ //' -e 's/^✅ //' -e 's/^❌ //' -e 's/^🔀 //' -e 's/^❓ //');
+    clean=\$(printf '%s' \"\$selection\" | sed -e 's/^📄 //' -e 's/^✏ //' -e 's/^✅ //' -e 's/^❌ //' -e 's/^🔀 //' -e 's/^❓ //');
     [ -z \"\$clean\" ] && { echo 'No selection'; exit 0; }
     target=\$(readlink -f \"\$clean\" 2>/dev/null || printf '%s' \"\$clean\");
     if [ -z \"\$target\" ]; then
@@ -65,7 +65,7 @@ files=$(fzf-tmux \
     else if (staged == \"!\" && unstaged == \"!\") icon=\"❌\";
     else if (staged != \" \" && staged != \"?\" && unstaged != \" \" && unstaged != \"?\") icon=\"🔀\";
     else if (staged != \" \" && staged != \"?\") icon=\"✅\";
-    else if (unstaged != \" \") icon=\"✏️\";
+    else if (unstaged != \" \") icon=\"✏\";
     else icon=\"❓\";
     print icon \" \" root \"/\" file
       }'; else echo 'This is not a git repository.'; fi)" \
