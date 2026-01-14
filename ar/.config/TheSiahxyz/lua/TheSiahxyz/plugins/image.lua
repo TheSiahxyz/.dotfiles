@@ -64,9 +64,9 @@ return {
 					local absolute_image_path = current_file_path .. "/" .. image_path
 					-- Check if the image exists in the current path
 					if not file_exists(absolute_image_path) then
-						-- If not found, search ../Screenshots/
+						-- If not found, search ../screenshots/
 						local fallback_path = vim.fn.fnamemodify(current_file_path, ":h")
-							.. "/Screenshots/"
+							.. "/screenshots/"
 							.. image_path
 						if file_exists(fallback_path) then
 							absolute_image_path = fallback_path
