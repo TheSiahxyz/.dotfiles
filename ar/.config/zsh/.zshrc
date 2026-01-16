@@ -21,23 +21,28 @@ zstyle ':vcs_info:git*+set-message:*' hooks git-untracked git-behind-upstream gi
     fi
 }
 +vi-git-behind-upstream() {
-    if [[ $(git rev-list HEAD..$(git rev-parse --abbrev-ref @{upstream}) --count) -gt 0 ]]; then
+    local upstream=$(git rev-parse --abbrev-ref @{upstream} 2>/dev/null)
+    if [[ -n "$upstream" ]] && [[ $(git rev-list HEAD..$upstream --count 2>/dev/null) -gt 0
+]]; then
         hook_com[misc]+="%{$fg[red]%}<"
     fi
 }
 +vi-git-ahead-upstream() {
-    if [[ $(git rev-list $(git rev-parse --abbrev-ref @{upstream})..HEAD --count) -gt 0 ]]; then
+    local upstream=$(git rev-parse --abbrev-ref @{upstream} 2>/dev/null)
+    if [[ -n "$upstream" ]] && [[ $(git rev-list $upstream..HEAD --count 2>/dev/null) -gt 0
+]]; then
         hook_com[misc]+="%{$fg[green]%}>"
     fi
 }
 +vi-git-diverged-upstream() {
-    local ahead_count=$(git rev-list --count $(git rev-parse --abbrev-ref @{upstream})..HEAD 2>/dev/null)
-    local behind_count=$(git rev-list --count HEAD..$(git rev-parse --abbrev-ref @{upstream}) 2>/dev/null)
+    local upstream=$(git rev-parse --abbrev-ref @{upstream} 2>/dev/null)
+    [[ -z "$upstream" ]] && return
+    local ahead_count=$(git rev-list --count $upstream..HEAD 2>/dev/null)
+    local behind_count=$(git rev-list --count HEAD..$upstream 2>/dev/null)
     if [[ "$ahead_count" -gt 0 && "$behind_count" -gt 0 ]]; then
         hook_com[misc]+="%{$fg[white]%}<>"
     fi
 }
-
 
 ### --- ZSH --- ###
 # GnuPG
@@ -112,20 +117,6 @@ zstyle ':fzf-tab:*' switch-group ',' '.'    # switch group using `,` and `.`
 [ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutrc" ] && source "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutrc"
 [ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutenvrc" ] && source "${XDG_CONFIG_HOME:-$HOME/.config}/shell/shortcutenvrc"
 [ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/zshnameddirrc" ] && source "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/zshnameddirrc"
-
-
-### --- AVANTE --- ###
-export AVANTE_ANTHROPIC_API_KEY="$(pass show api/claude/nvim | head -n1)"
-export AVANTE_OPENAI_API_KEY="$(pass show api/chatGPT/nvim | head -n1)"
-# export AVANTE_AZURE_OPENAI_API_KEY="$(pass show api/azure/nvim | head -n1)"
-# export AVANTE_GEMINI_API_KEY="$(pass show api/gemini/nvim | head -n1)"
-# export AVANTE_CO_API_KEY="$(pass show api/cohere/nvim | head -n1)"
-# export AVANTE_AIHUBMIX_API_KEY="$(pass show api/aihubmix/nvim | head -n1)"
-# export AVANTE_MOONSHOT_API_KEY="$(pass show api/moonshot/nvim | head -n1)"
-
-
-### --- OPENAI --- ###
-export OPENAI_API_KEY="$(pass show api/chatGPT/nvim | head -n1)"
 
 
 ## --- TMUX --- ###
