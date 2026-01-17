@@ -791,44 +791,43 @@ main() {
     output+="$version_component"
   }
 
-  # Line 2: Context
-  output+=$'\n'
-  output+=$(build_context_component "$context_size" "$current_usage")
-
-  # Line 3: Cost | Daily Cost | Remaining Time | Tokens | Time
-  local cost_component daily_cost_component remaining_component token_component time_component cache_component
+  # Line 2: Context | Cost | Tokens | Time (current window/session related)
+  local cost_component token_component time_component
   cost_component=$(build_cost_component "$cost_usd" "$duration_ms")
-  daily_cost_component=$(build_daily_cost_component "$daily_cost")
-  remaining_component=$(build_remaining_time_component "$remaining_minutes" "$projected_cost")
   token_component=$(build_token_component "$total_input" "$total_output" "$duration_ms")
   time_component=$(build_time_component "$duration_ms")
+
+  output+=$'\n'
+  output+=$(build_context_component "$context_size" "$current_usage")
+  [[ -n "$cost_component" ]] && {
+    output+=$(sep)
+    output+="$cost_component"
+  }
+  [[ -n "$token_component" ]] && {
+    output+=$(sep)
+    output+="$token_component"
+  }
+  [[ -n "$time_component" ]] && {
+    output+=$(sep)
+    output+="$time_component"
+  }
+
+  # Line 3: Daily Cost | Remaining Time (daily/block related)
+  local daily_cost_component remaining_component cache_component
+  daily_cost_component=$(build_daily_cost_component "$daily_cost")
+  remaining_component=$(build_remaining_time_component "$remaining_minutes" "$projected_cost")
   cache_component=$(build_cache_component "${cache_creation:-0}" "${cache_read:-0}")
 
-  if [[ -n "$cost_component" || -n "$daily_cost_component" || -n "$remaining_component" || -n "$token_component" || -n "$time_component" ]]; then
+  if [[ -n "$daily_cost_component" || -n "$remaining_component" ]]; then
     output+=$'\n'
     local first=1
-    if [[ -n "$cost_component" ]]; then
-      output+="$cost_component"
-      first=0
-    fi
     if [[ -n "$daily_cost_component" ]]; then
-      [[ "$first" -eq 0 ]] && output+=$(sep)
       output+="$daily_cost_component"
       first=0
     fi
     if [[ -n "$remaining_component" ]]; then
       [[ "$first" -eq 0 ]] && output+=$(sep)
       output+="$remaining_component"
-      first=0
-    fi
-    if [[ -n "$token_component" ]]; then
-      [[ "$first" -eq 0 ]] && output+=$(sep)
-      output+="$token_component"
-      first=0
-    fi
-    if [[ -n "$time_component" ]]; then
-      [[ "$first" -eq 0 ]] && output+=$(sep)
-      output+="$time_component"
     fi
   fi
 
