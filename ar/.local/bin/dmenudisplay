@@ -3,6 +3,31 @@
 # A UI for detecting and selecting all displays. Probes xrandr for connected
 # displays and lets user select one to use. User may also select "manual
 # selection" which opens arandr.
+#
+# Options:
+#   -r    Enable resolution selection for each display
+
+# Parse options
+select_resolution=false
+while getopts "r" opt; do
+  case $opt in
+    r) select_resolution=true ;;
+    *) echo "Usage: $0 [-r]" >&2; exit 1 ;;
+  esac
+done
+shift $((OPTIND - 1))
+
+# Function to select resolution for a display
+get_resolution() {
+  display="$1"
+  if [ "$select_resolution" = true ]; then
+    resolutions=$(xrandr --query | sed -n "/^$display/,/^[^ ]/p" | grep -v "^$display" | grep -v "^[^ ]" | awk '{print $1}' | grep -E "^[0-9]+x[0-9]+$")
+    chosen_res=$(echo "$resolutions" | dmenu -i -p "Resolution for $display:")
+    [ -n "$chosen_res" ] && echo "--mode $chosen_res" || echo "--auto"
+  else
+    echo "--auto"
+  fi
+}
 
 twoscreen() { # If multi-monitor is selected and there are two screens.
   mirror=$(printf "no\\nyes" | dmenu -i -p "Mirror displays?")
@@ -34,7 +59,9 @@ twoscreen() { # If multi-monitor is selected and there are two screens.
     [ -z "$primary" ] && exit
     secondary=$(echo "$screens" | grep -v ^"$primary"$)
     direction=$(printf "left\\nright" | dmenu -i -p "What side of $primary should $secondary be on?")
-    xrandr --output "$primary" --primary --auto --scale 1.0x1.0 --output "$secondary" --"$direction"-of "$primary" --auto --scale 1.0x1.0
+    primary_res=$(get_resolution "$primary")
+    secondary_res=$(get_resolution "$secondary")
+    xrandr --output "$primary" --primary $primary_res --scale 1.0x1.0 --output "$secondary" --"$direction"-of "$primary" $secondary_res --scale 1.0x1.0
   fi
 }
 
@@ -44,7 +71,10 @@ morescreen() { # If multi-monitor is selected and there are more than two screen
   secondary=$(echo "$screens" | grep -v ^"$primary"$ | dmenu -i -p "Select secondary display:")
   direction=$(printf "left\\nright" | dmenu -i -p "What side of $primary should $secondary be on?")
   tertiary=$(echo "$screens" | grep -v ^"$primary"$ | grep -v ^"$secondary"$ | dmenu -i -p "Select third display:")
-  xrandr --output "$primary" --primary --auto --output "$secondary" --"$direction"-of "$primary" --auto --output "$tertiary" --"$(printf "left\\nright" | grep -v "$direction")"-of "$primary" --auto
+  primary_res=$(get_resolution "$primary")
+  secondary_res=$(get_resolution "$secondary")
+  tertiary_res=$(get_resolution "$tertiary")
+  xrandr --output "$primary" --primary $primary_res --output "$secondary" --"$direction"-of "$primary" $secondary_res --output "$tertiary" --"$(printf "left\\nright" | grep -v "$direction")"-of "$primary" $tertiary_res
 }
 
 multimon() { # Multi-monitor handler.
@@ -55,7 +85,8 @@ multimon() { # Multi-monitor handler.
 }
 
 onescreen() { # If only one output available or chosen.
-  xrandr --output "$1" --primary --auto --scale 1.0x1.0 $(echo "$allposs" | grep -v "\b$1" | awk '{print "--output", $1, "--off"}' | paste -sd ' ' -)
+  res_opt=$(get_resolution "$1")
+  xrandr --output "$1" --primary $res_opt --scale 1.0x1.0 $(echo "$allposs" | grep -v "\b$1" | awk '{print "--output", $1, "--off"}' | paste -sd ' ' -)
 }
 
 postrun() { # Stuff to run to clean up.

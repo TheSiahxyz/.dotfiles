@@ -117,10 +117,9 @@ zstyle ':fzf-tab:*' switch-group ',' '.'    # switch group using `,` and `.`
 [ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutrc" ] && source "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutrc"
 [ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutenvrc" ] && source "${XDG_CONFIG_HOME:-$HOME/.config}/shell/shortcutenvrc"
 [ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/zshnameddirrc" ] && source "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/zshnameddirrc"
-source "$HOME/.local/share/../bin/env"
 
 
-## --- TMUX --- ###
+### --- TMUX --- ###
 if command -v tmux >/dev/null 2>&1 && [ -z "$TMUX" ]; then
     terminal_count=$(pgrep -u "$USER" -ax "${TERMINAL:-st}" | grep -Ev 'ncmpcpp|newsboat|pulsemixer|spterm|splf|spcalc|stig|vimwikitodo' | wc -l)
     if [ "$terminal_count" -le 1 ]; then
