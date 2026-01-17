@@ -74,6 +74,9 @@ export BAT_CONFIG_PATH="$XDG_CONFIG_HOME/bat/config"
 ### --- CARGO --- ###
 export CARGO_HOME="$XDG_DATA_HOME/cargo"
 
+### --- CLAUDE --- ###
+export CLAUDE_CONFIG_DIR="$XDG_CONFIG_HOME/claude"
+
 ### --- DICS --- ###
 export DICS="/usr/share/stardict/dic/"
 

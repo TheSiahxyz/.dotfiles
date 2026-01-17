@@ -1,0 +1,42 @@
+{
+  "model": "sonnet",
+  "permissions": {
+    "deny": [
+      "Bash(rm -rf:*)",
+      "Read(**/*.gpg)",
+      "Read(**/.gnupg/**/*)",
+      "Read(**/.password-store/**/*)",
+      "Write(**/*.gpg)",
+      "Write(**/.gnupg/**/*)",
+      "Write(**/.password-store/**/*)"
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "$CLAUDE_CONFIG_DIR/statuslines/statusline.sh"
+  },
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "permission_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "notify-send -u critical -i dialog-warning '🤖 Claude Code' 'Permission confirmation required'",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "idle_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "notify-send -i dialog-question '🤖 Claude Code' 'Waiting for input'",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
