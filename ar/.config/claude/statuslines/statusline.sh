@@ -52,72 +52,6 @@ readonly STATE_NOT_REPO="not_repo"
 readonly STATE_CLEAN="clean"
 readonly STATE_DIRTY="dirty"
 
-# Context usage messages (tiered by usage percentage)
-readonly CONTEXT_MSG_VERY_LOW=(
-  "just getting started"
-  "barely touched it"
-  "fresh as a daisy"
-  "room for an elephant"
-  "zero stress mode"
-  "could do this all day"
-  "warming up the engines"
-  "practically empty"
-  "smooth sailing ahead"
-  "all systems nominal"
-)
-
-readonly CONTEXT_MSG_LOW=(
-  "light snacking"
-  "taking it easy"
-  "smooth operator"
-  "just vibing"
-  "cruising altitude"
-  "nice and steady"
-  "zen mode activated"
-  "coasting along"
-  "comfortable cruise"
-  "looking good"
-)
-
-readonly CONTEXT_MSG_MEDIUM=(
-  "halfway there"
-  "finding the groove"
-  "building momentum"
-  "picking up speed"
-  "getting interesting"
-  "entering the zone"
-  "getting warmer"
-  "balanced perfectly"
-  "sweet spot territory"
-  "gears are meshing"
-)
-
-readonly CONTEXT_MSG_HIGH=(
-  "getting spicy"
-  "filling up fast"
-  "things heating up"
-  "turning up the heat"
-  "entering danger zone"
-  "feeling the pressure"
-  "approaching red zone"
-  "intensity rising"
-  "full throttle mode"
-  "hold on tight"
-)
-
-readonly CONTEXT_MSG_CRITICAL=(
-  "living dangerously"
-  "pushing the limits"
-  "houston we have a problem"
-  "danger zone activated"
-  "running on fumes"
-  "this is fine 🔥"
-  "critical mass approaching"
-  "maximum overdrive"
-  "context go brrrr"
-  "about to explode"
-)
-
 # ============================================================
 # LOGGING
 # ============================================================
@@ -205,28 +139,6 @@ format_cost() {
   else
     echo "0.00"
   fi
-}
-
-# Get random context message based on usage percentage
-get_context_message() {
-  local percent="${1:-0}"
-  local messages=()
-
-  if [[ "$percent" -le 20 ]]; then
-    messages=("${CONTEXT_MSG_VERY_LOW[@]}")
-  elif [[ "$percent" -le 40 ]]; then
-    messages=("${CONTEXT_MSG_LOW[@]}")
-  elif [[ "$percent" -le 60 ]]; then
-    messages=("${CONTEXT_MSG_MEDIUM[@]}")
-  elif [[ "$percent" -le 80 ]]; then
-    messages=("${CONTEXT_MSG_HIGH[@]}")
-  else
-    messages=("${CONTEXT_MSG_CRITICAL[@]}")
-  fi
-
-  local count=${#messages[@]}
-  local index=$((RANDOM % count))
-  echo "${messages[$index]}"
 }
 
 # ============================================================
@@ -502,11 +414,7 @@ build_context_component() {
   usage_fmt=$(format_number "$current_usage")
   size_fmt=$(format_number "$context_size")
 
-  # Get random message
-  local message
-  message=$(get_context_message "$context_percent")
-
-  echo -n "${CONTEXT_ICON} ${GRAY}[${NC}${bar}${GRAY}]${NC} ${context_percent}% ${usage_fmt}/${size_fmt} ${GRAY}· ${message}${NC}"
+  echo -n "${CONTEXT_ICON} ${GRAY}[${NC}${bar}${GRAY}]${NC} ${context_percent}% ${usage_fmt}/${size_fmt}"
 }
 
 build_directory_component() {
@@ -791,18 +699,13 @@ main() {
     output+="$version_component"
   }
 
-  # Line 2: Context | Cost | Tokens | Time (current window/session related)
-  local cost_component token_component time_component
-  cost_component=$(build_cost_component "$cost_usd" "$duration_ms")
+  # Line 2: Context | Tokens | Time (현재 세션 상태)
+  local token_component time_component
   token_component=$(build_token_component "$total_input" "$total_output" "$duration_ms")
   time_component=$(build_time_component "$duration_ms")
 
   output+=$'\n'
   output+=$(build_context_component "$context_size" "$current_usage")
-  [[ -n "$cost_component" ]] && {
-    output+=$(sep)
-    output+="$cost_component"
-  }
   [[ -n "$token_component" ]] && {
     output+=$(sep)
     output+="$token_component"
@@ -812,16 +715,22 @@ main() {
     output+="$time_component"
   }
 
-  # Line 3: Daily Cost | Remaining Time (daily/block related)
-  local daily_cost_component remaining_component cache_component
+  # Line 3: Cost | Daily Cost | Remaining (비용/리소스)
+  local cost_component daily_cost_component remaining_component cache_component
+  cost_component=$(build_cost_component "$cost_usd" "$duration_ms")
   daily_cost_component=$(build_daily_cost_component "$daily_cost")
   remaining_component=$(build_remaining_time_component "$remaining_minutes" "$projected_cost")
   cache_component=$(build_cache_component "${cache_creation:-0}" "${cache_read:-0}")
 
-  if [[ -n "$daily_cost_component" || -n "$remaining_component" ]]; then
+  if [[ -n "$cost_component" || -n "$daily_cost_component" || -n "$remaining_component" ]]; then
     output+=$'\n'
     local first=1
+    if [[ -n "$cost_component" ]]; then
+      output+="$cost_component"
+      first=0
+    fi
     if [[ -n "$daily_cost_component" ]]; then
+      [[ "$first" -eq 0 ]] && output+=$(sep)
       output+="$daily_cost_component"
       first=0
     fi
