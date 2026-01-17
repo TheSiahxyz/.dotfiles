@@ -40,5 +40,8 @@
   "statusLine": {
     "type": "command",
     "command": "$CLAUDE_CONFIG_DIR/statuslines/statusline.sh"
+  },
+  "enabledPlugins": {
+    "typescript-lsp@claude-plugins-official": true
   }
 }
