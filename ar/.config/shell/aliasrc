@@ -77,6 +77,9 @@ alias 666='chmod -R 666'
 alias 755='chmod -R 755'
 alias 777='chmod -R 777'
 
+# claude
+alias cld='claude'
+
 # copy
 alias CC='$(fc -l -n -1) | xclip -selection clipboard'
 ialias cp='cp -iv'
