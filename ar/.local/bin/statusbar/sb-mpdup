@@ -4,5 +4,6 @@
 # music player's status. mpd must be running on X's start for this to work.
 
 while :; do
-  mpc idle >/dev/null && kill -55 "$(pidof "${STATUSBAR:-dwmblocks}")" || break
+  mpc idle >/dev/null || continue
+  kill -55 "$(pidof "${STATUSBAR:-dwmblocks}")" 2>/dev/null
 done
