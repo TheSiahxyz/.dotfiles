@@ -37,7 +37,7 @@ readonly DIR_ICON="📁"
 readonly GIT_ICON="🌿"
 readonly COST_ICON="💰"
 readonly TOKEN_ICON="📊"
-readonly TIME_ICON="⏱️"
+readonly TIME_ICON="🕒"
 readonly VERSION_ICON="📟"
 
 # Git state constants
@@ -120,7 +120,7 @@ readonly LOG_FILE="${SCRIPT_DIR}/statusline.log"
 log_debug() {
   local timestamp
   timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-  echo "[$timestamp] $*" >> "$LOG_FILE" 2>/dev/null || true
+  echo "[$timestamp] $*" >>"$LOG_FILE" 2>/dev/null || true
 }
 
 # ============================================================
@@ -139,7 +139,10 @@ sep() { echo -n " ${SEPARATOR} "; }
 # Format numbers with K/M suffixes
 format_number() {
   local num="${1:-0}"
-  [[ ! "$num" =~ ^[0-9]+$ ]] && { echo "$num"; return; }
+  [[ ! "$num" =~ ^[0-9]+$ ]] && {
+    echo "$num"
+    return
+  }
 
   if [[ "$num" -lt 1000 ]]; then
     echo "$num"
@@ -167,7 +170,10 @@ format_number() {
 # Format duration (ms to human readable)
 format_duration() {
   local ms="${1:-0}"
-  [[ ! "$ms" =~ ^[0-9]+$ ]] && { echo ""; return; }
+  [[ ! "$ms" =~ ^[0-9]+$ ]] && {
+    echo ""
+    return
+  }
 
   local seconds=$((ms / 1000))
   local minutes=$((seconds / 60))
@@ -314,18 +320,18 @@ get_git_info() {
   local branch="" ahead="0" behind="0"
   while IFS= read -r line; do
     case "$line" in
-      "# branch.head "*)
-        branch="${line#\# branch.head }"
-        ;;
-      "# branch.ab "*)
-        local ab="${line#\# branch.ab }"
-        ahead="${ab%% *}"
-        ahead="${ahead#+}"
-        behind="${ab##* }"
-        behind="${behind#-}"
-        ;;
+    "# branch.head "*)
+      branch="${line#\# branch.head }"
+      ;;
+    "# branch.ab "*)
+      local ab="${line#\# branch.ab }"
+      ahead="${ab%% *}"
+      ahead="${ahead#+}"
+      behind="${ab##* }"
+      behind="${behind#-}"
+      ;;
     esac
-  done <<< "$status_output"
+  done <<<"$status_output"
 
   branch="${branch:-(detached)}"
   ahead="${ahead:-0}"
@@ -335,7 +341,7 @@ get_git_info() {
   local file_count=0
   while IFS= read -r line; do
     [[ "$line" != \#* && -n "$line" ]] && ((file_count++))
-  done <<< "$status_output"
+  done <<<"$status_output"
 
   if [[ "$file_count" -eq 0 ]]; then
     echo "$STATE_CLEAN|$branch|$ahead|$behind"
@@ -350,7 +356,7 @@ get_git_info() {
     while IFS=$'\t' read -r a r _; do
       [[ "$a" =~ ^[0-9]+$ ]] && added=$((added + a))
       [[ "$r" =~ ^[0-9]+$ ]] && removed=$((removed + r))
-    done <<< "$diff_output"
+    done <<<"$diff_output"
   fi
 
   echo "$STATE_DIRTY|$branch|$file_count|$added|$removed|$ahead|$behind"
@@ -392,9 +398,10 @@ build_context_component() {
   local filled=$((context_percent * BAR_WIDTH / 100))
   local empty=$((BAR_WIDTH - filled))
   local bar="${bar_color}"
-  bar+=$(printf "%${filled}s" | tr ' ' "$BAR_FILLED")
+  local i
+  for ((i = 0; i < filled; i++)); do bar+="$BAR_FILLED"; done
   bar+="${GRAY}"
-  bar+=$(printf "%${empty}s" | tr ' ' "$BAR_EMPTY")
+  for ((i = 0; i < empty; i++)); do bar+="$BAR_EMPTY"; done
   bar+="${NC}"
 
   # Format numbers
@@ -428,30 +435,30 @@ build_git_component() {
   local git_data="$1"
 
   local state
-  IFS='|' read -r state _ <<< "$git_data"
+  IFS='|' read -r state _ <<<"$git_data"
 
   case "$state" in
-    "$STATE_NOT_REPO")
-      return 0
-      ;;
-    "$STATE_CLEAN")
-      local branch ahead behind
-      IFS='|' read -r _ branch ahead behind <<< "$git_data"
-      echo -n "${GIT_ICON} ${MAGENTA}${branch}${NC}"
-      [[ "$ahead" -gt 0 ]] 2>/dev/null && echo -n " ${GREEN}↑${ahead}${NC}"
-      [[ "$behind" -gt 0 ]] 2>/dev/null && echo -n " ${RED}↓${behind}${NC}"
-      ;;
-    "$STATE_DIRTY")
-      local branch files added removed ahead behind
-      IFS='|' read -r _ branch files added removed ahead behind <<< "$git_data"
-      echo -n "${GIT_ICON} ${MAGENTA}${branch}${NC}"
-      [[ "$ahead" -gt 0 ]] 2>/dev/null && echo -n " ${GREEN}↑${ahead}${NC}"
-      [[ "$behind" -gt 0 ]] 2>/dev/null && echo -n " ${RED}↓${behind}${NC}"
-      echo -n " ${GRAY}·${NC} ${ORANGE}${files} files${NC}"
-      if [[ "$added" -gt 0 || "$removed" -gt 0 ]] 2>/dev/null; then
-        echo -n " ${GREEN}+${added}${NC}/${RED}-${removed}${NC}"
-      fi
-      ;;
+  "$STATE_NOT_REPO")
+    return 0
+    ;;
+  "$STATE_CLEAN")
+    local branch ahead behind
+    IFS='|' read -r _ branch ahead behind <<<"$git_data"
+    echo -n "${GIT_ICON} ${MAGENTA}${branch}${NC}"
+    [[ "$ahead" -gt 0 ]] 2>/dev/null && echo -n " ${GREEN}↑${ahead}${NC}"
+    [[ "$behind" -gt 0 ]] 2>/dev/null && echo -n " ${RED}↓${behind}${NC}"
+    ;;
+  "$STATE_DIRTY")
+    local branch files added removed ahead behind
+    IFS='|' read -r _ branch files added removed ahead behind <<<"$git_data"
+    echo -n "${GIT_ICON} ${MAGENTA}${branch}${NC}"
+    [[ "$ahead" -gt 0 ]] 2>/dev/null && echo -n " ${GREEN}↑${ahead}${NC}"
+    [[ "$behind" -gt 0 ]] 2>/dev/null && echo -n " ${RED}↓${behind}${NC}"
+    echo -n " ${GRAY}·${NC} ${ORANGE}${files} files${NC}"
+    if [[ "$added" -gt 0 || "$removed" -gt 0 ]] 2>/dev/null; then
+      echo -n " ${GREEN}+${added}${NC}/${RED}-${removed}${NC}"
+    fi
+    ;;
   esac
 }
 
@@ -553,7 +560,7 @@ main() {
     read -r duration_ms
     read -r version
     read -r session_id
-  } <<< "$parsed"
+  } <<<"$parsed"
 
   log_debug "Parsed: model=$model_name, dir=$current_dir, context=$current_usage/$context_size, cost=$cost_usd, duration=$duration_ms"
 
@@ -571,11 +578,17 @@ main() {
 
   local git_component
   git_component=$(build_git_component "$git_data")
-  [[ -n "$git_component" ]] && { output+=$(sep); output+="$git_component"; }
+  [[ -n "$git_component" ]] && {
+    output+=$(sep)
+    output+="$git_component"
+  }
 
   local version_component
   version_component=$(build_version_component "$version")
-  [[ -n "$version_component" ]] && { output+=$(sep); output+="$version_component"; }
+  [[ -n "$version_component" ]] && {
+    output+=$(sep)
+    output+="$version_component"
+  }
 
   # Line 2: Context
   output+=$'\n'
