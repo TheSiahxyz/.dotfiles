@@ -2,10 +2,10 @@
 set -euo pipefail 2>/dev/null || set -eu
 
 # ============================================================
-# STATUSLINE v2.1.0 - Claude Code Status Line
+# STATUSLINE v2.2.0 - Claude Code Status Line
 # ============================================================
 
-readonly STATUSLINE_VERSION="2.1.0"
+readonly STATUSLINE_VERSION="2.2.0"
 
 # ============================================================
 # CONFIGURATION
@@ -189,12 +189,14 @@ detect_language_info() {
 }
 
 # ============================================================
-# CCUSAGE DATA FETCHING
+# CCUSAGE DATA FETCHING (with caching)
 # ============================================================
 
-get_ccusage_data() {
-  local session_id="$1"
+readonly CCUSAGE_CACHE_FILE="${SCRIPT_DIR}/.ccusage_cache"
+readonly CCUSAGE_CACHE_TTL=60  # seconds
 
+# Fetch fresh ccusage data (internal)
+_fetch_ccusage_data() {
   # Check if npx is available
   command -v npx >/dev/null 2>&1 || return 1
 
@@ -219,6 +221,40 @@ get_ccusage_data() {
 
   # Output: daily_cost|remaining_minutes|projected_cost|block_cost|burn_rate
   echo "${daily_cost:-0}|${remaining_minutes:-0}|${projected_cost:-0}|${block_cost:-0}|${burn_rate:-0}"
+}
+
+# Get ccusage data with caching
+get_ccusage_data() {
+  local session_id="$1"
+  local now
+  now=$(date +%s)
+
+  # Check if cache exists and is valid
+  if [[ -f "$CCUSAGE_CACHE_FILE" ]]; then
+    local cache_line
+    cache_line=$(head -1 "$CCUSAGE_CACHE_FILE" 2>/dev/null)
+    local cache_time="${cache_line%%|*}"
+    local cache_data="${cache_line#*|}"
+
+    if [[ -n "$cache_time" && "$cache_time" =~ ^[0-9]+$ ]]; then
+      local age=$((now - cache_time))
+      if [[ "$age" -lt "$CCUSAGE_CACHE_TTL" ]]; then
+        log_debug "Using cached ccusage data (age: ${age}s)"
+        echo "$cache_data"
+        return 0
+      fi
+    fi
+  fi
+
+  # Cache miss or expired - fetch fresh data
+  log_debug "Fetching fresh ccusage data"
+  local fresh_data
+  fresh_data=$(_fetch_ccusage_data) || return 1
+
+  # Save to cache
+  echo "${now}|${fresh_data}" > "$CCUSAGE_CACHE_FILE" 2>/dev/null
+
+  echo "$fresh_data"
 }
 
 # ============================================================
