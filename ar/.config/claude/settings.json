@@ -1,5 +1,4 @@
 {
-  "model": "sonnet",
   "permissions": {
     "deny": [
       "Bash(rm -rf:*)",
@@ -10,10 +9,6 @@
       "Write(**/.gnupg/**/*)",
       "Write(**/.password-store/**/*)"
     ]
-  },
-  "statusLine": {
-    "type": "command",
-    "command": "$CLAUDE_CONFIG_DIR/statuslines/statusline.sh"
   },
   "hooks": {
     "Notification": [
@@ -38,5 +33,9 @@
         ]
       }
     ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "$CLAUDE_CONFIG_DIR/statuslines/statusline.sh"
   }
 }
