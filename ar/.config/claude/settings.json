@@ -1,5 +1,8 @@
 {
   "permissions": {
+    "allow": [
+      "mcp__taskmaster__ai"
+    ],
     "deny": [
       "Bash(rm -rf:*)",
       "Read(**/*.gpg)",

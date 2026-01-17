@@ -9,6 +9,9 @@ credentials
 # Bookmakrs
 .vim-bookmarks
 
+# Claude
+**/.claude/settings.local.json
+
 # Compiled files
 *.class
 *.com
