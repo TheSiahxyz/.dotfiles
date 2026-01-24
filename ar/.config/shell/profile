@@ -9,7 +9,6 @@
 # Add all directories in each subdirectory to $PATH
 [ -d ~/.local/bin ] && export PATH="$(find ~/.local/bin -path '*/.git*' -prune -o \( -type f -o -type l \) -perm -u=x -exec dirname {} \; | sort -u | paste -sd ':' -):$PATH"
 [ -d ~/.local/share/.password-store ] && export PATH="$(find ~/.local/share/.password-store -type d -name '.extensions' | paste -sd ':' -):$PATH"
-command -v asdf >/dev/null 2>&1 && export PATH="$(find -L ~/.local/share/asdf/installs -name bin -type d -print 2>/dev/null | sort -u | paste -s -d ':' -):$PATH"
 command -v npm >/dev/null 2>&1 && export PATH="$(find -L ~/.local/share/npm -name bin -type d -print 2>/dev/null | sort -u | paste -s -d ':' -):$PATH"
 
 unsetopt PROMPT_SP 2>/dev/null
@@ -67,6 +66,7 @@ export ANSIBLE_CONFIG="$XDG_CONFIG_HOME/ansible/ansible.cfg"
 ### --- ASDF --- ###
 export ASDF_CONFIG_FILE="$XDG_CONFIG_HOME/asdf/asdfrc"
 export ASDF_DATA_DIR="$XDG_DATA_HOME/asdf"
+command -v asdf >/dev/null 2>&1 && export PATH="$ASDF_DATA_DIR/shims:$PATH"
 
 ### --- BAT --- ###
 export BAT_CONFIG_PATH="$XDG_CONFIG_HOME/bat/config"
