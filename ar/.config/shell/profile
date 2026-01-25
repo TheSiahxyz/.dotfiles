@@ -9,7 +9,6 @@
 # Add all directories in each subdirectory to $PATH
 [ -d ~/.local/bin ] && export PATH="$(find ~/.local/bin -path '*/.git*' -prune -o \( -type f -o -type l \) -perm -u=x -exec dirname {} \; | sort -u | paste -sd ':' -):$PATH"
 [ -d ~/.local/share/.password-store ] && export PATH="$(find ~/.local/share/.password-store -type d -name '.extensions' | paste -sd ':' -):$PATH"
-command -v npm >/dev/null 2>&1 && export PATH="$(find -L ~/.local/share/npm -name bin -type d -print 2>/dev/null | sort -u | paste -s -d ':' -):$PATH"
 
 unsetopt PROMPT_SP 2>/dev/null
 
@@ -168,6 +167,7 @@ export NOTMUCH_CONFIG="$XDG_CONFIG_HOME/notmuch/config"
 
 ### --- NPM --- ###
 export NPM_CONFIG_USERCONFIG="~/.config/npm/.npmrc"
+command -v npm >/dev/null 2>&1 && export PATH="$(find -L ~/.local/share/npm -name bin -type d -print 2>/dev/null | sort -u | paste -s -d ':' -):$PATH"
 
 ### --- NVM --- ###
 export NVM_DIR="$XDG_CONFIG_HOME/nvm"
