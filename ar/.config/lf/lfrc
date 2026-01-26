@@ -305,7 +305,7 @@ cmd open ${{
   text/html|text/xml) lynx $fx;;
   text/troff) groff -mom $fx -Tpdf | zathura - ;;
   text/*|application/json|inode/x-empty|application/x-subrip) $EDITOR $fx;;
-  video/*) setsid -f mpv --x11-name=video --really-quiet -- "$f" </dev/null >/dev/null 2>&1 ;;
+  video/*) setsid -f mpv --x11-name=video --really-quiet -- "$f" >/dev/null 2>&1 ;;
 	*) for f in $fx; do setsid -f ${OPENER:-xdg-open} $f >/dev/null 2>&1; done;;
   esac
 }}
