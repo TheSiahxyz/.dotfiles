@@ -138,6 +138,11 @@ return {
 							-- },
 						})
 					end,
+					["hadolint"] = function()
+						lspconfig.bashls.setup({
+							capabilities = capabilities,
+						})
+					end,
 					["harper_ls"] = function()
 						lspconfig.harper_ls.setup({
 							capabilities = capabilities,
@@ -253,7 +258,7 @@ return {
 					"black", -- python formatter
 					"debugpy", -- python debuger
 					"eslint_d", -- eslint linter
-					-- "hadolint", -- docker linter
+					"hadolint", -- docker linter
 					"isort", -- python formatter
 					"java-debug-adapter", -- java debugger
 					"java-test", -- java test
