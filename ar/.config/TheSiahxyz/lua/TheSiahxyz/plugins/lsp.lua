@@ -94,6 +94,7 @@ return {
 					"bashls",
 					"dockerls",
 					"docker_compose_language_service",
+					"eslint",
 					"harper_ls",
 					"jdtls",
 					"jsonls",
@@ -102,6 +103,7 @@ return {
 					"pyright",
 					"ruff",
 					"sqls",
+					"tailwindcss",
 					"ts_ls",
 				},
 				automatic_enable = true,
@@ -139,7 +141,7 @@ return {
 						})
 					end,
 					["hadolint"] = function()
-						lspconfig.bashls.setup({
+						lspconfig.hadolint.setup({
 							capabilities = capabilities,
 						})
 					end,
@@ -223,8 +225,13 @@ return {
 							capabilities = capabilities,
 						})
 					end,
+					["sql-formatter"] = function()
+						lspconfig.sql.setup({
+							capabilities = capabilities,
+						})
+					end,
 					["ts_ls"] = function()
-						lspconfig.ruff.setup({
+						lspconfig.ts_ls.setup({
 							capabilities = capabilities,
 						})
 					end,
@@ -265,6 +272,7 @@ return {
 					"js-debug-adapter", -- javascript debugger
 					"markdown-toc", -- markdown toc
 					"prettier", -- prettier formatter
+					"prettierd", -- css, java, javascript, typescript formatter
 					"pylint", -- python linter
 					"ruff", -- python formatter
 					"shellcheck", -- bash lint
