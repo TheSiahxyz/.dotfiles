@@ -43,15 +43,26 @@ else
 fi
 
 # Shows the current moon phase.
-location=$(curl -s http://ip-api.com/json | jq -r '[.regionName, .countryCode] | join(",")')
+locationfile="${XDG_CACHE_HOME:-${HOME}/.cache}/statusbar/location"
 moonfile="${XDG_DATA_HOME:-${HOME}/.local/share}/wallpapers/moonphase"
 
-if [ ! -s "$moonfile" ] || [ "$(stat -c %y "$moonfile" 2>/dev/null | cut -d' ' -f1)" != "$(date '+%Y-%m-%d')" ]; then
-  moon=$(curl -sf "wttr.in/$location?format=%m")
-  [ -n "$moon" ] && grep -vq 'Unknown location' "$moon" && echo "$moon" >"$moonfile"
+# Cache location for 24 hours
+if [ ! -s "$locationfile" ] || [ $(($(date +%s) - $(stat -c %Y "$locationfile" 2>/dev/null || echo 0))) -gt 86400 ]; then
+  mkdir -p "${XDG_CACHE_HOME:-${HOME}/.cache}/statusbar"
+  curl -s http://ip-api.com/json | jq -r '[.regionName, .countryCode] | join(",")' > "$locationfile" 2>/dev/null &
 fi
 
-moonicon="$(cat "$moonfile")"
+location=$(cat "$locationfile" 2>/dev/null || echo "")
+
+# Update moon phase only once per day
+if [ ! -s "$moonfile" ] || [ "$(stat -c %y "$moonfile" 2>/dev/null | cut -d' ' -f1)" != "$(date '+%Y-%m-%d')" ]; then
+  if [ -n "$location" ]; then
+    moon=$(curl -sf "wttr.in/$location?format=%m" 2>/dev/null)
+    [ -n "$moon" ] && ! echo "$moon" | grep -q 'Unknown location' && echo "$moon" >"$moonfile" &
+  fi
+fi
+
+moonicon="$(cat "$moonfile" 2>/dev/null)"
 
 case $BLOCK_BUTTON in
 1) notify-send "This Month" "$(cal | sed "s/\<$(date +'%B' | tr -d ' ')\>/<b><span color='blue'>&<\/span><\/b>/;s/\<$(date +'%Y' | sed 's/ //g')\>/<b><span color='blue'>&<\/span><\/b>/;s/\<$(date +'%B' | sed 's/ //g')\>/<b><span color='blue'>&<\/span><\/b>/;s/\<$(date +'%e' | sed 's/ //g')\>/<b><span color='red'>&<\/span><\/b>/")" && notify-send "Appointments" "$(calcurse -d3)" ;;

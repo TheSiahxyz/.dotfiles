@@ -3,7 +3,13 @@
 # Displays today's snow chance (🏂), precipication chance (☔), humidity (💧), wind speed (🎐), and current (feel like) temperature (🌞).
 # Usually intended for the statusbar.
 
-location=$(curl -s http://ip-api.com/json | jq -r '[.regionName, .countryCode] | join(",")')
+# Cache location for 24 hours
+locationfile="${XDG_CACHE_HOME:-${HOME}/.cache}/statusbar/location"
+if [ ! -s "$locationfile" ] || [ $(($(date +%s) - $(stat -c %Y "$locationfile" 2>/dev/null || echo 0))) -gt 86400 ]; then
+  mkdir -p "${XDG_CACHE_HOME:-${HOME}/.cache}/statusbar"
+  curl -s http://ip-api.com/json 2>/dev/null | jq -r '[.regionName, .countryCode] | join(",")' > "$locationfile" 2>/dev/null || true
+fi
+location=$(cat "$locationfile" 2>/dev/null || echo "")
 
 url="${WTTRURL:-wttr.in}"
 weatherreport="${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport"
