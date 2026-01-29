@@ -46,10 +46,10 @@ files=$(fzf-tmux \
   --multi \
   --exit-0 \
   --prompt " 💡 " \
-  --bind "ctrl-a:change-prompt( ⚡ )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . $PWD)" \
-  --bind "ctrl-b:change-prompt( 🌎 )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . ${XDG_PUBLICSHARE_DIR:-${HOME}/Public})" \
-  --bind "ctrl-d:change-prompt( ⚙️ )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . ${XDG_DOTFILES_DIR:-${HOME}/.dotfiles})" \
-  --bind "ctrl-f:change-prompt( 🗂️ )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . ${XDG_CONFIG_HOME:-${HOME}/.config})" \
+  --bind "ctrl-a:change-prompt( ⚡ )+reload(fd -H -L -t f -E .Trash -E .git -E .cache -E node_modules -E .next -E dist -E build -E coverage -E target -E vendor -E .venv -E venv . $PWD)" \
+  --bind "ctrl-b:change-prompt( 🌎 )+reload(fd -H -L -t f -E .Trash -E .git -E .cache -E node_modules -E .next -E dist -E build -E coverage -E target -E vendor -E .venv -E venv . ${XDG_PUBLICSHARE_DIR:-${HOME}/Public})" \
+  --bind "ctrl-d:change-prompt( ⚙️ )+reload(fd -H -L -t f -E .Trash -E .git -E .cache -E node_modules -E .next -E dist -E build -E coverage -E target -E vendor -E .venv -E venv . ${XDG_DOTFILES_DIR:-${HOME}/.dotfiles})" \
+  --bind "ctrl-f:change-prompt( 🗂️ )+reload(fd -H -L -t f -E .Trash -E .git -E .cache -E node_modules -E .next -E dist -E build -E coverage -E target -E vendor -E .venv -E venv . ${XDG_CONFIG_HOME:-${HOME}/.config})" \
   --bind "ctrl-g:change-prompt(   )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . $HOME/Private/repos $HOME/Public/repos)" \
   --bind "ctrl-h:change-prompt( 🏠 )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . $HOME)" \
   --bind "ctrl-k:change-prompt( 🖥️ )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . ${XDG_DESKTOP_DIR:-${HOME}/Desktop})" \
