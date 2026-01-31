@@ -1,0 +1,82 @@
+#!/bin/sh
+# POSIX compliant script to switch GitHub CLI accounts using fzf
+
+set -e
+
+# Check if gh is installed
+if ! command -v gh >/dev/null 2>&1; then
+  printf "Error: gh (GitHub CLI) is not installed\n" >&2
+  exit 1
+fi
+
+# Check if fzf is installed
+if ! command -v fzf >/dev/null 2>&1; then
+  printf "Error: fzf is not installed\n" >&2
+  exit 1
+fi
+
+# Get authentication status and parse accounts with active status
+# Parse the full status output to get hostname, username, login status, and active status
+status_output=$(gh auth status 2>&1)
+
+# Use awk to parse multi-line account information and get both active and inactive accounts
+parsed_data=$(printf "%s\n" "$status_output" | awk '
+    /Logged in to|Failed to log in to/ {
+        # Extract hostname and username
+        match($0, /(Logged in to|Failed to log in to) ([^ ]+) account ([^ ]+)/, arr)
+        hostname = arr[2]
+        username = arr[3]
+        logged_status = (arr[1] == "Logged in to" ? "✓" : "✗")
+        account_key = username "@" hostname
+        accounts[account_key] = logged_status
+        account_order[++order_count] = account_key
+    }
+    /Active account: true/ {
+        # Mark the previous account as active
+        if (account_key != "") {
+            active_account = account_key
+        }
+    }
+    END {
+        # Print active account on first line
+        print "ACTIVE:" active_account
+        # Print other accounts
+        for (i = 1; i <= order_count; i++) {
+            key = account_order[i]
+            # Skip the active account
+            if (key == active_account) continue
+            status = accounts[key]
+            print key " [" status "]"
+        }
+    }
+')
+
+# Extract active account and other accounts
+current_account=$(printf "%s\n" "$parsed_data" | grep "^ACTIVE:" | cut -d: -f2)
+display_accounts=$(printf "%s\n" "$parsed_data" | grep -v "^ACTIVE:")
+
+if [ -z "$display_accounts" ]; then
+  printf "No other accounts found. You are already on the only account.\n" >&2
+  exit 1
+fi
+
+# Use fzf to select account with current account in header
+selected=$(printf "%s\n" "$display_accounts" | fzf --prompt="Switch to: " --header="*$current_account" --height=40% --border --reverse)
+
+if [ -z "$selected" ]; then
+  printf "No account selected\n" >&2
+  exit 1
+fi
+
+# Extract hostname and username from selection
+# Remove status indicator: "username@hostname [✓]" -> "username@hostname"
+selected_clean=$(printf "%s" "$selected" | sed 's/ \[.*\]//')
+hostname=$(printf "%s" "$selected_clean" | cut -d'@' -f2)
+username=$(printf "%s" "$selected_clean" | cut -d'@' -f1)
+
+printf "Switching to %s on %s...\n" "$username" "$hostname"
+
+# Switch to selected account using gh auth switch
+gh auth switch --hostname "$hostname" --user "$username"
+
+printf "Successfully switched to %s@%s\n" "$username" "$hostname"
