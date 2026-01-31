@@ -71,6 +71,7 @@ application/x-hwp)
   [ ! -f "$CACHE.jpg" ] && gnome-epub-thumbnailer "$1" "$CACHE.jpg"
   image "$CACHE.jpg" "$2" "$3" "$4" "$5" "$1"
   ;;
+applicationg/gzip) zcat -- "$1" ;;
 application/*zip) atool --list -- "$1" ;;
 *opendocument*) odt2txt "$1" ;;
 application/pgp-encrypted) gpg -d -- "$1" ;;
