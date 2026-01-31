@@ -2,6 +2,9 @@
 set autoquit true
 set cleaner '~/.config/lf/cleaner'
 set dircache false
+set dircounts true
+set dirfirst true
+set dirpreviews false
 set drawbox true
 set dupfilefmt '%f_%n'
 set hidden false
@@ -18,11 +21,13 @@ set period 1
 set previewer '~/.config/lf/scope'
 set ratios 1:2:3
 set relativenumber true
+set rulerfmt "%a| %p| %m| %c| %s| %v| %f| %i/%t(%h) %P %d"
 set scrolloff 10
 set shellopts '-eu'
+set statfmt "\033[36m%p\033[0m| %M| %c| %u| %g| %S| %t| -> %l"
 set tempmarks '123456'
 set truncatepct 50
-
+set info custom
 
 ### --- Custom Functions --- ###
 # Chmod
@@ -234,6 +239,26 @@ cmd on-cd &{{
   '
 }}
 
+cmd on-load &{{
+    cd "$(dirname "$1")" || exit 1
+    [ "$(git rev-parse --is-inside-git-dir 2>/dev/null)" = false ] || exit 0
+    cmds=""
+    for file in "$@"; do
+        case "$file" in
+            */.git|*/.git/*) continue;;
+        esac
+        status=$(git status --porcelain --ignored -- "$file" | cut -c1-2 | head -n1)
+        if [ -n "$status" ]; then
+            cmds="${cmds}addcustominfo \"${file}\" \"$status\"; "
+        else
+            cmds="${cmds}addcustominfo \"${file}\" ''; "
+        fi
+    done
+    if [ -n "$cmds" ]; then
+        lf -remote "send $id :$cmds"
+    fi
+}}
+
 # iPython
 cmd create-ipynb ${{
   clear; tput cup $(($(tput lines)/3)); tput bold
@@ -386,7 +411,7 @@ cmd select-music &{{
   [ -n "$files" ] && lf -remote "send $id :unselect; toggle $files"
 }}
 cmd on-select &{{
-  lf -remote "send $id set statfmt \"$(eza -ld --color=always "$f")\""
+  lf -remote "send $id set statfmt \"$(eza -ldg --color=always "$f")\""
 }}
 cmd load-select &{{
     if [ $# -eq 1 ] && [ "$1" = "$id" ]; then
@@ -530,6 +555,15 @@ map vln $$EDITOR "$(nvim -u NONE --headless +'lua io.write(vim.v.oldfiles[1] .. 
 # Extract
 map E extract; clear; save-select
 
+# Info
+map za set info size:time
+map zc set info custom
+map zh set hidden!
+map zn set info
+map zr set reverse!
+map zs set info size
+map zt set info time
+
 # iPython
 map Mi create-ipynb
 
@@ -584,7 +618,6 @@ map SMB share-samba
 
 # Select
 map <space> :toggle; down; save-select
-map sb :invert-below; save-select
 map sd select-dirs
 map sf select-files
 map si :invert; save-select
@@ -596,11 +629,12 @@ map sv select-videos
 
 # Sort
 map sa :set sortby atime; set info atime
+map sb :set sortby btime; set info btime
 map sc :set sortby ctime; set info ctime
 map se :set sortby ext; set info
 map sn :set sortby natural; set info
+map ss :set sortby size; set info size
 map st :set sortby time; set info time
-map sz :set sortby size; set info size
 
 # Tag
 map tg tag-toggle
@@ -623,3 +657,4 @@ map bl $setlock "$f"
 map wi wine-run
 
 load-select
+on-cd
