@@ -188,7 +188,22 @@ case "$content_choice" in
   ;;
 "Local Files")
   check_mount
-  printf "%s\n%s\n%s\n%s\n%s\n%s\n" "$HOME/Downloads" "$HOME/Private" "$HOME/Torrents/complete" "$HOME/Videos" "/media/$USER" "/mnt/second" | dmenu -i -p "Choose your initial directory:" | {
+  # Build directory list
+  dir_list="$HOME/Downloads\n$HOME/Private\n$HOME/Torrents/complete\n$HOME/Videos"
+
+  # Add subdirectories from /media/$USER if they exist
+  if [ -d "/media/$USER" ]; then
+    media_subdirs=$(find "/media/$USER" -mindepth 1 -maxdepth 1 -type d ! -name ".*" 2>/dev/null)
+    [ -n "$media_subdirs" ] && dir_list="$dir_list\n$media_subdirs"
+  fi
+
+  # Add subdirectories from /mnt if they exist
+  if [ -d "/mnt" ]; then
+    mnt_subdirs=$(find "/mnt" -mindepth 1 -maxdepth 1 -type d ! -name ".*" 2>/dev/null)
+    [ -n "$mnt_subdirs" ] && dir_list="$dir_list\n$mnt_subdirs"
+  fi
+
+  printf "%b" "$dir_list" | dmenu -i -p "Choose your initial directory:" | {
     read -r init_dir
     [ -z "$init_dir" ] && $mount_script && exit
     selected_dir="$init_dir"
