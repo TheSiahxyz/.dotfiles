@@ -179,6 +179,7 @@ cmd delete ${{
 }}
 
 cmd trash ${{
+  clear
   files=$(printf "$fx" | tr '\n' ';')
   while [ "$files" ]; do
     file=${files%%;*}
@@ -223,6 +224,15 @@ cmd extract ${{
 }}
 
 # Git
+cmd git-root %{{
+  root=$(git rev-parse --show-toplevel 2>/dev/null)
+  if [ -n "$root" ]; then
+    lf -remote "send $id cd \"$root\""
+  else
+    lf -remote "send $id echo 'Not in a git repository'"
+  fi
+}}
+
 cmd on-cd &{{
   zoxide add "$PWD"
   bash -c '
@@ -646,6 +656,7 @@ map fD zi
 map fd $lf -remote "send $id select \"$(find . -type d | fzf)\""
 map ff $lf -remote "send $id select \"$(find . -type f | fzf)\""
 map gl follow_link
+map gc git-root
 map <c-f> fzf_search
 map <c-z> z
 
