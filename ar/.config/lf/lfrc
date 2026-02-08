@@ -376,50 +376,39 @@ cmd share-samba ${{
 }}
 
 # Select
-cmd select-type &{{
+cmd select-mime &{{
   set -f
   [ "$#" -eq 0 ] && exit
-  files="$(
-    find "$PWD" -mindepth 1 -maxdepth 1 \
-    \( \( -type "$1" -o \( -type l -a -exec test -"$1" {} \; \) \) \) \
-    $([ "$lf_hidden" = false ] && printf '%s\n' -not -name '.*') -print0 |
-    sort -z |
-    sed -z 's/\\/\\\\/g;s/"/\\"/g;s/\n/\\n/g;s/^/"/;s/$/"/' |
-    tr '\0' ' ')"
+
+  case "$1" in
+    -*)
+      # Exclusion: grep -v (e.g., -inode/directory for files)
+      pattern="${1#-}"
+      files=$(find "$PWD" -mindepth 1 -maxdepth 1 \
+        $([ "$lf_hidden" = false ] && printf '%s\n' ! -name '.*') -print |
+        file -L --mime-type -f - | grep -v "$pattern" | cut -d: -f1 |
+        sort |
+        sed 's/\\/\\\\/g;s/"/\\"/g;s/^/"/;s/$/"/' |
+        tr '\n' ' ')
+      ;;
+    *)
+      # Inclusion: grep pattern
+      files=$(find "$PWD" -mindepth 1 -maxdepth 1 \
+        $([ "$lf_hidden" = false ] && printf '%s\n' ! -name '.*') -print |
+        file -L --mime-type -f - | grep "$1" | cut -d: -f1 |
+        sort |
+        sed 's/\\/\\\\/g;s/"/\\"/g;s/^/"/;s/$/"/' |
+        tr '\n' ' ')
+      ;;
+  esac
+
   [ -n "$files" ] && lf -remote "send $id :unselect; toggle $files"
 }}
-cmd select-dirs select-type d
-cmd select-files select-type f
-cmd select-videos &{{
-  set -f
-  files="$(
-    find "$PWD" -mindepth 1 -maxdepth 1 \( \( -type f -o \( -type l -a -exec test -f {} \; \) \) \) \( -iname '*.mp4' -o -iname '*.mkv' -o -iname '*.flv' -o -iname '*.avi' -o -iname '*.webm' -o -iname '*.mov' -o -iname '*.mpg' -o -iname '*.ts' -o -iname '*.wmv' -o -iname '*.vob' -o -iname '*.3gp' -o -iname '*.rmvb' \) \
-    $([ "$lf_hidden" = false ] && printf '%s\n' ! -name '.*') -print0 |
-    sort -z |
-    sed -z 's/\\/\\\\/g;s/"/\\"/g;s/\n/\\n/g;s/^/"/;s/$/"/' |
-    tr '\0' ' ')"
-  [ -n "$files" ] && lf -remote "send $id :unselect; toggle $files"
-}}
-cmd select-images &{{
-  set -f
-  files="$(
-    find "$PWD" -mindepth 1 -maxdepth 1 \( \( -type f -o \( -type l -a -exec test -f {} \; \) \) \) \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.gif' -o -iname '*.bmp' -o -iname '*.tiff' -o -iname '*.tif' -o -iname '*.svg' -o -iname '*.webp' \) \
-    $([ "$lf_hidden" = false ] && printf '%s\n' ! -name '.*') -print0 |
-    sort -z |
-    sed -z 's/\\/\\\\/g;s/"/\\"/g;s/\n/\\n/g;s/^/"/;s/$/"/' |
-    tr '\0' ' ')"
-  [ -n "$files" ] && lf -remote "send $id :unselect; toggle $files"
-}}
-cmd select-music &{{
-  set -f
-  files="$(
-    find "$PWD" -mindepth 1 -maxdepth 1 \( \( -type f -o \( -type l -a -exec test -f {} \; \) \) \) \( -iname '*.mp3' -o -iname '*.flac' -o -iname '*.wav' -o -iname '*.aac' -o -iname '*.ogg' -o -iname '*.m4a' -o -iname '*.wma' \) \
-    $([ "$lf_hidden" = false ] && printf '%s\n' ! -name '.*') -print0 |
-    sort -z |
-    sed -z 's/\\/\\\\/g;s/"/\\"/g;s/\n/\\n/g;s/^/"/;s/$/"/' |
-    tr '\0' ' ')"
-  [ -n "$files" ] && lf -remote "send $id :unselect; toggle $files"
-}}
+cmd select-dirs select-mime 'inode/directory'
+cmd select-files select-mime '-inode/directory'
+cmd select-videos select-mime 'video/'
+cmd select-images select-mime 'image/'
+cmd select-music select-mime 'audio/'
 cmd on-select &{{
   lf -remote "send $id set statfmt \"$(eza -ldg --color=always "$f")\""
 }}
