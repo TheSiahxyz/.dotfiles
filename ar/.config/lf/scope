@@ -10,9 +10,17 @@ image() {
   if [ -f "$1" ] && [ -n "$DISPLAY" ] && [ -z "$WAYLAND_DISPLAY" ] && command -V ueberzugpp >/dev/null 2>&1; then
     printf '{"action": "add", "identifier": "PREVIEW", "x": "%s", "y": "%s", "width": "%s", "height": "%s", "scaler": "contain", "path": "%s"}\n' "$4" "$(($5 + 1))" "$(($2 - 1))" "$(($3 - 2))" "$1" >"$FIFO_UEBERZUGPP"
     mediainfo --Output="Video;%Duration/String%" "$6"
+  elif command -V chafa >/dev/null 2>&1; then
+    chafa -s "$4"x"$3" "$1"
   else
     mediainfo "$6"
   fi
+}
+
+thumb_cache() {
+  printf '%s/lf/thumb.%s' \
+    "${XDG_CACHE_HOME:-$HOME/.cache}" \
+    "$(stat --printf '%n\0%i\0%F\0%s\0%W\0%Y' -- "$(readlink -f "$1")" | sha256sum | cut -d' ' -f1)"
 }
 
 # Note that the cache file name is a function of file information, meaning if
@@ -21,22 +29,22 @@ image() {
 
 case "$(file --dereference --brief --mime-type -- "$1")" in
 image/avif)
-  CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/thumb.$(stat --printf '%n\0%i\0%F\0%s\0%W\0%Y' -- "$(readlink -f "$1")" | sha256sum | cut -d' ' -f1)"
+  CACHE="$(thumb_cache "$1")"
   [ ! -f "$CACHE" ] && magick "$1" "$CACHE.jpg"
   image "$CACHE.jpg" "$2" "$3" "$4" "$5" "$1"
   ;;
 image/vnd.djvu)
-  CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/thumb.$(stat --printf '%n\0%i\0%F\0%s\0%W\0%Y' -- "$(readlink -f "$1")" | sha256sum | cut -d' ' -f1)"
+  CACHE="$(thumb_cache "$1")"
   [ ! -f "$CACHE" ] && djvused "$1" -e 'select 1; save-page-with /dev/stdout' | magick -density 200 - "$CACHE.jpg" >/dev/null 2>&1
   image "$CACHE.jpg" "$2" "$3" "$4" "$5" "$1"
   ;;
 image/svg+xml)
-  CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/thumb.$(stat --printf '%n\0%i\0%F\0%s\0%W\0%Y' -- "$(readlink -f "$1")" | sha256sum | cut -d' ' -f1)"
-  [ ! -f "$CACHE" ] && inkscape --convert-dpi-method=none -o "$CACHE.png" --export-overwrite -D --export-png-color-mode=RGBA_16 "$1"
+  CACHE="$(thumb_cache "$1")"
+  [ ! -f "$CACHE.png" ] && rsvg-convert -w "$(($2 * 10))" "$1" -o "$CACHE.png"
   image "$CACHE.png" "$2" "$3" "$4" "$5" "$1"
   ;;
 image/x-xcf)
-  CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/thumb.$(stat --printf '%n\0%i\0%F\0%s\0%W\0%Y' -- "$(readlink -f "$1")" | sha256sum | awk '{print $1}')"
+  CACHE="$(thumb_cache "$1")"
   [ ! -f "$CACHE.jpg" ] && magick "$1[0]" "$CACHE.jpg"
   image "$CACHE.jpg" "$2" "$3" "$4" "$5" "$1"
   ;;
@@ -46,28 +54,28 @@ text/troff) man ./ "$1" | col -b ;;
 text/* | */xml | application/json | application/java* | application/x-ndjson) bat -p --theme ansi --terminal-width "$(($4 - 2))" -f "$1" ;;
 audio/*) mediainfo "$1" || exit 1 ;;
 video/* | application/octet-stream | application/vnd.rn-realmedia)
-  CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/thumb.$(stat --printf '%n\0%i\0%F\0%s\0%W\0%Y' -- "$(readlink -f "$1")" | sha256sum | cut -d' ' -f1)"
+  CACHE="$(thumb_cache "$1")"
   [ ! -f "$CACHE" ] && ffmpegthumbnailer -i "$1" -o "$CACHE" -s 0
   image "$CACHE" "$2" "$3" "$4" "$5" "$1"
   ;;
 */pdf)
-  CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/thumb.$(stat --printf '%n\0%i\0%F\0%s\0%W\0%Y' -- "$(readlink -f "$1")" | sha256sum | cut -d' ' -f1)"
+  CACHE="$(thumb_cache "$1")"
   [ ! -f "$CACHE.jpg" ] && pdftoppm -jpeg -f 1 -singlefile "$1" "$CACHE"
   image "$CACHE.jpg" "$2" "$3" "$4" "$5" "$1"
   ;;
 application/vnd.openxmlformats-officedocument.presentationml.presentation)
-  CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/thumb.$(stat --printf '%n\0%i\0%F\0%s\0%W\0%Y' -- "$(readlink -f "$1")" | sha256sum | cut -d' ' -f1)"
+  CACHE="$(thumb_cache "$1")"
   [ ! -f "$CACHE.jpg" ] && unoconv -f jpg -o "$CACHE.jpg" "$1"
   image "$CACHE.jpg" "$2" "$3" "$4" "$5" "$1"
   ;;
 application/x-hwp)
-  CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/thumb.$(stat --printf '%n\0%i\0%F\0%s\0%W\0%Y' -- "$(readlink -f "$1")" | sha256sum | cut -d' ' -f1)"
+  CACHE="$(thumb_cache "$1")"
   OUT_DIR="$(dirname "$CACHE")"
   [ ! -f "$CACHE.jpg" ] && libreoffice --headless --convert-to jpg --outdir "$OUT_DIR" "$1" && mv "$OUT_DIR/$(basename "$1" .hwp).jpg" "$CACHE.jpg"
   image "$CACHE.jpg" "$2" "$3" "$4" "$5" "$1"
   ;;
 */epub+zip | */mobi*)
-  CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/thumb.$(stat --printf '%n\0%i\0%F\0%s\0%W\0%Y' -- "$(readlink -f "$1")" | sha256sum | cut -d' ' -f1)"
+  CACHE="$(thumb_cache "$1")"
   [ ! -f "$CACHE.jpg" ] && gnome-epub-thumbnailer "$1" "$CACHE.jpg"
   image "$CACHE.jpg" "$2" "$3" "$4" "$5" "$1"
   ;;
@@ -76,7 +84,7 @@ application/*zip) atool --list -- "$1" ;;
 *opendocument*) odt2txt "$1" ;;
 application/pgp-encrypted) gpg -d -- "$1" ;;
 application/vnd.openxmlformats-officedocument.wordprocessingml.document)
-  CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/thumb.$(stat --printf '%n\0%i\0%F\0%s\0%W\0%Y' -- "$(readlink -f "$1")" | sha256sum | cut -d' ' -f1)"
+  CACHE="$(thumb_cache "$1")"
   [ ! -f "$CACHE.txt" ] && pandoc "$1" -t plain -o "$CACHE.txt"
   bat -p --theme ansi --terminal-width "$(($4 - 2))" -f "$CACHE.txt"
   ;;

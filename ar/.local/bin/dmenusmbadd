@@ -32,9 +32,15 @@ else
     target_name="$folder_name"
   fi
 
-  folder_path=$(for path in $base_path; do
-    find "$path" -type d -iname "$target_name" -print 2>/dev/null
-  done | sort -r | dmenu -l 10 -p "Select the folder to share:")
+  if command -v fd >/dev/null 2>&1; then
+    # Use fd if available (fastest)
+    folder_path=$(for path in $base_path; do
+      fd -t d -d 3 -i "^$target_name$" "$path" 2>/dev/null
+    done | sed 's:/$::' | sort -r | dmenu -l 10 -p "Select the folder to share:")
+  else
+    # Fallback to parallel find with depth limit
+    folder_path=$(printf "%s\n" $base_path | xargs -P 3 -I {} find {} -maxdepth 3 -type d -iname "$target_name" -print 2>/dev/null | sed 's:/$::' | sort -r | dmenu -l 10 -p "Select the folder to share:")
+  fi
   [ -z "$folder_path" ] && notify-send "📁Folder not found." && exit 1
 fi
 
