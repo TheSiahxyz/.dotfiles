@@ -29,11 +29,12 @@ Options:
 
   -s SCOPE     Select log scope (default: all)
                 all        : recordings + access + hidden + diary + peertube
-                recordings : recordings.* logs only
                 access     : access.* logs only
-                hidden     : hidden.access.* logs only
                 diary      : diary.* logs only
+                hidden     : hidden.access.* logs only
+                media      : media.access.* logs only
                 peertube   : peertube.* logs only
+                recordings : recordings.* logs only
 
   -n           Disable Firefox exclusion (by default, Firefox lines are excluded)
 
@@ -53,14 +54,15 @@ Options:
 
 Examples:
   ylog                  # All logs, last 10 lines each
-  ylog -s recordings    # Recordings logs only, last 10 lines each
   ylog -s diary         # Diary logs only, last 10 lines each
-  ylog -s peertube       # Peertube logs only, last 10 lines each
+  ylog -s media         # Media logs only, last 10 lines each
+  ylog -s peertube      # Peertube logs only, last 10 lines each
+  ylog -s recordings    # Recordings logs only, last 10 lines each
   ylog -c kr -t 1.2.3.4 # Search specific IP in Korean logs
-  ylog -c kr -s diary    # Korean diary logs only
+  ylog -c kr -s diary   # Korean diary logs only
   ylog -t all -l 50     # All logs, last 50 lines each
   ylog -d 1             # Logs from 1 day ago only
-  ylog -d ~2             # Logs from 2 days ago to today
+  ylog -d ~2            # Logs from 2 days ago to today
 EOF
   exit 0
 }
@@ -142,14 +144,39 @@ pick_files() {
         ;;
     esac
   fi
+  # media logs: similar structure to recordings
+  if [ "$SCOPE" = "media" ] || [ "$SCOPE" = "all" ]; then
+    if [ "$COUNTRY" = "all" ]; then
+      for q in "$LOG_DIR/media.access.log" "$LOG_DIR/media.access.log".*; do
+        [ -e "$q" ] && printf "%s\n" "$q"
+      done
+    fi
+    case "$COUNTRY" in
+      kr) for q in "$LOG_DIR/media.kr.log" "$LOG_DIR/media.kr.log".*; do [ -e "$q" ] && printf "%s\n" "$q"; done ;;
+      us) for q in "$LOG_DIR/media.us.log" "$LOG_DIR/media.us.log".*; do [ -e "$q" ] && printf "%s\n" "$q"; done ;;
+      all)
+        for p in media.kr.log media.us.log; do
+          for q in "$LOG_DIR/$p" "$LOG_DIR/$p".*; do [ -e "$q" ] && printf "%s\n" "$q"; done
+        done
+        ;;
+    esac
+  fi
   # peertube logs
   if [ "$SCOPE" = "peertube" ] || [ "$SCOPE" = "all" ]; then
-    for q in "$LOG_DIR/peertube.access.log" "$LOG_DIR/peertube.access.log".*; do
-      [ -e "$q" ] && printf "%s\n" "$q"
-    done
-    for q in "$LOG_DIR/peertube.error.log" "$LOG_DIR/peertube.error.log".*; do
-      [ -e "$q" ] && printf "%s\n" "$q"
-    done
+    if [ "$COUNTRY" = "all" ]; then
+      for q in "$LOG_DIR/peertube.access.log" "$LOG_DIR/peertube.access.log".*; do
+        [ -e "$q" ] && printf "%s\n" "$q"
+      done
+    fi
+    case "$COUNTRY" in
+      kr) for q in "$LOG_DIR/peertube.kr.log" "$LOG_DIR/peertube.kr.log".*; do [ -e "$q" ] && printf "%s\n" "$q"; done ;;
+      us) for q in "$LOG_DIR/peertube.us.log" "$LOG_DIR/peertube.us.log".*; do [ -e "$q" ] && printf "%s\n" "$q"; done ;;
+      all)
+        for p in peertube.kr.log peertube.us.log; do
+          for q in "$LOG_DIR/$p" "$LOG_DIR/$p".*; do [ -e "$q" ] && printf "%s\n" "$q"; done
+        done
+        ;;
+    esac
   fi
 }
 

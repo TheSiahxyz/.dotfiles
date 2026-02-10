@@ -37,16 +37,17 @@ search_term() {
   # Construct the preview command
   preview_cmd=$(printf "rga %s --pretty --context 10 '%s' {}" "$case_flag" "$*")
   rga_output=$(rga --follow --no-ignore --hidden --text --max-count=1 ${case_flag:+$case_flag} --files-with-matches --no-messages \
-    --glob '!**/.git/*' \
-    --glob '!**/node_modules/*' \
-    --glob '!**/.next/*' \
-    --glob '!**/dist/*' \
-    --glob '!**/build/*' \
     --glob '!**/.cache/*' \
+    --glob '!**/.git/*' \
+    --glob '!**/.github/*' \
+    --glob '!**/.next/*' \
+    --glob '!**/.venv/*' \
+    --glob '!**/build/*' \
     --glob '!**/coverage/*' \
+    --glob '!**/dist/*' \
+    --glob '!**/node_modules/*' \
     --glob '!**/target/*' \
     --glob '!**/vendor/*' \
-    --glob '!**/.venv/*' \
     --glob '!**/venv/*' \
     "$*")
 
@@ -83,6 +84,7 @@ list_or_open_project_files() {
       rga_result=$(rga --follow --no-ignore --hidden --text --max-count=1 --files-with-matches --no-messages \
         --glob '!**/.cache/*' \
         --glob '!**/.git/*' \
+        --glob '!**/.github/*' \
         --glob '!**/.next/*' \
         --glob '!**/.venv/*' \
         --glob '!**/build/*' \
