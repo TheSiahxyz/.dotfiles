@@ -1,3 +1,4 @@
+* * * * * export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u $USER)/bus; export DISPLAY=:0; . $HOME/.zprofile; kill -36 $(pidof dwmblocks) 2>/dev/null
 */3 * * * * export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u $USER)/bus; export DISPLAY=:0; . $HOME/.zprofile; /usr/local/bin/mailsync
 */15 * * * * export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u $USER)/bus; export DISPLAY=:0; . $HOME/.zprofile; $HOME/.local/bin/cron/newsup
 0 */3 * * * export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u $USER)/bus; export DISPLAY=:0; . $HOME/.zprofile; $HOME/.local/bin/cron/checkup
