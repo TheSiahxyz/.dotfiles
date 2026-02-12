@@ -5,8 +5,19 @@ calendar="🗓"
 hour=$(date '+%I')
 minute=$(date '+%M')
 
+# Cache crontab check for 5 minutes
+crontab_cache="${XDG_CACHE_HOME:-${HOME}/.cache}/statusbar/has_crontab"
+if [ ! -f "$crontab_cache" ] || [ $(($(date +%s) - $(stat -c %Y "$crontab_cache" 2>/dev/null || echo 0))) -gt 300 ]; then
+  mkdir -p "${XDG_CACHE_HOME:-${HOME}/.cache}/statusbar"
+  if crontab -l 2>/dev/null | grep -q '^[^#[:space:]]'; then
+    echo "1" > "$crontab_cache"
+  else
+    echo "0" > "$crontab_cache"
+  fi
+fi
+
 # Determine the icon based on hour and minute
-if crontab -l 2>/dev/null | grep -q '^[^#[:space:]]'; then
+if [ "$(cat "$crontab_cache" 2>/dev/null)" = "1" ]; then
   if [ "$minute" -ge 30 ]; then
     case "$hour" in
     "00" | "12") icon="🕧" ;; # 12:30
@@ -49,7 +60,7 @@ moonfile="${XDG_DATA_HOME:-${HOME}/.local/share}/wallpapers/moonphase"
 # Cache location for 24 hours
 if [ ! -s "$locationfile" ] || [ $(($(date +%s) - $(stat -c %Y "$locationfile" 2>/dev/null || echo 0))) -gt 86400 ]; then
   mkdir -p "${XDG_CACHE_HOME:-${HOME}/.cache}/statusbar"
-  curl -s http://ip-api.com/json | jq -r '[.regionName, .countryCode] | join(",")' > "$locationfile" 2>/dev/null &
+  curl -s --max-time 2 http://ip-api.com/json | jq -r '[.regionName, .countryCode] | join(",")' > "$locationfile" 2>/dev/null &
 fi
 
 location=$(cat "$locationfile" 2>/dev/null || echo "")
@@ -57,7 +68,7 @@ location=$(cat "$locationfile" 2>/dev/null || echo "")
 # Update moon phase only once per day
 if [ ! -s "$moonfile" ] || [ "$(stat -c %y "$moonfile" 2>/dev/null | cut -d' ' -f1)" != "$(date '+%Y-%m-%d')" ]; then
   if [ -n "$location" ]; then
-    moon=$(curl -sf "wttr.in/$location?format=%m" 2>/dev/null)
+    moon=$(curl -sf --max-time 2 "wttr.in/$location?format=%m" 2>/dev/null)
     [ -n "$moon" ] && ! echo "$moon" | grep -q 'Unknown location' && echo "$moon" >"$moonfile" &
   fi
 fi
