@@ -1,0 +1,354 @@
+#!/bin/sh
+# Simple Docker Database Query Tool
+
+set -e
+
+# Check docker is available and accessible
+if ! docker ps >/dev/null 2>&1; then
+    echo "[ERROR] Cannot access Docker daemon" >&2
+    echo "[WARNING] Make sure you are in the 'docker' group or run: newgrp docker" >&2
+    exit 1
+fi
+
+# Detect database type from image name
+detect_db_type() {
+    case "$1" in
+        *postgres*|*postgresql*) echo "postgres" ;;
+        *mysql*|*mariadb*) echo "mysql" ;;
+        *mongo*) echo "mongo" ;;
+        *redis*) echo "redis" ;;
+        *) echo "unknown" ;;
+    esac
+}
+
+# Parse drizzle config to find migration output directory
+find_migration_dir_from_config() {
+    config_file="$1"
+
+    # Try to find 'out' field in config file
+    # Supports both single and double quotes: out: './drizzle', out: "./migrations"
+    out_dir=$(grep "out:" "$config_file" | \
+              sed -E "s/.*['\"]([^'\"]+)['\"].*/\1/" | \
+              head -1)
+
+    if [ -n "$out_dir" ]; then
+        echo "$out_dir"
+        return 0
+    fi
+    return 1
+}
+
+# Find drizzle migration files
+find_drizzle_migrations() {
+    # Try to find git root first
+    git_root=$(git rev-parse --show-toplevel 2>/dev/null)
+
+    if [ -n "$git_root" ]; then
+        search_base="$git_root"
+        echo "[INFO] Found git root: $git_root" >&2
+    else
+        search_base="."
+        echo "[INFO] Not in git repo, using current directory" >&2
+    fi
+
+    # Try to find drizzle config file
+    for config_name in drizzle.config.ts drizzle.config.js drizzle.config.mjs drizzle.config.json; do
+        config_path="$search_base/$config_name"
+        if [ -f "$config_path" ]; then
+            echo "[INFO] Found config: $config_name" >&2
+            migration_dir=$(find_migration_dir_from_config "$config_path")
+
+            if [ -n "$migration_dir" ]; then
+                # Remove leading ./ if present
+                migration_dir=$(echo "$migration_dir" | sed 's|^\./||')
+                full_path="$search_base/$migration_dir"
+
+                echo "[INFO] Using migration directory from config: $migration_dir" >&2
+
+                if [ -d "$full_path" ]; then
+                    find "$full_path" -name "*.sql" -type f 2>/dev/null | sort -r
+                    return 0
+                else
+                    echo "[WARNING] Config specifies '$migration_dir' but directory not found" >&2
+                fi
+            fi
+        fi
+    done
+
+    echo "[INFO] No drizzle config found, searching default locations..." >&2
+
+    # Fallback: Search for common drizzle migration folders
+    for dir in drizzle migrations db/migrations src/db/migrations; do
+        full_path="$search_base/$dir"
+        if [ -d "$full_path" ]; then
+            find "$full_path" -name "*.sql" -type f 2>/dev/null | sort -r
+            return 0
+        fi
+    done
+    return 1
+}
+
+# Parse command line arguments
+MIGRATE_MODE=0
+
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    echo "Usage: $(basename "$0") [OPTIONS]"
+    echo ""
+    echo "Interactive script to query Docker database containers"
+    echo ""
+    echo "Options:"
+    echo "  -h, --help        Show this help message"
+    echo "  -m, --migrate     Run drizzle migration SQL file"
+    echo ""
+    echo "Supported databases:"
+    echo "  - PostgreSQL"
+    echo "  - MySQL/MariaDB"
+    echo "  - MongoDB"
+    echo "  - Redis"
+    exit 0
+elif [ "$1" = "-m" ] || [ "$1" = "--migrate" ]; then
+    MIGRATE_MODE=1
+fi
+
+# Get database containers and save to temp file
+TMP_FILE="/tmp/ddb_$$.tmp"
+trap 'rm -f "$TMP_FILE"' EXIT
+
+docker ps --format "{{.ID}}|{{.Names}}|{{.Image}}|{{.Status}}" | \
+while IFS='|' read -r id name image status; do
+    db_type=$(detect_db_type "$image")
+    if [ "$db_type" != "unknown" ]; then
+        echo "$id|$name|$image|$db_type|$status"
+    fi
+done > "$TMP_FILE"
+
+# Check if any database containers found
+if [ ! -s "$TMP_FILE" ]; then
+    echo "[ERROR] No running database containers found" >&2
+    exit 1
+fi
+
+# Display menu
+echo ""
+echo "=== Running Database Containers ==="
+echo ""
+
+i=1
+while IFS='|' read -r id name image db_type status; do
+    echo "  $i) $name [$db_type] - $id"
+    i=$((i + 1))
+done < "$TMP_FILE"
+
+# Get selection
+echo ""
+total=$(wc -l < "$TMP_FILE")
+echo -n "Select container (1-$total): "
+read selection
+
+# Validate selection
+case "$selection" in
+    ''|*[!0-9]*)
+        echo "[ERROR] Invalid selection" >&2
+        exit 1
+        ;;
+esac
+
+if [ "$selection" -lt 1 ] || [ "$selection" -gt "$total" ]; then
+    echo "[ERROR] Selection out of range" >&2
+    exit 1
+fi
+
+# Get selected container info
+container_info=$(sed -n "${selection}p" "$TMP_FILE")
+container_id=$(echo "$container_info" | cut -d'|' -f1)
+container_name=$(echo "$container_info" | cut -d'|' -f2)
+db_type=$(echo "$container_info" | cut -d'|' -f4)
+
+echo ""
+echo "[INFO] Selected: $container_name ($db_type)"
+echo ""
+
+# Handle migrate mode or interactive query mode
+if [ "$MIGRATE_MODE" = 1 ]; then
+    # Migrate mode - find and select SQL file
+    echo "[INFO] Searching for drizzle migration files..."
+    echo ""
+
+    SQL_FILES_TMP="/tmp/ddb_sql_files_$$.tmp"
+    trap 'rm -f "$TMP_FILE" "$SQL_FILES_TMP"' EXIT
+
+    if ! find_drizzle_migrations > "$SQL_FILES_TMP"; then
+        echo "[ERROR] No drizzle migration folder found" >&2
+        echo "[INFO] Searched in: drizzle/, migrations/, db/migrations/, src/db/migrations/" >&2
+        exit 1
+    fi
+
+    if [ ! -s "$SQL_FILES_TMP" ]; then
+        echo "[ERROR] No SQL files found in migration folders" >&2
+        exit 1
+    fi
+
+    echo "=== Available Migration Files ==="
+    echo ""
+
+    i=1
+    while IFS= read -r sql_file; do
+        echo "  $i) $(basename "$sql_file")"
+        i=$((i + 1))
+    done < "$SQL_FILES_TMP"
+
+    echo ""
+    sql_total=$(wc -l < "$SQL_FILES_TMP")
+    echo -n "Select SQL file to execute (1-$sql_total): "
+    read sql_selection
+
+    # Validate selection
+    case "$sql_selection" in
+        ''|*[!0-9]*)
+            echo "[ERROR] Invalid selection" >&2
+            exit 1
+            ;;
+    esac
+
+    if [ "$sql_selection" -lt 1 ] || [ "$sql_selection" -gt "$sql_total" ]; then
+        echo "[ERROR] Selection out of range" >&2
+        exit 1
+    fi
+
+    # Get selected SQL file
+    sql_file_path=$(sed -n "${sql_selection}p" "$SQL_FILES_TMP")
+
+    echo ""
+    echo "[INFO] Selected: $(basename "$sql_file_path")"
+    echo ""
+    echo "=== SQL Content Preview ==="
+    head -20 "$sql_file_path"
+
+    if [ "$(wc -l < "$sql_file_path")" -gt 20 ]; then
+        echo "..."
+        echo "(showing first 20 lines)"
+    fi
+
+    echo ""
+    echo -n "Execute this migration? (y/N): "
+    read confirm
+
+    case "$confirm" in
+        y|Y|yes|YES)
+            # Wrap SQL in transaction for safety
+            query="BEGIN;
+$(cat "$sql_file_path")
+COMMIT;"
+            ;;
+        *)
+            echo "[INFO] Migration cancelled"
+            exit 0
+            ;;
+    esac
+else
+    # Normal mode - ask for query or interactive shell
+    echo -n "Enter query (or press Enter for interactive shell): "
+    read query
+fi
+
+if [ -z "$query" ]; then
+    # Interactive shell
+    echo "[INFO] Starting interactive shell for $container_name ($db_type)..."
+    echo ""
+
+    case "$db_type" in
+        postgres)
+            db_name=$(docker exec "$container_id" sh -c 'echo $POSTGRES_DB' 2>/dev/null || echo "postgres")
+            user=$(docker exec "$container_id" sh -c 'echo $POSTGRES_USER' 2>/dev/null || echo "postgres")
+            docker exec -it "$container_id" psql -U "$user" -d "$db_name"
+            ;;
+        mysql)
+            db_name=$(docker exec "$container_id" sh -c 'echo $MYSQL_DATABASE' 2>/dev/null || echo "")
+            user=$(docker exec "$container_id" sh -c 'echo $MYSQL_USER' 2>/dev/null || echo "root")
+            password=$(docker exec "$container_id" sh -c 'echo $MYSQL_ROOT_PASSWORD' 2>/dev/null || echo "")
+
+            if [ -n "$password" ]; then
+                docker exec -it "$container_id" mysql -u"$user" -p"$password" ${db_name:+-D "$db_name"}
+            else
+                docker exec -it "$container_id" mysql -u"$user" ${db_name:+-D "$db_name"}
+            fi
+            ;;
+        mongo)
+            db_name=$(docker exec "$container_id" sh -c 'echo $MONGO_INITDB_DATABASE' 2>/dev/null || echo "test")
+            docker exec -it "$container_id" mongosh "$db_name"
+            ;;
+        redis)
+            docker exec -it "$container_id" redis-cli
+            ;;
+        *)
+            echo "[ERROR] Unsupported database type: $db_type" >&2
+            exit 1
+            ;;
+    esac
+else
+    # Execute query
+    echo "[INFO] Executing query on $container_name ($db_type)..."
+    echo ""
+
+    case "$db_type" in
+        postgres)
+            db_name=$(docker exec "$container_id" sh -c 'echo $POSTGRES_DB' 2>/dev/null || echo "postgres")
+            user=$(docker exec "$container_id" sh -c 'echo $POSTGRES_USER' 2>/dev/null || echo "postgres")
+
+            if docker exec -it "$container_id" psql -U "$user" -d "$db_name" -c "$query"; then
+                echo ""
+                echo "[SUCCESS] Query executed successfully"
+            else
+                echo ""
+                echo "[ERROR] Query execution failed" >&2
+                exit 1
+            fi
+            ;;
+        mysql)
+            db_name=$(docker exec "$container_id" sh -c 'echo $MYSQL_DATABASE' 2>/dev/null || echo "")
+            user=$(docker exec "$container_id" sh -c 'echo $MYSQL_USER' 2>/dev/null || echo "root")
+            password=$(docker exec "$container_id" sh -c 'echo $MYSQL_ROOT_PASSWORD' 2>/dev/null || echo "")
+
+            if [ -n "$password" ]; then
+                result=$(docker exec -it "$container_id" mysql -u"$user" -p"$password" ${db_name:+-D "$db_name"} -e "$query")
+            else
+                result=$(docker exec -it "$container_id" mysql -u"$user" ${db_name:+-D "$db_name"} -e "$query")
+            fi
+
+            if [ $? -eq 0 ]; then
+                echo ""
+                echo "[SUCCESS] Query executed successfully"
+            else
+                echo ""
+                echo "[ERROR] Query execution failed" >&2
+                exit 1
+            fi
+            ;;
+        mongo)
+            db_name=$(docker exec "$container_id" sh -c 'echo $MONGO_INITDB_DATABASE' 2>/dev/null || echo "test")
+
+            if docker exec -it "$container_id" mongosh "$db_name" --eval "$query"; then
+                echo ""
+                echo "[SUCCESS] Query executed successfully"
+            else
+                echo ""
+                echo "[ERROR] Query execution failed" >&2
+                exit 1
+            fi
+            ;;
+        redis)
+            if docker exec -it "$container_id" redis-cli "$query"; then
+                echo ""
+                echo "[SUCCESS] Command executed successfully"
+            else
+                echo ""
+                echo "[ERROR] Command execution failed" >&2
+                exit 1
+            fi
+            ;;
+        *)
+            echo "[ERROR] Unsupported database type: $db_type" >&2
+            exit 1
+            ;;
+    esac
+fi
