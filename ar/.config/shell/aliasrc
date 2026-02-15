@@ -12,7 +12,7 @@
 [ -f "$MBSYNCRC" ] && alias mbsync='mbsync -c $MBSYNCRC'
 
 # sudo not required for some system commands
-for command in arp-scan blkid docker ecrypt lazydocker lsblk mount umount pacman poweroff reboot shutdown su sv updatedb; do
+for command in arp-scan blkid ecrypt lsblk mount umount pacman poweroff reboot shutdown su sv updatedb; do
     alias $command="sudo $command"
 done
 unset command
