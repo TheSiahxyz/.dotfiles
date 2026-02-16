@@ -57,11 +57,11 @@ check_multi_repo_status() {
       [ "$unpushed" -gt 0 ] && status+="↑$unpushed"
       [ "$unpulled" -gt 0 ] && status+="↓$unpulled"
       status+=" "
-      changed_repos+="$repo_dir"
+      changed_repos+="$repo_dir"$'\n'
     fi
   done < <(find "$dir" -mindepth 2 -maxdepth 2 -type d -name ".git" 2>/dev/null)
 
-  printf "%s%s" "$status" "$changed_repos"
+  printf "%s %s" "$status" "$changed_repos"
 }
 
 # Function to check Git repository status for a single repository
@@ -101,7 +101,7 @@ private_status=$(check_multi_repo_status "$private_repos" "$private_icon" | awk 
 private_changes=$(check_multi_repo_status "$private_repos" "$private_icon" | awk -F' ' '{print $2}')
 
 public_status=$(check_multi_repo_status "$public_repos" "$public_icon" | awk -F' ' '{print $1}')
-public_changes=$(check_multi_repo_status "$public_repos" "$public_icon" | awk -F' ' '{print $1}')
+public_changes=$(check_multi_repo_status "$public_repos" "$public_icon" | awk -F' ' '{print $2}')
 
 [ -f /tmp/gitsync ] && rm -f /tmp/gitsync
 
@@ -118,7 +118,11 @@ output="${output%"${output##*[! ]}"}"
 
 openrepos() {
   all_changed_repos="$dotfiles_changes"$'\n'"$suckless_changes"$'\n'"$private_changes"$'\n'"$public_changes"
-  [ -n "$all_changed_repos" ] && exec "$TERMINAL" -e opensessions "$(echo "$all_changed_repos" | grep -v '^$')"
+  repos_cleaned="$(echo "$all_changed_repos" | grep -v '^$')"
+
+  if [ -n "$repos_cleaned" ]; then
+    setsid -f "$TERMINAL" -e opensessions $repos_cleaned >/dev/null 2>&1
+  fi
 }
 
 # Handle button actions
