@@ -90,7 +90,7 @@ sync_server() {
   ssh "$THESIAH_SERVER" "mkdir -p /root/.config/bash /root/.config/shell /root/.config/vim /root/.local/bin /root/.local/share /root/.local/state /var/www/thesiah"
 
   # Sync operations with explicit error checking
-  cd "$THESIAH_WWW" || exit 1
+  cd "$THESIAH_WWW" || return 1
   [ -d "$thesiah_path" ] || hugo --cleanDestinationDir
   rsync -vrazPlu --delete "$thesiah_path/" "$THESIAH_SERVER:/var/www/thesiah/" >/dev/null 2>&1 && rm -rf "$thesiah_path"
   rsync -vrazPlu --delete "$vim_path/vimrc" "$THESIAH_SERVER:/root/.config/vim/" >/dev/null 2>&1
@@ -121,10 +121,10 @@ sync_server() {
 }
 
 sync_nextcloud() {
-  base="$(basename $backup_path)"
-  parent="$(dirname $backup_path)"
+  base="$(basename "$backup_path")"
+  parent="$(dirname "$backup_path")"
   tmpdir="$(mktemp -d)"
-  cd "$tmpdir" || exit
+  cd "$tmpdir" || return 1
   tar -C "$parent" -zcf "$base".tar.gz "$base" >/dev/null 2>&1
   rsync -vrazPlu --delete "$tmpdir/$base".tar.gz "$THESIAH_SERVER:/var/www/nextcloud/data/si@thesiah.xyz/files/backup/" >/dev/null 2>&1
   ssh "$THESIAH_SERVER" "chown -R www-data:www-data /var/www/nextcloud/data/si@thesiah.xyz/files/backup" >/dev/null 2>&1
@@ -178,10 +178,42 @@ echo "Backup starts to $backup_path..."
 process_options "$@"
 
 # Main script logic
-#mount_luks && echo "Mount backup drive... " && echo "Success to mount luks drive!" || error "Failed to mount $backup_path"
-[ -d "$backup_path" ] || sudo mkdir -p "$backup_path"
-echo "Sync home files..." && sync_files && echo "Success to sync files!" || error "Failed back up files"
-echo "Sync root files..." && sync_root && echo "Success to sync root!" || error "Failed back up root"
-echo "Sync server files..." && sync_server && echo "Success to sync server!" || error "Failed back up server"
-#echo "Sync files to nextcloud..." && sync_nextcloud && echo "Success to sync nextcloud!" || error "Failed back up nextcloud"
+# Check if backup drive is available
+backup_available=false
+if mount | grep -q " /mnt/second "; then
+  backup_available=true
+  echo "Backup drive is mounted"
+else
+  echo "Warning: /mnt/second is not mounted"
+  echo "Attempting to mount backup drive..."
+  if mount_luks 2>/dev/null && mountpoint -q /mnt/second 2>/dev/null; then
+    backup_available=true
+    echo "Success to mount luks drive!"
+  else
+    echo "Backup drive not available. Skipping file backup..."
+  fi
+fi
+
+# Sync home files only if backup drive is available
+if [ "$backup_available" = true ]; then
+  [ -d "$backup_path" ] || sudo mkdir -p "$backup_path"
+  echo "Sync home files..." && sync_files && echo "Success to sync files!" || echo "Warning: Failed to sync some files"
+else
+  echo "Skipping home files sync (no backup drive)"
+fi
+
+echo "Sync root files..." && sync_root && echo "Success to sync root!" || echo "Warning: Failed to sync root"
+
+# Sync server files only if server is configured
+if [ -n "$THESIAH_SERVER" ]; then
+  echo "Sync server files..." && sync_server && echo "Success to sync server!" || echo "Warning: Failed to sync server"
+else
+  echo "Skipping server sync (THESIAH_SERVER not set)"
+fi
+
+# Sync to nextcloud only if backup drive is available and server is configured
+if [ "$backup_available" = true ] && [ -n "$THESIAH_SERVER" ]; then
+  echo "Sync files to nextcloud..." && sync_nextcloud && echo "Success to sync nextcloud!" || echo "Warning: Failed to sync nextcloud"
+fi
+
 echo "Done!"
