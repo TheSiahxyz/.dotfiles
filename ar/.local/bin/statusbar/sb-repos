@@ -25,9 +25,12 @@ get_git_status_symbols() {
         }
     }
     END {
-        for (change in changes) {
-            printf "%s%s", change, changes[change]
-        }
+        # Print in consistent order: M, A, D, R, ?
+        if (changes["M"] > 0) printf "M%s", changes["M"]
+        if (changes["A"] > 0) printf "A%s", changes["A"]
+        if (changes["D"] > 0) printf "D%s", changes["D"]
+        if (changes["R"] > 0) printf "R%s", changes["R"]
+        if (changes["?"] > 0) printf "?%s", changes["?"]
     }'
 }
 
@@ -41,7 +44,7 @@ get_unpulled_commits() { git rev-list --count HEAD..@{upstream}; }
 check_multi_repo_status() {
   local dir="$1"
   local icon="$2"
-  local status=""
+  local repo_status=""
   local changed_repos=""
 
   while IFS= read -r git_dir; do
@@ -53,15 +56,15 @@ check_multi_repo_status() {
     unpulled=$(get_unpulled_commits)
 
     if [ -n "$changes" ] || [ "$unpushed" -gt 0 ] || [ "$unpulled" -gt 0 ]; then
-      status+="$icon$changes"
-      [ "$unpushed" -gt 0 ] && status+="↑$unpushed"
-      [ "$unpulled" -gt 0 ] && status+="↓$unpulled"
-      status+=" "
+      [ -n "$repo_status" ] && repo_status+=" "
+      repo_status+="$icon$changes"
+      [ "$unpushed" -gt 0 ] && repo_status+="↑$unpushed"
+      [ "$unpulled" -gt 0 ] && repo_status+="↓$unpulled"
       changed_repos+="$repo_dir"$'\n'
     fi
   done < <(find "$dir" -mindepth 2 -maxdepth 2 -type d -name ".git" 2>/dev/null)
 
-  printf "%s %s" "$status" "$changed_repos"
+  printf "%s|%s" "$repo_status" "$changed_repos"
 }
 
 # Function to check Git repository status for a single repository
@@ -82,26 +85,29 @@ check_single_repo_status() {
       repo_status+="$icon$changes"
       [ "$unpushed" -gt 0 ] && repo_status+="↑$unpushed"
       [ "$unpulled" -gt 0 ] && repo_status+="↓$unpulled"
-      repo_status+=" "
       changed_repo="$dir"
     fi
   fi
 
-  printf "%s%s" "$repo_status" "$changed_repo"
+  printf "%s|%s" "$repo_status" "$changed_repo"
 }
 
 # Check statuses for repositories
-dotfiles_status=$(check_single_repo_status "$dotfiles_repos" "$dotfiles_icon" | awk -F' ' '{print $1}')
-dotfiles_changes=$(check_single_repo_status "$dotfiles_repos" "$dotfiles_icon" | awk -F' ' '{print $2}')
+dotfiles_result=$(check_single_repo_status "$dotfiles_repos" "$dotfiles_icon")
+dotfiles_status="${dotfiles_result%%|*}"
+dotfiles_changes="${dotfiles_result#*|}"
 
-suckless_status=$(check_single_repo_status "$suckless_repos" "$suckless_icon" | awk -F' ' '{print $1}')
-suckless_changes=$(check_single_repo_status "$suckless_repos" "$suckless_icon" | awk -F' ' '{print $2}')
+suckless_result=$(check_single_repo_status "$suckless_repos" "$suckless_icon")
+suckless_status="${suckless_result%%|*}"
+suckless_changes="${suckless_result#*|}"
 
-private_status=$(check_multi_repo_status "$private_repos" "$private_icon" | awk -F' ' '{print $1}')
-private_changes=$(check_multi_repo_status "$private_repos" "$private_icon" | awk -F' ' '{print $2}')
+private_result=$(check_multi_repo_status "$private_repos" "$private_icon")
+private_status="${private_result%%|*}"
+private_changes="${private_result#*|}"
 
-public_status=$(check_multi_repo_status "$public_repos" "$public_icon" | awk -F' ' '{print $1}')
-public_changes=$(check_multi_repo_status "$public_repos" "$public_icon" | awk -F' ' '{print $2}')
+public_result=$(check_multi_repo_status "$public_repos" "$public_icon")
+public_status="${public_result%%|*}"
+public_changes="${public_result#*|}"
 
 [ -f /tmp/gitsync ] && rm -f /tmp/gitsync
 
@@ -113,7 +119,7 @@ output=""
 [ -n "$public_status" ] && output+="$public_status "
 
 # Trim trailing spaces and display output
-output="${output%"${output##*[! ]}"}"
+output="${output% }"
 [ -n "$output" ] && (cat /tmp/gitsync 2>/dev/null || echo "$output")
 
 openrepos() {
@@ -121,7 +127,14 @@ openrepos() {
   repos_cleaned="$(echo "$all_changed_repos" | grep -v '^$')"
 
   if [ -n "$repos_cleaned" ]; then
-    setsid -f "$TERMINAL" -e opensessions $repos_cleaned >/dev/null 2>&1
+    # Build array of repos
+    repos_array=()
+    while IFS= read -r repo; do
+      [ -n "$repo" ] && repos_array+=("$repo")
+    done <<< "$repos_cleaned"
+
+    # Call opensessions with all repos as separate arguments
+    [ "${#repos_array[@]}" -gt 0 ] && setsid -f "$TERMINAL" -e opensessions "${repos_array[@]}" >/dev/null 2>&1
   fi
 }
 
