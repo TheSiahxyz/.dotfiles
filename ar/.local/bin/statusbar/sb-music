@@ -1,5 +1,8 @@
 #!/bin/bash
 
+MPD_HOST="${MPD_HOST:-/tmp/mpd_socket}"
+export MPD_HOST
+
 truncate_string() {
   input="$1"
   max_length="$2"

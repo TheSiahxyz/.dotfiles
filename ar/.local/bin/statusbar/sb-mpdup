@@ -3,6 +3,9 @@
 # This loop will update the mpd statusbar module whenever a command changes the
 # music player's status. mpd must be running on X's start for this to work.
 
+MPD_HOST="${MPD_HOST:-/tmp/mpd_socket}"
+export MPD_HOST
+
 while :; do
   mpc idle >/dev/null || continue
   kill -55 "$(pidof "${STATUSBAR:-dwmblocks}")" 2>/dev/null

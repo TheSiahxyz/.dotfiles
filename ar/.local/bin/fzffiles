@@ -1,6 +1,21 @@
 #!/bin/sh
 
-# The set -e option instructs sh to immediately exit if any command has a non-zero exit status
+case "$(uname -a)" in
+    *Darwin*) UEBERZUG_TMP_DIR="$TMPDIR" ;;
+    *) UEBERZUG_TMP_DIR="/tmp" ;;
+esac
+
+cleanup() {
+    ueberzugpp cmd -s "$SOCKET" -a exit
+}
+trap cleanup HUP INT QUIT TERM EXIT
+
+UB_PID_FILE="$UEBERZUG_TMP_DIR/.$(uuidgen)"
+ueberzugpp layer --no-stdin --silent --use-escape-codes --pid-file "$UB_PID_FILE"
+UB_PID=$(cat "$UB_PID_FILE")
+
+export SOCKET="$UEBERZUG_TMP_DIR/ueberzugpp-$UB_PID.socket"
+
 set -e
 
 # Set new line and tab for word splitting
@@ -8,38 +23,36 @@ IFS='
 '
 
 # Get the list of selected files with key bindings for specific paths
-files=$(fzf-tmux \
+files=$(fzf \
   --header "^a pwd ^b public ^d .dotfiles ^f configs ^g git ^h home ^k desktop ^r scripts ^s suckless ^u staged files ^v private ^/ help" \
   --preview "selection={};
     clean=\$(printf '%s' \"\$selection\" | sed -e 's/^📄 //' -e 's/^✏ //' -e 's/^✅ //' -e 's/^❌ //' -e 's/^🔀 //' -e 's/^❓ //');
     [ -z \"\$clean\" ] && { echo 'No selection'; exit 0; }
     target=\$(readlink -f \"\$clean\" 2>/dev/null || printf '%s' \"\$clean\");
-    if [ -z \"\$target\" ]; then
-      echo 'Could not resolve path';
-      exit 0;
-    fi
+    if [ -z \"\$target\" ]; then echo 'Could not resolve path'; exit 0; fi;
+    mime=\$(file --mime-type -b \"\$target\" 2>/dev/null);
+    case \"\$mime\" in
+      image/*)
+        ueberzugpp cmd -s $SOCKET -i fzfpreview -a add -x \$FZF_PREVIEW_LEFT -y \$FZF_PREVIEW_TOP --max-width \$FZF_PREVIEW_COLUMNS --max-height \$FZF_PREVIEW_LINES -f \"\$target\";
+        exit 0;;
+    esac;
+    ueberzugpp cmd -s $SOCKET -i fzfpreview -a remove 2>/dev/null;
     if [ -f \"\$target\" ]; then
       dir=\$(dirname \"\$target\");
       if git_root=\$(git -C \"\$dir\" rev-parse --show-toplevel 2>/dev/null); then
         rel=\${target#\"\$git_root\"/};
         diff_output=\$(git -C \"\$git_root\" diff --color -- \"\$rel\");
-        if [ -n \"\$diff_output\" ]; then
-          printf '%s\n' \"\$diff_output\"
-          exit 0
-        fi
+        if [ -n \"\$diff_output\" ]; then printf '%s\n' \"\$diff_output\"; exit 0; fi;
         diff_output=\$(git -C \"\$git_root\" diff --color --cached -- \"\$rel\");
-        if [ -n \"\$diff_output\" ]; then
-          printf '%s\n' \"\$diff_output\"
-          exit 0
-        fi
-      fi
-    fi
+        if [ -n \"\$diff_output\" ]; then printf '%s\n' \"\$diff_output\"; exit 0; fi;
+      fi;
+    fi;
     if [ -d \"\$target\" ]; then
-      eza --color=always --long --all --header --icons --git \"\$target\"
+      eza --color=always --long --all --header --icons --git \"\$target\";
     elif [ -f \"\$target\" ]; then
-      bat --color=always --style=header,grid --line-range=:500 \"\$target\"
+      bat --color=always --style=header,grid --line-range=:500 \"\$target\";
     else
-      file -h \"\$target\"
+      file -h \"\$target\";
     fi" \
   --reverse \
   --query="$1" \
@@ -50,7 +63,7 @@ files=$(fzf-tmux \
   --bind "ctrl-b:change-prompt( 🌎 )+reload(fd -H -L -t f -E .Trash -E .git -E .cache -E node_modules -E .next -E dist -E build -E coverage -E target -E vendor -E .venv -E venv . ${XDG_PUBLICSHARE_DIR:-${HOME}/Public})" \
   --bind "ctrl-d:change-prompt( ⚙️ )+reload(fd -H -L -t f -E .Trash -E .git -E .cache -E node_modules -E .next -E dist -E build -E coverage -E target -E vendor -E .venv -E venv . ${XDG_DOTFILES_DIR:-${HOME}/.dotfiles})" \
   --bind "ctrl-f:change-prompt( 🗂️ )+reload(fd -H -L -t f -E .Trash -E .git -E .cache -E node_modules -E .next -E dist -E build -E coverage -E target -E vendor -E .venv -E venv . ${XDG_CONFIG_HOME:-${HOME}/.config})" \
-  --bind "ctrl-g:change-prompt(   )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . $HOME/Private/repos $HOME/Public/repos)" \
+  --bind "ctrl-g:change-prompt(   )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . $HOME/Private/repos $HOME/Public/repos)" \
   --bind "ctrl-h:change-prompt( 🏠 )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . $HOME)" \
   --bind "ctrl-k:change-prompt( 🖥️ )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . ${XDG_DESKTOP_DIR:-${HOME}/Desktop})" \
   --bind "ctrl-r:change-prompt( 👟 )+reload(fd -H -L -t f -E .Trash -E .git -E .cache -E zsh . ${XDG_SCRIPTS_HOME:-${HOME}/.local/bin})" \

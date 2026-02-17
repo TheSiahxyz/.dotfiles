@@ -252,6 +252,9 @@ export WGETRC="$XDG_CONFIG_HOME/wget/wgetrc"
 ### --- W3M --- ###
 export W3M_DIR="$XDG_STATE_HOME/w3m"
 
+### --- MPD --- ###
+export MPD_HOST=/tmp/mpd_socket
+
 ### --- X11 --- ###
 export XINITRC="$XDG_CONFIG_HOME/x11/xinitrc"
 export XSERVERRC="$XDG_CONFIG_HOME/X11/xserverrc"

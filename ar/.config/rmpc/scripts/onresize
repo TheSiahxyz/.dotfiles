@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+if [[ $COLS -gt 100 ]]; then
+    rmpc remote --pid "$PID" set theme ~/.config/rmpc/themes/catppuccin-mocha.ron
+else
+    rmpc remote --pid "$PID" set theme ~/.config/rmpc/themes/catppuccin-mocha-small.ron
+fi
