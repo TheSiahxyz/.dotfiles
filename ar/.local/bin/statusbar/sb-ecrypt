@@ -7,4 +7,4 @@ case $BLOCK_BUTTON in
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
-mount | grep -q "$HOME/Private" && echo "🔑" || echo "🔒"
+mount | grep -q "$HOME/Secret" && echo "🔑" || echo "🔒"
