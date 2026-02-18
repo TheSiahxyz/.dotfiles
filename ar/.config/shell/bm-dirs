@@ -58,6 +58,7 @@ gpb             ${XDG_PUBLICSHARE_DIR:-${HOME}/Public}
 gpp             ${XDG_PICTURES_DIR:-${HOME}/Pictures}
 gpv             $HOME/Private
 grr             ${XDG_PICTURES_DIR:-${HOME}/Pictures}/resources
+gsc             $HOME/Secret
 gsh             $HOME/.ssh
 gss             ${XDG_PICTURES_DIR:-${HOME}/Pictures}/screenshots
 gtc             $HOME/Torrents/complete

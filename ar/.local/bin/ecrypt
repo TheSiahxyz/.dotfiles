@@ -25,7 +25,7 @@ attempt_mount() {
 }
 
 targets="$HOME/.secret"
-mounts="$HOME/Private"
+mounts="$HOME/Secret"
 pw="default"
 [ -d "$targets" ] || mkdir -p "$targets"
 [ -d "$mounts" ] || mkdir -p "$mounts"
