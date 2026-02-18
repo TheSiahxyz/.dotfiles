@@ -302,7 +302,7 @@ cmd mpvdir ${{
     set -- $fx
     setsid -f mpv --x11-name=video --really-quiet -- "$@" </dev/null >/dev/null 2>&1
   else
-    for file in $(printf '%s\n' *.mp4 *.mkv *.avi *.flv *.webm *.mov *.mpg *.3gp *.ts *.rmvb | sort); do
+    for file in $(printf '%s\n' *.mp4 *.mkv *.avi *.flv *.webm *.mov *.mpg *.3gp *.ts *.rmvb | sort -f); do
       [ -e "$file" ] && set -- "$@" "$file"
     done
     [ -n "$1" ] && setsid -f mpv --x11-name=video --really-quiet -- "$@" </dev/null >/dev/null 2>&1
@@ -387,7 +387,7 @@ cmd select-mime &{{
       files=$(find "$PWD" -mindepth 1 -maxdepth 1 \
         $([ "$lf_hidden" = false ] && printf '%s\n' ! -name '.*') -print |
         file -L --mime-type -f - | grep -v "$pattern" | cut -d: -f1 |
-        sort |
+        sort -f |
         sed 's/\\/\\\\/g;s/"/\\"/g;s/^/"/;s/$/"/' |
         tr '\n' ' ')
       ;;
@@ -396,7 +396,7 @@ cmd select-mime &{{
       files=$(find "$PWD" -mindepth 1 -maxdepth 1 \
         $([ "$lf_hidden" = false ] && printf '%s\n' ! -name '.*') -print |
         file -L --mime-type -f - | grep "$1" | cut -d: -f1 |
-        sort |
+        sort -f |
         sed 's/\\/\\\\/g;s/"/\\"/g;s/^/"/;s/$/"/' |
         tr '\n' ' ')
       ;;
