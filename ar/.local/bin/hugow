@@ -3,10 +3,13 @@ set -eu
 
 repodir="$HOME/Private/repos/THESIAH"
 out="$repodir/public/diary/index.html"
+out2="$repodir/public/recordings/index.html"
 server="${THESIAH_SERVER:-root@thesiah.xyz}"
 dest="/var/www/thesiah/diary/"
+dest2="/var/www/thesiah/recordings/"
 defaults="sy after foramonth"
 src="$repodir/public/diary/"
+src2="$repodir/public/recordings/"
 bgm="$repodir/static/bgm/"
 bgmd="/var/www/thesiah/bgm/"
 
@@ -18,7 +21,13 @@ if [ ! -f "$out" ]; then
   exit 1
 fi
 
+if [ ! -f "$out2" ]; then
+  echo "error: not found: $out2" >&2
+  exit 1
+fi
+
 ssh "$server" "mkdir -p '$dest'"
+ssh "$server" "mkdir -p '$dest2'"
 
 rsync -azv --update --itemize-changes --stats "$bgm" "$server:$bgmd"
 
@@ -31,6 +40,15 @@ else
     "$src" "$server:$dest"
 fi
 
+if [ -n "${THESIAH_SSH_OPTS:-}" ]; then
+  rsync -azv --update --itemize-changes --stats \
+    -e "ssh $THESIAH_SSH_OPTS" \
+    "$src2" "$server:$dest2"
+else
+  rsync -azv --update --itemize-changes --stats \
+    "$src2" "$server:$dest2"
+fi
+
 if [ -n "${1-}" ]; then
   new="$repodir/content/diary/$1"
   if [ -f "$new" ]; then
@@ -40,6 +58,16 @@ if [ -n "${1-}" ]; then
   fi
 fi
 
+if [ -n "${1-}" ]; then
+  new="$repodir/content/recordings/$1"
+  if [ -f "$new" ]; then
+    rsync -az --update "$new" "$server:$dest2"
+  elif [ -d "$new" ]; then
+    rsync -az --update "$new/" "$server:$dest2$(basename "$new")/"
+  fi
+fi
+
 ssh "$THESIAH_SERVER" "chmod 644 $dest/index.html"
+ssh "$THESIAH_SERVER" "chmod 644 $dest2/index.html"
 
 cd - >/dev/null
