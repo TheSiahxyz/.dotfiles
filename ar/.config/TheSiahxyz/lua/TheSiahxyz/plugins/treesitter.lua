@@ -17,6 +17,7 @@ return {
 					"bash",
 					"c",
 					"cpp",
+					"css",
 					"dockerfile",
 					"html",
 					"java",
@@ -27,7 +28,9 @@ return {
 					"markdown",
 					"markdown_inline",
 					"python",
+					"rust",
 					"sql",
+					"typescript",
 					"vim",
 					"vimdoc",
 				})

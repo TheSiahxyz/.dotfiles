@@ -92,10 +92,12 @@ return {
 			require("mason-lspconfig").setup({
 				ensure_installed = {
 					"bashls",
+					"cssls",
 					"dockerls",
 					"docker_compose_language_service",
 					"eslint",
 					"harper_ls",
+					"html",
 					"jdtls",
 					"jsonls",
 					"lua_ls",
@@ -220,11 +222,6 @@ return {
 							-- },
 						})
 					end,
-					["rust_analyzer"] = function()
-						lspconfig.rust_analyzer.setup({
-							capabilities = capabilities,
-						})
-					end,
 					["sqls"] = function()
 						lspconfig.sqls.setup({
 							capabilities = capabilities,
@@ -246,14 +243,10 @@ return {
 			local lint = require("lint")
 			lint.linters_by_ft = {
 				dockerfile = { "hadolint" },
-				javascript = { "eslint_d" },
-				javascriptreact = { "eslint_d" },
 				python = { "pylint" },
 				sh = { "shellcheck" },
 				sql = { "sqlfluff" },
 				svelte = { "eslint_d" },
-				typescript = { "eslint_d" },
-				typescriptreact = { "eslint_d" },
 			}
 
 			local lint_augroup = vim.api.nvim_create_augroup("lint", { clear = true })
@@ -380,12 +373,12 @@ return {
 					end
 					local ft = vim.bo[bufnr].filetype
 					local off = {
-						javascript = true,
-						typescript = true,
-						javascriptreact = true,
-						typescriptreact = true,
-						json = true,
-						css = true,
+						javascript = false,
+						typescript = false,
+						javascriptreact = false,
+						typescriptreact = false,
+						json = false,
+						css = false,
 					}
 					if off[ft] then
 						return false
