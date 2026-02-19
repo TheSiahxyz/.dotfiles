@@ -35,7 +35,7 @@ return {
 					"vimdoc",
 				})
 			end,
-			desc = "Update treesitter",
+			desc = "Install treesitter",
 		},
 	},
 }
