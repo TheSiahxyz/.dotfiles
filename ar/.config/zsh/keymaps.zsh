@@ -332,7 +332,7 @@ else
     bindkey -s '^X^R' '^ufgst\n'
     bindkey -s '^X^T' '^ugitstagedfiles\n'
     bindkey -s '^X^U' '^ugitupdate\n'
-    bindkey -s '^X^]' '^uylogt\n'
+    bindkey -s '^X^]' '^uylogY\n'
     bindkey -s '^X^_' '^ufzffns\n'
     bindkey -s '^X^X^B' '^urbackup\n'
     bindkey -s '^X^X^P' '^upcyr\n'
