@@ -220,6 +220,11 @@ return {
 							-- },
 						})
 					end,
+					["rust_analyzer"] = function()
+						lspconfig.rust_analyzer.setup({
+							capabilities = capabilities,
+						})
+					end,
 					["sqls"] = function()
 						lspconfig.sqls.setup({
 							capabilities = capabilities,
@@ -275,6 +280,7 @@ return {
 					"prettierd", -- css, java, javascript, typescript formatter
 					"pylint", -- python linter
 					"ruff", -- python formatter
+					"rust-analyzer", -- rust lsp
 					"shellcheck", -- bash lint
 					"shfmt", -- sh formatter
 					"sqlfluff", -- sql linter
@@ -356,6 +362,7 @@ return {
 					lua = { "stylua" },
 					markdown = { "prettier" },
 					python = { "ruff", "isort", "black" },
+					rust = { "rustfmt" },
 					sh = { "shfmt" },
 					sql = { "sql-formatter" },
 					svelte = { "prettier" },
