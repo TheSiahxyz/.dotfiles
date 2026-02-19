@@ -6,7 +6,7 @@
 cron_file="${XDG_CONFIG_HOME:-$HOME/.config}/crons"
 
 # Check if there are any active cronjobs
-if crontab -l 2>/dev/null | grep -q '^[^#[:space:]]'; then
+if crontab -l 2>/dev/null | grep -qv '^#\|^$'; then
   # If active cronjobs are found, save and disable them
   ln -sf "${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/$(whereami)/.config/crons" "${XDG_CONFIG_HOME:-${HOME}/.config}/crons"
   crontab -r
@@ -21,6 +21,9 @@ else
     notify-send "🕰️ No saved cronjobs to re-enable."
   fi
 fi
+
+# Invalidate sb-clock cache so icon updates immediately
+rm -f "${XDG_CACHE_HOME:-${HOME}/.cache}/crontab/cronjobs"
 
 # Notify status bar to update
 pkill -RTMIN+2 "${STATUSBAR:-dwmblocks}"

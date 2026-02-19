@@ -5,14 +5,14 @@ calendar="🗓"
 hour=$(date '+%I')
 minute=$(date '+%M')
 
-# Cache crontab check for 5 minutes
-crontab_cache="${XDG_CACHE_HOME:-${HOME}/.cache}/statusbar/has_crontab"
+# Cache cron daemon check for 5 minutes
+crontab_cache="${XDG_CACHE_HOME:-${HOME}/.cache}/crontab/cronjobs"
 if [ ! -f "$crontab_cache" ] || [ $(($(date +%s) - $(stat -c %Y "$crontab_cache" 2>/dev/null || echo 0))) -gt 300 ]; then
-  mkdir -p "${XDG_CACHE_HOME:-${HOME}/.cache}/statusbar"
-  if crontab -l 2>/dev/null | grep -q '^[^#[:space:]]'; then
-    echo "1" > "$crontab_cache"
+  mkdir -p "${XDG_CACHE_HOME:-${HOME}/.cache}/crontab"
+  if crontab -l 2>/dev/null | grep -qv '^#\|^$'; then
+    echo "1" >"$crontab_cache"
   else
-    echo "0" > "$crontab_cache"
+    echo "0" >"$crontab_cache"
   fi
 fi
 
@@ -60,7 +60,7 @@ moonfile="${XDG_DATA_HOME:-${HOME}/.local/share}/wallpapers/moonphase"
 # Cache location for 24 hours
 if [ ! -s "$locationfile" ] || [ $(($(date +%s) - $(stat -c %Y "$locationfile" 2>/dev/null || echo 0))) -gt 86400 ]; then
   mkdir -p "${XDG_CACHE_HOME:-${HOME}/.cache}/statusbar"
-  curl -s --max-time 2 http://ip-api.com/json | jq -r '[.regionName, .countryCode] | join(",")' > "$locationfile" 2>/dev/null &
+  curl -s --max-time 2 http://ip-api.com/json | jq -r '[.regionName, .countryCode] | join(",")' >"$locationfile" 2>/dev/null &
 fi
 
 location=$(cat "$locationfile" 2>/dev/null || echo "")
