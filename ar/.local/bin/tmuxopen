@@ -35,14 +35,14 @@ wrapper() {
       echo {q}
     )+reload(
       rm -f $tmp_files;
-      rg --line-number --follow --fixed-strings --hidden --no-heading --color=always --smart-case --glob '!**/.git/**' --glob '!node_modules/**' {q} 2>/dev/null || true
+      rg --line-number --follow --fixed-strings --hidden --no-heading --color=always --smart-case --glob '!**/.git/**' --glob '!**/.github/**' --glob '!node_modules/**' --glob '!dist/**' --glob '!build/**' --glob '!__pycache__/**' --glob '!target/**' --glob '!.venv/**' --glob '!venv/**' --glob '!coverage/**' --glob '!.next/**' {q} 2>/dev/null || true
     )"
     file_bind="ctrl-f:transform-query(
       current_query={q};
       if [ ! -s $tmp_content_query ]; then
         echo \$current_query > $tmp_content_query;
       fi;
-      rg --hidden --follow --files-with-matches --no-messages --glob '!**/.git/**' --glob '!node_modules/**' -- \$current_query > $tmp_files;
+      rg --hidden --follow --files-with-matches --no-messages --glob '!**/.git/**' --glob '!**/.github/**' --glob '!node_modules/**' --glob '!dist/**' --glob '!build/**' --glob '!__pycache__/**' --glob '!target/**' --glob '!.venv/**' --glob '!venv/**' --glob '!coverage/**' --glob '!.next/**' -- \$current_query > $tmp_files;
     )+reload(
       if [ -s $tmp_files ]; then
         if [ -n {q} ]; then
@@ -59,12 +59,12 @@ wrapper() {
       fi
     )"
     if command -v fd >/dev/null 2>&1; then
-      dir_bind="ctrl-d:change-prompt(📁 )+reload(fd --follow --type d --hidden --absolute-path --color never --exclude .git --exclude node_modules --search-path \"\$PWD\")"
+      dir_bind="ctrl-d:change-prompt(📁 )+reload(fd --follow --type d --hidden --absolute-path --color never --exclude .git --exclude .github --exclude node_modules --exclude dist --exclude build --exclude __pycache__ --exclude target --exclude .venv --exclude venv --exclude coverage --exclude .next --search-path \"\$PWD\")"
     else
-      dir_bind="ctrl-d:change-prompt(📁 )+reload(find \"\$PWD\" -L -type d -name node_modules -prune -o -name .git -prune -o -type d -print)"
+      dir_bind="ctrl-d:change-prompt(📁 )+reload(find \"\$PWD\" -L -type d -name node_modules -prune -o -name .git -prune -o -name .github -prune -o -name dist -prune -o -name build -prune -o -name __pycache__ -prune -o -name target -prune -o -name .venv -prune -o -name venv -prune -o -name coverage -prune -o -name .next -prune -o -type d -print)"
     fi
 
-    rg --line-number --follow --no-heading --color=always --smart-case --glob '!**/.git/**' --glob '!LICENSE' '' 2>/dev/null |
+    rg --line-number --follow --no-heading --color=always --smart-case --glob '!**/.git/**' --glob '!**/.github/**' --glob '!node_modules/**' --glob '!dist/**' --glob '!build/**' --glob '!.next/**' --glob '!__pycache__/**' --glob '!target/**' --glob '!.venv/**' --glob '!venv/**' --glob '!coverage/**' --glob '!LICENSE' '' 2>/dev/null |
       fzf-tmux \
         --ansi --multi --delimiter : \
         --reverse \
