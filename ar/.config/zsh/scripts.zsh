@@ -569,7 +569,7 @@ function change_nvim_config_dir() {
     echo "$config_path"
 
     # Clear existing configurations if confirmed by the user
-    echo -n "This will overwrite existing configurations. Continue? (y/n) "
+    echo -n "This will overwrite existing configurations. Continue? (y/N) "
     read reply
     if [[ $reply =~ ^[Yy]$ ]]; then
         echo "Clearing existing Neovim configurations..."
