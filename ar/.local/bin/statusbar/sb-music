@@ -1,13 +1,16 @@
 #!/bin/bash
 
+shopt -s extglob
+
 MPD_HOST="${MPD_HOST:-/tmp/mpd_socket}"
 export MPD_HOST
 
 truncate_string() {
-  input="$1"
-  max_length="$2"
+  local input="$1"
+  local max_length="$2"
   if [ "${#input}" -gt "$max_length" ]; then
-    echo "${input:0:$((max_length - 2))}.."
+    local truncated="${input:0:$((max_length - 2))}"
+    echo "${truncated%%+( )}.."
   else
     echo "$input"
   fi
@@ -17,18 +20,23 @@ signal="$(awk -F', *' -v name="${0##*/}" '$2 ~ name {print $3+0}' "${XDG_SOURCES
 
 [ "$signal" -eq 0 ] && {
   pidof -x sb-mpdup >/dev/null 2>&1 || sb-mpdup >/dev/null 2>&1 &
+  pidof -x sb-playerctlup >/dev/null 2>&1 || sb-playerctlup >/dev/null 2>&1 &
 }
+
+screen_width=$(xrandr | awk '/\*/ {split($1, res, "x"); print res[1]; exit}')
+if [ "$screen_width" -le 2048 ]; then
+  length="$(grep 'MAX_BLOCK_OUTPUT_LENGTH' ~/.local/src/suckless/dwmblocks/config.def.h | awk '{print $3}')"
+  max_length="${length:+$((length / 3))}"
+  max_length="${max_length:-15}"
+fi
 
 status() {
   if ps -C mpd >/dev/null 2>&1; then
-    screen_width=$(xrandr | awk '/\*/ {split($1, res, "x"); print res[1]; exit}')
+    local artist title prefix indicators current_time total_time
     artist=$(mpc current -f %artist%)
     title=$(mpc current -f %title%)
 
     if [ "$screen_width" -le 2048 ]; then
-      length="$(grep 'MAX_BLOCK_OUTPUT_LENGTH' ~/.local/src/suckless/dwmblocks/config.def.h | awk '{print $3}')"
-      max_length="${length:+$((length / 3))}"
-      max_length="${max_length:-15}"
       artist=$(truncate_string "$artist" "$max_length")
       title=$(truncate_string "$title" "$max_length")
     fi
@@ -58,7 +66,69 @@ status() {
   fi
 }
 
-mpc status %state% | grep -q "stopped" || status
+playerctl_status() {
+  command -v playerctl >/dev/null 2>&1 || return
+
+  local output="" player
+  while IFS= read -r player; do
+    local player_status
+    player_status=$(playerctl --player="$player" status 2>/dev/null) || continue
+
+    local play_icon
+    case "${player%%.*}" in
+    spotify|rhythmbox|audacious|clementine|strawberry) play_icon="🎵" ;;
+    vlc|mpv|totem|celluloid) play_icon="🎬" ;;
+    firefox|chromium|chrome) play_icon="📺" ;;
+    *) play_icon="▶️" ;;
+    esac
+
+    local prefix
+    case "$player_status" in
+    "Playing") prefix="$play_icon" ;;
+    "Paused") prefix="⏸" ;;
+    *) continue ;;
+    esac
+
+    if [[ "$player" == chromium.instance* ]]; then
+      local pid proc_name
+      pid="${player#chromium.instance}"
+      proc_name=$(ps -p "$pid" -o comm= 2>/dev/null)
+      [ "$proc_name" = "youtube-music" ] || continue
+    else
+      continue
+    fi
+
+    local artist title
+    artist=$(playerctl --player="$player" metadata artist 2>/dev/null)
+    title=$(playerctl --player="$player" metadata title 2>/dev/null)
+
+    [ -z "$artist" ] && [ -z "$title" ] && continue
+
+    if [ -n "$max_length" ]; then
+      artist=$(truncate_string "$artist" "$max_length")
+      title=$(truncate_string "$title" "$max_length")
+    fi
+
+    output="${output:+$output | }${prefix}${artist:+$artist - }${title}"
+  done < <(playerctl -l 2>/dev/null)
+
+  echo "$output"
+}
+
+mpd_output=""
+if ps -C mpd >/dev/null 2>&1 && ! mpc status %state% 2>/dev/null | grep -q "stopped"; then
+  mpd_output=$(status)
+fi
+
+playerctl_output=$(playerctl_status)
+
+if [ -n "$mpd_output" ] && [ -n "$playerctl_output" ]; then
+  echo "$mpd_output | $playerctl_output"
+elif [ -n "$mpd_output" ]; then
+  echo "$mpd_output"
+elif [ -n "$playerctl_output" ]; then
+  echo "$playerctl_output"
+fi
 
 case $BLOCK_BUTTON in
 1) setsid -f "$TERMINAL" -e ncmpcpp ;; # left click, opens ncmpcpp

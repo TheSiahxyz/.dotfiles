@@ -485,6 +485,9 @@ alias xauto='xrandr --auto'
 # xset
 alias xoff='xset s off -dpms'
 
+# youtube-music
+alias ym='youtube-music'
+
 # zathura
 alias za='zathura'
 
