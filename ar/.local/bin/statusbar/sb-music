@@ -76,9 +76,9 @@ playerctl_status() {
 
     local play_icon
     case "${player%%.*}" in
-    spotify|rhythmbox|audacious|clementine|strawberry) play_icon="🎵" ;;
-    vlc|mpv|totem|celluloid) play_icon="🎬" ;;
-    firefox|chromium|chrome) play_icon="📺" ;;
+    spotify | rhythmbox | audacious | clementine | strawberry) play_icon="🎵" ;;
+    vlc | mpv | totem | celluloid) play_icon="🎬" ;;
+    firefox | chromium | chrome) play_icon="📺" ;;
     *) play_icon="▶️" ;;
     esac
 
@@ -123,7 +123,7 @@ fi
 playerctl_output=$(playerctl_status)
 
 if [ -n "$mpd_output" ] && [ -n "$playerctl_output" ]; then
-  echo "$mpd_output | $playerctl_output"
+  echo "$mpd_output $playerctl_output"
 elif [ -n "$mpd_output" ]; then
   echo "$mpd_output"
 elif [ -n "$playerctl_output" ]; then
