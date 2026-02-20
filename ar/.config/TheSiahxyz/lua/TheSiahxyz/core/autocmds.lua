@@ -361,7 +361,7 @@ autocmd("BufWritePost", {
 	group = suckless_keys,
 	pattern = { home .. "/.local/src/suckless/dwm/config.def.h", home .. "/.local/src/suckless/st/config.def.h" },
 	callback = function()
-		local choice = vim.fn.confirm("Extract key bindings?", "&Yes\n&No", 2)
+		local choice = vim.fn.confirm("Extract key bindings?", "&y\n&N", 2)
 		if choice == 1 then
 			vim.cmd("silent !" .. home .. "/.local/bin/extractkeys")
 		end
