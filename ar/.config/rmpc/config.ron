@@ -284,7 +284,20 @@
             border_symbols: Rounded,
             pane: Split(
                 direction: Vertical,
-                panes: [(size: "25%", pane: Pane(AlbumArt)), (size: "70%", pane: Pane(Lyrics), vertical_align: Bottom)],
+                panes: [
+                    (
+                        size: "30%",
+                        pane: Split(
+                            direction: Horizontal,
+                            panes: [
+                                (pane: Pane(Empty()), size: "43%"),
+                                (pane: Pane(AlbumArt), size: "14%"),
+                                (pane: Pane(Empty()), size: "43%"),
+                            ],
+                        ),
+                    ),
+                    (pane: Pane(Lyrics), size: "70%", vertical_align: Bottom),
+                ],
             ),
         ),
         (

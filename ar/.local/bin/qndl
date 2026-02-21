@@ -33,13 +33,13 @@ case $type in
   download_type="music"
   output_dir="${XDG_MUSIC_DIR:-${HOME}/Music}"
   archive_file="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/global/Music/.music.txt"
-  ytdl_output_format="${output_dir}/%(artist|)s%(artist& - |)s%(title)s.%(ext)s"
+  ytdl_output_format="${output_dir}/%(album_artist,artist|Unknown Artist)s/%(album|Unknown Album)s/%(title)s.%(ext)s"
   ytdl_cmd_base="$ytdl_cmd_base --audio-format best --audio-quality 0 --download-archive \"$archive_file\" --extract-audio --recode-video mp3"
   ;;
 -r | --restore | r | restore)
   output_dir="${XDG_MUSIC_DIR:-${HOME}/Music}"
   archive_file="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/global/Music/.music.txt"
-  ytdl_output_format="${output_dir}/%(artist|)s%(artist& - |)s%(title)s.%(ext)s"
+  ytdl_output_format="${output_dir}/%(album_artist,artist|Unknown Artist)s/%(album|Unknown Album)s/%(title)s.%(ext)s"
   ytdl_cmd_base="$ytdl_cmd_base --audio-format best --audio-quality 0 --extract-audio --recode-video mp3"
   ytdl_cmd="$ytdl_cmd_base --output \"$ytdl_output_format\""
   [ ! -f "$archive_file" ] && exit 1
@@ -127,4 +127,4 @@ tsp -D "$idnum" notify-send "✅ $download_type download complete:" "$url" ||
   notify-send "❌ Faild to download:" "$url"
 
 # Conditionally update the music database if the download type is music
-[ "$download_type" = "music" ] && tsp -D "$idnum" bash -c "mpc update"
+[ "$download_type" = "music" ] && tsp -D "$idnum" bash -c "mpc update --wait && find /home/si/Music -name '*.mp3' | sed 's|/home/si/Music/||' | sort > /home/si/.config/mpd/playlists/entire.m3u"
