@@ -9,53 +9,96 @@ mkdir -p "$TMP_DIR"
 ALBUM_ART_PATH="$TMP_DIR/notification_cover"
 
 if ! rmpc albumart --output "$ALBUM_ART_PATH"; then
-    ALBUM_ART_PATH=""
+  ALBUM_ART_PATH=""
 fi
 
 if [ -n "$ALBUM_ART_PATH" ]; then
-    notify-send -i "$ALBUM_ART_PATH" "Now Playing" "$ARTIST - $TITLE"
+  notify-send -i "$ALBUM_ART_PATH" " Now Playing" "$ARTIST - $TITLE"
 else
-    notify-send "Now Playing" "$ARTIST - $TITLE"
+  notify-send " Now Playing" "$ARTIST - $TITLE"
 fi
 
 # ── Play count ────────────────────────────────────────────────────────────────
 sticker=$(rmpc sticker get "$FILE" "playCount" 2>/dev/null | jq -r '.value')
 if [ -z "$sticker" ]; then
-    rmpc sticker set "$FILE" "playCount" "1"
+  rmpc sticker set "$FILE" "playCount" "1"
 else
-    rmpc sticker set "$FILE" "playCount" "$((sticker + 1))"
+  rmpc sticker set "$FILE" "playCount" "$((sticker + 1))"
+fi
+
+# ── Auto album tag ───────────────────────────────────────────────────────────
+if [ -z "$ALBUM" ] && [ -n "$ARTIST" ] && [ -n "$TITLE" ]; then
+  MUSIC_DIR="$HOME/Music"
+  SONG_PATH="$MUSIC_DIR/$FILE"
+
+  result=$(curl -sG \
+    --data-urlencode "term=$ARTIST $TITLE" \
+    --data-urlencode "entity=song" \
+    --data-urlencode "limit=1" \
+    "https://itunes.apple.com/search")
+
+  found_album=$(echo "$result" | jq -r '.results[0].collectionName')
+  found_artist=$(echo "$result" | jq -r '.results[0].artistName')
+
+  if [ -n "$found_album" ] && [ "$found_album" != "null" ]; then
+    eyeD3 -A "$found_album" -a "$found_artist" "$SONG_PATH" 2>/dev/null
+    rmpc remote --pid "$PID" status "Set album: $found_album" --level info
+  else
+    rmpc remote --pid "$PID" status "Album not found for $ARTIST - $TITLE" --level warn
+  fi
+fi
+
+# ── Auto album art download ──────────────────────────────────────────────────
+if [ -z "$ALBUM_ART_PATH" ] && [ -n "$ALBUM" ] && [ -n "$ARTIST" ]; then
+  MUSIC_DIR="$HOME/Music"
+  SONG_PATH="$MUSIC_DIR/$FILE"
+  COVER_PATH="$TMP_DIR/cover.jpg"
+
+  ARTWORK_URL=$(curl -sG \
+    --data-urlencode "term=$ARTIST $ALBUM" \
+    --data-urlencode "entity=album" \
+    --data-urlencode "limit=1" \
+    "https://itunes.apple.com/search" | jq -r '.results[0].artworkUrl100' | sed 's/100x100bb/600x600bb/')
+
+  if [ -n "$ARTWORK_URL" ] && [ "$ARTWORK_URL" != "null" ]; then
+    curl -s -o "$COVER_PATH" "$ARTWORK_URL"
+    eyeD3 --add-image="$COVER_PATH:FRONT_COVER" "$SONG_PATH" 2>/dev/null
+    rmpc remote --pid "$PID" status "Downloaded album art for $ARTIST - $ALBUM" --level info
+  else
+    rmpc remote --pid "$PID" status "Album art not found for $ARTIST - $ALBUM" --level warn
+  fi
 fi
 
 # ── Auto lyrics download ──────────────────────────────────────────────────────
 LRCLIB_INSTANCE="https://lrclib.net"
 
 if [ "$HAS_LRC" = "false" ]; then
-    mkdir -p "$(dirname "$LRC_FILE")"
+  mkdir -p "$(dirname "$LRC_FILE")"
 
-    LYRICS="$(curl -X GET -sG \
-        -H "Lrclib-Client: rmpc-$VERSION" \
-        --data-urlencode "artist_name=$ARTIST" \
-        --data-urlencode "track_name=$TITLE" \
-        --data-urlencode "album_name=$ALBUM" \
-        "$LRCLIB_INSTANCE/api/get" | jq -r '.syncedLyrics')"
+  LYRICS="$(curl -X GET -sG \
+    -H "Lrclib-Client: rmpc-$VERSION" \
+    --data-urlencode "artist_name=$ARTIST" \
+    --data-urlencode "track_name=$TITLE" \
+    --data-urlencode "album_name=$ALBUM" \
+    "$LRCLIB_INSTANCE/api/get" | jq -r '.syncedLyrics')"
 
-    if [ -z "$LYRICS" ]; then
-        rmpc remote --pid "$PID" status "Failed to download lyrics for $ARTIST - $TITLE" --level error
-        exit
-    fi
+  if [ -z "$LYRICS" ]; then
+    rmpc remote --pid "$PID" status "Failed to download lyrics for $ARTIST - $TITLE" --level error
+    exit
+  fi
 
-    if [ "$LYRICS" = "null" ]; then
-        rmpc remote --pid "$PID" status "Lyrics for $ARTIST - $TITLE not found" --level warn
-        exit
-    fi
+  if [ "$LYRICS" = "null" ]; then
+    rmpc remote --pid "$PID" status "Lyrics for $ARTIST - $TITLE not found" --level warn
+    exit
+  fi
 
-    echo "[ar:$ARTIST]" >"$LRC_FILE"
-    {
-        echo "[al:$ALBUM]"
-        echo "[ti:$TITLE]"
-    } >>"$LRC_FILE"
-    echo "$LYRICS" | sed -E '/^\[(ar|al|ti):/d' >>"$LRC_FILE"
+  echo "[ar:$ARTIST]" >"$LRC_FILE"
+  {
+    echo "[al:$ALBUM]"
+    echo "[ti:$TITLE]"
+  } >>"$LRC_FILE"
+  echo "$LYRICS" | sed -E '/^\[(ar|al|ti):/d' >>"$LRC_FILE"
 
-    rmpc remote --pid "$PID" indexlrc --path "$LRC_FILE"
-    rmpc remote --pid "$PID" status "Downloaded lyrics for $ARTIST - $TITLE" --level info
+  rmpc remote --pid "$PID" indexlrc --path "$LRC_FILE"
+  rmpc remote --pid "$PID" status "Downloaded lyrics for $ARTIST - $TITLE" --level info
 fi

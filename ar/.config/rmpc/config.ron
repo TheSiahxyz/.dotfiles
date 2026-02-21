@@ -5,8 +5,8 @@
     address: "/tmp/mpd_socket",
     password: None,
     theme: "~/.config/rmpc/themes/catppuccin-mocha.ron",
-    cache_dir: "~/.cache/rmpc",
-    lyrics_dir: "~/.local/share/lyrics",
+    cache_dir: Some("~/.cache/rmpc"),
+    lyrics_dir: Some("~/.local/share/lyrics"),
     on_song_change: ["~/.config/rmpc/scripts/on_song_change"],
     on_resize: ["~/.config/rmpc/scripts/onresize"],
     extra_yt_dlp_args: ["--audio-quality", "0"],
@@ -44,6 +44,7 @@
             "3":          SwitchToTab("Albums"),
             "4":          SwitchToTab("Library"),
             "5":          SwitchToTab("Playlists"),
+            "6":          SwitchToTab("Lyrics"),
             "F":          SwitchToTab("Search"),
             ":":          CommandMode,
             "<":          PreviousTrack,
@@ -159,7 +160,7 @@
                 direction: Horizontal,
                 panes: [
                     (
-                        size: "75%",
+                        size: "65%",
                         pane: Split(
                             direction: Vertical,
                             panes: [
@@ -203,7 +204,7 @@
                         )
                     ),
                     (
-                        size: "25%",
+                        size: "35%",
                         pane: Split(
                             direction: Vertical,
                             panes: [
@@ -218,7 +219,7 @@
                                     borders: "ALL",
                                     border_symbols: Inherited(parent: Rounded, top_left: "├", top_right: "┤",),
                                     border_title: [(kind: Text(" Lyrics "))],
-                                    border_title_alignment: Right,
+                                    border_title_alignment: Center,
                                     pane: Pane(Lyrics)
                                 ),
                             ],
@@ -276,6 +277,15 @@
                 direction: Vertical,
                 panes: [(pane: Pane(Playlists), size: "100%", borders: "ALL", border_symbols: Rounded)],
             )
+        ),
+        (
+            name: "Lyrics",
+            borders: "ALL",
+            border_symbols: Rounded,
+            pane: Split(
+                direction: Vertical,
+                panes: [(size: "25%", pane: Pane(AlbumArt)), (size: "70%", pane: Pane(Lyrics), vertical_align: Bottom)],
+            ),
         ),
         (
             name: "Search",
