@@ -335,8 +335,10 @@ else
     bindkey -s '^X^]' '^uylogd\n'
     bindkey -s '^X^_' '^ufzffns\n'
     bindkey -s '^X^X^B' '^urbackup\n'
+    bindkey -s '^X^X^O' '^uylogR\n'
     bindkey -s '^X^X^P' '^upcyr\n'
     bindkey -s '^X^X^R' '^urbackup -r\n'
     bindkey -s '^X^X^S' '^usshadd\n'
     bindkey -s '^X^X^Y' '^uyay -Syu && remaps\n'
+    bindkey -s '^X^X^]' '^uylogr\n'
 fi
