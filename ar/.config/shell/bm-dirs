@@ -39,6 +39,7 @@ ctc             ${XDG_CONFIG_HOME:-${HOME}/.config}/task
 ctd             ${XDG_CONFIG_HOME:-${HOME}/.config}/transmission-daemon
 ctm             ${XDG_CONFIG_HOME:-${HOME}/.config}/tmux
 cts             ${XDG_CONFIG_HOME:-${HOME}/.config}/TheSiahxyz
+ctv             ${XDG_CONFIG_HOME:-${HOME}/.config}/television
 cvc             ${XDG_CONFIG_HOME:-${HOME}/.config}/vim
 cvp             ${XDG_CONFIG_HOME:-${HOME}/.config}/openvpn
 cvw             ${XDG_DATA_HOME:-${HOME}/.local/share}/vimwiki

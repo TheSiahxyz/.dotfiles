@@ -44,6 +44,7 @@ vtc     ${XDG_CONFIG_HOME:-${HOME}/.config}/task/taskrc                         
 vtm     ${XDG_CONFIG_HOME:-${HOME}/.config}/tmux/tmux.conf                      # Tmux config
 vto     ${XDG_CONFIG_HOME:-${HOME}/.config}/taskopen/taskopenrc                 # Taskopen config
 vtt     ${XDG_CONFIG_HOME:-${HOME}/.config}/transmission-daemon/settings.json   # Transmission-daemon config
+vtv     ${XDG_CONFIG_HOME:-${HOME}/.config}/television/config.toml              # Television config
 vur     ${XDG_DATA_HOME:-${HOME}/.local/share}/thesiah/urls                     # Custom urls
 vvc     ${XDG_CONFIG_HOME:-${HOME}/.config}/vim/vimrc                           # Vim config
 vvi     ${XDG_CONFIG_HOME:-${HOME}/.config}/vim/init.vim                        # Vim init

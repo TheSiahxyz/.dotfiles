@@ -65,7 +65,8 @@ video/* | application/octet-stream | application/vnd.rn-realmedia)
   ;;
 application/vnd.openxmlformats-officedocument.presentationml.presentation)
   CACHE="$(thumb_cache "$1")"
-  [ ! -f "$CACHE.jpg" ] && unoconv -f jpg -o "$CACHE.jpg" "$1"
+  [ ! -f "$CACHE.jpg" ] && libreoffice --headless --convert-to jpg --outdir "$(dirname "$CACHE")" "$1" >/dev/null 2>&1 \
+    && mv "$(dirname "$CACHE")/$(basename "${1%.*}").jpg" "$CACHE.jpg"
   image "$CACHE.jpg" "$2" "$3" "$4" "$5" "$1"
   ;;
 application/x-hwp)
@@ -81,12 +82,35 @@ application/x-hwp)
   ;;
 applicationg/gzip) zcat -- "$1" ;;
 application/*zip) atool --list -- "$1" ;;
+application/vnd.oasis.opendocument.text|application/vnd.oasis.opendocument.text-template)
+  CACHE="$(thumb_cache "$1")"
+  [ ! -f "$CACHE.md" ] && pandoc "$1" -t markdown -o "$CACHE.md"
+  bat -p --theme ansi --terminal-width "$(($4 - 2))" -f "$CACHE.md"
+  ;;
+application/vnd.oasis.opendocument.spreadsheet|application/vnd.oasis.opendocument.spreadsheet-template)
+  CACHE="$(thumb_cache "$1")"
+  [ ! -f "$CACHE.csv" ] && libreoffice --headless --convert-to csv --outdir "$(dirname "$CACHE")" "$1" >/dev/null 2>&1 \
+    && mv "$(dirname "$CACHE")/$(basename "${1%.*}").csv" "$CACHE.csv"
+  bat -p --theme ansi --terminal-width "$(($4 - 2))" -f "$CACHE.csv"
+  ;;
+application/vnd.oasis.opendocument.presentation|application/vnd.oasis.opendocument.presentation-template)
+  CACHE="$(thumb_cache "$1")"
+  [ ! -f "$CACHE.jpg" ] && libreoffice --headless --convert-to jpg --outdir "$(dirname "$CACHE")" "$1" >/dev/null 2>&1 \
+    && mv "$(dirname "$CACHE")/$(basename "${1%.*}").jpg" "$CACHE.jpg"
+  image "$CACHE.jpg" "$2" "$3" "$4" "$5" "$1"
+  ;;
 *opendocument*) odt2txt "$1" ;;
 application/pgp-encrypted) gpg -d -- "$1" ;;
 application/vnd.openxmlformats-officedocument.wordprocessingml.document)
   CACHE="$(thumb_cache "$1")"
-  [ ! -f "$CACHE.txt" ] && pandoc "$1" -t plain -o "$CACHE.txt"
-  bat -p --theme ansi --terminal-width "$(($4 - 2))" -f "$CACHE.txt"
+  [ ! -f "$CACHE.md" ] && pandoc "$1" -t markdown -o "$CACHE.md"
+  bat -p --theme ansi --terminal-width "$(($4 - 2))" -f "$CACHE.md"
+  ;;
+application/vnd.openxmlformats-officedocument.spreadsheetml.sheet|application/vnd.ms-excel)
+  CACHE="$(thumb_cache "$1")"
+  [ ! -f "$CACHE.csv" ] && libreoffice --headless --convert-to csv --outdir "$(dirname "$CACHE")" "$1" >/dev/null 2>&1 \
+    && mv "$(dirname "$CACHE")/$(basename "${1%.*}").csv" "$CACHE.csv"
+  bat -p --theme ansi --terminal-width "$(($4 - 2))" -f "$CACHE.csv"
   ;;
 esac
 exit 1
