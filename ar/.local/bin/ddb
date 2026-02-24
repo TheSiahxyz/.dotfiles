@@ -90,6 +90,7 @@ find_drizzle_migrations() {
 
 # Parse command line arguments
 MIGRATE_MODE=0
+GENERATE_MODE=0
 
 if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     echo "Usage: $(basename "$0") [OPTIONS]"
@@ -97,8 +98,10 @@ if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     echo "Interactive script to query Docker database containers"
     echo ""
     echo "Options:"
-    echo "  -h, --help        Show this help message"
-    echo "  -m, --migrate     Run drizzle migration SQL file"
+    echo "  -h, --help              Show this help message"
+    echo "  -g, --generate          Run drizzle-kit generate to create migration files"
+    echo "  -m, --migrate           Run drizzle migration SQL file"
+    echo "  -gm, --generate-migrate Run drizzle-kit generate then immediately migrate"
     echo ""
     echo "Supported databases:"
     echo "  - PostgreSQL"
@@ -106,8 +109,43 @@ if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     echo "  - MongoDB"
     echo "  - Redis"
     exit 0
+elif [ "$1" = "-g" ] || [ "$1" = "--generate" ]; then
+    GENERATE_MODE=1
 elif [ "$1" = "-m" ] || [ "$1" = "--migrate" ]; then
     MIGRATE_MODE=1
+elif [ "$1" = "-gm" ] || [ "$1" = "--generate-migrate" ]; then
+    GENERATE_MODE=1
+    MIGRATE_MODE=1
+fi
+
+# Handle generate step (runs before container selection)
+if [ "$GENERATE_MODE" = 1 ]; then
+    git_root=$(git rev-parse --show-toplevel 2>/dev/null)
+    if [ -n "$git_root" ]; then
+        project_dir="$git_root"
+        echo "[INFO] Found git root: $git_root"
+    else
+        project_dir="$(pwd)"
+        echo "[INFO] Using current directory: $project_dir"
+    fi
+
+    echo "[INFO] Running drizzle-kit generate..."
+    echo ""
+
+    if (cd "$project_dir" && npx drizzle-kit generate); then
+        echo ""
+        echo "[SUCCESS] Migration files generated successfully"
+    else
+        echo ""
+        echo "[ERROR] drizzle-kit generate failed" >&2
+        exit 1
+    fi
+
+    if [ "$MIGRATE_MODE" = 0 ]; then
+        exit 0
+    fi
+
+    echo ""
 fi
 
 # Get database containers and save to temp file

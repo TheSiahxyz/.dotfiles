@@ -2,6 +2,9 @@
 api.json
 credentials
 
+# ASDF
+.tool-versions
+
 # Backup files
 *~
 *.swp
