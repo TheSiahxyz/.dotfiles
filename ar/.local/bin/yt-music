@@ -1,0 +1,23 @@
+#!/bin/sh
+
+XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+
+if [ -f "$XDG_CONFIG_HOME/youtube-music-flags.conf" ]; then
+  YOUTUBE_MUSIC_USER_FLAGS="$(grep -v '^#' "$XDG_CONFIG_HOME/youtube-music-flags.conf")"
+fi
+
+export ELECTRON_IS_DEV=0
+"/opt/YouTube Music/youtube-music" $YOUTUBE_MUSIC_USER_FLAGS "$@" &
+APP_PID=$!
+
+# Wait for the main window, then override WM_CLASS set by Electron
+i=0
+while [ "$i" -lt 50 ]; do
+  WID=$(xdotool search --classname "com.github.th_ch.youtube_music" 2>/dev/null | tail -1)
+  if [ -n "$WID" ]; then
+    xdotool set_window --classname "yt-music" --class "yt-music" "$WID"
+    break
+  fi
+  sleep 0.2
+  i=$((i + 1))
+done
