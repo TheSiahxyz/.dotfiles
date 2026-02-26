@@ -496,8 +496,6 @@ alias sps="source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/profile"
 alias szs="source ${XDG_CONFIG_HOME:-${HOME}/.config}/zsh/.zshrc"
 
 # personal
-alias ylogh='ylog -s hidden -c us | grep $(LC_TIME=C date +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
-alias ylogH='ylog -s hidden -c us | grep $(LC_TIME=C date -d "1 days ago" +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
 alias ylogp='ylog -s peertube -c us | grep $(LC_TIME=C date +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
 alias ylogP='ylog -s peertube -c us | grep $(LC_TIME=C date -d "1 days ago" +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
 alias ylogd='ylog -s diary -c us | grep $(LC_TIME=C date +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
