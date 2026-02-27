@@ -505,3 +505,5 @@ alias ylogr='ylog -s recordings -c us | grep $(LC_TIME=C date +%d/%b) | grep -E 
 alias ylogR='ylog -s recordings -c us | grep $(LC_TIME=C date -d "1 days ago" +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
 alias ylogT='ylog -s recordings -c us | grep $(LC_TIME=C date -d "2 days ago" +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
 alias ylogu='ylog -s diary -c us'
+alias yloga='ylogd; ylogr; ylogp'
+alias ylogA='ylogD; ylogR; ylogP'

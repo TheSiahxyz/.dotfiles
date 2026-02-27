@@ -8,5 +8,5 @@ export MPD_HOST
 
 while :; do
   mpc idle >/dev/null || continue
-  kill -55 "$(pidof "${STATUSBAR:-dwmblocks}")" 2>/dev/null
+  kill -54 "$(pidof "${STATUSBAR:-dwmblocks}")" 2>/dev/null
 done
