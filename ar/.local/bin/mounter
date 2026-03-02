@@ -91,7 +91,7 @@ rawdisks="$(echo "$lsblkoutput" | awk '
 ' | sed "s/^/💾 /" | filter)"
 
 # Get all available IP addresses with open Samba shares in the wlan0 subnet, excluding eth0 IP
-smbips="$(sudo arp-scan --interface=eth0 --interface=wlan0 --localnet | grep -vEi '(EFM Networks|DUP:)' | awk '/^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/{print $1}')"
+smbips="$(sudo arp-scan --interface=eth0 --interface=wlan0 --localnet 2>/dev/null | grep -vEi '(EFM Networks|DUP:)' | awk '/^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/{print $1}')"
 
 # Get currently mounted CIFS shares
 mountedsmbs="$(grep 'cifs' /etc/mtab)"
@@ -109,7 +109,7 @@ username=$(whoami)
 password=$(pass show default/mac)
 EOF
   )
-  smb=$(
+  linux=$(
     smbclient -L "$smbip" -U% -A /dev/stdin <<EOF 2>/dev/null | awk '/Disk/ {print $1}' | grep -vEi '(ADMIN|\w)\$|Macintosh'
 username=$(whoami)
 password=$(pass show default/default)
@@ -129,7 +129,7 @@ EOF
     if ! echo "$smbshares" | grep -q "$share"; then
       smbshares+="//$smbip/$share"$'\n'
     fi
-  done <<<"$smb"
+  done <<<"$linux"
 done
 
 smbshares="$(echo "$smbshares" | sed '/^$/d')"
