@@ -1,5 +1,4 @@
 {
-  "model": "sonnet",
   "cleanupPeriodDays": 365,
   "env": {
     "MAX_MCP_OUTPUT_TOKENS": "60000",
@@ -106,6 +105,7 @@
       "Write(**/.password-store/**/*)"
     ]
   },
+  "model": "sonnet",
   "hooks": {
     "Notification": [
       {
@@ -135,6 +135,12 @@
     "command": "$CLAUDE_CONFIG_DIR/statuslines/statusline.sh"
   },
   "enabledPlugins": {
-    "typescript-lsp@claude-plugins-official": true
+    "typescript-lsp@claude-plugins-official": true,
+    "playwright@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true,
+    "github@claude-plugins-official": true,
+    "context7@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true
   }
 }
