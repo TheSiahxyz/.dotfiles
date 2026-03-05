@@ -1,7 +1,5 @@
 #!/bin/bash
 
-pidof transmission-daemon >/dev/null && exit
-
 # Directories containing Git repositories
 dotfiles_repos="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}"
 suckless_repos="${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless"
@@ -131,7 +129,7 @@ openrepos() {
     repos_array=()
     while IFS= read -r repo; do
       [ -n "$repo" ] && repos_array+=("$repo")
-    done <<< "$repos_cleaned"
+    done <<<"$repos_cleaned"
 
     # Call opensessions with all repos as separate arguments
     [ "${#repos_array[@]}" -gt 0 ] && setsid -f "$TERMINAL" -e opensessions "${repos_array[@]}" >/dev/null 2>&1
