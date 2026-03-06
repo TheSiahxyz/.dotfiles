@@ -167,7 +167,7 @@ export NOTMUCH_CONFIG="$XDG_CONFIG_HOME/notmuch/default/config"
 
 ### --- NPM --- ###
 export NPM_CONFIG_USERCONFIG="~/.config/npm/.npmrc"
-command -v npm >/dev/null 2>&1 && export PATH="$(find -L ~/.local/share/npm -name bin -type d -print 2>/dev/null | sort -u | paste -s -d ':' -):$PATH"
+command -v npm >/dev/null 2>&1 && export PATH="$(find -L ~/.local/share/npm -mindepth 2 -name bin -type d -print 2>/dev/null | sort -u | paste -s -d ':' -):$PATH"
 
 ### --- NVM --- ###
 export NVM_DIR="$XDG_CONFIG_HOME/nvm"
