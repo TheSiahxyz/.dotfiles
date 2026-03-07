@@ -45,7 +45,7 @@ for file_path in "${config_files[@]}"; do
   fi
   echo ".LI" >>"$temp_file_before"
 
-  awk 'BEGIN {flag=0} /static[[:space:]]+(const[[:space:]]+)?(Keychord|Shortcut)[[:space:]]+(*keychords|shortcuts)[[:space:]]*\[\][[:space:]]*=[[:space:]]*{/ {flag=1} /\};/ {flag=0} flag' "$file_path" | while read -r line; do
+  awk 'BEGIN {flag=0} /static[[:space:]]+(const[[:space:]]+)?(Keychord|Shortcut)[[:space:]]+(\*keychords|shortcuts)[[:space:]]*\[\][[:space:]]*=[[:space:]]*{/ {flag=1} /\};/ {flag=0} flag' "$file_path" | while read -r line; do
     if [[ "$line" =~ \/\*.*\*\/ || "$line" =~ .*\"\\.* || "$line" =~ ^$ || "$line" =~ STACKKEYS || "$line" =~ TAGKEYS || "$line" =~ static\ Keychord\ \*keychords || "$line" =~ static\ Shortcut\ \shortcuts || "$line" =~ ^\#.* ]]; then
       continue
     fi
