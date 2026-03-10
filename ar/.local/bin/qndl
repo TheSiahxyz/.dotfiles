@@ -96,8 +96,8 @@ case $url in
     ytdl_cmd_base="$ytdl_cmd_base --yes-playlist" &&
     echo 🪏 >/tmp/qplaylist
   [ "$download_type" = "video" ] &&
-    channel=$(yt-dlp --print "%(channel)s" "$url" | head -n 1 | sed 's/, /,/g;s/[\/:*?"<>| ]/-/g' | tr '[:upper:]' '[:lower:]') &&
-    playlist=$(yt-dlp --print "%(playlist_title)s" "$url" | head -n 1 | sed 's/, /,/g;s/[\/:*?"<>| ]/-/g' | tr '[:upper:]' '[:lower:]') &&
+    channel=$(yt-dlp --print "%(channel)s" "$url" 2>/dev/null | head -n 1 | sed 's/, /,/g;s/[\/:*?"<>| ]/-/g' | tr '[:upper:]' '[:lower:]') &&
+    playlist=$(yt-dlp --print "%(playlist_title)s" "$url" 2>/dev/null | head -n 1 | sed 's/, /,/g;s/[\/:*?"<>| ]/-/g' | tr '[:upper:]' '[:lower:]') &&
     subdir="${channel}/${playlist}" &&
     mkdir -p "${output_dir}/${subdir}" &&
     ytdl_output_format="${output_dir}/${subdir}/%(playlist_index)02d_%(title)s [%(id)s].%(ext)s"

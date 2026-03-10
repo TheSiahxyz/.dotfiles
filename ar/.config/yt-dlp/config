@@ -1,0 +1,2 @@
+--js-runtimes node:/home/si/.local/share/asdf/shims/node
+--remote-components ejs:github
