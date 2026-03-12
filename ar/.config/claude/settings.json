@@ -24,6 +24,7 @@
       "Bash(fd:*)",
       "Bash(find:*)",
       "Bash(fold:*)",
+      "Bash(git:*)",
       "Bash(grep:*)",
       "Bash(jq:*)",
       "Bash(ls:*)",
