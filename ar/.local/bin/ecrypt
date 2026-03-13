@@ -9,6 +9,7 @@ attempt_mount() {
   if mount | grep -q " $2 "; then
     if sudo umount "$2"; then
       notify-send "🔒 Locked: $3"
+      pkill -RTMIN+1 dwmblocks
     else
       notify-send "❗ Unable to lock" "Mounted: $3"
     fi
@@ -20,7 +21,7 @@ attempt_mount() {
       notify-send "❌ Failed to retrieve passphrase."
       exit 1
     }
-    mount_encrypted "$1" "$2" && notify-send "🔑 Unlocked: $3"
+    mount_encrypted "$1" "$2" && notify-send "🔑 Unlocked: $3" && pkill -RTMIN+1 dwmblocks
   fi
 }
 

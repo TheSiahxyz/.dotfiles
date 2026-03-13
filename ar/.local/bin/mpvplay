@@ -3,9 +3,9 @@
 mount_script="${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/ecrypt"
 db_path="$HOME/.local/share/history/mpv.sqlite"
 
-check_mount() { findmnt "$HOME/Private" >/dev/null || $mount_script; }
+check_mount() { findmnt "$HOME/Secret" >/dev/null || $mount_script; }
 
-check_unmount() { findmnt "$HOME/Private" >/dev/null && $mount_script; }
+check_unmount() { findmnt "$HOME/Secret" >/dev/null && $mount_script; }
 
 loginurl() {
   notify-send "🔑 Authentication required"
@@ -33,12 +33,12 @@ play_url() {
 play_media() {
   if echo "$1" | grep -q ".*\.m3u$"; then
     playlist_file="${1#--playlist=}"
-    if grep -q "/home/$USER/Private" "$playlist_file"; then
+    if grep -q "/home/$USER/Secret" "$playlist_file"; then
       mpv --x11-name=video "$@" && check_unmount || exit
     else
       $mount_script && mpv --x11-name=video "$@" || exit
     fi
-  elif echo "$1" | grep -q "/home/$USER/Private"; then
+  elif echo "$1" | grep -q "/home/$USER/Secret"; then
     mpv --x11-name=video "$@" && check_unmount || exit
   else
     $mount_script && mpv --x11-name=video "$@" || exit
@@ -189,17 +189,21 @@ case "$content_choice" in
 "Local Files")
   check_mount
   # Build directory list
-  dir_list="$HOME/Downloads\n$HOME/Private\n$HOME/Torrents/complete\n$HOME/Videos"
+  dir_list="$HOME/Downloads\n$HOME/Secret\n$HOME/Torrents/complete\n$HOME/Videos"
 
   # Add subdirectories from /media/$USER if they exist
   if [ -d "/media/$USER" ]; then
-    media_subdirs=$(find "/media/$USER" -mindepth 1 -maxdepth 1 -type d ! -name ".*" 2>/dev/null)
+    media_subdirs=$(find "/media/$USER" -mindepth 1 -maxdepth 1 -type d ! -name ".*" 2>/dev/null | while read -r d; do
+      [ -n "$(ls -A "$d" 2>/dev/null)" ] && echo "$d"
+    done)
     [ -n "$media_subdirs" ] && dir_list="$dir_list\n$media_subdirs"
   fi
 
   # Add subdirectories from /mnt if they exist
   if [ -d "/mnt" ]; then
-    mnt_subdirs=$(find "/mnt" -mindepth 1 -maxdepth 1 -type d ! -name ".*" 2>/dev/null)
+    mnt_subdirs=$(find "/mnt" -mindepth 1 -maxdepth 1 -type d ! -name ".*" 2>/dev/null | while read -r d; do
+      [ -n "$(ls -A "$d" 2>/dev/null)" ] && echo "$d"
+    done)
     [ -n "$mnt_subdirs" ] && dir_list="$dir_list\n$mnt_subdirs"
   fi
 
@@ -208,7 +212,9 @@ case "$content_choice" in
     [ -z "$init_dir" ] && $mount_script && exit
     selected_dir="$init_dir"
     while true; do
-      subdir_options="$(find "$selected_dir" -mindepth 1 -maxdepth 1 -type d ! -name ".*" -printf "%P\n" | sort)"
+      subdir_options="$(find "$selected_dir" -mindepth 1 -maxdepth 1 -type d ! -name ".*" | while read -r d; do
+        [ -n "$(ls -A "$d" 2>/dev/null)" ] && basename "$d"
+      done | sort)"
       [ -z "$subdir_options" ] && list_and_play "$selected_dir" && break
       options="All files\n$subdir_options"
       selected_relative_dir="$(printf "%b" "$options" | dmenu -i -p "Select a directory or 'All files':")"
