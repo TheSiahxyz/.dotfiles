@@ -264,7 +264,7 @@ export XAUTHORITY="$XDG_RUNTIME_DIR/Xauthority" # This line will break some DMs.
 
 ### --- ZSH --- ###
 export ZDOTDIR="$XDG_CONFIG_HOME/zsh"
-export ZPLUGINDIR="$XDG_SCRIPTS_HOME/zsh"
+export ZPLUGINDIR="$XDG_DATA_HOME/zsh"
 
 ### --- SDCV --- ###
 export STARDICT_DATA_DIR="$XDG_DATA_HOME/dic"
