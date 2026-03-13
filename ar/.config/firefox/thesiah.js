@@ -21,7 +21,7 @@ user_pref("extensions.pocket.enabled", false);
 // Fullscreen notifications
 user_pref("full-screen-api.warning.timeout", false);
 // Disable Firefox sync and its menu entries
-user_pref("identity.fxaccounts.enabled", false);
+user_pref("identity.fxaccounts.enabled", true);
 // Keep cookies until expiration or user deletion:
 user_pref("network.cookie.lifetimePolicy", 0);
 // Enable custom userChrome.js:
