@@ -623,7 +623,7 @@ function pass_qr() { qrencode -o "$1".png -t png -Sv 40 < "$1".pgp; }
 ###########################################################################################
 ###########################################################################################
 ### --- PASTE --- ###
-if ls "${ZPLUGINDIR:-${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/zsh}/zsh-autosuggestions" >/dev/null 2>&1; then
+if ls "${ZPLUGINDIR:-${HOME}/.local/share/zsh}/zsh-autosuggestions" >/dev/null 2>&1; then
     autoload -Uz url-quote-magic
     function pasteinit() {
         OLD_SELF_INSERT=${${(s.:.)widgets[self-insert]}[2,3]}

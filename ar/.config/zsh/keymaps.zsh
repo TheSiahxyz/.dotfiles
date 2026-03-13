@@ -125,7 +125,7 @@ bindkey '^X^X^U' print-unix-timestamp
 
 
 ### --- VI-MODE --- ###
-if [[ -f "${ZPLUGINDIR:-${HOME}/.local/bin/zsh}/zsh-vi-mode/zsh-vi-mode.plugin.zsh" ]]; then
+if [[ -f "${ZPLUGINDIR:-${HOME}/.local/share/zsh}/zsh-vi-mode/zsh-vi-mode.plugin.zsh" ]]; then
     ### --- ZSH-VI-MODE--- ###
     # config
     ZVM_INIT_MODE=sourcing

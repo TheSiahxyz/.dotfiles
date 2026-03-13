@@ -2,7 +2,7 @@
 
 [[ "$XDG_SCRIPTS_HOME" == "$HOME/.local/bin" ]] || return
 [[ "$ZDOTDIR" == "$HOME/.config/zsh" ]] || return
-[[ "$ZPLUGINDIR" == "$XDG_SCRIPTS_HOME/zsh" ]] || return
+[[ "$ZPLUGINDIR" == "$XDG_DATA_HOME/zsh" ]] || return
 
 ### --- Plugins --- ###
 plugins=(
