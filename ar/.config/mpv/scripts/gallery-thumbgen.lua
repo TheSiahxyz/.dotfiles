@@ -18,7 +18,7 @@ local script_id = mp.get_script_name() .. utils.getpid()
 
 local opts = {
 	ytdl_exclude = "",
-};
+}
 (require("mp.options")).read_options(opts, "gallery_worker")
 
 local ytdl = {

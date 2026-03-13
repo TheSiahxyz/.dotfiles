@@ -36,7 +36,6 @@ local settings = {
 	--on windows use double backslash c:\\my\\directory\\
 	favorites = {
 		"/media/" .. user,
-		"/mnt/second/videos",
 		home .. "/Downloads",
 		home .. "/Torrents/complete",
 		home .. "/Videos",
