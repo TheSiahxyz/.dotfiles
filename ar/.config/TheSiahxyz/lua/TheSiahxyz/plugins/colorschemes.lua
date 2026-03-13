@@ -1,5 +1,5 @@
 function ColorMyPencils(color)
-	color = color or "catppuccin"
+	color = color or "catppuccin-nvim"
 	vim.cmd.colorscheme(color)
 	local set = vim.api.nvim_set_hl
 	set(0, "Normal", { bg = "NONE" })
@@ -17,6 +17,7 @@ return {
 	{
 		"catppuccin/nvim",
 		name = "catppuccin",
+		priority = 1000,
 		config = function()
 			require("catppuccin").setup({
 				flavour = "auto", -- latte, frappe, macchiato, mocha
