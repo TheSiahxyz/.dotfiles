@@ -1,5 +1,10 @@
 #!/bin/sh
 
+# Run screenlayout script if available
+for script in ~/.screenlayout/*.sh; do
+  [ -f "$script" ] && sh "$script" && exit
+done
+
 # Parse connected displays
 default="--mode 1920x1080 --rotate normal --scale 1.0x1.0 --dpi 96"
 
