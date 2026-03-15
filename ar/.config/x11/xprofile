@@ -2,7 +2,7 @@
 
 sleep 3
 xrandr --dpi 192 # adjust the number based on your resolution and size of the screen
-# setmonitor
+setmonitors
 
 setbg & # set the background with the `setbg` script
 # fcitx5 & # set the input method
