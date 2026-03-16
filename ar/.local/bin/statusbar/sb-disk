@@ -8,8 +8,8 @@ location=${1:-/}
 [ -d "$location" ] || exit
 
 case "$location" in
-"/home"*) icon="🏠" ;;
-"/mnt"*) icon="💾" ;;
+"/home"*) icon="💾" ;;
+"/mnt"*) icon="🫜" ;;
 *) icon="💻" ;;
 esac
 

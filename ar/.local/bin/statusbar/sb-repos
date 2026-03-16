@@ -9,7 +9,7 @@ public_repos="${XDG_PUBLICSHARE_DIR:-${HOME}/Public}/repos"
 # Icon indicators
 dotfiles_icon="⚙"
 suckless_icon="🛠"
-private_icon="🏘"
+private_icon="🏠"
 public_icon="🏢"
 
 # Function to parse Git status and format symbols
