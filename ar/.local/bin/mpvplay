@@ -54,7 +54,7 @@ tmp_playlist() {
   [ -f "$tmplist" ] && rm -rf "$tmplist"
   find "$1" -maxdepth 1 \
     -type f \( -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.mov" -o -iname "*.flv" -o -iname "*.wmv" -o -iname "*.webm" -o -iname "*.mpeg" -o -iname "*.mpg" -o -iname "*.avi" -o -iname "*.ts" -o -iname "*.3gp" -o -iname "*.rmvb" \) |
-    sort >>"$tmplist"
+    sort -V >>"$tmplist"
   play_playlist "$tmplist"
   rm -rf "$tmplist"
 }
@@ -69,7 +69,7 @@ list_and_play() {
     notify-send "🔎 Finding videos named with '$search_term'.."
     files=$(find "$dir" \
       -type f \( -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.mov" -o -iname "*.flv" -o -iname "*.wmv" -o -iname "*.webm" -o -iname "*.mpeg" -o -iname "*.mpg" -o -iname "*.avi" -o -iname "*.ts" -o -iname "*.3gp" -o -iname "*.rmvb" \) \
-      -iname "*$search_term*" | sort)
+      -iname "*$search_term*" | sort -V)
     [ -z "$files" ] && echo "No files named with \"$search_term\"." && exit
     tmpplaylist=$(mktemp /tmp/mpv_playlist_XXXXXX.m3u)
     echo "$files" | while read -r file; do
@@ -81,10 +81,10 @@ list_and_play() {
   "List files")
     files_with_paths=$(find "$dir" -mindepth 1 -maxdepth 1 \
       -type f \( -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.mov" -o -iname "*.flv" -o -iname "*.wmv" -o -iname "*.webm" -o -iname "*.mpeg" -o -iname "*.mpg" -o -iname "*.avi" -o -iname "*.ts" -o -iname "*.3gp" -o -iname "*.rmvb" \) |
-      sort)
-    selected_file=$(printf "All files\n%s" "$files_with_paths" | sed 's|.*/||' | dmenu -i -l 21 -p "Select a file:")
+      sort -V)
+    selected_file=$(printf "All\n%s" "$files_with_paths" | sed 's|.*/||' | dmenu -i -l 21 -p "Select a file:")
     [ -z "$selected_file" ] && echo "No file selected." && exit
-    [ "$selected_file" = "All files" ] && tmp_playlist "$dir" && return
+    [ "$selected_file" = "All" ] && tmp_playlist "$dir" && return
     full_path="$(echo "$files_with_paths" | grep -F "$selected_file")"
     [ -f "$full_path" ] && play_media "$full_path" && return
     ;;
@@ -182,7 +182,7 @@ content_choice=$(printf "URL\nLocal Files\nPlaylist\nHistory" | dmenu -i -p "Cho
 case "$content_choice" in
 "URL") play_url ;;
 "Playlist")
-  playlist=$(find "$HOME/.config/mpv/playlists" -maxdepth 1 -type f -name "*.m3u" -exec basename {} .m3u \; | dmenu -i -p "Select a playlist:")
+  playlist=$(find "$HOME/.config/mpv/playlists" -maxdepth 1 -type f -name "*.m3u" -exec basename {} .m3u \; | sort -V | dmenu -i -p "Select a playlist:")
   [ -z "$playlist" ] && exit
   play_playlist "$HOME/.config/mpv/playlists/$playlist.m3u"
   ;;
@@ -214,12 +214,17 @@ case "$content_choice" in
     while true; do
       subdir_options="$(find "$selected_dir" -mindepth 1 -maxdepth 1 -type d ! -name ".*" | while read -r d; do
         [ -n "$(ls -A "$d" 2>/dev/null)" ] && basename "$d"
-      done | sort)"
+      done | sort -V)"
       [ -z "$subdir_options" ] && list_and_play "$selected_dir" && break
-      options="All files\n$subdir_options"
-      selected_relative_dir="$(printf "%b" "$options" | dmenu -i -p "Select a directory or 'All files':")"
+      has_video=$(find "$selected_dir" -maxdepth 1 -type f \( -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.mov" -o -iname "*.flv" -o -iname "*.wmv" -o -iname "*.webm" -o -iname "*.mpeg" -o -iname "*.mpg" -o -iname "*.avi" -o -iname "*.ts" -o -iname "*.3gp" -o -iname "*.rmvb" \) -print -quit)
+      if [ -n "$has_video" ]; then
+        options="Files\n$subdir_options"
+      else
+        options="$subdir_options"
+      fi
+      selected_relative_dir="$(printf "%b" "$options" | dmenu -i -p "Select a directory or 'files':")"
       [ -z "$selected_relative_dir" ] && echo "No relative directory." && exit
-      [ "$selected_relative_dir" = "All files" ] && list_and_play "$selected_dir" && break
+      [ "$selected_relative_dir" = "Files" ] && list_and_play "$selected_dir" && break
       selected_dir="$selected_dir/$selected_relative_dir"
     done
   }
