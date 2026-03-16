@@ -137,6 +137,7 @@
     "command": "$CLAUDE_CONFIG_DIR/statuslines/statusline.sh"
   },
   "enabledPlugins": {
+    "clangd-lsp@claude-plugins-official": true,
     "code-review@claude-plugins-official": true,
     "context7@claude-plugins-official": true,
     "frontend-design@claude-plugins-official": true,
