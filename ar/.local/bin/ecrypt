@@ -1,7 +1,7 @@
 #!/bin/sh
 
 mount_encrypted() {
-  ! mount | grep -q " $1 " && echo "$passphrase" | sudo mount -t ecryptfs "$1" "$2" \
+  echo "$passphrase" | sudo mount -t ecryptfs "$1" "$2" \
     -o ecryptfs_cipher=aes,ecryptfs_key_bytes=32,ecryptfs_passthrough=no,ecryptfs_enable_filename_crypto=yes,ecryptfs_sig=$ecryptfs_sig,ecryptfs_fnek_sig=$fnek_sig,key=passphrase:passphrase_passwd=$(printf '%s' "$passphrase")
 }
 
@@ -21,7 +21,10 @@ attempt_mount() {
       notify-send "❌ Failed to retrieve passphrase."
       exit 1
     }
-    mount_encrypted "$1" "$2" && notify-send "🔑 Unlocked: $3" && pkill -RTMIN+1 dwmblocks
+    if mount_encrypted "$1" "$2"; then
+      notify-send "🔑 Unlocked: $3"
+      pkill -RTMIN+1 dwmblocks
+    fi
   fi
 }
 
