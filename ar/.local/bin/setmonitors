@@ -5,8 +5,8 @@ script="$HOME/.screenlayout/default.sh"
 [ -f "$script" ] && sh "$script" && exit
 
 # Per-monitor settings
-edp_cfg="--mode 1920x1080 --rotate normal --scale 1.0x1.0 --dpi 96"
-hdmi_cfg="--mode 1920x1080 --rotate normal --scale 1.0x1.0 --dpi 96"
+edp_cfg="--mode 1920x1080 --rotate normal --scale 1.0x1.0 --dpi 82"
+hdmi_cfg="--mode 1920x1080 --rotate normal --scale 1.0x1.0 --dpi 82"
 dp_cfg="--mode 2560x1600 --rotate normal --scale 1.0x1.0 --dpi 192"
 
 # Parse connected displays
@@ -20,7 +20,11 @@ for connected in $(xrandr -q | grep -w "connected" | cut -d ' ' -f 1); do
 done
 
 # If the lid is closed, turn off the laptop's screen
-if grep -q "closed" /proc/acpi/button/lid/LID/state; then
+lid_state=""
+for lid_path in /proc/acpi/button/lid/*/state; do
+  [ -f "$lid_path" ] && lid_state=$(cat "$lid_path") && break
+done
+if echo "$lid_state" | grep -q "closed"; then
   if [ -n "$hdmi" ] && [ -z "$dp" ] && [ -n "$edp" ]; then
     xrandr --output "$edp" --off --output "$hdmi" --primary $hdmi_cfg
   elif [ -z "$hdmi" ] && [ -n "$dp" ] && [ -n "$edp" ]; then
@@ -36,6 +40,10 @@ else
     xrandr --output "$dp" --primary --pos 0x0 $dp_cfg --output "$edp" --pos 2560x0 $edp_cfg
   elif [ -z "$hdmi" ] && [ -z "$dp" ] && [ -n "$edp" ]; then
     xrandr --output "$edp" --primary $edp_cfg
+  elif [ -n "$hdmi" ] && [ -z "$dp" ] && [ -z "$edp" ]; then
+    xrandr --output "$hdmi" --primary $hdmi_cfg
+  elif [ -z "$hdmi" ] && [ -n "$dp" ] && [ -z "$edp" ]; then
+    xrandr --output "$dp" --primary $dp_cfg
   else
     xrandr --output "$display" --primary --auto
   fi
