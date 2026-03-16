@@ -88,6 +88,10 @@ return {
 		})
 	end,
 	config = function()
+		local vault_path = vim.fn.expand("~/Private/repos/Obsidian/SI")
+		if vim.fn.isdirectory(vault_path) == 0 then
+			return
+		end
 		require("obsidian").setup({
 			-- A list of workspace names, paths, and configuration overrides.
 			-- If you use the Obsidian app, the 'path' of a workspace should generally be
