@@ -468,6 +468,10 @@ alias uzl='unzip -l'
 alias vi='vim'
 alias vi.='vim .'
 
+# vnc
+alias vncs='vncserver :1'
+alias xvncs='x11vnc -display :0 -usepw'
+
 # watch
 alias w1='watch -n 1'
 
