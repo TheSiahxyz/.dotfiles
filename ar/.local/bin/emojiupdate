@@ -18,48 +18,40 @@ else
   exit 1
 fi
 
+# VS16 (U+FE0F)
+vs16="$(printf '\xEF\xB8\x8F')"
+
 awk '
-    # Skip empty lines and comments
     /^[[:space:]]*$/ || /^#/ { next }
-
-    # Keep only fully-qualified lines
     !/(fully-qualified|component)/ { next }
-
-    # Skip lines containing 200D (zero-width joiner)
     /200D/ { next }
-
-    # Skip lines containing components
     $2 ~ /1F3F[BCDEF]/ { next }
-
-    # Print valid lines
     { print }
 ' "$input_file" >"$temp_file"
 
-# Second stage: Extract emoji and description
+# Extract + VS16 제거
 awk -F'#' '
     {
         if (NF >= 2) {
-            full_data = $2                                # Extract the emoji and description (after #)
-            gsub(/^[[:space:]]+|[[:space:]]+$/, "", full_data)  # Trim spaces around the entire field
+            full_data = $2
+            gsub(/^[[:space:]]+|[[:space:]]+$/, "", full_data)
 
-            split(full_data, parts, " ")                  # Split into parts by spaces
-            emoji = parts[1]                              # First part is the emoji
+            split(full_data, parts, " ")
+            emoji = parts[1]
 
-            # Reconstruct description from parts[3] onward
             description = ""
             for (i = 3; i <= length(parts); i++) {
                 description = description parts[i] " "
             }
 
-            # Remove excessive internal spaces and trim description
             gsub(/[[:space:]]+/, " ", description)
             gsub(/^[[:space:]]+|[[:space:]]+$/, "", description)
 
-            # Print emoji and description
             print emoji, description
         }
     }
-' "$temp_file" >"$output_file"
+' "$temp_file" |
+  sed "s/$vs16//g" >"$output_file"
 
 rm -rf "$input_file" "$temp_file"
 echo "Processing complete! File saved to: $output_file"
