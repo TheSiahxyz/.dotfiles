@@ -5,15 +5,20 @@ tmpfile="$(mktemp)"
 
 curl -sSL -o "$tmpfile" "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/metadata/icons.json" || exit 1
 
+vs16="$(printf '\xEF\xB8\x8F')"
+
 while read -r hex name; do
   hex_uc=$(printf '%s' "$hex" | tr '[:lower:]' '[:upper:]')
-  if [[ ${#hex_uc} -le 4 ]]; then
+  if [ ${#hex_uc} -le 4 ]; then
     unicode="\\u$hex_uc"
   else
     unicode="\\U$(printf '%08X' "0x$hex_uc")"
   fi
   printf "%b  %s; %s\n" "$unicode" "$name" "$hex"
-done < <(jq -r 'to_entries[] | select(.value.unicode) | .value.unicode + " " + .key' "$tmpfile") >"$icons"
+done < <(
+  jq -r 'to_entries[] | select(.value.unicode) | .value.unicode + " " + .key' "$tmpfile"
+) |
+  sed "s/$vs16//g" >"$icons"
 
 rm -f "$tmpfile"
 echo "Processing complete! icons saved to: $icons"
