@@ -129,8 +129,8 @@ export JUPYTER_PLATFORM_DIRS="1"
 export KODI_DATA="$XDG_DATA_HOME/kodi"
 
 ### --- LUA --- ###
-export LUA_PATH="$XDG_CONFIG_HOME/luarocks/lib/lua/5.1/?.lua"
-export LUA_CPATH="$XDG_CONFIG_HOME/luarocks/lib/lua/5.1/?.so"
+export LUA_PATH="$XDG_CONFIG_HOME/luarocks/lib/lua/5.1/?.lua;$LUA_PATH"
+export LUA_CPATH="$XDG_CONFIG_HOME/luarocks/lib/lua/5.1/?.so;$LUA_CPATH"
 
 ### --- LYNX --- ###
 export LYNX_CFG="$HOME/.config/lynx/lynx.cfg"
