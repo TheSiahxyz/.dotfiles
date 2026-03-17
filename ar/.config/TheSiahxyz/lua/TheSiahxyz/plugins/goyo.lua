@@ -33,6 +33,24 @@ return {
 					":Goyo|q!<CR>",
 					{ noremap = true, silent = true, desc = "Goyo abort" }
 				)
+				-- Goyo creates multiple padding windows.
+				-- Use a global (non-buffer-local) QuitPre so it fires regardless of which window is active.
+				local mutt_quit_group = vim.api.nvim_create_augroup("TheSiahxyz_mutt_quit", { clear = true })
+				vim.api.nvim_create_autocmd("QuitPre", {
+					group = mutt_quit_group,
+					once = true,
+					callback = function()
+						vim.cmd("qa!")
+					end,
+				})
+				-- Clean up the global QuitPre if the buffer is deleted without quitting
+				vim.api.nvim_create_autocmd("BufDelete", {
+					buffer = 0,
+					once = true,
+					callback = function()
+						pcall(vim.api.nvim_del_augroup_by_id, mutt_quit_group)
+					end,
+				})
 			end,
 		})
 	end,
