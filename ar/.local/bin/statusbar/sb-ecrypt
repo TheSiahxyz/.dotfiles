@@ -7,4 +7,15 @@ case $BLOCK_BUTTON in
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
-mount | grep -q "$HOME/Secret" && echo "🔑" || echo "🔒"
+secret_mounted=0
+mnt_mounted=0
+mount | grep -q "$HOME/Secret" && secret_mounted=1
+mount | grep -q "/mnt/" && mnt_mounted=1
+
+if [ $secret_mounted -eq 1 ] && [ $mnt_mounted -eq 1 ]; then
+    echo "🔑"
+elif [ $secret_mounted -eq 1 ] || [ $mnt_mounted -eq 1 ]; then
+    echo "🔐"
+else
+    echo "🔒"
+fi

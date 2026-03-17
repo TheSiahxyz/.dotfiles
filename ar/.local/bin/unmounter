@@ -49,6 +49,8 @@ else
     notify-send "🚮 Mounted path removed." "$chosen has been removed."
 fi
 
+pkill -RTMIN+1 dwmblocks
+
 # Close the chosen drive if decrypted.
 cryptid="$(echo "$lsblkoutput" | grep "/${chosen#*/}$")"
 cryptid="${cryptid%% *}"

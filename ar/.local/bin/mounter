@@ -218,3 +218,5 @@ case "$chosen" in
   notify-send "📡 Samba successfully mounted to" "$mp"
   ;;
 esac
+
+pkill -RTMIN+1 dwmblocks
