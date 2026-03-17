@@ -73,4 +73,4 @@ done
 killall xcape 2>/dev/null
 xcape -e 'Caps_Lock=Escape;Control_L=Escape' #;Super_L=Escape'
 # Turn off caps lock if on since there is no longer a key for it.
-xset -q | grep -q "Caps Lock:\s*on" && xdotool key Caps_Lock
+xset -q | grep -qE "Caps Lock:[[:space:]]+on[[:space:]]" && xdotool key Caps_Lock
