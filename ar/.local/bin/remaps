@@ -4,6 +4,8 @@
 xset s off -dpms
 # Decrease key repeat delay to 200ms and increase key repeat rate to 50 per second.
 xset r rate 200 50
+# Turn off caps lock if on since there is no longer a key for it.
+xset -q | grep -qE "Caps Lock:[[:space:]]+on[[:space:]]" && xdotool key Caps_Lock
 # Map the caps lock key to control, and map the menu key to right super.
 xinput list | grep 'id=' | while read -r line; do
   keyboard=$(echo "$line" | grep -i 'keyboard.*id.*keyboard' | sed 's/.*id=\([0-9]\+\).*/\1/')
@@ -72,5 +74,3 @@ done
 # When left control, caps lock, or Super_L is pressed only once, treat it as escape.
 killall xcape 2>/dev/null
 xcape -e 'Caps_Lock=Escape;Control_L=Escape' #;Super_L=Escape'
-# Turn off caps lock if on since there is no longer a key for it.
-xset -q | grep -qE "Caps Lock:[[:space:]]+on[[:space:]]" && xdotool key Caps_Lock
