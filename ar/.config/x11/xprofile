@@ -1,7 +1,7 @@
 #!/bin/sh
 
 sleep 3
-xrandr --dpi 192 # adjust the number based on your resolution and size of the screen
+xrandr --dpi 82 # adjust the number based on your resolution and size of the screen
 setmonitors
 
 setbg & # set the background with the `setbg` script
