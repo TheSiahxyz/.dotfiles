@@ -44,12 +44,12 @@ get_current_hour() { date +%H | sed 's/^0*//'; }
 get_nearest_hourly() {
   current_hour=$(get_current_hour)
   hour_index=$((current_hour / 3))
-  jq ".weather[0].hourly[$hour_index]" "$weatherreportjson"
+  jq ".data.weather[0].hourly[$hour_index]" "$weatherreportjson"
 }
 
 getprecip() { get_nearest_hourly | jq -r '.chanceofrain'; }
 
-gethighprecip() { jq -r '.weather[0].hourly[].chanceofrain' "$weatherreportjson" | sort -rn | head -1; }
+gethighprecip() { jq -r '.data.weather[0].hourly[].chanceofrain' "$weatherreportjson" | sort -rn | head -1; }
 
 getsnow() { get_nearest_hourly | jq -r '.chanceofsnow'; }
 
@@ -59,9 +59,9 @@ gettemp() { get_nearest_hourly | jq -r '.tempC'; }
 
 getfeelslike() { get_nearest_hourly | jq -r '.FeelsLikeC'; }
 
-getlowtemp() { jq -r '.weather[0].hourly[].tempC' "$weatherreportjson" | sort -n | head -1; }
+getlowtemp() { jq -r '.data.weather[0].hourly[].tempC' "$weatherreportjson" | sort -n | head -1; }
 
-gethightemp() { jq -r '.weather[0].hourly[].tempC' "$weatherreportjson" | sort -rn | head -1; }
+gethightemp() { jq -r '.data.weather[0].hourly[].tempC' "$weatherreportjson" | sort -rn | head -1; }
 
 gethumidity() {
   humidity=$(get_nearest_hourly | jq -r '.humidity')
