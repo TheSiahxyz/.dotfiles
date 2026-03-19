@@ -1,0 +1,46 @@
+#!/bin/sh
+# POSIX-compliant Wine application uninstaller
+# Usage: wineuninstaller [app_name]
+
+set -e
+
+WINE_BASE="${WINEPREFIX:-${XDG_DATA_HOME:-${HOME}/.local/share}/wine}"
+
+# Pick app with fzf if no argument given
+if [ -z "$1" ]; then
+  APP_NAME="$(
+    find "${WINE_BASE}" -mindepth 1 -maxdepth 1 -type d 2>/dev/null \
+      | xargs -I{} basename {} \
+      | fzf --prompt="Uninstall> "
+  )"
+else
+  APP_NAME="$1"
+fi
+
+[ -z "${APP_NAME}" ] && exit 0
+
+WINEPREFIX="${WINE_BASE}/${APP_NAME}"
+LAUNCHER="${HOME}/.local/bin/${APP_NAME}"
+DESKTOP_FILE="${XDG_DATA_HOME:-${HOME}/.local/share}/applications/${APP_NAME}.desktop"
+
+echo "Uninstalling: ${APP_NAME}"
+
+# Remove Wine prefix
+if [ -d "${WINEPREFIX}" ]; then
+  rm -rf "${WINEPREFIX}"
+  echo "Removed: ${WINEPREFIX}"
+fi
+
+# Remove launcher script
+if [ -f "${LAUNCHER}" ]; then
+  rm -f "${LAUNCHER}"
+  echo "Removed: ${LAUNCHER}"
+fi
+
+# Remove desktop entry
+if [ -f "${DESKTOP_FILE}" ]; then
+  rm -f "${DESKTOP_FILE}"
+  echo "Removed: ${DESKTOP_FILE}"
+fi
+
+echo "Done."

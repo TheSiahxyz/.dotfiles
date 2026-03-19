@@ -1,0 +1,218 @@
+#!/bin/sh
+# POSIX-compliant Wine application installer
+# Usage: wineinstaller <url> [app_name]
+
+# Prohibit errors
+set -e
+
+###########################################################
+#   Usage                                                 #
+###########################################################
+
+_usage() {
+  echo "Usage: wineinstaller <url> [app_name]"
+  echo ""
+  echo "  url       URL of the Windows installer (.exe)"
+  echo "  app_name  Name for the Wine prefix directory (default: derived from URL)"
+  exit 1
+}
+
+###########################################################
+#   Install Checker                                       #
+###########################################################
+
+_check_wine() {
+  WINE_EXE="$1"
+  ls "${WINE_EXE}" >/dev/null 2>&1
+}
+
+###########################################################
+#   Home Directory Linker                                 #
+###########################################################
+
+_link_home_dirs() {
+  HOME_WINE="$(
+    find "${WINEPREFIX}/drive_c/users" \
+      -mindepth 1 -maxdepth 1 -type d -not -name 'Public' 2>/dev/null | head -n1
+  )"
+
+  dirs="Desktop Documents Downloads Music Pictures Videos"
+  [ -n "${HOME_WINE}" ] && for dir in ${dirs}; do
+    [ -e "${HOME_WINE}/${dir}" ] && ! [ -L "${HOME_WINE}/${dir}" ] && rm -rf "${HOME_WINE}/${dir:?}"
+    [ -L "${HOME_WINE}/${dir}" ] || ln -sf "${HOME}/${dir:?}" "${HOME_WINE}/${dir:?}"
+  done
+}
+
+###########################################################
+#   Installer                                             #
+###########################################################
+
+_install_wine() {
+  DST_FILE="$(mktemp)"
+
+  # Mock home directory
+  HOME_ORIGIN="${HOME}"
+  HOME_PATCH="${WINEPREFIX}/tmp"
+  export HOME="${HOME_PATCH}"
+
+  echo "Installing ${APP_NAME}..."
+  [ -d "${WINEPREFIX}" ] || mkdir -p "${WINEPREFIX}"
+  curl -L "${SRC_URL}" -o "${DST_FILE}"
+  wineboot
+  wine "${DST_FILE}" /S
+  rm -f "${DST_FILE}"
+
+  # Install fonts
+  _font_install
+
+  # Remove tmp home directory
+  rm -rf "${HOME_PATCH}"
+
+  # Restore home directory
+  export HOME="${HOME_ORIGIN}"
+
+  # Link the wine home directory to the wild
+  _link_home_dirs
+}
+
+###########################################################
+#   Exe Finder                                            #
+###########################################################
+
+_find_exe() {
+  # Search Program Files dirs, exclude default Wine/Windows folders, sort by depth (shallowest first)
+  find \
+    "${WINEPREFIX}/drive_c/Program Files" \
+    "${WINEPREFIX}/drive_c/Program Files (x86)" \
+    -name "*.exe" \
+    -not -path "*/Common Files/*" \
+    -not -path "*/Internet Explorer/*" \
+    -not -path "*/Windows Media Player/*" \
+    -not -path "*/Windows NT/*" \
+    -not -name "unins*" \
+    -not -name "Uninstall*" \
+    2>/dev/null \
+    | awk '{ print gsub(/\//,"/"), $0 }' \
+    | sort -n \
+    | awk '{ $1=""; sub(/^ /, ""); print }'
+}
+
+###########################################################
+#   Font Installer                                        #
+###########################################################
+
+_font_install() {
+  echo "Installing fonts..."
+  WINEPREFIX="${WINEPREFIX}" winetricks -q corefonts
+  echo "Fonts installed."
+}
+
+###########################################################
+#   Executor                                              #
+###########################################################
+
+_exec_wine() {
+  WINE_EXE="$1"
+  echo "Executing ${APP_NAME}..."
+  exec wine "${WINE_EXE}" >/dev/null 2>&1
+}
+
+###########################################################
+#   Launcher Creator                                      #
+###########################################################
+
+_create_launcher() {
+  WINE_EXE="$1"
+  LAUNCHER="${HOME}/.local/bin/${APP_NAME}"
+
+  cat >"${LAUNCHER}" <<EOF
+#!/bin/sh
+export LANG='en_US.UTF-8'
+export LC_ALL='en_US.UTF-8'
+export WINEARCH='win64'
+export WINEPREFIX='${WINEPREFIX}'
+exec wine '${WINE_EXE}' "\$@" >/dev/null 2>&1
+EOF
+  chmod +x "${LAUNCHER}"
+  echo "Launcher created: ${LAUNCHER}"
+}
+
+###########################################################
+#   Desktop Entry Creator                                 #
+###########################################################
+
+_create_desktop() {
+  WINE_EXE="$1"
+  APPS_DIR="${XDG_DATA_HOME:-${HOME}/.local/share}/applications"
+  DESKTOP_FILE="${APPS_DIR}/${APP_NAME}.desktop"
+  APP_LABEL="$(echo "${APP_NAME}" | sed 's/[-_]/ /g' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2); print}')"
+
+  mkdir -p "${APPS_DIR}"
+  cat >"${DESKTOP_FILE}" <<EOF
+[Desktop Entry]
+Name=${APP_LABEL}
+Exec=${HOME}/.local/bin/${APP_NAME}
+Type=Application
+Categories=Application;Wine;
+StartupNotify=false
+EOF
+  chmod +x "${DESKTOP_FILE}"
+  echo "Desktop entry created: ${DESKTOP_FILE}"
+}
+
+###########################################################
+#   Main Function                                         #
+###########################################################
+
+main() {
+  [ -z "$1" ] && _usage
+
+  SRC_URL="$1"
+  APP_NAME="${2:-$(basename "${SRC_URL}" | sed 's/[Ss]etup.*//;s/[Ii]nstall.*//;s/[._-]*$//;s/[^a-zA-Z0-9_-]/_/g' | tr '[:upper:]' '[:lower:]')}"
+
+  # Configure environment variables
+  export LANG='en_US.UTF-8'
+  export LC_ALL='en_US.UTF-8'
+  export WINEARCH='win64'
+  export WINEPREFIX="${WINEPREFIX:-${XDG_DATA_HOME:-${HOME}/.local/share}/wine}/${APP_NAME}"
+
+  echo "App:    ${APP_NAME}"
+  echo "Prefix: ${WINEPREFIX}"
+
+  # Install only if not already installed
+  WINE_EXE="$(_find_exe | head -n1)"
+  if [ -z "${WINE_EXE}" ]; then
+    _install_wine
+    _link_home_dirs
+    WINE_EXE="$(_find_exe | head -n1)"
+  else
+    echo "Already installed: ${WINE_EXE}"
+  fi
+
+  if [ -z "${WINE_EXE}" ]; then
+    echo "Warning: no .exe found in Program Files. Launcher not created."
+    echo "  Manually run: WINEPREFIX=${WINEPREFIX} wine <path-to-exe>"
+    exit 0
+  fi
+
+  # Create launcher script if not exists
+  LAUNCHER="${HOME}/.local/bin/${APP_NAME}"
+  if [ ! -f "${LAUNCHER}" ]; then
+    _create_launcher "${WINE_EXE}"
+  else
+    echo "Launcher already exists: ${LAUNCHER}"
+  fi
+
+  # Create desktop entry if not exists
+  DESKTOP_FILE="${XDG_DATA_HOME:-${HOME}/.local/share}/applications/${APP_NAME}.desktop"
+  if [ ! -f "${DESKTOP_FILE}" ]; then
+    _create_desktop "${WINE_EXE}"
+  else
+    echo "Desktop entry already exists: ${DESKTOP_FILE}"
+  fi
+
+  echo "Done."
+}
+
+# Execute main function
+main "$@"
