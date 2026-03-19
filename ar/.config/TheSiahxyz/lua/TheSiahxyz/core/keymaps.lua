@@ -757,41 +757,60 @@ vim.keymap.set("n", "<C-l>", "<C-w><C-l>", { desc = "Move to right window" })
 -- vim.keymap.set("n", "<C-right>", "<Cmd>vertical resize +2<cr>", { desc = "Increase window width" })
 
 function WordDefinition(input)
-	-- Function to run the dict command and return its output
-	local function get_output(word)
-		local escaped_word = vim.fn.shellescape(word)
-		return vim.fn.system("dict " .. escaped_word)
-	end
+	local results = {}
+	local pending = 0
 
-	-- Function to process the word for singular/plural handling
-	local function get_definition(word)
-		-- Attempt to derive the singular form
-		local singular = word
-		if word:sub(-2) == "es" then
-			singular = word:sub(1, -3) -- Remove 'es'
-		elseif word:sub(-1) == "s" then
-			singular = word:sub(1, -2) -- Remove 's'
-		end
-
-		-- Fetch output for both singular and original word
-		local singular_output = get_output(singular)
-		local original_output = get_output(word)
-
-		-- Determine which output to prioritize
-		if singular ~= word and not vim.startswith(singular_output, "No definitions found") then
-			return singular_output -- Use singular if valid and different
+	local function show_results()
+		local dict_out
+		if results.dict_singular and not vim.startswith(results.dict_singular, "No definitions found") then
+			dict_out = results.dict_singular
 		else
-			return original_output -- Otherwise, use the original word
+			dict_out = results.dict_original or "(no definition found)"
 		end
+		local trans_out = results.trans or "(no translation found)"
+
+		local sep = string.rep("─", 60)
+		local combined = vim.split(dict_out .. "\n" .. sep .. "\n" .. trans_out, "\n")
+
+		local bufnr = vim.api.nvim_create_buf(false, true)
+		vim.api.nvim_set_current_buf(bufnr)
+		vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, combined)
 	end
 
-	-- Get the definition and output for the word
-	local output = get_definition(input)
+	local function start_job(args, key)
+		local lines = {}
+		pending = pending + 1
+		vim.fn.jobstart(args, {
+			stdout_buffered = true,
+			on_stdout = function(_, data)
+				vim.list_extend(lines, data)
+			end,
+			on_exit = function()
+				results[key] = table.concat(lines, "\n")
+				pending = pending - 1
+				if pending == 0 then
+					vim.schedule(show_results)
+				end
+			end,
+		})
+	end
 
-	-- Create a new buffer and display the result
-	local bufnr = vim.api.nvim_create_buf(false, true)
-	vim.api.nvim_set_current_buf(bufnr)
-	vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, vim.split(output, "\n"))
+	-- Singular/plural handling
+	local singular = input
+	if input:sub(-2) == "es" then
+		singular = input:sub(1, -3)
+	elseif input:sub(-1) == "s" then
+		singular = input:sub(1, -2)
+	end
+
+	-- Run all jobs in parallel
+	if singular ~= input then
+		start_job({ "dict", singular }, "dict_singular")
+		start_job({ "dict", input }, "dict_original")
+	else
+		start_job({ "dict", input }, "dict_original")
+	end
+	start_job({ "trans", "-no-ansi", ":ko+en", input }, "trans")
 end
 vim.api.nvim_set_keymap(
 	"n",
@@ -799,6 +818,13 @@ vim.api.nvim_set_keymap(
 	":lua WordDefinition(vim.fn.expand('<cword>'))<cr>",
 	{ noremap = true, silent = true, desc = "Word definition" }
 )
+vim.keymap.set("v", "<leader>k", function()
+	local saved = vim.fn.getreg("a")
+	vim.cmd('normal! "ay')
+	local text = vim.trim(vim.fn.getreg("a"))
+	vim.fn.setreg("a", saved)
+	WordDefinition(text)
+end, { noremap = true, silent = true, desc = "Word definition (visual)" })
 
 -- Lazy
 vim.keymap.set("n", "<leader>L", "<Cmd>Lazy<cr>", { desc = "Open lazy plugin manager" })
