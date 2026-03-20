@@ -39,7 +39,7 @@ endif
 
 " AUTOCMD ---------------------------------------------------------------- {{{
 
-autocmd VimEnter * silent execute '!echo -ne "\e[2 q"'
+set t_RV=
 
 " }}}
 
