@@ -6,11 +6,15 @@ xset s off -dpms
 xset r rate 200 50
 # Map the caps lock key to control, and map the menu key to right super.
 xinput list | grep 'id=' | while read -r line; do
-  keyboard=$(echo "$line" | grep -i 'keyboard.*id.*keyboard' | sed 's/.*id=\([0-9]\+\).*/\1/')
+  keyboard=$(echo "$line" | grep -i 'id.*keyboard' | sed 's/.*id=\([0-9]\+\).*/\1/')
   mouse=$(echo "$line" | grep -i '.*id.*pointer' | sed 's/.*id=\([0-9]\+\).*/\1/')
   [ -z "$keyboard" ] || {
     case "$(echo "$line" | grep -oE '.*id=' | sed 's/ id=.*//')" in
     *"Lenovo TrackPoint Keyboard II"*)
+      setxkbmap -device "$keyboard" -option
+      setxkbmap -device "$keyboard" -option caps:ctrl_modifier,altwin:menu_win,altwin:swap_lalt_lwin
+      ;;
+    *"Topre REALFORCE 108 US"*)
       setxkbmap -device "$keyboard" -option
       setxkbmap -device "$keyboard" -option caps:ctrl_modifier,altwin:menu_win,altwin:swap_lalt_lwin
       ;;
