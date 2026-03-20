@@ -2,16 +2,16 @@
 
 # Displays today's snow chance (🏂), precipication chance (☔), humidity (💧), wind speed (🎐), and current (feel like) temperature (🌞).
 # Usually intended for the statusbar.
+# Data source: Open-Meteo (https://open-meteo.com/) - free, open-source weather API
 
-# Cache location for 24 hours
+# Cache location for 24 hours - stores lat,lon
 locationfile="${XDG_CACHE_HOME:-${HOME}/.cache}/statusbar/location"
 if [ ! -s "$locationfile" ] || [ $(($(date +%s) - $(stat -c %Y "$locationfile" 2>/dev/null || echo 0))) -gt 86400 ]; then
   mkdir -p "${XDG_CACHE_HOME:-${HOME}/.cache}/statusbar"
-  curl -s http://ip-api.com/json 2>/dev/null | jq -r '[.regionName, .countryCode] | join(",")' >"$locationfile" 2>/dev/null || true
+  curl -s http://ip-api.com/json 2>/dev/null | jq -r '[.lat, .lon] | join(",")' >"$locationfile" 2>/dev/null || true
 fi
 location=$(cat "$locationfile" 2>/dev/null || echo "")
 
-url="${WTTRURL:-wttr.in}"
 weatherreport="${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport"
 weatherreportjson="${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport.json"
 
@@ -22,17 +22,29 @@ error() {
   exit 1
 }
 
-# Get a weather report from 'wttr.in' and save it locally.
-getweatherreport() {
-  (timeout --signal=1 10s curl -sf "$url/$location" >"$weatherreport" &&
-    printf "\nUpdated: %s\n" "$(date '+%Y-%m-%d %H:%M:%S')" >>"$weatherreport") ||
-    error "report"
+# Get weather data from Open-Meteo and save it locally.
+getweatherreportjson() {
+  lat=$(echo "$location" | cut -d',' -f1)
+  lon=$(echo "$location" | cut -d',' -f2)
+  tmp=$(timeout --signal=1 10s curl -sf \
+    "https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation_probability,snowfall,wind_speed_10m,weather_code&daily=temperature_2m_min,temperature_2m_max,precipitation_probability_max&timezone=auto&wind_speed_unit=kmh&forecast_days=1") || error "reportjson"
+  echo "$tmp" | jq -e '.hourly' >/dev/null 2>&1 || error "reportjson"
+  echo "$tmp" >"$weatherreportjson"
 }
 
-getweatherreportjson() {
-  tmp=$(timeout --signal=1 10s curl -sf "$url/$location?format=j1") || error "reportjson"
-  echo "$tmp" | jq -e '.data.weather' >/dev/null 2>&1 || error "reportjson"
-  echo "$tmp" >"$weatherreportjson"
+# Generate a text report from JSON data and save it locally.
+getweatherreport() {
+  {
+    printf "🌈 Today's weather: %s\n" "$(getdesc)"
+    printf "🏂: %s%%\n" "$(getsnow)"
+    printf "☔: %s%% (day high: %s%%)\n" "$(getprecip)" "$(gethighprecip)"
+    gethumidity
+    printf "🎐: %s km/h\n" "$(getwind)"
+    printf "🌞: %s°C (feels like %s°C)\n" "$(gettemp)" "$(getfeelslike)"
+    printf "🥶: %s°C\n" "$(getlowtemp)"
+    printf "🥵: %s°C\n" "$(gethightemp)"
+    printf "\nUpdated: %s\n" "$(date '+%Y-%m-%d %H:%M:%S')"
+  } >"$weatherreport"
 }
 
 # Forecast should be updated every 3 hours, but set 86400 to check once a day for reliability.
@@ -40,32 +52,39 @@ checkforecast() {
   [ -s "$1" ] && [ "$(($(date +%s) - $(stat -c %Y "$1")))" -le "$2" ]
 }
 
-get_current_hour() { date +%H | sed 's/^0*//'; }
+get_current_hour() { date +%-H; }
 
-get_nearest_hourly() {
-  current_hour=$(get_current_hour)
-  hour_index=$((current_hour / 3))
-  jq ".data.weather[0].hourly[$hour_index]" "$weatherreportjson"
+# Get a value from the current hour's hourly forecast.
+get_hourly_value() {
+  field="$1"
+  idx=$(get_current_hour)
+  jq -r ".hourly.${field}[${idx}]" "$weatherreportjson"
 }
 
-getprecip() { get_nearest_hourly | jq -r '.chanceofrain'; }
+getprecip() { get_hourly_value "precipitation_probability"; }
 
-gethighprecip() { jq -r '.data.weather[0].hourly[].chanceofrain' "$weatherreportjson" | sort -rn | head -1; }
+gethighprecip() { jq -r '.hourly.precipitation_probability[]' "$weatherreportjson" | sort -rn | head -1; }
 
-getsnow() { get_nearest_hourly | jq -r '.chanceofsnow'; }
+getsnow() {
+  code=$(get_hourly_value "weather_code")
+  case "$code" in
+  71 | 73 | 75 | 77 | 85 | 86) echo "100" ;;
+  *) echo "0" ;;
+  esac
+}
 
-getwind() { get_nearest_hourly | jq -r '.windspeedKmph'; }
+getwind() { get_hourly_value "wind_speed_10m" | awk '{printf "%.0f", $1}'; }
 
-gettemp() { get_nearest_hourly | jq -r '.tempC'; }
+gettemp() { get_hourly_value "temperature_2m" | awk '{printf "%.0f", $1}'; }
 
-getfeelslike() { get_nearest_hourly | jq -r '.FeelsLikeC'; }
+getfeelslike() { get_hourly_value "apparent_temperature" | awk '{printf "%.0f", $1}'; }
 
-getlowtemp() { jq -r '.data.weather[0].hourly[].tempC' "$weatherreportjson" | sort -n | head -1; }
+getlowtemp() { jq -r '.daily.temperature_2m_min[0]' "$weatherreportjson" | awk '{printf "%.0f", $1}'; }
 
-gethightemp() { jq -r '.data.weather[0].hourly[].tempC' "$weatherreportjson" | sort -rn | head -1; }
+gethightemp() { jq -r '.daily.temperature_2m_max[0]' "$weatherreportjson" | awk '{printf "%.0f", $1}'; }
 
 gethumidity() {
-  humidity=$(get_nearest_hourly | jq -r '.humidity')
+  humidity=$(get_hourly_value "relative_humidity_2m" | awk '{printf "%.0f", $1}')
   case "$humidity" in
   [0-9] | [1-2][0-9]) echo "🏜: $humidity%" ;;
   [3-4][0-9]) echo "🌲: $humidity%" ;;
@@ -75,7 +94,37 @@ gethumidity() {
   esac
 }
 
-getdesc() { get_nearest_hourly | jq -r '.weatherDesc[0].value' | sed 's/ $//'; }
+# Map WMO weather codes to descriptions.
+getdesc() {
+  code=$(get_hourly_value "weather_code")
+  case "$code" in
+  0) echo "Clear sky" ;;
+  1) echo "Mainly clear" ;;
+  2) echo "Partly cloudy" ;;
+  3) echo "Overcast" ;;
+  45) echo "Foggy" ;;
+  48) echo "Depositing rime fog" ;;
+  51) echo "Light drizzle" ;;
+  53) echo "Moderate drizzle" ;;
+  55) echo "Dense drizzle" ;;
+  61) echo "Slight rain" ;;
+  63) echo "Moderate rain" ;;
+  65) echo "Heavy rain" ;;
+  71) echo "Slight snow fall" ;;
+  73) echo "Moderate snow fall" ;;
+  75) echo "Heavy snow fall" ;;
+  77) echo "Snow grains" ;;
+  80) echo "Slight rain showers" ;;
+  81) echo "Moderate rain showers" ;;
+  82) echo "Violent rain showers" ;;
+  85) echo "Slight snow showers" ;;
+  86) echo "Heavy snow showers" ;;
+  95) echo "Thunderstorm" ;;
+  96) echo "Thunderstorm with slight hail" ;;
+  99) echo "Thunderstorm with heavy hail" ;;
+  *) echo "Unknown" ;;
+  esac
+}
 
 showweather() {
   case "$(gettemp)" in
@@ -87,7 +136,7 @@ showweather() {
 }
 
 todayweather() {
-  printf "🌈 Today's weather: %s\n🏂: %s%%\n☔: %s(%s)m⧸s\n%s\n🎐: %sm/s\n🌞: %s°(%s°)\n🥶: %s°\n🥵: %s°\n" \
+  printf "🌈 Today's weather: %s\n🏂: %s%%\n☔: %s%%(%s%%)max\n%s\n🎐: %s km/h\n🌞: %s°(%s°)\n🥶: %s°\n🥵: %s°\n" \
     "$(getdesc)" "$(getsnow)" "$(getprecip)" "$(gethighprecip)" "$(gethumidity)" "$(getwind)" "$(gettemp)" "$(getfeelslike)" "$(getlowtemp)" "$(gethightemp)"
 }
 
@@ -328,13 +377,13 @@ case $BLOCK_BUTTON in
   [ "$pager" = "false" ] && {
     export MANPAGER='less -s'
     export LESS="R"
-    export LESS_TERMCAP_mb="$(printf '%b' '[1;31m')"
-    export LESS_TERMCAP_md="$(printf '%b' '[1;36m')"
-    export LESS_TERMCAP_me="$(printf '%b' '[0m')"
-    export LESS_TERMCAP_so="$(printf '%b' '[01;44;33m')"
-    export LESS_TERMCAP_se="$(printf '%b' '[0m')"
-    export LESS_TERMCAP_us="$(printf '%b' '[1;32m')"
-    export LESS_TERMCAP_ue="$(printf '%b' '[0m')"
+    export LESS_TERMCAP_mb="$(printf '%b' '\033[1;31m')"
+    export LESS_TERMCAP_md="$(printf '%b' '\033[1;36m')"
+    export LESS_TERMCAP_me="$(printf '%b' '\033[0m')"
+    export LESS_TERMCAP_so="$(printf '%b' '\033[01;44;33m')"
+    export LESS_TERMCAP_se="$(printf '%b' '\033[0m')"
+    export LESS_TERMCAP_us="$(printf '%b' '\033[1;32m')"
+    export LESS_TERMCAP_ue="$(printf '%b' '\033[0m')"
     export LESSOPEN="| /usr/bin/highlight -O ansi %s 2>/dev/null"
   }
   setsid -f "$TERMINAL" -e less -Sf "${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport"
@@ -363,11 +412,10 @@ case $BLOCK_BUTTON in
 - Shift + middle click to update RADAR location
 After $secs seconds, new clicks will also automatically update the doppler RADAR"
   ;;
-6) getweatherreport && getweatherreportjson && notify-send "🌈 Updated forecast" ;;
+6) getweatherreportjson && getweatherreport && notify-send "🌈 Updated forecast" ;;
 7) pickloc && getdoppler && showdoppler ;;
 8) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
-checkforecast "$weatherreport" "3600" || { getweatherreport && pkill -RTMIN+13 "${STATUSBAR:-dwmblocks}" && sleep 3; }
-checkforecast "$weatherreportjson" "86400" || { getweatherreportjson && pkill -RTMIN+13 "${STATUSBAR:-dwmblocks}" && sleep 3; }
+checkforecast "$weatherreportjson" "10800" || { getweatherreportjson && getweatherreport && pkill -RTMIN+13 "${STATUSBAR:-dwmblocks}" && sleep 3; }
 showweather
