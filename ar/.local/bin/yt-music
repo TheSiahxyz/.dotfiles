@@ -2,12 +2,12 @@
 
 XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 
-if [ -f "$XDG_CONFIG_HOME/youtube-music-flags.conf" ]; then
-  YOUTUBE_MUSIC_USER_FLAGS="$(grep -v '^#' "$XDG_CONFIG_HOME/youtube-music-flags.conf")"
+if [ -f "$XDG_CONFIG_HOME/pear-flags.conf" ]; then
+  PEAR_USER_FLAGS="$(grep -v '^#' "$XDG_CONFIG_HOME/pear-flags.conf")"
 fi
 
 export ELECTRON_IS_DEV=0
-"/opt/YouTube Music/youtube-music" $YOUTUBE_MUSIC_USER_FLAGS "$@" &
+/usr/bin/pear-desktop $PEAR_USER_FLAGS "$@" &
 APP_PID=$!
 
 # Wait for the main window, then override WM_CLASS set by Electron
