@@ -78,7 +78,7 @@ screencast() {
     -crf 0 -preset ultrafast -c:a aac \
     "$recordings/screencast-$(date '+%y%m%d-%H%M-%S').mp4" &
   echo $! >/tmp/recordingpid
-  updateicon "⏺️🎙️"
+  updateicon "⏺🎙"
 }
 
 screencastselected() {
@@ -98,7 +98,7 @@ screencastselected() {
       -crf 0 -preset ultrafast -c:a aac \
       "$recordings/screencast-$(date '+%y%m%d-%H%M-%S').mp4" &
     echo $! >/tmp/recordingpid
-    updateicon "⏺️🎙️"
+    updateicon "⏺🎙"
   fi
 }
 
@@ -111,7 +111,7 @@ video() {
     -c:v libx264 -qp 0 -r 30 \
     "$recordings/video-$(date '+%y%m%d-%H%M-%S').mkv" &
   echo $! >/tmp/recordingpid
-  updateicon "⏺️"
+  updateicon "⏺"
 }
 
 videoselected() {
@@ -127,7 +127,7 @@ videoselected() {
     -c:v libx264 -qp 0 -r 30 \
     "$recordings/box-$(date '+%y%m%d-%H%M-%S').mkv" &
   echo $! >/tmp/recordingpid
-  updateicon "⏺️"
+  updateicon "⏺"
 }
 
 webcamselect() {
