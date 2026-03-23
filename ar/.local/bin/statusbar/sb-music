@@ -92,8 +92,8 @@ playerctl_status() {
     if [[ "$player" == chromium.instance* ]]; then
       local pid proc_name
       pid="${player#chromium.instance}"
-      proc_name=$(ps -p "$pid" -o comm= 2>/dev/null)
-      [ "$proc_name" = "youtube-music" ] || continue
+      proc_name=$(cat /proc/"$pid"/cmdline 2>/dev/null | tr '\0' '\n' | grep -i "youtube-music\|pear-desktop" | head -1)
+      [ -n "$proc_name" ] || continue
     else
       continue
     fi
