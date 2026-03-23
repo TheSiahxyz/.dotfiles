@@ -115,7 +115,7 @@ video() {
 }
 
 videoselected() {
-  slop -f "%x %y %w %h" >/tmp/slop
+  slop -f "%x %y %w %h" >/tmp/slop || { rm -f /tmp/slop; exit 1; }
   read -r X Y W H </tmp/slop
   rm /tmp/slop
 
