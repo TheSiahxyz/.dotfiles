@@ -3,7 +3,7 @@
 # Combined system status bar module
 # Toggle each section on/off (1=on, 0=off)
 SHOW_CPU=1
-SHOW_CPUBARS=1
+SHOW_CPUBARS=0
 SHOW_MEMORY=1
 SHOW_DISK=1
 
@@ -24,19 +24,19 @@ mkdir -p "$CACHE_DIR"
 # ── Helper: check if cache is stale ────────────────────────
 # usage: is_stale <cache_file> <interval_seconds>
 is_stale() {
-	[ ! -f "$1" ] && return 0
-	last=$(stat -c %Y "$1" 2>/dev/null || echo 0)
-	now=$(date +%s)
-	[ $((now - last)) -ge "$2" ]
+  [ ! -f "$1" ] && return 0
+  last=$(stat -c %Y "$1" 2>/dev/null || echo 0)
+  now=$(date +%s)
+  [ $((now - last)) -ge "$2" ]
 }
 
 # ── Click handlers ──────────────────────────────────────────
 case $BLOCK_BUTTON in
 1)
-	[ "$SHOW_CPU" = 1 ] && notify-send "🖥 CPU hogs" "$(ps axch -o cmd,%cpu | awk '{cmd[$1]+=$2} END {for (i in cmd) print i, cmd[i]}' | sort -nrk2 | head)\\n(100% per core)"
-	[ "$SHOW_MEMORY" = 1 ] && notify-send "🐏 Memory hogs" "$(ps axch -o cmd,%mem | awk '{cmd[$1]+=$2} END {for (i in cmd) print i, cmd[i]}' | sort -nrk2 | head)"
-	[ "$SHOW_DISK" = 1 ] && notify-send "💽 Disk space" "$(df -h --output=target,used,size)"
-	;;
+  [ "$SHOW_CPU" = 1 ] && notify-send "🖥 CPU hogs" "$(ps axch -o cmd,%cpu | awk '{cmd[$1]+=$2} END {for (i in cmd) print i, cmd[i]}' | sort -nrk2 | head)\\n(100% per core)"
+  [ "$SHOW_MEMORY" = 1 ] && notify-send "🐏 Memory hogs" "$(ps axch -o cmd,%mem | awk '{cmd[$1]+=$2} END {for (i in cmd) print i, cmd[i]}' | sort -nrk2 | head)"
+  [ "$SHOW_DISK" = 1 ] && notify-send "💽 Disk space" "$(df -h --output=target,used,size)"
+  ;;
 2) setsid -f "$TERMINAL" -e htop ;;
 3) notify-send "🖥 System module" "CPU temp, CPU bars, Memory, Disk usage
 Left click: show hogs & disk info
@@ -47,75 +47,81 @@ esac
 
 # ── Module: CPU temperature ─────────────────────────────────
 if [ "$SHOW_CPU" = 1 ]; then
-	cf="$CACHE_DIR/cpu"
-	if is_stale "$cf" "$INTERVAL_CPU"; then
-		sensors | awk '/Tctl:/ {gsub(/[+°C]/,"",$2); printf "🧁%s°", $2}' > "$cf"
-	fi
+  cf="$CACHE_DIR/cpu"
+  if is_stale "$cf" "$INTERVAL_CPU"; then
+    sensors | awk '/Tctl:/ {gsub(/[+°C]/,"",$2); printf "🧁%s°", $2}' >"$cf"
+  fi
 fi
 
 # ── Module: CPU bars ────────────────────────────────────────
 if [ "$SHOW_CPUBARS" = 1 ]; then
-	cf="$CACHE_DIR/cpubars"
-	if is_stale "$cf" "$INTERVAL_CPUBARS"; then
-		prev_cache="$CACHE_DIR/cpubars_prev"
-		stats=$(awk '/cpu[0-9]+/ {printf "%d %d %d\n", substr($1,4), ($2 + $3 + $4 + $5), $5 }' /proc/stat)
-		[ ! -f "$prev_cache" ] && echo "$stats" > "$prev_cache"
-		old=$(cat "$prev_cache")
-		echo "$stats" | while read -r row; do
-			id=${row%% *}
-			rest=${row#* }
-			total=${rest%% *}
-			idle=${rest##* }
-			case "$(echo "$old" | awk '{if ($1 == id)
+  cf="$CACHE_DIR/cpubars"
+  if is_stale "$cf" "$INTERVAL_CPUBARS"; then
+    prev_cache="$CACHE_DIR/cpubars_prev"
+    stats=$(awk '/cpu[0-9]+/ {printf "%d %d %d\n", substr($1,4), ($2 + $3 + $4 + $5), $5 }' /proc/stat)
+    [ ! -f "$prev_cache" ] && echo "$stats" >"$prev_cache"
+    old=$(cat "$prev_cache")
+    echo "$stats" | while read -r row; do
+      id=${row%% *}
+      rest=${row#* }
+      total=${rest%% *}
+      idle=${rest##* }
+      case "$(echo "$old" | awk '{if ($1 == id)
 				printf "%d\n", (1 - (idle - $3) / (total - $2))*100 /12.5}' \
-				id="$id" total="$total" idle="$idle")" in
-			"0") printf "▁" ;; "1") printf "▂" ;; "2") printf "▃" ;; "3") printf "▄" ;;
-			"4") printf "▅" ;; "5") printf "▆" ;; "6") printf "▇" ;; "7"|"8") printf "█" ;;
-			esac
-		done > "$cf"
-		echo "$stats" > "$prev_cache"
-	fi
+        id="$id" total="$total" idle="$idle")" in
+      "0") printf "▁" ;; "1") printf "▂" ;; "2") printf "▃" ;; "3") printf "▄" ;;
+      "4") printf "▅" ;; "5") printf "▆" ;; "6") printf "▇" ;; "7" | "8") printf "█" ;;
+      esac
+    done >"$cf"
+    echo "$stats" >"$prev_cache"
+  fi
 fi
 
 # ── Module: Memory + NVMe temp ──────────────────────────────
 if [ "$SHOW_MEMORY" = 1 ]; then
-	cf="$CACHE_DIR/memory"
-	if is_stale "$cf" "$INTERVAL_MEMORY"; then
-		width=$(xrandr | grep "\*" | awk '{print $1}' | sed 's/x[0-9]*//g' | head -n1)
-		nvme_temp=$(sensors 2>/dev/null |
-			awk '/Composite:/ {gsub(/[+°C]/,"",$2); print $2; exit}')
-		if [ -n "$width" ] && [ "$width" -eq "$width" ] 2>/dev/null; then
-			if [ "$width" -lt 1920 ]; then
-				free --mebi | sed -n '2{p;q}' |
-					awk -v t="$nvme_temp" '{printf "🌡%s° 🐏%d%%", t, ($3/$2)*100+0.5}' > "$cf"
-			else
-				free --mebi | sed -n '2{p;q}' |
-					awk -v t="$nvme_temp" '{printf "🌡%s° 🐏%dGB/%dGB", t, $3/1000+0.5, $2/1000+0.5}' > "$cf"
-			fi
-		fi
-	fi
+  cf="$CACHE_DIR/memory"
+  if is_stale "$cf" "$INTERVAL_MEMORY"; then
+    width=$(xrandr | grep "\*" | awk '{print $1}' | sed 's/x[0-9]*//g' | head -n1)
+    nvme_temp=$(sensors 2>/dev/null |
+      awk '/Composite:/ {gsub(/[+°C]/,"",$2); print $2; exit}')
+    if [ -n "$width" ] && [ "$width" -eq "$width" ] 2>/dev/null; then
+      if [ "$width" -lt 1920 ]; then
+        free --mebi | sed -n '2{p;q}' |
+          awk -v t="$nvme_temp" '{printf "🌡%s° 🐏%d%%", t, ($3/$2)*100+0.5}' >"$cf"
+      else
+        free --mebi | sed -n '2{p;q}' |
+          awk -v t="$nvme_temp" '{printf "🌡%s° 🐏%dGB/%dGB", t, $3/1000+0.5, $2/1000+0.5}' >"$cf"
+      fi
+    fi
+  fi
 fi
 
 # ── Module: Disk usage ──────────────────────────────────────
 if [ "$SHOW_DISK" = 1 ] && [ -d "$DISK_LOCATION" ]; then
-	disk_key=$(printf "%s" "$DISK_LOCATION" | tr '/' '_')
-	cf="$CACHE_DIR/disk${disk_key}"
-	if is_stale "$cf" "$INTERVAL_DISK"; then
-		case "$DISK_LOCATION" in
-		"/home"*) icon="💾" ;; "/mnt"*) icon="🫜" ;; *) icon="💻" ;;
-		esac
-		printf "%s%s" "$icon" "$(df -hP "$DISK_LOCATION" | awk '/[0-9]/ {print $5}')" > "$cf"
-	fi
+  disk_key=$(printf "%s" "$DISK_LOCATION" | tr '/' '_')
+  cf="$CACHE_DIR/disk${disk_key}"
+  if is_stale "$cf" "$INTERVAL_DISK"; then
+    case "$DISK_LOCATION" in
+    "/home"*) icon="💾" ;; "/mnt"*) icon="🫜" ;; *) icon="💻" ;;
+    esac
+    printf "%s%s" "$icon" "$(df -hP "$DISK_LOCATION" | awk '/[0-9]/ {print $5}')" >"$cf"
+  fi
 fi
+
+# ── Clean up disabled module caches ───────────────────────────
+[ "$SHOW_CPU" = 0 ] && rm -f "$CACHE_DIR/cpu"
+[ "$SHOW_CPUBARS" = 0 ] && rm -f "$CACHE_DIR/cpubars" "$CACHE_DIR/cpubars_prev"
+[ "$SHOW_MEMORY" = 0 ] && rm -f "$CACHE_DIR/memory"
+disk_key=$(printf "%s" "$DISK_LOCATION" | tr '/' '_')
+[ "$SHOW_DISK" = 0 ] && rm -f "$CACHE_DIR/disk${disk_key}"
 
 # ── Assemble output ─────────────────────────────────────────
 out=""
-disk_key=$(printf "%s" "$DISK_LOCATION" | tr '/' '_')
 for mod in cpu cpubars memory "disk${disk_key}"; do
-	f="$CACHE_DIR/$mod"
-	[ -f "$f" ] && val=$(cat "$f") && [ -n "$val" ] && {
-		[ -n "$out" ] && out="$out "
-		out="$out$val"
-	}
+  f="$CACHE_DIR/$mod"
+  [ -f "$f" ] && val=$(cat "$f") && [ -n "$val" ] && {
+    [ -n "$out" ] && out="$out "
+    out="$out$val"
+  }
 done
 printf "%s\n" "$out"

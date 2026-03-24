@@ -16,7 +16,7 @@ case "$selection" in
   if [ "$(printf "No\nYes" | dmenu -i -p 'Proceed with upgrade for all packages?')" = "Yes" ]; then
     notify-send "📦 Upgrading all packages..."
     yay -Syu --noconfirm
-    pkill -RTMIN+14 "${STATUSBAR:-dwmblocks}"
+    pkill -RTMIN+11 "${STATUSBAR:-dwmblocks}"
     notify-send "✅ Upgrade of all packages completed."
   else
     notify-send "❌ Upgrade cancelled."
@@ -31,7 +31,7 @@ case "$selection" in
     if [ "$(printf "No\nYes" | dmenu -i -p 'Proceed with pacman upgrade?')" = "Yes" ]; then
       notify-send "📦 Upgrading pacman packages..."
       printf "%s" "$pacman_updates" | awk '{print $1}' | xargs sudo pacman -S --noconfirm
-      pkill -RTMIN+14 "${STATUSBAR:-dwmblocks}"
+      pkill -RTMIN+11 "${STATUSBAR:-dwmblocks}"
       notify-send "✅ Pacman packages upgrade completed."
     else
       notify-send "❌ Upgrade cancelled."
@@ -46,7 +46,7 @@ case "$selection" in
       if [ "$(printf "No\nYes" | dmenu -i -p 'Proceed with upgrade for this package?')" = "Yes" ]; then
         notify-send "📦 Upgrading package: $selection..."
         sudo pacman -S --noconfirm "$(printf "%s" "$selection" | awk '{print $1}')"
-        pkill -RTMIN+14 "${STATUSBAR:-dwmblocks}"
+        pkill -RTMIN+11 "${STATUSBAR:-dwmblocks}"
         notify-send "✅ Upgrade completed for package: $selection."
       else
         notify-send "❌ Upgrade cancelled."
@@ -73,7 +73,7 @@ case "$selection" in
     if [ "$(printf "No\nYes" | dmenu -i -p 'Proceed with AUR upgrade?')" = "Yes" ]; then
       notify-send "📦 Upgrading AUR packages..."
       yay -Syu --aur --noconfirm
-      pkill -RTMIN+14 "${STATUSBAR:-dwmblocks}"
+      pkill -RTMIN+11 "${STATUSBAR:-dwmblocks}"
       notify-send "✅ AUR packages upgrade completed."
     else
       notify-send "❌ Upgrade cancelled."
@@ -88,7 +88,7 @@ case "$selection" in
       if [ "$(printf "No\nYes" | dmenu -i -p 'Proceed with upgrade for this package?')" = "Yes" ]; then
         notify-send "📦 Upgrading AUR package: $selection..."
         yay -S --noconfirm "$(printf "%s" "$selection" | awk '{print $2}')"
-        pkill -RTMIN+14 "${STATUSBAR:-dwmblocks}"
+        pkill -RTMIN+11 "${STATUSBAR:-dwmblocks}"
         notify-send "✅ Upgrade completed for AUR package: $selection."
       else
         notify-send "❌ Upgrade cancelled."

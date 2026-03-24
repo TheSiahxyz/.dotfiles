@@ -3,6 +3,13 @@
 # Show wifi 🛜 and percent strength or 📡 if none.
 # Show 🌐 if connected to ethernet or ❎ if none.
 # Show 🛰 if a vpn connection is active
+# Show 🇰🇷 country flag via geoip lookup
+
+# Toggle each section: 1 to show, 0 to hide
+SHOW_WIFI=1
+SHOW_ETH=1
+SHOW_VPN=1
+SHOW_IPLOC=1
 
 eth_con="$(nmcli -t -f NAME,TYPE,DEVICE connection show |
   awk -F: '$2=="ethernet" && $3!="" { print $1; exit }')"
@@ -53,30 +60,60 @@ case $BLOCK_BUTTON in
 ❎: no ethernet
 🌐: ethernet working
 🛰: vpn is active
+🏳: ip geolocation (country flag)
 " ;;
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
-# Wifi
-if grep -q 'up' /sys/class/net/w*/operstate 2>/dev/null; then
-  if grep -q '^\s*w' /proc/net/wireless; then
-    wifiicon="$(awk '/^\s*w/ { print "🛜" int($3 * 100 / 70) "%" }' /proc/net/wireless)"
+icons=""
+
+# IP Geolocation
+if [ "$SHOW_IPLOC" = 1 ]; then
+  ip="$(curl -4sfm 3 ifconfig.me 2>/dev/null)"
+  if [ -n "$ip" ]; then
+    addr="$(geoiplookup "$ip" 2>/dev/null)"
   else
-    wifiicon="📡"
+    ip="$(curl -6sfm 3 ifconfig.me 2>/dev/null)"
+    [ -n "$ip" ] && addr="$(geoiplookup6 "$ip" 2>/dev/null)"
   fi
-elif grep -q 'down' /sys/class/net/w*/operstate 2>/dev/null; then
-  wifiicon="❌"
+  case "$addr" in *"not found"*) addr="" ;; esac
+  if [ -n "$addr" ]; then
+    cc="$(echo "$addr" | sed 's/.*: \([A-Z][A-Z]\),.*/\1/')"
+    if [ -n "$cc" ]; then
+      c1=$(printf '%d' "'$(echo "$cc" | cut -c1)")
+      c2=$(printf '%d' "'$(echo "$cc" | cut -c2)")
+      oct1=$(printf '%03o' "$((c1 + 101))")
+      oct2=$(printf '%03o' "$((c2 + 101))")
+      flag=$(printf "\\360\\237\\207\\${oct1}\\360\\237\\207\\${oct2}")
+      [ -n "$flag" ] && icons="${icons}$flag "
+    fi
+  fi
+fi
+
+# Wifi
+if [ "$SHOW_WIFI" = 1 ]; then
+  if grep -q 'up' /sys/class/net/w*/operstate 2>/dev/null; then
+    if grep -q '^\s*w' /proc/net/wireless; then
+      wifiicon="$(awk '/^\s*w/ { print "🛜" int($3 * 100 / 70) "%" }' /proc/net/wireless)"
+    else
+      wifiicon="📡"
+    fi
+  elif grep -q 'down' /sys/class/net/w*/operstate 2>/dev/null; then
+    wifiicon="❌"
+  fi
+  [ -n "$wifiicon" ] && icons="${icons}$wifiicon "
 fi
 
 # Ethernet
-grep -q 'up' /sys/class/net/e*/operstate && ethericon="🌐" || ethericon="❎"
+if [ "$SHOW_ETH" = 1 ]; then
+  grep -q 'up' /sys/class/net/e*/operstate && ethericon="🌐" || ethericon="❎"
+  [ -n "$ethericon" ] && icons="${icons}$ethericon "
+fi
 
-# TUN
-[ -n "$(cat /sys/class/net/tun*/operstate 2>/dev/null)" ] && tunicon="🛰"
-
-icons=""
-[ -n "$wifiicon" ] && icons="${icons}$wifiicon "
-[ -n "$ethericon" ] && icons="${icons}$ethericon "
-[ -n "$tunicon" ] && icons="${icons}$tunicon "
+# TUN/VPN
+if [ "$SHOW_VPN" = 1 ]; then
+  [ -n "$(cat /sys/class/net/tun*/operstate 2>/dev/null)" ] && tunicon="🛰"
+  [ -n "$tunicon" ] && icons="${icons}$tunicon "
+fi
 
 printf "%s\n" "${icons% }"

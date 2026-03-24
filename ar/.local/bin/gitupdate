@@ -85,4 +85,4 @@ printf "\n[repo] %s(%s): %s\n" "$(basename "$repo_root")" "$branch" "$message"
 # Return to the original directory
 cd - >/dev/null
 
-command -v dwmblocks >/dev/null 2>&1 && pkill -RTMIN+16 "${STATUSBAR:-dwmblocks}"
+command -v dwmblocks >/dev/null 2>&1 && pkill -RTMIN+13 "${STATUSBAR:-dwmblocks}"
