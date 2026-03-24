@@ -9,7 +9,7 @@
 SHOW_WIFI=1
 SHOW_ETH=1
 SHOW_VPN=1
-SHOW_IPLOC=1
+SHOW_IPLOC=0
 
 eth_con="$(nmcli -t -f NAME,TYPE,DEVICE connection show |
   awk -F: '$2=="ethernet" && $3!="" { print $1; exit }')"
