@@ -107,7 +107,6 @@
       "Write(**/.password-store/**/*)"
     ]
   },
-  "model": "sonnet",
   "hooks": {
     "Notification": [
       {
