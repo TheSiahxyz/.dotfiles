@@ -36,6 +36,7 @@ search_term() {
 
   # Construct the preview command
   preview_cmd=$(printf "rga %s --pretty --context 10 '%s' {}" "$case_flag" "$*")
+  query="$*"
   rga_output=$(rga --follow --no-ignore --hidden --text --max-count=1 ${case_flag:+$case_flag} --files-with-matches --no-messages \
     --glob '!**/.cache/*' \
     --glob '!**/.git/*' \
@@ -49,7 +50,7 @@ search_term() {
     --glob '!**/target/*' \
     --glob '!**/vendor/*' \
     --glob '!**/venv/*' \
-    "$*")
+    "$query")
 
   # Use fzf to select files
   files=$(echo "$rga_output" | fzf-tmux +m --preview="$preview_cmd" --reverse --multi --select-1 --exit-0) || return 1
@@ -61,9 +62,32 @@ search_term() {
   fi
 
   # copy target to the clipboard
-  echo "$@" | xclip -selection clipboard 2>/dev/null
+  echo "$query" | xclip -selection clipboard 2>/dev/null
 
-  openfiles "$files"
+  # Open files at matching lines
+  count=$(echo "$files" | wc -l)
+  if [ "$count" -eq 1 ]; then
+    # Find the first matching line number in the selected file
+    line=$(rga --max-count=1 --line-number --no-filename ${case_flag:+$case_flag} --no-messages "$query" "$files" 2>/dev/null | head -1 | cut -d: -f1)
+    if [ -n "$line" ]; then
+      ${EDITOR:-nvim} "+${line}" "$(realpath "$files")"
+    else
+      openfiles "$files"
+    fi
+  else
+    # Multiple files: build quickfix entries for line-accurate navigation
+    tmpfile=$(mktemp)
+    echo "$files" | while IFS= read -r file; do
+      match=$(rga --max-count=1 --line-number --no-filename ${case_flag:+$case_flag} --no-messages "$query" "$file" 2>/dev/null | head -1)
+      if [ -n "$match" ]; then
+        printf '%s:%s\n' "$file" "$match" >> "$tmpfile"
+      else
+        printf '%s:1:\n' "$file" >> "$tmpfile"
+      fi
+    done
+    ${EDITOR:-nvim} -q "$tmpfile"
+    rm -f "$tmpfile"
+  fi
 
   # print the file names
   echo "$rga_output"
@@ -112,9 +136,29 @@ list_or_open_project_files() {
   if [ "$list_mode" -eq 1 ]; then
     echo "$rga_output"
   else
-    # Otherwise, open the files with nvim
-    set -- "$(printf "%s\n" "$rga_output")"
-    openfiles "$@"
+    # Open files at matching lines
+    file_count=$(echo "$rga_output" | wc -w)
+    if [ "$file_count" -eq 1 ]; then
+      line=$(rga --max-count=1 --line-number --no-filename --no-messages "$project_tag" "$rga_output" 2>/dev/null | head -1 | cut -d: -f1)
+      if [ -n "$line" ]; then
+        ${EDITOR:-nvim} "+${line}" "$(realpath "$rga_output")"
+      else
+        openfiles "$rga_output"
+      fi
+    else
+      # Multiple files: build quickfix entries for line-accurate navigation
+      tmpfile=$(mktemp)
+      for file in $rga_output; do
+        match=$(rga --max-count=1 --line-number --no-filename --no-messages "$project_tag" "$file" 2>/dev/null | head -1)
+        if [ -n "$match" ]; then
+          printf '%s:%s\n' "$file" "$match" >> "$tmpfile"
+        else
+          printf '%s:1:\n' "$file" >> "$tmpfile"
+        fi
+      done
+      ${EDITOR:-nvim} -q "$tmpfile"
+      rm -f "$tmpfile"
+    fi
   fi
 }
 
