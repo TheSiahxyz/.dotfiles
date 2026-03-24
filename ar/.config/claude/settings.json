@@ -145,5 +145,6 @@
     "superpowers@claude-plugins-official": true,
     "typescript-lsp@claude-plugins-official": true
   },
-  "skipDangerousModePermissionPrompt": true
+  "skipDangerousModePermissionPrompt": true,
+  "effortLevel": "high"
 }
