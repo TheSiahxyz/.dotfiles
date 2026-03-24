@@ -1,7 +1,9 @@
 #!/bin/sh
 
-# Updates the music statusbar module when a playerctl-compatible player changes state
+# Updates the music statusbar module when a playerctl-compatible player changes
 
-playerctl -aF status 2>/dev/null | while read -r _; do
-  kill -52 "$(pidof "${STATUSBAR:-dwmblocks}")" 2>/dev/null
-done
+signal() { kill -52 "$(pidof "${STATUSBAR:-dwmblocks}")" 2>/dev/null; }
+
+playerctl -aF status 2>/dev/null | while read -r _; do signal; done &
+playerctl -aF metadata -f '{{playerName}}' 2>/dev/null | while read -r _; do signal; done &
+wait
