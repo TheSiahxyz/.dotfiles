@@ -320,22 +320,22 @@ vim.keymap.set("n", "<leader>ip", vim.show_pos, { desc = "Inspect position" })
 vim.keymap.set("n", "<leader>K", "<Cmd>norm! K<cr>", { desc = "Look up keyword" })
 
 -- Lines
--- vim.keymap.set("n", "<A-,>", "<Cmd>m .-2<cr>==", { desc = "Move line up" })
--- vim.keymap.set("n", "<A-.>", "<Cmd>m .+1<cr>==", { desc = "Move line down" })
+vim.keymap.set("n", "<M-S-lt>", "<Cmd>m .-2<cr>==", { desc = "Move line up" })
+vim.keymap.set("n", "<M-S->>", "<Cmd>m .+1<cr>==", { desc = "Move line down" })
 vim.keymap.set(
 	"i",
-	"<A-,>",
+	"<M-S-lt>",
 	"<esc><Cmd>m .-2<cr>==gi",
 	{ noremap = true, silent = true, desc = "Move line up in insert mode" }
 )
 vim.keymap.set(
 	"i",
-	"<A-.>",
+	"<M-S->>",
 	"<esc><Cmd>m .+1<cr>==gi",
 	{ noremap = true, silent = true, desc = "Move line down in insert mode" }
 )
-vim.keymap.set("v", "<C-,>", ":m '<-2<cr>gv=gv", { desc = "Move selected lines up" })
-vim.keymap.set("v", "<C-.>", ":m '>+1<cr>gv=gv", { desc = "Move selected lines down" })
+vim.keymap.set("v", "<M-S-lt>", ":m '<-2<cr>gv=gv", { desc = "Move selected lines up" })
+vim.keymap.set("v", "<M-S->>", ":m '>+1<cr>gv=gv", { desc = "Move selected lines down" })
 
 -- Markdown
 vim.keymap.set({ "n", "v" }, "gk", function()

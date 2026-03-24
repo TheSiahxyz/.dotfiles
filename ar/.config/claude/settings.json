@@ -146,5 +146,5 @@
     "typescript-lsp@claude-plugins-official": true
   },
   "skipDangerousModePermissionPrompt": true,
-  "effortLevel": "high"
+  "effortLevel": "medium"
 }
