@@ -2,8 +2,16 @@
 
 # Updates the music statusbar module when a playerctl-compatible player changes
 
-signal() { kill -52 "$(pidof "${STATUSBAR:-dwmblocks}")" 2>/dev/null; }
+signal() { kill -52 $(pidof "${STATUSBAR:-dwmblocks}") 2>/dev/null; }
 
 playerctl -aF status 2>/dev/null | while read -r _; do signal; done &
-playerctl -aF metadata -f '{{playerName}}' 2>/dev/null | while read -r _; do signal; done &
+playerctl -aF metadata -f '{{playerName}}{{title}}' 2>/dev/null | while read -r _; do signal; done &
+
+dbus-monitor --session "interface='org.freedesktop.DBus.Properties',member='PropertiesChanged',arg0='org.mpris.MediaPlayer2.Player'" 2>/dev/null |
+  while read -r line; do
+    case "$line" in
+      *PropertiesChanged*) signal ;;
+    esac
+  done &
+
 wait

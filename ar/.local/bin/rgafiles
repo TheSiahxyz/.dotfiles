@@ -75,17 +75,27 @@ search_term() {
       openfiles "$files"
     fi
   else
-    # Multiple files: build quickfix entries for line-accurate navigation
+    # Multiple files: open at matching lines via quickfix
     tmpfile=$(mktemp)
     echo "$files" | while IFS= read -r file; do
       match=$(rga --max-count=1 --line-number --no-filename ${case_flag:+$case_flag} --no-messages "$query" "$file" 2>/dev/null | head -1)
       if [ -n "$match" ]; then
-        printf '%s:%s\n' "$file" "$match" >> "$tmpfile"
+        printf '%s:%s\n' "$(realpath "$file")" "$match" >> "$tmpfile"
       else
-        printf '%s:1:\n' "$file" >> "$tmpfile"
+        printf '%s:1:\n' "$(realpath "$file")" >> "$tmpfile"
       fi
     done
-    ${EDITOR:-nvim} -q "$tmpfile"
+    if [ "$count" -lt 5 ]; then
+      ${EDITOR:-nvim} -q "$tmpfile" \
+        -c 'for i in range(2,len(getqflist())) | vsplit | execute "cc ".i | endfor | wincmd t'
+    else
+      first_line=$(head -1 "$tmpfile" | cut -d: -f2)
+      file_args=""
+      while IFS=: read -r fpath _; do
+        file_args="$file_args \"$fpath\""
+      done < "$tmpfile"
+      eval "${EDITOR:-nvim}" "+${first_line}" "$file_args"
+    fi
     rm -f "$tmpfile"
   fi
 
@@ -146,17 +156,23 @@ list_or_open_project_files() {
         openfiles "$rga_output"
       fi
     else
-      # Multiple files: build quickfix entries for line-accurate navigation
+      # Multiple files: open at matching lines via quickfix
       tmpfile=$(mktemp)
       for file in $rga_output; do
         match=$(rga --max-count=1 --line-number --no-filename --no-messages "$project_tag" "$file" 2>/dev/null | head -1)
         if [ -n "$match" ]; then
-          printf '%s:%s\n' "$file" "$match" >> "$tmpfile"
+          printf '%s:%s\n' "$(realpath "$file")" "$match" >> "$tmpfile"
         else
-          printf '%s:1:\n' "$file" >> "$tmpfile"
+          printf '%s:1:\n' "$(realpath "$file")" >> "$tmpfile"
         fi
       done
-      ${EDITOR:-nvim} -q "$tmpfile"
+      if [ "$file_count" -lt 5 ]; then
+        ${EDITOR:-nvim} -q "$tmpfile" \
+          -c 'for i in range(2,len(getqflist())) | vsplit | execute "cc ".i | endfor | wincmd t'
+      else
+        ${EDITOR:-nvim} -q "$tmpfile" \
+          -c 'silent! for i in range(2,len(getqflist())+1) | execute "silent! cc ".i | endfor | silent! cfirst'
+      fi
       rm -f "$tmpfile"
     fi
   fi
