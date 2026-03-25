@@ -16,9 +16,8 @@ case $BLOCK_BUTTON in
 4) pkexec brillo -A 5 -q ;;
 5) pkexec brillo -U 5 -q ;;
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
-7) monitorbright -inc 5 ;;
-8) monitorbright -dec 5 ;;
-9) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
+9) monitorbright -inc 5 ;;
+10) monitorbright -dec 5 ;;
 esac
 
 if [ -r /sys/class/backlight/*/brightness ]; then
