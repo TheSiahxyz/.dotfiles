@@ -1,0 +1,84 @@
+#!/bin/sh
+
+# Displays new nginx log entries from ylog.
+# Updates every 30 minutes via dwmblocks.
+# Left click: show new entries and mark as seen
+# Middle click: force refresh
+# Right click: help
+
+CACHE_DIR="/tmp/ylog_sb"
+PREV="$CACHE_DIR/prev"
+CURR="$CACHE_DIR/curr"
+NEW="$CACHE_DIR/new"
+LOCK="$CACHE_DIR/lock"
+
+mkdir -p "$CACHE_DIR"
+
+fetch_logs() {
+  today=$(LC_TIME=C date +%d/%b)
+  ssh -o BatchMode=yes -o ConnectTimeout=10 root@thesiah.xyz \
+    "cat /var/log/nginx/diary.us.log /var/log/nginx/recordings.us.log /var/log/nginx/peertube.us.log 2>/dev/null" \
+    2>/dev/null | grep "$today" | grep -E '[0-9]{2}:[0-9]{2}:[0-9]{2} ' | grep -v '59\.19\.56\.8' | sort -u
+}
+
+update() {
+  # Prevent concurrent updates
+  if [ -f "$LOCK" ]; then
+    kill -0 "$(cat "$LOCK")" 2>/dev/null && return
+  fi
+  echo $$ > "$LOCK"
+
+  fetch_logs > "$CURR" 2>/dev/null
+  total=$(wc -l < "$CURR")
+
+  if [ -f "$PREV" ]; then
+    # Find lines in curr that are not in prev
+    comm -23 "$CURR" "$PREV" > "$NEW"
+  else
+    cp "$CURR" "$NEW"
+  fi
+
+  new_count=$(wc -l < "$NEW")
+  [ -t 1 ] && echo "[ylog] fetched $total lines, $new_count new" >&2
+
+  rm -f "$LOCK"
+}
+
+mark_seen() {
+  [ -f "$CURR" ] && cp "$CURR" "$PREV"
+  : > "$NEW"
+}
+
+case $BLOCK_BUTTON in
+1)
+  if [ -s "$NEW" ]; then
+    notify-send "🌐 New log entries" "$(cat "$NEW" | sed 's/^[^ ]* //' | cut -c1-120 | tail -20)"
+    mark_seen
+    pkill -RTMIN+21 "${STATUSBAR:-dwmblocks}"
+  else
+    notify-send "🌐 Ylog" "No new entries."
+  fi
+  ;;
+2)
+  notify-send "🌐 Ylog" "Refreshing..."
+  update
+  pkill -RTMIN+21 "${STATUSBAR:-dwmblocks}"
+  ;;
+3)
+  notify-send "🌐 Ylog module" "- Shows new nginx log entries (diary/recordings/peertube US)
+- Updates every 30 minutes
+- Left click: show new entries & mark seen
+- Middle click: force refresh"
+  ;;
+6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
+*)
+  # Regular update (called by dwmblocks interval)
+  update
+  ;;
+esac
+
+# Display
+if [ -s "$NEW" ]; then
+  count=$(wc -l < "$NEW")
+  echo "🌐$count"
+fi
