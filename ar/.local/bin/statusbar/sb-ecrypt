@@ -14,8 +14,10 @@ mount | grep -q "/mnt/" && mnt_mounted=1
 
 if [ $secret_mounted -eq 1 ] && [ $mnt_mounted -eq 1 ]; then
     echo "🔑"
-elif [ $secret_mounted -eq 1 ] || [ $mnt_mounted -eq 1 ]; then
+elif [ $secret_mounted -eq 1 ]; then
     echo "🔐"
+elif [ $mnt_mounted -eq 1 ]; then
+    echo "🔏"
 else
     echo "🔒"
 fi
