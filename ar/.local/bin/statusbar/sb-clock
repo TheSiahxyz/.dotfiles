@@ -57,10 +57,12 @@ fi
 locationfile="${XDG_CACHE_HOME:-${HOME}/.cache}/statusbar/location"
 moonfile="${XDG_DATA_HOME:-${HOME}/.local/share}/wallpapers/moonphase"
 
-# Cache location for 24 hours
-if [ ! -s "$locationfile" ] || [ $(($(date +%s) - $(stat -c %Y "$locationfile" 2>/dev/null || echo 0))) -gt 86400 ]; then
+# Cache location for 24 hours - stores lat,lon
+valid_latlon() { echo "$1" | grep -qE '^-?[0-9]+\.?[0-9]*,-?[0-9]+\.?[0-9]*$'; }
+if ! ([ -s "$locationfile" ] && valid_latlon "$(cat "$locationfile")" && [ $(($(date +%s) - $(stat -c %Y "$locationfile" 2>/dev/null || echo 0))) -le 86400 ]); then
   mkdir -p "${XDG_CACHE_HOME:-${HOME}/.cache}/statusbar"
-  curl -s --max-time 2 http://ip-api.com/json | jq -r '[.regionName, .countryCode] | join(",")' >"$locationfile" 2>/dev/null &
+  loc=$(curl -s --max-time 2 http://ip-api.com/json 2>/dev/null | jq -r 'select(.status == "success") | [.lat, .lon] | join(",")' 2>/dev/null)
+  valid_latlon "$loc" && echo "$loc" >"$locationfile" &
 fi
 
 location=$(cat "$locationfile" 2>/dev/null || echo "")
@@ -68,7 +70,8 @@ location=$(cat "$locationfile" 2>/dev/null || echo "")
 # Update moon phase only once per day
 if [ ! -s "$moonfile" ] || [ "$(stat -c %y "$moonfile" 2>/dev/null | cut -d' ' -f1)" != "$(date '+%Y-%m-%d')" ]; then
   if [ -n "$location" ]; then
-    moon=$(curl -sf --max-time 2 "wttr.in/$location?format=%m" 2>/dev/null)
+    lat=${location%%,*} lon=${location##*,}
+    moon=$(curl -sf --max-time 2 "wttr.in/${lat},${lon}?format=%m" 2>/dev/null)
     [ -n "$moon" ] && ! echo "$moon" | grep -q 'Unknown location' && echo "$moon" >"$moonfile" &
   fi
 fi

@@ -6,9 +6,11 @@
 
 # Cache location for 24 hours - stores lat,lon
 locationfile="${XDG_CACHE_HOME:-${HOME}/.cache}/statusbar/location"
-if [ ! -s "$locationfile" ] || [ $(($(date +%s) - $(stat -c %Y "$locationfile" 2>/dev/null || echo 0))) -gt 86400 ]; then
+valid_latlon() { echo "$1" | grep -qE '^-?[0-9]+\.?[0-9]*,-?[0-9]+\.?[0-9]*$'; }
+if ! ([ -s "$locationfile" ] && valid_latlon "$(cat "$locationfile")" && [ $(($(date +%s) - $(stat -c %Y "$locationfile" 2>/dev/null || echo 0))) -le 86400 ]); then
   mkdir -p "${XDG_CACHE_HOME:-${HOME}/.cache}/statusbar"
-  curl -s http://ip-api.com/json 2>/dev/null | jq -r '[.lat, .lon] | join(",")' >"$locationfile" 2>/dev/null || true
+  loc=$(curl -s http://ip-api.com/json 2>/dev/null | jq -r 'select(.status == "success") | [.lat, .lon] | join(",")' 2>/dev/null)
+  valid_latlon "$loc" && echo "$loc" >"$locationfile"
 fi
 location=$(cat "$locationfile" 2>/dev/null || echo "")
 
