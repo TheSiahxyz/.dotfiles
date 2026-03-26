@@ -13,11 +13,11 @@ mount | grep -q "$HOME/Secret" && secret_mounted=1
 mount | grep -q "/mnt/" && mnt_mounted=1
 
 if [ $secret_mounted -eq 1 ] && [ $mnt_mounted -eq 1 ]; then
-    echo "🔑"
+  echo "🔑"
 elif [ $secret_mounted -eq 1 ]; then
-    echo "🔐"
+  echo "🔏"
 elif [ $mnt_mounted -eq 1 ]; then
-    echo "🔏"
+  echo "🔐"
 else
-    echo "🔒"
+  echo "🔒"
 fi
