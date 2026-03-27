@@ -1,14 +1,5 @@
 #!/bin/sh
 
-monitor=$(xrandr --query | grep -i '\sconnected' | grep '[0-9]x[0-9]' | grep -i 'primary' | cut -d ' ' -f1)
-[ -z "$monitor" ] && monitor=$(xrandr --query | grep -i '\sconnected' | grep '[0-9]x[0-9]' | cut -d ' ' -f1)
-case "$monitor" in
-*DP* | *HDMI*)
-  current_brightness=$(xrandr --verbose | grep -i "^$monitor connected" -A5 | grep -i "Brightness:" | cut -d ' ' -f2)
-  current_brightness=$(printf "%.0f\n" "$(echo "$current_brightness * 100" | bc -l)")
-  ;;
-esac
-
 case $BLOCK_BUTTON in
 3) notify-send "🔆 Backlight module
 - Scroll up & down changes screen brightness
@@ -20,11 +11,23 @@ case $BLOCK_BUTTON in
 10) monitorbright -dec 5 ;;
 esac
 
+xrandr_verbose=$(xrandr --verbose)
+monitors=$(echo "$xrandr_verbose" | grep -i '\sconnected' | grep '[0-9]x[0-9]' | cut -d ' ' -f1)
+monitor_brightness=""
+for monitor in $monitors; do
+  case "$monitor" in
+  *DP* | *DisplayPort* | *HDMI*)
+    b=$(echo "$xrandr_verbose" | grep -i "^$monitor connected" -A5 | grep -i "Brightness:" | cut -d ' ' -f2)
+    [ -n "$b" ] && { monitor_brightness=$(printf "%.0f" "$(echo "$b * 100" | bc -l)"); break; }
+    ;;
+  esac
+done
+
 if [ -r /sys/class/backlight/*/brightness ]; then
   curr_brightness=$(cat /sys/class/backlight/*/brightness)
   max_brightness=$(cat /sys/class/backlight/*/max_brightness)
   brightness_per=$((100 * curr_brightness / max_brightness))
-  printf "%s %s\n" "💡${brightness_per}%" "🪟$current_brightness"
+  printf "%s %s\n" "💡${brightness_per}%" "🪟${monitor_brightness}%"
 else
-  printf "%s\n" "🪟$current_brightness"
+  [ -n "$monitor_brightness" ] && printf "%s\n" "🪟${monitor_brightness}%"
 fi
