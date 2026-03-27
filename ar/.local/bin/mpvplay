@@ -1,238 +1,284 @@
 #!/bin/sh
 
-mount_script="${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/ecrypt"
+# --- Configuration ---
+scripts_dir="${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}"
 db_path="$HOME/.local/share/history/mpv.sqlite"
+playlist_dir="$HOME/.config/mpv/playlists"
+mpv_opts="--x11-name=video"
+ytdl_format="bestvideo[height<=1080]+bestaudio/best[height<=1080]"
 
-check_mount() { findmnt "$HOME/Secret" >/dev/null || $mount_script; }
+# Managed mount points: "mountpoint|mount_cmd|unmount_cmd" (one per line)
+MANAGED_MOUNTS="$HOME/Secret|$scripts_dir/ecrypt|$scripts_dir/ecrypt
+/mnt/second|$scripts_dir/mounter|$scripts_dir/unmounter"
 
-check_unmount() { findmnt "$HOME/Secret" >/dev/null && $mount_script; }
+# Video file extensions for find commands
+VIDEO_EXTS='-iname "*.mp4" -o -iname "*.mkv" -o -iname "*.mov" -o -iname "*.flv" -o -iname "*.wmv" -o -iname "*.webm" -o -iname "*.mpeg" -o -iname "*.mpg" -o -iname "*.avi" -o -iname "*.ts" -o -iname "*.3gp" -o -iname "*.rmvb"'
 
+# --- Utility Functions ---
+find_videos() {
+  eval "find \"$1\" -maxdepth 1 -type f \\( $VIDEO_EXTS \\)" | sort -V
+}
+
+has_videos() {
+  eval "find \"$1\" -maxdepth 1 -type f \\( $VIDEO_EXTS \\) -print -quit" | grep -q .
+}
+
+is_mounted() { findmnt "$1" >/dev/null 2>&1; }
+
+# Return the managed mount point for a given file path
+get_managed_mount() {
+  while IFS='|' read -r mp mcmd ucmd; do
+    [ -n "$mp" ] && echo "$1" | grep -q "^$mp/" && echo "$mp" && return 0
+  done <<EOF
+$MANAGED_MOUNTS
+EOF
+}
+
+mount_path() {
+  while IFS='|' read -r mp mcmd ucmd; do
+    [ -n "$mp" ] && echo "$1" | grep -q "^$mp" && ! is_mounted "$mp" && $mcmd && return 0
+  done <<EOF
+$MANAGED_MOUNTS
+EOF
+}
+
+unmount_path() {
+  while IFS='|' read -r mp mcmd ucmd; do
+    [ -n "$mp" ] && [ "$mp" = "$1" ] && is_mounted "$mp" && $ucmd && return 0
+  done <<EOF
+$MANAGED_MOUNTS
+EOF
+}
+
+unmount_all() {
+  while IFS='|' read -r mp mcmd ucmd; do
+    [ -n "$mp" ] && is_mounted "$mp" && $ucmd
+  done <<EOF
+$MANAGED_MOUNTS
+EOF
+}
+
+play() { mpv $mpv_opts "$@"; }
+
+# --- URL Playback ---
 loginurl() {
-  notify-send "🔑 Authentication required"
+  notify-send "Authentication required"
   username="$(echo | dmenu -i -p "Enter a username:")"
-  [ -n "$username" ] && password="$(echo | dmenu -i -P -p "Enter a password:")" || exit
-  if [ -n "$username" ] && [ -n "$password" ]; then
-    if ! mpv --x11-name=video --ytdl-format='bestvideo[height<=1080]+bestaudio/best[height<=1080]' --ytdl-raw-options=username="$username",password="$password" "$url"; then
-      notify-send "❌ Failed to play $url" "❗ Check your username or password"
-      exit 1
-    fi
+  [ -z "$username" ] && exit
+  password="$(echo | dmenu -i -P -p "Enter a password:")"
+  [ -z "$password" ] && exit
+  if ! play --ytdl-format="$ytdl_format" --ytdl-raw-options=username="$username",password="$password" "$url"; then
+    notify-send "Failed to play $url" "Check your username or password"
+    exit 1
   fi
 }
 
 play_url() {
   url=$(xclip -selection clipboard -o)
-  [ -n "$url" ] && echo "$url" | grep -E '^https?://' >/dev/null || return 1
+  echo "$url" | grep -qE '^https?://' || return 1
   if yt-dlp --simulate --dump-json "$url" >/dev/null 2>&1; then
-    notify-send "📽️ Playing video from URL:" "$url"
-    mpv --x11-name=video --ytdl-format='bestvideo[height<=1080]+bestaudio/best[height<=1080]' "$url"
+    notify-send "Playing video from URL:" "$url"
+    play --ytdl-format="$ytdl_format" "$url"
   else
     loginurl
   fi
 }
 
+# --- Local File Playback ---
 play_media() {
-  if echo "$1" | grep -q ".*\.m3u$"; then
-    playlist_file="${1#--playlist=}"
-    if grep -q "/home/$USER/Secret" "$playlist_file"; then
-      mpv --x11-name=video "$@" && check_unmount || exit
-    else
-      $mount_script && mpv --x11-name=video "$@" || exit
-    fi
-  elif echo "$1" | grep -q "/home/$USER/Secret"; then
-    mpv --x11-name=video "$@" && check_unmount || exit
+  _path=""
+  for _a in "$@"; do
+    case "$_a" in --*) ;; *) _path="$_a" ;; esac
+  done
+  _mp=$(get_managed_mount "$_path")
+  if [ -n "$_mp" ]; then
+    mount_path "$_path"
+    play "$@" && unmount_path "$_mp" || exit
   else
-    $mount_script && mpv --x11-name=video "$@" || exit
+    play "$@" || exit
   fi
 }
 
-play_playlist() { play_media "--playlist=$1"; }
+play_playlist() {
+  # Check if playlist references any managed mount path
+  _mp=""
+  while IFS='|' read -r mp mcmd ucmd; do
+    [ -n "$mp" ] && grep -q "$mp/" "$1" 2>/dev/null && _mp="$mp" && break
+  done <<EOF
+$MANAGED_MOUNTS
+EOF
+  if [ -n "$_mp" ]; then
+    play --playlist="$1" && unmount_path "$_mp" || exit
+  else
+    play --playlist="$1" || exit
+  fi
+}
 
-tmp_playlist() {
-  playlistdir="$HOME/.config/mpv/playlists"
-  [ -d "$playlistdir" ] || mkdir -p "$playlistdir"
-  tmplist="$playlistdir/tmplist.m3u"
-  [ -f "$tmplist" ] && rm -rf "$tmplist"
-  find "$1" -maxdepth 1 \
-    -type f \( -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.mov" -o -iname "*.flv" -o -iname "*.wmv" -o -iname "*.webm" -o -iname "*.mpeg" -o -iname "*.mpg" -o -iname "*.avi" -o -iname "*.ts" -o -iname "*.3gp" -o -iname "*.rmvb" \) |
-    sort -V >>"$tmplist"
+make_tmp_playlist() {
+  [ -d "$playlist_dir" ] || mkdir -p "$playlist_dir"
+  tmplist="$playlist_dir/tmplist.m3u"
+  [ -f "$tmplist" ] && rm -f "$tmplist"
+  find_videos "$1" >"$tmplist"
   play_playlist "$tmplist"
-  rm -rf "$tmplist"
+  rm -f "$tmplist"
 }
 
 list_and_play() {
-  dir=$1
-  any_video=$(find "$dir" -type f \( -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.mov" -o -iname "*.flv" -o -iname "*.wmv" -o -iname "*.webm" -o -iname "*.mpeg" -o -iname "*.mpg" -o -iname "*.avi" -o -iname "*.ts" -o -iname "*.3gp" -o -iname "*.rmvb" \) -print -quit)
-  [ -z "$any_video" ] && echo "No video files in $dir." && exit
+  dir="$1"
+  has_videos "$dir" || { echo "No video files in $dir." && exit; }
+
   choice=$(printf "List files\nEnter filenames" | dmenu -i -p "Choose an option:")
   case "$choice" in
   "Enter filenames")
     search_term=$(echo | dmenu -i -p "File names:")
-    [ -z "$search_term" ] && echo "Invalid search term \"$search_term\"" && exit
-    notify-send "🔎 Finding videos named with '$search_term'.."
-    files=$(find "$dir" \
-      -type f \( -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.mov" -o -iname "*.flv" -o -iname "*.wmv" -o -iname "*.webm" -o -iname "*.mpeg" -o -iname "*.mpg" -o -iname "*.avi" -o -iname "*.ts" -o -iname "*.3gp" -o -iname "*.rmvb" \) \
-      -iname "*$search_term*" | sort -V)
+    [ -z "$search_term" ] && exit
+    notify-send "Finding videos named with '$search_term'.."
+    files=$(eval "find \"$dir\" -type f \\( $VIDEO_EXTS \\) -iname \"*$search_term*\"" | sort -V)
     [ -z "$files" ] && echo "No files named with \"$search_term\"." && exit
     tmpplaylist=$(mktemp /tmp/mpv_playlist_XXXXXX.m3u)
-    echo "$files" | while read -r file; do
-      echo "$file"
-    done >"$tmpplaylist"
+    echo "$files" >"$tmpplaylist"
     play_playlist "$tmpplaylist"
-    rm -rf "$tmpplaylist"
+    rm -f "$tmpplaylist"
     ;;
   "List files")
-    files_with_paths=$(find "$dir" -mindepth 1 -maxdepth 1 \
-      -type f \( -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.mov" -o -iname "*.flv" -o -iname "*.wmv" -o -iname "*.webm" -o -iname "*.mpeg" -o -iname "*.mpg" -o -iname "*.avi" -o -iname "*.ts" -o -iname "*.3gp" -o -iname "*.rmvb" \) |
-      sort -V)
+    files_with_paths=$(find_videos "$dir")
     selected_file=$(printf "All\n%s" "$files_with_paths" | sed 's|.*/||' | dmenu -i -l 21 -p "Select a file:")
-    [ -z "$selected_file" ] && echo "No file selected." && exit
-    [ "$selected_file" = "All" ] && tmp_playlist "$dir" && return
-    full_path="$(echo "$files_with_paths" | grep -F "$selected_file")"
+    [ -z "$selected_file" ] && exit
+    [ "$selected_file" = "All" ] && make_tmp_playlist "$dir" && return
+    full_path=$(echo "$files_with_paths" | grep -F "$selected_file")
     [ -f "$full_path" ] && play_media "$full_path" && return
     ;;
-  *) return ;;
   esac
 }
 
+# --- Directory Browser ---
+list_nonempty_subdirs() {
+  find "$1" -mindepth 1 -maxdepth 1 -type d ! -name ".*" 2>/dev/null | while read -r d; do
+    [ -n "$(ls -A "$d" 2>/dev/null)" ] && echo "$d"
+  done
+}
+
+browse_local() {
+  dir_list="$HOME/Downloads
+$HOME/Torrents/complete
+$HOME/Videos"
+
+  # Add managed mount points (always shown, even if not yet mounted)
+  while IFS='|' read -r mp mcmd ucmd; do
+    [ -n "$mp" ] && [ -d "$mp" ] && dir_list="$dir_list
+$mp"
+  done <<EOF
+$MANAGED_MOUNTS
+EOF
+
+  # Add other mounted media directories (excluding managed ones already listed)
+  for base in "/media/$USER" "/mnt"; do
+    [ -d "$base" ] || continue
+    extra=$(list_nonempty_subdirs "$base" | while read -r d; do
+      echo "$dir_list" | grep -qxF "$d" || echo "$d"
+    done)
+    [ -n "$extra" ] && dir_list="$dir_list
+$extra"
+  done
+
+  init_dir=$(printf "%s" "$dir_list" | dmenu -i -p "Choose your initial directory:")
+  [ -z "$init_dir" ] && exit
+  mount_path "$init_dir"
+
+  selected_dir="$init_dir"
+  while true; do
+    subdir_names=$(list_nonempty_subdirs "$selected_dir" | while read -r d; do basename "$d"; done | sort -V)
+    [ -z "$subdir_names" ] && list_and_play "$selected_dir" && break
+
+    if has_videos "$selected_dir"; then
+      options="Files
+$subdir_names"
+    else
+      options="$subdir_names"
+    fi
+
+    pick=$(printf "%s" "$options" | dmenu -i -p "Select a directory or 'Files':")
+    [ -z "$pick" ] && exit
+    [ "$pick" = "Files" ] && list_and_play "$selected_dir" && break
+    selected_dir="$selected_dir/$pick"
+  done
+}
+
+# --- Playlist and History ---
+choose_playlist() {
+  [ -d "$playlist_dir" ] || mkdir -p "$playlist_dir"
+  playlist=$(find "$playlist_dir" -maxdepth 1 -type f -name "*.m3u" -exec basename {} .m3u \; | sort -V | dmenu -i -p "Select a playlist:")
+  [ -z "$playlist" ] && exit
+  play_playlist "$playlist_dir/$playlist.m3u"
+}
+
 history_play() {
-  # Check if the database exists
-  if [ ! -f "$db_path" ]; then
+  [ -f "$db_path" ] || {
     echo "Error: SQLite database not found at $db_path" >&2
     exit 1
-  fi
+  }
 
-  # Query the database for the latest distinct files by path, formatting time_pos as HH:MM:SS
   history=$(
-    sqlite3 "$db_path" <<EOF
+    sqlite3 "$db_path" <<'SQL'
 WITH LatestFiles AS (
     SELECT path, title, time_pos, MAX(date) AS max_date
     FROM loaded_items
     GROUP BY path
 ),
 FormattedHistory AS (
-    SELECT
-        path,
-        title,
-        CASE
-            WHEN time_pos IS NOT NULL THEN
-                printf('%02d:%02d:%02d',
-                    time_pos / 3600,
-                    (time_pos % 3600) / 60,
-                    time_pos % 60
-                )
-            ELSE '00:00:00'
-        END AS formatted_time,
+    SELECT path, title,
+        CASE WHEN time_pos IS NOT NULL THEN
+            printf('%02d:%02d:%02d', time_pos / 3600, (time_pos % 3600) / 60, time_pos % 60)
+        ELSE '00:00:00' END AS formatted_time,
         max_date
     FROM LatestFiles
 )
 SELECT path || ' | ' || title || ' | ' || formatted_time
 FROM FormattedHistory
 ORDER BY max_date DESC;
-EOF
+SQL
   )
 
-  # Check if there are any results
-  if [ -z "$history" ]; then
-    echo "No history items found in the database." >&2
+  [ -z "$history" ] && {
+    echo "No history items found." >&2
     exit 1
-  fi
+  }
 
-  # Create a temporary file for filtered results
   temp_file=$(mktemp)
-
-  # Filter out entries with non-existing files
   echo "$history" | while IFS= read -r line; do
     file_path=$(printf '%s\n' "$line" | awk -F ' \\| ' '{print $1}')
-    if [ -f "$file_path" ]; then
-      printf '%s\n' "$line" >>"$temp_file"
-    fi
+    [ -f "$file_path" ] && printf '%s\n' "$line" >>"$temp_file"
   done
 
-  # Check if there are valid entries after filtering
-  if [ ! -s "$temp_file" ]; then
-    echo "No valid history items found (all files missing)." >&2
+  [ -s "$temp_file" ] || {
+    echo "No valid history items (all files missing)." >&2
     rm -f "$temp_file"
     exit 1
-  fi
+  }
 
-  # Display results in dmenu and get the user's choice
   chosen=$(dmenu -i -l 20 -p "Choose a file to play:" <"$temp_file")
   rm -f "$temp_file"
+  [ -z "$chosen" ] && exit
 
-  # Check if the user made a selection
-  if [ -z "$chosen" ]; then
-    echo "No file selected." >&2
-    exit 1
-  fi
-
-  # Extract the file path and formatted time position from the selected item
   file_path=$(printf '%s\n' "$chosen" | awk -F ' \\| ' '{print $1}')
   formatted_time=$(printf '%s\n' "$chosen" | awk -F ' \\| ' '{print $3}')
-
-  # Convert the formatted time back to seconds for mpv
   time_pos=$(printf '%s\n' "$formatted_time" | awk -F: '{print ($1 * 3600) + ($2 * 60) + $3}')
 
-  # Play the file with mpv, resuming from the saved time position
   if [ "$time_pos" -gt 0 ]; then
-    mpv --x11-name=video --start="$time_pos" "$file_path"
+    play_media --start="$time_pos" "$file_path"
   else
-    mpv --x11-name=video "$file_path"
+    play_media "$file_path"
   fi
 }
+
+# --- Main ---
+trap 'unmount_all; exit' EXIT INT
 
 content_choice=$(printf "URL\nLocal Files\nPlaylist\nHistory" | dmenu -i -p "Choose media source:")
 case "$content_choice" in
 "URL") play_url ;;
-"Playlist")
-  playlist=$(find "$HOME/.config/mpv/playlists" -maxdepth 1 -type f -name "*.m3u" -exec basename {} .m3u \; | sort -V | dmenu -i -p "Select a playlist:")
-  [ -z "$playlist" ] && exit
-  play_playlist "$HOME/.config/mpv/playlists/$playlist.m3u"
-  ;;
-"Local Files")
-  check_mount
-  # Build directory list
-  dir_list="$HOME/Downloads\n$HOME/Secret\n$HOME/Torrents/complete\n$HOME/Videos"
-
-  # Add subdirectories from /media/$USER if they exist
-  if [ -d "/media/$USER" ]; then
-    media_subdirs=$(find "/media/$USER" -mindepth 1 -maxdepth 1 -type d ! -name ".*" 2>/dev/null | while read -r d; do
-      [ -n "$(ls -A "$d" 2>/dev/null)" ] && echo "$d"
-    done)
-    [ -n "$media_subdirs" ] && dir_list="$dir_list\n$media_subdirs"
-  fi
-
-  # Add subdirectories from /mnt if they exist
-  if [ -d "/mnt" ]; then
-    mnt_subdirs=$(find "/mnt" -mindepth 1 -maxdepth 1 -type d ! -name ".*" 2>/dev/null | while read -r d; do
-      [ -n "$(ls -A "$d" 2>/dev/null)" ] && echo "$d"
-    done)
-    [ -n "$mnt_subdirs" ] && dir_list="$dir_list\n$mnt_subdirs"
-  fi
-
-  printf "%b" "$dir_list" | dmenu -i -p "Choose your initial directory:" | {
-    read -r init_dir
-    [ -z "$init_dir" ] && $mount_script && exit
-    selected_dir="$init_dir"
-    while true; do
-      subdir_options="$(find "$selected_dir" -mindepth 1 -maxdepth 1 -type d ! -name ".*" | while read -r d; do
-        [ -n "$(ls -A "$d" 2>/dev/null)" ] && basename "$d"
-      done | sort -V)"
-      [ -z "$subdir_options" ] && list_and_play "$selected_dir" && break
-      has_video=$(find "$selected_dir" -maxdepth 1 -type f \( -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.mov" -o -iname "*.flv" -o -iname "*.wmv" -o -iname "*.webm" -o -iname "*.mpeg" -o -iname "*.mpg" -o -iname "*.avi" -o -iname "*.ts" -o -iname "*.3gp" -o -iname "*.rmvb" \) -print -quit)
-      if [ -n "$has_video" ]; then
-        options="Files\n$subdir_options"
-      else
-        options="$subdir_options"
-      fi
-      selected_relative_dir="$(printf "%b" "$options" | dmenu -i -p "Select a directory or 'files':")"
-      [ -z "$selected_relative_dir" ] && echo "No relative directory." && exit
-      [ "$selected_relative_dir" = "Files" ] && list_and_play "$selected_dir" && break
-      selected_dir="$selected_dir/$selected_relative_dir"
-    done
-  }
-  ;;
-"history") history_play ;;
+"Local Files") browse_local ;;
+"Playlist") choose_playlist ;;
+"History") history_play ;;
 *) exit ;;
 esac
-
-trap 'check_unmount; exit' EXIT INT
