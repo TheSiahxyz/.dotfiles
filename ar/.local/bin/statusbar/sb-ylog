@@ -27,19 +27,19 @@ update() {
   if [ -f "$LOCK" ]; then
     kill -0 "$(cat "$LOCK")" 2>/dev/null && return
   fi
-  echo $$ > "$LOCK"
+  echo $$ >"$LOCK"
 
-  fetch_logs > "$CURR" 2>/dev/null
-  total=$(wc -l < "$CURR")
+  fetch_logs >"$CURR" 2>/dev/null
+  total=$(wc -l <"$CURR")
 
   if [ -f "$PREV" ]; then
     # Find lines in curr that are not in prev
-    comm -23 "$CURR" "$PREV" > "$NEW"
+    comm -23 "$CURR" "$PREV" >"$NEW"
   else
     cp "$CURR" "$NEW"
   fi
 
-  new_count=$(wc -l < "$NEW")
+  new_count=$(wc -l <"$NEW")
   [ -t 1 ] && echo "[ylog] fetched $total lines, $new_count new" >&2
 
   rm -f "$LOCK"
@@ -47,7 +47,7 @@ update() {
 
 mark_seen() {
   [ -f "$CURR" ] && cp "$CURR" "$PREV"
-  : > "$NEW"
+  : >"$NEW"
 }
 
 case $BLOCK_BUTTON in
@@ -80,6 +80,6 @@ esac
 
 # Display
 if [ -s "$NEW" ]; then
-  count=$(wc -l < "$NEW")
-  echo "🌐$count"
+  count=$(wc -l <"$NEW")
+  printf "🌐%s\n" "$count"
 fi
