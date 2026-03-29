@@ -21,6 +21,13 @@ DISK_LOCATION=${1:-/}
 CACHE_DIR=/tmp/sb-system
 mkdir -p "$CACHE_DIR"
 
+# Clear stale caches on first run (e.g. dwmblocks restart)
+LOCK="$CACHE_DIR/.started"
+if [ ! -f "$LOCK" ]; then
+  rm -f "$CACHE_DIR"/cpu "$CACHE_DIR"/cpubars "$CACHE_DIR"/cpubars_prev "$CACHE_DIR"/memory "$CACHE_DIR"/disk*
+  touch "$LOCK"
+fi
+
 # ── Helper: check if cache is stale ────────────────────────
 # usage: is_stale <cache_file> <interval_seconds>
 is_stale() {
