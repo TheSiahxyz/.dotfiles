@@ -23,7 +23,7 @@
     preview_metadata_group_style: (fg: "#f9e2af", modifiers: "Bold"),
     highlighted_item_style: (fg: "#cba6f7", modifiers: "Bold"),
     current_item_style: (fg: "#1e1e2e", bg: "#89b4fa", modifiers: "Bold"),
-    borders_style: (fg: "#45475a"),
+    borders_style: (fg: "#6c7086"),
     highlight_border_style: (fg: "#89b4fa"),
     symbols: (
         song: "🎵",
