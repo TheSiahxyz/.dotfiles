@@ -6,13 +6,15 @@
 # Middle click: force refresh
 # Right click: help
 
-CACHE_DIR="/tmp/ylog_sb"
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/ylog_sb"
 PREV="$CACHE_DIR/prev"
 CURR="$CACHE_DIR/curr"
 NEW="$CACHE_DIR/new"
 LOCK="$CACHE_DIR/lock"
 
 mkdir -p "$CACHE_DIR"
+
+export SSH_AUTH_SOCK="/run/user/$(id -u)/gnupg/S.gpg-agent.ssh"
 
 fetch_logs() {
   us_today=$(TZ=America/New_York LC_TIME=C date +%d/%b)
@@ -83,3 +85,5 @@ if [ -s "$NEW" ]; then
   count=$(wc -l <"$NEW")
   printf "🌐%s\n" "$count"
 fi
+
+exit 0
