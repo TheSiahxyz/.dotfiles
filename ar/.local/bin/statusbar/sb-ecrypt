@@ -1,9 +1,16 @@
 #!/bin/sh
 
 case $BLOCK_BUTTON in
-1) "${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/ecrypt" >/dev/null ;;
+1) "${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/ecrypt" secret >/dev/null ;;
+2) if mount | grep -q "/mnt/"; then
+    "${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/unmounter"
+  else
+    "${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/mounter"
+  fi ;;
+
 3) notify-send "🔒 Encrypted Media Folder " "\- Shows mount status of Media
-- Left click to toggle mount" ;;
+- Left click to toggle ~/Secret
+- Middle click to toggle /mnt/" ;;
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
