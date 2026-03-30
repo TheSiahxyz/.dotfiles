@@ -34,19 +34,11 @@ getweatherreportjson() {
   echo "$tmp" >"$weatherreportjson"
 }
 
-# Generate a text report from JSON data and save it locally.
+# Fetch a text weather report from wttr.in and save it locally.
 getweatherreport() {
-  {
-    printf "🌈 Today's weather: %s\n" "$(getdesc)"
-    printf "🏂: %s%%\n" "$(getsnow)"
-    printf "☔: %s%% (day high: %s%%)\n" "$(getprecip)" "$(gethighprecip)"
-    gethumidity
-    printf "🎐: %s km/h\n" "$(getwind)"
-    printf "🌞: %s°C (feels like %s°C)\n" "$(gettemp)" "$(getfeelslike)"
-    printf "🥶: %s°C\n" "$(getlowtemp)"
-    printf "🥵: %s°C\n" "$(gethightemp)"
-    printf "\nUpdated: %s\n" "$(date '+%Y-%m-%d %H:%M:%S')"
-  } >"$weatherreport"
+  url="${WTTRURL:-wttr.in}"
+  tmp=$(timeout --signal=1 2s curl -sf "$url/${LOCATION:-$location}") || error "weatherreport"
+  echo "$tmp" >"$weatherreport"
 }
 
 # Forecast should be updated every 3 hours, but set 86400 to check once a day for reliability.
