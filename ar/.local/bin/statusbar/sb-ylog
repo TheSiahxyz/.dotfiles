@@ -17,11 +17,11 @@ mkdir -p "$CACHE_DIR"
 export SSH_AUTH_SOCK="/run/user/$(id -u)/gnupg/S.gpg-agent.ssh"
 
 fetch_logs() {
-  us_today=$(TZ=America/New_York LC_TIME=C date +%d/%b)
-  us_yesterday=$(TZ=America/New_York LC_TIME=C date -d 'yesterday' +%d/%b)
+  kr_today=$(TZ=Asia/Seoul LC_TIME=C date +%d/%b)
+  kr_yesterday=$(TZ=Asia/Seoul LC_TIME=C date -d 'yesterday' +%d/%b)
   ssh -o BatchMode=yes -o ConnectTimeout=10 root@thesiah.xyz \
     "cat /var/log/nginx/diary.us.log /var/log/nginx/recordings.us.log /var/log/nginx/peertube.us.log 2>/dev/null" \
-    2>/dev/null | grep -E "$us_today|$us_yesterday" | grep -E '[0-9]{2}:[0-9]{2}:[0-9]{2} ' | grep -v '59\.19\.56\.8' | sort -u
+    2>/dev/null | grep -E "$kr_today|$kr_yesterday" | grep -E '[0-9]{2}:[0-9]{2}:[0-9]{2} ' | grep -v '59\.19\.56\.8' | sort -u
 }
 
 update() {
