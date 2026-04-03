@@ -184,7 +184,11 @@ cmd trash ${{
   while [ "$files" ]; do
     file=${files%%;*}
 
-    trash-put "$(basename "$file")"
+    trash-put "$(basename "$file")" || {
+      printf "sudo delete?[y/N]"
+      read ans
+      [ $ans = "y" ] && sudo rm -rf -- $fx
+    }
     if [ "$files" = "$file" ]; then
       files=''
     else
@@ -387,27 +391,36 @@ cmd select-mime &{{
 
   case "$1" in
     -*)
-      # Exclusion: grep -v (e.g., -inode/directory for files)
       pattern="${1#-}"
-      files=$(find "$PWD" -mindepth 1 -maxdepth 1 \
+      find "$PWD" -mindepth 1 -maxdepth 1 \
         $([ "$lf_hidden" = false ] && printf '%s\n' ! -name '.*') -print |
         file -L --mime-type -f - | grep -v "$pattern" | cut -d: -f1 |
-        sort -f |
-        sed 's/\\/\\\\/g;s/"/\\"/g;s/^/"/;s/$/"/' |
-        tr '\n' ' ')
+        sort -f > /tmp/lf-select-mime-$$
       ;;
     *)
-      # Inclusion: grep pattern
-      files=$(find "$PWD" -mindepth 1 -maxdepth 1 \
+      find "$PWD" -mindepth 1 -maxdepth 1 \
         $([ "$lf_hidden" = false ] && printf '%s\n' ! -name '.*') -print |
         file -L --mime-type -f - | grep "$1" | cut -d: -f1 |
-        sort -f |
-        sed 's/\\/\\\\/g;s/"/\\"/g;s/^/"/;s/$/"/' |
-        tr '\n' ' ')
+        sort -f > /tmp/lf-select-mime-$$
       ;;
   esac
 
-  [ -n "$files" ] && lf -remote "send $id :unselect; toggle $files"
+  [ -s /tmp/lf-select-mime-$$ ] || { rm -f /tmp/lf-select-mime-$$; exit; }
+
+  lf -remote "send $id unselect"
+  batch=""
+  while IFS= read -r file; do
+    quoted=$(printf '%s' "$file" | sed 's/\\/\\\\/g;s/"/\\"/g')
+    candidate="$batch \"$quoted\""
+    if [ ${#candidate} -gt 8000 ]; then
+      lf -remote "send $id toggle $batch"
+      batch="\"$quoted\""
+    else
+      batch="$candidate"
+    fi
+  done < /tmp/lf-select-mime-$$
+  [ -n "$batch" ] && lf -remote "send $id toggle $batch"
+  rm -f /tmp/lf-select-mime-$$
 }}
 cmd select-dirs select-mime 'inode/directory'
 cmd select-files select-mime '-inode/directory'
