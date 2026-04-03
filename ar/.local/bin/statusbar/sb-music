@@ -132,8 +132,17 @@ fi
 
 case $BLOCK_BUTTON in
 1) setsid -f "$TERMINAL" -e ncmpcpp ;; # left click, opens ncmpcpp
-2) mpc toggle ;;                       # middle click, pause/unpause
-3)                                     # right click
+2)                                     # middle click, pause/unpause
+  mpc toggle 2>/dev/null
+  while IFS= read -r player; do
+    if [[ "$player" == chromium.instance* ]]; then
+      pid="${player#chromium.instance}"
+      proc_name=$(cat /proc/"$pid"/cmdline 2>/dev/null | tr '\0' '\n' | grep -i "youtube-music\|pear-desktop" | head -1)
+      [ -n "$proc_name" ] && playerctl --player="$player" play-pause 2>/dev/null
+    fi
+  done < <(playerctl -l 2>/dev/null)
+  ;;
+3) # right click
   { [ -n "$(mpc current)" ] && [ -n "$(mpc queued)" ]; } && notify-send "🎵 $(mpc current)" "⏭  $(mpc queued)"
   notify-send "🎵 Music module" "\- Shows mpd song playing and status
 - 🎵 if playing
