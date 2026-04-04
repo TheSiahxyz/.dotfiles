@@ -1,5 +1,5 @@
 * * * * * export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u $USER)/bus; export DISPLAY=:0; . $HOME/.zprofile; kill -36 $(pidof dwmblocks) 2>/dev/null
-*/3 * * * * export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u $USER)/bus; export DISPLAY=:0; . $HOME/.zprofile; /usr/local/bin/mailsync
+*/3 * * * * export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u $USER)/bus; export DISPLAY=:0; . $HOME/.zprofile; /usr/local/bin/mailsync; kill -49 $(pidof dwmblocks) 2>/dev/null
 */15 * * * * export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u $USER)/bus; export DISPLAY=:0; . $HOME/.zprofile; $HOME/.local/bin/cron/newsup
 0 */3 * * * export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u $USER)/bus; export DISPLAY=:0; . $HOME/.zprofile; $HOME/.local/bin/cron/checkup
 0 0 * * * export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u $USER)/bus; export DISPLAY=:0; . $HOME/.zprofile; NVIM_APPNAME=TheSiahxyz nvim --headless "+Lazy! sync" +qa
