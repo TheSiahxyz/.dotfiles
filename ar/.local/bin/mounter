@@ -14,12 +14,17 @@ escape() { echo "$@" | iconv -cf UTF-8 -t ASCII//TRANSLIT | tr -d '[:punct:]' | 
 # Determine mount base: /mnt for internal drives, /media/$USER for external.
 mountbase() {
   local dev="$1"
-  # Resolve to parent disk (e.g., /dev/nvme0n1p2 -> /dev/nvme0n1).
-  local pkname
-  pkname="$(lsblk -no PKNAME "$dev" 2>/dev/null | head -1)"
-  [ -z "$pkname" ] && pkname="$(basename "$dev")"
+  # Resolve through device-mapper and partitions to the underlying disk.
+  local cur="$dev"
+  while true; do
+    local parent
+    parent="$(sudo lsblk -no PKNAME "$cur" 2>/dev/null | head -1)"
+    [ -z "$parent" ] && break
+    cur="/dev/$parent"
+  done
   local hotplug
-  hotplug="$(lsblk -dno HOTPLUG "/dev/$pkname" 2>/dev/null | head -1)"
+  hotplug="$(sudo lsblk -dno HOTPLUG "$cur" 2>/dev/null | head -1)"
+  printf "[DEBUG mountbase] dev=%s resolved=%s hotplug='%s'\n" "$dev" "$cur" "$hotplug" >&2
   if [ "$hotplug" = "0" ]; then
     echo "/mnt"
   else
@@ -53,12 +58,10 @@ attemptmount() {
     ntfs*) mountopts="-o uid=$(id -u),gid=$(id -g)" ;;
     *) mountopts="" ;;
   esac
-  if [ ! -d "$mp" ] && [ ! -d "/mnt/$mplabel" ]; then
-    getmount "$mp" && sudo -A mount $mountopts "$chosen" "$mp" >/dev/null 2>&1 || return 1
-  elif [ -d "$mp" ] && [ ! -d "/mnt/$mplabel" ]; then
+  if [ -d "$mp" ]; then
     sudo -A mount $mountopts "$chosen" "$mp" >/dev/null 2>&1 || return 1
-  elif [ -d "/mnt/$mplabel" ]; then
-    getmount "/mnt/$mplabel" && sudo -A mount $mountopts "$chosen" "/mnt/$mplabel" >/dev/null 2>&1 || return 1
+  elif [ ! -d "$mp" ]; then
+    getmount "$mp" && sudo -A mount $mountopts "$chosen" "$mp" >/dev/null 2>&1 || return 1
   else
     sudo -A mount $mountopts "$chosen" >/dev/null 2>&1 || return 1
   fi
