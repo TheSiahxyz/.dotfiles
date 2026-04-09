@@ -17,7 +17,9 @@ getmount() {
   test -n "$mp"
   if [ ! -d "$mp" ]; then
     mkdiryn=$(printf "Yes\nNo" | dmenu -i -p "$mp does not exist. Create it?")
-    [ "$mkdiryn" = "Yes" ] && (mkdir -p "$mp" 2>/dev/null || sudo -A mkdir -p "$mp")
+    [ "$mkdiryn" = "Yes" ] && (mkdir -p "$mp" 2>/dev/null || { sudo -A mkdir -p "$mp" && sudo -A chown "$USER":"$(id -gn)" "$mp"; })
+  elif [ "$(stat -c '%U' "$mp")" != "$USER" ]; then
+    sudo -A chown "$USER":"$(id -gn)" "$mp"
   fi
 }
 
@@ -26,14 +28,21 @@ attemptmount() {
   mplabel=$(sudo lsblk -no "label" "$chosen")
   mp="/media/$USER/$mplabel"
   [ -n "$mplabel" ] || return
+  # Determine mount options based on filesystem type.
+  fstype="$(sudo lsblk -no fstype "$chosen" | head -1)"
+  case "$fstype" in
+    vfat|exfat) mountopts="-o uid=$(id -u),gid=$(id -g),umask=0000" ;;
+    ntfs*) mountopts="-o uid=$(id -u),gid=$(id -g)" ;;
+    *) mountopts="" ;;
+  esac
   if [ ! -d "$mp" ] && [ ! -d "/mnt/$mplabel" ]; then
-    getmount "$mp" && sudo -A mount "$chosen" "$mp" >/dev/null 2>&1 || return 1
+    getmount "$mp" && sudo -A mount $mountopts "$chosen" "$mp" >/dev/null 2>&1 || return 1
   elif [ -d "$mp" ] && [ ! -d "/mnt/$mplabel" ]; then
-    sudo -A mount "$chosen" "$mp" >/dev/null 2>&1 || return 1
+    sudo -A mount $mountopts "$chosen" "$mp" >/dev/null 2>&1 || return 1
   elif [ -d "/mnt/$mplabel" ]; then
-    getmount "/mnt/$mplabel" && sudo -A mount "$chosen" "/mnt/$mplabel" >/dev/null 2>&1 || return 1
+    getmount "/mnt/$mplabel" && sudo -A mount $mountopts "$chosen" "/mnt/$mplabel" >/dev/null 2>&1 || return 1
   else
-    sudo -A mount "$chosen" >/dev/null 2>&1 || return 1
+    sudo -A mount $mountopts "$chosen" >/dev/null 2>&1 || return 1
   fi
 }
 
@@ -162,9 +171,12 @@ case "$chosen" in
   chosen="${chosen:1}" # This is a bashism.
   parttype="$(echo "$lsblkoutput" | grep "$chosen")"
   attemptmount || {
-    getmount
+    # Use label or device basename as default mount point.
+    mplabel="$(sudo lsblk -no label "$chosen" | head -1)"
+    [ -z "$mplabel" ] && mplabel="$(basename "$chosen")"
+    getmount "/media/$USER/$mplabel"
     case "${parttype##* }" in
-    vfat) sudo -A mount -t vfat "$chosen" "$mp" -o rw,umask=0000 ;;
+    vfat) sudo -A mount -t vfat "$chosen" "$mp" -o rw,umask=0000,uid="$(id -u)",gid="$(id -g)" ;;
     btrfs) sudo -A mount "$chosen" "$mp" ;;
     *) sudo -A mount "$chosen" "$mp" -o uid="$(id -u)",gid="$(id -g)" ;;
     esac
@@ -183,23 +195,27 @@ case "$chosen" in
   test -b "/dev/mapper/usb$num"
   chosen="/dev/mapper/usb$num"
   attemptmount || {
-    getmount
+    mplabel="$(sudo lsblk -no label "$chosen" | head -1)"
+    [ -z "$mplabel" ] && mplabel="usb$num"
+    getmount "/media/$USER/$mplabel"
     sudo -A mount "/dev/mapper/usb$num" "$mp" -o uid="$(id -u)",gid="$(id -g)" || sudo -A mount "/dev/mapper/usb$num" "$mp"
   }
   notify-send "🔓 Decrypted drive Mounted." "$chosen decrypted and mounted to $mp."
   ;;
 📱*)
   notify-send "❗ Note" "Remember to allow file access on your phone now."
-  getmount
   number="${chosen%%:*}"
   number="${chosen:1}" # This is a bashism.
+  phonename="$(escape "$chosen")"
+  getmount "/media/$USER/$phonename"
   sudo -A simple-mtpfs -o allow_other -o fsname="simple-mtpfs-$(escape "$chosen")" --device "$number" "$mp" 2>dev/null
   notify-send "🤖 Android Mounted." "Android device mounted to $mp."
   ;;
 🍎*)
-  getmount
   number="${chosen%%:*}"
   number="${chosen:1}" # This is a bashism.
+  iphonename="$(escape "$chosen")"
+  getmount "/media/$USER/$iphonename"
   sudo -A ifuse "$mp" 2>dev/null
   notify-send "🍎 iPhone Mounted." "$chosen mounted to $mp."
   ;;
