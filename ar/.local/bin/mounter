@@ -11,6 +11,22 @@ IFS='
 # Function for escaping cell-phone names.
 escape() { echo "$@" | iconv -cf UTF-8 -t ASCII//TRANSLIT | tr -d '[:punct:]' | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | sed "s/-\+/-/g;s/\(^-\|-\$\)//g"; }
 
+# Determine mount base: /mnt for internal drives, /media/$USER for external.
+mountbase() {
+  local dev="$1"
+  # Resolve to parent disk (e.g., /dev/nvme0n1p2 -> /dev/nvme0n1).
+  local pkname
+  pkname="$(lsblk -no PKNAME "$dev" 2>/dev/null | head -1)"
+  [ -z "$pkname" ] && pkname="$(basename "$dev")"
+  local hotplug
+  hotplug="$(lsblk -dno HOTPLUG "/dev/$pkname" 2>/dev/null | head -1)"
+  if [ "$hotplug" = "0" ]; then
+    echo "/mnt"
+  else
+    echo "/media/$USER"
+  fi
+}
+
 # Function for prompting user for a mountpoint.
 getmount() {
   [ -z "$1" ] && mp="$(find "/media/$USER" /mnt -mindepth 1 -maxdepth 1 -type d 2>/dev/null | dmenu -i -p "Mount this drive where?")" || mp="$1"
@@ -26,8 +42,10 @@ getmount() {
 attemptmount() {
   # Attempt to mount without a mountpoint, to see if drive is in fstab.
   mplabel=$(sudo lsblk -no "label" "$chosen")
-  mp="/media/$USER/$mplabel"
   [ -n "$mplabel" ] || return
+  local base
+  base="$(mountbase "$chosen")"
+  mp="$base/$mplabel"
   # Determine mount options based on filesystem type.
   fstype="$(sudo lsblk -no fstype "$chosen" | head -1)"
   case "$fstype" in
@@ -174,7 +192,7 @@ case "$chosen" in
     # Use label or device basename as default mount point.
     mplabel="$(sudo lsblk -no label "$chosen" | head -1)"
     [ -z "$mplabel" ] && mplabel="$(basename "$chosen")"
-    getmount "/media/$USER/$mplabel"
+    getmount "$(mountbase "$chosen")/$mplabel"
     case "${parttype##* }" in
     vfat) sudo -A mount -t vfat "$chosen" "$mp" -o rw,umask=0000,uid="$(id -u)",gid="$(id -g)" ;;
     btrfs) sudo -A mount "$chosen" "$mp" ;;
@@ -197,7 +215,7 @@ case "$chosen" in
   attemptmount || {
     mplabel="$(sudo lsblk -no label "$chosen" | head -1)"
     [ -z "$mplabel" ] && mplabel="usb$num"
-    getmount "/media/$USER/$mplabel"
+    getmount "$(mountbase "$chosen")/$mplabel"
     sudo -A mount "/dev/mapper/usb$num" "$mp" -o uid="$(id -u)",gid="$(id -g)" || sudo -A mount "/dev/mapper/usb$num" "$mp"
   }
   notify-send "🔓 Decrypted drive Mounted." "$chosen decrypted and mounted to $mp."
