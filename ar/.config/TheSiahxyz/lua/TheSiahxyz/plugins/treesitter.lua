@@ -8,6 +8,13 @@ return {
 			install_dir = vim.fn.stdpath("data") .. "/treesitter",
 		})
 	end,
+	init = function()
+		local wk = require("which-key")
+		wk.add({
+			mode = { "n" },
+			{ "<leader>T", group = "Treesitter" },
+		})
+	end,
 	keys = {
 		{ "<leader>TU", ":TSUpdate<cr>", desc = "Update treesitter" },
 		{
@@ -30,6 +37,7 @@ return {
 					"python",
 					"rust",
 					"sql",
+					"tsx",
 					"typescript",
 					"vim",
 					"vimdoc",

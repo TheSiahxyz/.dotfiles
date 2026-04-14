@@ -262,7 +262,15 @@ return {
 	{
 		"coder/claudecode.nvim",
 		dependencies = { "folke/snacks.nvim" },
-		config = true,
+		opts = {
+			terminal_cmd = "~/.local/bin/claude", -- Point to local installation
+		},
+		config = function()
+			require("claudecode").setup({
+				-- Top-level aliases are supported and forwarded to terminal config
+				git_repo_cwd = true,
+			})
+		end,
 		keys = {
 			{ "<leader>a", nil, desc = "AI/Claude Code" },
 			{ "<leader>ac", "<cmd>ClaudeCode<cr>", desc = "Toggle Claude" },
