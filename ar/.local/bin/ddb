@@ -180,8 +180,14 @@ done < "$TMP_FILE"
 # Get selection
 echo ""
 total=$(wc -l < "$TMP_FILE")
-echo -n "Select container (1-$total): "
-read selection
+if [ "$total" -eq 1 ]; then
+    echo -n "Select container [1]: "
+    read selection
+    selection="${selection:-1}"
+else
+    echo -n "Select container (1-$total): "
+    read selection
+fi
 
 # Validate selection
 case "$selection" in
@@ -237,46 +243,100 @@ if [ "$MIGRATE_MODE" = 1 ]; then
 
     echo ""
     sql_total=$(wc -l < "$SQL_FILES_TMP")
-    echo -n "Select SQL file to execute (1-$sql_total): "
+    echo -n "Select SQL file(s) to execute (e.g. 3 or 3,5,7 or 3-7) [1-$sql_total]: "
     read sql_selection
 
-    # Validate selection
-    case "$sql_selection" in
-        ''|*[!0-9]*)
-            echo "[ERROR] Invalid selection" >&2
-            exit 1
-            ;;
-    esac
-
-    if [ "$sql_selection" -lt 1 ] || [ "$sql_selection" -gt "$sql_total" ]; then
-        echo "[ERROR] Selection out of range" >&2
+    if [ -z "$sql_selection" ]; then
+        echo "[ERROR] No selection provided" >&2
         exit 1
     fi
 
-    # Get selected SQL file
-    sql_file_path=$(sed -n "${sql_selection}p" "$SQL_FILES_TMP")
+    # Parse selection into reverse-sorted list (highest number first = oldest file first)
+    SELECTED_TMP="/tmp/ddb_selected_$$.tmp"
+    trap 'rm -f "$TMP_FILE" "$SQL_FILES_TMP" "$SELECTED_TMP"' EXIT
 
-    echo ""
-    echo "[INFO] Selected: $(basename "$sql_file_path")"
-    echo ""
-    echo "=== SQL Content Preview ==="
-    head -20 "$sql_file_path"
+    # Split by comma and expand ranges
+    echo "$sql_selection" | tr ',' '\n' | while IFS= read -r part; do
+        part=$(echo "$part" | tr -d ' ')
+        case "$part" in
+            *-*)
+                range_start=$(echo "$part" | cut -d'-' -f1)
+                range_end=$(echo "$part" | cut -d'-' -f2)
+                # Validate range parts are numbers
+                case "$range_start" in ''|*[!0-9]*) echo "[ERROR] Invalid range: $part" >&2; exit 1;; esac
+                case "$range_end" in ''|*[!0-9]*) echo "[ERROR] Invalid range: $part" >&2; exit 1;; esac
+                n=$range_start
+                while [ "$n" -le "$range_end" ]; do
+                    echo "$n"
+                    n=$((n + 1))
+                done
+                ;;
+            *)
+                case "$part" in ''|*[!0-9]*) echo "[ERROR] Invalid selection: $part" >&2; exit 1;; esac
+                echo "$part"
+                ;;
+        esac
+    done | sort -rn -u > "$SELECTED_TMP"
 
-    if [ "$(wc -l < "$sql_file_path")" -gt 20 ]; then
-        echo "..."
-        echo "(showing first 20 lines)"
+    if [ ! -s "$SELECTED_TMP" ]; then
+        echo "[ERROR] Invalid selection" >&2
+        exit 1
+    fi
+
+    # Validate all selections are in range
+    while IFS= read -r num; do
+        if [ "$num" -lt 1 ] || [ "$num" -gt "$sql_total" ]; then
+            echo "[ERROR] Selection $num out of range (1-$sql_total)" >&2
+            exit 1
+        fi
+    done < "$SELECTED_TMP"
+
+    selected_count=$(wc -l < "$SELECTED_TMP")
+
+    # Show selected files (in execution order: ascending = oldest first)
+    echo ""
+    echo "=== Selected Migration Files (execution order) ==="
+    echo ""
+    while IFS= read -r num; do
+        sql_file_path=$(sed -n "${num}p" "$SQL_FILES_TMP")
+        echo "  $num) $(basename "$sql_file_path")"
+    done < "$SELECTED_TMP"
+
+    # Preview if single file
+    if [ "$selected_count" -eq 1 ]; then
+        sql_file_path=$(sed -n "$(cat "$SELECTED_TMP")p" "$SQL_FILES_TMP")
+        echo ""
+        echo "=== SQL Content Preview ==="
+        head -20 "$sql_file_path"
+
+        if [ "$(wc -l < "$sql_file_path")" -gt 20 ]; then
+            echo "..."
+            echo "(showing first 20 lines)"
+        fi
     fi
 
     echo ""
-    echo -n "Execute this migration? (y/N): "
+    if [ "$selected_count" -gt 1 ]; then
+        echo -n "Execute $selected_count migrations? (y/N): "
+    else
+        echo -n "Execute this migration? (y/N): "
+    fi
     read confirm
 
     case "$confirm" in
         y|Y|yes|YES)
-            # Write wrapped SQL to temp file to avoid ARG_MAX limit on large migrations
-            QUERY_TMP="/tmp/ddb_query_$$.sql"
-            trap 'rm -f "$TMP_FILE" "$SQL_FILES_TMP" "$QUERY_TMP"' EXIT
-            { printf 'BEGIN;\n'; cat "$sql_file_path"; printf '\nCOMMIT;\n'; } > "$QUERY_TMP"
+            # Build per-file SQL temps for sequential execution
+            QUERY_TMP_DIR="/tmp/ddb_queries_$$"
+            mkdir -p "$QUERY_TMP_DIR"
+            trap 'rm -f "$TMP_FILE" "$SQL_FILES_TMP" "$SELECTED_TMP"; rm -rf "$QUERY_TMP_DIR"' EXIT
+
+            migrate_seq=0
+            while IFS= read -r num; do
+                sql_file_path=$(sed -n "${num}p" "$SQL_FILES_TMP")
+                migrate_seq=$((migrate_seq + 1))
+                { printf 'BEGIN;\n'; cat "$sql_file_path"; printf '\nCOMMIT;\n'; } > "$QUERY_TMP_DIR/${migrate_seq}_$(basename "$sql_file_path")"
+            done < "$SELECTED_TMP"
+
             query="__MIGRATE__"
             ;;
         *)
@@ -335,20 +395,36 @@ else
             user=$(docker exec "$container_id" sh -c 'echo $POSTGRES_USER' 2>/dev/null || echo "postgres")
 
             if [ "$MIGRATE_MODE" = 1 ]; then
-                docker exec -i "$container_id" psql -U "$user" -d "$db_name" < "$QUERY_TMP"
-                psql_exit=$?
+                migrate_failed=0
+                for qfile in $(ls "$QUERY_TMP_DIR"/*.sql | sort -n); do
+                    fname=$(basename "$qfile" | sed 's/^[0-9]*_//')
+                    echo "[INFO] Executing: $fname"
+                    docker exec -i "$container_id" psql -v ON_ERROR_STOP=1 -U "$user" -d "$db_name" < "$qfile"
+                    if [ $? -ne 0 ]; then
+                        echo ""
+                        echo "[ERROR] Migration failed: $fname" >&2
+                        migrate_failed=1
+                        break
+                    fi
+                    echo "[SUCCESS] Applied: $fname"
+                    echo ""
+                done
+                if [ "$migrate_failed" -eq 1 ]; then
+                    exit 1
+                fi
+                echo "[SUCCESS] All migrations executed successfully"
             else
                 docker exec -it "$container_id" psql -U "$user" -d "$db_name" -c "$query"
                 psql_exit=$?
-            fi
 
-            if [ "$psql_exit" -eq 0 ]; then
-                echo ""
-                echo "[SUCCESS] Query executed successfully"
-            else
-                echo ""
-                echo "[ERROR] Query execution failed" >&2
-                exit 1
+                if [ "$psql_exit" -eq 0 ]; then
+                    echo ""
+                    echo "[SUCCESS] Query executed successfully"
+                else
+                    echo ""
+                    echo "[ERROR] Query execution failed" >&2
+                    exit 1
+                fi
             fi
             ;;
         mysql)
@@ -357,44 +433,78 @@ else
             password=$(docker exec "$container_id" sh -c 'echo $MYSQL_ROOT_PASSWORD' 2>/dev/null || echo "")
 
             if [ "$MIGRATE_MODE" = 1 ]; then
-                if [ -n "$password" ]; then
-                    docker exec -i "$container_id" mysql -u"$user" -p"$password" ${db_name:+-D "$db_name"} < "$QUERY_TMP"
-                else
-                    docker exec -i "$container_id" mysql -u"$user" ${db_name:+-D "$db_name"} < "$QUERY_TMP"
+                migrate_failed=0
+                for qfile in $(ls "$QUERY_TMP_DIR"/*.sql | sort -n); do
+                    fname=$(basename "$qfile" | sed 's/^[0-9]*_//')
+                    echo "[INFO] Executing: $fname"
+                    if [ -n "$password" ]; then
+                        docker exec -i "$container_id" mysql -u"$user" -p"$password" ${db_name:+-D "$db_name"} < "$qfile"
+                    else
+                        docker exec -i "$container_id" mysql -u"$user" ${db_name:+-D "$db_name"} < "$qfile"
+                    fi
+                    if [ $? -ne 0 ]; then
+                        echo ""
+                        echo "[ERROR] Migration failed: $fname" >&2
+                        migrate_failed=1
+                        break
+                    fi
+                    echo "[SUCCESS] Applied: $fname"
+                    echo ""
+                done
+                if [ "$migrate_failed" -eq 1 ]; then
+                    exit 1
                 fi
+                echo "[SUCCESS] All migrations executed successfully"
             else
                 if [ -n "$password" ]; then
                     docker exec -it "$container_id" mysql -u"$user" -p"$password" ${db_name:+-D "$db_name"} -e "$query"
                 else
                     docker exec -it "$container_id" mysql -u"$user" ${db_name:+-D "$db_name"} -e "$query"
                 fi
-            fi
 
-            if [ $? -eq 0 ]; then
-                echo ""
-                echo "[SUCCESS] Query executed successfully"
-            else
-                echo ""
-                echo "[ERROR] Query execution failed" >&2
-                exit 1
+                if [ $? -eq 0 ]; then
+                    echo ""
+                    echo "[SUCCESS] Query executed successfully"
+                else
+                    echo ""
+                    echo "[ERROR] Query execution failed" >&2
+                    exit 1
+                fi
             fi
             ;;
         mongo)
             db_name=$(docker exec "$container_id" sh -c 'echo $MONGO_INITDB_DATABASE' 2>/dev/null || echo "test")
 
             if [ "$MIGRATE_MODE" = 1 ]; then
-                docker exec -i "$container_id" mongosh "$db_name" < "$QUERY_TMP"
+                migrate_failed=0
+                for qfile in $(ls "$QUERY_TMP_DIR"/*.sql | sort -n); do
+                    fname=$(basename "$qfile" | sed 's/^[0-9]*_//')
+                    echo "[INFO] Executing: $fname"
+                    docker exec -i "$container_id" mongosh "$db_name" < "$qfile"
+                    if [ $? -ne 0 ]; then
+                        echo ""
+                        echo "[ERROR] Migration failed: $fname" >&2
+                        migrate_failed=1
+                        break
+                    fi
+                    echo "[SUCCESS] Applied: $fname"
+                    echo ""
+                done
+                if [ "$migrate_failed" -eq 1 ]; then
+                    exit 1
+                fi
+                echo "[SUCCESS] All migrations executed successfully"
             else
                 docker exec -it "$container_id" mongosh "$db_name" --eval "$query"
-            fi
 
-            if [ $? -eq 0 ]; then
-                echo ""
-                echo "[SUCCESS] Query executed successfully"
-            else
-                echo ""
-                echo "[ERROR] Query execution failed" >&2
-                exit 1
+                if [ $? -eq 0 ]; then
+                    echo ""
+                    echo "[SUCCESS] Query executed successfully"
+                else
+                    echo ""
+                    echo "[ERROR] Query execution failed" >&2
+                    exit 1
+                fi
             fi
             ;;
         redis)
