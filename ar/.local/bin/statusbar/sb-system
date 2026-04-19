@@ -47,8 +47,7 @@ case $BLOCK_BUTTON in
 2) setsid -f "$TERMINAL" -e htop ;;
 3) notify-send "🖥 System module" "CPU temp, CPU bars, Memory, Disk usage
 Left click: show hogs & disk info
-Middle click: open htop
-Right click: this help" ;;
+Middle click: open htop" ;;
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
