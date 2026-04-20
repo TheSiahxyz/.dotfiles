@@ -145,11 +145,6 @@ case $BLOCK_BUTTON in
 3) # right click
   { [ -n "$(mpc current)" ] && [ -n "$(mpc queued)" ]; } && notify-send "🎵 $(mpc current)" "⏭  $(mpc queued)"
   notify-send "🎵 Music module" "\- Shows mpd song playing and status
-- 🎵 if playing
-- ⏸ if paused
-- 🔂 if single on
-- 🔁 if repeat on
-- 🔀 if random on
 - Left click opens ncmpcpp
 - Middle click pauses/unpause
 - Scroll changes track"
