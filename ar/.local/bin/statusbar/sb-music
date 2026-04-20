@@ -154,7 +154,9 @@ case $BLOCK_BUTTON in
 - Middle click pauses/unpause
 - Scroll changes track"
   ;;
-4) mpc prev ;; # scroll up, previous
-5) mpc next ;; # scroll down, next
+4) mpc prev ;;
+5) mpc next ;;
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
+9) playerctl prev ;;
+10) playerctl next ;;
 esac
