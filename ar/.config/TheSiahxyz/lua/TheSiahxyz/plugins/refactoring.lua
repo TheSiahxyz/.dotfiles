@@ -9,7 +9,7 @@ return {
 		wk.add({
 			mode = { "n", "v", "x" },
 			{ "<leader>r", group = "Compiler/Refactoring" },
-			{ "<leader>rb", group = "Extract block" },
+			{ "<leader>rd", group = "Debug" },
 		})
 	end,
 	lazy = false,
@@ -41,38 +41,80 @@ return {
 			print_var_statements = {},
 			show_success_message = false,
 		})
-		vim.keymap.set({ "n", "x" }, "<leader>re", function()
-			return require("refactoring").refactor("Extract Function")
-		end, { expr = true, desc = "Extract" })
-		vim.keymap.set({ "n", "x" }, "<leader>rf", function()
-			return require("refactoring").refactor("Extract Function To File")
-		end, { expr = true, desc = "Extract to file" })
-		vim.keymap.set({ "n", "x" }, "<leader>rv", function()
-			return require("refactoring").refactor("Extract Variable")
-		end, { expr = true, desc = "Extract variable" })
-		vim.keymap.set({ "n", "x" }, "<leader>rI", function()
-			return require("refactoring").refactor("Inline Function")
-		end, { expr = true, desc = "Refactor inline function" })
-		vim.keymap.set({ "n", "x" }, "<leader>ri", function()
-			return require("refactoring").refactor("Inline Variable")
-		end, { expr = true, desc = "Refactor inline variable" })
 
-		vim.keymap.set({ "n", "x" }, "<leader>rbb", function()
-			return require("refactoring").refactor("Extract Block")
-		end, { expr = true, desc = "Extract block" })
-		vim.keymap.set({ "n", "x" }, "<leader>rbf", function()
-			return require("refactoring").refactor("Extract Block To File")
-		end, { expr = true, desc = "Extract block to file" })
+		local keymap = vim.keymap
 
-		-- prompt for a refactor to apply when the remap is triggered
-		vim.keymap.set({ "n", "x" }, "<leader>rs", function()
-			require("refactoring").select_refactor({ prefer_ex_cmd = true })
-		end, { desc = "Refactor selection" })
-		-- Note that not all refactor support both normal and visual mode
-		-- load refactoring Telescope extension
-		require("telescope").load_extension("refactoring")
-		vim.keymap.set({ "n", "x" }, "<leader>rf", function()
-			require("telescope").extensions.refactoring.refactors()
-		end, { desc = "Open refactor" })
+		keymap.set({ "n", "x" }, "<leader>re", function()
+			return require("refactoring").extract_func()
+		end, { desc = "Extract Function", expr = true })
+		-- `_` is the default textobject for "current line"
+		keymap.set("n", "<leader>ree", function()
+			return require("refactoring").extract_func() .. "_"
+		end, { desc = "Extract Function (line)", expr = true })
+
+		keymap.set({ "n", "x" }, "<leader>rE", function()
+			return require("refactoring").extract_func_to_file()
+		end, { desc = "Extract Function To File", expr = true })
+
+		keymap.set({ "n", "x" }, "<leader>rv", function()
+			return require("refactoring").extract_var()
+		end, { desc = "Extract Variable", expr = true })
+
+		-- `_` is the default textobject for "current line"
+		keymap.set("n", "<leader>rvv", function()
+			return require("refactoring").extract_var() .. "_"
+		end, { desc = "Extract Variable (line)", expr = true })
+
+		keymap.set({ "n", "x" }, "<leader>ri", function()
+			return require("refactoring").inline_var()
+		end, { desc = "Inline Variable", expr = true })
+		keymap.set({ "n", "x" }, "<leader>rI", function()
+			return require("refactoring").inline_func()
+		end, { desc = "Inline function", expr = true })
+
+		keymap.set({ "n", "x" }, "<leader>rs", function()
+			return require("refactoring").select_refactor()
+		end, { desc = "Select refactor" })
+
+		-- `iw` is the builtin textobject for "in word". You can use any other textobject or even create the keymap without any textobject if you prefer to provide one yourself each time that you use the keymap
+		keymap.set({ "x", "n" }, "<leader>rdv", function()
+			return require("refactoring.debug").print_var({ output_location = "below" }) .. "iw"
+		end, { desc = "Debug print var below", expr = true })
+
+		-- `iw` is the builtin textobject for "in word". You can use any other textobject or even create the keymap without any textobject if you prefer to provide one yourself each time that you use the keymap
+		keymap.set({ "x", "n" }, "<leader>rdV", function()
+			return require("refactoring.debug").print_var({ output_location = "above" }) .. "iw"
+		end, { desc = "Debug print var above", expr = true })
+
+		keymap.set({ "x", "n" }, "<leader>rde", function()
+			return require("refactoring.debug").print_exp({ output_location = "below" })
+		end, { desc = "Debug print exp below", expr = true })
+		-- `_` is the default textobject for "current line"
+		keymap.set("n", "<leader>rdee", function()
+			return require("refactoring.debug").print_exp({ output_location = "below" }) .. "_"
+		end, { desc = "Debug print exp below", expr = true })
+
+		keymap.set({ "x", "n" }, "<leader>rdE", function()
+			return require("refactoring.debug").print_exp({ output_location = "above" })
+		end, { desc = "Debug print exp above", expr = true })
+		-- `_` is the default textobject for "current line"
+		keymap.set("n", "<leader>rdEE", function()
+			return require("refactoring.debug").print_exp({ output_location = "above" }) .. "_"
+		end, { desc = "Debug print exp above", expr = true })
+
+		keymap.set("n", "<leader>rdP", function()
+			return require("refactoring.debug").print_loc({ output_location = "above" })
+		end, { desc = "Debug print location", expr = true })
+		keymap.set("n", "<leader>rdp", function()
+			return require("refactoring.debug").print_loc({ output_location = "below" })
+		end, { desc = "Debug print location", expr = true })
+
+		keymap.set({ "x", "n" }, "<leader>rdc", function()
+			-- `ag` is a custom textobject that selects the whole buffer. It's provided by plugins like `mini.ai` (requires manual configuration using `MiniExtra.gen_ai_spec.buffer()`).
+			-- return require("refactoring.debug").cleanup { restore_view = true } .. "ag"
+
+			-- this keymap doesn't select any textobject by default, so you need to provide one each time you use it.
+			return require("refactoring.debug").cleanup({ restore_view = true })
+		end, { desc = "Debug print clean", expr = true, remap = true })
 	end,
 }
