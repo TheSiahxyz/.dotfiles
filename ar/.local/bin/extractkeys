@@ -44,6 +44,7 @@ for file_path in "${config_files[@]}"; do
     printf ".PP\nTHESIAH's default terminal in C. It is light, configurable, and fast.\n" >>"$temp_file_before"
   fi
   echo ".LI" >>"$temp_file_before"
+  echo ".QUAD L" >>"$temp_file_before"
 
   awk 'BEGIN {flag=0} /static[[:space:]]+(const[[:space:]]+)?(Keychord|Shortcut)[[:space:]]+(\*keychords|shortcuts)[[:space:]]*\[\][[:space:]]*=[[:space:]]*{/ {flag=1} /\};/ {flag=0} flag' "$file_path" | while read -r line; do
     if [[ "$line" =~ \/\*.*\*\/ || "$line" =~ .*\"\\.* || "$line" =~ ^$ || "$line" =~ STACKKEYS || "$line" =~ TAGKEYS || "$line" =~ static\ Keychord\ \*keychords || "$line" =~ static\ Shortcut\ \shortcuts || "$line" =~ ^\#.* ]]; then
@@ -52,10 +53,12 @@ for file_path in "${config_files[@]}"; do
 
     if [[ "$line" =~ ^\/\/.* ]]; then
       echo ".LIST OFF" >>"$temp_file_before"
+      echo ".QUAD J" >>"$temp_file_before"
       line=$(echo "$line" | sed -e 's/\/\/\s*//g' | awk '{for (i=1; i<=NF; i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2)); print}')
       output_line=".HEADING 5 \"$line\""
       echo "$output_line" >>"$temp_file_before"
       echo ".LI" >>"$temp_file_before"
+      echo ".QUAD L" >>"$temp_file_before"
       continue
     fi
 
@@ -152,6 +155,7 @@ for file_path in "${config_files[@]}"; do
   done
 
   echo ".LIST OFF" >>"$temp_file_before"
+  echo ".QUAD J" >>"$temp_file_before"
 done
 
 # Append the latter part of the document that follows the end marker
