@@ -12,7 +12,7 @@
 [ -f "$MBSYNCRC" ] && alias mbsync='mbsync -c $MBSYNCRC'
 
 # sudo not required for some system commands
-for command in blkid pacman poweroff sv updatedb; do
+for command in blkid mount pacman poweroff reboot su sv umount updatedb; do
     alias $command="sudo $command"
 done
 unset command
