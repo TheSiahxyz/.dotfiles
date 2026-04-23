@@ -79,7 +79,17 @@ fi
 moonicon="$(cat "$moonfile" 2>/dev/null)"
 
 case $BLOCK_BUTTON in
-1) notify-send "This Month" "$(cal | sed "s/\<$(date +'%B' | tr -d ' ')\>/<b><span color='blue'>&<\/span><\/b>/;s/\<$(date +'%Y' | sed 's/ //g')\>/<b><span color='blue'>&<\/span><\/b>/;s/\<$(date +'%B' | sed 's/ //g')\>/<b><span color='blue'>&<\/span><\/b>/;s/\<$(date +'%e' | sed 's/ //g')\>/<b><span color='red'>&<\/span><\/b>/")" && notify-send "Appointments" "$(calcurse -d3)" ;;
+1)
+  hcache="${XDG_CACHE_HOME:-${HOME}/.cache}/statusbar/holidays-$(date +%Y)"
+  if [ ! -s "$hcache" ]; then
+    mkdir -p "${XDG_CACHE_HOME:-${HOME}/.cache}/statusbar"
+    python -c "import holidays; y=$(date +%Y); p=holidays.KR(years=y,categories=('public',)); [print('public' if d in p else 'bank', d.strftime('%m-%d')) for d in sorted(holidays.KR(years=y,categories=('public','bank')))]" 2>/dev/null >"$hcache"
+  fi
+  mm=$(date +%m)
+  hpub=$(awk -v m="$mm" '$1=="public" && substr($2,1,2)==m {split($2,a,"-"); printf "%s,", a[2]+0}' "$hcache" 2>/dev/null | sed 's/,$//')
+  hbnk=$(awk -v m="$mm" '$1=="bank" && substr($2,1,2)==m {split($2,a,"-"); printf "%s,", a[2]+0}' "$hcache" 2>/dev/null | sed 's/,$//')
+  notify-send "This Month" "$(cal | awk -v t="$(date +%-d)" -v m="$(date +%B)" -v y="$(date +%Y)" -v p="$hpub" -v b="$hbnk" 'BEGIN{cnt=split(p,ap,",");for(k=1;k<=cnt;k++)hpub[ap[k]+0]=1;cnt=split(b,ab,",");for(k=1;k<=cnt;k++)hbnk[ab[k]+0]=1}NR<=2{gsub(m,"<b><span color=\"blue\">"m"</span></b>");gsub(y,"<b><span color=\"blue\">"y"</span></b>");print;next}{out="";for(i=0;i<7;i++){pos=i*3+1;raw=substr($0,pos,2);n=raw+0;if(length(raw)<2)raw=raw"  ";raw=substr(raw,1,2);sep=(i<6)?" ":"";if(n>0&&n==t){out=out"<b><span color=\"#5fafff\">"raw"</span></b>"sep}else if(n>0&&(n in hpub)){out=out"<span color=\"red\">"raw"</span>"sep}else if(n>0&&(n in hbnk)){out=out"<span color=\"orange\">"raw"</span>"sep}else if(n>0&&(i==0||i==6)){out=out"<span color=\"red\">"raw"</span>"sep}else{out=out raw sep}}print out}')" && notify-send "Appointments" "$(calcurse -d3)"
+  ;;
 2) setsid -f "$TERMINAL" -e calcurse ;;
 3)
   notify-send "📅 Time/date module" "\- Left click to show upcoming appointments for the next three days via \`calcurse -d3\` and show the month via \`cal\`
