@@ -86,7 +86,11 @@ cmd compress ${{
 cmd copyto ${{
   set -f
   clear; tput cup $(($(tput lines)/3))
-	dest=$(sed -e 's/\s*#.*//' -e '/^$/d' -e 's/^\S*\s*//' "${XDG_CONFIG_HOME:-$HOME/.config}/shell/bm-dirs" | fzf --layout=reverse --height 40% --prompt 'Copy to where? ' | sed 's|~|$HOME|')
+	dest=$(
+	  {
+	    sed -e 's/\s*#.*//' -e '/^$/d' -e 's/^\S*\s*//' "${XDG_CONFIG_HOME:-$HOME/.config}/shell/bm-dirs"
+	    findmnt -rno TARGET | grep -E "^/mnt/|^/media/$USER/"
+	  } | awk '!seen[$0]++' | fzf --layout=reverse --height 40% --prompt 'Copy to where? ' | sed 's|~|$HOME|')
 	[ -z "$dest" ] && exit
 	destpath=$(eval printf '%s' \"$dest\")
 	clear; tput cup $(($(tput lines)/3)); tput bold
@@ -95,10 +99,17 @@ cmd copyto ${{
 	printf "To:\n   %s\n\n\tcopy?[y/N]" "$destpath"
 	read -r ans
 	[ "$ans" != "y" ] && exit
-  for x in $fx; do
-    cp -ivr "$x" "$destpath"
-  done &&
-  notify-send "📋 File(s) copied." "File(s) copied to $destpath."
+  if [ -w "$destpath" ]; then
+    for x in $fx; do cp -ivr "$x" "$destpath"; done &&
+    notify-send "📋 File(s) copied." "File(s) copied to $destpath."
+  else
+    printf "\nNo write permission on %s. Use sudo?[y/N]" "$destpath"
+    read root
+    [ "$root" = "y" ] && {
+      for x in $fx; do sudo cp -ivr "$x" "$destpath"; done &&
+      notify-send "📋 File(s) copied (sudo)." "File(s) copied to $destpath."
+    }
+  fi
 }}
 cmd yank-dirname $dirname -- "$f" | head -c-1 | xclip -i -selection clipboard
 cmd yank-path $printf '%s' "$fx" | xclip -i -selection clipboard
@@ -285,7 +296,11 @@ cmd create-ipynb ${{
 cmd moveto ${{
   set -f
   clear; tput cup $(($(tput lines)/3))
-	dest=$(sed -e 's/\s*#.*//' -e '/^$/d' -e 's/^\S*\s*//' "${XDG_CONFIG_HOME:-$HOME/.config}/shell/bm-dirs" | fzf --layout=reverse --height 40% --prompt 'Move to where? ' | sed 's|~|$HOME|')
+	dest=$(
+	  {
+	    sed -e 's/\s*#.*//' -e '/^$/d' -e 's/^\S*\s*//' "${XDG_CONFIG_HOME:-$HOME/.config}/shell/bm-dirs"
+	    findmnt -rno TARGET | grep -E "^/mnt/|^/media/$USER/"
+	  } | awk '!seen[$0]++' | fzf --layout=reverse --height 40% --prompt 'Move to where? ' | sed 's|~|$HOME|')
 	[ -z "$dest" ] && exit
 	destpath=$(eval printf '%s' \"$dest\")
 	clear; tput cup $(($(tput lines)/3)); tput bold
@@ -294,10 +309,17 @@ cmd moveto ${{
 	printf "To:\n   %s\n\n\tmove?[y/N]" "$destpath"
 	read -r ans
 	[ "$ans" != "y" ] && exit
-  for x in $fx; do
-    mv -iv "$x" "$destpath"
-  done &&
-  notify-send "🚚 File(s) moved." "File(s) moved to $destpath."
+  if [ -w "$destpath" ]; then
+    for x in $fx; do mv -iv "$x" "$destpath"; done &&
+    notify-send "🚚 File(s) moved." "File(s) moved to $destpath."
+  else
+    printf "\nNo write permission on %s. Use sudo?[y/N]" "$destpath"
+    read root
+    [ "$root" = "y" ] && {
+      for x in $fx; do sudo mv -iv "$x" "$destpath"; done &&
+      notify-send "🚚 File(s) moved (sudo)." "File(s) moved to $destpath."
+    }
+  fi
 }}
 
 # MPV
@@ -535,14 +557,14 @@ map <c-l> :clear; unselect; save-select
 map <c-x> :clear; unselect; save-select
 
 # Compress
-map C compress
+map Cc compress
 
 # Copy
 # map yy %cp -ri -- $fs .; clear
+map Cp copyto; clear; save-select
 map Y $printf "%s" "$fx" | xclip -selection clipboard; clear; save-select
 map yb yank-basename
 map yd yank-dirname
-map ye copyto; clear; save-select
 map yl $printf "%s" "$fx" | sed -E 's/^.+\[/https:\/\/piped.video\/watch?v=/' | sed -E 's/\]\..+//' | xclip -selection clipboard
 map yn yank-basename-without-extension
 map yp yank-path
@@ -585,7 +607,7 @@ map zt set info time
 map Mi create-ipynb
 
 # Move
-map Mt moveto; clear; save-select
+map Mv moveto; clear; save-select
 
 # MPV
 map Mpv mpvdir
