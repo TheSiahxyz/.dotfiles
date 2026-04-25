@@ -189,9 +189,8 @@ download_music() {
   enqueue "music" "$_url" \
     "$_pl_flag" \
     --extract-audio \
-    --audio-format best \
+    --audio-format mp3 \
     --audio-quality 0 \
-    --recode-video mp3 \
     --download-archive "$_archive" \
     --output "$_fmt"
 }
@@ -279,9 +278,8 @@ restore_archive() {
     enqueue "music" "https://www.youtube.com/watch?v=$_id" \
       --no-playlist \
       --extract-audio \
-      --audio-format best \
+      --audio-format mp3 \
       --audio-quality 0 \
-      --recode-video mp3 \
       --output "$_format"
   done <"$_tmpfile"
   rm -f "$_tmpfile"
