@@ -182,9 +182,7 @@ download_music() {
   _url="$1"
   _output_dir="${XDG_MUSIC_DIR:-$HOME/Music}"
   _archive="${XDG_DOTFILES_DIR:-$HOME/.dotfiles}/global/Music/.music.txt"
-  _titles="${XDG_DOTFILES_DIR:-$HOME/.dotfiles}/global/Music/.music_titles.txt"
   _format="${_output_dir}/%(artists.0|Unknown Artist)s/%(album|Unknown Album)s/%(title)s.%(ext)s"
-  _title_fmt="$(printf '%%(id)s\t%%(artists.0|Unknown Artist)s - %%(title)s')"
 
   _pl_result="$(handle_playlist "$_url" "music" "$_output_dir" "$_format")"
   _pl_flag="$(printf '%s' "$_pl_result" | head -n 1)"
@@ -199,7 +197,6 @@ download_music() {
     --audio-format mp3 \
     --audio-quality 0 \
     --download-archive "$_archive" \
-    --print-to-file "$_title_fmt" "$_titles" \
     --output "$_fmt"
 }
 
