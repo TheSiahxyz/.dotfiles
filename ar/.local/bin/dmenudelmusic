@@ -4,8 +4,11 @@ music_dir="${XDG_MUSIC_DIR:-${HOME}/Music}"
 music_txt="${music_dir}/.music.txt"
 playlist_dir="${XDG_CONFIG_HOME:-${HOME}/.config}/mpd/playlists"
 
-# Select the relative path (so we can find the actual file in subdirectories)
-selected_relpath=$(cd "$music_dir" && find . -type f | sed 's|^\./||' | dmenu -i -l 20 -p "Select a file to delete:") || exit 1
+# Select the relative path. Sort the list so "first match" semantics in dmenu
+# are deterministic — otherwise filesystem order is unstable and typing a
+# substring (e.g. "성시경") can return whichever file find walked first.
+# `-not -path '*/.*'` skips hidden files (.music.txt, etc.); name filter limits to audio.
+selected_relpath=$(cd "$music_dir" && find . -type f -not -path '*/.*' \( -name '*.mp3' -o -name '*.m4a' -o -name '*.opus' -o -name '*.flac' -o -name '*.wav' -o -name '*.webm' \) | sed 's|^\./||' | LC_ALL=C.UTF-8 sort | dmenu -i -l 20 -p "Select a file to delete:") || exit 1
 [ -n "$selected_relpath" ] || exit 1
 
 selected_file="$music_dir/$selected_relpath"
