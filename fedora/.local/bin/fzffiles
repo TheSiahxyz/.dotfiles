@@ -1,6 +1,5 @@
 #!/bin/sh
 
-# The set -e option instructs sh to immediately exit if any command has a non-zero exit status
 set -e
 
 # Set new line and tab for word splitting
@@ -8,49 +7,47 @@ IFS='
 '
 
 # Get the list of selected files with key bindings for specific paths
-files=$(fzf-tmux \
+files=$(fzf \
   --header "^a pwd ^b public ^d .dotfiles ^f configs ^g git ^h home ^k desktop ^r scripts ^s suckless ^u staged files ^v private ^/ help" \
   --preview "selection={};
-    clean=\$(printf '%s' \"\$selection\" | sed -e 's/^📄 //' -e 's/^✏️ //' -e 's/^✅ //' -e 's/^❌ //' -e 's/^🔀 //' -e 's/^❓ //');
+    clean=\$(printf '%s' \"\$selection\" | sed -e 's/^📄 //' -e 's/^✏ //' -e 's/^✅ //' -e 's/^❌ //' -e 's/^🔀 //' -e 's/^❓ //');
     [ -z \"\$clean\" ] && { echo 'No selection'; exit 0; }
     target=\$(readlink -f \"\$clean\" 2>/dev/null || printf '%s' \"\$clean\");
-    if [ -z \"\$target\" ]; then
-      echo 'Could not resolve path';
-      exit 0;
-    fi
+    if [ -z \"\$target\" ]; then echo 'Could not resolve path'; exit 0; fi;
+    mime=\$(file --mime-type -b \"\$target\" 2>/dev/null);
+    case \"\$mime\" in
+      image/*)
+        echo \"[image preview disabled] \$target\";
+        file -h \"\$target\";
+        exit 0;;
+    esac;
     if [ -f \"\$target\" ]; then
       dir=\$(dirname \"\$target\");
       if git_root=\$(git -C \"\$dir\" rev-parse --show-toplevel 2>/dev/null); then
         rel=\${target#\"\$git_root\"/};
         diff_output=\$(git -C \"\$git_root\" diff --color -- \"\$rel\");
-        if [ -n \"\$diff_output\" ]; then
-          printf '%s\n' \"\$diff_output\"
-          exit 0
-        fi
+        if [ -n \"\$diff_output\" ]; then printf '%s\n' \"\$diff_output\"; exit 0; fi;
         diff_output=\$(git -C \"\$git_root\" diff --color --cached -- \"\$rel\");
-        if [ -n \"\$diff_output\" ]; then
-          printf '%s\n' \"\$diff_output\"
-          exit 0
-        fi
-      fi
-    fi
+        if [ -n \"\$diff_output\" ]; then printf '%s\n' \"\$diff_output\"; exit 0; fi;
+      fi;
+    fi;
     if [ -d \"\$target\" ]; then
-      exa --color=always --long --all --header --icons --git \"\$target\"
+      eza --color=always --long --all --header --icons --git \"\$target\";
     elif [ -f \"\$target\" ]; then
-      bat --color=always --style=header,grid --line-range=:500 \"\$target\"
+      bat --color=always --style=header,grid --line-range=:500 \"\$target\";
     else
-      file -h \"\$target\"
+      file -h \"\$target\";
     fi" \
   --reverse \
   --query="$1" \
   --multi \
   --exit-0 \
   --prompt " 💡 " \
-  --bind "ctrl-a:change-prompt( ⚡ )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . $PWD)" \
-  --bind "ctrl-b:change-prompt( 🌎 )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . ${XDG_PUBLICSHARE_DIR:-${HOME}/Public})" \
-  --bind "ctrl-d:change-prompt( ⚙️ )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . ${XDG_DOTFILES_DIR:-${HOME}/.dotfiles})" \
-  --bind "ctrl-f:change-prompt( 🗂️ )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . ${XDG_CONFIG_HOME:-${HOME}/.config})" \
-  --bind "ctrl-g:change-prompt(   )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . $HOME/Private/repos $HOME/Public/repos)" \
+  --bind "ctrl-a:change-prompt( ⚡ )+reload(fd -H -L -t f -E .Trash -E .git -E .cache -E node_modules -E .next -E dist -E build -E coverage -E target -E vendor -E .venv -E venv . $PWD)" \
+  --bind "ctrl-b:change-prompt( 🌎 )+reload(fd -H -L -t f -E .Trash -E .git -E .cache -E node_modules -E .next -E dist -E build -E coverage -E target -E vendor -E .venv -E venv . ${XDG_PUBLICSHARE_DIR:-${HOME}/Public})" \
+  --bind "ctrl-d:change-prompt( ⚙️ )+reload(fd -H -L -t f -E .Trash -E .git -E .cache -E node_modules -E .next -E dist -E build -E coverage -E target -E vendor -E .venv -E venv . ${XDG_DOTFILES_DIR:-${HOME}/.dotfiles})" \
+  --bind "ctrl-f:change-prompt( 🗂️ )+reload(fd -H -L -t f -E .Trash -E .git -E .cache -E node_modules -E .next -E dist -E build -E coverage -E target -E vendor -E .venv -E venv . ${XDG_CONFIG_HOME:-${HOME}/.config})" \
+  --bind "ctrl-g:change-prompt(   )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . $HOME/Private/repos $HOME/Public/repos)" \
   --bind "ctrl-h:change-prompt( 🏠 )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . $HOME)" \
   --bind "ctrl-k:change-prompt( 🖥️ )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . ${XDG_DESKTOP_DIR:-${HOME}/Desktop})" \
   --bind "ctrl-r:change-prompt( 👟 )+reload(fd -H -L -t f -E .Trash -E .git -E .cache -E zsh . ${XDG_SCRIPTS_HOME:-${HOME}/.local/bin})" \
@@ -65,7 +62,7 @@ files=$(fzf-tmux \
     else if (staged == \"!\" && unstaged == \"!\") icon=\"❌\";
     else if (staged != \" \" && staged != \"?\" && unstaged != \" \" && unstaged != \"?\") icon=\"🔀\";
     else if (staged != \" \" && staged != \"?\") icon=\"✅\";
-    else if (unstaged != \" \") icon=\"✏️\";
+    else if (unstaged != \" \") icon=\"✏\";
     else icon=\"❓\";
     print icon \" \" root \"/\" file
       }'; else echo 'This is not a git repository.'; fi)" \
@@ -85,7 +82,7 @@ files=$(fzf-tmux \
 # Check if any files were selected, and exit if not
 [ -z "$files" ] && exit 0
 
-files=$(printf '%s\n' "$files" | sed -e 's/^📄 //' -e 's/^✏️ //' -e 's/^✅ //' -e 's/^❌ //' -e 's/^🔀 //' -e 's/^❓ //')
+files=$(printf '%s\n' "$files" | sed -e 's/^📄 //' -e 's/^✏ //' -e 's/^✅ //' -e 's/^❌ //' -e 's/^🔀 //' -e 's/^❓ //')
 
 if [ -d "$files" ]; then
   absolute_files=$(realpath $files)

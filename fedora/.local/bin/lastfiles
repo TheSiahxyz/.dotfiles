@@ -2,7 +2,7 @@
 
 # Display help message
 usage() {
-  echo "Open the most recent file or the list of old files in fzf edited by Vim."
+  echo "Open the most recent file or the list of old files in fzf edited by vim."
   echo ""
   echo "Usage: ${0##*/} [OPTION]"
   echo ""
@@ -17,16 +17,16 @@ usage() {
   exit 0
 }
 
-# Fetch oldfiles from Vim
-get_oldfiles() {
-  vim -u NONE -es +'silent oldfiles' +qa 2>/dev/null |
-    sed 's/^[0-9]\+\s\+//' |
-    grep -v "^$"
-}
-
 # List and handle oldfiles
 list_oldfiles() {
-  oldfiles=$(get_oldfiles)
+  # Fetch the oldfiles list from Vim's viminfo (file-mark entries start with '> ')
+  viminfo="${VIMINFO:-${HOME}/.viminfo}"
+  if [ ! -f "$viminfo" ]; then
+    echo "No viminfo found at $viminfo" >&2
+    exit 1
+  fi
+
+  oldfiles=$(awk '/^> / {sub(/^> /,""); print}' "$viminfo" | sed "s|^~|$HOME|")
 
   # Exit if no oldfiles are found
   [ -z "$oldfiles" ] && {
@@ -39,28 +39,33 @@ list_oldfiles() {
     usage
     ;;
   -l | --list)
+    # Filter valid files
     valid_files=$(echo "$oldfiles" | while IFS= read -r file; do
       [ -f "$file" ] && printf "%s\n" "$file"
     done)
 
+    # Exit if no valid files exist
     [ -z "$valid_files" ] && {
       echo "No valid files found." >&2
       exit 1
     }
 
+    # Use fzf to select files
     selected_files=$(echo "$valid_files" |
-      fzf-tmux \
+      fzf \
         --multi \
         --preview 'bat -n --color=always --line-range=:500 {} 2>/dev/null || echo "Error previewing file"' \
         --height=70% \
         --reverse)
 
+    # Exit if no files were selected
     [ -z "$selected_files" ] && exit 1
 
-    openfiles $selected_files
+    # Open selected files in Vim
+    openfiles "$selected_files"
     ;;
   *)
-    # Open the most recent valid file
+    # Open the most recent file
     for file in $oldfiles; do
       if [ -f "$file" ]; then
         openfiles "$file"
