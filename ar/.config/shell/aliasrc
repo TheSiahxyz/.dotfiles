@@ -80,6 +80,7 @@ alias 777='chmod -R 777'
 # claude
 alias cld='claude'
 alias cldd='claude --dangerously-skip-permissions'
+alias cldr='claude --dangerously-skip-permissions --resume'
 
 # copy
 alias CC='$(fc -l -n -1) | xclip -selection clipboard'
