@@ -190,22 +190,12 @@ cmd delete ${{
 }}
 
 cmd trash ${{
-  clear
-  files=$(printf "$fx" | tr '\n' ';')
-  while [ "$files" ]; do
-    file=${files%%;*}
-
-    trash-put "$(basename "$file")" || {
-      printf "sudo delete?[y/N]"
-      read ans
-      [ $ans = "y" ] && sudo rm -rf -- $fx
-    }
-    if [ "$files" = "$file" ]; then
-      files=''
-    else
-      files="${files#*;}"
-    fi
-  done
+  set -f
+  trash-put -- $fx 2>/dev/null || {
+    printf "sudo trash?[y/N]"
+    read ans
+    [ "${ans:-}" = "y" ] && sudo trash-put -- $fx
+  }
 }}
 
 cmd restore_trash ${{
