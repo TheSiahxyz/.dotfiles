@@ -6,7 +6,7 @@ sort_order = [
 ]
 
 [default_session]
-startup_command = "if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then git status; else clear && ls -I .git; fi"
+startup_command = "if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then git status; else clear && ls -I .git; fi; exec $SHELL"
 preview_command = "eza -glaa --icons --group-directories-first --color=always {}"
 
 [[session]]

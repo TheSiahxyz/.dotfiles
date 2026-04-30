@@ -28,8 +28,10 @@ M-cr open in editor
   )" 2>/dev/null
 
   case "$path" in
+  "") ;;
   ^*) sessionizer ;;
-  *) sesh connect "$path" >/dev/null 2>&1 && exit ;;
+  /*|\~*) sesh connect "$path" >/dev/null 2>&1 && exit ;;
+  *) sesh connect "${path#* }" >/dev/null 2>&1 && exit ;;
   esac
 }
 
