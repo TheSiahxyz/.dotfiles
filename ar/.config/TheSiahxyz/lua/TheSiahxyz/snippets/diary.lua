@@ -10,6 +10,8 @@ local sn = ls.snippet_node
 
 local fmt = require("luasnip.extras.fmt").fmta
 
+local default_bgm = "darling.mp3"
+
 local function bgm_node_generator()
 	return function()
 		local handle = io.popen("ssh root@thesiah.xyz 'ls /var/www/thesiah/bgm/' 2>/dev/null")
@@ -24,9 +26,24 @@ local function bgm_node_generator()
 			return sn(nil, { i(1, "bgm") })
 		end
 
-		local choices = {}
+		local filenames = {}
 		for filename in result:gmatch("[^\r\n]+") do
-			table.insert(choices, t(filename))
+			table.insert(filenames, filename)
+		end
+
+		if default_bgm ~= "" then
+			for idx, name in ipairs(filenames) do
+				if name == default_bgm then
+					table.remove(filenames, idx)
+					table.insert(filenames, 1, name)
+					break
+				end
+			end
+		end
+
+		local choices = {}
+		for _, name in ipairs(filenames) do
+			table.insert(choices, t(name))
 		end
 
 		if #choices == 0 then
