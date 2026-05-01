@@ -73,6 +73,14 @@ get_type() {
       printf 'restore'
       return 0
       ;;
+    -l | --list | l | list)
+      printf 'list'
+      return 0
+      ;;
+    -k | --kill | k | kill)
+      printf 'kill'
+      return 0
+      ;;
     *)
       printf '%s' "$_arg"
       return 0
@@ -95,10 +103,12 @@ get_filename() {
 enqueue() {
   _dl_type="$1"
   _url="$2"
-  shift 2
+  _title="$3"
+  shift 3
 
   _cookies="$(get_cookies)"
   _music_dir="${XDG_MUSIC_DIR:-$HOME/Music}"
+  _cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/qndl"
 
   # Build argument list without string concatenation chains
   set -- \
@@ -125,6 +135,11 @@ enqueue() {
 
   _idnum="$(tsp bash -c "$_ytdl_cmd")"
   pkill -RTMIN+16 "${STATUSBAR:-dwmblocks}"
+
+  # tsp output doesn't carry titles; cache them at queue time so `qndl -l/-k`
+  # can show meaningful labels instead of bare URLs.
+  mkdir -p "$_cache_dir"
+  printf '%s\t%s\t%s\n' "$_idnum" "$_dl_type" "${_title:-$_url}" >> "$_cache_dir/titles"
 
   # tsp -D runs next job only if dependency succeeded (exit 0)
   # Success notification — runs only if download succeeds
@@ -199,7 +214,7 @@ download_music() {
   _filename="$(get_filename "$_url")"
   notify "📥 Queuing music download:" "$_filename"
 
-  enqueue "music" "$_url" \
+  enqueue "music" "$_url" "$_filename" \
     "$_pl_flag" \
     --extract-audio \
     --audio-format mp3 \
@@ -243,7 +258,7 @@ download_video() {
   notify "📥 Queuing video download:" "$_filename"
 
   if [ -n "$_recode_ext" ]; then
-    enqueue "video" "$_url" \
+    enqueue "video" "$_url" "$_filename" \
       "$_pl_flag" \
       --buffer-size 1M \
       --embed-thumbnail \
@@ -252,7 +267,7 @@ download_video() {
       --recode-video "$_recode_ext" \
       --output "$_fmt"
   else
-    enqueue "video" "$_url" \
+    enqueue "video" "$_url" "$_filename" \
       "$_pl_flag" \
       --buffer-size 1M \
       --embed-thumbnail \
@@ -310,7 +325,12 @@ restore_archive() {
   printf '%s\n' "$_selected" >"$_tmpfile"
   while IFS= read -r _id; do
     [ -z "$_id" ] && continue
-    enqueue "music" "https://www.youtube.com/watch?v=$_id" \
+    if [ -f "$_titles" ]; then
+      _t="$(awk -F'\t' -v id="$_id" '$1 == id {print $2; exit}' "$_titles")"
+    else
+      _t=""
+    fi
+    enqueue "music" "https://www.youtube.com/watch?v=$_id" "${_t:-$_id}" \
       --no-playlist \
       --extract-audio \
       --audio-format mp3 \
@@ -319,6 +339,117 @@ restore_archive() {
   done <"$_tmpfile"
   rm -f "$_tmpfile"
   notify "✅ All $_sel_total job(s) queued" "tsp will process them sequentially"
+}
+
+# ---------------------------------------------------------------------------
+# Listing & Cancellation
+# ---------------------------------------------------------------------------
+
+# Two consecutive tsp IDs after the main download are notification helpers
+# (success via `tsp -D`, failure via separate bash script). Music adds a
+# 3rd helper for `mpc update`. When cancelling a job we remove main + its
+# helpers so stray ❌ notifications don't fire.
+_helper_offset_for() {
+  case "$1" in
+  music) printf '3' ;;
+  *) printf '2' ;;
+  esac
+}
+
+list_queue() {
+  _cache="${XDG_CACHE_HOME:-$HOME/.cache}/qndl/titles"
+  [ -f "$_cache" ] || _cache=/dev/null
+  _tab="$(printf '\t')"
+
+  {
+    printf 'ID\tState\tType\tTitle\tURL\n'
+    tsp | awk -v cache="$_cache" '
+      BEGIN {
+        while ((getline line < cache) > 0) {
+          n = split(line, a, "\t")
+          if (n >= 3) { types[a[1]] = a[2]; titles[a[1]] = a[3] }
+        }
+      }
+      NR == 1 { next }
+      /yt-dlp/ && ($2 == "queued" || $2 == "running") {
+        match($0, /https?:\/\/[^ '\'']+/)
+        url = RSTART ? substr($0, RSTART, RLENGTH) : "-"
+        t = ($1 in types) ? types[$1] : "?"
+        title = ($1 in titles) ? titles[$1] : "-"
+        printf "%s\t%s\t%s\t%s\t%s\n", $1, $2, t, title, url
+      }
+    '
+  } | column -t -s "$_tab"
+}
+
+kill_job() {
+  command -v fzf >/dev/null 2>&1 || die "⛔ fzf not installed" "Install fzf to use qndl -k."
+
+  _cache="${XDG_CACHE_HOME:-$HOME/.cache}/qndl/titles"
+  [ -f "$_cache" ] || _cache=/dev/null
+
+  # Build fzf input: <id>\t<displayed line>. --with-nth hides column 1, cut grabs it back.
+  _entries="$(tsp | awk -v cache="$_cache" '
+    BEGIN {
+      while ((getline line < cache) > 0) {
+        n = split(line, a, "\t")
+        if (n >= 3) { types[a[1]] = a[2]; titles[a[1]] = a[3] }
+      }
+    }
+    /yt-dlp/ && ($2 == "queued" || $2 == "running") {
+      match($0, /https?:\/\/[^ '\'']+/)
+      url = RSTART ? substr($0, RSTART, RLENGTH) : "-"
+      t = ($1 in types) ? types[$1] : "?"
+      title = ($1 in titles) ? titles[$1] : "-"
+      printf "%s\t[%s] %-9s %-5s %s :: %s\n", $1, t, $2, $1, title, url
+    }
+  ')"
+
+  [ -z "$_entries" ] && die "⛔ No active downloads" "Nothing to cancel."
+
+  _selected="$(printf '%s\n' "$_entries" |
+    fzf -m \
+      --with-nth=2.. \
+      --delimiter='\t' \
+      --prompt='Cancel: ' \
+      --header='TAB to mark multiple, Enter to confirm' |
+    cut -f1)"
+
+  [ -z "$_selected" ] && return 0
+
+  _ids_file="$(mktemp)"
+  printf '%s\n' "$_selected" >"$_ids_file"
+
+  _killed=0
+  while IFS= read -r _id; do
+    [ -z "$_id" ] && continue
+
+    _t="$(awk -F'\t' -v id="$_id" '$1 == id {print $2; exit}' "$_cache" 2>/dev/null)"
+    _max="$(_helper_offset_for "${_t:-video}")"
+
+    _off=0
+    while [ "$_off" -le "$_max" ]; do
+      _target=$((_id + _off))
+      # `-r` for queued, `-k` for running; only one applies, ignore the other's error.
+      tsp -r "$_target" 2>/dev/null
+      tsp -k "$_target" 2>/dev/null
+      _off=$((_off + 1))
+    done
+    _killed=$((_killed + 1))
+  done <"$_ids_file"
+
+  # Drop cancelled IDs from the title cache in one pass.
+  if [ -f "$_cache" ] && [ "$_cache" != "/dev/null" ]; then
+    _new_cache="$(mktemp)"
+    awk -F'\t' 'NR==FNR { drop[$1]=1; next } !($1 in drop)' \
+      "$_ids_file" "$_cache" >"$_new_cache"
+    mv "$_new_cache" "$_cache"
+  fi
+
+  rm -f "$_ids_file"
+
+  notify "🗑️ Cancelled $_killed download(s)" "Helper notifications removed too."
+  pkill -RTMIN+16 "${STATUSBAR:-dwmblocks}"
 }
 
 # ---------------------------------------------------------------------------
@@ -342,11 +473,17 @@ main() {
   restore)
     restore_archive
     ;;
+  list)
+    list_queue
+    ;;
+  kill)
+    kill_job
+    ;;
   "")
-    die "⛔ No type specified" "Provide: music, video, or restore."
+    die "⛔ No type specified" "Provide: music, video, restore, list, or kill."
     ;;
   *)
-    die "⛔ Invalid type: $_type" "Recognized types: music, video, restore."
+    die "⛔ Invalid type: $_type" "Recognized types: music, video, restore, list, kill."
     ;;
   esac
 }
