@@ -1,0 +1,251 @@
+#!/bin/sh
+set -eu
+
+prog="${0##*/}"
+
+usage() {
+  cat <<EOF
+${prog} - cut and concat video files with ffmpeg
+
+Usage:
+  ${prog} [-j | concat] [-o <output>] <file>
+  ${prog}  -c | cut    [-o <output>] <file> <start> [<end|duration>]
+  ${prog} -h | --help
+
+Concat (default mode):
+  Combines all files matching '<base>*.<ext>' into '<base>_combine.<ext>'.
+  Examples:
+    ${prog} clip_cut.mp4
+    ${prog} -j clip_cut.mp4 -o joined.mp4
+
+Cut:
+  <start> uses HH:MM:SS (e.g. 00:01:30).
+  Third argument is auto-detected:
+    contains ':'  -> end position (ffmpeg -to)
+    pure number   -> duration in seconds (ffmpeg -t)
+    omitted       -> cut to end of video
+  Default output: '<base>_cut.<ext>', auto-incremented if it exists.
+  Examples:
+    ${prog} -c movie.mp4 00:12:30              # 12:30 -> end
+    ${prog} -c movie.mp4 00:12:30 00:15:00     # 12:30 -> 15:00
+    ${prog} -c movie.mp4 00:12:30 90 -o trim.mp4
+
+Output (-o):
+  May appear before or after the file argument.
+  If <output> has no extension, the input's extension is appended.
+  If the resolved output exists, you'll be asked whether to overwrite;
+  declining (default) auto-increments to '<name>_NN.<ext>'. Non-interactive
+  runs always auto-increment.
+EOF
+}
+
+die() {
+  printf '%s: %s\n' "$prog" "$1" >&2
+  exit 1
+}
+
+require_ffmpeg() {
+  command -v ffmpeg >/dev/null 2>&1 || die "ffmpeg not found in PATH"
+}
+
+# Globals set by resolve_output (avoids subshell variable loss):
+#   RESOLVED_OUTPUT - final output path
+#   FF_OVERWRITE    - '-y' if user chose overwrite, '' otherwise
+RESOLVED_OUTPUT=""
+FF_OVERWRITE=""
+
+increment_name() {
+  _base="${1%.*}"
+  _ext="${1##*.}"
+  _n=1
+  while [ -e "${_base}_$(printf '%02d' "$_n").${_ext}" ]; do
+    _n=$((_n + 1))
+  done
+  printf '%s_%02d.%s' "$_base" "$_n" "$_ext"
+}
+
+# resolve_output <user-output> <default-extension>
+# Sets globals RESOLVED_OUTPUT and FF_OVERWRITE. Must run in current shell
+# (NOT inside $(...)) to propagate FF_OVERWRITE to the caller.
+resolve_output() {
+  _out="$1"
+  _default_ext="$2"
+  FF_OVERWRITE=""
+
+  [ -n "$_out" ] || die "-o requires a non-empty argument"
+  case "$_out" in
+    */) die "output cannot be a directory: $_out" ;;
+    *.*) ;;
+    *)   _out="${_out}.${_default_ext}" ;;
+  esac
+
+  if [ -e "$_out" ]; then
+    if [ -t 0 ] && [ -t 2 ]; then
+      printf '%s: %s exists. Overwrite? [y/N] ' "$prog" "$_out" >&2
+      _ans=""
+      read _ans || _ans=""
+      case "$_ans" in
+        [yY]|[yY][eE][sS]) FF_OVERWRITE="-y" ;;
+        *) _out=$(increment_name "$_out") ;;
+      esac
+    else
+      _out=$(increment_name "$_out")
+    fi
+  fi
+  RESOLVED_OUTPUT="$_out"
+}
+
+cmd_concat() {
+  require_ffmpeg
+  input_file="$1"
+  user_output="$2"
+
+  pattern="${input_file%.*}"
+  extension="${input_file##*.}"
+  [ "$pattern" != "$input_file" ] || die "input file must have an extension: $input_file"
+
+  set +e
+  set -- "${pattern}"*."${extension}"
+  set -e
+  # Unmatched glob remains literal in POSIX sh; check via -e on the first entry.
+  if [ ! -e "$1" ]; then
+    die "no files match '${pattern}*.${extension}'"
+  fi
+  if [ $# -eq 1 ]; then
+    printf '%s: warning: only one file matches (%s); nothing to concat\n' \
+      "$prog" "$1" >&2
+    exit 1
+  fi
+
+  if [ -n "$user_output" ]; then
+    resolve_output "$user_output" "$extension"
+    output_file="$RESOLVED_OUTPUT"
+  else
+    output_file="${pattern}_combine.${extension}"
+    FF_OVERWRITE=""
+  fi
+
+  file_list=$(mktemp)
+  trap 'rm -f "$file_list"' EXIT INT HUP TERM
+
+  for video do
+    full_path=$(realpath "$video")
+    # concat demuxer: escape single quotes by closing/reopening.
+    escaped=$(printf '%s' "$full_path" | sed "s/'/'\\\\''/g")
+    printf "file '%s'\n" "$escaped" >>"$file_list"
+  done
+
+  count=$#
+  set -- ffmpeg -hide_banner
+  [ -n "$FF_OVERWRITE" ] && set -- "$@" "$FF_OVERWRITE"
+  set -- "$@" -f concat -safe 0 -i "$file_list" -c copy "$output_file"
+  "$@"
+
+  printf 'Combined %d files into %s\n' "$count" "$output_file"
+}
+
+cmd_cut() {
+  require_ffmpeg
+  file="$1"
+  start="$2"
+  end_or_dur="$3"
+  user_output="$4"
+
+  [ -f "$file" ] || die "file not found: $file"
+
+  base="${file%.*}"
+  ext="${file##*.}"
+  [ "$base" != "$file" ] || die "input file must have an extension: $file"
+
+  if [ -n "$user_output" ]; then
+    resolve_output "$user_output" "$ext"
+    out="$RESOLVED_OUTPUT"
+  else
+    FF_OVERWRITE=""
+    if [ -f "${base}_cut.${ext}" ]; then
+      n=1
+      while [ -f "${base}_cut_$(printf '%02d' "$n").${ext}" ]; do
+        n=$((n + 1))
+      done
+      out="${base}_cut_$(printf '%02d' "$n").${ext}"
+    else
+      out="${base}_cut.${ext}"
+    fi
+  fi
+
+  set -- ffmpeg -hide_banner
+  [ -n "$FF_OVERWRITE" ] && set -- "$@" "$FF_OVERWRITE"
+  set -- "$@" -ss "$start" -i "$file" -c copy
+  if [ -n "$end_or_dur" ]; then
+    case "$end_or_dur" in
+      *:*)        set -- "$@" -to "$end_or_dur" ;;
+      *[!0-9.]*)  die "invalid end/duration: $end_or_dur" ;;
+      *)          set -- "$@" -t  "$end_or_dur" ;;
+    esac
+  fi
+  set -- "$@" "$out"
+  "$@"
+
+  printf 'Created %s\n' "$out"
+}
+
+# ---- Argument parsing ----
+
+[ $# -eq 0 ] && { usage; exit 0; }
+
+mode_explicit=""
+out_override=""
+
+# Rotate args: separate flags from positionals while preserving original order
+# of positionals. After the loop, $@ holds positional args only.
+i=$#
+while [ "$i" -gt 0 ]; do
+  arg="$1"
+  shift
+  i=$((i - 1))
+  case "$arg" in
+    -h|--help)
+      usage; exit 0 ;;
+    -j|concat)
+      [ -z "$mode_explicit" ] || die "mode specified twice"
+      mode_explicit="concat" ;;
+    -c|cut)
+      [ -z "$mode_explicit" ] || die "mode specified twice"
+      mode_explicit="cut" ;;
+    -o)
+      [ "$i" -gt 0 ] || die "-o requires an argument"
+      out_override="$1"
+      shift
+      i=$((i - 1))
+      [ -n "$out_override" ] || die "-o requires a non-empty argument" ;;
+    -o=*)
+      out_override="${arg#-o=}"
+      [ -n "$out_override" ] || die "-o requires a non-empty argument" ;;
+    -*)
+      die "unknown option: $arg" ;;
+    *)
+      set -- "$@" "$arg" ;;
+  esac
+done
+
+if [ -z "$mode_explicit" ]; then
+  case $# in
+    1)   mode_explicit="concat" ;;
+    2|3) mode_explicit="cut" ;;
+    *)   usage >&2; exit 1 ;;
+  esac
+fi
+
+case "$mode_explicit" in
+  concat)
+    [ $# -eq 1 ] || die "concat takes 1 file argument, got $#"
+    cmd_concat "$1" "$out_override"
+    ;;
+  cut)
+    case $# in
+      2) cmd_cut "$1" "$2" ""   "$out_override" ;;
+      3) cmd_cut "$1" "$2" "$3" "$out_override" ;;
+      *) die "cut takes 2 or 3 positional arguments, got $#" ;;
+    esac
+    ;;
+esac
