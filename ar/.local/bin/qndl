@@ -25,11 +25,17 @@ get_cookies() {
   esac
 }
 
+normalize_url() {
+  # yt-dlp's `soop` extractor only matches sooplive.co.kr / afreecatv.com,
+  # so rewrite the newer sooplive.com domain to .co.kr.
+  printf '%s' "$1" | sed 's|\.sooplive\.com/|.sooplive.co.kr/|'
+}
+
 get_url() {
   for _arg in "$@"; do
     case "$_arg" in
     https://* | http://*)
-      printf '%s' "$_arg"
+      normalize_url "$_arg"
       return 0
       ;;
     esac
@@ -37,7 +43,7 @@ get_url() {
   _clip="$(xclip -selection clipboard -o 2>/dev/null)"
   case "$_clip" in
   https://* | http://*)
-    printf '%s' "$_clip"
+    normalize_url "$_clip"
     return 0
     ;;
   esac
