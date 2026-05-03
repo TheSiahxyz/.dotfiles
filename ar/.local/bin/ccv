@@ -173,9 +173,12 @@ cmd_cut() {
     fi
   fi
 
+  # -ss / -to / -t go BEFORE -i so they apply as input options against the
+  # source's absolute timestamps. Placed after -i, -to/-t use the output's
+  # reset timeline and cut for the entire END value instead of START->END.
   set -- ffmpeg -hide_banner
   [ -n "$FF_OVERWRITE" ] && set -- "$@" "$FF_OVERWRITE"
-  set -- "$@" -ss "$start" -i "$file" -c copy
+  set -- "$@" -ss "$start"
   if [ -n "$end_or_dur" ]; then
     case "$end_or_dur" in
       *:*)        set -- "$@" -to "$end_or_dur" ;;
@@ -183,7 +186,7 @@ cmd_cut() {
       *)          set -- "$@" -t  "$end_or_dur" ;;
     esac
   fi
-  set -- "$@" "$out"
+  set -- "$@" -i "$file" -c copy "$out"
   "$@"
 
   printf 'Created %s\n' "$out"
