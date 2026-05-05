@@ -194,7 +194,7 @@ if [[ -f "${ZPLUGINDIR:-${HOME}/.local/share/zsh}/zsh-vi-mode/zsh-vi-mode.plugin
         zvm_bind_script viins '^X^X^P' 'pcyr'
         zvm_bind_script viins '^X^X^R' 'rbackup -r'
         zvm_bind_script viins '^X^X^S' 'sshadd'
-        zvm_bind_script viins '^X^X^Y' 'yay -Syu && remaps'
+        zvm_bind_script viins '^X^X^Y' 'pacman -Syyu && yay -Syu && remaps'
 
         # widgets
         zvm_define_widget sudo-command-line
@@ -339,6 +339,6 @@ else
     bindkey -s '^X^X^P' '^upcyr\n'
     bindkey -s '^X^X^R' '^urbackup -r\n'
     bindkey -s '^X^X^S' '^usshadd\n'
-    bindkey -s '^X^X^Y' '^uyay -Syu && remaps\n'
+    bindkey -s '^X^X^Y' '^upacman -Syyu && yay -Syu && remaps\n'
     bindkey -s '^X^X^]' '^uylogd\n'
 fi
