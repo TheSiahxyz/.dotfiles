@@ -4,12 +4,15 @@ set -eu
 repodir="$HOME/Private/repos/THESIAH"
 out="$repodir/public/diary/index.html"
 out2="$repodir/public/recordings/index.html"
+out3="$repodir/public/videos/index.html"
 server="${THESIAH_SERVER:-root@thesiah.xyz}"
 dest="/var/www/thesiah/diary/"
 dest2="/var/www/thesiah/recordings/"
+dest3="/var/www/thesiah/videos/"
 defaults="sy after foramonth"
 src="$repodir/public/diary/"
 src2="$repodir/public/recordings/"
+src3="$repodir/public/videos/"
 bgm="$repodir/static/bgm/"
 bgmd="/var/www/thesiah/bgm/"
 
@@ -26,8 +29,14 @@ if [ ! -f "$out2" ]; then
   exit 1
 fi
 
+if [ ! -f "$out3" ]; then
+  echo "error: not found: $out3" >&2
+  exit 1
+fi
+
 ssh "$server" "mkdir -p '$dest'"
 ssh "$server" "mkdir -p '$dest2'"
+ssh "$server" "mkdir -p '$dest3'"
 
 rsync -azv --update --itemize-changes --stats "$bgm" "$server:$bgmd"
 
@@ -49,6 +58,15 @@ else
     "$src2" "$server:$dest2"
 fi
 
+if [ -n "${THESIAH_SSH_OPTS:-}" ]; then
+  rsync -azv --update --itemize-changes --stats \
+    -e "ssh $THESIAH_SSH_OPTS" \
+    "$src3" "$server:$dest3"
+else
+  rsync -azv --update --itemize-changes --stats \
+    "$src3" "$server:$dest3"
+fi
+
 if [ -n "${1-}" ]; then
   new="$repodir/content/diary/$1"
   if [ -f "$new" ]; then
@@ -67,7 +85,17 @@ if [ -n "${1-}" ]; then
   fi
 fi
 
+if [ -n "${1-}" ]; then
+  new="$repodir/content/videos/$1"
+  if [ -f "$new" ]; then
+    rsync -az --update "$new" "$server:$dest3"
+  elif [ -d "$new" ]; then
+    rsync -az --update "$new/" "$server:$dest3$(basename "$new")/"
+  fi
+fi
+
 ssh "$THESIAH_SERVER" "chmod 644 $dest/index.html"
 ssh "$THESIAH_SERVER" "chmod 644 $dest2/index.html"
+ssh "$THESIAH_SERVER" "chmod 644 $dest3/index.html"
 
 cd - >/dev/null
