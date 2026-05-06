@@ -15,6 +15,8 @@ src2="$repodir/public/recordings/"
 src3="$repodir/public/videos/"
 bgm="$repodir/static/bgm/"
 bgmd="/var/www/thesiah/bgm/"
+prv="$repodir/static/previews/"
+prvd="/var/www/thesiah/previews/"
 
 cd "$repodir"
 hugo --cleanDestinationDir
@@ -37,8 +39,13 @@ fi
 ssh "$server" "mkdir -p '$dest'"
 ssh "$server" "mkdir -p '$dest2'"
 ssh "$server" "mkdir -p '$dest3'"
+ssh "$server" "mkdir -p '$prvd'"
 
 rsync -azv --update --itemize-changes --stats "$bgm" "$server:$bgmd"
+
+if [ -d "$prv" ]; then
+  rsync -azv --update --itemize-changes --stats "$prv" "$server:$prvd"
+fi
 
 if [ -n "${THESIAH_SSH_OPTS:-}" ]; then
   rsync -azv --update --itemize-changes --stats \
