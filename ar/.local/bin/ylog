@@ -28,13 +28,14 @@ Options:
                 us    : recordings.us.log + recordings.access.log (and diary.us.log when -s diary)
 
   -s SCOPE     Select log scope (default: all)
-                all        : recordings + access + hidden + diary + peertube
+                all        : recordings + access + hidden + diary + peertube + videos
                 access     : access.* logs only
                 diary      : diary.* logs only
                 hidden     : hidden.access.* logs only
                 media      : media.access.* logs only
                 peertube   : peertube.* logs only
                 recordings : recordings.* logs only
+                videos     : videos.* logs only
 
   -n           Disable Firefox exclusion (by default, Firefox lines are excluded)
 
@@ -58,6 +59,7 @@ Examples:
   ylog -s media         # Media logs only, last 10 lines each
   ylog -s peertube      # Peertube logs only, last 10 lines each
   ylog -s recordings    # Recordings logs only, last 10 lines each
+  ylog -s videos        # Videos logs only, last 10 lines each
   ylog -c kr -t 1.2.3.4 # Search specific IP in Korean logs
   ylog -c kr -s diary   # Korean diary logs only
   ylog -t all -l 50     # All logs, last 50 lines each
@@ -173,6 +175,23 @@ pick_files() {
       us) for q in "$LOG_DIR/peertube.us.log" "$LOG_DIR/peertube.us.log".*; do [ -e "$q" ] && printf "%s\n" "$q"; done ;;
       all)
         for p in peertube.kr.log peertube.us.log; do
+          for q in "$LOG_DIR/$p" "$LOG_DIR/$p".*; do [ -e "$q" ] && printf "%s\n" "$q"; done
+        done
+        ;;
+    esac
+  fi
+  # videos logs: similar structure to recordings
+  if [ "$SCOPE" = "videos" ] || [ "$SCOPE" = "all" ]; then
+    if [ "$COUNTRY" = "all" ]; then
+      for q in "$LOG_DIR/videos.access.log" "$LOG_DIR/videos.access.log".*; do
+        [ -e "$q" ] && printf "%s\n" "$q"
+      done
+    fi
+    case "$COUNTRY" in
+      kr) for q in "$LOG_DIR/videos.kr.log" "$LOG_DIR/videos.kr.log".*; do [ -e "$q" ] && printf "%s\n" "$q"; done ;;
+      us) for q in "$LOG_DIR/videos.us.log" "$LOG_DIR/videos.us.log".*; do [ -e "$q" ] && printf "%s\n" "$q"; done ;;
+      all)
+        for p in videos.kr.log videos.us.log; do
           for q in "$LOG_DIR/$p" "$LOG_DIR/$p".*; do [ -e "$q" ] && printf "%s\n" "$q"; done
         done
         ;;
