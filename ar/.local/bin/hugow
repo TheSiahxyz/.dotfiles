@@ -16,7 +16,7 @@ src3="$repodir/public/videos/"
 bgm="$repodir/static/bgm/"
 bgmd="/var/www/thesiah/bgm/"
 prv="$repodir/static/previews/"
-prvd="/var/www/thesiah/previews/"
+prvd="/var/www/thesiah/videos/previews/"
 
 cd "$repodir"
 hugo --cleanDestinationDir
