@@ -385,6 +385,9 @@ alias ref='shortcuts >/dev/null; source ${XDG_CONFIG_HOME:-${HOME}/.config}/shel
 # skype
 alias skype='skypeforlinux'
 
+# sql
+alias lsql='env -u PGSERVICEFILE lazysql'
+
 # ssh
 alias gts="ssh $THESIAH_SERVER"
 alias wwr="ssh diary"
