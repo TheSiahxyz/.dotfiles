@@ -100,6 +100,44 @@ get_filename() {
   basename "$_fname"
 }
 
+# HH:MM:SS / MM:SS / SS / "inf" → seconds (-1 for inf). awk handles
+# leading zeros (POSIX sh's $((08)) treats them as octal and breaks).
+parse_section_time() {
+  case "$1" in
+  inf) printf -- '-1' ;;
+  *)
+    printf '%s' "$1" | awk -F: '{
+      if (NF == 1) print $1 + 0
+      else if (NF == 2) print ($1 + 0) * 60 + ($2 + 0)
+      else if (NF == 3) print ($1 + 0) * 3600 + ($2 + 0) * 60 + ($3 + 0)
+    }'
+    ;;
+  esac
+}
+
+# seconds → "HH-MM-SS" (filename-safe). -1 → "inf".
+format_seconds() {
+  case "$1" in
+  -1 | inf) printf 'inf' ;;
+  *) printf '%02d-%02d-%02d' $(($1 / 3600)) $(($1 % 3600 / 60)) $(($1 % 60)) ;;
+  esac
+}
+
+# Probe a URL for its multi_video parts. Returns one "<index>|<seconds>"
+# line per part. Single-video URLs return one line with index "NA".
+# Uses '|' rather than a tab because yt-dlp's --print template doesn't
+# interpret backslash escapes (\t lands in output literally).
+get_parts() {
+  _url="$1"
+  _cookies="$(get_cookies)"
+  if [ -n "$_cookies" ]; then
+    yt-dlp --no-warnings --print '%(playlist_index)s|%(duration)s' \
+      --cookies-from-browser "$_cookies" "$_url" 2>/dev/null
+  else
+    yt-dlp --no-warnings --print '%(playlist_index)s|%(duration)s' "$_url" 2>/dev/null
+  fi
+}
+
 enqueue() {
   _dl_type="$1"
   _url="$2"
@@ -257,31 +295,84 @@ download_video() {
     ;;
   esac
 
-  # Section downloads bypass playlist handling (sectioning a whole playlist
-  # makes no sense) and embed the range in the filename so multiple sections
-  # of the same VOD don't collide with --no-force-overwrites.
-  if [ -n "$_sections" ]; then
-    _pl_flag="--no-playlist"
-    _section_safe="$(printf '%s' "$_sections" | tr ':' '-')"
-    _fmt="${_output_dir}/%(title)s [%(id)s] [${_section_safe}].%(ext)s"
-  else
+  # Non-section paths use the regular playlist prompt + standard filename.
+  if [ -z "$_sections" ]; then
     _pl_result="$(handle_playlist "$_url" "video" "$_output_dir" "$_format")"
     _pl_flag="$(printf '%s' "$_pl_result" | head -n 1)"
     _fmt="$(printf '%s' "$_pl_result" | tail -n 1)"
+    _filename="$(get_filename "$_url")"
+    notify "📥 Queuing video download:" "$_filename"
   fi
 
-  _filename="$(get_filename "$_url")"
-  notify "📥 Queuing video download:" "$_filename"
-
+  # Section downloads need special handling for multi_video URLs (e.g. Soop
+  # VODs split into multiple files): yt-dlp's --download-sections is applied
+  # per-part using each part's *local* timeline starting at 00:00:00. So a
+  # global "03:33:00-inf" must be split: each affected part gets its own
+  # locally-translated section, and the user gets one file per part.
   if [ -n "$_sections" ]; then
-    enqueue "video" "$_url" "$_filename" \
-      "$_pl_flag" \
-      --buffer-size 1M \
-      --embed-thumbnail \
-      --no-sponsorblock \
-      --format "$_format_val" \
-      --download-sections "*${_sections}" \
-      --output "$_fmt"
+    _filename="$(get_filename "$_url")"
+    notify "🔍 Probing VOD parts…" "$_filename"
+    _parts="$(get_parts "$_url")"
+    _part_count="$(printf '%s\n' "$_parts" | awk 'NF{n++} END{print n+0}')"
+
+    _sec_start_str="${_sections%-*}"
+    _sec_end_str="${_sections#*-}"
+    _sec_start="$(parse_section_time "$_sec_start_str")"
+    _sec_end="$(parse_section_time "$_sec_end_str")"
+
+    if [ "$_part_count" -le 1 ]; then
+      # Single video — pass section straight through.
+      _section_safe="$(printf '%s' "$_sections" | tr ':' '-')"
+      _fmt="${_output_dir}/%(title)s [%(id)s] [${_section_safe}].%(ext)s"
+      notify "📥 Queuing video download:" "$_filename"
+      enqueue "video" "$_url" "$_filename" \
+        --no-playlist \
+        --buffer-size 1M \
+        --embed-thumbnail \
+        --no-sponsorblock \
+        --format "$_format_val" \
+        --download-sections "*${_sections}" \
+        --output "$_fmt"
+    else
+      # multi_video — translate global section into per-part local sections
+      # and dispatch one job per overlapping part.
+      notify "📥 Queuing $_part_count parts:" "$_filename ($_sections)"
+      _offset=0
+      printf '%s\n' "$_parts" | while IFS='|' read -r _idx _dur; do
+        case "$_dur" in '' | NA) continue ;; esac
+
+        _part_start="$_offset"
+        _part_end=$((_offset + _dur))
+        _offset="$_part_end"
+
+        # Skip parts outside the requested global range.
+        [ "$_sec_end" != "-1" ] && [ "$_sec_end" -le "$_part_start" ] && continue
+        [ "$_sec_start" -ge "$_part_end" ] && continue
+
+        _ls=$((_sec_start - _part_start))
+        [ "$_ls" -lt 0 ] && _ls=0
+        if [ "$_sec_end" = "-1" ]; then
+          _le=-1
+          _yt_end="inf"
+        else
+          _le=$((_sec_end - _part_start))
+          [ "$_le" -gt "$_dur" ] && _le="$_dur"
+          _yt_end="$_le"
+        fi
+
+        _safe_section="$(format_seconds "$_ls")-$(format_seconds "$_le")"
+        _fmt_part="${_output_dir}/%(title)s [%(id)s] [part${_idx}_${_safe_section}].%(ext)s"
+
+        enqueue "video" "$_url" "$_filename (part $_idx)" \
+          --playlist-items "$_idx" \
+          --buffer-size 1M \
+          --embed-thumbnail \
+          --no-sponsorblock \
+          --format "$_format_val" \
+          --download-sections "*${_ls}-${_yt_end}" \
+          --output "$_fmt_part"
+      done
+    fi
   elif [ -n "$_recode_ext" ]; then
     enqueue "video" "$_url" "$_filename" \
       "$_pl_flag" \
