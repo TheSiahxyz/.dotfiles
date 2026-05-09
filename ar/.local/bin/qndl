@@ -229,11 +229,12 @@ download_video() {
   _output_dir="${XDG_VIDEOS_DIR:-$HOME/Videos}"
   _format="${_output_dir}/%(title)s [%(id)s].%(ext)s"
 
-  _video_ext="$(printf 'best\n60fps\n30fps\nmp4\nmkv' | dmenu -i -p 'Choose an encoding (default: 1080p)')" ||
+  _video_ext="$(printf 'best\n60fps\n30fps\nsection\nmp4\nmkv' | dmenu -i -p 'Choose an encoding (default: 1080p)')" ||
     die "⛔ Video encoding selection cancelled" ""
 
   _format_val=""
   _recode_ext=""
+  _sections=""
   case "$_video_ext" in
   best)
     _format_val="bestvideo+bestaudio/best"
@@ -244,20 +245,44 @@ download_video() {
   30fps)
     _format_val="((bv*[fps=30]/bv*)[height<=1080]/(wv*[fps=30]/wv*))+ba/(b[fps=30]/b)[height<=1080]/(w[fps=30]/w)"
     ;;
+  section)
+    _format_val="bestvideo+bestaudio/best"
+    _sections="$(printf '' | dmenu -p 'Section (e.g. 10:00-20:00 or 30:00-inf):')" ||
+      die "⛔ Section selection cancelled" ""
+    [ -z "$_sections" ] && die "⛔ No section specified" ""
+    ;;
   *)
     _format_val="bestvideo+bestaudio/best"
     _recode_ext="$_video_ext"
     ;;
   esac
 
-  _pl_result="$(handle_playlist "$_url" "video" "$_output_dir" "$_format")"
-  _pl_flag="$(printf '%s' "$_pl_result" | head -n 1)"
-  _fmt="$(printf '%s' "$_pl_result" | tail -n 1)"
+  # Section downloads bypass playlist handling (sectioning a whole playlist
+  # makes no sense) and embed the range in the filename so multiple sections
+  # of the same VOD don't collide with --no-force-overwrites.
+  if [ -n "$_sections" ]; then
+    _pl_flag="--no-playlist"
+    _section_safe="$(printf '%s' "$_sections" | tr ':' '-')"
+    _fmt="${_output_dir}/%(title)s [%(id)s] [${_section_safe}].%(ext)s"
+  else
+    _pl_result="$(handle_playlist "$_url" "video" "$_output_dir" "$_format")"
+    _pl_flag="$(printf '%s' "$_pl_result" | head -n 1)"
+    _fmt="$(printf '%s' "$_pl_result" | tail -n 1)"
+  fi
 
   _filename="$(get_filename "$_url")"
   notify "📥 Queuing video download:" "$_filename"
 
-  if [ -n "$_recode_ext" ]; then
+  if [ -n "$_sections" ]; then
+    enqueue "video" "$_url" "$_filename" \
+      "$_pl_flag" \
+      --buffer-size 1M \
+      --embed-thumbnail \
+      --no-sponsorblock \
+      --format "$_format_val" \
+      --download-sections "*${_sections}" \
+      --output "$_fmt"
+  elif [ -n "$_recode_ext" ]; then
     enqueue "video" "$_url" "$_filename" \
       "$_pl_flag" \
       --buffer-size 1M \
