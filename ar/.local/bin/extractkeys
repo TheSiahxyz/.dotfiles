@@ -9,7 +9,7 @@ temp_file_after="$path.tmp.after"
 start_phrase="When config.def.h in DWM and ST is saved, key bindings will be extracted and updated below."
 end_phrase=".HEADING 2 \"Other buttons\""
 
-[ -f "$path.mom" ] && source_file="$path.mom" || source_file="$path-default.mom"
+source_file="$path-default.mom"
 
 # Extract the section before the end marker
 sed "/$end_phrase/,\$d" "$source_file" >"$temp_file_before"
@@ -19,9 +19,6 @@ sed -n "/$end_phrase/,\$p" "$source_file" >"$temp_file_after"
 
 # Remove the contents between the start and end phrases, including the markers themselves
 sed -i "/$start_phrase/,/$end_phrase/d" "$temp_file_before"
-
-# Verify that the section has been removed
-echo "Section between markers removed. Check $temp_file_before for correctness."
 
 # Re-append the start marker since it was deleted
 echo "$start_phrase" >>"$temp_file_before"
@@ -39,21 +36,23 @@ for file_path in "${config_files[@]}"; do
 
   echo ".HEADING 3 \"$project_name\"" >>"$temp_file_before"
   if [ "$project_name" == "DWM" ]; then
-    printf ".PP\nTHESIAH's window manager. I do not use a desktop environment.\n" >>"$temp_file_before"
+    printf ".PP\nTHESIAH's window manager. Patched for keychords, vanity gaps, alt-tab, scratchpads, and per-tag layouts.\n" >>"$temp_file_before"
   elif [ "$project_name" == "ST" ]; then
-    printf ".PP\nTHESIAH's default terminal in C. It is light, configurable, and fast.\n" >>"$temp_file_before"
+    printf ".PP\nTHESIAH's terminal. A small C program patched for ligatures, scrollback, anysize, externalpipe, and clipboard integration.\n" >>"$temp_file_before"
   fi
-  echo ".LI" >>"$temp_file_before"
-  echo ".QUAD L" >>"$temp_file_before"
 
-  awk 'BEGIN {flag=0} /static[[:space:]]+(const[[:space:]]+)?(Keychord|Shortcut)[[:space:]]+(\*keychords|shortcuts)[[:space:]]*\[\][[:space:]]*=[[:space:]]*{/ {flag=1} /\};/ {flag=0} flag' "$file_path" | while read -r line; do
+  first_section=1
+  while read -r line; do
     if [[ "$line" =~ \/\*.*\*\/ || "$line" =~ .*\"\\.* || "$line" =~ ^$ || "$line" =~ STACKKEYS || "$line" =~ TAGKEYS || "$line" =~ static\ Keychord\ \*keychords || "$line" =~ static\ Shortcut\ \shortcuts || "$line" =~ ^\#.* ]]; then
       continue
     fi
 
     if [[ "$line" =~ ^\/\/.* ]]; then
-      echo ".LIST OFF" >>"$temp_file_before"
-      echo ".QUAD J" >>"$temp_file_before"
+      if [[ $first_section -eq 0 ]]; then
+        echo ".LIST OFF" >>"$temp_file_before"
+        echo ".QUAD J" >>"$temp_file_before"
+      fi
+      first_section=0
       line=$(echo "$line" | sed -e 's/\/\/\s*//g' | awk '{for (i=1; i<=NF; i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2)); print}')
       output_line=".HEADING 5 \"$line\""
       echo "$output_line" >>"$temp_file_before"
@@ -134,8 +133,6 @@ for file_path in "${config_files[@]}"; do
                                                        /^\s*0\s*$/d
                                                        ')
 
-    # args=$(echo "$line" | cut -d',' -f4- | sed "s/\.v = (const char \*\[\])//g;s/{\s*\.v = (int \[\])//g;s/SHCMD(\(.*\))/\1/g;s/\.. = //g")
-
     if [[ -z "$modkey" ]]; then
       if [[ -z $func ]]; then
         output_line="\\f(CW${key}\\fP \\(en ${args}"
@@ -152,10 +149,12 @@ for file_path in "${config_files[@]}"; do
 
     echo ".ITEM" >>"$temp_file_before"
     echo "$output_line" >>"$temp_file_before"
-  done
+  done < <(awk 'BEGIN {flag=0} /static[[:space:]]+(const[[:space:]]+)?(Keychord|Shortcut)[[:space:]]+(\*keychords|shortcuts)[[:space:]]*\[\][[:space:]]*=[[:space:]]*{/ {flag=1} /\};/ {flag=0} flag' "$file_path")
 
-  echo ".LIST OFF" >>"$temp_file_before"
-  echo ".QUAD J" >>"$temp_file_before"
+  if [[ $first_section -eq 0 ]]; then
+    echo ".LIST OFF" >>"$temp_file_before"
+    echo ".QUAD J" >>"$temp_file_before"
+  fi
 done
 
 # Append the latter part of the document that follows the end marker
