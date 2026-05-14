@@ -202,6 +202,22 @@ cmd restore_trash ${{
   trash-restore
 }}
 
+# Drag & Drop
+cmd dragon &dragon-drop -a -x $fx
+cmd dragon-stay &dragon-drop -a $fx
+cmd dragon-individual &dragon-drop $fx
+cmd dragon-target ${{
+  out=$(dragon-drop -t -x)
+  [ -n "$out" ] && printf "%s\n" "$out" | while IFS= read -r src; do
+    [ -e "$src" ] && cp -ivr "$src" "$PWD"
+  done
+}}
+
+# File Manager
+cmd fm ${{
+  setsid -f ${FM:-thunar} "$PWD" >/dev/null 2>&1
+}}
+
 # Extract
 cmd extract ${{
   clear; tput cup $(($(tput lines)/3)); tput bold
@@ -574,6 +590,12 @@ map dr cut-remove
 map D trash; clear; save-select
 map <delete> delete; clear; save-select
 
+# Drag & Drop
+map dga dragon
+map dgs dragon-stay
+map dgi dragon-individual
+map dgt dragon-target
+
 # Editor
 map <enter> $$EDITOR "$f"
 map <c-v> push :!nvim<space>
@@ -674,6 +696,7 @@ map fb $lf -remote "send $id cd $(sed -e 's/\s*#.*//' -e '/^$/d' -e 's/^\S*\s*//
 map fD zi
 map fd $lf -remote "send $id select \"$(find . -type d | fzf)\""
 map ff $lf -remote "send $id select \"$(find . -type f | fzf)\""
+map fm fm
 map gl follow_link
 map gc git-root
 map <c-f> fzf_search
