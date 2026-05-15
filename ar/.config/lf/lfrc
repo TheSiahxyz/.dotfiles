@@ -203,14 +203,24 @@ cmd restore_trash ${{
 }}
 
 # Drag & Drop
-cmd dragon &dragon-drop -a -x $fx
-cmd dragon-stay &dragon-drop -a $fx
-cmd dragon-individual &dragon-drop $fx
+cmd dragon &{{
+  dragon-drop -a -x $fx
+  lf -remote "send $id :unselect; save-select"
+}}
+cmd dragon-stay &{{
+  dragon-drop -a $fx
+  lf -remote "send $id :unselect; save-select"
+}}
+cmd dragon-individual &{{
+  dragon-drop $fx
+  lf -remote "send $id :unselect; save-select"
+}}
 cmd dragon-target ${{
   out=$(dragon-drop -t -x)
   [ -n "$out" ] && printf "%s\n" "$out" | while IFS= read -r src; do
     [ -e "$src" ] && cp -ivr "$src" "$PWD"
   done
+  lf -remote "send $id :unselect; save-select"
 }}
 
 # File Manager
