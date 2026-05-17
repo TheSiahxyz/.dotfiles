@@ -13,7 +13,8 @@
 grep -q 'down' /sys/class/net/w*/operstate && wifiicon="❌"
 [ -z "${wifiicon+var}" ] && wifiicon=$(grep "^\s*w" /proc/net/wireless | awk '{ print "🛜", int($3 * 100 / 70) "%" }')
 
-wifi=$(printf "%s %s" "${wifiicon}" "$(sed "s/down/❎/;s/up/🌐/" /sys/class/net/e*/operstate)")
+grep -qx up /sys/class/net/e*/operstate && ethicon="🌐" || ethicon="❎"
+wifi=$(printf "%s %s" "${wifiicon}" "${ethicon}")
 
 if [ -n "${wifi}" ]; then
   choice=$(printf 'bluetooth\nnetwork\nwifi' | dmenu -i -p "${wifi}")
