@@ -4,15 +4,21 @@
 # Usually intended for the statusbar.
 # Data source: Open-Meteo (https://open-meteo.com/) - free, open-source weather API
 
+# User-defined location file (lat,lon). Takes precedence over IP-based detection.
+userlocationfile="${XDG_CONFIG_HOME:-${HOME}/.config}/location"
 # Cache location for 24 hours - stores lat,lon
 locationfile="${XDG_CACHE_HOME:-${HOME}/.cache}/statusbar/location"
 valid_latlon() { echo "$1" | grep -qE '^-?[0-9]+\.?[0-9]*,-?[0-9]+\.?[0-9]*$'; }
-if ! ([ -s "$locationfile" ] && valid_latlon "$(cat "$locationfile")" && [ $(($(date +%s) - $(stat -c %Y "$locationfile" 2>/dev/null || echo 0))) -le 86400 ]); then
-  mkdir -p "${XDG_CACHE_HOME:-${HOME}/.cache}/statusbar"
-  loc=$(curl -s http://ip-api.com/json 2>/dev/null | jq -r 'select(.status == "success") | [.lat, .lon] | join(",")' 2>/dev/null)
-  valid_latlon "$loc" && echo "$loc" >"$locationfile"
+if [ -s "$userlocationfile" ] && valid_latlon "$(cat "$userlocationfile")"; then
+  location=$(cat "$userlocationfile")
+else
+  if ! ([ -s "$locationfile" ] && valid_latlon "$(cat "$locationfile")" && [ $(($(date +%s) - $(stat -c %Y "$locationfile" 2>/dev/null || echo 0))) -le 86400 ]); then
+    mkdir -p "${XDG_CACHE_HOME:-${HOME}/.cache}/statusbar"
+    loc=$(curl -s http://ip-api.com/json 2>/dev/null | jq -r 'select(.status == "success") | [.lat, .lon] | join(",")' 2>/dev/null)
+    valid_latlon "$loc" && echo "$loc" >"$locationfile"
+  fi
+  location=$(cat "$locationfile" 2>/dev/null || echo "")
 fi
-location=$(cat "$locationfile" 2>/dev/null || echo "")
 
 weatherreport="${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport"
 weatherreportjson="${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport.json"
