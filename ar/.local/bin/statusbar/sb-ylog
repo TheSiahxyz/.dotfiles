@@ -83,7 +83,7 @@ esac
 # Display
 if [ -s "$NEW" ]; then
   count=$(wc -l <"$NEW")
-  printf "%s\n" "$count"
+  printf "🐈%s\n" "$count"
 fi
 
 exit 0
