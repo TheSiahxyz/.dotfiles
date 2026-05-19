@@ -1,4 +1,4 @@
-if ! filereadable(system('echo -n "${XDG_CONFIG_HOME:-$HOME/.config}/vim/autoload/plug.vim"'))
+if getfsize(expand("${XDG_CONFIG_HOME:-$HOME/.config}/vim/autoload/plug.vim")) <= 0
     echo "Downloading junegunn/vim-plug to manage plugins..."
     silent !mkdir -p ${XDG_CONFIG_HOME:-$HOME/.config}/vim/autoload/
     silent !mkdir -p ${XDG_CONFIG_HOME:-$HOME/.config}/vim/plugged/
