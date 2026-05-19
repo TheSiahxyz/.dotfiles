@@ -1,8 +1,7 @@
 if getfsize(expand("${XDG_CONFIG_HOME:-$HOME/.config}/vim/autoload/plug.vim")) <= 0
     echo "Downloading junegunn/vim-plug to manage plugins..."
-    silent !mkdir -p ${XDG_CONFIG_HOME:-$HOME/.config}/vim/autoload/
     silent !mkdir -p ${XDG_CONFIG_HOME:-$HOME/.config}/vim/plugged/
-    silent !curl "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim" > ${XDG_CONFIG_HOME:-$HOME/.config}/vim/autoload/plug.vim
+    silent !curl -fLo ${XDG_CONFIG_HOME:-$HOME/.config}/vim/autoload/plug.vim --create-dirs "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
     autocmd VimEnter * PlugInstall
 endif
 
