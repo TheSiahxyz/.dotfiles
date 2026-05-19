@@ -235,23 +235,70 @@ cmd extract ${{
   printf "%s\n\t" "$fx"
   printf "extract?[y/N]"
   read ans
-  [ $ans = "y" ] && {
-    case $fx in
-      *.tar.bz|*.tar.bz2|*.tbz|*.tbz2) tar xjf $fx;;
-      *.tar.gz|*.tgz) tar xzf $fx                 ;;
-      *.tar.xz|*.txz) tar xf $fx                  ;;
-      *.bz2)        bunzip2 $fx                   ;;
-      *.lzma)       unlzma $fx                    ;;
-      *.rar)        unrar e $fx                   ;;
-      *.gz)         gunzip $fx                    ;;
-      *.tar)        tar xf $fx                    ;;
-      *.xz)         unxz $fx                      ;;
-      *.zip|*.jar|*.war|*.7z) 7z x $fx            ;;
-      *.Z)          uncompress $fx                ;;
-      *.exe)        cabextract $fx                ;;
-      *.ace)        unace x $fx                   ;;
+  [ "$ans" != "y" ] && exit
+
+  for archive in $fx; do
+    [ -e "$archive" ] || continue
+    case "$archive" in
+      /*) archive_abs="$archive";;
+      *)  archive_abs="$PWD/$archive";;
     esac
-  }
+    base="${archive##*/}"
+    tar_flag=""
+    type=""
+    name=""
+    case "$base" in
+      *.tar.bz2) name="${base%.tar.bz2}"; type=tar; tar_flag=j;;
+      *.tar.bz)  name="${base%.tar.bz}";  type=tar; tar_flag=j;;
+      *.tbz2)    name="${base%.tbz2}";    type=tar; tar_flag=j;;
+      *.tbz)     name="${base%.tbz}";     type=tar; tar_flag=j;;
+      *.tar.gz)  name="${base%.tar.gz}";  type=tar; tar_flag=z;;
+      *.tgz)     name="${base%.tgz}";     type=tar; tar_flag=z;;
+      *.tar.xz)  name="${base%.tar.xz}";  type=tar; tar_flag=J;;
+      *.txz)     name="${base%.txz}";     type=tar; tar_flag=J;;
+      *.tar)     name="${base%.tar}";     type=tar;;
+      *.zip|*.jar|*.war|*.7z) name="${base%.*}"; type=7z;;
+      *.rar)     name="${base%.rar}";     type=rar;;
+      *.exe)     name="${base%.exe}";     type=cab;;
+      *.ace)     name="${base%.ace}";     type=ace;;
+      *.bz2)     bunzip2 "$archive";      continue;;
+      *.gz)      gunzip "$archive";       continue;;
+      *.xz)      unxz "$archive";         continue;;
+      *.lzma)    unlzma "$archive";       continue;;
+      *.Z)       uncompress "$archive";   continue;;
+      *) printf "Unknown archive type: %s\n" "$archive"; continue;;
+    esac
+
+    case "$type" in
+      tar) toplevel=$(tar tf "$archive" 2>/dev/null | awk -F/ 'NF{print $1}' | sort -u);;
+      7z)  toplevel=$(7z l -slt -ba "$archive" 2>/dev/null | awk -F'= ' '/^Path = /{print $2}' | awk -F/ 'NF{print $1}' | sort -u);;
+      rar) toplevel=$(unrar lb "$archive" 2>/dev/null | awk -F/ 'NF{print $1}' | sort -u);;
+      *)   toplevel="";;
+    esac
+    if [ -z "$toplevel" ]; then
+      count=0
+    else
+      count=$(printf '%s\n' "$toplevel" | wc -l)
+    fi
+
+    target="."
+    if [ "$count" != "1" ]; then
+      printf "\n'%s' has %s top-level entries.\nExtract into folder '%s'? [Y/n] " "$base" "$count" "$name"
+      read folder_ans
+      if [ "$folder_ans" != "n" ] && [ "$folder_ans" != "N" ]; then
+        mkdir -p -- "$name"
+        target="$name"
+      fi
+    fi
+
+    case "$type" in
+      tar) tar x${tar_flag}f "$archive" -C "$target";;
+      7z)  7z x "$archive" -o"$target";;
+      rar) (cd "$target" && unrar x "$archive_abs");;
+      cab) (cd "$target" && cabextract "$archive_abs");;
+      ace) (cd "$target" && unace x "$archive_abs");;
+    esac
+  done
 }}
 
 # Git
