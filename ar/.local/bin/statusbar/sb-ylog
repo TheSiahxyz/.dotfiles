@@ -2,8 +2,8 @@
 
 # Displays new nginx log entries from ylog.
 # Updates every 30 minutes via dwmblocks.
-# Left click: show new entries and mark as seen
-# Middle click: force refresh
+# Left click: show all current entries
+# Middle click: show new entries and mark as seen
 # Right click: help
 
 CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/ylog_sb"
@@ -54,6 +54,14 @@ mark_seen() {
 
 case $BLOCK_BUTTON in
 1)
+  if [ -s "$CURR" ]; then
+    count=$(wc -l <"$CURR")
+    notify-send "🌐 Current log entries ($count)" "$(sed 's/^[^ ]* //' "$CURR" | cut -c1-120 | tail -20)"
+  else
+    notify-send "🌐 Ylog" "No entries in cache."
+  fi
+  ;;
+2)
   if [ -s "$NEW" ]; then
     notify-send "🌐 New log entries" "$(cat "$NEW" | sed 's/^[^ ]* //' | cut -c1-120 | tail -20)"
     mark_seen
@@ -62,16 +70,11 @@ case $BLOCK_BUTTON in
     notify-send "🌐 Ylog" "No new entries."
   fi
   ;;
-2)
-  notify-send "🌐 Ylog" "Refreshing..."
-  update
-  pkill -RTMIN+21 "${STATUSBAR:-dwmblocks}"
-  ;;
 3)
-  notify-send "🌐 Ylog module" "- Shows new nginx log entries (diary/recordings/peertube/videos US)
+  notify-send "🌐 Ylog module" "\- Shows new nginx log entries (diary/recordings/peertube/videos US)
 - Updates every 30 minutes
-- Left click: show new entries & mark seen
-- Middle click: force refresh"
+- Left click: show all current entries
+- Middle click: show new entries & mark seen"
   ;;
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 *)
