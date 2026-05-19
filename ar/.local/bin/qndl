@@ -81,6 +81,10 @@ get_type() {
       printf 'kill'
       return 0
       ;;
+    -d | --delete | d | delete)
+      printf 'delete'
+      return 0
+      ;;
     *)
       printf '%s' "$_arg"
       return 0
@@ -465,6 +469,69 @@ restore_archive() {
   notify "✅ All $_sel_total job(s) queued" "tsp will process them sequentially"
 }
 
+delete_archive() {
+  command -v fzf >/dev/null 2>&1 || die "⛔ fzf not installed" "Install fzf to use qndl -d."
+
+  _archive="${XDG_DOTFILES_DIR:-$HOME/.dotfiles}/global/Music/.music.txt"
+  _titles="${XDG_DOTFILES_DIR:-$HOME/.dotfiles}/global/Music/.music_titles.txt"
+
+  [ ! -f "$_archive" ] && die "⛔ Archive not found" "$_archive"
+
+  # fzf input: <id>\t<display>. --with-nth hides column 1, cut grabs it back.
+  if [ -f "$_titles" ]; then
+    _entries="$(awk '
+      NR==FNR {
+        tab = index($0, "\t")
+        if (tab > 0) titles[substr($0, 1, tab-1)] = substr($0, tab+1)
+        next
+      }
+      {
+        sp = index($0, " ")
+        if (sp == 0) next
+        id = substr($0, sp+1)
+        if (id == "") next
+        if (id in titles) printf "%s\t%s  [%s]\n", id, titles[id], id
+        else printf "%s\t[%s]\n", id, id
+      }
+    ' "$_titles" "$_archive")"
+  else
+    _entries="$(awk '$2 != "" { printf "%s\t[%s]\n", $2, $2 }' "$_archive")"
+  fi
+
+  [ -z "$_entries" ] && die "⛔ Archive is empty" "Nothing to delete."
+
+  _selected="$(printf '%s\n' "$_entries" |
+    fzf -m \
+      --with-nth=2.. \
+      --delimiter='\t' \
+      --prompt='Delete: ' \
+      --header='TAB to mark multiple, Enter to confirm' |
+    cut -f1)"
+
+  [ -z "$_selected" ] && return 0
+
+  _ids_file="$(mktemp)"
+  printf '%s\n' "$_selected" >"$_ids_file"
+
+  # YouTube IDs have no whitespace, so default FS works for both files.
+  # Archive lines: "youtube <ID>" → drop where $2 matches.
+  # Titles lines:  "<ID>\t<title>" → drop where $1 matches.
+  _new_archive="$(mktemp)"
+  awk 'NR==FNR { drop[$1]=1; next } !($2 in drop)' "$_ids_file" "$_archive" >"$_new_archive" &&
+    mv "$_new_archive" "$_archive"
+
+  if [ -f "$_titles" ]; then
+    _new_titles="$(mktemp)"
+    awk 'NR==FNR { drop[$1]=1; next } !($1 in drop)' "$_ids_file" "$_titles" >"$_new_titles" &&
+      mv "$_new_titles" "$_titles"
+  fi
+
+  _count="$(printf '%s\n' "$_selected" | grep -c .)"
+  rm -f "$_ids_file"
+
+  notify "🗑️ Removed $_count archive entry/entries" "from .music.txt and .music_titles.txt"
+}
+
 # ---------------------------------------------------------------------------
 # Listing & Cancellation
 # ---------------------------------------------------------------------------
@@ -597,6 +664,9 @@ main() {
   restore)
     restore_archive
     ;;
+  delete)
+    delete_archive
+    ;;
   list)
     list_queue
     ;;
@@ -604,10 +674,10 @@ main() {
     kill_job
     ;;
   "")
-    die "⛔ No type specified" "Provide: music, video, restore, list, or kill."
+    die "⛔ No type specified" "Provide: music, video, restore, delete, list, or kill."
     ;;
   *)
-    die "⛔ Invalid type: $_type" "Recognized types: music, video, restore, list, kill."
+    die "⛔ Invalid type: $_type" "Recognized types: music, video, restore, delete, list, kill."
     ;;
   esac
 }
