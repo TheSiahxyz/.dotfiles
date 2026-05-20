@@ -54,16 +54,16 @@ mark_seen() {
 
 case $BLOCK_BUTTON in
 1)
-  if [ -s "$CURR" ]; then
-    count=$(wc -l <"$CURR")
-    notify-send "🌐 Current log entries ($count)" "$(sed 's/^[^ ]* //' "$CURR" | cut -c1-120 | tail -20)"
+  if [ -s "$NEW" ]; then
+    count=$(wc -l <"$NEW")
+    notify-send "🌐 Current log entries ($count)" "$(cut -c1-120 "$NEW" | tail -20)"
   else
     notify-send "🌐 Ylog" "No entries in cache."
   fi
   ;;
 2)
   if [ -s "$NEW" ]; then
-    notify-send "🌐 New log entries" "$(cat "$NEW" | sed 's/^[^ ]* //' | cut -c1-120 | tail -20)"
+    notify-send "🌐 New log entries" "$(cut -c1-120 "$NEW" | tail -20)"
     mark_seen
     pkill -RTMIN+21 "${STATUSBAR:-dwmblocks}"
   else
