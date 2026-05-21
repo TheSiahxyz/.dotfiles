@@ -63,7 +63,6 @@ case $BLOCK_BUTTON in
   ;;
 2)
   if [ -s "$NEW" ]; then
-    notify-send "🌐 New log entries" "$(cut -c1-120 "$NEW" | tail -20)"
     mark_seen
     pkill -RTMIN+21 "${STATUSBAR:-dwmblocks}"
   else
