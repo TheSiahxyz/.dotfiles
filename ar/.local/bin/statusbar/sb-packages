@@ -5,7 +5,7 @@
 # cronjob every so often as root. This script will then read those packages.
 # When clicked, it will run an upgrade via pacman.
 #
-# Add the following text as a file in /usr/share/libalpm/hooks/statusbar.hook:
+# Add the following text as a file in /etc/pacman.d/hooks/statusbar.hook:
 #
 # [Trigger]
 # Operation = Upgrade
