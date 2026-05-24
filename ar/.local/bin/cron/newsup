@@ -7,7 +7,7 @@
 
 pgrep -f newsboat$ && /usr/bin/xdotool key --window "$(/usr/bin/xdotool search --name "^newsboat$")" R && exit
 
-echo 📰🔃 >/tmp/newsupdate
+echo "📰$(/usr/bin/newsboat -x print-unread | awk '{print $1}')🔃" >/tmp/newsupdate
 pkill -RTMIN+14 "${STATUSBAR:-dwmblocks}"
 /usr/bin/newsboat -x reload
 rm -f /tmp/newsupdate
