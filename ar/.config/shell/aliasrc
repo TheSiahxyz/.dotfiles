@@ -311,7 +311,6 @@ alias open='xdg-open'
 # pacman
 command -v pacman > /dev/null 2>&1 && {
   alias -g pcy='pacman -Syu'
-  alias -g pcyr='pacman -Syu; remaps'
   alias -g pcs='pacman -S'
   alias -g pcss='pacman -Ss'
   alias -g pcqs='pacman -Qs'
