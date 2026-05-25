@@ -76,11 +76,22 @@ loginurl() {
 play_url() {
   url=$(xclip -selection clipboard -o)
   echo "$url" | grep -qE '^https?://' || return 1
-  if yt-dlp --simulate --dump-json "$url" >/dev/null 2>&1; then
+
+  # SOOP rebrand: yt-dlp only recognizes sooplive.co.kr / afreecatv.com,
+  # not sooplive.com. Normalize so VOD/live/channel URLs work.
+  url=$(echo "$url" | sed -E 's#(https?://[^/]*\.)sooplive\.com#\1sooplive.co.kr#')
+
+  # Capture stderr so we can tell "needs login" apart from other failures
+  # (e.g. unsupported URL), instead of always prompting for credentials.
+  err=$(yt-dlp --simulate --dump-json "$url" 2>&1 >/dev/null)
+  if [ $? -eq 0 ]; then
     notify-send "Playing video from URL:" "$url"
     play --ytdl-format="$ytdl_format" "$url"
-  else
+  elif echo "$err" | grep -qiE 'log[ -]?in|sign[ -]?in|authenticat|registered user|--username|--cookies|members[- ]?only|private'; then
     loginurl
+  else
+    notify-send "Failed to play URL" "${err##*ERROR: }"
+    exit 1
   fi
 }
 
