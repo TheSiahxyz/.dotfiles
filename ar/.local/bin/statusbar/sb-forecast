@@ -8,6 +8,8 @@
 userlocationfile="${XDG_CONFIG_HOME:-${HOME}/.config}/location"
 # Cache location for 24 hours - stores lat,lon
 locationfile="${XDG_CACHE_HOME:-${HOME}/.cache}/statusbar/location"
+# Cache for the resolved place name (line 1: the lat,lon it was resolved for; line 2: "City, Country")
+locationnamefile="${XDG_CACHE_HOME:-${HOME}/.cache}/statusbar/locationname"
 valid_latlon() { echo "$1" | grep -qE '^-?[0-9]+\.?[0-9]*,-?[0-9]+\.?[0-9]*$'; }
 if [ -s "$userlocationfile" ] && valid_latlon "$(cat "$userlocationfile")"; then
   location=$(cat "$userlocationfile")
@@ -135,9 +137,33 @@ showweather() {
   [ -n "$(gettemp)" ] && echo "$icon$(gettemp)°"
 }
 
+# Resolve the current location to a "City, Country" name via BigDataCloud reverse
+# geocoding (free, no API key). Cached and only re-fetched when the coordinates
+# change, so it never hits the network on routine statusbar refreshes. Falls back
+# to the raw coordinates if the lookup fails.
+getlocname() {
+  [ -z "$location" ] && return
+  if [ -s "$locationnamefile" ] && [ "$(head -n1 "$locationnamefile")" = "$location" ]; then
+    sed -n '2p' "$locationnamefile"
+    return
+  fi
+  lat=$(echo "$location" | cut -d',' -f1)
+  lon=$(echo "$location" | cut -d',' -f2)
+  name=$(timeout --signal=1 5s curl -sfL \
+    "https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en" 2>/dev/null |
+    jq -r '([.city, .locality, .principalSubdivision] | map(select(. != null and . != "")) | .[0]) as $p | [$p, .countryName] | map(select(. != null and . != "")) | join(", ")' 2>/dev/null)
+  if [ -n "$name" ]; then
+    mkdir -p "${XDG_CACHE_HOME:-${HOME}/.cache}/statusbar"
+    printf '%s\n%s\n' "$location" "$name" >"$locationnamefile"
+    echo "$name"
+  else
+    echo "$location"
+  fi
+}
+
 todayweather() {
-  printf "🌈 Today's weather: %s\n🏂: %s%%\n☔: %s%%(%s%%)max\n%s\n🎐: %s km/h\n🌞: %s°(%s°)\n🥶: %s°\n🥵: %s°\n" \
-    "$(getdesc)" "$(getsnow)" "$(getprecip)" "$(gethighprecip)" "$(gethumidity)" "$(getwind)" "$(gettemp)" "$(getfeelslike)" "$(getlowtemp)" "$(gethightemp)"
+  printf "📍 %s\n🌈 Today's weather: %s\n🏂: %s%%\n☔: %s%%(%s%%)max\n%s\n🎐: %s km/h\n🌞: %s°(%s°)\n🥶: %s°\n🥵: %s°\n" \
+    "$(getlocname)" "$(getdesc)" "$(getsnow)" "$(getprecip)" "$(gethighprecip)" "$(gethumidity)" "$(getwind)" "$(gettemp)" "$(getfeelslike)" "$(getlowtemp)" "$(gethightemp)"
 }
 
 # Show a Doppler RADAR of a user's preferred location.
