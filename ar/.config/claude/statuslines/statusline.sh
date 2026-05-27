@@ -632,24 +632,17 @@ build_language_component() {
 
 build_daily_cost_component() {
   local daily_cost="$1"
-  local projected_cost="${2:-}"
 
   [[ -z "$daily_cost" || "$daily_cost" == "0" || "$daily_cost" == "$NULL_VALUE" ]] && return 0
 
   local cost_fmt
   cost_fmt=$(format_cost "$daily_cost")
   echo -n "${DAILY_COST_ICON} ${ORANGE}\$${cost_fmt}/day${NC}"
-
-  # Projected cost for the active billing block
-  if [[ -n "$projected_cost" && "$projected_cost" != "0" && "$projected_cost" != "$NULL_VALUE" ]]; then
-    local proj_fmt
-    proj_fmt=$(format_cost "$projected_cost")
-    echo -n " ${GRAY}(💵\$${proj_fmt})${NC}"
-  fi
 }
 
 build_remaining_time_component() {
   local remaining_minutes="$1"
+  local projected_cost="${2:-}"
 
   [[ -z "$remaining_minutes" || "$remaining_minutes" == "0" || "$remaining_minutes" == "$NULL_VALUE" ]] && return 0
 
@@ -676,6 +669,13 @@ build_remaining_time_component() {
   fi
 
   echo -n "${REMAINING_ICON} ${time_color}${time_str} left${NC}"
+
+  # Projected cost for the active billing block
+  if [[ -n "$projected_cost" && "$projected_cost" != "0" && "$projected_cost" != "$NULL_VALUE" ]]; then
+    local proj_fmt
+    proj_fmt=$(format_cost "$projected_cost")
+    echo -n " ${GRAY}(💵\$${proj_fmt})${NC}"
+  fi
 }
 
 build_cache_component() {
@@ -821,11 +821,11 @@ main() {
     output+="$time_component"
   }
 
-  # Line 3: Cost | Daily Cost | Remaining (비용/리소스)
+  # Line 3: Cost | Remaining | Daily Cost (비용/리소스)
   local cost_component daily_cost_component remaining_component cache_component
   cost_component=$(build_cost_component "$cost_usd" "$duration_ms")
-  daily_cost_component=$(build_daily_cost_component "$daily_cost" "$projected_cost")
-  remaining_component=$(build_remaining_time_component "$remaining_minutes")
+  daily_cost_component=$(build_daily_cost_component "$daily_cost")
+  remaining_component=$(build_remaining_time_component "$remaining_minutes" "$projected_cost")
   cache_component=$(build_cache_component "${cache_creation:-0}" "${cache_read:-0}")
 
   if [[ -n "$cost_component" || -n "$daily_cost_component" || -n "$remaining_component" ]]; then
@@ -835,14 +835,14 @@ main() {
       output+="$cost_component"
       first=0
     fi
-    if [[ -n "$daily_cost_component" ]]; then
-      [[ "$first" -eq 0 ]] && output+=$(sep)
-      output+="$daily_cost_component"
-      first=0
-    fi
     if [[ -n "$remaining_component" ]]; then
       [[ "$first" -eq 0 ]] && output+=$(sep)
       output+="$remaining_component"
+      first=0
+    fi
+    if [[ -n "$daily_cost_component" ]]; then
+      [[ "$first" -eq 0 ]] && output+=$(sep)
+      output+="$daily_cost_component"
     fi
   fi
 
