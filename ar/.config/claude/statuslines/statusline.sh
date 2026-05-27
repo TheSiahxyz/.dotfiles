@@ -563,6 +563,9 @@ build_git_component() {
     fi
     ;;
   esac
+  # Guard set -e: trailing `[[ … ]] && echo` returns 1 when ahead/behind are 0,
+  # which would abort the script via the `git_component=$(…)` assignment.
+  return 0
 }
 
 build_cost_component() {
@@ -611,6 +614,7 @@ build_time_component() {
   local duration_fmt
   duration_fmt=$(format_duration "$duration_ms")
   [[ -n "$duration_fmt" ]] && echo -n "${TIME_ICON} ${LIGHT_GRAY}${duration_fmt}${NC}"
+  return 0
 }
 
 build_version_component() {
