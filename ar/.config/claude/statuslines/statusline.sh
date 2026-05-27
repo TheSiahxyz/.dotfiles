@@ -2,10 +2,10 @@
 set -euo pipefail 2>/dev/null || set -eu
 
 # ============================================================
-# STATUSLINE v2.2.0 - Claude Code Status Line
+# STATUSLINE v2.3.0 - Claude Code Status Line
 # ============================================================
 
-readonly STATUSLINE_VERSION="2.2.0"
+readonly STATUSLINE_VERSION="2.3.0"
 
 # ============================================================
 # CONFIGURATION
@@ -57,8 +57,19 @@ readonly STATE_DIRTY="dirty"
 # ============================================================
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly LOG_FILE="${SCRIPT_DIR}/statusline.log"
+readonly LOG_MAX_BYTES=524288  # rotate past 512 KB; one generation kept (.1)
 
 log_debug() {
+  # Disable entirely with STATUSLINE_LOG=0
+  [[ "${STATUSLINE_LOG:-1}" == "0" ]] && return 0
+
+  # Bound growth: rotate to .1 once over the cap (was 23 MB unbounded before)
+  local size=0
+  size=$(stat -c%s "$LOG_FILE" 2>/dev/null || echo 0)
+  if [[ "$size" -gt "$LOG_MAX_BYTES" ]]; then
+    mv -f "$LOG_FILE" "${LOG_FILE}.1" 2>/dev/null || true
+  fi
+
   local timestamp
   timestamp=$(date '+%Y-%m-%d %H:%M:%S')
   echo "[$timestamp] $*" >>"$LOG_FILE" 2>/dev/null || true
@@ -193,17 +204,44 @@ detect_language_info() {
 # ============================================================
 
 readonly CCUSAGE_CACHE_FILE="${SCRIPT_DIR}/.ccusage_cache"
-readonly CCUSAGE_CACHE_TTL=60  # seconds
+readonly CCUSAGE_LOCK_FILE="${SCRIPT_DIR}/.ccusage_refresh.lock"
+readonly CCUSAGE_CACHE_TTL=60     # seconds before cache is considered stale
+readonly CCUSAGE_LOCK_TTL=300     # seconds before a stuck refresh lock is reclaimed
+readonly CCUSAGE_FETCH_TIMEOUT=90 # safety net per ccusage call (normal: ~40s)
 
-# Fetch fresh ccusage data (internal)
+# Run `npx ccusage ...`, bounded by a timeout when available
+_ccusage_call() {
+  if command -v timeout >/dev/null 2>&1; then
+    timeout "$CCUSAGE_FETCH_TIMEOUT" npx ccusage "$@" 2>/dev/null
+  else
+    npx ccusage "$@" 2>/dev/null
+  fi
+}
+
+# Fetch fresh ccusage data (internal). SLOW: npx can take tens of seconds,
+# so this must only ever run in the background (see _refresh_ccusage_async).
 _fetch_ccusage_data() {
   # Check if npx is available
   command -v npx >/dev/null 2>&1 || return 1
 
-  # Get daily cost
-  local daily_cost=""
+  # Get TODAY's cost only. Two gotchas:
+  #  1. Without --since, .totals.totalCost sums every retained day, so the
+  #     "$/day" label would show a cumulative total, not today.
+  #  2. ccusage groups days in UTC by default. We resolve the same timezone
+  #     `date` uses (TZ env, else /etc/localtime) and pass it via -z, so the
+  #     --since day and ccusage's buckets agree (matters in local-morning
+  #     hours that still fall on the previous UTC day).
+  local daily_cost="" today tz tz_arg=()
+  tz="${TZ:-}"
+  [[ -z "$tz" ]] && tz=$(readlink -f /etc/localtime 2>/dev/null | sed 's#.*/zoneinfo/##')
+  if [[ -n "$tz" ]]; then
+    today=$(date +%Y%m%d)
+    tz_arg=(-z "$tz")
+  else
+    today=$(date -u +%Y%m%d) # detection failed: match ccusage's UTC default
+  fi
   local daily_json
-  daily_json=$(npx ccusage daily --json 2>/dev/null)
+  daily_json=$(_ccusage_call daily --since "$today" "${tz_arg[@]}" --json)
   if [[ -n "$daily_json" ]]; then
     daily_cost=$(echo "$daily_json" | jq -r '.totals.totalCost // 0' 2>/dev/null)
   fi
@@ -211,7 +249,7 @@ _fetch_ccusage_data() {
   # Get active block data (projections, remaining time)
   local remaining_minutes="" projected_cost="" block_cost="" burn_rate=""
   local blocks_json
-  blocks_json=$(npx ccusage blocks --active --json 2>/dev/null)
+  blocks_json=$(_ccusage_call blocks --active --json)
   if [[ -n "$blocks_json" ]]; then
     remaining_minutes=$(echo "$blocks_json" | jq -r '.blocks[0].projection.remainingMinutes // empty' 2>/dev/null)
     projected_cost=$(echo "$blocks_json" | jq -r '.blocks[0].projection.totalCost // empty' 2>/dev/null)
@@ -223,38 +261,66 @@ _fetch_ccusage_data() {
   echo "${daily_cost:-0}|${remaining_minutes:-0}|${projected_cost:-0}|${block_cost:-0}|${burn_rate:-0}"
 }
 
-# Get ccusage data with caching
+# Spawn a detached background refresh of the ccusage cache, if one isn't
+# already running. The slow fetch never blocks rendering; the next status
+# line invocation picks up the fresh value.
+_refresh_ccusage_async() {
+  local now="$1"
+
+  # Single-flight: skip if a refresh is already in progress and not stuck
+  if [[ -f "$CCUSAGE_LOCK_FILE" ]]; then
+    local lock_time
+    lock_time=$(cat "$CCUSAGE_LOCK_FILE" 2>/dev/null)
+    if [[ "$lock_time" =~ ^[0-9]+$ ]] && [[ $((now - lock_time)) -lt "$CCUSAGE_LOCK_TTL" ]]; then
+      log_debug "ccusage refresh already running (lock age: $((now - lock_time))s)"
+      return 0
+    fi
+  fi
+  echo "$now" >"$CCUSAGE_LOCK_FILE" 2>/dev/null
+
+  # Fully detach: setsid (own session) + redirect ALL fds away from the
+  # status line's stdout pipe, so Claude Code never waits on this child.
+  # The child is a fresh bash, so carry in the values/functions it needs.
+  local runner
+  runner="CCUSAGE_FETCH_TIMEOUT=${CCUSAGE_FETCH_TIMEOUT}
+$(declare -f _ccusage_call)
+$(declare -f _fetch_ccusage_data)
+fresh_data=\$(_fetch_ccusage_data)
+[ -n \"\$fresh_data\" ] && printf '%s|%s\\n' \"\$(date +%s)\" \"\$fresh_data\" > '${CCUSAGE_CACHE_FILE}'
+rm -f '${CCUSAGE_LOCK_FILE}'"
+  if command -v setsid >/dev/null 2>&1; then
+    setsid bash -c "$runner" </dev/null >/dev/null 2>&1 &
+  else
+    ( bash -c "$runner" </dev/null >/dev/null 2>&1 & )
+  fi
+  disown 2>/dev/null || true
+  log_debug "Spawned background ccusage refresh"
+}
+
+# Get ccusage data: serve cache immediately, refresh in background if stale.
 get_ccusage_data() {
   local session_id="$1"
-  local now
+  local now cache_data="" cache_time=""
   now=$(date +%s)
 
-  # Check if cache exists and is valid
   if [[ -f "$CCUSAGE_CACHE_FILE" ]]; then
     local cache_line
     cache_line=$(head -1 "$CCUSAGE_CACHE_FILE" 2>/dev/null)
-    local cache_time="${cache_line%%|*}"
-    local cache_data="${cache_line#*|}"
-
-    if [[ -n "$cache_time" && "$cache_time" =~ ^[0-9]+$ ]]; then
-      local age=$((now - cache_time))
-      if [[ "$age" -lt "$CCUSAGE_CACHE_TTL" ]]; then
-        log_debug "Using cached ccusage data (age: ${age}s)"
-        echo "$cache_data"
-        return 0
-      fi
-    fi
+    cache_time="${cache_line%%|*}"
+    cache_data="${cache_line#*|}"
   fi
 
-  # Cache miss or expired - fetch fresh data
-  log_debug "Fetching fresh ccusage data"
-  local fresh_data
-  fresh_data=$(_fetch_ccusage_data) || return 1
+  # Trigger a background refresh when the cache is missing or stale
+  if [[ ! "$cache_time" =~ ^[0-9]+$ ]] || [[ $((now - cache_time)) -ge "$CCUSAGE_CACHE_TTL" ]]; then
+    _refresh_ccusage_async "$now"
+  else
+    log_debug "Using cached ccusage data (age: $((now - cache_time))s)"
+  fi
 
-  # Save to cache
-  echo "${now}|${fresh_data}" > "$CCUSAGE_CACHE_FILE" 2>/dev/null
-
-  echo "$fresh_data"
+  # Always render instantly from whatever cache we have (possibly stale).
+  # On a cold start with no cache, returns non-zero so the components skip.
+  [[ -n "$cache_data" ]] || return 1
+  echo "$cache_data"
 }
 
 # ============================================================
@@ -562,17 +628,24 @@ build_language_component() {
 
 build_daily_cost_component() {
   local daily_cost="$1"
+  local projected_cost="${2:-}"
 
   [[ -z "$daily_cost" || "$daily_cost" == "0" || "$daily_cost" == "$NULL_VALUE" ]] && return 0
 
   local cost_fmt
   cost_fmt=$(format_cost "$daily_cost")
   echo -n "${DAILY_COST_ICON} ${ORANGE}\$${cost_fmt}/day${NC}"
+
+  # Projected cost for the active billing block
+  if [[ -n "$projected_cost" && "$projected_cost" != "0" && "$projected_cost" != "$NULL_VALUE" ]]; then
+    local proj_fmt
+    proj_fmt=$(format_cost "$projected_cost")
+    echo -n " ${GRAY}(💵\$${proj_fmt})${NC}"
+  fi
 }
 
 build_remaining_time_component() {
   local remaining_minutes="$1"
-  local projected_cost="$2"
 
   [[ -z "$remaining_minutes" || "$remaining_minutes" == "0" || "$remaining_minutes" == "$NULL_VALUE" ]] && return 0
 
@@ -599,13 +672,6 @@ build_remaining_time_component() {
   fi
 
   echo -n "${REMAINING_ICON} ${time_color}${time_str} left${NC}"
-
-  # Show projected cost if available
-  if [[ -n "$projected_cost" && "$projected_cost" != "0" && "$projected_cost" != "$NULL_VALUE" ]]; then
-    local proj_fmt
-    proj_fmt=$(format_cost "$projected_cost")
-    echo -n " ${GRAY}(💵\$${proj_fmt})${NC}"
-  fi
 }
 
 build_cache_component() {
@@ -754,8 +820,8 @@ main() {
   # Line 3: Cost | Daily Cost | Remaining (비용/리소스)
   local cost_component daily_cost_component remaining_component cache_component
   cost_component=$(build_cost_component "$cost_usd" "$duration_ms")
-  daily_cost_component=$(build_daily_cost_component "$daily_cost")
-  remaining_component=$(build_remaining_time_component "$remaining_minutes" "$projected_cost")
+  daily_cost_component=$(build_daily_cost_component "$daily_cost" "$projected_cost")
+  remaining_component=$(build_remaining_time_component "$remaining_minutes")
   cache_component=$(build_cache_component "${cache_creation:-0}" "${cache_read:-0}")
 
   if [[ -n "$cost_component" || -n "$daily_cost_component" || -n "$remaining_component" ]]; then
