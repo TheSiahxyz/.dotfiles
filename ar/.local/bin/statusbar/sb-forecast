@@ -24,6 +24,9 @@ fi
 
 weatherreport="${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport"
 weatherreportjson="${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport.json"
+# Records the lat,lon the current report was fetched for, so the forecast is
+# refreshed immediately when the location changes (not just every 3 hours).
+weatherreportloc="${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport.loc"
 
 error() {
   rm -f "$weatherreport" "$weatherreportjson"
@@ -40,6 +43,7 @@ getweatherreportjson() {
     "https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation_probability,snowfall,wind_speed_10m,weather_code&daily=temperature_2m_min,temperature_2m_max,precipitation_probability_max&timezone=auto&wind_speed_unit=kmh&forecast_days=1") || error "reportjson"
   echo "$tmp" | jq -e '.hourly' >/dev/null 2>&1 || error "reportjson"
   echo "$tmp" >"$weatherreportjson"
+  echo "$location" >"$weatherreportloc"
 }
 
 # Fetch a text weather report from wttr.in and save it locally.
@@ -443,5 +447,8 @@ After $secs seconds, new clicks will also automatically update the doppler RADAR
 8) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
-checkforecast "$weatherreportjson" "10800" || { getweatherreportjson && getweatherreport && pkill -RTMIN+10 "${STATUSBAR:-dwmblocks}" && sleep 3; }
+# Refresh if the cached forecast is stale (>3h) or was fetched for a different location.
+if ! checkforecast "$weatherreportjson" "10800" || { [ -n "$location" ] && [ "$(cat "$weatherreportloc" 2>/dev/null)" != "$location" ]; }; then
+  getweatherreportjson && getweatherreport && pkill -RTMIN+10 "${STATUSBAR:-dwmblocks}" && sleep 3
+fi
 showweather
