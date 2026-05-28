@@ -187,8 +187,30 @@ enqueue() {
   # Success notification — runs only if download succeeds
   tsp -D "$_idnum" notify-send -- "✅ ${_dl_type} download complete:" "$_url"
 
-  # Failure notification — waits for job, checks its exit status
-  tsp bash -c 'tsp -w "$1"; _exit=$(tsp -i "$1" | sed -n "s/.*exit code //p"); [ -n "$_exit" ] && [ "$_exit" != "0" ] && notify-send -- "❌ Failed to download:" "$2"' -- "$_idnum" "$_url"
+  # Failure notification — waits for job, then distinguishes partial-success
+  # (yt-dlp skipped some HLS fragments via --ignore-errors but still produced
+  # a playable output) from full failure. On partial success, also clean up
+  # orphan `<final>.part-Frag*.part` files yt-dlp leaves behind for skipped
+  # fragments.
+  tsp bash -c '
+    tsp -w "$1"
+    _exit=$(tsp -i "$1" | sed -n "s/.*exit code //p")
+    { [ -z "$_exit" ] || [ "$_exit" = "0" ]; } && exit 0
+    _log=$(tsp -o "$1" 2>/dev/null)
+    _final=""
+    _skipped=0
+    if [ -n "$_log" ] && [ -f "$_log" ]; then
+      _final=$(grep -oE "\[Merger\] Merging formats into \"[^\"]+\"" "$_log" | tail -n 1 | sed "s/^\[Merger\] Merging formats into \"//; s/\"$//")
+      [ -z "$_final" ] && _final=$(grep "^\[download\] Destination: " "$_log" | tail -n 1 | sed "s/^\[download\] Destination: //")
+      _skipped=$(grep -c "fragment not found; Skipping fragment" "$_log" 2>/dev/null || printf 0)
+    fi
+    if [ -n "$_final" ] && [ -f "$_final" ]; then
+      find "$(dirname "$_final")" -maxdepth 1 -name "$(basename "$_final").part-Frag*.part" -delete 2>/dev/null
+      notify-send -- "⚠️ Partial download (${_skipped} fragments lost):" "$2"
+    else
+      notify-send -- "❌ Failed to download:" "$2"
+    fi
+  ' -- "$_idnum" "$_url"
 
   if [ "$_dl_type" = "music" ]; then
     tsp -D "$_idnum" bash -c "mpc update --wait && find '$_music_dir' -name '*.mp3' | sed 's|$_music_dir/||' | sort > '$HOME/.config/mpd/playlists/entire.m3u'"
@@ -386,9 +408,14 @@ download_video() {
       done
     fi
   elif [ -n "$_recode_ext" ]; then
+    # --http-chunk-size 9M: Soop's CDN closes the connection at exactly 10 MiB
+    # per HTTP GET, which silently truncated ~12 MiB HLS fragments and forced
+    # them to be skipped. Capping per-request bytes under that limit splits
+    # each fragment into multiple Range requests so none hit the cutoff.
     enqueue "video" "$_url" "$_filename" \
       "$_pl_flag" \
       --buffer-size 1M \
+      --http-chunk-size 9M \
       --embed-thumbnail \
       --no-sponsorblock \
       --format "$_format_val" \
@@ -398,6 +425,7 @@ download_video() {
     enqueue "video" "$_url" "$_filename" \
       "$_pl_flag" \
       --buffer-size 1M \
+      --http-chunk-size 9M \
       --embed-thumbnail \
       --no-sponsorblock \
       --format "$_format_val" \
