@@ -8,7 +8,7 @@ IFS="${IFS%_}"
 
 image() {
   if [ -f "$1" ] && [ -n "$DISPLAY" ] && [ -z "$WAYLAND_DISPLAY" ] && command -V ueberzugpp >/dev/null 2>&1; then
-    printf '{"action": "add", "identifier": "PREVIEW", "x": "%s", "y": "%s", "width": "%s", "height": "%s", "scaler": "contain", "path": "%s"}\n' "$4" "$(($5 + 1))" "$(($2 - 1))" "$(($3 - 2))" "$1" >"$FIFO_UEBERZUGPP"
+    printf '{"action": "add", "identifier": "PREVIEW", "x": "%s", "y": "%s", "width": "%s", "height": "%s", "scaler": "contain", "path": "%s"}\n' "$4" "$(($5 + 2))" "$(($2 - 1))" "$(($3 - 3))" "$1" >"$FIFO_UEBERZUGPP"
     mediainfo --Output="Video;%Duration/String%" "$6"
   elif command -V chafa >/dev/null 2>&1; then
     chafa -s "$4"x"$3" "$1"
