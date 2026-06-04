@@ -434,7 +434,7 @@ alias trem='transmission-remote'
 
 # trash
 alias trd='trash-rm'
-alias tre='trash-empty'
+alias tre='trash-empty && trash-empty --trash-dir /home/si/Secret/.Trash-1000'
 alias trl='trash-list'
 alias trp='trash-put'
 alias trr='trash-restore'
