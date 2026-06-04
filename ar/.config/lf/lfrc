@@ -86,13 +86,18 @@ cmd compress ${{
 cmd copyto ${{
   set -f
   clear; tput cup $(($(tput lines)/3))
-	dest=$(
-	  {
-	    sed -e 's/\s*#.*//' -e '/^$/d' -e 's/^\S*\s*//' "${XDG_CONFIG_HOME:-$HOME/.config}/shell/bm-dirs"
-	    findmnt -rno TARGET | grep -E "^/mnt/|^/media/$USER/"
-	  } | awk '!seen[$0]++' | fzf --layout=reverse --height 40% --prompt 'Copy to where? ' | sed 's|~|$HOME|')
+	tmpdest=$(mktemp)
+	{
+	  sed -e 's/\s*#.*//' -e '/^$/d' -e 's/^\S*\s*//' "${XDG_CONFIG_HOME:-$HOME/.config}/shell/bm-dirs"
+	  findmnt -rno TARGET | grep -E "^/mnt/|^/media/$USER/" | while read -r m; do
+	    printf '%s\n' "$m"
+	    find "$m" -mindepth 1 -maxdepth 2 -type d -not -name '.*' 2>/dev/null || true
+	  done
+	} | awk '!seen[$0]++' | fzf --layout=reverse --height 40% --prompt 'Copy to where? ' > "$tmpdest" || true
+	IFS= read -r dest < "$tmpdest" || dest=""
+	rm -f "$tmpdest"
 	[ -z "$dest" ] && exit
-	destpath=$(eval printf '%s' \"$dest\")
+	case "$dest" in "~"*) destpath="$HOME${dest#?}";; *) destpath="$dest";; esac
 	clear; tput cup $(($(tput lines)/3)); tput bold
 	echo "From:"
 	echo "$fx" | sed 's/^/   /'
@@ -121,7 +126,10 @@ cmd mkdir %{{
     IFS=" "
     file="$*"
     mkdir -p -- "$file"
-    lf -remote "send $id cd \"$(printf '%s' "$file" | sed 's/\\/\\\\/g;s/"/\\"/g')\""
+    printf '%s' "$file" | sed 's/\\/\\\\/g;s/"/\\"/g' | {
+        IFS= read -r quoted || quoted="$file"
+        lf -remote "send $id cd \"$quoted\""
+    }
 }}
 cmd touch %{{
     IFS=" "
@@ -133,11 +141,16 @@ cmd touch %{{
     dir="${file%/*}"
     [ "$dir" != "$file" ] && mkdir -p -- "$dir"
     touch -- "$file"
-    file="$(printf '%s' "$file" | sed 's/\\/\\\\/g;s/"/\\"/g')"
-    lf -remote "send $id :select \"$file\"; \$\$EDITOR \"$file\""
+    printf '%s' "$file" | sed 's/\\/\\\\/g;s/"/\\"/g' | {
+        IFS= read -r quoted || quoted="$file"
+        lf -remote "send $id :select \"$quoted\"; \$\$EDITOR \"$quoted\""
+    }
 }}
 cmd link %{{
-  set -- $(cat ~/.local/share/lf/files)
+  set --
+  while IFS= read -r line || [ -n "$line" ]; do
+    set -- "$@" "$line"
+  done < ~/.local/share/lf/files
   mode="$1"
   shift
   if [ "$#" -lt 1 ]; then
@@ -216,8 +229,7 @@ cmd dragon-individual &{{
   lf -remote "send $id :unselect; save-select"
 }}
 cmd dragon-target ${{
-  out=$(dragon-drop -t -x)
-  [ -n "$out" ] && printf "%s\n" "$out" | while IFS= read -r src; do
+  dragon-drop -t -x | while IFS= read -r src; do
     [ -e "$src" ] && cp -ivr "$src" "$PWD"
   done
   lf -remote "send $id :unselect; save-select"
@@ -269,17 +281,13 @@ cmd extract ${{
       *) printf "Unknown archive type: %s\n" "$archive"; continue;;
     esac
 
+    # count only (ASCII) — entry names must not pass through dash's $()
     case "$type" in
-      tar) toplevel=$(tar tf "$archive" 2>/dev/null | awk -F/ 'NF{print $1}' | sort -u);;
-      7z)  toplevel=$(7z l -slt -ba "$archive" 2>/dev/null | awk -F'= ' '/^Path = /{print $2}' | awk -F/ 'NF{print $1}' | sort -u);;
-      rar) toplevel=$(unrar lb "$archive" 2>/dev/null | awk -F/ 'NF{print $1}' | sort -u);;
-      *)   toplevel="";;
+      tar) count=$(tar tf "$archive" 2>/dev/null | awk -F/ 'NF{print $1}' | sort -u | grep -c . || true);;
+      7z)  count=$(7z l -slt -ba "$archive" 2>/dev/null | awk -F'= ' '/^Path = /{print $2}' | awk -F/ 'NF{print $1}' | sort -u | grep -c . || true);;
+      rar) count=$(unrar lb "$archive" 2>/dev/null | awk -F/ 'NF{print $1}' | sort -u | grep -c . || true);;
+      *)   count=0;;
     esac
-    if [ -z "$toplevel" ]; then
-      count=0
-    else
-      count=$(printf '%s\n' "$toplevel" | wc -l)
-    fi
 
     target="."
     if [ "$count" != "1" ]; then
@@ -303,12 +311,14 @@ cmd extract ${{
 
 # Git
 cmd git-root %{{
-  root=$(git rev-parse --show-toplevel 2>/dev/null)
-  if [ -n "$root" ]; then
-    lf -remote "send $id cd \"$root\""
-  else
-    lf -remote "send $id echo 'Not in a git repository'"
-  fi
+  { git rev-parse --show-toplevel 2>/dev/null || true; } | {
+    IFS= read -r root || root=""
+    if [ -n "$root" ]; then
+      lf -remote "send $id cd \"$root\""
+    else
+      lf -remote "send $id echo 'Not in a git repository'"
+    fi
+  }
 }}
 
 cmd on-cd &{{
@@ -328,7 +338,8 @@ cmd on-cd &{{
 }}
 
 cmd on-load &{{
-    cd "$(dirname "$1")" || exit 1
+    dir="${1%/*}"
+    cd "${dir:-/}" || exit 1
     [ "$(git rev-parse --is-inside-git-dir 2>/dev/null)" = false ] || exit 0
     cmds=""
     for file in "$@"; do
@@ -359,13 +370,18 @@ cmd create-ipynb ${{
 cmd moveto ${{
   set -f
   clear; tput cup $(($(tput lines)/3))
-	dest=$(
-	  {
-	    sed -e 's/\s*#.*//' -e '/^$/d' -e 's/^\S*\s*//' "${XDG_CONFIG_HOME:-$HOME/.config}/shell/bm-dirs"
-	    findmnt -rno TARGET | grep -E "^/mnt/|^/media/$USER/"
-	  } | awk '!seen[$0]++' | fzf --layout=reverse --height 40% --prompt 'Move to where? ' | sed 's|~|$HOME|')
+	tmpdest=$(mktemp)
+	{
+	  sed -e 's/\s*#.*//' -e '/^$/d' -e 's/^\S*\s*//' "${XDG_CONFIG_HOME:-$HOME/.config}/shell/bm-dirs"
+	  findmnt -rno TARGET | grep -E "^/mnt/|^/media/$USER/" | while read -r m; do
+	    printf '%s\n' "$m"
+	    find "$m" -mindepth 1 -maxdepth 2 -type d -not -name '.*' 2>/dev/null || true
+	  done
+	} | awk '!seen[$0]++' | fzf --layout=reverse --height 40% --prompt 'Move to where? ' > "$tmpdest" || true
+	IFS= read -r dest < "$tmpdest" || dest=""
+	rm -f "$tmpdest"
 	[ -z "$dest" ] && exit
-	destpath=$(eval printf '%s' \"$dest\")
+	case "$dest" in "~"*) destpath="$HOME${dest#?}";; *) destpath="$dest";; esac
 	clear; tput cup $(($(tput lines)/3)); tput bold
 	echo "From:"
 	echo "$fx" | sed 's/^/   /'
@@ -391,10 +407,14 @@ cmd mpvdir ${{
     set -- $fx
     setsid -f mpv --x11-name=video --really-quiet -- "$@" </dev/null >/dev/null 2>&1
   else
-    for file in $(printf '%s\n' *.mp4 *.mkv *.avi *.flv *.webm *.mov *.mpg *.3gp *.ts *.rmvb | sort -f); do
+    tmplist=$(mktemp)
+    printf '%s\n' *.mp4 *.mkv *.avi *.flv *.webm *.mov *.mpg *.3gp *.ts *.rmvb | sort -f > "$tmplist"
+    set --
+    while IFS= read -r file; do
       [ -e "$file" ] && set -- "$@" "$file"
-    done
-    [ -n "$1" ] && setsid -f mpv --x11-name=video --really-quiet -- "$@" </dev/null >/dev/null 2>&1
+    done < "$tmplist"
+    rm -f "$tmplist"
+    [ "$#" -gt 0 ] && setsid -f mpv --x11-name=video --really-quiet -- "$@" </dev/null >/dev/null 2>&1
   fi
 
   lf -remote "send $id :clear; unselect; save-select"
@@ -402,7 +422,7 @@ cmd mpvdir ${{
 
 # Open
 cmd open ${{
-  case $(file --mime-type "$(readlink -f $f)" -b) in
+  case $(file -bL --mime-type -- "$f") in
   application/octet-stream)
     case ${f##*.} in
     ppt|pptx) setsid -f libreoffice --impress $fx >/dev/null 2>&1 ;;
@@ -443,21 +463,41 @@ cmd open ${{
 cmd bulkrename ${{
   tmpfile_old="$(mktemp)"
   tmpfile_new="$(mktemp)"
+  tmpfile_failed="$(mktemp)"
 
-  [ -n "$fs" ] && fs=$(basename -a $fs) || fs=$([ "$lf_hidden" = "true" ] && ls -A || ls)
-
-  echo "$fs" > "$tmpfile_old"
-  echo "$fs" > "$tmpfile_new"
+  # NOTE: avoid command substitution over multibyte data — dash's $() corrupts
+  # UTF-8 chars straddling its 128-byte read buffer (stray 0x81 CTLESC bytes)
+  if [ -n "$fs" ]; then
+    printf '%s\n' "$fs" | xargs -d '\n' -r basename -a -- > "$tmpfile_old"
+  elif [ "$lf_hidden" = "true" ]; then
+    ls -A > "$tmpfile_old"
+  else
+    ls > "$tmpfile_old"
+  fi
+  cp "$tmpfile_old" "$tmpfile_new"
   $EDITOR "$tmpfile_new"
 
-  [ "$(wc -l < "$tmpfile_old")" -eq "$(wc -l < "$tmpfile_new")" ] || { rm -f "$tmpfile_old" "$tmpfile_new"; exit 1; }
+  [ "$(wc -l < "$tmpfile_old")" -eq "$(wc -l < "$tmpfile_new")" ] || { rm -f "$tmpfile_old" "$tmpfile_new" "$tmpfile_failed"; exit 1; }
 
   paste "$tmpfile_old" "$tmpfile_new" | while IFS="$(printf '\t')" read -r src dst
   do
-    [ "$src" = "$dst" ] || [ -e "$dst" ] || mv -- "$src" "$dst"
+    [ "$src" = "$dst" ] || [ -e "$dst" ] ||
+      mv -- "$src" "$dst" 2>/dev/null ||
+      printf '%s\t%s\n' "$src" "$dst" >> "$tmpfile_failed"
   done
 
-  rm -f "$tmpfile_old" "$tmpfile_new"
+  if [ -s "$tmpfile_failed" ]; then
+    clear; tput cup $(($(tput lines)/3)); tput bold
+    cut -f1 "$tmpfile_failed"
+    printf "Permission needed for %s file(s). Rename with sudo?[y/N]" "$(wc -l < "$tmpfile_failed")"
+    read -r ans
+    [ "$ans" = "y" ] && while IFS="$(printf '\t')" read -r src dst
+    do
+      sudo mv -- "$src" "$dst"
+    done < "$tmpfile_failed"
+  fi
+
+  rm -f "$tmpfile_old" "$tmpfile_new" "$tmpfile_failed"
   lf -remote "send $id unselect"
 }}
 
@@ -493,9 +533,9 @@ cmd select-mime &{{
   [ -s /tmp/lf-select-mime-$$ ] || { rm -f /tmp/lf-select-mime-$$; exit; }
 
   lf -remote "send $id unselect"
+  sed 's/\\/\\\\/g;s/"/\\"/g' /tmp/lf-select-mime-$$ > /tmp/lf-select-mime-q-$$
   batch=""
-  while IFS= read -r file; do
-    quoted=$(printf '%s' "$file" | sed 's/\\/\\\\/g;s/"/\\"/g')
+  while IFS= read -r quoted; do
     candidate="$batch \"$quoted\""
     if [ ${#candidate} -gt 8000 ]; then
       lf -remote "send $id toggle $batch"
@@ -503,9 +543,9 @@ cmd select-mime &{{
     else
       batch="$candidate"
     fi
-  done < /tmp/lf-select-mime-$$
+  done < /tmp/lf-select-mime-q-$$
   [ -n "$batch" ] && lf -remote "send $id toggle $batch"
-  rm -f /tmp/lf-select-mime-$$
+  rm -f /tmp/lf-select-mime-$$ /tmp/lf-select-mime-q-$$
 }}
 cmd select-dirs select-mime 'inode/directory'
 cmd select-files select-mime '-inode/directory'
@@ -513,7 +553,10 @@ cmd select-videos select-mime 'video/'
 cmd select-images select-mime 'image/'
 cmd select-music select-mime 'audio/'
 cmd on-select &{{
-  lf -remote "send $id set statfmt \"$(eza -ldg --color=always "$f")\""
+  eza -ldg --color=always "$f" | {
+    IFS= read -r line || line=""
+    lf -remote "send $id set statfmt \"$line\""
+  }
 }}
 cmd load-select &{{
     if [ $# -eq 1 ] && [ "$1" = "$id" ]; then
@@ -521,7 +564,13 @@ cmd load-select &{{
     fi
     lf -remote "send $id unselect"
     if [ -s ~/.local/share/lf/select ]; then
-        files="$(sed 's/\\/\\\\/g;s/"/\\"/g;s/^/"/;s/$/"/' ~/.local/share/lf/select | tr '\n' ' ')"
+        tmpq=$(mktemp)
+        sed 's/\\/\\\\/g;s/"/\\"/g;s/^/"/;s/$/"/' ~/.local/share/lf/select > "$tmpq"
+        files=""
+        while IFS= read -r line || [ -n "$line" ]; do
+            files="$files $line"
+        done < "$tmpq"
+        rm -f "$tmpq"
         lf -remote "send $id toggle $files"
     fi
 }}
@@ -545,34 +594,51 @@ cmd alt-paste &{{
 }}
 
 # Traversal
-cmd fzf $nvim $(find . -name "$1" | fzf)
+cmd fzf ${{
+  tmpsel=$(mktemp)
+  find . -name "$1" | fzf > "$tmpsel" || true
+  IFS= read -r sel < "$tmpsel" || sel=""
+  rm -f "$tmpsel"
+  if [ -n "$sel" ]; then nvim -- "$sel"; fi
+}}
 cmd fzf_search ${{
   RG_PREFIX="rg --column --line-number --no-heading --color=always --smart-case "
-  res="$(
-    FZF_DEFAULT_COMMAND="$RG_PREFIX ''" \
-      fzf --bind "change:reload:$RG_PREFIX {q} || true" \
-      --ansi --layout=reverse --header 'Search in files' \
-      | cut -d':' -f1 | sed 's/\\/\\\\/g;s/"/\\"/g'
-  )"
-  [ -n "$res" ] && lf -remote "send $id select \"$res\""
+  FZF_DEFAULT_COMMAND="$RG_PREFIX ''" \
+    fzf --bind "change:reload:$RG_PREFIX {q} || true" \
+    --ansi --layout=reverse --header 'Search in files' \
+    | cut -d':' -f1 | sed 's/\\/\\\\/g;s/"/\\"/g' | {
+      IFS= read -r res || res=""
+      if [ -n "$res" ]; then lf -remote "send $id select \"$res\""; fi
+    }
 }}
 cmd z %{{
-	result="$(zoxide query --exclude $PWD $@ | sed 's/\\/\\\\/g;s/"/\\"/g')"
-	lf -remote "send $id cd \"$result\""
+	{ zoxide query --exclude $PWD $@ 2>/dev/null || true; } | sed 's/\\/\\\\/g;s/"/\\"/g' | {
+		IFS= read -r result || result=""
+		if [ -n "$result" ]; then lf -remote "send $id cd \"$result\""; fi
+	}
 }}
 cmd zi ${{
-	result="$(zoxide query -i | sed 's/\\/\\\\/g;s/"/\\"/g')"
-	lf -remote "send $id cd \"$result\""
+	{ zoxide query -i 2>/dev/null || true; } | sed 's/\\/\\\\/g;s/"/\\"/g' | {
+		IFS= read -r result || result=""
+		if [ -n "$result" ]; then lf -remote "send $id cd \"$result\""; fi
+	}
 }}
 cmd follow_link %{{
-  lf -remote "send ${id} select '$(readlink $f)'"
+  { readlink -- "$f" || true; } | sed 's/\\/\\\\/g;s/"/\\"/g' | {
+    IFS= read -r target || target=""
+    if [ -n "$target" ]; then lf -remote "send ${id} select \"$target\""; fi
+  }
 }}
 cmd lastfiles ${{
-  list=$(nvim -u NONE --headless +'lua io.write(table.concat(vim.v.oldfiles, "\n") .. "\n")' +qa)
-  file=$(printf "%s" "$list" | while read -r file; do
+  tmplist=$(mktemp)
+  tmpsel=$(mktemp)
+  nvim -u NONE --headless +'lua io.write(table.concat(vim.v.oldfiles, "\n") .. "\n")' +qa > "$tmplist"
+  while IFS= read -r file; do
     [ -f "$file" ] && printf "%s\n" "$file"
-  done | fzf --reverse || lf -remote "send $id reload")
-  [ -n "$file" ] && $EDITOR "$file"
+  done < "$tmplist" | fzf --reverse > "$tmpsel" || lf -remote "send $id reload"
+  IFS= read -r file < "$tmpsel" || file=""
+  rm -f "$tmplist" "$tmpsel"
+  if [ -n "$file" ]; then $EDITOR "$file"; fi
 }}
 cmd edit-config ${{
   $EDITOR ~/.config/lf/lfrc
@@ -580,7 +646,7 @@ cmd edit-config ${{
 }}
 
 cmd wine-run ${{
-  if [ $(file --mime-type "$(readlink -f $f)" -b) = "application/vnd.microsoft.portable-executable" ]; then
+  if [ "$(file -bL --mime-type -- "$f")" = "application/vnd.microsoft.portable-executable" ]; then
     file="${f##*/}"
     file="${file%.*}"
     export WINEPREFIX="${WINEPREFIX:-${XDG_DATA_HOME:-${HOME}/.local/share}/wine}/$file"
@@ -658,7 +724,7 @@ map <enter> $$EDITOR "$f"
 map <c-v> push :!nvim<space>
 map vlf edit-config
 map vll lastfiles
-map vln $$EDITOR "$(nvim -u NONE --headless +'lua io.write(vim.v.oldfiles[1] .. "\n")' +qa)"
+map vln $nvim -u NONE --headless +'lua io.write(vim.v.oldfiles[1] .. "\n")' +qa | { IFS= read -r file || exit 0; if [ -f "$file" ]; then $EDITOR "$file" < /dev/tty; fi; }
 
 # Extract
 map E extract; clear; save-select
@@ -682,7 +748,7 @@ map Mv moveto; clear; save-select
 map Mpv mpvdir
 
 # Nsxiv
-map th $nsxiv -apt "$(pwd)"
+map th $nsxiv -apt "$PWD"
 
 # Open
 map O $mimeopen "$f"
@@ -748,11 +814,11 @@ map st :set sortby time; set info time
 map tg tag-toggle
 
 # Traversal
-map fa $lf -remote "send $id select \"$(fzf)\""
-map fb $lf -remote "send $id cd $(sed -e 's/\s*#.*//' -e '/^$/d' -e 's/^\S*\s*//' ${XDG_CONFIG_HOME:-$HOME/.config}/shell/bm-dirs | fzf)"
+map fa $fzf | { IFS= read -r sel || exit 0; lf -remote "send $id select \"$sel\""; }
+map fb $sed -e 's/\s*#.*//' -e '/^$/d' -e 's/^\S*\s*//' ${XDG_CONFIG_HOME:-$HOME/.config}/shell/bm-dirs | fzf | { IFS= read -r d || exit 0; case "$d" in "~"*) d="$HOME${d#?}";; esac; lf -remote "send $id cd \"$d\""; }
 map fD zi
-map fd $lf -remote "send $id select \"$(find . -type d | fzf)\""
-map ff $lf -remote "send $id select \"$(find . -type f | fzf)\""
+map fd $find . -type d | fzf | { IFS= read -r sel || exit 0; lf -remote "send $id select \"$sel\""; }
+map ff $find . -type f | fzf | { IFS= read -r sel || exit 0; lf -remote "send $id select \"$sel\""; }
 map fm fm
 map gl follow_link
 map gc git-root

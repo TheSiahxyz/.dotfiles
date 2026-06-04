@@ -13,7 +13,11 @@ Usage:
   ${prog} -h | --help
 
 Concat (default mode):
-  Combines all files matching '<base>*.<ext>' into '<base>_combine.<ext>'.
+  Combines all video files matching '<base>*.*' into '<base>_combine.<ext>'.
+  Mixed container extensions (e.g. .mp4 + .mkv) are allowed; the output
+  then uses .mkv. Streams are checked with ffprobe first: all files must
+  share the same video codec/resolution and audio codec/rate/channels.
+  Previous '*_combine.*' outputs are excluded from matching.
   Examples:
     ${prog} clip_cut.mp4
     ${prog} -j clip_cut.mp4 -o joined.mp4
@@ -46,6 +50,27 @@ die() {
 
 require_ffmpeg() {
   command -v ffmpeg >/dev/null 2>&1 || die "ffmpeg not found in PATH"
+  command -v ffprobe >/dev/null 2>&1 || die "ffprobe not found in PATH"
+}
+
+# Extensions eligible for concat matching; keeps sidecar files
+# (.srt, .txt, ...) out of the glob results.
+is_video_ext() {
+  case "$1" in
+    mp4|mkv|webm|mov|avi|ts|m2ts|flv|wmv|m4v) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+# stream_sig <file>
+# Prints a comparable signature of the first video/audio streams.
+# Files must share a signature to be concat-able with -c copy.
+stream_sig() {
+  _v=$(ffprobe -v error -select_streams v:0 \
+    -show_entries stream=codec_name,width,height -of csv=p=0 "$1") || return 1
+  _a=$(ffprobe -v error -select_streams a:0 \
+    -show_entries stream=codec_name,sample_rate,channels -of csv=p=0 "$1") || return 1
+  printf 'video=%s audio=%s' "$_v" "$_a"
 }
 
 # Globals set by resolve_output (avoids subshell variable loss):
@@ -105,11 +130,28 @@ cmd_concat() {
   [ "$pattern" != "$input_file" ] || die "input file must have an extension: $input_file"
 
   set +e
-  set -- "${pattern}"*."${extension}"
+  set -- "${pattern}"*.*
   set -e
   # Unmatched glob remains literal in POSIX sh; check via -e on the first entry.
   if [ ! -e "$1" ]; then
-    die "no files match '${pattern}*.${extension}'"
+    die "no files match '${pattern}*.*'"
+  fi
+
+  # Rotate args: keep only video files, dropping previous combine outputs.
+  i=$#
+  while [ "$i" -gt 0 ]; do
+    candidate="$1"
+    shift
+    i=$((i - 1))
+    case "$candidate" in
+      *_combine.*|*_combine_[0-9]*.*) continue ;;
+    esac
+    is_video_ext "${candidate##*.}" || continue
+    set -- "$@" "$candidate"
+  done
+
+  if [ $# -eq 0 ]; then
+    die "no video files match '${pattern}*.*'"
   fi
   if [ $# -eq 1 ]; then
     printf '%s: warning: only one file matches (%s); nothing to concat\n' \
@@ -117,19 +159,59 @@ cmd_concat() {
     exit 1
   fi
 
+  # Mixed container extensions break the concat demuxer's timestamp
+  # offsetting even with identical codecs, so non-mkv inputs are first
+  # remuxed (lossless stream copy) into the one container that holds
+  # anything: mkv. The output then uses mkv too.
+  mixed=""
+  output_ext="$extension"
+  for video do
+    if [ "${video##*.}" != "$extension" ]; then
+      mixed=1
+      output_ext="mkv"
+      break
+    fi
+  done
+
+  # Refuse mismatched streams up front; -c copy would produce a broken
+  # file instead of erroring.
+  ref_sig=""
+  ref_file=""
+  for video do
+    sig=$(stream_sig "$video") || die "ffprobe failed on: $video"
+    if [ -z "$ref_sig" ]; then
+      ref_sig="$sig"
+      ref_file="$video"
+    elif [ "$sig" != "$ref_sig" ]; then
+      die "stream mismatch, cannot concat with stream copy:
+  $ref_file: $ref_sig
+  $video: $sig"
+    fi
+  done
+
   if [ -n "$user_output" ]; then
-    resolve_output "$user_output" "$extension"
+    resolve_output "$user_output" "$output_ext"
     output_file="$RESOLVED_OUTPUT"
   else
-    output_file="${pattern}_combine.${extension}"
+    output_file="${pattern}_combine.${output_ext}"
     FF_OVERWRITE=""
   fi
 
   file_list=$(mktemp)
-  trap 'rm -f "$file_list"' EXIT INT HUP TERM
+  remux_dir=""
+  [ -n "$mixed" ] && remux_dir=$(mktemp -d)
+  trap 'rm -rf "$file_list" ${remux_dir:+"$remux_dir"}' EXIT INT HUP TERM
 
+  n=0
   for video do
-    full_path=$(realpath "$video")
+    n=$((n + 1))
+    if [ -n "$mixed" ] && [ "${video##*.}" != "mkv" ]; then
+      printf '%s: remuxing %s -> mkv for concat\n' "$prog" "$video" >&2
+      full_path="$remux_dir/$(printf '%03d' "$n").mkv"
+      ffmpeg -hide_banner -v error -i "$video" -c copy "$full_path"
+    else
+      full_path=$(realpath "$video")
+    fi
     # concat demuxer: escape single quotes by closing/reopening.
     escaped=$(printf '%s' "$full_path" | sed "s/'/'\\\\''/g")
     printf "file '%s'\n" "$escaped" >>"$file_list"
