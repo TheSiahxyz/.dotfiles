@@ -47,8 +47,17 @@ mount_luks() {
 
 # Using a loop over space-separated strings instead of an array
 sync_files() {
-  for source in "$dot_path" "$git_path" "$pass_path" "$suck_path"; do
+  # top-level targets go directly under the backup path
+  for source in "$git_path" "$pass_path"; do
     rsync -vrazPlu --exclude=".music.txt" --delete "$source" "$backup_path/" >/dev/null 2>&1 || {
+      echo "Failed to sync $(basename "$source")"
+    }
+  done
+
+  # dotfiles and suckless are stored under repos/
+  [ -d "$backup_path/repos" ] || mkdir -p "$backup_path/repos"
+  for source in "$dot_path" "$suck_path"; do
+    rsync -vrazPlu --exclude=".music.txt" --delete "$source" "$backup_path/repos/" >/dev/null 2>&1 || {
       echo "Failed to sync $(basename "$source")"
     }
   done
