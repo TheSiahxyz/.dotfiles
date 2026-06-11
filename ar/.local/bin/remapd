@@ -1,8 +1,22 @@
 #!/bin/bash
 
-# Rerun the remaps script whenever a new input device is added.
+device_ids() { xinput list --id-only 2>/dev/null | sort; }
 
-while :; do
+run_remaps_settled() {
+  before=$1
+  i=0
+  while [ "$i" -lt 15 ]; do
+    [ "$(device_ids)" != "$before" ] && break
+    sleep 0.1
+    i=$((i + 1))
+  done
+  sleep 0.3
   remaps
+}
+
+remaps
+while :; do
+  before=$(device_ids)
   grep -qP -m1 '[^un]bind.+\/[^:]+\(usb\)' <(udevadm monitor -u -t seat -s input -s usb)
+  run_remaps_settled "$before"
 done
