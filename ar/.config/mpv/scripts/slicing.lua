@@ -39,8 +39,7 @@ local function set_start()
     osd(("Cut start: %s"):format(fmt(start_time)))
 end
 
-local function set_end()
-    local end_time = mp.get_property_number("time-pos")
+local function do_cut(end_time)
     if not end_time then return end
 
     if not start_time then
@@ -107,5 +106,17 @@ local function set_end()
     end)
 end
 
+-- mark end at the current playback position
+local function set_end()
+    do_cut(mp.get_property_number("time-pos"))
+end
+
+-- mark end at the very end of the file, regardless of playback position,
+-- so you don't have to catch the last frame before playback ends
+local function set_end_eof()
+    do_cut(mp.get_property_number("duration"))
+end
+
 mp.add_key_binding(nil, "set-start", set_start)
 mp.add_key_binding(nil, "set-end", set_end)
+mp.add_key_binding(nil, "set-end-eof", set_end_eof)
