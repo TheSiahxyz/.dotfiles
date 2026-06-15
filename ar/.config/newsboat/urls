@@ -16,6 +16,7 @@ https://artixlinux.org/feed.php                                                 
 " "
 "--- Blog ---"
 https://lukesmith.xyz/rss.xml                                                   "~Luke Smith"           Blog
+https://rss.app/feeds/uTZzTWaglo01beu0.xml                                      "~Joonhoe Kim"          Blog        Tech
 " "
 "--- Git ---"
 https://github.com/LukeSmithxyz/voidrice/commits/master.atom                    "~Luke Smith dotfiles"              Git
@@ -40,3 +41,14 @@ https://odysee.com/$/rss/@Luke:7                                                
 " "
 "--- Youtube ---"
 https://www.youtube.com/feeds/videos.xml?channel_id=UCwHwDuNd9lCdA7chyyquDXw    "~Bread on Penguins"    Linux       Shell     Tech        Youtube
+" "
+"--- Finance ---"
+filter:~/.config/newsboat/fulltext.py:https://www.cnbc.com/id/100003114/device/rss/rss.html             "~CNBC Top News"      Finance     US          Fulltext
+filter:~/.config/newsboat/fulltext.py:https://www.cnbc.com/id/20910258/device/rss/rss.html              "~CNBC Economy"       Finance     US          Fulltext
+filter:~/.config/newsboat/fulltext.py:https://www.cnbc.com/id/15839135/device/rss/rss.html              "~CNBC Earnings"      Finance     US          Fulltext
+filter:~/.config/newsboat/fulltext.py:https://seekingalpha.com/market_currents.xml                      "~Seeking Alpha"      Finance     US          Fulltext
+https://feeds.content.dowjones.io/public/rss/mw_topstories                      "~MarketWatch Top"      Finance     US
+https://feeds.content.dowjones.io/public/rss/mw_marketpulse                     "~MarketWatch Pulse"    Finance     US
+https://feeds.a.dj.com/rss/RSSMarketsMain.xml                                   "~WSJ Markets"          Finance     US
+https://www.investing.com/rss/news_25.rss                                       "~Investing Stocks"     Finance     US
+https://www.federalreserve.gov/feeds/press_all.xml                              "~Fed Press"            Finance     US
