@@ -36,6 +36,18 @@ mountbase() {
 getmount() {
   [ -z "$1" ] && mp="$(find "/media/$USER" /mnt -mindepth 1 -maxdepth 1 -type d 2>/dev/null | dmenu -i -p "Mount this drive where?")" || mp="$1"
   test -n "$mp"
+  # Ensure the /media/$USER base exists and is owned by the user before any
+  # mountpoint is created under it. Otherwise `sudo mkdir -p` would create the
+  # base as root and only the leaf would get chowned below.
+  case "$mp" in
+  "/media/$USER"/*)
+    if [ ! -d "/media/$USER" ]; then
+      sudo -A mkdir -p "/media/$USER" && sudo -A chown "$USER":"$(id -gn)" "/media/$USER"
+    elif [ "$(stat -c '%U' "/media/$USER")" != "$USER" ]; then
+      sudo -A chown "$USER":"$(id -gn)" "/media/$USER"
+    fi
+    ;;
+  esac
   if [ ! -d "$mp" ]; then
     mkdiryn=$(printf "Yes\nNo" | dmenu -i -p "$mp does not exist. Create it?")
     [ "$mkdiryn" = "Yes" ] && (mkdir -p "$mp" 2>/dev/null || { sudo -A mkdir -p "$mp" && sudo -A chown "$USER":"$(id -gn)" "$mp"; })
