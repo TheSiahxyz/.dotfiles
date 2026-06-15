@@ -43,10 +43,10 @@ https://odysee.com/$/rss/@Luke:7                                                
 https://www.youtube.com/feeds/videos.xml?channel_id=UCwHwDuNd9lCdA7chyyquDXw    "~Bread on Penguins"    Linux       Shell     Tech        Youtube
 " "
 "--- Finance ---"
-filter:~/.config/newsboat/fulltext.py:https://www.cnbc.com/id/100003114/device/rss/rss.html             "~CNBC Top News"      Finance     US          Fulltext
-filter:~/.config/newsboat/fulltext.py:https://www.cnbc.com/id/20910258/device/rss/rss.html              "~CNBC Economy"       Finance     US          Fulltext
-filter:~/.config/newsboat/fulltext.py:https://www.cnbc.com/id/15839135/device/rss/rss.html              "~CNBC Earnings"      Finance     US          Fulltext
-filter:~/.config/newsboat/fulltext.py:https://seekingalpha.com/market_currents.xml                      "~Seeking Alpha"      Finance     US          Fulltext
+filter:~/.config/newsboat/fulltext.py:https://www.cnbc.com/id/100003114/device/rss/rss.html   "~CNBC Top News"      Finance   US          Fulltext
+filter:~/.config/newsboat/fulltext.py:https://www.cnbc.com/id/20910258/device/rss/rss.html    "~CNBC Economy"       Finance   US          Fulltext
+filter:~/.config/newsboat/fulltext.py:https://www.cnbc.com/id/15839135/device/rss/rss.html    "~CNBC Earnings"      Finance   US          Fulltext
+filter:~/.config/newsboat/fulltext.py:https://seekingalpha.com/market_currents.xml            "~Seeking Alpha"      Finance   US          Fulltext
 https://feeds.content.dowjones.io/public/rss/mw_topstories                      "~MarketWatch Top"      Finance     US
 https://feeds.content.dowjones.io/public/rss/mw_marketpulse                     "~MarketWatch Pulse"    Finance     US
 https://feeds.a.dj.com/rss/RSSMarketsMain.xml                                   "~WSJ Markets"          Finance     US
