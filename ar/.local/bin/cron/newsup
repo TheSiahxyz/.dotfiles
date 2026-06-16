@@ -16,6 +16,25 @@ pgrep -x newsboat && /usr/bin/xdotool key --window "$(/usr/bin/xdotool search --
 echo "📰$(/usr/bin/newsboat -x print-unread | awk '{print $1}')🔃" >/tmp/newsupdate
 pkill -RTMIN+14 "${STATUSBAR:-dwmblocks}"
 /usr/bin/newsboat -x reload
+
+# Prune feeds no longer in the urls file. Editing urls directly (removing or
+# changing a feed) leaves the old feed's items in cache.db; newsboat hides them
+# (not in urls) but sb-news counts every unread row, so they show as a phantom
+# count. cleanup-on-quit only fires on a graceful `q` quit, so we replicate it
+# here non-interactively: any rss_feed.rssurl not present in urls is an orphan.
+# Safe to write directly — newsboat isn't running in this branch (it exits at
+# the xdotool line above) and `-x reload` has already released the cache lock.
+nb_db="${XDG_DATA_HOME:-${HOME}/.local/share}/newsboat/cache.db"
+nb_urls="${XDG_CONFIG_HOME:-${HOME}/.config}/newsboat/urls"
+awk '!/^[[:space:]]*#/ && ($1 ~ /^https?:/ || $1 ~ /^filter:/){print $1}' "$nb_urls" \
+	| sort -u >/tmp/newsup_urls.$$
+/usr/bin/sqlite3 "$nb_db" "SELECT rssurl FROM rss_feed;" | sort -u \
+	| comm -23 - /tmp/newsup_urls.$$ | while IFS= read -r u; do
+		[ -n "$u" ] && /usr/bin/sqlite3 "$nb_db" \
+			"DELETE FROM rss_item WHERE feedurl='$u'; DELETE FROM rss_feed WHERE rssurl='$u';"
+	done
+rm -f /tmp/newsup_urls.$$
+
 rm -f /tmp/newsupdate
 pkill -RTMIN+14 "${STATUSBAR:-dwmblocks}"
 /usr/bin/notify-send "📰 RSS feed update complete."
