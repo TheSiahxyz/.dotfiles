@@ -15,21 +15,22 @@ case $BLOCK_BUTTON in
 esac
 
 # During a sync, `newsup` writes the spinner to /tmp/newsupdate; show that.
-# Otherwise read the unread count. `newsboat -x print-unread` needs the cache.db
-# lock and prints NOTHING (exit 1, "an instance is already running") whenever
-# another newsboat holds it — e.g. a slow `-x reload`. Falling through to an
-# empty block makes the icon vanish/flicker, so cache the last good count and
-# reuse it when the read fails.
+# Otherwise read the unread count directly from newsboat's cache.db in
+# read-only mode. We deliberately avoid `newsboat -x print-unread`: it needs
+# the cache.db lock and prints NOTHING (exit 1, "an instance is already
+# running") whenever another newsboat holds it — an open session or a slow
+# `-x reload` — which blanked/flickered the block. A read-only+immutable query
+# never locks, so it always returns the live count even mid-reload.
+# NOTE: this counts every unread item in the DB, which matches print-unread
+# only while the DB has no feeds outside ~/.config/newsboat/urls. If you remove
+# a feed from urls, purge its leftover items so the count stays accurate:
+#   newsboat (open and quit once — cleanup-on-quit prunes orphaned feeds)
 if [ -f /tmp/newsupdate ]; then
 	cat /tmp/newsupdate
 else
-	cache="${XDG_CACHE_HOME:-${HOME}/.cache}/newsunread"
-	count=$(newsboat -x print-unread 2>/dev/null | awk '{print $1}')
-	if [ -n "$count" ]; then
-		printf '%s' "$count" >"$cache"
-	else
-		count=$(cat "$cache" 2>/dev/null) # DB locked → reuse last known value
-	fi
+	db="${XDG_DATA_HOME:-${HOME}/.local/share}/newsboat/cache.db"
+	count=$(sqlite3 "file:${db}?mode=ro&immutable=1" \
+		"SELECT count(*) FROM rss_item WHERE unread=1 AND deleted=0;" 2>/dev/null)
 	[ "${count:-0}" -gt 0 ] 2>/dev/null && printf '📰%s' "$count"
 	cat "${XDG_CONFIG_HOME:-${HOME}/.config}"/newsboat/.update 2>/dev/null
 	echo
