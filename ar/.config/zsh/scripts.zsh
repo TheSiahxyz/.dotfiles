@@ -767,25 +767,29 @@ function create_venv() {
     local env_dir="${XDG_DATA_HOME:-${HOME}/.local/share}/venvs/${1:-venv}"
     local requirements_path="${XDG_DATA_HOME:-${HOME}/.local/share}/venvs"
 
-    # Check if the environment already exists
     # Create the virtual environment
     echo "Creating new virtual environment in '$env_dir'..."
-    python3 -m venv $env_dir
+    python3 -m venv "$env_dir"
 
     # Activate the virtual environment
-    source $env_dir/bin/activate
+    source "$env_dir/bin/activate"
 
     # Optional: Install any default packages
     pip3 install --upgrade pip >/dev/null 2>&1
 
     if [ -f "$requirements_path/default-requirements.txt" ]; then
         echo "Installing packages from '$requirements_path/default-requirements.txt'..."
-        pip3 install -r "$requirements_path/default-requirements.txt" >/dev/null 2>&1
+        if ! pip3 install -r "$requirements_path/default-requirements.txt"; then
+            echo "WARNING: pip failed to install some packages from default-requirements.txt (see errors above)" >&2
+        fi
     fi
 
-    if [ -f "$requirements_path/captured-requirements.txt" ]; then
-        echo "Installing packages from '$requirements_path/captured-requirements.txt'..."
-        pip3 install -r "$requirements_path/captured-requirements.txt" >/dev/null 2>&1
+    # Restore this venv's own previously-captured packages, if any (written by deactive_venv)
+    if [ -f "$env_dir/requirements.txt" ]; then
+        echo "Restoring packages from '$env_dir/requirements.txt'..."
+        if ! pip3 install -r "$env_dir/requirements.txt"; then
+            echo "WARNING: pip failed to install some packages from $env_dir/requirements.txt (see errors above)" >&2
+        fi
     fi
 
     echo "Virtual environment '${1:-venv}' created and activated!"
@@ -794,21 +798,30 @@ function create_venv() {
 # activate or switch venvs
 alias actv=active_venv
 function active_venv() {
+    local venvs_dir="${XDG_DATA_HOME:-${HOME}/.local/share}/venvs"
     local venv="$1"
     if [[ -z "$venv" ]]; then
-        venv=$(find "$XDG_DATA_HOME/venvs" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | fzf)
+        venv=$(find "$venvs_dir" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | fzf)
     fi
-    source "$XDG_DATA_HOME/venvs/$venv/bin/activate"
+    if [[ -z "$venv" ]]; then
+        echo "No venv selected"
+        return 1
+    fi
+    if [[ ! -f "$venvs_dir/$venv/bin/activate" ]]; then
+        echo "venv '$venv' not found in $venvs_dir"
+        return 1
+    fi
+    source "$venvs_dir/$venv/bin/activate"
     python -m ensurepip --upgrade >/dev/null 2>&1
     python -m pip install --upgrade pip >/dev/null 2>&1
-    jupyter kernel --kernel=$venv
+    jupyter kernel --kernel="$venv"
 }
 
 # list venvs
 alias listv=list_venv
 function list_venv() {
     local venvs_dir="${XDG_DATA_HOME:-${HOME}/.local/share}/venvs"
-    local venvs=("$venvs_dir"/*)
+    local venvs=("$venvs_dir"/*(N))
 
     if [ ${#venvs[@]} -eq 0 ]; then
         echo "No venvs"
@@ -826,12 +839,13 @@ function list_venv() {
 # deactivate venv
 alias deactv=deactive_venv
 function deactive_venv() {
-    if [[ "$VIRTUAL_ENV" != "" ]]; then
-        if [[ ! -f "${XDG_DATA_HOME:-${HOME}/.local/share}/venvs/requirements.txt" ]]; then
-            pip3 freeze > "${XDG_DATA_HOME:-${HOME}/.local/share}/venvs/captured-requirements.txt"
-        fi
+    if [[ -n "$VIRTUAL_ENV" ]]; then
+        # Capture this venv's packages into its own folder (not a shared file),
+        # so other venvs are never polluted. create_venv restores from here.
+        pip3 freeze > "$VIRTUAL_ENV/requirements.txt"
+        echo "Captured installed packages to '$VIRTUAL_ENV/requirements.txt'"
         deactivate
-        echo "Virtual environment deactivated and all installed packages captured"
+        echo "Virtual environment deactivated"
     else
         echo "No virtual environment is active."
     fi
