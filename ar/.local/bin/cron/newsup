@@ -3,9 +3,15 @@
 # Set as a cron job to check for new RSS entries for newsboat.
 # If newsboat is open, sends it an "R" key to refresh.
 
+# Bail if a previous run is still going. With the fulltext filter a reload now
+# takes ~17s+, so back-to-back cron ticks could overlap: a second `-x reload`
+# can't grab the cache.db lock, and the rm/signal races blank the status bar.
+exec 9>/tmp/newsup.lock
+flock -n 9 || exit
+
 /usr/bin/notify-send "📰 Updating RSS feeds..."
 
-pgrep -f newsboat$ && /usr/bin/xdotool key --window "$(/usr/bin/xdotool search --name "^newsboat$")" R && exit
+pgrep -x newsboat && /usr/bin/xdotool key --window "$(/usr/bin/xdotool search --name "^newsboat$")" R && exit
 
 echo "📰$(/usr/bin/newsboat -x print-unread | awk '{print $1}')🔃" >/tmp/newsupdate
 pkill -RTMIN+14 "${STATUSBAR:-dwmblocks}"

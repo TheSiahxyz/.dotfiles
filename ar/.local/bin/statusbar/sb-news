@@ -14,4 +14,23 @@ case $BLOCK_BUTTON in
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
-cat /tmp/newsupdate 2>/dev/null || echo "$(newsboat -x print-unread | awk '{ if($1>0) print "📰" $1}')$(cat "${XDG_CONFIG_HOME:-${HOME}/.config}"/newsboat/.update 2>/dev/null)"
+# During a sync, `newsup` writes the spinner to /tmp/newsupdate; show that.
+# Otherwise read the unread count. `newsboat -x print-unread` needs the cache.db
+# lock and prints NOTHING (exit 1, "an instance is already running") whenever
+# another newsboat holds it — e.g. a slow `-x reload`. Falling through to an
+# empty block makes the icon vanish/flicker, so cache the last good count and
+# reuse it when the read fails.
+if [ -f /tmp/newsupdate ]; then
+	cat /tmp/newsupdate
+else
+	cache="${XDG_CACHE_HOME:-${HOME}/.cache}/newsunread"
+	count=$(newsboat -x print-unread 2>/dev/null | awk '{print $1}')
+	if [ -n "$count" ]; then
+		printf '%s' "$count" >"$cache"
+	else
+		count=$(cat "$cache" 2>/dev/null) # DB locked → reuse last known value
+	fi
+	[ "${count:-0}" -gt 0 ] 2>/dev/null && printf '📰%s' "$count"
+	cat "${XDG_CONFIG_HOME:-${HOME}/.config}"/newsboat/.update 2>/dev/null
+	echo
+fi
