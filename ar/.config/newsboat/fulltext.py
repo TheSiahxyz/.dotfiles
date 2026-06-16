@@ -14,6 +14,12 @@ Design notes:
 - Concurrency-limited; per-article timeout.
 - Fail-safe: if extraction fails (rdrview missing, network error, paywall),
   the item's original summary is left untouched so the feed never breaks.
+- Paywall honesty: some sites (e.g. Seeking Alpha, behind PerimeterX + a metered
+  wall) only serve a short teaser to non-browser clients like rdrview. rdrview
+  "succeeds" but the body is cut off mid-sentence with a regwall stub. We detect
+  that, strip the legal boilerplate, and prepend a visible banner so the preview
+  isn't mistaken for the full article. The rest is only reachable in a real
+  browser, so open the link ('o') to read it.
 """
 
 import sys
@@ -24,6 +30,7 @@ import hashlib
 import subprocess
 import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor
+from urllib.parse import urlparse
 
 CACHE_DIR = os.path.expanduser("~/.cache/newsboat-fulltext")
 TIMEOUT = 20          # seconds per article
@@ -32,6 +39,42 @@ CONTENT_NS = "http://purl.org/rss/1.0/modules/content/"
 
 os.makedirs(CACHE_DIR, exist_ok=True)
 ET.register_namespace("content", CONTENT_NS)
+
+# Hosts that gate articles behind bot-detection (PerimeterX) + a metered wall:
+# a non-browser client like rdrview always gets a short teaser cut off
+# mid-sentence, never the full body. Anything fetched from these is a teaser.
+GATED_HOSTS = (
+    "seekingalpha.com",
+)
+
+# Content markers for the same situation on other sites. Kept conservative so
+# normal feeds (CNBC, etc.) are never flagged. (rdrview's readability strips
+# empty regwall stubs, so host-based detection above is the reliable path.)
+PAYWALL_MARKERS = (
+    "signup_widget_placeholder",
+    'data-test-id="paywall"',
+)
+
+# Legal boilerplate to drop from teasers so the short preview isn't buried.
+DISCLAIMER_RE = re.compile(
+    r"<p>\s*<strong>[^<]*Disclaimer:?\s*</strong>.*?</p>",
+    re.IGNORECASE | re.DOTALL,
+)
+
+# Prepended to detected teasers so the reader sees at a glance it's not the
+# full text. newsboat's HTML renderer turns &#9888; into the warning sign.
+TEASER_BANNER = (
+    "<p><strong>&#9888; PAYWALLED TEASER</strong> &mdash; the site gated this "
+    "article; only the preview below is available. Open the link in a browser "
+    "('o') for the full text.</p>\n<hr/>\n"
+)
+
+
+def is_teaser(url, body):
+    host = (urlparse(url).hostname or "").lower()
+    if any(host == g or host.endswith("." + g) for g in GATED_HOSTS):
+        return True
+    return any(marker in body for marker in PAYWALL_MARKERS)
 
 
 def cache_path(url):
@@ -56,6 +99,10 @@ def extract(url):
     body = out.stdout.strip()
     if out.returncode != 0 or len(body) < 200:
         return None
+    if is_teaser(url, body):
+        # Not the full article — flag it honestly instead of passing the
+        # teaser off as extracted content.
+        body = TEASER_BANNER + DISCLAIMER_RE.sub("", body).strip()
     with open(cp, "w", encoding="utf-8") as f:
         f.write(body)
     return body
