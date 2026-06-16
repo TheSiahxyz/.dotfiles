@@ -3,6 +3,24 @@
 # Syncs repositories and downloads updates, meant to be run as a cronjob.
 # /usr/share/libalpm/hooks/statusbar.hook
 
+# Take an exclusive lock so two checkups never run at once, and so a manual
+# update can yield this run. Interactive update commands can guard themselves
+# with the same lock, e.g.:
+#   flock -n /tmp/checkup.lock sudo pacman -Syu
+LOCKFILE="/tmp/checkup.lock"
+exec 9>"$LOCKFILE" || exit 1
+if ! flock -n 9; then
+  notify-send "📦 Repository Sync" "Another checkup is already running. Skipping."
+  exit 0
+fi
+
+# Courtesy check: if pacman's database is already locked (e.g. you're running a
+# manual update), back off quietly instead of failing on a lock error.
+if [ -e /var/lib/pacman/db.lck ]; then
+  notify-send "📦 Repository Sync" "pacman is busy (db locked). Skipping this sync."
+  exit 0
+fi
+
 notify-send "📦 Repository Sync" "Checking for package updates..."
 
 sudo pacman -Syyuw --noconfirm || notify-send "⛔ Error downloading updates.
