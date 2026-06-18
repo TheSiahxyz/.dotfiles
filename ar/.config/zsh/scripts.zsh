@@ -371,7 +371,7 @@ function fetch_git_repos_status() {
                 fi
 
                 # Get Git branch and status using __git_ps1
-                GIT_STATUS=$(__git_ps1 "%s")
+                GIT_STATUS=$(__git_ps1 "%s" 2>/dev/null)
 
                 # Colorize the Git status
                 COLORED_GIT_STATUS=$(colorize_git_status "$GIT_STATUS")
