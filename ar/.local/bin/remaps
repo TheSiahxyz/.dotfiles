@@ -10,25 +10,9 @@ xinput list | grep 'id=' | while read -r line; do
   mouse=$(echo "$line" | grep -i '.*id.*pointer' | sed 's/.*id=\([0-9]\+\).*/\1/')
   [ -z "$keyboard" ] || {
     case "$(echo "$line" | grep -oE '.*id=' | sed 's/ id=.*//')" in
-    *"BYCX Gaming Keyboard"*)
-      setxkbmap -device "$keyboard" -option
-      setxkbmap -device "$keyboard" -option caps:ctrl_modifier,altwin:menu_win,altwin:swap_ralt_rwin
-      ;;
-    *"Lenovo TrackPoint Keyboard II"*)
-      setxkbmap -device "$keyboard" -option
-      setxkbmap -device "$keyboard" -option caps:ctrl_modifier,altwin:menu_win,altwin:swap_lalt_lwin
-      ;;
-    *"Topre REALFORCE 108 US"*)
-      setxkbmap -device "$keyboard" -option
-      setxkbmap -device "$keyboard" -option caps:ctrl_modifier,altwin:menu_win,altwin:swap_lalt_lwin
-      ;;
     *"Lite-On Tech Lenovo USB Travel Keyboard with Ultra Nav"*)
       setxkbmap -device "$keyboard" -option
       setxkbmap -device "$keyboard" -option caps:ctrl_modifier,ctrl:swap_lwin_lctl
-      ;;
-    *"Lite-On Technology Corp. ThinkPad USB Keyboard with TrackPoint"* | *"AT Translated Set 2 keyboard"*)
-      setxkbmap -device "$keyboard" -option
-      setxkbmap -device "$keyboard" -option caps:ctrl_modifier,altwin:menu_win,altwin:swap_lalt_lwin
       ;;
     *"Magic keyboard"*)
       setxkbmap -device "$keyboard" -option
@@ -43,7 +27,7 @@ xinput list | grep 'id=' | while read -r line; do
       ;;
     *)
       setxkbmap -device "$keyboard" -option
-      setxkbmap -device "$keyboard" -option caps:ctrl_modifier,altwin:menu_win
+      setxkbmap -device "$keyboard" -option caps:ctrl_modifier,altwin:menu_win,altwin:swap_lalt_lwin
       ;;
     esac
   }
