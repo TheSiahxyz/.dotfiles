@@ -60,6 +60,7 @@ local HOME = os.getenv("HOME") or ""
 local CONFIG_DIR = HOME .. "/.config/mpv"
 local CACHE_FILE = CONFIG_DIR .. "/integrity_cache.tsv"
 local LOG_FILE = CONFIG_DIR .. "/corrupted.log"
+local DUR_FILE = CONFIG_DIR .. "/integrity_dur.tsv" -- persisted durations (separate from the status cache)
 
 ----------------------------------------------------------------------
 -- State
@@ -73,6 +74,7 @@ local scan_token = 0 -- to ignore stale callbacks
 local bg_token = 0 -- to invalidate the playlist background scan
 local current_scanning = false -- true while the current file is being checked
 local scanning = {} -- path -> {prog=, dur=} for every in-flight check (current + playlist)
+local dur_cache = {} -- path -> {mtime=, size=, dur=} persisted durations (avoids re-probing)
 
 ----------------------------------------------------------------------
 -- Cache I/O
@@ -266,6 +268,53 @@ local function cached_fresh(path)
 	return nil
 end
 
+-- Persisted duration cache (A): reuse a known duration instead of re-probing
+-- with ffprobe (helps especially after an interrupted scan).
+local function load_dur_cache()
+	local f = io.open(DUR_FILE, "r")
+	if not f then
+		return
+	end
+	for line in f:lines() do
+		local mt, sz, d, path = line:match("^(%d+)\t(%d+)\t([%d%.]+)\t(.+)$")
+		if path then
+			dur_cache[path] = { mtime = tonumber(mt), size = tonumber(sz), dur = tonumber(d) }
+		end
+	end
+	f:close()
+end
+
+-- Return a cached duration if it matches the file's current mtime/size.
+local function cached_duration(path)
+	local e = dur_cache[path]
+	if not e then
+		return nil
+	end
+	local mtime, size = file_sig(path)
+	if mtime and e.mtime == mtime and e.size == size then
+		return e.dur
+	end
+	return nil
+end
+
+-- Remember a duration (in memory + appended to DUR_FILE).
+local function remember_duration(path, dur)
+	if not (dur and dur > 0) then
+		return
+	end
+	local mtime, size = file_sig(path)
+	if not mtime then
+		return
+	end
+	dur_cache[path] = { mtime = mtime, size = size, dur = dur }
+	local f = io.open(DUR_FILE, "a")
+	if not f then
+		return
+	end
+	f:write(string.format("%d\t%d\t%s\t%s\n", mtime, size, dur, path))
+	f:close()
+end
+
 -- In-flight scan tracking (for the status display: filename + % progress)
 local function basename(p)
 	return (p:gsub("^.*/", ""))
@@ -286,8 +335,25 @@ local function clear_scanning(path)
 	scanning[path] = nil
 end
 
--- Probe a file's duration in the background so progress can be shown as %.
-local function probe_duration(path)
+-- Probe durations with a small concurrency cap (B) so they keep resolving even
+-- when the whole playlist is scanned in parallel - otherwise hundreds of ffprobe
+-- processes would flood the system and progress % would never appear.
+local PROBE_MAX = 4
+local probe_active = 0
+local probe_queue = {}
+local run_probe
+
+local function pump_probes()
+	while probe_active < PROBE_MAX and #probe_queue > 0 do
+		run_probe(table.remove(probe_queue, 1))
+	end
+end
+
+run_probe = function(path)
+	if not scanning[path] then -- scan already finished/cancelled
+		return pump_probes()
+	end
+	probe_active = probe_active + 1
 	mp.command_native_async({
 		name = "subprocess",
 		args = {
@@ -303,15 +369,22 @@ local function probe_duration(path)
 		playback_only = false,
 		capture_stdout = true,
 	}, function(success, result, err)
+		probe_active = probe_active - 1
 		local rec = scanning[path]
-		if not rec or not result or not result.stdout then
-			return
+		if rec and result and result.stdout then
+			local d = tonumber((result.stdout:gsub("%s+", "")))
+			if d and d > 0 then
+				rec.dur = d
+				remember_duration(path, d) -- (A) persist for next time
+			end
 		end
-		local d = tonumber((result.stdout:gsub("%s+", "")))
-		if d and d > 0 then
-			rec.dur = d
-		end
+		pump_probes()
 	end)
+end
+
+local function probe_duration(path)
+	probe_queue[#probe_queue + 1] = path
+	pump_probes()
 end
 
 -- Latest progress (%) for an in-flight scan, read from its -progress file.
@@ -345,9 +418,11 @@ local function start_scan(path, on_done)
 	scan_token = scan_token + 1
 	local token = scan_token
 	current_scanning = true
-	local dur = (path == current_path) and mp.get_property_number("duration") or nil
+	local dur = (path == current_path) and mp.get_property_number("duration") or cached_duration(path)
 	local prog = begin_scanning(path, dur)
-	if not dur then
+	if dur then
+		remember_duration(path, dur) -- (A) persist current-file duration too
+	else
 		probe_duration(path)
 	end
 	show_scanning()
@@ -452,7 +527,7 @@ local function scan_playlist_from(start_index)
 	cancel_bg()
 	local token = bg_token
 	local count = mp.get_property_number("playlist-count", 0)
-	-- 0 = fully dynamic: run the whole remaining playlist in parallel
+	-- 0 = entire remaining playlist in parallel
 	local workers = opts.scan_concurrency or 1
 	if workers <= 0 then
 		workers = math.max(1, count)
@@ -518,8 +593,11 @@ local function scan_playlist_from(start_index)
 			end
 			active = active + 1
 			did_scan = true
-			local prog = begin_scanning(path, nil)
-			probe_duration(path)
+			local cdur = cached_duration(path)
+			local prog = begin_scanning(path, cdur)
+			if not cdur then
+				probe_duration(path)
+			end
 			mp.command_native_async({
 				name = "subprocess",
 				args = build_args(path, opts.bg_read_rate, prog),
@@ -742,4 +820,5 @@ mp.register_script_message("integrity-status", status)
 ----------------------------------------------------------------------
 load_cache()
 compact_cache()
+load_dur_cache()
 mp.register_event("file-loaded", on_file_loaded)
