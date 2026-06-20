@@ -6,7 +6,7 @@
 --   * Checking starts on the "scan" key (script-message integrity-scan), or
 --     automatically on file open if scan_on_load=yes. ffmpeg demux runs in the
 --     background, so playback continues.
---   * Abort on the first error with -xerror -> corrupt files are judged quickly.
+--   * Reads the whole file; benign muxer warnings (e.g. duplicate DTS) are ignored.
 --   * Results are cached by path + mtime -> the same file shows instantly next time.
 --   * Corrupt file paths are recorded in corrupted.log.
 --   * If a playlist exists (scan_playlist), after the current file is checked,
@@ -209,7 +209,7 @@ local function build_args(path, read_rate, progfile)
 			args[#args + 1] = v
 		end
 	end
-	add(opts.ffmpeg, "-hide_banner", "-v", "error", "-xerror")
+	add(opts.ffmpeg, "-hide_banner", "-v", "error")
 	if read_rate and read_rate > 0 then
 		add("-readrate", tostring(read_rate), "-readrate_initial_burst", tostring(opts.bg_read_burst or 30))
 	end
@@ -248,11 +248,33 @@ local function apply_result(path, corrupt, from_cache)
 	end
 end
 
--- Convert the subprocess result into a corrupt/ok verdict
+-- Muxer-side complaints that don't indicate a damaged file (false positives).
+-- e.g. duplicate/non-monotonic audio DTS, common in recordings; plays fine.
+local BENIGN_PATTERNS = {
+	"non monotonically increasing dts",
+	"Application provided invalid",
+	"Last message repeated", -- ffmpeg log de-dup line (summarizes a prior, often benign, message)
+}
+
+-- Convert the subprocess result into a corrupt/ok verdict. A file is corrupt
+-- only if a real (non-benign) error line was logged.
 local function determine_corrupt(result)
 	local stderr = result.stderr or ""
-	local status = result.status or 0
-	return (stderr:gsub("%s+", "") ~= "") or (status ~= 0)
+	for line in (stderr .. "\n"):gmatch("([^\n]*)\n") do
+		if line:gsub("%s+", "") ~= "" then
+			local benign = false
+			for _, pat in ipairs(BENIGN_PATTERNS) do
+				if line:find(pat, 1, true) then
+					benign = true
+					break
+				end
+			end
+			if not benign then
+				return true
+			end
+		end
+	end
+	return false
 end
 
 -- Return the cache entry if it matches the file's current mtime/size
