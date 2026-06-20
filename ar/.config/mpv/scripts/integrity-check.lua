@@ -3,12 +3,17 @@
 -- Shows a badge in the top-right ONLY when corrupt; healthy files show nothing.
 --
 -- Behaviour:
---   * On file-loaded, run an ffmpeg demux check in the background (playback continues).
+--   * Checking starts on the "scan" key (script-message integrity-scan), or
+--     automatically on file open if scan_on_load=yes. ffmpeg demux runs in the
+--     background, so playback continues.
 --   * Abort on the first error with -xerror -> corrupt files are judged quickly.
 --   * Results are cached by path + mtime -> the same file shows instantly next time.
 --   * Corrupt file paths are recorded in corrupted.log.
 --   * If a playlist exists (scan_playlist), after the current file is checked,
---     the following entries are pre-checked one at a time in the background.
+--     the following entries are pre-checked in parallel in the background
+--     (scan_concurrency workers). Background checks are read-rate throttled
+--     (bg_read_rate x realtime) and run at low CPU priority so they don't
+--     starve playback I/O. The current file is always checked at full speed.
 --     (The badge is only for the current file; pre-checks update cache/log only.)
 --   * When the playlist pre-check finishes, an OSD summary is shown (notify_done).
 --     script-message integrity-status shows the current progress at any time.
@@ -26,13 +31,23 @@ local msg   = require 'mp.msg'
 ----------------------------------------------------------------------
 local opts = {
     enabled       = true,   -- feature on/off
-    scan_on_load  = true,   -- auto-check when a file opens
+    scan_on_load  = false,  -- auto-check on file open; if false, trigger with the "scan" key
     scan_playlist = true,   -- after the current file, also background-check following playlist entries
+    scan_concurrency = 2,   -- how many playlist entries to check in parallel
     notify_done   = true,   -- show an OSD summary when the playlist background check finishes
     show_scanning = false,  -- show a "scanning" badge (default: off)
     deep_scan     = false,  -- if true, decode while checking (precise but slow)
     use_cache     = true,   -- use the result cache
     ffmpeg        = "ffmpeg",
+    -- Throttle background playlist checks to N x realtime so they don't flood
+    -- the disk/cache and stutter playback (ionice is ignored by the `none`
+    -- scheduler, so rate-limiting is what actually protects playback).
+    -- 0 = unlimited. The current file is always checked at full speed.
+    bg_read_rate  = 8,
+    bg_read_burst = 30,     -- seconds to read at full speed first (headers/early errors)
+    -- Low-priority wrapper (helps userspace CPU; ionice is a no-op on `none`).
+    -- Set to "" to disable. (Linux: coreutils `nice`, util-linux `ionice`.)
+    priority_cmd  = "nice -n 19 ionice -c 3",
     font_size     = 22,
 }
 require('mp.options').read_options(opts, "integrity-check")
@@ -53,6 +68,7 @@ local overlay      = mp.create_osd_overlay("ass-events")
 local current_path = nil
 local scan_token   = 0      -- to ignore stale callbacks
 local bg_token     = 0      -- to invalidate the playlist background scan
+local current_scanning = false  -- true while the current file is being checked
 
 ----------------------------------------------------------------------
 -- Cache I/O
@@ -150,15 +166,30 @@ end
 ----------------------------------------------------------------------
 -- Check
 ----------------------------------------------------------------------
-local function build_args(path)
-    if opts.deep_scan then
-        -- with decoding: precise but slow
-        return { opts.ffmpeg, "-hide_banner", "-v", "error", "-xerror",
-                 "-i", path, "-map", "0", "-f", "null", "-" }
+-- read_rate: nil/0 = full speed; >0 = throttle reading to that many x realtime
+-- (input option, must precede -i) so background checks don't starve playback.
+local function build_args(path, read_rate)
+    local args = {}
+    -- Prepend the low-priority wrapper (nice helps userspace CPU).
+    if opts.priority_cmd and opts.priority_cmd ~= "" then
+        for word in opts.priority_cmd:gmatch("%S+") do
+            args[#args + 1] = word
+        end
     end
-    -- demux only: fast; detects container/truncation/cutoff
-    return { opts.ffmpeg, "-hide_banner", "-v", "error", "-xerror",
-             "-i", path, "-c", "copy", "-map", "0", "-f", "null", "-" }
+    local function add(...)
+        for _, v in ipairs({ ... }) do args[#args + 1] = v end
+    end
+    add(opts.ffmpeg, "-hide_banner", "-v", "error", "-xerror")
+    if read_rate and read_rate > 0 then
+        add("-readrate", tostring(read_rate),
+            "-readrate_initial_burst", tostring(opts.bg_read_burst or 30))
+    end
+    add("-i", path)
+    if not opts.deep_scan then       -- demux only (fast); deep_scan decodes (slow)
+        add("-c", "copy")
+    end
+    add("-map", "0", "-f", "null", "-")
+    return args
 end
 
 local function apply_result(path, corrupt, from_cache)
@@ -203,6 +234,7 @@ end
 local function start_scan(path, on_done)
     scan_token = scan_token + 1
     local token = scan_token
+    current_scanning = true
     show_scanning()
     mp.command_native_async({
         name           = "subprocess",
@@ -212,6 +244,7 @@ local function start_scan(path, on_done)
         capture_stderr = true,
     }, function(success, result, err)
         if token ~= scan_token then return end       -- moved to another file -> ignore
+        current_scanning = false
         if not result then hide_badge(); return end
         if result.killed_by_us then return end
         if result.error_string == "init" then
@@ -276,16 +309,24 @@ local function playlist_stats()
     return s
 end
 
--- Scan sequentially, one at a time, from start_index to the end of the playlist
+-- Scan playlist entries from start_index to the end, up to scan_concurrency at
+-- a time (parallel). Each check is a low-priority external ffmpeg process, so
+-- playback is never blocked even with several running at once.
 local function scan_playlist_from(start_index)
     cancel_bg()
     local token    = bg_token
     local count    = mp.get_property_number("playlist-count", 0)
+    local workers  = math.max(1, opts.scan_concurrency or 1)
+    local next_i   = start_index
+    local active   = 0
     local did_scan = false   -- whether this run actually checked any new entry
+    local notified = false
 
-    -- Summary notification when reaching the end (only if something new was
+    -- Summary notification once all workers drain (only if something new was
     -- scanned - avoids duplicate notifications during autoplay)
     local function finish()
+        if notified then return end
+        notified = true
         if not (opts.notify_done and did_scan) then return end
         local s = playlist_stats()
         local txt = (s.corrupt > 0)
@@ -295,33 +336,53 @@ local function scan_playlist_from(start_index)
         msg.info(txt)
     end
 
-    local function step(i)
-        if token ~= bg_token then return end          -- file change / toggle -> stop
-        if i >= count then finish(); return end
-        local path = resolve_playlist_path(
-            mp.get_property("playlist/" .. i .. "/filename"))
-        if not scannable(path) then return step(i + 1) end
-        if path == current_path then return step(i + 1) end  -- current file already checked
-        if cached_fresh(path) then return step(i + 1) end     -- already checked, skip
+    local pump  -- forward declaration
 
-        did_scan = true
-        mp.command_native_async({
-            name           = "subprocess",
-            args           = build_args(path),
-            playback_only  = false,
-            capture_stdout = true,
-            capture_stderr = true,
-        }, function(success, result, err)
-            if token ~= bg_token then return end      -- invalidated midway -> ignore
-            if result and not result.killed_by_us
-               and result.error_string ~= "init" then
-                record_result_quiet(path, determine_corrupt(result))
-            end
-            step(i + 1)
-        end)
+    local function on_done(path, result)
+        active = active - 1
+        -- Keep any finished result even if this sweep was superseded (file
+        -- switched): the ffmpeg work is already done, so persist it to cache.
+        if result and not result.killed_by_us
+           and result.error_string ~= "init" then
+            record_result_quiet(path, determine_corrupt(result))
+        end
+        if token ~= bg_token then return end          -- superseded -> don't dispatch more
+        pump()
     end
 
-    step(start_index)
+    -- Fill free worker slots with the next eligible entries.
+    pump = function()
+        if token ~= bg_token then return end
+        while active < workers do
+            local path
+            while next_i < count do
+                local p = resolve_playlist_path(
+                    mp.get_property("playlist/" .. next_i .. "/filename"))
+                next_i = next_i + 1
+                if scannable(p) and p ~= current_path and not cached_fresh(p) then
+                    path = p
+                    break
+                end
+            end
+            if not path then                          -- nothing left to dispatch
+                if active == 0 then finish() end
+                return
+            end
+            active = active + 1
+            did_scan = true
+            mp.command_native_async({
+                name           = "subprocess",
+                args           = build_args(path, opts.bg_read_rate),
+                playback_only  = false,
+                capture_stdout = true,
+                capture_stderr = true,
+            }, function(success, result, err)
+                on_done(path, result)
+            end)
+        end
+    end
+
+    pump()
 end
 
 -- If a playlist exists, start the background scan from the entry after the current position
@@ -336,16 +397,13 @@ end
 ----------------------------------------------------------------------
 -- Events
 ----------------------------------------------------------------------
-local function on_file_loaded()
-    hide_badge()
-    cancel_bg()                                        -- stop the previous playlist scan
-    current_path = mp.get_property("path")
-    if not opts.enabled or not opts.scan_on_load then return end
+-- Check the current file, then (if any) sweep the rest of the playlist.
+local function check_current_and_playlist()
+    if not opts.enabled then return end
     if not scannable(current_path) then
         maybe_scan_playlist()                          -- even if current is a stream, still scan the list
         return
     end
-
     -- On a cache hit (same mtime/size), show immediately
     local e = cached_fresh(current_path)
     if e then
@@ -356,13 +414,39 @@ local function on_file_loaded()
     start_scan(current_path, maybe_scan_playlist)      -- after the current check, scan the list
 end
 
+local function on_file_loaded()
+    hide_badge()
+    cancel_bg()                                        -- stop the previous playlist scan
+    scan_token = scan_token + 1                        -- invalidate any in-flight current-file scan
+    current_scanning = false
+    current_path = mp.get_property("path")
+    if not opts.enabled then return end
+    if opts.scan_on_load then check_current_and_playlist() end
+end
+
 ----------------------------------------------------------------------
 -- Key bindings / messages
 ----------------------------------------------------------------------
+-- Manually start a check: current file, then the rest of the playlist.
+-- This is the trigger to use when scan_on_load = false.
+local function scan_now()
+    if not opts.enabled then
+        mp.osd_message("Integrity check: off")
+        return
+    end
+    current_path = mp.get_property("path")
+    if not current_path then
+        mp.osd_message("Integrity: no file")
+        return
+    end
+    mp.osd_message("Integrity: scanning...")
+    check_current_and_playlist()
+end
+
 local function rescan()
     if current_path and scannable(current_path) then
         cache[current_path] = nil
-        start_scan(current_path)
+        start_scan(current_path, maybe_scan_playlist)
         mp.osd_message("Integrity: re-checking...")
     else
         mp.osd_message("Integrity: file cannot be checked")
@@ -389,7 +473,8 @@ local function current_status_text()
     if e and mtime and e.mtime == mtime and e.size == size then
         return (e.status == "corrupt") and "Integrity: corrupt" or "Integrity: OK"
     end
-    return "Integrity: checking..."
+    if current_scanning then return "Integrity: checking..." end
+    return "Integrity: not checked"
 end
 
 -- Show the check status immediately (single file, or whole playlist)
@@ -406,9 +491,11 @@ local function status()
         state, s.ok, s.corrupt, s.pending, s.total), 4)
 end
 
+mp.add_key_binding(nil, "scan", scan_now)
 mp.add_key_binding(nil, "rescan", rescan)
 mp.add_key_binding(nil, "toggle", toggle)
 mp.add_key_binding(nil, "status", status)
+mp.register_script_message("integrity-scan", scan_now)
 mp.register_script_message("integrity-rescan", rescan)
 mp.register_script_message("integrity-toggle", toggle)
 mp.register_script_message("integrity-status", status)
