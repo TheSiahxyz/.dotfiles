@@ -33,7 +33,7 @@ local opts = {
 	enabled = true, -- feature on/off
 	scan_on_load = false, -- auto-check on file open; if false, trigger with the "scan" key
 	scan_playlist = true, -- after the current file, also background-check following playlist entries
-	scan_concurrency = 10, -- how many playlist entries to check in parallel
+	scan_concurrency = 0, -- how many playlist entries to check in parallel (0 = entire playlist at once)
 	notify_done = true, -- show an OSD summary when the playlist background check finishes
 	show_scanning = false, -- show a "scanning" badge (default: off)
 	deep_scan = false, -- if true, decode while checking (precise but slow)
@@ -48,6 +48,7 @@ local opts = {
 	-- Low-priority wrapper (helps userspace CPU; ionice is a no-op on `none`).
 	-- Set to "" to disable. (Linux: coreutils `nice`, util-linux `ionice`.)
 	priority_cmd = "nice -n 19 ionice -c 3",
+	status_font = 20, -- base OSD font for the status list; shrinks automatically so all lines fit
 	font_size = 22,
 }
 require("mp.options").read_options(opts, "integrity-check")
@@ -65,6 +66,8 @@ local LOG_FILE = CONFIG_DIR .. "/corrupted.log"
 ----------------------------------------------------------------------
 local cache = {} -- path -> {mtime=, size=, status=, errors=}
 local overlay = mp.create_osd_overlay("ass-events")
+local status_overlay = mp.create_osd_overlay("ass-events")
+local status_timer = nil
 local current_path = nil
 local scan_token = 0 -- to ignore stale callbacks
 local bg_token = 0 -- to invalidate the playlist background scan
@@ -449,7 +452,11 @@ local function scan_playlist_from(start_index)
 	cancel_bg()
 	local token = bg_token
 	local count = mp.get_property_number("playlist-count", 0)
-	local workers = math.max(1, opts.scan_concurrency or 1)
+	-- 0 = fully dynamic: run the whole remaining playlist in parallel
+	local workers = opts.scan_concurrency or 1
+	if workers <= 0 then
+		workers = math.max(1, count)
+	end
 	local next_i = start_index
 	local active = 0
 	local did_scan = false -- whether this run actually checked any new entry
@@ -640,11 +647,57 @@ end
 local function scanning_list()
 	local out = {}
 	for p, rec in pairs(scanning) do
-		local pct = scan_progress(rec)
-		out[#out + 1] = pct and string.format("%s (%d%%)", basename(p), pct) or basename(p)
+		out[#out + 1] = { name = basename(p), pct = scan_progress(rec) }
 	end
-	table.sort(out)
-	return out
+	-- nearly-finished first (highest %), then by name
+	table.sort(out, function(a, b)
+		local pa, pb = a.pct or -1, b.pct or -1
+		if pa ~= pb then
+			return pa > pb
+		end
+		return a.name < b.name
+	end)
+	local res = {}
+	for _, e in ipairs(out) do
+		res[#res + 1] = e.pct and string.format("%s (%d%%)", e.name, e.pct) or e.name
+	end
+	return res
+end
+
+-- Render status lines via an ASS overlay, shrinking the font so every line fits.
+local function hide_status()
+	status_overlay:remove()
+	if status_timer then
+		status_timer:kill()
+		status_timer = nil
+	end
+end
+
+local function show_status(lines)
+	local n = #lines
+	local resy = 720
+	status_overlay.res_x = 1280
+	status_overlay.res_y = resy
+	-- line height ~ fs * 1.25; keep within ~94% of the height
+	local base = opts.status_font or 20
+	local fs = math.min(base, math.floor(resy * 0.94 / (n * 1.25)))
+	if fs < 6 then
+		fs = 6
+	end
+	local body = {}
+	for i, l in ipairs(lines) do
+		body[i] = l:gsub("\\", "/"):gsub("{", "("):gsub("}", ")")
+	end
+	status_overlay.data = string.format(
+		"{\\an7\\pos(12,8)\\fs%d\\bord2\\shad1\\1c&HFFFFFF&\\3c&H000000&}%s",
+		fs,
+		table.concat(body, "\\N")
+	)
+	status_overlay:update()
+	if status_timer then
+		status_timer:kill()
+	end
+	status_timer = mp.add_timeout(5, hide_status)
 end
 
 -- Show the check status immediately (single file, or whole playlist)
@@ -667,12 +720,12 @@ local function status()
 	end
 	local checking = scanning_list()
 	if #checking > 0 then
-		lines[#lines + 1] = "Checking:"
+		lines[#lines + 1] = string.format("Checking (%d):", #checking)
 		for _, name in ipairs(checking) do
-			lines[#lines + 1] = "  " .. name -- one file per line for readability
+			lines[#lines + 1] = "  " .. name -- one file per line
 		end
 	end
-	mp.osd_message(table.concat(lines, "\n"), 5)
+	show_status(lines)
 end
 
 mp.add_key_binding(nil, "scan", scan_now)
