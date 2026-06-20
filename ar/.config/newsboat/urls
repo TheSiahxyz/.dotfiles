@@ -16,7 +16,6 @@ https://artixlinux.org/feed.php                                                 
 " "
 "--- Blog ---"
 https://lukesmith.xyz/rss.xml                                                   "~Luke Smith"           Blog
-https://rss.app/feeds/uTZzTWaglo01beu0.xml                                      "~Joonhoe Kim"          Blog        Tech
 " "
 "--- Git ---"
 https://github.com/LukeSmithxyz/voidrice/commits/master.atom                    "~Luke Smith dotfiles"              Git
