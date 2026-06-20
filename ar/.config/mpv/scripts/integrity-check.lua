@@ -284,6 +284,18 @@ local function load_dur_cache()
 	f:close()
 end
 
+-- Rewrite DUR_FILE keeping only the latest entry per path (drops duplicates).
+local function compact_dur_cache()
+	local f = io.open(DUR_FILE, "w")
+	if not f then
+		return
+	end
+	for path, e in pairs(dur_cache) do
+		f:write(string.format("%d\t%d\t%s\t%s\n", e.mtime or 0, e.size or 0, e.dur, path))
+	end
+	f:close()
+end
+
 -- Return a cached duration if it matches the file's current mtime/size.
 local function cached_duration(path)
 	local e = dur_cache[path]
@@ -821,4 +833,5 @@ mp.register_script_message("integrity-status", status)
 load_cache()
 compact_cache()
 load_dur_cache()
+compact_dur_cache()
 mp.register_event("file-loaded", on_file_loaded)
