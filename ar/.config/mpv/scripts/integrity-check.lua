@@ -43,7 +43,7 @@ local opts = {
 	-- the disk/cache and stutter playback (ionice is ignored by the `none`
 	-- scheduler, so rate-limiting is what actually protects playback).
 	-- 0 = unlimited. The current file is always checked at full speed.
-	bg_read_rate = 8,
+	bg_read_rate = 0,
 	bg_read_burst = 30, -- seconds to read at full speed first (headers/early errors)
 	-- Low-priority wrapper (helps userspace CPU; ionice is a no-op on `none`).
 	-- Set to "" to disable. (Linux: coreutils `nice`, util-linux `ionice`.)
