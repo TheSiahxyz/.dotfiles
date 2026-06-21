@@ -34,6 +34,42 @@ get_resolution() {
   fi
 }
 
+# Map a friendly direction to the correct xrandr relative-position flag.
+# Note: left/right use the "-of" suffix, but above/below do NOT.
+dir_flag() {
+  case "$1" in
+    left) echo "--left-of" ;;
+    right) echo "--right-of" ;;
+    above) echo "--above" ;;
+    below) echo "--below" ;;
+  esac
+}
+
+# Return the opposite direction (used to place a third display).
+opposite_dir() {
+  case "$1" in
+    left) echo "right" ;;
+    right) echo "left" ;;
+    above) echo "below" ;;
+    below) echo "above" ;;
+  esac
+}
+
+# Extract "WIDTH HEIGHT" for a display given its resolution option
+# ("--mode WxH" or "--auto"). Falls back to the display's highest mode.
+res_wh() {
+  display="$1"
+  opt="$2"
+  case "$opt" in
+  *--mode*) echo "$opt" | sed 's/.*--mode //; s/x/ /' ;;
+  *)
+    xrandr --query | sed -n "/^$display/,/^[^ ]/p" |
+      grep -v "^$display" | grep -E "^[[:space:]]+[0-9]+x[0-9]+" |
+      awk '{print $1}' | sort -t x -k1,1n -k2,2n | tail -n1 | sed 's/x/ /'
+    ;;
+  esac
+}
+
 twoscreen() { # If multi-monitor is selected and there are two screens.
   mirror=$(printf "no\\nyes" | dmenu -i -p "Mirror displays?")
   [ -z "$mirror" ] && exit
@@ -63,10 +99,26 @@ twoscreen() { # If multi-monitor is selected and there are two screens.
     primary=$(echo "$screens" | dmenu -i -p "Select primary display:")
     [ -z "$primary" ] && exit
     secondary=$(echo "$screens" | grep -v ^"$primary"$)
-    direction=$(printf "left\\nright" | dmenu -i -p "What side of $primary should $secondary be on?")
+    direction=$(printf "left\\nright\\nabove\\nbelow" | dmenu -i -p "What side of $primary should $secondary be on?")
+    [ -z "$direction" ] && exit
     primary_res=$(get_resolution "$primary")
     secondary_res=$(get_resolution "$secondary")
-    xrandr --output "$primary" --primary $primary_res --scale 1.0x1.0 --output "$secondary" --"$direction"-of "$primary" $secondary_res --scale 1.0x1.0
+    case "$direction" in
+    left | right)
+      xrandr --output "$primary" --primary $primary_res --scale 1.0x1.0 \
+        --output "$secondary" $(dir_flag "$direction") "$primary" $secondary_res --scale 1.0x1.0
+      ;;
+    above | below)
+      # --above/--below left-align by default; compute positions to right-align.
+      set -- $(res_wh "$primary" "$primary_res"); pw=$1; ph=$2
+      set -- $(res_wh "$secondary" "$secondary_res"); sw=$1; sh=$2
+      maxw=$pw; [ "$sw" -gt "$maxw" ] && maxw=$sw
+      px=$((maxw - pw)); sx=$((maxw - sw))
+      if [ "$direction" = "above" ]; then py=$sh; sy=0; else py=0; sy=$ph; fi
+      xrandr --output "$primary" --primary --mode "${pw}x${ph}" --pos "${px}x${py}" --scale 1.0x1.0 \
+        --output "$secondary" --mode "${sw}x${sh}" --pos "${sx}x${sy}" --scale 1.0x1.0
+      ;;
+    esac
   fi
 }
 
@@ -74,12 +126,36 @@ morescreen() { # If multi-monitor is selected and there are more than two screen
   primary=$(echo "$screens" | dmenu -i -p "Select primary display:")
   [ -z "$primary" ] && exit
   secondary=$(echo "$screens" | grep -v ^"$primary"$ | dmenu -i -p "Select secondary display:")
-  direction=$(printf "left\\nright" | dmenu -i -p "What side of $primary should $secondary be on?")
+  direction=$(printf "left\\nright\\nabove\\nbelow" | dmenu -i -p "What side of $primary should $secondary be on?")
+  [ -z "$direction" ] && exit
   tertiary=$(echo "$screens" | grep -v ^"$primary"$ | grep -v ^"$secondary"$ | dmenu -i -p "Select third display:")
   primary_res=$(get_resolution "$primary")
   secondary_res=$(get_resolution "$secondary")
   tertiary_res=$(get_resolution "$tertiary")
-  xrandr --output "$primary" --primary $primary_res --output "$secondary" --"$direction"-of "$primary" $secondary_res --output "$tertiary" --"$(printf "left\\nright" | grep -v "$direction")"-of "$primary" $tertiary_res
+  case "$direction" in
+  left | right)
+    xrandr --output "$primary" --primary $primary_res \
+      --output "$secondary" $(dir_flag "$direction") "$primary" $secondary_res \
+      --output "$tertiary" $(dir_flag "$(opposite_dir "$direction")") "$primary" $tertiary_res
+    ;;
+  above | below)
+    # Stack vertically (secondary on the chosen side, tertiary opposite) and
+    # right-align all three to the widest display.
+    set -- $(res_wh "$primary" "$primary_res"); pw=$1; ph=$2
+    set -- $(res_wh "$secondary" "$secondary_res"); sw=$1; sh=$2
+    set -- $(res_wh "$tertiary" "$tertiary_res"); tw=$1; th=$2
+    maxw=$pw; [ "$sw" -gt "$maxw" ] && maxw=$sw; [ "$tw" -gt "$maxw" ] && maxw=$tw
+    px=$((maxw - pw)); sx=$((maxw - sw)); tx=$((maxw - tw))
+    if [ "$direction" = "above" ]; then
+      sy=0; py=$sh; ty=$((sh + ph)) # secondary top, primary middle, tertiary bottom
+    else
+      ty=0; py=$th; sy=$((th + ph)) # tertiary top, primary middle, secondary bottom
+    fi
+    xrandr --output "$primary" --primary --mode "${pw}x${ph}" --pos "${px}x${py}" \
+      --output "$secondary" --mode "${sw}x${sh}" --pos "${sx}x${sy}" \
+      --output "$tertiary" --mode "${tw}x${th}" --pos "${tx}x${ty}"
+    ;;
+  esac
 }
 
 multimon() { # Multi-monitor handler.
