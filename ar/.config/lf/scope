@@ -55,8 +55,8 @@ text/* | */xml | application/json | application/java* | application/x-ndjson) ba
 audio/*) mediainfo "$1" || exit 1 ;;
 video/* | application/octet-stream | application/vnd.rn-realmedia)
   CACHE="$(thumb_cache "$1")"
-  [ ! -f "$CACHE" ] && ffmpegthumbnailer -i "$1" -o "$CACHE" -s 0
-  image "$CACHE" "$2" "$3" "$4" "$5" "$1"
+  [ ! -f "$CACHE.jpg" ] && ffmpegthumbnailer -i "$1" -o "$CACHE.jpg" -s 0
+  image "$CACHE.jpg" "$2" "$3" "$4" "$5" "$1"
   ;;
 */pdf)
   CACHE="$(thumb_cache "$1")"
