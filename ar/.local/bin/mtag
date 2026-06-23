@@ -1,0 +1,308 @@
+#!/bin/sh
+
+# mtag — rebuild MP3 ID3 tags from each file's path/name, then file the song
+# under <music>/<artist>/<album>/<title>.mp3 (qndl's layout).
+#
+# ncmpcpp/MPD show the *embedded* ID3 tags, not the filename — so renaming a
+# file or folder doesn't change what you see. mtag reads the tags back out of
+# the on-disk layout (so a rename "sticks") and then moves the file to match.
+#
+# Resolution rules (is_known = non-empty and not "Unknown Artist"/"Unknown Album"):
+#   title  = filename without extension
+#   artist = grandparent folder, if known
+#   album  = parent folder, if known
+#   When the artist is NOT known from a folder, a "Artist - Title" filename is
+#   parsed (split on the FIRST " - ") to recover the artist and title.
+#   When no real album is known, the album falls back to the title (single style).
+#   If the artist still can't be determined, its TAG is left untouched, and the
+#   move target falls back to the existing tag, then "Unknown Artist".
+
+set -u
+
+MUSIC="${XDG_MUSIC_DIR:-$HOME/Music}"
+PLAYLIST="${XDG_CONFIG_HOME:-$HOME/.config}/mpd/playlists/entire.m3u"
+TITLES="${XDG_DOTFILES_DIR:-$HOME/.dotfiles}/global/Music/.music_titles.txt"
+DRY=0
+
+usage() {
+  cat <<EOF
+Usage: mtag [--dry-run|-n] [DIR]
+
+By default mtag REWRITES tags AND MOVES each *.mp3 into
+<music>/<artist>/<album>/<title>.mp3, prunes emptied folders, regenerates the
+'entire.m3u' playlist (if present), syncs qndl's '.music_titles.txt' restore/
+delete labels (if present), and refreshes MPD.
+
+  (no args)      apply everything (tags + move + playlist + mpc update)
+  --dry-run, -n  preview only — show planned tag and move changes, touch nothing
+  DIR            scan DIR instead of the whole music dir ($MUSIC)
+  -h, --help     this help
+
+Tags are written as ID3v2.3 (UTF-16) so Korean/Japanese text is safe, and
+ffmpeg -c copy preserves all other embedded data (e.g. the source URL that
+dmenudelmusic relies on). Collisions during a move are skipped, never clobbered.
+EOF
+}
+
+# --- argument parsing -------------------------------------------------------
+SCAN=""
+for arg in "$@"; do
+  case "$arg" in
+  --dry-run | -n) DRY=1 ;;
+  -h | --help)
+    usage
+    exit 0
+    ;;
+  -*)
+    printf 'mtag: unknown option: %s\n\n' "$arg" >&2
+    usage >&2
+    exit 2
+    ;;
+  *) SCAN="$arg" ;;
+  esac
+done
+[ -n "$SCAN" ] || SCAN="$MUSIC"
+
+# --- prerequisites ----------------------------------------------------------
+for bin in ffmpeg ffprobe; do
+  command -v "$bin" >/dev/null 2>&1 || {
+    printf 'mtag: %s not found (required)\n' "$bin" >&2
+    exit 1
+  }
+done
+[ -d "$SCAN" ] || {
+  printf 'mtag: not a directory: %s\n' "$SCAN" >&2
+  exit 1
+}
+
+# --- helpers ----------------------------------------------------------------
+is_known() {
+  case "$1" in
+  "" | "Unknown Artist" | "Unknown Album") return 1 ;;
+  *) return 0 ;;
+  esac
+}
+
+# Make a string safe as a single path component: '/' is the only byte Linux
+# forbids in a name, so replace just that (keeps spaces, brackets, CJK as-is).
+san() {
+  printf '%s' "$1" | tr '/' '_'
+}
+
+# Show a path relative to the music root when possible (nicer output).
+reldisp() {
+  case "$1" in
+  "$MUSIC"/*) printf '%s' "${1#"$MUSIC"/}" ;;
+  *) printf '%s' "$1" ;;
+  esac
+}
+
+get_tag() {
+  # get_tag <file> <tag-name>
+  ffprobe -v error -show_entries "format_tags=$2" \
+    -of default=nw=1:nk=1 "$1" 2>/dev/null | head -n 1
+}
+
+get_vid() {
+  # Recover the YouTube ID from the embedded source URL (same method as
+  # dmenudelmusic), or empty if there is none.
+  strings "$1" 2>/dev/null | grep 'watch?v=' |
+    sed 's/.*watch?v=\([A-Za-z0-9_-]*\).*/\1/' | head -n 1
+}
+
+# --- main loop --------------------------------------------------------------
+_list="$(mktemp)"
+_titlemap="$(mktemp)"
+trap 'rm -f "$_list" "$_titlemap"' EXIT INT TERM
+find "$SCAN" -type f -name '*.mp3' | sort >"$_list"
+
+_total=0
+_changed=0
+_moved=0
+
+while IFS= read -r f; do
+  [ -n "$f" ] || continue
+  _total=$((_total + 1))
+
+  # Path relative to the music root, so artist/album come from the right depth
+  # regardless of where SCAN points.
+  case "$f" in
+  "$MUSIC"/*) rel="${f#"$MUSIC"/}" ;;
+  *) rel="$f" ;;
+  esac
+
+  fname="$(basename "$rel")"
+  base="${fname%.*}" # title candidate (drop extension)
+
+  # Determine artist/album folders by depth under the music root.
+  dir="$(dirname "$rel")"
+  artistdir=""
+  albumdir=""
+  if [ "$dir" != "." ]; then
+    albumdir="$(basename "$dir")" # immediate parent
+    pdir="$(dirname "$dir")"
+    [ "$pdir" != "." ] && artistdir="$(basename "$pdir")"
+    # Two-level case (artist/title.mp3): the single folder is the ARTIST,
+    # not the album.
+    if [ -z "$artistdir" ]; then
+      artistdir="$albumdir"
+      albumdir=""
+    fi
+  fi
+
+  title="$base"
+  artist=""
+  album=""
+  is_known "$artistdir" && artist="$artistdir"
+  is_known "$albumdir" && album="$albumdir"
+
+  # Recover artist from a "Artist - Title" filename only when we couldn't get
+  # one from a folder — avoids mangling titles that legitimately contain " - ".
+  if [ -z "$artist" ]; then
+    case "$base" in
+    *" - "*)
+      artist="${base%%" - "*}"
+      title="${base#*" - "}"
+      ;;
+    esac
+  fi
+
+  # Single style: no real album -> album is the title.
+  [ -n "$album" ] || album="$title"
+
+  old_title="$(get_tag "$f" title)"
+  old_artist="$(get_tag "$f" artist)"
+  old_album="$(get_tag "$f" album)"
+
+  # What would actually change? (artist only counts when we have a value)
+  diff=0
+  [ "$old_title" != "$title" ] && diff=1
+  [ "$old_album" != "$album" ] && diff=1
+  [ -n "$artist" ] && [ "$old_artist" != "$artist" ] && diff=1
+  [ "$diff" -eq 1 ] && _changed=$((_changed + 1))
+
+  # Move target: <music>/<artist>/<album>/<title>.mp3. The path needs a
+  # concrete artist even when we won't write the tag, so fall back to the
+  # existing tag, then "Unknown Artist".
+  path_artist="$artist"
+  [ -n "$path_artist" ] || path_artist="$old_artist"
+  [ -n "$path_artist" ] || path_artist="Unknown Artist"
+  target="$MUSIC/$(san "$path_artist")/$(san "$album")/$(san "$title").mp3"
+  needmove=0
+  [ "$target" != "$f" ] && needmove=1
+  [ "$needmove" -eq 1 ] && _moved=$((_moved + 1))
+
+  # Display
+  mark="  "
+  { [ "$diff" -eq 1 ] || [ "$needmove" -eq 1 ]; } && mark="* "
+  printf '%s%s\n' "$mark" "$rel"
+  printf '    title : %s\n' "$title"
+  if [ -n "$artist" ]; then
+    printf '    artist: %s\n' "$artist"
+  else
+    printf '    artist: (tag left as-is: %s)\n' "${old_artist:-<empty>}"
+  fi
+  printf '    album : %s\n' "$album"
+  [ "$needmove" -eq 1 ] && printf '    move  : -> %s\n' "$(reldisp "$target")"
+
+  [ "$DRY" -eq 1 ] && continue
+
+  # Record the restore/delete label for qndl's .music_titles.txt, keyed by the
+  # embedded YouTube ID, so 'qndl -r'/'-d' show the corrected "artist - title"
+  # instead of the stale download-time label. Done before any move (the file is
+  # still at "$f"). Files without an embedded ID are skipped.
+  vid="$(get_vid "$f")"
+  [ -n "$vid" ] && printf '%s\t%s - %s\n' "$vid" "$path_artist" "$title" >>"$_titlemap"
+
+  # Write tags (in place) first, so the moved file carries the new tags.
+  # -map 0 + -c copy keep the audio stream and ALL other metadata (cover art,
+  # the embedded source URL, etc.) untouched — only the listed tags change.
+  if [ "$diff" -eq 1 ]; then
+    tmp="${f%.mp3}.mtag.$$.mp3"
+    set -- ffmpeg -v error -y -i "$f" -map 0 -c copy -id3v2_version 3 \
+      -metadata "title=$title" -metadata "album=$album"
+    [ -n "$artist" ] && set -- "$@" -metadata "artist=$artist"
+    set -- "$@" "$tmp"
+    if "$@" && [ -s "$tmp" ]; then
+      mv -f "$tmp" "$f"
+    else
+      rm -f "$tmp"
+      printf '    !! ffmpeg failed, left unchanged\n' >&2
+    fi
+  fi
+
+  # Then relocate, skipping collisions and pruning emptied source folders.
+  if [ "$needmove" -eq 1 ]; then
+    if [ -e "$target" ]; then
+      printf '    !! target exists, not moved: %s\n' "$(reldisp "$target")" >&2
+      _moved=$((_moved - 1))
+    else
+      mkdir -p "$(dirname "$target")"
+      if mv -n "$f" "$target"; then
+        d="$(dirname "$f")"
+        while [ "$d" != "$MUSIC" ] && [ "$d" != "/" ] && [ "$d" != "." ]; do
+          rmdir "$d" 2>/dev/null || break
+          d="$(dirname "$d")"
+        done
+      else
+        printf '    !! move failed, left in place\n' >&2
+        _moved=$((_moved - 1))
+      fi
+    fi
+  fi
+done <"$_list"
+
+# --- finish -----------------------------------------------------------------
+printf '\n'
+if [ "$DRY" -eq 1 ]; then
+  printf 'mtag: dry-run — %d tag change(s), %d move(s), of %d file(s).\n' \
+    "$_changed" "$_moved" "$_total"
+  printf 'mtag: (apply would also sync entire.m3u and qndl .music_titles.txt labels.)\n'
+  printf 'mtag: run without --dry-run to apply.\n'
+  exit 0
+fi
+
+printf 'mtag: updated %d tag(s), moved %d file(s), of %d total.\n' \
+  "$_changed" "$_moved" "$_total"
+
+# Keep qndl's playlist consistent: it lists music-relative *.mp3 paths, which
+# moves invalidate. Regenerate it the same way qndl does, but only if it
+# already exists (don't create the artifact on setups that don't use it).
+if [ "$_moved" -gt 0 ] && [ -f "$PLAYLIST" ]; then
+  find "$MUSIC" -name '*.mp3' | sed "s|$MUSIC/||" | sort >"$PLAYLIST"
+  printf 'mtag: regenerated %s\n' "$(reldisp "$PLAYLIST")"
+fi
+
+# Keep qndl's restore/delete labels (.music_titles.txt) in sync with the new
+# tags. Upsert by YouTube ID: update existing lines, append IDs not yet listed.
+# Only rewrite the file when its content actually changes (avoids dotfiles noise).
+if [ -s "$_titlemap" ] && [ -f "$TITLES" ]; then
+  _tnew="$(mktemp)"
+  awk '
+    FNR==NR {
+      t = index($0, "\t"); if (t == 0) next
+      id = substr($0, 1, t - 1); lab = substr($0, t + 1)
+      map[id] = lab; if (!(id in known)) { order[++n] = id; known[id] = 1 }
+      next
+    }
+    {
+      t = index($0, "\t"); lid = (t ? substr($0, 1, t - 1) : $0)
+      if (lid in map) { print lid "\t" map[lid]; seen[lid] = 1 }
+      else print $0
+    }
+    END { for (i = 1; i <= n; i++) { id = order[i]; if (!(id in seen)) print id "\t" map[id] } }
+  ' "$_titlemap" "$TITLES" >"$_tnew"
+  if cmp -s "$_tnew" "$TITLES"; then
+    rm -f "$_tnew"
+  else
+    mv "$_tnew" "$TITLES"
+    printf 'mtag: synced labels in %s\n' "$(reldisp "$TITLES")"
+  fi
+fi
+
+if command -v mpc >/dev/null 2>&1; then
+  printf 'mtag: running mpc update...\n'
+  mpc update --wait >/dev/null 2>&1 && printf 'mtag: MPD database refreshed.\n'
+else
+  printf 'mtag: mpc not found — skipped database refresh.\n'
+fi
