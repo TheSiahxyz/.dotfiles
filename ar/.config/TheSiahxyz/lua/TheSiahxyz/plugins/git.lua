@@ -155,6 +155,7 @@ return {
 		-- order to load the plugin when the command is run for the first time
 		keys = {
 			{ "<leader>gg", "<Cmd>LazyGit<cr>", desc = "Lazygit" },
+			{ "<leader>gf", "<Cmd>LazyGitFilterCurrentFile<cr>", desc = "Current File" },
 		},
 	},
 	{
@@ -208,7 +209,7 @@ return {
 		end,
 		keys = {
 			{ mode = "n", "<leader>g<leader>", ":Git ", desc = "Git" },
-			{ mode = "n", "<leader>gf", vim.cmd.Git, desc = "Git fugitive" },
+			{ mode = "n", "<leader>gF", vim.cmd.Git, desc = "Git fugitive" },
 			{ mode = "n", "gm", "<Cmd>diffget //2<cr>", desc = "Git diff on my side" },
 			{ mode = "n", "go", "<Cmd>diffget //3<cr>", desc = "Git diff on their side" },
 		},
