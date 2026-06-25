@@ -155,7 +155,7 @@ kcx0a2OAhN0	IU - Love poem
 ybiINVA_gLc	IU - Ending Scene (이런 엔딩)
 1MnzUWjBQog	IU - The shower (푸르던)
 EQzqq0LNlto	IU - Rain Drop
-5CXTwUrotf4	라따뚜이 - 레오 Leo - 콧시 CozySea cover (원곡:優里 Yuuri - Leo)
+5CXTwUrotf4	콧시 CozySea - Leo (cover)
 cvQQEs4TDGM	BIBI - Bam Yang Gang (밤양갱)
 9TiGuWyGlXc	10CM - Tell Me It's Not a Dream
 zFpoaELOrTo	Crush - Love You With All My Heart
@@ -173,23 +173,23 @@ yuTesDwv6uA	DAOKO & Kenshi Yonezu - 打上花火
 TQ8WlA2GXbk	OFFICIAL HIGE DANDISM - Pretender
 m9SMT5ipbxk	YOASOBI - アイドル
 _PNFMuT6e4o	King Gnu - Hakujitsu
-iuJDhFRDx9M	Master ZX - Tokyo Drift - Teriyaki Boyz [ MUSIC VIDEO ] HD
+iuJDhFRDx9M	Teriyaki Boyz - Tokyo Drift
 1tk1pqwrOys	Eve - Kaikai Kitan
 4r6L3FUhbIo	YOASOBI - Monster
--EKxzId_Sj4	Kenshi Yonezu - 米津玄師  - アイネクライネ , Kenshi Yonezu - Eine Kleine
+-EKxzId_Sj4	Kenshi Yonezu - アイネクライネ
 0xSiBpUdW4E	あいみょん - Marigold
-Dx_fKPBPYUI	Kenshi Yonezu - 米津玄師 - LOSER , Kenshi Yonezu
+Dx_fKPBPYUI	Kenshi Yonezu - LOSER
 GtPLYvYeZ_4	Ado - Usseewa
 diH9qVVUSNo	NiziU - Make you happy
 NinLIDs9qmU	LiSA - homura
 qp0AktOIAag	RADWIMPS - Zenzenzense - movie ver.
 zqKrpw36xnU	KANA-BOON - Silhouette
-9aJVr5tTTWk	Kenshi Yonezu - 米津玄師 - ピースサイン , Kenshi Yonezu - Peace Sign
+9aJVr5tTTWk	Kenshi Yonezu - ピースサイン
 -Jget2NBi30	紗倉ひびき（CV:ファイルーズあい）＆街雄鳴造（CV:石川界人） - お願いマッスル
 x8VYWazR5mE	YOASOBI - Yoru ni Kakeru
 wNjvuRZtQeI	Mrs. GREEN APPLE - Inferno
 RjDEFe8dw0A	DA PUMP - U.S.A.
-gJX2iy6nhHc	Masaki Suda & Kenshi Yonezu - 米津玄師 MV「 灰色と青（ ＋菅田将暉 ）」
+gJX2iy6nhHc	Kenshi Yonezu - 灰色と青 (+菅田将暉)
 by4SYYWlhEs	YOASOBI - 夜に駆ける
 KMdTrqzEI0I	Gen Hoshino - Koi
 b9dBi-Sd4SI	Kenshi Yonezu - Paprika
@@ -208,16 +208,16 @@ gxp3R7l1iSk	minami - Kawakiwoameku
 pdvnR6cmI5U	Masaki Suda - Machigaisagashi
 0t0HtFYjcU8	imase - NIGHT DANCER
 C7YQq-nup3A	Ado - Odo
-ptnYBctoexk	Kenshi Yonezu - 米津玄師  - 馬と鹿   Kenshi Yonezu - Uma to Shika
-bt8wNQJaKAk	OFFICIAL HIGE DANDISM - Official髭男dism - I LOVE...［Official Video］
+ptnYBctoexk	Kenshi Yonezu - 馬と鹿
+bt8wNQJaKAk	Official髭男dism - I LOVE...
 yzC4hFK5P3g	Kyary Pamyu Pamyu - Pon Pon Pon
 anOu7GvEKpI	BABYMETAL - Gimme Chocolate!!
 -J9FuvPmMoI	RADWIMPS - Sparkle - movie ver.
-DuMqFknYHBs	Official髭男dism - Official髭男dism - イエスタデイ［Official Video］
+DuMqFknYHBs	Official髭男dism - イエスタデイ
 CVe_AuaoQJk	Kenshi Yonezu - Flamingo
 3wu_p2s3h1g	Columbia Music Box - Orion (Kenshi Yonezu)
 3zh9Wb1KuW8	Fujii Kaze - Shinunoga E-Wa
-J5Z7tIq7bco	スキマスイッチ - 「奏（かなで）」Music Video : SUKIMASWITCH / KANADE Music Video
+J5Z7tIq7bco	スキマスイッチ - 奏（かなで）
 hxLXdCvLHfs	AKB48 - Heavy Rotation
 jJzw1h5CR-I	Eve - Dramaturgy
 pOnXgF4wTmc	J SOUL BROTHERS III from EXILE TRIBE - R.Y.U.S.E.I.
@@ -228,7 +228,7 @@ dGZqpVCJP3k	YOASOBI - 群青
 qT2ZeIWhcno	Masaki Suda - Sayonara Elegy
 yOAwvRmVIyo	あいみょん - Naked Heart
 IHaUGQVrBa8	THE ORAL CIGARETTES - Kyouran Hey Kids!!
-CID-sYQNCew	animelab - Attack on Titan Season 2 - Official Opening Song - Shinzou wo Sasageyo by Linked Horizon
+CID-sYQNCew	Linked Horizon - Shinzou wo Sasageyo
 96IPIQjohZ4	WANIMA - Tomoni
 1jaK9CT_omc	Eito - Kousui
 Dt0CYNAYfNY	Ado - Gira Gira
@@ -236,7 +236,7 @@ VJDbgtc692k	Ado - Show
 qhmrt3ZNgcs	Ado - Dried Flowers
 QnAUQvrjuP0	King & Prince - Tsukiyomi
 ViOzYSYWCMM	Ado - New Genesis (UTA from ONE PIECE FILM RED)
-zkNzxsaCunU	Kenshi Yonezu - 米津玄師 - 春雷   Kenshi Yonezu - Shunrai
+zkNzxsaCunU	Kenshi Yonezu - 春雷
 wJuef4IAt4k	WagakkiBand - Senbonzakura
 mMlFlUZDZVQ	Superfly - Aiwo Komete Hanatabawo (From THE FIRST TAKE)
 F8xpmTmdf6o	MONOGATARI Series - Renai Circulation
@@ -246,25 +246,25 @@ WHdL2vstvL8	ヨルシカ - 言って。
 YL9_wPbbvQo	Masaki Suda - Niji
 6gMBmZ28Xg4	Creepy Nuts - Bling-Bang-Bang-Born
 -QxMzUEJH4Q	Mrs. GREEN APPLE - Ao To Natsu
--kgOFJG881I	OFFICIAL HIGE DANDISM - Official髭男dism - 宿命［Official Video］
+-kgOFJG881I	Official髭男dism - 宿命
 mp2-w15SXms	Tani Yuuki - W / X / Y
 EwpKUV0ECvQ	yama - Haru wo Tsugeru
-O1bhZgkC4Gw	OFFICIAL HIGE DANDISM - Official髭男dism - Cry Baby［Official Video］
+O1bhZgkC4Gw	Official髭男dism - Cry Baby
 N2A2VZTl9X0	Iori Kanzaki - Hated by Life
 9mWbCPJuoIo	frederic - Oddloop
-EHw005ZqCXk	OFFICIAL HIGE DANDISM - Official髭男dism - ノーダウト［Official Video］
+EHw005ZqCXk	Official髭男dism - ノーダウト
 waYhTInn7GU	神山 羊 - YELLOW
-s582L3gujnw	Kenshi Yonezu - 米津玄師 - パプリカ  Kenshi Yonezu - PAPRIKA
+s582L3gujnw	Kenshi Yonezu - パプリカ
 oGWXgMa5vdE	HIKAKIN & SEIKIN - YouTube Theme Song
 6f6J7bvnceU	Taro Urashima - Umino Koe (Instrumental)
 xiuOSWPsIyM	OFFICIAL HIGE DANDISM - Subtitle
 TqyfmFaZlqw	LiSA - Gurenge
 VEe_yIbW64w	Miki Matsubara - Mayonaka no Door 〜 Stay with Me
-xOYe7PN9u5E	Kenshi Yonezu - KICK BACK  (Tomggg Remix)
+xOYe7PN9u5E	Kenshi Yonezu - KICK BACK (Tomggg Remix)
 0ad7f0H5wmY	ZUTOMAYO - Byoushinwo Kamu
-nROvY9uiYYk	Eve - お気に召すまま - Eve MV
+nROvY9uiYYk	Eve - お気に召すまま
 tkjALBLAF6o	SixTONES - kokkara
-Woorod1gJ_w	Amatsuki - 【オリジナルPV】 小さな恋のうた ／ MONGOL800(cover) by天月
+Woorod1gJ_w	天月 - 小さな恋のうた (cover)
 vfLfonEeoyM	Chinozo - Good-bye Declaration
 bWVYjgsJUUc	ONE OK ROCK - Clock Strikes
 M_Uz5SKGxs4	BUMP OF CHICKEN - Tentaikansoku
@@ -292,9 +292,9 @@ Hx_7LvLjNmc	AAA - KoiotoToAmazora
 tgNIeWvXKNM	Yoko Oginome - Dancing Hero(Eat You Up)
 7lcxt2tRyGQ	AAA - さよならの前に
 6ZyZRFChIPU	Uru - Anataga Iru Kotode
-clU8c2fpk2s	kobasolo - 【女性が歌う】Lemon/米津玄師(Full Covered by コバソロ & 春茶)
+clU8c2fpk2s	kobasolo - Lemon (cover)
 uDsEVMjwNb0	back number - Takaneno Hanakosan
-1s84rIhPuhk	Kenshi Yonezu - 米津玄師 - 海の幽霊  Kenshi Yonezu - Spirits of the Sea
+1s84rIhPuhk	Kenshi Yonezu - 海の幽霊
 e7u2aPzWmU4	back number - Christmas Song
 ENQANfv2ANQ	Vaundy - Kaiju no Hanauta
 Po2Ujyn8SXE	aimyon - Harunohi
@@ -308,7 +308,7 @@ oMeFtedQS0E	King Gnu - Ichizu (ALBUM ver.)
 8GfDq1osBLM	YOASOBI - ハルジオン
 vJ2AhTaQO10	Saucy Dog - Cinderella Boy
 kMzcG30g8OQ	なにわ男子 - 初心LOVE（うぶらぶ）YouTube ver.
-jOegTv3a2h4	high_note Music Lounge - 糸 - 中島みゆき（フル）
+jOegTv3a2h4	中島みゆき - 糸
 csVeFCLhmAM	FLOW - Sign
 FVaAp4dhK0Q	gesunokiwamiotome - watashi igai watashi ja naino
 IGldkA5dG8o	Hikaru Utada - First Love
@@ -349,7 +349,7 @@ MYZXUJ-BG-Q	Paul Blanco - Summer
 kp-gVJ7XJV4	KyoungSeo - 첫 키스에 내 심장은 120BPM
 8kQH_bBMrMQ	최유리 - Forest
 7eiQHEJ-Sbo	안예은 - Magic Lily
-EK18vAp9VVc	CHiCORY - 비몽 - 작야 Live COVER (240201) │ 원곡 조선블루스
+EK18vAp9VVc	비몽 - 작야 (cover)
 2El3ZfWbehw	OOHYO - Youth (DAY)
 yPCi20P1QFs	YEEUN AHN - Night Flower (야화)
 KBKzIDdAO1s	하시토 - [한글자막] 원피스 필름 레드 삽입곡 Full - 나는 최강(I'm invincible) │ Ado
@@ -358,7 +358,7 @@ hza4uQGZexA	이예준 - miss you more, I'm sorry
 Bi87zvvexLo	majiko - Kokoronashi (2017 Live Version)
 em0lGANmAUU	GUMMY - Memory Loss
 RGPpBDFFqDg	Lucia(심규선) - 달과 6펜스
-i6rXYiwuJwM	Philopon Music - 리무카이쵸 - 너에게 마지막 입맞춤을(君に最後の口づけを) [자막/가사]
+i6rXYiwuJwM	리무카이쵸 - 너에게 마지막 입맞춤을
 R89tf2GbxTM	위도 Music Official  - Gravity | 위도(W2RDO) Live Cover
 a1IuJLebHgM	Adele - When We Were Young
 8CNnNGgAHig	Lucia - Narrow Road (소로 小路)
@@ -505,7 +505,7 @@ Dmy0CkieM6s	CAMO - Shawty
 CLNQ_qWdEeA	Gyeong Je Hwan - a remote star and satellite
 h0ccMK0U9nY	Coogie - Alone (Feat. LeeHi) (Alone
 5TgTPH2b6nM	Jehwwn - No Hope For Your Return
-JvQhJTM9OJU	JUSTHIS - Do Not Go Gentle Into That Good Night (Feat. KWAII, DON MALIK, GongGongGoo009) (Prod. Humbert)
+JvQhJTM9OJU	JUSTHIS - Do Not Go Gentle Into That Good Night
 pRosoqfxJY4	GIRIBOY - That's Why I Can't Talk About Love (Feat. Woo) (That's Why I Can't Talk About Love
 vMrI9LXohYo	2NE1 - 그리워해요(Missing You)
 iTPkkKRKGrQ	2NE1 - Go Away
@@ -850,7 +850,7 @@ _0Yp2Wtvpeo	Primary - Drama
 jXgc1FTjMd4	hard life - dead celebrities
 pwjj1eInTSU	Zion.T - Click Me (2013)
 sobPzRxbmwE	스트레이 - Thing You Are (Live Demo)
-OejyNpxR-DM	The S6 - Vardy's on Fire - The S6 [Official Lyric Video]
+OejyNpxR-DM	The S6 - Vardy's on Fire
 vw3k_jWa-gI	Yeah Yeah Yeahs - Heads Will Roll
 pRIZohFFOMo	Lewis Capaldi - Someone You Loved
 NqLB6ub1BOw	VIVIZ - MANIAC
@@ -900,9 +900,9 @@ PiHCuVnvBkU	Shin Giwon Piano - In Your Time
 IwQGnXpskoY	Rokudenashi - One Voice
 dgZlLjfh6q4	Damons year - yours
 BctgR3JqGug	Hebi - 늘 (EVER)
-2ThVc_x9_y0	비몽 Beemong - 김필선 - 마마 live (cover by 비몽)
+2ThVc_x9_y0	비몽 - 마마 (cover)
 29lj9jFfJvY	Woody - Sadder Than Yesterday (어제보다 슬픈 오늘)
-iTF-zVkrtZk	비몽 Beemong - 비몽 - 야수 live cover  [돌발서버 콘서트]
+iTF-zVkrtZk	비몽 - 야수 (cover)
 eNiPuDEUQpQ	AKMU - Joy, Sorrow, A Beautiful Heart
 7kCDaxIjZFY	Park Hyo Shin - AE
 QmyrqNY9RPU	하데스(HADES) - Planet B

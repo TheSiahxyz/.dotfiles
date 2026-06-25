@@ -335,7 +335,7 @@ song_columns_list_format = (20)[cyan]{a} (40)[yellow]{t} (30)[blue]{b} (10)[mage
 ## Note: Custom command that will be executed each time song changes. Useful for
 ## notifications etc.
 ##
-execute_on_song_change="pkill -RTMIN+2 dwmblocks"
+execute_on_song_change="pkill -RTMIN+2 dwmblocks; (~/.config/ncmpcpp/genius-lyrics.py >/dev/null 2>&1 &)"
 #
 ##
 ## Note: Custom command that will be executed each time player state
@@ -421,7 +421,11 @@ media_library_albums_split_by_date = no
 #
 #cyclic_scrolling = no
 #
-#lyrics_fetchers = tags, genius, tekstowo, plyrics, justsomelyrics, jahlyrics, zeneszoveg, internet
+## Only `tags` (embedded lyrics) is kept here. The broken built-in `genius`
+## scraper is removed on purpose; lyrics downloading is handled by
+## ~/.config/ncmpcpp/genius-lyrics.py (run from execute_on_song_change).
+## To restore ncmpcpp's own fetchers, re-add: genius, tekstowo, plyrics, ...
+lyrics_fetchers = tags
 #
 #follow_now_playing_lyrics = no
 #
