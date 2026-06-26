@@ -3,9 +3,9 @@
 */15 * * * * export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u $USER)/bus; export DISPLAY=:0; . $HOME/.zprofile; $HOME/.local/bin/cron/newsup
 0 */3 * * * export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u $USER)/bus; export DISPLAY=:0; . $HOME/.zprofile; $HOME/.local/bin/cron/checkup
 0 0 * * * export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u $USER)/bus; export DISPLAY=:0; . $HOME/.zprofile; NVIM_APPNAME=TheSiahxyz nvim --headless "+Lazy! sync" +qa
-0 0 * * * export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u $USER)/bus; export DISPLAY=:0; . $HOME/.zprofile; NVIM_APPNAME=TheSiahxyz nvim --headless "+MasonUpdate" +qa
+30 0 * * * export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u $USER)/bus; export DISPLAY=:0; . $HOME/.zprofile; timeout 600 env NVIM_APPNAME=TheSiahxyz nvim --headless -c "autocmd User MasonToolsUpdateCompleted quitall" -c "Lazy! load nvim-lspconfig" -c "MasonToolsUpdate"
 0 * * * * export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u $USER)/bus; export DISPLAY=:0; . $HOME/.zprofile; /usr/bin/nvim --headless "+Lazy! sync" +qa
-0 * * * * export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u $USER)/bus; export DISPLAY=:0; . $HOME/.zprofile; /usr/bin/nvim --headless "+MasonUpdate" +qa
+30 * * * * export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u $USER)/bus; export DISPLAY=:0; . $HOME/.zprofile; timeout 600 /usr/bin/nvim --headless -c "autocmd User MasonToolsUpdateCompleted quitall" -c "Lazy! load nvim-lspconfig" -c "MasonToolsUpdate"
 @daily export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u $USER)/bus; export DISPLAY=:0; . $HOME/.zprofile; /usr/bin/trash-empty 30
 @daily export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u $USER)/bus; export DISPLAY=:0; . $HOME/.zprofile; $HOME/.local/bin/cron/mediaup
 @daily export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u $USER)/bus; export DISPLAY=:0; . $HOME/.zprofile; $HOME/.local/bin/task/taskwarrior-tui/tasks-sync
