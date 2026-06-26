@@ -9,7 +9,7 @@ edp_cfg="--mode 1920x1080 --rotate normal --scale 1.0x1.0 --dpi 82"
 hdmi_cfg="--mode 1920x1080 --rotate normal --scale 1.0x1.0 --dpi 82"
 dp_cfg="--mode 2560x1600 --rotate normal --scale 1.0x1.0 --dpi 192"
 
-# EDID 미감지 시 (640x480에 갇힌 경우) 1920x1080 폴백 적용
+# When EDID is not detected (stuck at 640x480), apply a 1920x1080 fallback
 if xrandr -q | grep " connected" | grep -q "640x480+"; then
   xrandr --newmode "1920x1080_60.00" 173.00 1920 2048 2248 2576 1080 1083 1088 1120 -hsync +vsync 2>/dev/null
   for output in $(xrandr -q | grep -w "connected" | cut -d ' ' -f 1); do

@@ -29,7 +29,7 @@ awk '
     { print }
 ' "$input_file" >"$temp_file"
 
-# Extract + VS16 제거
+# Extract + strip VS16
 awk -F'#' '
     {
         if (NF >= 2) {

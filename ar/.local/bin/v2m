@@ -1,38 +1,38 @@
 #!/bin/bash
 
-# 동영상에서 MP3 추출 스크립트
+# Extract MP3 audio from a video file
 
 if [ $# -eq 0 ]; then
-    echo "사용법: video2mp3 <입력파일> [출력파일]"
-    echo "예시: video2mp3 video.mp4"
-    echo "예시: video2mp3 video.mp4 audio.mp3"
+    echo "Usage: video2mp3 <input_file> [output_file]"
+    echo "Example: video2mp3 video.mp4"
+    echo "Example: video2mp3 video.mp4 audio.mp3"
     exit 1
 fi
 
 INPUT="$1"
 
-# 파일 존재 확인
+# Check that the file exists
 if [ ! -f "$INPUT" ]; then
-    echo "오류: 파일을 찾을 수 없습니다: $INPUT"
+    echo "Error: file not found: $INPUT"
     exit 1
 fi
 
-# 출력 파일명 설정
+# Determine the output filename
 if [ $# -eq 2 ]; then
     OUTPUT="$2"
 else
-    # 입력 파일에서 확장자를 제거하고 .mp3 추가
+    # Strip the extension from the input file and append .mp3
     OUTPUT="${INPUT%.*}.mp3"
 fi
 
-echo "변환 중: $INPUT -> $OUTPUT"
+echo "Converting: $INPUT -> $OUTPUT"
 
-# ffmpeg로 mp3 추출 (고품질: 320kbps)
+# Extract mp3 with ffmpeg (high quality: 320kbps)
 ffmpeg -i "$INPUT" -vn -acodec libmp3lame -b:a 320k "$OUTPUT"
 
 if [ $? -eq 0 ]; then
-    echo "✓ 완료: $OUTPUT"
+    echo "✓ Done: $OUTPUT"
 else
-    echo "✗ 오류 발생"
+    echo "✗ An error occurred"
     exit 1
 fi
