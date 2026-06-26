@@ -45,12 +45,18 @@ remove_id_from() {
 }
 
 if remove_id_from "$music_txt" && remove_id_from "$music_titles"; then
-	# Remove the relative path from playlists (-F avoids regex pitfalls with [], (), etc.)
+	# Remove the relative path from every playlist (entire.m3u + genre lists like
+	# jpop/kpop/pop). -F avoids regex pitfalls with [], (), etc.
+	# These .m3u files are symlinks into the dotfiles repo, so write the result
+	# back with `cat > "$playlist"` (which follows the symlink) instead of
+	# `mv`/`sed -i`, both of which would replace the symlink with a plain file.
 	for playlist in "$playlist_dir"/*.m3u; do
 		[ -e "$playlist" ] || continue
 		if grep -Fq "$selected_relpath" "$playlist"; then
-			grep -Fv "$selected_relpath" "$playlist" > "${playlist}.tmp" && mv "${playlist}.tmp" "$playlist"
-			sed -i '/^$/d' "$playlist"
+			_pl_tmp="$(mktemp)" || continue
+			grep -Fv "$selected_relpath" "$playlist" | sed '/^$/d' > "$_pl_tmp"
+			cat "$_pl_tmp" > "$playlist"
+			rm -f "$_pl_tmp"
 		fi
 	done
 

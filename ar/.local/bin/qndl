@@ -31,6 +31,17 @@ normalize_url() {
   printf '%s' "$1" | sed 's|\.sooplive\.com/|.sooplive.co.kr/|'
 }
 
+to_music_url() {
+  # Route YouTube links through music.youtube.com. The YouTube Music frontend
+  # yields cleaner song metadata (album/track/artist) than the plain video
+  # page. Non-YouTube URLs and already-music.youtube.com links pass through
+  # untouched; youtu.be short links are expanded to a watch?v= form.
+  printf '%s' "$1" | sed -E '
+    s#^(https?://)?(www\.|m\.)?youtube\.com/#https://music.youtube.com/#
+    s#^(https?://)?youtu\.be/([A-Za-z0-9_-]+).*#https://music.youtube.com/watch?v=\2#
+  '
+}
+
 get_url() {
   for _arg in "$@"; do
     case "$_arg" in
@@ -79,10 +90,6 @@ get_type() {
       ;;
     -k | --kill | k | kill)
       printf 'kill'
-      return 0
-      ;;
-    -d | --delete | d | delete)
-      printf 'delete'
       return 0
       ;;
     *)
@@ -264,7 +271,7 @@ handle_playlist() {
 # ---------------------------------------------------------------------------
 
 download_music() {
-  _url="$1"
+  _url="$(to_music_url "$1")"
   _output_dir="${XDG_MUSIC_DIR:-$HOME/Music}"
   _archive="${XDG_DOTFILES_DIR:-$HOME/.dotfiles}/global/Music/.music.txt"
   _titles="${XDG_DOTFILES_DIR:-$HOME/.dotfiles}/global/Music/.music_titles.txt"
@@ -283,6 +290,7 @@ download_music() {
     --extract-audio \
     --audio-format mp3 \
     --audio-quality 0 \
+    --parse-metadata "%(release_date,upload_date)s:%(meta_date)s" \
     --download-archive "$_archive" \
     --print-to-file "$_title_fmt" "$_titles" \
     --output "$_fmt"
@@ -486,79 +494,18 @@ restore_archive() {
     else
       _t=""
     fi
-    enqueue "music" "https://www.youtube.com/watch?v=$_id" "${_t:-$_id}" \
+    enqueue "music" "https://music.youtube.com/watch?v=$_id" "${_t:-$_id}" \
       --no-playlist \
       --extract-audio \
       --audio-format mp3 \
       --audio-quality 0 \
+      --parse-metadata "%(release_date,upload_date)s:%(meta_date)s" \
       --output "$_format"
   done <"$_tmpfile"
   rm -f "$_tmpfile"
   notify "✅ All $_sel_total job(s) queued" "tsp will process them sequentially"
 }
 
-delete_archive() {
-  command -v fzf >/dev/null 2>&1 || die "⛔ fzf not installed" "Install fzf to use qndl -d."
-
-  _archive="${XDG_DOTFILES_DIR:-$HOME/.dotfiles}/global/Music/.music.txt"
-  _titles="${XDG_DOTFILES_DIR:-$HOME/.dotfiles}/global/Music/.music_titles.txt"
-
-  [ ! -f "$_archive" ] && die "⛔ Archive not found" "$_archive"
-
-  # fzf input: <id>\t<display>. --with-nth hides column 1, cut grabs it back.
-  if [ -f "$_titles" ]; then
-    _entries="$(awk '
-      NR==FNR {
-        tab = index($0, "\t")
-        if (tab > 0) titles[substr($0, 1, tab-1)] = substr($0, tab+1)
-        next
-      }
-      {
-        sp = index($0, " ")
-        if (sp == 0) next
-        id = substr($0, sp+1)
-        if (id == "") next
-        if (id in titles) printf "%s\t%s  [%s]\n", id, titles[id], id
-        else printf "%s\t[%s]\n", id, id
-      }
-    ' "$_titles" "$_archive")"
-  else
-    _entries="$(awk '$2 != "" { printf "%s\t[%s]\n", $2, $2 }' "$_archive")"
-  fi
-
-  [ -z "$_entries" ] && die "⛔ Archive is empty" "Nothing to delete."
-
-  _selected="$(printf '%s\n' "$_entries" |
-    fzf -m \
-      --with-nth=2.. \
-      --delimiter='\t' \
-      --prompt='Delete: ' \
-      --header='TAB to mark multiple, Enter to confirm' |
-    cut -f1)"
-
-  [ -z "$_selected" ] && return 0
-
-  _ids_file="$(mktemp)"
-  printf '%s\n' "$_selected" >"$_ids_file"
-
-  # YouTube IDs have no whitespace, so default FS works for both files.
-  # Archive lines: "youtube <ID>" → drop where $2 matches.
-  # Titles lines:  "<ID>\t<title>" → drop where $1 matches.
-  _new_archive="$(mktemp)"
-  awk 'NR==FNR { drop[$1]=1; next } !($2 in drop)' "$_ids_file" "$_archive" >"$_new_archive" &&
-    mv "$_new_archive" "$_archive"
-
-  if [ -f "$_titles" ]; then
-    _new_titles="$(mktemp)"
-    awk 'NR==FNR { drop[$1]=1; next } !($1 in drop)' "$_ids_file" "$_titles" >"$_new_titles" &&
-      mv "$_new_titles" "$_titles"
-  fi
-
-  _count="$(printf '%s\n' "$_selected" | grep -c .)"
-  rm -f "$_ids_file"
-
-  notify "🗑️ Removed $_count archive entry/entries" "from .music.txt and .music_titles.txt"
-}
 
 # ---------------------------------------------------------------------------
 # Listing & Cancellation
@@ -692,9 +639,6 @@ main() {
   restore)
     restore_archive
     ;;
-  delete)
-    delete_archive
-    ;;
   list)
     list_queue
     ;;
@@ -702,10 +646,10 @@ main() {
     kill_job
     ;;
   "")
-    die "⛔ No type specified" "Provide: music, video, restore, delete, list, or kill."
+    die "⛔ No type specified" "Provide: music, video, restore, list, or kill."
     ;;
   *)
-    die "⛔ Invalid type: $_type" "Recognized types: music, video, restore, delete, list, kill."
+    die "⛔ Invalid type: $_type" "Recognized types: music, video, restore, list, kill."
     ;;
   esac
 }
