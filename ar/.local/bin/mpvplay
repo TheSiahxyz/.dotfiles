@@ -144,7 +144,7 @@ list_and_play() {
     search_term=$(echo | dmenu -i -p "File names:")
     [ -z "$search_term" ] && exit
     notify-send "Finding videos named with '$search_term'.."
-    files=$(eval "find \"$dir\" -type f \\( $VIDEO_EXTS \\) -iname \"*$search_term*\"" | sort -V)
+    files=$(eval "find \"$dir\" -type f \\( $VIDEO_EXTS \\) -iname \"*$search_term*\"" | awk -F/ '{print $NF"\t"$0}' | sort -V | cut -f2-)
     [ -z "$files" ] && echo "No files named with \"$search_term\"." && exit
     tmpplaylist=$(mktemp /tmp/mpv_playlist_XXXXXX.m3u)
     echo "$files" >"$tmpplaylist"
