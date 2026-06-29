@@ -33,7 +33,7 @@ local opts = {
 	enabled = true, -- feature on/off
 	scan_on_load = false, -- auto-check on file open; if false, trigger with the "scan" key
 	scan_playlist = true, -- after the current file, also background-check following playlist entries
-	scan_concurrency = 0, -- how many playlist entries to check in parallel (0 = entire playlist at once)
+	scan_concurrency = 5, -- how many playlist entries to check in parallel (0 = entire playlist at once)
 	notify_done = true, -- show an OSD summary when the playlist background check finishes
 	show_scanning = false, -- show a "scanning" badge (default: off)
 	deep_scan = false, -- if true, decode while checking (precise but slow)
@@ -43,7 +43,7 @@ local opts = {
 	-- the disk/cache and stutter playback (ionice is ignored by the `none`
 	-- scheduler, so rate-limiting is what actually protects playback).
 	-- 0 = unlimited. The current file is always checked at full speed.
-	bg_read_rate = 0,
+	bg_read_rate = 10,
 	bg_read_burst = 30, -- seconds to read at full speed first (headers/early errors)
 	-- Low-priority wrapper (helps userspace CPU; ionice is a no-op on `none`).
 	-- Set to "" to disable. (Linux: coreutils `nice`, util-linux `ionice`.)
