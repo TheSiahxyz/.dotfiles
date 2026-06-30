@@ -2,9 +2,9 @@
 
 # Usage:
 #	price <currency-base currency> <name of currency> <icon> <signal>
-#	price bat-btc "Basic Attention Token" 🦁 25
+#	price bat-btc "Basic Attention Token" 🦁 21
 #	This will give the price of BAT denominated in BTC and will update on
-#	signal 25.
+#	signal 21.
 # When the name of the currency is multi-word, put it in quotes.
 
 [ -z "$1" ] && exit 1
@@ -23,21 +23,27 @@ gbp) symb="£" ;;
 eur) symb="€" ;;
 btc) symb="" ;;
 esac
-interval="@1d" # History contained in chart preceded by '@' (7d = 7 days)
-dir="${XDG_CACHE_HOME:-${HOME}/.cache}/crypto-prices"
+interval="@14d" # History contained in chart preceded by '@' (7d = 7 days)
+dir="${XDG_CACHE_HOME:-$HOME/.cache}/crypto-prices"
 pricefile="$dir/$target-$denom"
 chartfile="$dir/$target-$denom-chart"
-filestat="$(stat -c %x "$pricefile" 2>/dev/null)"
 
 [ -d "$dir" ] || mkdir -p "$dir"
 
-updateprice() { curl -sf \
-  --fail-early "${denom}.${url}/1${target}" "${denom}.${url}/${target}${interval}" \
-  --output "$pricefile" --output "$chartfile" ||
-  rm -f "$pricefile" "$chartfile"; }
+checkprice() {
+  [ "$(stat -c %y "$pricefile" 2>/dev/null |
+    cut -d' ' -f1)" = "$(date '+%Y-%m-%d')" ]
+}
 
-[ "${filestat%% *}" != "$(date '+%Y-%m-%d')" ] &&
-  updateme="1"
+updateprice() {
+  { grep -q -m1 '^up$' /sys/class/net/w*/operstate || grep -q -m1 '^up$' /sys/class/net/e*/operstate; } &&
+    curl -sf \
+      --fail-early "${denom}.${url}/1${target}" "${denom}.${url}/${target}${interval}" \
+      --output "$pricefile" --output "$chartfile" &&
+    touch "$pricefile" "$chartfile"
+}
+
+checkprice || updateme="1"
 
 case $BLOCK_BUTTON in
 1) setsid "$TERMINAL" -e less -Srf "$chartfile" ;;
@@ -47,25 +53,42 @@ case $BLOCK_BUTTON in
   showupdate="1"
   ;;
 3)
-  uptime="$(date -d "$filestat" '+%D at %T' | sed "s|$(date '+%D')|Today|")"
+  uptime="$(date -d "$(stat -c %x "$pricefile" 2>/dev/null)" '+%D at %T' | sed "s|$(date '+%D')|Today|")"
   notify-send "$icon $name module" "\- <b>Exact price: \$$(cat "$pricefile")</b>
-- Left click for chart of changes
-- Middle click to update
-- Shows 🔃 if updating prices
+- Left click for chart of changes.
+- Middle click to update.
+- Shows 🔃 if updating prices.
 - <b>Last updated:
-$uptime</b>"
+	$uptime</b>"
   ;;
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
 [ -n "$updateme" ] &&
-  updateprice "$target" &&
-  [ -n "$showupdate" ] &&
-  notify-send "$icon Update complete" "$name price is now
-\$$(cat "$pricefile")"
+  if [ -n "$showupdate" ]; then
+    updateprice && notify-send "$icon Update complete." "$name price is now \$$(cat "$pricefile")"
+  else
+    # shellcheck disable=SC2015
+    [ -n "$4" ] &&
+      (
+        flock -n 9 &&
+          (
+            tries=0
+            while [ $tries -ne 100 ]; do
+              updateprice && break ||
+                {
+                  tries=$((tries + 1))
+                  sleep .1
+                }
+            done
+            ! checkprice &&
+              until updateprice; do sleep 60; done
+            pkill -RTMIN+"$4" "${STATUSBAR:-dwmblocks}"
+          ) &
+        echo
+        exit
+      ) 9>"${XDG_RUNTIME_DIR}/sb-price.lock" ||
+      updateprice
+  fi
 
-[ -f "$pricefile" ] && {
-  price=$(cat "$pricefile")
-  formatted_price=$(printf "%0.2f" "$price" | sed ':a;s/\B[0-9]\{3\}\>/,&/;ta')
-  printf "%s%s%s" "$icon" "$symb" "$formatted_price"
-}
+[ -f "$pricefile" ] && printf "%s%s%0.2f" "$icon" "$symb" "$(cat "$pricefile")"
