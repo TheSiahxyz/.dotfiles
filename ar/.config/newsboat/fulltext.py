@@ -90,8 +90,11 @@ def extract(url):
         with open(cp, "r", encoding="utf-8", errors="replace") as f:
             return f.read()
     try:
+        # Force UTF-8 decoding: some sites (e.g. CNBC) serve UTF-8 but declare
+        # no charset in the HTTP header or an early <meta>, so rdrview falls back
+        # to Latin-1/CP1252 and mangles multibyte chars (em-dash -> "â€"").
         out = subprocess.run(
-            ["rdrview", "-H", url],
+            ["rdrview", "-E", "UTF-8", "-H", url],
             capture_output=True, text=True, timeout=TIMEOUT,
         )
     except (FileNotFoundError, subprocess.TimeoutExpired):
