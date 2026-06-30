@@ -421,11 +421,7 @@ media_library_albums_split_by_date = no
 #
 #cyclic_scrolling = no
 #
-## Only `tags` (embedded lyrics) is kept here. The broken built-in `genius`
-## scraper is removed on purpose; lyrics downloading is handled by
-## ~/.config/ncmpcpp/genius-lyrics.py (run from execute_on_song_change).
-## To restore ncmpcpp's own fetchers, re-add: genius, tekstowo, plyrics, ...
-lyrics_fetchers = tags
+#lyrics_fetchers = tags, tekstowo, plyrics, justsomelyrics, jahlyrics, zeneszoveg, internet
 #
 #follow_now_playing_lyrics = no
 #
