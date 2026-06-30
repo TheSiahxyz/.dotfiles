@@ -8,13 +8,13 @@ case "$(readlink -f /sbin/init)" in
 esac
 
 lock() {
-  mpc pause
-  pauseallmpv
-  wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
-  kill -38 "$(pidof dwmblocks)"
+  was_muted="$(wpctl get-volume @DEFAULT_AUDIO_SINK@ | grep -o 'MUTED' && echo 1 || echo 0)"
+  mpc pause &
+  pauseallmpv &
+  wpctl set-mute @DEFAULT_AUDIO_SINK@ 1 &
   slock
-  wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
-  kill -38 "$(pidof dwmblocks)"
+  [ "$was_muted" -eq 0 ] && wpctl set-mute @DEFAULT_AUDIO_SINK@ 0
+  pkill -RTMIN+4 "${STATUSBAR:-dwmblocks}"
 }
 
 wmpid() { # This function is needed if there are multiple instances of the window manager.

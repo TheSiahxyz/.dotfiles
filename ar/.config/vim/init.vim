@@ -243,8 +243,7 @@ if !exists('g:airline_symbols')
 endif
 let g:airline_symbols.colnr = ' C:'
 let g:airline_symbols.linenr = ' L:'
-let g:airline_symbols.maxlinenr = ' '
-let g:airline#extensions#whitespace#symbol = '!'
+let g:airline_symbols.maxlinenr = '☰ '
 
 " colorscheme
 if isdirectory(expand("${XDG_CONFIG_HOME:-$HOME/.config}/vim/plugged/catppuccin"))
