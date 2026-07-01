@@ -44,4 +44,11 @@ SOLO="$(mktemp -d)/Music"; mkdir -p "$SOLO"
 ( export XDG_MUSIC_DIR="$SOLO"; mkmp3 "$SOLO/Solo/Al/s.mp3"; "$BIN" apply "$SOLO/Solo/Al/s.mp3" "SoloCanon" )
 eq "apply: prune keeps MUSIC root" "yes" "$([ -d "$SOLO" ] && echo yes || echo no)"
 
+# --- apply-download ---
+# 맵에 4MEN→4Men 이 있으므로 다운로드가 4MEN 폴더에 떨어지면 4Men으로 통일돼야 함
+mkmp3 "$XDG_MUSIC_DIR/4MEN/Later/y.mp3"
+"$BIN" apply-download "$XDG_MUSIC_DIR/4MEN/Later/y.mp3"
+eq "apply-download: unified via map" "yes" "$([ -f "$XDG_MUSIC_DIR/4Men/Later/y.mp3" ] && echo yes || echo no)"
+eq "apply-download: album_artist"    "4Men" "$(tag_of "$XDG_MUSIC_DIR/4Men/Later/y.mp3" album_artist)"
+
 exit $FAIL
