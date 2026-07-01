@@ -40,13 +40,14 @@ cmd_apply() {
     fi
     mkdir -p "$_destdir"
     mv "$_fp" "$_dest" || return 1
-    # 빈 원본 앨범/아티스트 폴더 정리
-    rmdir -p "$MUSIC/$_artist_seg/$(dirname "$_subpath")" 2>/dev/null || true
+    # 빈 원본 앨범/아티스트 폴더 정리 (MUSIC 루트는 지우지 않음)
+    rmdir "$MUSIC/$_artist_seg/$(dirname "$_subpath")" 2>/dev/null || true
+    rmdir "$MUSIC/$_artist_seg" 2>/dev/null || true
     _fp="$_dest"
   fi
   _tmp="$(dirname "$_fp")/.qndl-tag-$$.mp3"
   if ffmpeg -v error -y -i "$_fp" -map 0 -c copy -metadata album_artist="$_canon" "$_tmp" 2>/dev/null; then
-    mv "$_tmp" "$_fp"
+    mv "$_tmp" "$_fp" || { rm -f "$_tmp"; return 1; }
   else
     rm -f "$_tmp"
     printf 'apply: tag failed: %s\n' "$_fp" >&2

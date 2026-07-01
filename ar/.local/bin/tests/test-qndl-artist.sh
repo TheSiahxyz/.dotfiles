@@ -39,4 +39,9 @@ mkmp3 "$XDG_MUSIC_DIR/Dupe/Al/x.mp3"
 "$BIN" apply "$XDG_MUSIC_DIR/DUPE/Al/x.mp3" "Dupe" 2>/dev/null
 eq "apply: conflict keeps source" "yes" "$([ -f "$XDG_MUSIC_DIR/DUPE/Al/x.mp3" ] && echo yes || echo no)"
 
+# regression: 프루닝이 MUSIC 루트를 삭제하지 않음
+SOLO="$(mktemp -d)/Music"; mkdir -p "$SOLO"
+( export XDG_MUSIC_DIR="$SOLO"; mkmp3 "$SOLO/Solo/Al/s.mp3"; "$BIN" apply "$SOLO/Solo/Al/s.mp3" "SoloCanon" )
+eq "apply: prune keeps MUSIC root" "yes" "$([ -d "$SOLO" ] && echo yes || echo no)"
+
 exit $FAIL
