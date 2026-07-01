@@ -68,11 +68,98 @@ cmd_apply() {
   fi
 }
 
+# MUSIC의 모든 아티스트 폴더를 <name>\t<mp3수>로 출력.
+_artist_counts() {
+  find "$MUSIC" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' 2>/dev/null |
+    while IFS= read -r _d; do
+      _n="$(find "$MUSIC/$_d" -type f -name '*.mp3' 2>/dev/null | wc -l)"
+      printf '%s\t%s\n' "$_d" "$_n"
+    done
+}
+
+# stdin: <name>\t<count>. stdout: 실제 중복 그룹만 <canonical>\t<m1>\t<m2>...
+_group_awk() {
+  awk -F'\t' '
+    function norm(x,   y){ y=tolower(x); gsub(/[^[:alnum:]가-힣]/,"",y); return y }
+    function find(a){ while(parent[a]!=a){ parent[a]=parent[parent[a]]; a=parent[a] } return a }
+    function union(a,b,  ra,rb){ ra=find(a); rb=find(b); if(ra!=rb) parent[rb]=ra }
+    function addtok(idx,chunk,  k){ k=norm(chunk); if(k=="") return; if(k in owner) union(owner[k],idx); else owner[k]=idx }
+    function caserank(s,  u,l){ u=(s ~ /[A-Z]/); l=(s ~ /[a-z]/); return (u&&l)?2:1 }
+    {
+      name[NR]=$1; cnt[NR]=$2+0; parent[NR]=NR
+      s=$1; gsub(/（/,"(",s); gsub(/）/,")",s); rest=s
+      while (match(rest,/\([^)]*\)/)) {
+        addtok(NR, substr(rest,RSTART+1,RLENGTH-2))
+        rest=substr(rest,1,RSTART-1) " " substr(rest,RSTART+RLENGTH)
+      }
+      addtok(NR, rest)
+    }
+    END{
+      for(i=1;i<=NR;i++){ r=find(i); members[r]=members[r] i " " }
+      for(r in members){
+        n=split(members[r], m, " ")
+        real=0; for(j=1;j<=n;j++) if(m[j]!="") real++
+        if(real<2) continue
+        haveEng=0
+        for(j=1;j<=n;j++){ if(m[j]=="") continue; if(name[m[j]] !~ /[가-힣]/) haveEng=1 }
+        best=""; brank=-1; bcnt=-1
+        for(j=1;j<=n;j++){
+          if(m[j]=="") continue
+          nm=name[m[j]]
+          if(haveEng && nm ~ /[가-힣]/) continue
+          cr=caserank(nm); c=cnt[m[j]]
+          if(cr>brank || (cr==brank && c>bcnt) || (cr==brank && c==bcnt && (best=="" || nm<best))){
+            best=nm; brank=cr; bcnt=c
+          }
+        }
+        line=best
+        for(j=1;j<=n;j++){ if(m[j]=="") continue; line=line "\t" name[m[j]] }
+        print line
+      }
+    }
+  '
+}
+
+# stdin(그룹 라인) → 각 그룹의 비표준 멤버 이동 파일 수 계산해 dry-run 한 줄 출력.
+_merge_preview() {
+  while IFS="$(printf '\t')" read -r _canon _rest; do
+    [ -z "$_canon" ] && continue
+    _others=""; _files=0
+    _oldifs="$IFS"; IFS="$(printf '\t')"
+    for _mem in $_rest; do
+      [ "$_mem" = "$_canon" ] && continue
+      _others="${_others:+$_others, }$_mem"
+      _c="$(find "$MUSIC/$_mem" -type f -name '*.mp3' 2>/dev/null | wc -l)"
+      _files=$((_files + _c))
+    done
+    IFS="$_oldifs"
+    [ -z "$_others" ] && continue
+    printf '%s → %s (move %s files)\n' "$_others" "$_canon" "$_files"
+  done
+}
+
+cmd_merge() {
+  _apply=0
+  [ "${1:-}" = "--apply" ] && _apply=1
+  _groups="$(_artist_counts | _group_awk)"
+  if [ -z "$_groups" ]; then
+    printf 'No case/paren duplicate groups found.\n'
+    return 0
+  fi
+  if [ "$_apply" -eq 0 ]; then
+    printf '%s\n' "$_groups" | _merge_preview
+    printf '\n(dry-run) 실제 병합하려면: qndl-artist merge --apply\n'
+    return 0
+  fi
+  cmd_merge_apply "$_groups"
+}
+
 _sub="${1:-}"
 [ $# -gt 0 ] && shift
 case "$_sub" in
 normalize) cmd_normalize "$@" ;;
 apply) cmd_apply "$@" ;;
 apply-download) cmd_apply_download "$@" ;;
+merge) cmd_merge "$@" ;;
 *) printf 'usage: qndl-artist {normalize|apply|apply-download|merge} ...\n' >&2; exit 2 ;;
 esac

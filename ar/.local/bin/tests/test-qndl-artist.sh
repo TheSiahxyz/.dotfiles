@@ -51,4 +51,23 @@ mkmp3 "$XDG_MUSIC_DIR/4MEN/Later/y.mp3"
 eq "apply-download: unified via map" "yes" "$([ -f "$XDG_MUSIC_DIR/4Men/Later/y.mp3" ] && echo yes || echo no)"
 eq "apply-download: album_artist"    "4Men" "$(tag_of "$XDG_MUSIC_DIR/4Men/Later/y.mp3" album_artist)"
 
+# --- merge dry-run ---
+MTMP="$(mktemp -d)"; export XDG_MUSIC_DIR="$MTMP/Music"; export QNDL_ALIASES="$MTMP/aliases.tsv"
+: > "$QNDL_ALIASES"
+# 대소문자 그룹 (4Men 이 파일 더 많음 → 표준)
+mkmp3 "$XDG_MUSIC_DIR/4MEN/A/a.mp3"
+mkmp3 "$XDG_MUSIC_DIR/4Men/B/b.mp3"; mkmp3 "$XDG_MUSIC_DIR/4Men/B/c.mp3"
+# 병기+순서+대소문자 그룹 (영문전용 혼합대소문자 = 표준)
+mkmp3 "$XDG_MUSIC_DIR/엠씨더맥스 (M.C The Max)/A/a.mp3"
+mkmp3 "$XDG_MUSIC_DIR/M.C the MAX(엠씨더맥스)/A/b.mp3"
+mkmp3 "$XDG_MUSIC_DIR/M.C The Max/A/c.mp3"
+# 단독(그룹 아님)
+mkmp3 "$XDG_MUSIC_DIR/Lauv/A/a.mp3"
+
+DRY="$("$BIN" merge)"
+eq "merge dry: 4Men canonical" "yes" "$(printf '%s' "$DRY" | grep -q '→ 4Men (' && echo yes || echo no)"
+eq "merge dry: MC=영문혼합"     "yes" "$(printf '%s' "$DRY" | grep -q '→ M.C The Max (' && echo yes || echo no)"
+eq "merge dry: 단독 미포함"     "no"  "$(printf '%s' "$DRY" | grep -q 'Lauv' && echo yes || echo no)"
+eq "merge dry: 비파괴"          "yes" "$([ -f "$XDG_MUSIC_DIR/4MEN/A/a.mp3" ] && echo yes || echo no)"
+
 exit $FAIL
