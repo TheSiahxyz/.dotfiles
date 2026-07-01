@@ -6,12 +6,22 @@ MUSIC="${XDG_MUSIC_DIR:-$HOME/Music}"
 ALIASES="${QNDL_ALIASES:-${XDG_DOTFILES_DIR:-$HOME/.dotfiles}/global/Music/artist-aliases.tsv}"
 PLAYLIST="${QNDL_MPD_PLAYLIST:-$HOME/.config/mpd/playlists/entire.m3u}"
 
-# 이름 → 표준명. 맵 정확일치 → 기존 폴더 대소문자무시 매칭 → 원본.
+# 이름 → 표준명. 맵 정확일치(연쇄 추적) → 기존 폴더 대소문자무시 매칭 → 원본.
 cmd_normalize() {
   _name="$1"
   if [ -f "$ALIASES" ]; then
-    _c="$(awk -F'\t' -v n="$_name" '/^#/ || NF < 2 { next } $1 == n { print $2; exit }' "$ALIASES")"
-    [ -n "$_c" ] && { printf '%s\n' "$_c"; return 0; }
+    _cur="$_name"; _hops=0
+    while [ "$_hops" -lt 20 ]; do
+      _next="$(awk -F'\t' -v n="$_cur" '/^#/ || NF < 2 { next } $1 == n { print $2; exit }' "$ALIASES")"
+      [ -z "$_next" ] && break
+      [ "$_next" = "$_cur" ] && break
+      _cur="$_next"
+      _hops=$((_hops + 1))
+    done
+    if [ "$_cur" != "$_name" ]; then
+      printf '%s\n' "$_cur"
+      return 0
+    fi
   fi
   if [ -d "$MUSIC" ]; then
     _m="$(find "$MUSIC" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' 2>/dev/null |
@@ -42,6 +52,10 @@ cmd_apply() {
   "$MUSIC"/*) : ;;
   *) printf 'apply: not under %s: %s\n' "$MUSIC" "$_fp" >&2; return 1 ;;
   esac
+  case "$_fp" in
+  *.mp3) : ;;
+  *) return 0 ;;   # mp3 아니면 무시
+  esac
   _rel="${_fp#"$MUSIC"/}"
   _artist_seg="${_rel%%/*}"
   _subpath="${_rel#*/}"          # album/.../title.mp3
@@ -59,14 +73,16 @@ cmd_apply() {
     rmdir "$MUSIC/$_artist_seg" 2>/dev/null || true
     _fp="$_dest"
   fi
+  # 태깅은 best-effort: 실패해도 이미 이동은 성공했으므로 전체 실패로 취급하지 않음.
   _tmp="$(dirname "$_fp")/.qndl-tag-$$.mp3"
-  if ffmpeg -v error -y -i "$_fp" -map 0 -c copy -metadata album_artist="$_canon" "$_tmp" 2>/dev/null; then
-    mv "$_tmp" "$_fp" || { rm -f "$_tmp"; return 1; }
+  if ffmpeg -v error -y -i "$_fp" -map 0 -c copy -metadata album_artist="$_canon" "$_tmp" 2>/dev/null &&
+     mv "$_tmp" "$_fp"; then
+    :
   else
     rm -f "$_tmp"
-    printf 'apply: tag failed: %s\n' "$_fp" >&2
-    return 1
+    printf 'apply: tag failed (file kept): %s\n' "$_fp" >&2
   fi
+  return 0
 }
 
 # MUSIC의 모든 아티스트 폴더를 <name>\t<mp3수>로 출력.
@@ -162,6 +178,18 @@ cmd_merge_apply() {
       IFS="$_oldifs"
       find "$MUSIC/$_mem" -type f -name '*.mp3' 2>/dev/null | while IFS= read -r _f; do
         cmd_apply "$_f" "$_canon" || printf 'x\n' >> "$_failtmp"
+      done
+      # mp3 외 잔여 파일(cover.jpg 등)도 정경 폴더로 이동해 variant 폴더가 완전히 비워지게 함.
+      # (cmd_apply를 거치지 않는 단순 mv: 재태깅 대상이 아님)
+      find "$MUSIC/$_mem" -type f ! -name '*.mp3' 2>/dev/null | while IFS= read -r _f; do
+        _relsub="${_f#"$MUSIC/$_mem"/}"
+        _destf="$MUSIC/$_canon/$_relsub"
+        if [ -e "$_destf" ]; then
+          printf 'merge: skip residue (exists): %s\n' "$_destf" >&2
+          continue
+        fi
+        mkdir -p "$(dirname "$_destf")"
+        mv "$_f" "$_destf" 2>/dev/null || true
       done
       find "$MUSIC/$_mem" -type d -empty -delete 2>/dev/null || true
       _map_add "$_mem" "$_canon"

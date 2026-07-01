@@ -33,6 +33,12 @@ eq "normalize: case fallback"  "Epik High" "$("$BIN" normalize 'EPIK HIGH')"
 eq "normalize: unknown as-is"  "NewArtist" "$("$BIN" normalize 'NewArtist')"
 eq "normalize: map beats folder" "Bar" "$("$BIN" normalize 'Foo')"
 
+# --- normalize: 연쇄(transitive) 해석 (Fix 2) ---
+printf 'A\tB\nB\tC\n' >> "$QNDL_ALIASES"
+eq "normalize: transitive chain" "C" "$("$BIN" normalize 'A')"
+printf 'X\tX\n' >> "$QNDL_ALIASES"
+eq "normalize: self-loop safe" "X" "$("$BIN" normalize 'X')"
+
 # --- apply ---
 mkmp3 "$XDG_MUSIC_DIR/4MEN/Album1/song.mp3"
 "$BIN" apply "$XDG_MUSIC_DIR/4MEN/Album1/song.mp3" "4Men"
@@ -47,7 +53,7 @@ mkmp3 "$XDG_MUSIC_DIR/Dupe/Al/x.mp3"
 eq "apply: conflict keeps source" "yes" "$([ -f "$XDG_MUSIC_DIR/DUPE/Al/x.mp3" ] && echo yes || echo no)"
 
 # regression: 프루닝이 MUSIC 루트를 삭제하지 않음
-SOLO="$(mktemp -d)/Music"; mkdir -p "$SOLO"
+SOLO="$TMP/solo/Music"; mkdir -p "$SOLO"
 ( export XDG_MUSIC_DIR="$SOLO"; mkmp3 "$SOLO/Solo/Al/s.mp3"; "$BIN" apply "$SOLO/Solo/Al/s.mp3" "SoloCanon" )
 eq "apply: prune keeps MUSIC root" "yes" "$([ -d "$SOLO" ] && echo yes || echo no)"
 
@@ -59,7 +65,7 @@ eq "apply-download: unified via map" "yes" "$([ -f "$XDG_MUSIC_DIR/4Men/Later/y.
 eq "apply-download: album_artist"    "4Men" "$(tag_of "$XDG_MUSIC_DIR/4Men/Later/y.mp3" album_artist)"
 
 # --- merge dry-run ---
-MTMP="$(mktemp -d)"; export XDG_MUSIC_DIR="$MTMP/Music"; export QNDL_ALIASES="$MTMP/aliases.tsv"
+MTMP="$TMP/mtmp"; mkdir -p "$MTMP"; export XDG_MUSIC_DIR="$MTMP/Music"; export QNDL_ALIASES="$MTMP/aliases.tsv"
 : > "$QNDL_ALIASES"
 # 대소문자 그룹 (4Men 이 파일 더 많음 → 표준)
 mkmp3 "$XDG_MUSIC_DIR/4MEN/A/a.mp3"
@@ -87,5 +93,14 @@ eq "apply: album_artist 통일" "4Men" "$(tag_of "$XDG_MUSIC_DIR/4Men/A/a.mp3" a
 eq "apply: 맵 기록"           "yes" "$(awk -F'\t' '$1=="4MEN" && $2=="4Men"{print "yes"; exit}' "$QNDL_ALIASES")"
 eq "apply: idempotent 재실행" "No case/paren duplicate groups found." "$("$BIN" merge)"
 eq "apply: mpd 재인덱스는 격리된 플레이리스트로" "yes" "$([ -s "$QNDL_MPD_PLAYLIST" ] && echo yes || echo no)"
+
+# --- merge --apply: mp3 외 잔여 파일(cover.jpg 등)까지 이동해 variant 폴더가 완전히 사라짐 (Fix 3) ---
+mkmp3 "$XDG_MUSIC_DIR/ZEDDY/A/song.mp3"
+mkmp3 "$XDG_MUSIC_DIR/Zeddy/A/a.mp3"; mkmp3 "$XDG_MUSIC_DIR/Zeddy/A/b.mp3"
+printf x > "$XDG_MUSIC_DIR/ZEDDY/A/cover.jpg"
+"$BIN" merge --apply >/dev/null 2>&1
+eq "merge --apply: variant 폴더 완전히 사라짐" "no"  "$([ -d "$XDG_MUSIC_DIR/ZEDDY" ] && echo yes || echo no)"
+eq "merge --apply: cover.jpg가 표준 폴더로 이동" "yes" "$([ -f "$XDG_MUSIC_DIR/Zeddy/A/cover.jpg" ] && echo yes || echo no)"
+eq "merge --apply: 잔여 이동 후 idempotent" "No case/paren duplicate groups found." "$("$BIN" merge)"
 
 exit $FAIL
