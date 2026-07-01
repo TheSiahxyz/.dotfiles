@@ -101,15 +101,26 @@ _group_awk() {
     function find(a){ while(parent[a]!=a){ parent[a]=parent[parent[a]]; a=parent[a] } return a }
     function union(a,b,  ra,rb){ ra=find(a); rb=find(b); if(ra!=rb) parent[rb]=ra }
     function addtok(idx,chunk,  k){ k=norm(chunk); if(k=="") return; if(k in owner) union(owner[k],idx); else owner[k]=idx }
+    # For a chunk mixing Hangul + Latin without parens (e.g. "김나영 Kim na young"),
+    # also emit the Hangul-only and Latin-only pieces as tokens so it groups with
+    # its paren/split siblings ("Kim Na Young(김나영)", "김나영"). Length guards drop
+    # tiny fragments (e.g. "sg") that would over-merge unrelated artists.
+    function addchunk(idx,chunk,   h,l){
+      addtok(idx, chunk)
+      if (chunk ~ /[가-힣]/ && chunk ~ /[A-Za-z]/) {
+        h=chunk; gsub(/[^가-힣]/,"",h); if (length(h) >= 2) addtok(idx, h)
+        l=tolower(chunk); gsub(/[^a-z0-9]/,"",l); if (length(l) >= 3) addtok(idx, l)
+      }
+    }
     function caserank(s,  u,l){ u=(s ~ /[A-Z]/); l=(s ~ /[a-z]/); return (u&&l)?2:1 }
     {
       name[NR]=$1; cnt[NR]=$2+0; parent[NR]=NR
       s=$1; gsub(/（/,"(",s); gsub(/）/,")",s); rest=s
       while (match(rest,/\([^)]*\)/)) {
-        addtok(NR, substr(rest,RSTART+1,RLENGTH-2))
+        addchunk(NR, substr(rest,RSTART+1,RLENGTH-2))
         rest=substr(rest,1,RSTART-1) " " substr(rest,RSTART+RLENGTH)
       }
-      addtok(NR, rest)
+      addchunk(NR, rest)
     }
     END{
       for(i=1;i<=NR;i++){ r=find(i); members[r]=members[r] i " " }

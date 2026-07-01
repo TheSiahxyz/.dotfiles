@@ -103,4 +103,17 @@ eq "merge --apply: variant 폴더 완전히 사라짐" "no"  "$([ -d "$XDG_MUSIC
 eq "merge --apply: cover.jpg가 표준 폴더로 이동" "yes" "$([ -f "$XDG_MUSIC_DIR/Zeddy/A/cover.jpg" ] && echo yes || echo no)"
 eq "merge --apply: 잔여 이동 후 idempotent" "No case/paren duplicate groups found." "$("$BIN" merge)"
 
+# --- 병기(한글+영문, 괄호 없음) 폴더가 분리형 형제와 그룹핑됨 (addchunk) ---
+BTMP="$TMP/bimix"; export XDG_MUSIC_DIR="$BTMP/Music"; export QNDL_ALIASES="$BTMP/aliases.tsv"
+mkdir -p "$XDG_MUSIC_DIR"; : > "$QNDL_ALIASES"
+mkmp3 "$XDG_MUSIC_DIR/Kim Na Young/A/a.mp3"; mkmp3 "$XDG_MUSIC_DIR/Kim Na Young/A/b.mp3"
+mkmp3 "$XDG_MUSIC_DIR/김나영 Kim na young/A/c.mp3"          # 병기, 괄호 없음 → 예전엔 미매칭
+mkmp3 "$XDG_MUSIC_DIR/Kim Na Young(김나영)/A/d.mp3"         # 괄호 분리형
+BIDRY="$("$BIN" merge)"
+eq "bimix: 병기 폴더가 그룹에 포함" "yes" "$(printf '%s' "$BIDRY" | grep -q '김나영 Kim na young' && echo yes || echo no)"
+eq "bimix: 표준명은 영문 전용"      "yes" "$(printf '%s' "$BIDRY" | grep -q '→ Kim Na Young (' && echo yes || echo no)"
+# 짧은 라틴 조각(sg 등)으로 무관 아티스트가 오합쳐지지 않아야 함
+mkmp3 "$XDG_MUSIC_DIR/SG 워너비/A/e.mp3"; mkmp3 "$XDG_MUSIC_DIR/Someguy/A/f.mp3"
+eq "bimix: 짧은 라틴조각 오합침 없음" "no" "$("$BIN" merge | grep -q 'Someguy' && echo yes || echo no)"
+
 exit $FAIL
