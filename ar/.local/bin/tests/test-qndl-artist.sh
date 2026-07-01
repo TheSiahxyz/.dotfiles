@@ -13,12 +13,13 @@ trap 'rm -rf "$TMP"' EXIT
 export XDG_MUSIC_DIR="$TMP/Music"
 export QNDL_ALIASES="$TMP/aliases.tsv"
 mkdir -p "$XDG_MUSIC_DIR"
-printf '# header\n4MEN\t4Men\n' > "$QNDL_ALIASES"
-mkdir -p "$XDG_MUSIC_DIR/Epik High" "$XDG_MUSIC_DIR/4Men"
+printf '# header\n4MEN\t4Men\nFoo\tBar\n' > "$QNDL_ALIASES"
+mkdir -p "$XDG_MUSIC_DIR/Epik High" "$XDG_MUSIC_DIR/4Men" "$XDG_MUSIC_DIR/Foo"
 
 # --- normalize ---
 eq "normalize: map hit"        "4Men"      "$("$BIN" normalize '4MEN')"
 eq "normalize: case fallback"  "Epik High" "$("$BIN" normalize 'EPIK HIGH')"
 eq "normalize: unknown as-is"  "NewArtist" "$("$BIN" normalize 'NewArtist')"
+eq "normalize: map beats folder" "Bar" "$("$BIN" normalize 'Foo')"
 
 exit $FAIL
