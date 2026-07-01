@@ -14,6 +14,13 @@ tag_of() { ffprobe -v error -show_entries format_tags="$2" -of default=noprint_w
 # --- fixtures ---
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
+
+# isolate mpd reindex: stub mpc + temp playlist so tests never touch real mpd/playlist
+mkdir -p "$TMP/bin"
+printf '#!/bin/sh\nexit 0\n' > "$TMP/bin/mpc"; chmod +x "$TMP/bin/mpc"
+PATH="$TMP/bin:$PATH"; export PATH
+export QNDL_MPD_PLAYLIST="$TMP/entire.m3u"
+
 export XDG_MUSIC_DIR="$TMP/Music"
 export QNDL_ALIASES="$TMP/aliases.tsv"
 mkdir -p "$XDG_MUSIC_DIR"
@@ -79,5 +86,6 @@ eq "apply: MC 한글폴더 제거"  "no"  "$([ -d "$XDG_MUSIC_DIR/엠씨더맥�
 eq "apply: album_artist 통일" "4Men" "$(tag_of "$XDG_MUSIC_DIR/4Men/A/a.mp3" album_artist)"
 eq "apply: 맵 기록"           "yes" "$(awk -F'\t' '$1=="4MEN" && $2=="4Men"{print "yes"; exit}' "$QNDL_ALIASES")"
 eq "apply: idempotent 재실행" "No case/paren duplicate groups found." "$("$BIN" merge)"
+eq "apply: mpd 재인덱스는 격리된 플레이리스트로" "yes" "$([ -s "$QNDL_MPD_PLAYLIST" ] && echo yes || echo no)"
 
 exit $FAIL
