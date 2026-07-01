@@ -20,9 +20,44 @@ cmd_normalize() {
   printf '%s\n' "$_name"
 }
 
+# mp3 1개를 표준 폴더로 이동(필요시) + album_artist 설정.
+cmd_apply() {
+  _fp="$1"; _canon="$2"
+  [ -f "$_fp" ] || { printf 'apply: no such file: %s\n' "$_fp" >&2; return 1; }
+  case "$_fp" in
+  "$MUSIC"/*) : ;;
+  *) printf 'apply: not under %s: %s\n' "$MUSIC" "$_fp" >&2; return 1 ;;
+  esac
+  _rel="${_fp#"$MUSIC"/}"
+  _artist_seg="${_rel%%/*}"
+  _subpath="${_rel#*/}"          # album/.../title.mp3
+  if [ "$_artist_seg" != "$_canon" ]; then
+    _destdir="$MUSIC/$_canon/$(dirname "$_subpath")"
+    _dest="$_destdir/$(basename "$_fp")"
+    if [ -e "$_dest" ]; then
+      printf 'apply: skip (exists): %s\n' "$_dest" >&2
+      return 0
+    fi
+    mkdir -p "$_destdir"
+    mv "$_fp" "$_dest" || return 1
+    # 빈 원본 앨범/아티스트 폴더 정리
+    rmdir -p "$MUSIC/$_artist_seg/$(dirname "$_subpath")" 2>/dev/null || true
+    _fp="$_dest"
+  fi
+  _tmp="$(dirname "$_fp")/.qndl-tag-$$.mp3"
+  if ffmpeg -v error -y -i "$_fp" -map 0 -c copy -metadata album_artist="$_canon" "$_tmp" 2>/dev/null; then
+    mv "$_tmp" "$_fp"
+  else
+    rm -f "$_tmp"
+    printf 'apply: tag failed: %s\n' "$_fp" >&2
+    return 1
+  fi
+}
+
 _sub="${1:-}"
 [ $# -gt 0 ] && shift
 case "$_sub" in
 normalize) cmd_normalize "$@" ;;
+apply) cmd_apply "$@" ;;
 *) printf 'usage: qndl-artist {normalize|apply|apply-download|merge} ...\n' >&2; exit 2 ;;
 esac
