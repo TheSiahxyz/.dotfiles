@@ -402,20 +402,59 @@ cmd moveto ${{
 }}
 
 # MPV
+# Play videos in lf's on-screen order. GNU sort can't reproduce lf's natural
+# sort (lowercase -> digit runs compared as ints -> C-locale byte order), so we
+# port lf's naturalCmp inline in python. Both branches — the current selection
+# ($fx, e.g. set via `sv`) and the whole-dir video glob — go through the same
+# sort, so playback order always matches what lf displays.
+# NOTE: names flow through stdin, never captured via $() (dash $() corrupts UTF-8).
 cmd mpvdir ${{
+  natsort() {
+    python3 -c '
+import sys, unicodedata, functools
+def key(b):
+    s = b.decode("utf-8", "surrogateescape").lower()
+    s = unicodedata.normalize("NFD", s)
+    s = "".join(c for c in s if unicodedata.category(c) != "Mn")
+    return s.encode("utf-8", "surrogateescape")
+def isd(c):
+    return 48 <= c <= 57
+def cmp(a, b):
+    n1 = len(a); n2 = len(b); i = 0; j = 0
+    while True:
+        if i >= n1 and j >= n2: return 0
+        if i >= n1: return -1
+        if j >= n2: return 1
+        p = i; d1 = isd(a[i])
+        while i < n1 and isd(a[i]) == d1: i += 1
+        t1 = a[p:i]
+        q = j; d2 = isd(b[j])
+        while j < n2 and isd(b[j]) == d2: j += 1
+        t2 = b[q:j]
+        if d1 and d2:
+            u = int(t1); v = int(t2)
+            if u != v: return -1 if u < v else 1
+            if len(t1) != len(t2): return -1 if len(t1) < len(t2) else 1
+        if t1 != t2: return -1 if t1 < t2 else 1
+data = sys.stdin.buffer.read().split(b"\n")
+lines = [x for x in data if x]
+dec = [(key(x), x) for x in lines]
+dec.sort(key=functools.cmp_to_key(lambda x, y: cmp(x[0], y[0])))
+sys.stdout.buffer.write(b"\n".join(v for _, v in dec) + (b"\n" if dec else b""))
+'
+  }
+  tmplist=$(mktemp)
   if [ -n "$fx" ]; then
-    set -- $fx
-    setsid -f mpv --x11-name=video --really-quiet -- "$@" </dev/null >/dev/null 2>&1
+    printf '%s\n' "$fx" | natsort > "$tmplist"
   else
-    tmplist=$(mktemp)
-    printf '%s\n' *.mp4 *.mkv *.avi *.flv *.webm *.mov *.mpg *.3gp *.ts *.rmvb | sort -f > "$tmplist"
-    set --
-    while IFS= read -r file; do
-      [ -e "$file" ] && set -- "$@" "$file"
-    done < "$tmplist"
-    rm -f "$tmplist"
-    [ "$#" -gt 0 ] && setsid -f mpv --x11-name=video --really-quiet -- "$@" </dev/null >/dev/null 2>&1
+    printf '%s\n' *.mp4 *.mkv *.avi *.flv *.webm *.mov *.mpg *.3gp *.ts *.rmvb | natsort > "$tmplist"
   fi
+  set --
+  while IFS= read -r file; do
+    [ -e "$file" ] && set -- "$@" "$file"
+  done < "$tmplist"
+  rm -f "$tmplist"
+  [ "$#" -gt 0 ] && setsid -f mpv --x11-name=video --really-quiet -- "$@" </dev/null >/dev/null 2>&1
 
   lf -remote "send $id :clear; unselect; save-select"
 }}
@@ -465,14 +504,55 @@ cmd bulkrename ${{
   tmpfile_new="$(mktemp)"
   tmpfile_failed="$(mktemp)"
 
+  # List basenames in lf's on-screen order: directories first, then files, each
+  # in lf's natural order. GNU sort can't reproduce lf's natural sort, so port
+  # lf's naturalCmp inline in python (same helper as `mpvdir`).
   # NOTE: avoid command substitution over multibyte data — dash's $() corrupts
-  # UTF-8 chars straddling its 128-byte read buffer (stray 0x81 CTLESC bytes)
+  # UTF-8 chars straddling its 128-byte read buffer (stray 0x81 CTLESC bytes);
+  # names are only ever piped through stdin, never captured with $().
+  natsort() {
+    python3 -c '
+import sys, unicodedata, functools
+def key(b):
+    s = b.decode("utf-8", "surrogateescape").lower()
+    s = unicodedata.normalize("NFD", s)
+    s = "".join(c for c in s if unicodedata.category(c) != "Mn")
+    return s.encode("utf-8", "surrogateescape")
+def isd(c):
+    return 48 <= c <= 57
+def cmp(a, b):
+    n1 = len(a); n2 = len(b); i = 0; j = 0
+    while True:
+        if i >= n1 and j >= n2: return 0
+        if i >= n1: return -1
+        if j >= n2: return 1
+        p = i; d1 = isd(a[i])
+        while i < n1 and isd(a[i]) == d1: i += 1
+        t1 = a[p:i]
+        q = j; d2 = isd(b[j])
+        while j < n2 and isd(b[j]) == d2: j += 1
+        t2 = b[q:j]
+        if d1 and d2:
+            u = int(t1); v = int(t2)
+            if u != v: return -1 if u < v else 1
+            if len(t1) != len(t2): return -1 if len(t1) < len(t2) else 1
+        if t1 != t2: return -1 if t1 < t2 else 1
+data = sys.stdin.buffer.read().split(b"\n")
+lines = [x for x in data if x]
+dec = [(key(x), x) for x in lines]
+dec.sort(key=functools.cmp_to_key(lambda x, y: cmp(x[0], y[0])))
+sys.stdout.buffer.write(b"\n".join(v for _, v in dec) + (b"\n" if dec else b""))
+'
+  }
   if [ -n "$fs" ]; then
-    printf '%s\n' "$fs" | xargs -d '\n' -r basename -a -- > "$tmpfile_old"
+    printf '%s\n' "$fs" | while IFS= read -r p; do if [ -d "$p" ]; then printf '%s\n' "$p"; fi; done | xargs -d '\n' -r basename -a -- | natsort  > "$tmpfile_old"
+    printf '%s\n' "$fs" | while IFS= read -r p; do if [ ! -d "$p" ]; then printf '%s\n' "$p"; fi; done | xargs -d '\n' -r basename -a -- | natsort >> "$tmpfile_old"
   elif [ "$lf_hidden" = "true" ]; then
-    ls -A > "$tmpfile_old"
+    find . -mindepth 1 -maxdepth 1 -type d  -printf '%f\n' | natsort  > "$tmpfile_old"
+    find . -mindepth 1 -maxdepth 1 ! -type d -printf '%f\n' | natsort >> "$tmpfile_old"
   else
-    ls > "$tmpfile_old"
+    find . -mindepth 1 -maxdepth 1 -type d  ! -name '.*' -printf '%f\n' | natsort  > "$tmpfile_old"
+    find . -mindepth 1 -maxdepth 1 ! -type d ! -name '.*' -printf '%f\n' | natsort >> "$tmpfile_old"
   fi
   cp "$tmpfile_old" "$tmpfile_new"
   $EDITOR "$tmpfile_new"
