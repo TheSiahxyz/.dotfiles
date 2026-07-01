@@ -293,6 +293,7 @@ download_music() {
     --parse-metadata "%(release_date,upload_date)s:%(meta_date)s" \
     --download-archive "$_archive" \
     --print-to-file "$_title_fmt" "$_titles" \
+    --exec "after_move:qndl-artist apply-download %(filepath)q" \
     --output "$_fmt"
 }
 
@@ -500,6 +501,7 @@ restore_archive() {
       --audio-format mp3 \
       --audio-quality 0 \
       --parse-metadata "%(release_date,upload_date)s:%(meta_date)s" \
+      --exec "after_move:qndl-artist apply-download %(filepath)q" \
       --output "$_format"
   done <"$_tmpfile"
   rm -f "$_tmpfile"
