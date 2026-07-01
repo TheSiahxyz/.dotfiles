@@ -412,6 +412,7 @@ cmd mpvdir ${{
   natsort() {
     python3 -c '
 import sys, unicodedata, functools
+rev = len(sys.argv) > 1 and sys.argv[1] == "true"
 def key(b):
     s = b.decode("utf-8", "surrogateescape").lower()
     s = unicodedata.normalize("NFD", s)
@@ -439,9 +440,9 @@ def cmp(a, b):
 data = sys.stdin.buffer.read().split(b"\n")
 lines = [x for x in data if x]
 dec = [(key(x), x) for x in lines]
-dec.sort(key=functools.cmp_to_key(lambda x, y: cmp(x[0], y[0])))
+dec.sort(key=functools.cmp_to_key(lambda x, y: cmp(x[0], y[0])), reverse=rev)
 sys.stdout.buffer.write(b"\n".join(v for _, v in dec) + (b"\n" if dec else b""))
-'
+' "${lf_reverse:-false}"
   }
   tmplist=$(mktemp)
   if [ -n "$fx" ]; then
@@ -513,6 +514,7 @@ cmd bulkrename ${{
   natsort() {
     python3 -c '
 import sys, unicodedata, functools
+rev = len(sys.argv) > 1 and sys.argv[1] == "true"
 def key(b):
     s = b.decode("utf-8", "surrogateescape").lower()
     s = unicodedata.normalize("NFD", s)
@@ -540,9 +542,9 @@ def cmp(a, b):
 data = sys.stdin.buffer.read().split(b"\n")
 lines = [x for x in data if x]
 dec = [(key(x), x) for x in lines]
-dec.sort(key=functools.cmp_to_key(lambda x, y: cmp(x[0], y[0])))
+dec.sort(key=functools.cmp_to_key(lambda x, y: cmp(x[0], y[0])), reverse=rev)
 sys.stdout.buffer.write(b"\n".join(v for _, v in dec) + (b"\n" if dec else b""))
-'
+' "${lf_reverse:-false}"
   }
   if [ -n "$fs" ]; then
     printf '%s\n' "$fs" | while IFS= read -r p; do if [ -d "$p" ]; then printf '%s\n' "$p"; fi; done | xargs -d '\n' -r basename -a -- | natsort  > "$tmpfile_old"
