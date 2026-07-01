@@ -70,4 +70,14 @@ eq "merge dry: MC=영문혼합"     "yes" "$(printf '%s' "$DRY" | grep -q '→ M
 eq "merge dry: 단독 미포함"     "no"  "$(printf '%s' "$DRY" | grep -q 'Lauv' && echo yes || echo no)"
 eq "merge dry: 비파괴"          "yes" "$([ -f "$XDG_MUSIC_DIR/4MEN/A/a.mp3" ] && echo yes || echo no)"
 
+# --- merge --apply ---
+"$BIN" merge --apply >/dev/null 2>&1
+eq "apply: 4MEN 사라짐"       "no"  "$([ -d "$XDG_MUSIC_DIR/4MEN" ] && echo yes || echo no)"
+eq "apply: 4Men에 병합"       "yes" "$([ -f "$XDG_MUSIC_DIR/4Men/A/a.mp3" ] && echo yes || echo no)"
+eq "apply: MC 표준폴더 생성"  "yes" "$([ -d "$XDG_MUSIC_DIR/M.C The Max" ] && echo yes || echo no)"
+eq "apply: MC 한글폴더 제거"  "no"  "$([ -d "$XDG_MUSIC_DIR/엠씨더맥스 (M.C The Max)" ] && echo yes || echo no)"
+eq "apply: album_artist 통일" "4Men" "$(tag_of "$XDG_MUSIC_DIR/4Men/A/a.mp3" album_artist)"
+eq "apply: 맵 기록"           "yes" "$(awk -F'\t' '$1=="4MEN" && $2=="4Men"{print "yes"; exit}' "$QNDL_ALIASES")"
+eq "apply: idempotent 재실행" "No case/paren duplicate groups found." "$("$BIN" merge)"
+
 exit $FAIL

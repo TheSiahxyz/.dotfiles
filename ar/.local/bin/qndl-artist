@@ -138,6 +138,40 @@ _merge_preview() {
   done
 }
 
+# 맵에 변형→표준 append (이미 있으면 생략).
+_map_add() {
+  _v="$1"; _c="$2"
+  [ -f "$ALIASES" ] || { mkdir -p "$(dirname "$ALIASES")"; : > "$ALIASES"; }
+  awk -F'\t' -v v="$_v" '$1==v{f=1} END{exit f?0:1}' "$ALIASES" && return 0
+  printf '%s\t%s\n' "$_v" "$_c" >> "$ALIASES"
+}
+
+cmd_merge_apply() {
+  _groups="$1"
+  printf '%s\n' "$_groups" | while IFS="$(printf '\t')" read -r _canon _rest; do
+    [ -z "$_canon" ] && continue
+    _oldifs="$IFS"; IFS="$(printf '\t')"
+    for _mem in $_rest; do
+      [ "$_mem" = "$_canon" ] && continue
+      IFS="$_oldifs"
+      find "$MUSIC/$_mem" -type f -name '*.mp3' 2>/dev/null | while IFS= read -r _f; do
+        cmd_apply "$_f" "$_canon"
+      done
+      find "$MUSIC/$_mem" -type d -empty -delete 2>/dev/null || true
+      _map_add "$_mem" "$_canon"
+      IFS="$(printf '\t')"
+    done
+    IFS="$_oldifs"
+  done
+
+  if command -v mpc >/dev/null 2>&1; then
+    mpc update --wait >/dev/null 2>&1 &&
+      find "$MUSIC" -name '*.mp3' | sed "s|$MUSIC/||" | sort \
+        > "$HOME/.config/mpd/playlists/entire.m3u" 2>/dev/null || true
+  fi
+  printf 'merge --apply 완료.\n'
+}
+
 cmd_merge() {
   _apply=0
   [ "${1:-}" = "--apply" ] && _apply=1
