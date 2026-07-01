@@ -1,0 +1,28 @@
+#!/bin/sh
+# qndl-artist — 아티스트 폴더/메타데이터 통일 헬퍼
+export LC_ALL="${LC_ALL:-C.UTF-8}"
+
+MUSIC="${XDG_MUSIC_DIR:-$HOME/Music}"
+ALIASES="${QNDL_ALIASES:-${XDG_DOTFILES_DIR:-$HOME/.dotfiles}/global/Music/artist-aliases.tsv}"
+
+# 이름 → 표준명. 맵 정확일치 → 기존 폴더 대소문자무시 매칭 → 원본.
+cmd_normalize() {
+  _name="$1"
+  if [ -f "$ALIASES" ]; then
+    _c="$(awk -F'\t' -v n="$_name" '/^#/ || NF < 2 { next } $1 == n { print $2; exit }' "$ALIASES")"
+    [ -n "$_c" ] && { printf '%s\n' "$_c"; return 0; }
+  fi
+  if [ -d "$MUSIC" ]; then
+    _m="$(find "$MUSIC" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' 2>/dev/null |
+      awk -v n="$_name" 'tolower($0) == tolower(n) { print; exit }')"
+    [ -n "$_m" ] && { printf '%s\n' "$_m"; return 0; }
+  fi
+  printf '%s\n' "$_name"
+}
+
+_sub="${1:-}"
+[ $# -gt 0 ] && shift
+case "$_sub" in
+normalize) cmd_normalize "$@" ;;
+*) printf 'usage: qndl-artist {normalize|apply|apply-download|merge} ...\n' >&2; exit 2 ;;
+esac
