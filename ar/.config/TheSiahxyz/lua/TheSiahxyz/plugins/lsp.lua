@@ -279,7 +279,22 @@ return {
 					"sqlfluff", -- sql linter
 					"sql-formatter", -- sql formatter
 					"stylua", -- lua formatter
+					"bashls", -- bash lsp
+					"cssls", -- css lsp
+					"dockerls", -- dockerfile lsp
+					"docker_compose_language_service", -- docker compose lsp
+					"eslint", -- eslint lsp
+					"harper_ls", -- grammar lsp
+					"html", -- html lsp
+					"jdtls", -- java lsp
+					"jsonls", -- json lsp
+					"lua_ls", -- lua lsp
+					"pyright", -- python lsp
+					"sqls", -- sql lsp
+					"tailwindcss", -- tailwind lsp
+					"ts_ls", -- typescript lsp
 				},
+				run_on_start = false,
 				integrations = {
 					["mason-lspconfig"] = true,
 					["mason-null-ls"] = false,
