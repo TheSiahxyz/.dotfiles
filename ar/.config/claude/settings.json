@@ -107,7 +107,7 @@
       "Write(**/.password-store/**/*)"
     ]
   },
-  "model": "opus",
+  "model": "claude-fable-5[1m]",
   "hooks": {
     "Notification": [
       {
