@@ -385,9 +385,9 @@ cmd moveto ${{
 	clear; tput cup $(($(tput lines)/3)); tput bold
 	echo "From:"
 	echo "$fx" | sed 's/^/   /'
-	printf "To:\n   %s\n\n\tmove?[y/N]" "$destpath"
+	printf "To:\n   %s\n\n\tmove?[Y/n]" "$destpath"
 	read -r ans
-	[ "$ans" != "y" ] && exit
+	case "$ans" in [nN]*) exit;; esac
   if [ -w "$destpath" ]; then
     for x in $fx; do mv -iv "$x" "$destpath"; done &&
     notify-send "🚚 File(s) moved." "File(s) moved to $destpath."
