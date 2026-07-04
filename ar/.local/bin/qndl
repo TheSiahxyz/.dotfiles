@@ -17,11 +17,36 @@ die() {
   exit 1
 }
 
+# Resolve LibreWolf's default profile directory from profiles.ini. The
+# [Install*] section's Default= names the profile the browser actually
+# launches; the per-profile Default=1 flag is only a fallback (it can point
+# at a stale profile).
+get_librewolf_profile() {
+  _lw_dir="$HOME/.librewolf"
+  [ -f "$_lw_dir/profiles.ini" ] || return 1
+  _rel="$(awk -F= '/^\[Install/{ins=1;next} /^\[/{ins=0} ins && /^Default=/{print $2; exit}' "$_lw_dir/profiles.ini")"
+  [ -z "$_rel" ] && _rel="$(awk -F= '/^Path=/{p=$2} /^Default=1/{print p; exit}' "$_lw_dir/profiles.ini")"
+  [ -z "$_rel" ] && return 1
+  case "$_rel" in
+  /*) [ -d "$_rel" ] && printf '%s' "$_rel" ;;
+  *) [ -d "$_lw_dir/$_rel" ] && printf '%s/%s' "$_lw_dir" "$_rel" ;;
+  esac
+}
+
 get_cookies() {
   # yt-dlp doesn't have a native 'librewolf' option but reads its cookies as
-  # a Firefox-style profile when given --cookies-from-browser firefox.
+  # a Firefox-style profile when given --cookies-from-browser firefox. Plain
+  # 'firefox' makes yt-dlp look in ~/.mozilla/firefox, so LibreWolf needs its
+  # profile dir passed explicitly (firefox:<path>).
   case "${BROWSER:-}" in
-  *firefox* | *librewolf*) printf 'firefox' ;;
+  *librewolf*)
+    if _lw_profile="$(get_librewolf_profile)"; then
+      printf 'firefox:%s' "$_lw_profile"
+    else
+      printf 'firefox'
+    fi
+    ;;
+  *firefox*) printf 'firefox' ;;
   esac
 }
 
