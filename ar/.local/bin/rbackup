@@ -1,7 +1,12 @@
 #!/bin/sh
 
 # local backup
-backup_path="/mnt/second/backup"
+# Dotfiles are shared across machines, so no fixed device or path names:
+# the target is whichever mounted /mnt/*/backup directory exists; failing
+# that, a closed LUKS partition is opened and mounted under /mnt, named
+# after its filesystem label (mount_luks sets $luks_mount accordingly).
+luks_mount=""
+backup_path=""
 dot_path="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}"
 git_path="$HOME/Private/repos"
 pass_path="${PASSWORD_STORE_DIR:-${XDG_DATA_HOME:-${HOME}/.local/share}/.password-store}/exported_keys"
@@ -35,14 +40,42 @@ error() {
   exit 1
 }
 
+# First existing backup/ directory on a mounted drive under /mnt wins.
+find_backup_path() {
+  for _dir in /mnt/*/backup; do
+    [ -d "$_dir" ] || continue
+    mountpoint -q "${_dir%/backup}" 2>/dev/null || continue
+    printf '%s' "$_dir"
+    return 0
+  done
+  return 1
+}
+
+# Closed LUKS partition = crypto_LUKS fstype without an opened crypt child.
+# Device names differ across machines and boots, so detect by type instead
+# of hardcoding paths. Prints the largest candidate, if any.
+find_closed_luks() {
+  lsblk -prbno PATH,FSTYPE,SIZE 2>/dev/null |
+    awk '$2 == "crypto_LUKS" { print $3, $1 }' |
+    sort -rn |
+    while read -r _size _dev; do
+      lsblk -rno TYPE "$_dev" 2>/dev/null | grep -qx "crypt" && continue
+      printf '%s\n' "$_dev"
+      break
+    done
+}
+
+# Open the LUKS partition and mount it under /mnt. The mount point follows
+# the inner filesystem's label (same convention as the other /mnt/<label>
+# drives); "second" is only a fallback for unlabeled filesystems.
 mount_luks() {
-  if ! mount | grep -q " /mnt/second "; then
-    size_nvme0=$(sudo blockdev --getsize64 /dev/nvme0n1p1)
-    size_nvme1=$(sudo blockdev --getsize64 /dev/nvme1n1p1)
-    [ "$size_nvme1" -lt "$size_nvme0" ] && target_device="/dev/nvme0n1p1" || target_device="/dev/nvme1n1p1"
-    ${TERMINAL:-st} -n floatterm -g 60x1 -e sudo cryptsetup open "$target_device" "second"
-    sudo -A mount "/dev/mapper/second" "/mnt/second" -o uid="$(id -u)",gid="$(id -g)" 2>/dev/null || sudo -A mount "/dev/mapper/second" "/mnt/second"
-  fi
+  _device="$1"
+  ${TERMINAL:-st} -n floatterm -g 60x1 -e sudo cryptsetup open "$_device" "second"
+  [ -e /dev/mapper/second ] || return 1
+  _label="$(lsblk -rno LABEL /dev/mapper/second 2>/dev/null | head -n 1)"
+  luks_mount="/mnt/${_label:-second}"
+  sudo -A mkdir -p "$luks_mount"
+  sudo -A mount "/dev/mapper/second" "$luks_mount" -o uid="$(id -u)",gid="$(id -g)" 2>/dev/null || sudo -A mount "/dev/mapper/second" "$luks_mount"
 }
 
 # Using a loop over space-separated strings instead of an array
@@ -183,23 +216,31 @@ process_options() {
 }
 
 # Start script
-echo "Backup starts to $backup_path..."
+echo "Backup starts..."
 process_options "$@"
 
 # Main script logic
-# Check if backup drive is available
+# Resolve the backup target: an existing /mnt/*/backup directory first,
+# then a closed LUKS partition as fallback.
 backup_available=false
-if mount | grep -q " /mnt/second "; then
+if backup_path="$(find_backup_path)"; then
   backup_available=true
-  echo "Backup drive is mounted"
+  echo "Backup target found: $backup_path"
 else
-  echo "Warning: /mnt/second is not mounted"
-  echo "Attempting to mount backup drive..."
-  if mount_luks 2>/dev/null && mountpoint -q /mnt/second 2>/dev/null; then
-    backup_available=true
-    echo "Success to mount luks drive!"
+  echo "No /mnt/*/backup directory found"
+  luks_device="$(find_closed_luks)"
+  if [ -n "$luks_device" ]; then
+    echo "Attempting to mount LUKS drive $luks_device..."
+    if mount_luks "$luks_device" && mountpoint -q "$luks_mount" 2>/dev/null; then
+      backup_path="$luks_mount/backup"
+      backup_available=true
+      echo "Success to mount luks drive!"
+    else
+      echo "Backup drive not available. Skipping file backup..."
+    fi
   else
-    echo "Backup drive not available. Skipping file backup..."
+    echo "No closed LUKS partition found either. Skipping file backup..."
+    echo "(mark a drive as backup target once: mkdir /mnt/<drive>/backup)"
   fi
 fi
 
@@ -213,15 +254,23 @@ fi
 
 echo "Sync root files..." && sync_root && echo "Success to sync root!" || echo "Warning: Failed to sync root"
 
-# Sync server files only if server is configured
+# Sync server files only if the server is reachable without prompting;
+# otherwise each of the many ssh/rsync calls in sync_server would ask for
+# a password in turn.
+server_available=false
 if [ -n "$THESIAH_SERVER" ]; then
-  echo "Sync server files..." && sync_server && echo "Success to sync server!" || echo "Warning: Failed to sync server"
+  if ssh -o BatchMode=yes -o ConnectTimeout=5 "$THESIAH_SERVER" true >/dev/null 2>&1; then
+    server_available=true
+    echo "Sync server files..." && sync_server && echo "Success to sync server!" || echo "Warning: Failed to sync server"
+  else
+    echo "Warning: $THESIAH_SERVER not reachable via non-interactive ssh. Skipping server sync..."
+  fi
 else
   echo "Skipping server sync (THESIAH_SERVER not set)"
 fi
 
-# Sync to nextcloud only if backup drive is available and server is configured
-if [ "$backup_available" = true ] && [ -n "$THESIAH_SERVER" ]; then
+# Sync to nextcloud only if both backup drive and server are available
+if [ "$backup_available" = true ] && [ "$server_available" = true ]; then
   echo "Sync files to nextcloud..." && sync_nextcloud && echo "Success to sync nextcloud!" || echo "Warning: Failed to sync nextcloud"
 fi
 
