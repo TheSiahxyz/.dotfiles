@@ -16,6 +16,8 @@ case $BLOCK_BUTTON in
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
+pidof -x sb-audioup >/dev/null 2>&1 || sb-audioup >/dev/null 2>&1 &
+
 vol="$(wpctl get-volume @DEFAULT_AUDIO_SINK@)"
 
 # If muted, print 🔇 and exit.

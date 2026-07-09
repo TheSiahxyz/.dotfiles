@@ -1,0 +1,18 @@
+#!/bin/sh
+
+# Updates the volume and mic statusbar modules when audio devices change
+# (e.g. bluetooth/usb device connect/disconnect, volume/mute changed outside dwm)
+
+volume() { pkill -RTMIN+4 "${STATUSBAR:-dwmblocks}" 2>/dev/null; }
+mic() { pkill -RTMIN+5 "${STATUSBAR:-dwmblocks}" 2>/dev/null; }
+
+pactl subscribe 2>/dev/null | while read -r line; do
+  case "$line" in
+  *" on sink #"*) volume ;;
+  *" on source #"*) mic ;;
+  *" on card #"* | *" on server"*)
+    volume
+    mic
+    ;;
+  esac
+done

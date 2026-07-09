@@ -45,7 +45,7 @@ case $BLOCK_BUTTON in
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
-pidof -x sb-micup >/dev/null 2>&1 || sb-micup >/dev/null 2>&1 &
+pidof -x sb-audioup >/dev/null 2>&1 || sb-audioup >/dev/null 2>&1 &
 
 mic="$(wpctl get-volume @DEFAULT_AUDIO_SOURCE@)"
 
