@@ -82,18 +82,24 @@ openwindow() {
 }
 
 openinbrowser() {
-  # Extract only the default part of the profile name
+  # Resolve the default profile dir from the [Install] section of profiles.ini
   case $BROWSER in
   *firefox*)
     profiles_ini_path="$HOME/.mozilla/firefox/profiles.ini"
-    profile=$(awk '/\[Install/ {found=1} found && /^Default=/ {split($0, arr, "."); print arr[2]; exit}' "$profiles_ini_path")
-    profile_dir=$(find ~/.mozilla/firefox -type d -name "*.$profile*" | head -n 1)
+    profile=$(awk -F= '/^\[Install/ {found=1} found && /^Default=/ {print $2; exit}' "$profiles_ini_path")
+    case "$profile" in
+    /*) profile_dir="$profile" ;;
+    *) profile_dir="$HOME/.mozilla/firefox/$profile" ;;
+    esac
     db_path="$profile_dir/places.sqlite"
     ;;
   *librewolf*)
     profiles_ini_path="$HOME/.librewolf/profiles.ini"
-    profile=$(awk '/\[Install/ {found=1} found && /^Default=/ {split($0, arr, "."); print arr[2]; exit}' "$profiles_ini_path")
-    profile_dir=$(find ~/.librewolf -type d -name "*.$profile*" | head -n 1)
+    profile=$(awk -F= '/^\[Install/ {found=1} found && /^Default=/ {print $2; exit}' "$profiles_ini_path")
+    case "$profile" in
+    /*) profile_dir="$profile" ;;
+    *) profile_dir="$HOME/.librewolf/$profile" ;;
+    esac
     db_path="$profile_dir/places.sqlite"
     ;;
   *qutebrowser*)
