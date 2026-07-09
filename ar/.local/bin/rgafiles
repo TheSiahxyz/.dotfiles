@@ -68,26 +68,27 @@ search_term() {
   count=$(echo "$files" | wc -l)
   if [ "$count" -eq 1 ]; then
     # Find the first matching line number in the selected file
-    line=$(rga --max-count=1 --line-number --no-filename ${case_flag:+$case_flag} --no-messages "$query" "$files" 2>/dev/null | head -1 | cut -d: -f1)
-    if [ -n "$line" ]; then
-      ${EDITOR:-nvim} "+${line}" "$(realpath "$files")"
-    else
-      openfiles "$files"
-    fi
+    line=$(rga --follow --no-ignore --hidden --text --max-count=1 --line-number --no-filename ${case_flag:+$case_flag} --no-messages "$query" "$files" 2>/dev/null | head -1 | cut -d: -f1)
+    case "$line" in
+    '' | *[!0-9]*) openfiles "$files" ;;
+    *) ${EDITOR:-nvim} "+${line}" "$(realpath "$files")" ;;
+    esac
   else
     # Multiple files: open at matching lines via quickfix
     tmpfile=$(mktemp)
     echo "$files" | while IFS= read -r file; do
-      match=$(rga --max-count=1 --line-number --no-filename ${case_flag:+$case_flag} --no-messages "$query" "$file" 2>/dev/null | head -1)
-      if [ -n "$match" ]; then
-        printf '%s:%s\n' "$(realpath "$file")" "$match" >> "$tmpfile"
-      else
-        printf '%s:1:\n' "$(realpath "$file")" >> "$tmpfile"
-      fi
+      match=$(rga --follow --no-ignore --hidden --text --max-count=1 --line-number --no-filename ${case_flag:+$case_flag} --no-messages "$query" "$file" 2>/dev/null | head -1)
+      # Entries must be 'path:LINE:non-empty-message' or nvim marks them
+      # invalid and :cc silently keeps the previous buffer in the split
+      linenum=${match%%:*}
+      case "$linenum" in
+      '' | *[!0-9]*) printf '%s:1:no match\n' "$(realpath "$file")" >> "$tmpfile" ;;
+      *) printf '%s:%s\n' "$(realpath "$file")" "$match" >> "$tmpfile" ;;
+      esac
     done
     if [ "$count" -lt 5 ]; then
       ${EDITOR:-nvim} -q "$tmpfile" \
-        -c 'for i in range(2,len(getqflist())) | vsplit | execute "cc ".i | endfor | wincmd t'
+        -c 'let n=len(getqflist()) | if n >= 2 | vsplit | cc 2 | endif | if n >= 3 | split | cc 3 | endif | if n >= 4 | wincmd h | split | cc 4 | endif | wincmd t'
     else
       first_line=$(head -1 "$tmpfile" | cut -d: -f2)
       file_args=""
@@ -149,26 +150,27 @@ list_or_open_project_files() {
     # Open files at matching lines
     file_count=$(echo "$rga_output" | wc -w)
     if [ "$file_count" -eq 1 ]; then
-      line=$(rga --max-count=1 --line-number --no-filename --no-messages "$project_tag" "$rga_output" 2>/dev/null | head -1 | cut -d: -f1)
-      if [ -n "$line" ]; then
-        ${EDITOR:-nvim} "+${line}" "$(realpath "$rga_output")"
-      else
-        openfiles "$rga_output"
-      fi
+      line=$(rga --follow --no-ignore --hidden --text --max-count=1 --line-number --no-filename --no-messages "$project_tag" "$rga_output" 2>/dev/null | head -1 | cut -d: -f1)
+      case "$line" in
+      '' | *[!0-9]*) openfiles "$rga_output" ;;
+      *) ${EDITOR:-nvim} "+${line}" "$(realpath "$rga_output")" ;;
+      esac
     else
       # Multiple files: open at matching lines via quickfix
       tmpfile=$(mktemp)
       for file in $rga_output; do
-        match=$(rga --max-count=1 --line-number --no-filename --no-messages "$project_tag" "$file" 2>/dev/null | head -1)
-        if [ -n "$match" ]; then
-          printf '%s:%s\n' "$(realpath "$file")" "$match" >> "$tmpfile"
-        else
-          printf '%s:1:\n' "$(realpath "$file")" >> "$tmpfile"
-        fi
+        match=$(rga --follow --no-ignore --hidden --text --max-count=1 --line-number --no-filename --no-messages "$project_tag" "$file" 2>/dev/null | head -1)
+        # Entries must be 'path:LINE:non-empty-message' or nvim marks them
+        # invalid and :cc silently keeps the previous buffer in the split
+        linenum=${match%%:*}
+        case "$linenum" in
+        '' | *[!0-9]*) printf '%s:1:no match\n' "$(realpath "$file")" >> "$tmpfile" ;;
+        *) printf '%s:%s\n' "$(realpath "$file")" "$match" >> "$tmpfile" ;;
+        esac
       done
       if [ "$file_count" -lt 5 ]; then
         ${EDITOR:-nvim} -q "$tmpfile" \
-          -c 'for i in range(2,len(getqflist())) | vsplit | execute "cc ".i | endfor | wincmd t'
+          -c 'let n=len(getqflist()) | if n >= 2 | vsplit | cc 2 | endif | if n >= 3 | split | cc 3 | endif | if n >= 4 | wincmd h | split | cc 4 | endif | wincmd t'
       else
         ${EDITOR:-nvim} -q "$tmpfile" \
           -c 'silent! for i in range(2,len(getqflist())+1) | execute "silent! cc ".i | endfor | silent! cfirst'
