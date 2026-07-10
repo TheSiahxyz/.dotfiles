@@ -2,13 +2,25 @@
 # Gives a dmenu prompt to mount unmounted local NAS shares for read/write.
 # Requirements - "%wheel ALL=(ALL) NOPASSWD: ALL"
 #
-# Browse for mDNS/DNS-SD services using the Avahi daemon...
-srvname=$(avahi-browse _smb._tcp -t | awk '{print $4}' | dmenu -i -p "Which NAS?") || exit 1
+# Browse for mDNS/DNS-SD services using the Avahi daemon, keeping only real
+# IPv4 SMB hosts: exclude ourselves, link-local addresses and virtual
+# interfaces (loopback/docker/veth/bridges), then dedupe. Extra args (e.g.
+# "-l 10" for a vertical list) are passed straight through to dmenu via "$@".
+choice=$(avahi-browse _smb._tcp -trp 2>/dev/null | awk -F';' \
+	-v self="$(cat /etc/hostname)" \
+	'$1=="=" && $3=="IPv4" && $4!=self \
+	 && $8 !~ /^169\.254\./ \
+	 && $2 !~ /^(lo|docker|veth|br-)/ \
+	 {print $2" "$4" ("$8")"}' \
+	| sort -u | dmenu -i "$@" -p "Which NAS?") || exit 1
+# Pull the IP out of the parentheses; mounting by IP skips a second mDNS
+# lookup and stays unambiguous even when service names collide.
+srvname=$(printf '%s' "$choice" | sed 's/.*(\(.*\)).*/\1/')
 notify-send "Searching for network shares..." "Please wait..."
 # Choose share disk...
-share=$(smbclient -L "$srvname" -N | grep Disk | awk '{print $1}' | dmenu -i -p "Mount which share?") || exit 1
-# Format URL...
-share2mnt=//"$srvname".local/"$share"
+share=$(smbclient -L "$srvname" -N | grep Disk | awk '{print $1}' | dmenu -i "$@" -p "Mount which share?") || exit 1
+# Format URL ($srvname is already an IP, so no ".local" suffix)...
+share2mnt=//"$srvname"/"$share"
 
 sharemount() {
 	mounted=$(mount -v | grep "$share2mnt") || ([ ! -d /mnt/"$share" ] && sudo mkdir /mnt/"$share")
