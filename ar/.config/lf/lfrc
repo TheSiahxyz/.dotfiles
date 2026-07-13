@@ -402,17 +402,23 @@ cmd moveto ${{
 }}
 
 # MPV
-# Play videos in lf's on-screen order. GNU sort can't reproduce lf's natural
+# Play videos in lf's on-screen order. $fx arrives in selection (toggle) order,
+# not display order, so re-sort it here following the active sort settings
+# (lf_sortby/lf_reverse/lf_dirfirst). GNU sort can't reproduce lf's natural
 # sort (lowercase -> digit runs compared as ints -> C-locale byte order), so we
-# port lf's naturalCmp inline in python. Both branches — the current selection
-# ($fx, e.g. set via `sv`) and the whole-dir video glob — go through the same
-# sort, so playback order always matches what lf displays.
+# port lf's sort logic inline in python: stable natural base sort, then the
+# chosen key (mtime/atime/ctime/btime/size via stat, ext, or name), then a full
+# reversal like lf's reverse, then dirfirst. Both branches — the current
+# selection ($fx, e.g. set via `sv`) and the whole-dir video glob — go through
+# the same sort, so playback order always matches what lf displays.
 # NOTE: names flow through stdin, never captured via $() (dash $() corrupts UTF-8).
 cmd mpvdir ${{
-  natsort() {
+  lfsort() {
     python3 -c '
-import sys, unicodedata, functools
-rev = len(sys.argv) > 1 and sys.argv[1] == "true"
+import sys, os, unicodedata, functools
+sortby = sys.argv[1] if len(sys.argv) > 1 else "natural"
+rev = len(sys.argv) > 2 and sys.argv[2] == "true"
+dirfirst = len(sys.argv) > 3 and sys.argv[3] == "true"
 def key(b):
     s = b.decode("utf-8", "surrogateescape").lower()
     s = unicodedata.normalize("NFD", s)
@@ -437,18 +443,43 @@ def cmp(a, b):
             if u != v: return -1 if u < v else 1
             if len(t1) != len(t2): return -1 if len(t1) < len(t2) else 1
         if t1 != t2: return -1 if t1 < t2 else 1
+def statkey(p):
+    try:
+        st = os.stat(p)
+    except OSError:
+        return 0
+    if sortby == "size": return st.st_size
+    if sortby == "time": return st.st_mtime
+    if sortby == "atime": return st.st_atime
+    if sortby == "ctime": return st.st_ctime
+    if sortby == "btime": return getattr(st, "st_birthtime", st.st_ctime)
+    return 0
+def extkey(p):
+    name = p.rsplit(b"/", 1)[-1]
+    i = name.rfind(b".")
+    return key(name[i:]) if i > 0 else b""
 data = sys.stdin.buffer.read().split(b"\n")
 lines = [x for x in data if x]
 dec = [(key(x), x) for x in lines]
-dec.sort(key=functools.cmp_to_key(lambda x, y: cmp(x[0], y[0])), reverse=rev)
+dec.sort(key=functools.cmp_to_key(lambda x, y: cmp(x[0], y[0])))
+if sortby == "name":
+    dec.sort(key=lambda t: t[0])
+elif sortby == "ext":
+    dec.sort(key=lambda t: (extkey(t[1]), t[0]))
+elif sortby in ("size", "time", "atime", "ctime", "btime"):
+    dec.sort(key=lambda t: statkey(t[1]))
+if rev:
+    dec.reverse()
+if dirfirst:
+    dec.sort(key=lambda t: not os.path.isdir(t[1]))
 sys.stdout.buffer.write(b"\n".join(v for _, v in dec) + (b"\n" if dec else b""))
-' "${lf_reverse:-false}"
+' "${lf_sortby:-natural}" "${lf_reverse:-false}" "${lf_dirfirst:-true}"
   }
   tmplist=$(mktemp)
   if [ -n "$fx" ]; then
-    printf '%s\n' "$fx" | natsort > "$tmplist"
+    printf '%s\n' "$fx" | lfsort > "$tmplist"
   else
-    printf '%s\n' *.mp4 *.mkv *.avi *.flv *.webm *.mov *.mpg *.3gp *.ts *.rmvb | natsort > "$tmplist"
+    printf '%s\n' *.mp4 *.mkv *.avi *.flv *.webm *.mov *.mpg *.3gp *.ts *.rmvb | lfsort > "$tmplist"
   fi
   set --
   while IFS= read -r file; do
@@ -505,16 +536,22 @@ cmd bulkrename ${{
   tmpfile_new="$(mktemp)"
   tmpfile_failed="$(mktemp)"
 
-  # List basenames in lf's on-screen order: directories first, then files, each
-  # in lf's natural order. GNU sort can't reproduce lf's natural sort, so port
-  # lf's naturalCmp inline in python (same helper as `mpvdir`).
+  # List basenames in lf's on-screen order, following the active sort settings
+  # (lf_sortby/lf_reverse/lf_dirfirst) — same lfsort helper as `mpvdir`: stable
+  # natural base sort, then the chosen key (mtime/atime/ctime/btime/size via
+  # stat, ext, or name), then a full reversal like lf's reverse, then dirfirst
+  # (basenames are relative to $PWD, so stat/isdir resolve correctly).
+  # GNU sort can't reproduce lf's natural sort, so lf's naturalCmp is ported
+  # inline in python.
   # NOTE: avoid command substitution over multibyte data — dash's $() corrupts
   # UTF-8 chars straddling its 128-byte read buffer (stray 0x81 CTLESC bytes);
   # names are only ever piped through stdin, never captured with $().
-  natsort() {
+  lfsort() {
     python3 -c '
-import sys, unicodedata, functools
-rev = len(sys.argv) > 1 and sys.argv[1] == "true"
+import sys, os, unicodedata, functools
+sortby = sys.argv[1] if len(sys.argv) > 1 else "natural"
+rev = len(sys.argv) > 2 and sys.argv[2] == "true"
+dirfirst = len(sys.argv) > 3 and sys.argv[3] == "true"
 def key(b):
     s = b.decode("utf-8", "surrogateescape").lower()
     s = unicodedata.normalize("NFD", s)
@@ -539,22 +576,44 @@ def cmp(a, b):
             if u != v: return -1 if u < v else 1
             if len(t1) != len(t2): return -1 if len(t1) < len(t2) else 1
         if t1 != t2: return -1 if t1 < t2 else 1
+def statkey(p):
+    try:
+        st = os.stat(p)
+    except OSError:
+        return 0
+    if sortby == "size": return st.st_size
+    if sortby == "time": return st.st_mtime
+    if sortby == "atime": return st.st_atime
+    if sortby == "ctime": return st.st_ctime
+    if sortby == "btime": return getattr(st, "st_birthtime", st.st_ctime)
+    return 0
+def extkey(p):
+    name = p.rsplit(b"/", 1)[-1]
+    i = name.rfind(b".")
+    return key(name[i:]) if i > 0 else b""
 data = sys.stdin.buffer.read().split(b"\n")
 lines = [x for x in data if x]
 dec = [(key(x), x) for x in lines]
-dec.sort(key=functools.cmp_to_key(lambda x, y: cmp(x[0], y[0])), reverse=rev)
+dec.sort(key=functools.cmp_to_key(lambda x, y: cmp(x[0], y[0])))
+if sortby == "name":
+    dec.sort(key=lambda t: t[0])
+elif sortby == "ext":
+    dec.sort(key=lambda t: (extkey(t[1]), t[0]))
+elif sortby in ("size", "time", "atime", "ctime", "btime"):
+    dec.sort(key=lambda t: statkey(t[1]))
+if rev:
+    dec.reverse()
+if dirfirst:
+    dec.sort(key=lambda t: not os.path.isdir(t[1]))
 sys.stdout.buffer.write(b"\n".join(v for _, v in dec) + (b"\n" if dec else b""))
-' "${lf_reverse:-false}"
+' "${lf_sortby:-natural}" "${lf_reverse:-false}" "${lf_dirfirst:-true}"
   }
   if [ -n "$fs" ]; then
-    printf '%s\n' "$fs" | while IFS= read -r p; do if [ -d "$p" ]; then printf '%s\n' "$p"; fi; done | xargs -d '\n' -r basename -a -- | natsort  > "$tmpfile_old"
-    printf '%s\n' "$fs" | while IFS= read -r p; do if [ ! -d "$p" ]; then printf '%s\n' "$p"; fi; done | xargs -d '\n' -r basename -a -- | natsort >> "$tmpfile_old"
+    printf '%s\n' "$fs" | xargs -d '\n' -r basename -a -- | lfsort > "$tmpfile_old"
   elif [ "$lf_hidden" = "true" ]; then
-    find . -mindepth 1 -maxdepth 1 -type d  -printf '%f\n' | natsort  > "$tmpfile_old"
-    find . -mindepth 1 -maxdepth 1 ! -type d -printf '%f\n' | natsort >> "$tmpfile_old"
+    find . -mindepth 1 -maxdepth 1 -printf '%f\n' | lfsort > "$tmpfile_old"
   else
-    find . -mindepth 1 -maxdepth 1 -type d  ! -name '.*' -printf '%f\n' | natsort  > "$tmpfile_old"
-    find . -mindepth 1 -maxdepth 1 ! -type d ! -name '.*' -printf '%f\n' | natsort >> "$tmpfile_old"
+    find . -mindepth 1 -maxdepth 1 ! -name '.*' -printf '%f\n' | lfsort > "$tmpfile_old"
   fi
   cp "$tmpfile_old" "$tmpfile_new"
   $EDITOR "$tmpfile_new"
