@@ -11,6 +11,10 @@ ytdl_format="bestvideo[height<=1080]+bestaudio/best[height<=1080]"
 MANAGED_MOUNTS="$HOME/Secret|$scripts_dir/ecrypt|$scripts_dir/ecrypt
 /mnt/second|$scripts_dir/mounter|$scripts_dir/unmounter"
 
+# Mount points this invocation actually mounted, so the exit trap only
+# unmounts what we mounted (not mounts already up for other reasons).
+MOUNTED_BY_US=""
+
 # Video file extensions for find commands
 VIDEO_EXTS='-iname "*.mp4" -o -iname "*.mkv" -o -iname "*.mov" -o -iname "*.flv" -o -iname "*.wmv" -o -iname "*.webm" -o -iname "*.mpeg" -o -iname "*.mpg" -o -iname "*.avi" -o -iname "*.ts" -o -iname "*.3gp" -o -iname "*.rmvb"'
 
@@ -36,7 +40,11 @@ EOF
 
 mount_path() {
   while IFS='|' read -r mp mcmd ucmd; do
-    [ -n "$mp" ] && echo "$1" | grep -q "^$mp" && ! is_mounted "$mp" && $mcmd && return 0
+    if [ -n "$mp" ] && echo "$1" | grep -q "^$mp" && ! is_mounted "$mp"; then
+      $mcmd && MOUNTED_BY_US="$MOUNTED_BY_US
+$mp"
+      return 0
+    fi
   done <<EOF
 $MANAGED_MOUNTS
 EOF
@@ -50,12 +58,12 @@ $MANAGED_MOUNTS
 EOF
 }
 
-unmount_all() {
-  while IFS='|' read -r mp mcmd ucmd; do
-    [ -n "$mp" ] && is_mounted "$mp" && $ucmd
-  done <<EOF
-$MANAGED_MOUNTS
-EOF
+# Exit handler: unmount only the mounts this invocation brought up, so
+# playing a URL (which mounts nothing) never touches pre-existing mounts.
+cleanup() {
+  echo "$MOUNTED_BY_US" | while IFS= read -r mp; do
+    [ -n "$mp" ] && unmount_path "$mp"
+  done
 }
 
 play() { mpv $mpv_opts "$@"; }
@@ -283,7 +291,7 @@ SQL
 }
 
 # --- Main ---
-trap 'unmount_all; exit' EXIT INT
+trap 'cleanup; exit' EXIT INT
 
 content_choice=$(printf "URL\nLocal Files\nPlaylist\nHistory" | dmenu -i -p "Choose media source:")
 case "$content_choice" in
