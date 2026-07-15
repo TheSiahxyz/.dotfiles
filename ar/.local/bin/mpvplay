@@ -69,13 +69,32 @@ cleanup() {
 play() { mpv $mpv_opts "$@"; }
 
 # --- URL Playback ---
+# Ask which quality (i.e. how much data) to stream. Data usage scales with
+# resolution; audio-only skips the video stream entirely and is by far the
+# smallest. Sets url_ytdl_format and url_extra_opts used by the play calls.
+choose_url_quality() {
+  q=$(printf "1080p\n720p\n480p\n360p\nAudio" | dmenu -i -p "Quality (data usage):")
+  [ -z "$q" ] && exit
+  url_extra_opts=""
+  case "$q" in
+  "Audio")
+    url_ytdl_format="bestaudio/best"
+    url_extra_opts="--no-video"
+    ;;
+  "360p") url_ytdl_format="bestvideo[height<=360]+bestaudio/best[height<=360]" ;;
+  "480p") url_ytdl_format="bestvideo[height<=480]+bestaudio/best[height<=480]" ;;
+  "720p") url_ytdl_format="bestvideo[height<=720]+bestaudio/best[height<=720]" ;;
+  *) url_ytdl_format="$ytdl_format" ;;
+  esac
+}
+
 loginurl() {
   notify-send "Authentication required"
   username="$(echo | dmenu -i -p "Enter a username:")"
   [ -z "$username" ] && exit
   password="$(echo | dmenu -i -P -p "Enter a password:")"
   [ -z "$password" ] && exit
-  if ! play --ytdl-format="$ytdl_format" --ytdl-raw-options=username="$username",password="$password" "$url"; then
+  if ! play $url_extra_opts --ytdl-format="$url_ytdl_format" --ytdl-raw-options=username="$username",password="$password" "$url"; then
     notify-send "Failed to play $url" "Check your username or password"
     exit 1
   fi
@@ -85,16 +104,14 @@ play_url() {
   url=$(xclip -selection clipboard -o)
   echo "$url" | grep -qE '^https?://' || return 1
 
-  # SOOP rebrand: yt-dlp only recognizes sooplive.co.kr / afreecatv.com,
-  # not sooplive.com. Normalize so VOD/live/channel URLs work.
-  url=$(echo "$url" | sed -E 's#(https?://[^/]*\.)sooplive\.com#\1sooplive.co.kr#')
+  choose_url_quality
 
   # Capture stderr so we can tell "needs login" apart from other failures
   # (e.g. unsupported URL), instead of always prompting for credentials.
   err=$(yt-dlp --simulate --dump-json "$url" 2>&1 >/dev/null)
   if [ $? -eq 0 ]; then
     notify-send "Playing video from URL:" "$url"
-    play --ytdl-format="$ytdl_format" "$url"
+    play $url_extra_opts --ytdl-format="$url_ytdl_format" "$url"
   elif echo "$err" | grep -qiE 'log[ -]?in|sign[ -]?in|authenticat|registered user|--username|--cookies|members[- ]?only|private'; then
     loginurl
   else
