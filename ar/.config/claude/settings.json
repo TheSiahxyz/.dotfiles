@@ -102,9 +102,9 @@
       "Read(**/*.gpg)",
       "Read(**/.gnupg/**/*)",
       "Read(**/.password-store/**/*)",
-      "Write(**/*.gpg)",
-      "Write(**/.gnupg/**/*)",
-      "Write(**/.password-store/**/*)"
+      "Edit(**/*.gpg)",
+      "Edit(**/.gnupg/**/*)",
+      "Edit(**/.password-store/**/*)"
     ]
   },
   "model": "claude-fable-5[1m]",
