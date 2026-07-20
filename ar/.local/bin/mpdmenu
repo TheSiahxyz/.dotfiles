@@ -110,4 +110,4 @@ case "$mode" in
 *) exit ;;
 esac
 
-sleep 0.5 && mpc volume 50
+sleep 0.5 && mpc volume 35
