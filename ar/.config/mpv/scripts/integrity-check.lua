@@ -11,9 +11,9 @@
 --   * Corrupt file paths are recorded in corrupted.log.
 --   * If a playlist exists (scan_playlist), after the current file is checked,
 --     the following entries are pre-checked in parallel in the background
---     (scan_concurrency workers). Background checks are read-rate throttled
---     (bg_read_rate x realtime) and run at low CPU priority so they don't
---     starve playback I/O. The current file is always checked at full speed.
+--     (scan_concurrency workers) at low CPU priority (nice) so they don't
+--     starve playback. Checks always read at full speed; lower scan_concurrency
+--     if you need to cap resource use.
 --     (The badge is only for the current file; pre-checks update cache/log only.)
 --   * When the playlist pre-check finishes, an OSD summary is shown (notify_done).
 --     script-message integrity-status shows the current progress at any time.
@@ -33,21 +33,18 @@ local opts = {
 	enabled = true, -- feature on/off
 	scan_on_load = false, -- auto-check on file open; if false, trigger with the "scan" key
 	scan_playlist = true, -- after the current file, also background-check following playlist entries
-	scan_concurrency = 5, -- how many playlist entries to check in parallel (0 = entire playlist at once)
+	-- How many playlist entries to check in parallel (0 = entire playlist at once).
+	-- This is the only knob that throttles resource use; tune it and nothing else.
+	-- Measured on a 4.6 GB / 17-file library (warm page cache):
+	--   1 -> 5.46s, 1.8 cores | 2 -> 3.06s, 4.3 cores | 3 -> 2.06s, 5.5 cores
+	--   5 -> 1.77s, 9.7 cores | 8 -> 1.81s, 10.3 cores (slower AND hungrier)
+	-- Past 3 the returns collapse, so 3 is the sane default.
+	scan_concurrency = 3,
 	notify_done = true, -- show an OSD summary when the playlist background check finishes
 	show_scanning = false, -- show a "scanning" badge (default: off)
 	deep_scan = false, -- if true, decode while checking (precise but slow)
 	use_cache = true, -- use the result cache
 	ffmpeg = "ffmpeg",
-	-- Throttle background playlist checks to N x realtime so they don't flood
-	-- the disk/cache and stutter playback (ionice is ignored by the `none`
-	-- scheduler, so rate-limiting is what actually protects playback).
-	-- 0 = unlimited. The current file is always checked at full speed.
-	bg_read_rate = 500,
-	bg_read_burst = 50, -- seconds to read at full speed first (headers/early errors)
-	-- Low-priority wrapper (helps userspace CPU; ionice is a no-op on `none`).
-	-- Set to "" to disable. (Linux: coreutils `nice`, util-linux `ionice`.)
-	priority_cmd = "nice -n 19 ionice -c 3",
 	status_font = 20, -- base OSD font for the status list; shrinks automatically so all lines fit
 	font_size = 22,
 }
@@ -194,25 +191,26 @@ end
 ----------------------------------------------------------------------
 -- Check
 ----------------------------------------------------------------------
--- read_rate: nil/0 = full speed; >0 = throttle reading to that many x realtime
--- (input option, must precede -i) so background checks don't starve playback.
-local function build_args(path, read_rate, progfile)
+-- Every check runs at full read speed. ffmpeg's -readrate throttle is deliberately
+-- not used: on n8.1.2 it ignores its own argument and drops below realtime.
+-- Measured on a 17m19s / 105 MB MKV:
+--   no -readrate      -> 0.317s   (167% CPU)
+--   -readrate 10000   -> 27m03s   (0% CPU -- asleep the whole time)
+-- That is 5122x slower, and 0.64x realtime: scanning took longer than simply
+-- watching the file. 100 and 1000 behave the same, so the number is not a rate.
+-- The pacing misbehaves under `-c copy -map 0 -f null` on MKVs carrying
+-- subtitle/attachment streams. To limit resource use, lower scan_concurrency.
+local function build_args(path, progfile)
 	local args = {}
-	-- Prepend the low-priority wrapper (nice helps userspace CPU).
-	if opts.priority_cmd and opts.priority_cmd ~= "" then
-		for word in opts.priority_cmd:gmatch("%S+") do
-			args[#args + 1] = word
-		end
-	end
 	local function add(...)
 		for _, v in ipairs({ ... }) do
 			args[#args + 1] = v
 		end
 	end
+	-- nice keeps playback (nice 0) ahead of us whenever the CPU is contended.
+	-- No ionice: both NVMes use the `none` scheduler, where its classes are ignored.
+	add("nice", "-n", "19")
 	add(opts.ffmpeg, "-hide_banner", "-v", "error")
-	if read_rate and read_rate > 0 then
-		add("-readrate", tostring(read_rate), "-readrate_initial_burst", tostring(opts.bg_read_burst or 30))
-	end
 	add("-i", path)
 	if not opts.deep_scan then -- demux only (fast); deep_scan decodes (slow)
 		add("-c", "copy")
@@ -462,7 +460,7 @@ local function start_scan(path, on_done)
 	show_scanning()
 	mp.command_native_async({
 		name = "subprocess",
-		args = build_args(path, nil, prog),
+		args = build_args(path, prog),
 		playback_only = false,
 		capture_stdout = true,
 		capture_stderr = true,
@@ -634,7 +632,7 @@ local function scan_playlist_from(start_index)
 			end
 			mp.command_native_async({
 				name = "subprocess",
-				args = build_args(path, opts.bg_read_rate, prog),
+				args = build_args(path, prog),
 				playback_only = false,
 				capture_stdout = true,
 				capture_stderr = true,
