@@ -66,9 +66,9 @@ attemptmount() {
   # Determine mount options based on filesystem type.
   fstype="$(sudo lsblk -no fstype "$chosen" | head -1)"
   case "$fstype" in
-    vfat|exfat) mountopts="-o uid=$(id -u),gid=$(id -g),umask=0000" ;;
-    ntfs*) mountopts="-o uid=$(id -u),gid=$(id -g)" ;;
-    *) mountopts="" ;;
+  vfat | exfat) mountopts="-o uid=$(id -u),gid=$(id -g),umask=0000" ;;
+  ntfs*) mountopts="-o uid=$(id -u),gid=$(id -g)" ;;
+  *) mountopts="" ;;
   esac
   if [ -d "$mp" ]; then
     sudo -A mount $mountopts "$chosen" "$mp" >/dev/null 2>&1 || return 1
@@ -210,7 +210,7 @@ case "$chosen" in
     getmount "$(mountbase "$chosen")/$mplabel"
     case "${parttype##* }" in
     vfat) sudo -A mount -t vfat "$chosen" "$mp" -o rw,umask=0000,uid="$(id -u)",gid="$(id -g)" ;;
-    btrfs) sudo -A mount "$chosen" "$mp" ;;
+    ext4 | btrfs) sudo -A mount "$chosen" "$mp" ;;
     *) sudo -A mount "$chosen" "$mp" -o uid="$(id -u)",gid="$(id -g)" ;;
     esac
   }
