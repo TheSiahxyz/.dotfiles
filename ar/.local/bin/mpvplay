@@ -69,55 +69,85 @@ cleanup() {
 play() { mpv $mpv_opts "$@"; }
 
 # --- URL Playback ---
-# Ask which quality (i.e. how much data) to stream. Data usage scales with
-# resolution; audio-only skips the video stream entirely and is by far the
-# smallest. Sets url_ytdl_format and url_extra_opts used by the play calls.
+# Heights the URL actually offers, so the menu matches the site. vcodec "none"
+# drops storyboard tracks; null means unknown (HLS live) and must be kept.
+list_heights() {
+  printf '%s\n' "$1" | head -n1 |
+    jq -r '.formats[]? | select(.height != null and .vcodec != "none")
+           | .height' 2>/dev/null | sort -rnu
+}
+
+# Ask which quality to stream; sets url_ytdl_format and url_extra_opts.
+# $1: newline-separated heights; falls back to a generic list when empty.
 choose_url_quality() {
-  q=$(printf "1080p\n720p\n480p\n360p\nAudio" | dmenu -i -p "Quality (data usage):")
+  if [ -n "$1" ]; then
+    options=$(printf '%s\n' "$1" | sed 's/$/p/')
+  else
+    options="1080p
+720p
+480p
+360p"
+  fi
+
+  q=$(printf "%s\nAudio" "$options" | dmenu -i -p "Quality (data usage):")
   [ -z "$q" ] && exit
   url_extra_opts=""
   case "$q" in
   "Audio")
-    url_ytdl_format="bestaudio/best"
-    url_extra_opts="--no-video"
+    # Sites without an audio-only track (SOOP is muxed) fall back to the
+    # smallest stream, not the best, since mpv discards the video anyway.
+    url_ytdl_format="bestaudio/worst"
+    # No video means no window, so force one to have something to quit from.
+    url_extra_opts="--no-video --force-window=yes --x11-name=music"
     ;;
-  "360p") url_ytdl_format="bestvideo[height<=360]+bestaudio/best[height<=360]" ;;
-  "480p") url_ytdl_format="bestvideo[height<=480]+bestaudio/best[height<=480]" ;;
-  "720p") url_ytdl_format="bestvideo[height<=720]+bestaudio/best[height<=720]" ;;
+  *[0-9]p)
+    h=${q%p}
+    url_ytdl_format="bestvideo[height<=$h]+bestaudio/best[height<=$h]"
+    ;;
   *) url_ytdl_format="$ytdl_format" ;;
   esac
 }
 
-loginurl() {
+# Prompt for credentials and set url_auth_opt, used by both yt-dlp and mpv.
+ask_credentials() {
   notify-send "Authentication required"
   username="$(echo | dmenu -i -p "Enter a username:")"
   [ -z "$username" ] && exit
   password="$(echo | dmenu -i -P -p "Enter a password:")"
   [ -z "$password" ] && exit
-  if ! play $url_extra_opts --ytdl-format="$url_ytdl_format" --ytdl-raw-options=username="$username",password="$password" "$url"; then
-    notify-send "Failed to play $url" "Check your username or password"
-    exit 1
-  fi
+  url_auth_opt="--ytdl-raw-options=username=$username,password=$password"
 }
 
 play_url() {
   url=$(xclip -selection clipboard -o)
   echo "$url" | grep -qE '^https?://' || return 1
 
-  choose_url_quality
+  url_auth_opt=""
+  errfile=$(mktemp)
 
-  # Capture stderr so we can tell "needs login" apart from other failures
-  # (e.g. unsupported URL), instead of always prompting for credentials.
-  err=$(yt-dlp --simulate --dump-json "$url" 2>&1 >/dev/null)
-  if [ $? -eq 0 ]; then
-    notify-send "Playing video from URL:" "$url"
-    play $url_extra_opts --ytdl-format="$url_ytdl_format" "$url"
-  elif echo "$err" | grep -qiE 'log[ -]?in|sign[ -]?in|authenticat|registered user|--username|--cookies|members[- ]?only|private'; then
-    loginurl
-  else
-    notify-send "Failed to play URL" "${err##*ERROR: }"
-    exit 1
+  # Probe first: the JSON lists the resolutions, its stderr flags a login need.
+  if ! json=$(yt-dlp --simulate --dump-json "$url" 2>"$errfile"); then
+    err=$(cat "$errfile")
+    if echo "$err" | grep -qiE 'log[ -]?in|sign[ -]?in|authenticat|registered user|--username|--cookies|members[- ]?only|private'; then
+      ask_credentials
+      if ! json=$(yt-dlp --simulate --dump-json --username "$username" --password "$password" "$url" 2>"$errfile"); then
+        notify-send "Failed to play $url" "Check your username or password"
+        rm -f "$errfile"
+        exit 1
+      fi
+    else
+      rm -f "$errfile"
+      notify-send "Failed to play URL" "${err##*ERROR: }"
+      exit 1
+    fi
   fi
+  rm -f "$errfile"
+
+  choose_url_quality "$(list_heights "$json")"
+
+  notify-send "Playing video from URL:" "$url"
+  # shellcheck disable=SC2086 # url_extra_opts is a flag list and must split
+  play $url_extra_opts --ytdl-format="$url_ytdl_format" ${url_auth_opt:+"$url_auth_opt"} "$url"
 }
 
 # --- Local File Playback ---
