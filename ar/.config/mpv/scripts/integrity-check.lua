@@ -246,12 +246,19 @@ local function apply_result(path, corrupt, from_cache)
 	end
 end
 
--- Muxer-side complaints that don't indicate a damaged file (false positives).
--- e.g. duplicate/non-monotonic audio DTS, common in recordings; plays fine.
+-- Complaints that don't indicate a damaged file (false positives).
+-- This script is a container/truncation checker (-c copy, no decoding), so
+-- muxer chatter and codec-parser warnings are out of scope by design -- only
+-- container-level failures should ever flag a file.
 local BENIGN_PATTERNS = {
 	"non monotonically increasing dts",
 	"Application provided invalid",
 	"Last message repeated", -- ffmpeg log de-dup line (summarizes a prior, often benign, message)
+	-- h264 parser warning emitted when a stream is joined mid-GOP, so the first
+	-- buffering-period SEI cites an SPS not yet seen. Standard for MPEG-TS
+	-- captures. Verified false positive: a 19m18s .ts flagged by this line alone
+	-- played fine and fully decoded (deep scan) with no other message.
+	"non-existing SPS",
 }
 
 -- Convert the subprocess result into a corrupt/ok verdict. A file is corrupt
