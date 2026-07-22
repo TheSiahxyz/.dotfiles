@@ -147,11 +147,17 @@ case $BLOCK_BUTTON in
   notify-send "🎵 Music module" "\- Shows mpd song playing and status
 - Left click opens ncmpcpp
 - Middle click pauses/unpause
-- Scroll changes track"
+- Scroll changes track
+- Horizontal scroll seeks 5s
+- Shift+horizontal scroll seeks 5s in the browser player"
   ;;
 4) mpc prev ;;
 5) mpc next ;;
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 9) playerctl prev ;;
 10) playerctl next ;;
+16) mpc seek -5 ;;            # horizontal scroll left
+17) mpc seek +5 ;;            # horizontal scroll right
+18) playerctl position 5- ;;  # shift + horizontal scroll left
+19) playerctl position 5+ ;;  # shift + horizontal scroll right
 esac
