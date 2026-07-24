@@ -2,51 +2,23 @@
 set -eu
 
 repodir="$HOME/Private/repos/diary"
-out="$repodir/public/diary/index.html"
-out2="$repodir/public/recordings/index.html"
-out3="$repodir/public/videos/index.html"
+out="$repodir/public/index.html"
 server="${THESIAH_SERVER:-root@thesiah.xyz}"
-dest="/var/www/thesiah/diary/"
-dest2="/var/www/thesiah/recordings/"
-dest3="/var/www/thesiah/videos/"
-defaults="sy after foramonth"
-src="$repodir/public/diary/"
-src2="$repodir/public/recordings/"
-src3="$repodir/public/videos/"
-bgm="$repodir/static/bgm/"
-bgmd="/var/www/thesiah/bgm/"
-prv="$repodir/static/previews/"
-prvd="/var/www/thesiah/videos/previews/"
+dest="/var/www/diary/"
+src="$repodir/public/"
 
 cd "$repodir"
 hugo --cleanDestinationDir
 
 if [ ! -f "$out" ]; then
-  echo "error: not found: $out" >&2
-  exit 1
-fi
-
-if [ ! -f "$out2" ]; then
-  echo "error: not found: $out2" >&2
-  exit 1
-fi
-
-if [ ! -f "$out3" ]; then
-  echo "error: not found: $out3" >&2
+  echo "error: not found: $out (hugo build produced no homepage)" >&2
   exit 1
 fi
 
 ssh "$server" "mkdir -p '$dest'"
-ssh "$server" "mkdir -p '$dest2'"
-ssh "$server" "mkdir -p '$dest3'"
-ssh "$server" "mkdir -p '$prvd'"
 
-rsync -azv --update --itemize-changes --stats "$bgm" "$server:$bgmd"
-
-if [ -d "$prv" ]; then
-  rsync -azv --update --itemize-changes --stats "$prv" "$server:$prvd"
-fi
-
+# Sync the whole built site to the web root. No --delete: files already on
+# the server are never removed, only added or updated.
 if [ -n "${THESIAH_SSH_OPTS:-}" ]; then
   rsync -azv --update --itemize-changes --stats \
     -e "ssh $THESIAH_SSH_OPTS" \
@@ -56,53 +28,6 @@ else
     "$src" "$server:$dest"
 fi
 
-if [ -n "${THESIAH_SSH_OPTS:-}" ]; then
-  rsync -azv --update --itemize-changes --stats \
-    -e "ssh $THESIAH_SSH_OPTS" \
-    "$src2" "$server:$dest2"
-else
-  rsync -azv --update --itemize-changes --stats \
-    "$src2" "$server:$dest2"
-fi
-
-if [ -n "${THESIAH_SSH_OPTS:-}" ]; then
-  rsync -azv --update --itemize-changes --stats \
-    -e "ssh $THESIAH_SSH_OPTS" \
-    "$src3" "$server:$dest3"
-else
-  rsync -azv --update --itemize-changes --stats \
-    "$src3" "$server:$dest3"
-fi
-
-if [ -n "${1-}" ]; then
-  new="$repodir/content/diary/$1"
-  if [ -f "$new" ]; then
-    rsync -az --update "$new" "$server:$dest"
-  elif [ -d "$new" ]; then
-    rsync -az --update "$new/" "$server:$dest$(basename "$new")/"
-  fi
-fi
-
-if [ -n "${1-}" ]; then
-  new="$repodir/content/recordings/$1"
-  if [ -f "$new" ]; then
-    rsync -az --update "$new" "$server:$dest2"
-  elif [ -d "$new" ]; then
-    rsync -az --update "$new/" "$server:$dest2$(basename "$new")/"
-  fi
-fi
-
-if [ -n "${1-}" ]; then
-  new="$repodir/content/videos/$1"
-  if [ -f "$new" ]; then
-    rsync -az --update "$new" "$server:$dest3"
-  elif [ -d "$new" ]; then
-    rsync -az --update "$new/" "$server:$dest3$(basename "$new")/"
-  fi
-fi
-
-ssh "$THESIAH_SERVER" "chmod 644 $dest/index.html"
-ssh "$THESIAH_SERVER" "chmod 644 $dest2/index.html"
-ssh "$THESIAH_SERVER" "chmod 644 $dest3/index.html"
+ssh "$server" "find '$dest' -name index.html -type f -exec chmod 644 {} +"
 
 cd - >/dev/null
