@@ -14,7 +14,7 @@ local default_bgm = "darling.mp3"
 
 local function bgm_node_generator()
 	return function()
-		local handle = io.popen("ssh root@thesiah.xyz 'ls /var/www/thesiah/bgm/' 2>/dev/null")
+		local handle = io.popen("ssh root@thesiah.xyz 'ls /var/www/diary/bgm/' 2>/dev/null")
 		if not handle then
 			return sn(nil, { i(1, "bgm") })
 		end
