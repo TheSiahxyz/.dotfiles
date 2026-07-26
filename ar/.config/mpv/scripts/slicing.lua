@@ -28,9 +28,12 @@ local function fmt(t)
 	return string.format("%02d:%02d:%06.3f", h, m, s)
 end
 
--- whole-seconds token for filenames: 12.345 -> "12"
+-- whole-seconds token for filenames, zero-padded to a fixed width so
+-- lexicographic order matches chronological order. This lets `ccv` concat
+-- (which globs "<base>*.*" and joins in shell sort order) stitch the clips
+-- back in the right sequence. 12.345 -> "000012" (6 digits ~= 277 hours).
 local function fmt_tag(t)
-	return string.format("%d", math.floor(t + 0.5))
+	return string.format("%06d", math.floor(t + 0.5))
 end
 
 local function set_start()

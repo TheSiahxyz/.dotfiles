@@ -3,12 +3,16 @@ set -eu
 
 prog="${0##*/}"
 
+# CRF for --normalize re-encodes (libx264/libx265; lower = better quality,
+# 16 is near-visually-lossless).
+NORMALIZE_CRF=16
+
 usage() {
   cat <<EOF
 ${prog} - cut and concat video files with ffmpeg
 
 Usage:
-  ${prog} [-j | concat] [-o <output>] <file>
+  ${prog} [-j | concat] [-n | --normalize] [-o <output>] <file>
   ${prog}  -c | cut    [-o <output>] <file> <start> [<end|duration>]
   ${prog} -h | --help
 
@@ -16,7 +20,11 @@ Concat (default mode):
   Combines all video files matching '<base>*.*' into '<base>_combine.<ext>'.
   Mixed container extensions (e.g. .mp4 + .mkv) are allowed; the output
   then uses .mkv. Streams are checked with ffprobe first: all files must
-  share the same video codec/resolution and audio codec/rate/channels.
+  share the same video codec and audio codec/rate/channels.
+  Resolution must match too for a stream copy. If it doesn't, pass
+  -n/--normalize to scale the smaller clips up to the HIGHEST resolution
+  among the inputs, re-encoding only the clips that differ; the
+  best-quality clip is copied untouched. Requires h264 or hevc.
   Previous '*_combine.*' outputs are excluded from matching.
   Examples:
     ${prog} clip_cut.mp4
@@ -62,15 +70,32 @@ is_video_ext() {
   esac
 }
 
-# stream_sig <file>
-# Prints a comparable signature of the first video/audio streams.
-# Files must share a signature to be concat-able with -c copy.
-stream_sig() {
+# rest_sig <file>
+# Comparable signature of the first video/audio streams EXCLUDING resolution.
+# Codec or audio differences can't be bridged by -c copy; resolution can, via
+# a --normalize re-encode, so it's checked separately (see video_dims).
+rest_sig() {
   _v=$(ffprobe -v error -select_streams v:0 \
-    -show_entries stream=codec_name,width,height -of csv=p=0 "$1") || return 1
+    -show_entries stream=codec_name -of csv=p=0 "$1") || return 1
   _a=$(ffprobe -v error -select_streams a:0 \
     -show_entries stream=codec_name,sample_rate,channels -of csv=p=0 "$1") || return 1
   printf 'video=%s audio=%s' "$_v" "$_a"
+}
+
+# video_dims <file> -> "<width> <height>"
+video_dims() {
+  _d=$(ffprobe -v error -select_streams v:0 \
+    -show_entries stream=width,height -of csv=p=0 "$1") || return 1
+  printf '%s' "$_d" | tr ',' ' '
+}
+
+# encoder_for <codec_name> -> matching libx encoder; fails on unsupported.
+encoder_for() {
+  case "$1" in
+    h264) printf 'libx264' ;;
+    hevc) printf 'libx265' ;;
+    *) return 1 ;;
+  esac
 }
 
 # Globals set by resolve_output (avoids subshell variable loss):
@@ -124,6 +149,7 @@ cmd_concat() {
   require_ffmpeg
   input_file="$1"
   user_output="$2"
+  normalize="$3"
 
   pattern="${input_file%.*}"
   extension="${input_file##*.}"
@@ -159,35 +185,80 @@ cmd_concat() {
     exit 1
   fi
 
-  # Mixed container extensions break the concat demuxer's timestamp
-  # offsetting even with identical codecs, so non-mkv inputs are first
-  # remuxed (lossless stream copy) into the one container that holds
-  # anything: mkv. The output then uses mkv too.
+  # One ffprobe pass over every input gathers what the concat needs:
+  #  - container mix: non-mkv inputs must be remuxed (lossless) to mkv,
+  #    because the concat demuxer mishandles timestamps across containers.
+  #  - reduced signature (codec + audio, WITHOUT resolution): a hard gate,
+  #    since -c copy can't bridge different codecs or audio layouts.
+  #  - the largest resolution among inputs: the --normalize reference, kept
+  #    untouched while smaller clips are scaled up to match it.
   mixed=""
   output_ext="$extension"
+  ref_rest=""
+  ref_rest_file=""
+  first_dims=""
+  uniform_dims=1
+  max_area=0
+  target_w=""
+  target_h=""
+  ref_file=""
   for video do
     if [ "${video##*.}" != "$extension" ]; then
       mixed=1
       output_ext="mkv"
-      break
+    fi
+
+    rs=$(rest_sig "$video") || die "ffprobe failed on: $video"
+    if [ -z "$ref_rest" ]; then
+      ref_rest="$rs"
+      ref_rest_file="$video"
+    elif [ "$rs" != "$ref_rest" ]; then
+      die "codec/audio mismatch, cannot concat with stream copy:
+  $ref_rest_file: $ref_rest
+  $video: $rs"
+    fi
+
+    dims=$(video_dims "$video") || die "ffprobe failed on: $video"
+    if [ -z "$first_dims" ]; then
+      first_dims="$dims"
+    elif [ "$dims" != "$first_dims" ]; then
+      uniform_dims=""
+    fi
+    w=${dims%% *}
+    h=${dims##* }
+    area=$((w * h))
+    if [ "$area" -gt "$max_area" ]; then
+      max_area="$area"
+      target_w="$w"
+      target_h="$h"
+      ref_file="$video"
     fi
   done
 
-  # Refuse mismatched streams up front; -c copy would produce a broken
-  # file instead of erroring.
-  ref_sig=""
-  ref_file=""
-  for video do
-    sig=$(stream_sig "$video") || die "ffprobe failed on: $video"
-    if [ -z "$ref_sig" ]; then
-      ref_sig="$sig"
-      ref_file="$video"
-    elif [ "$sig" != "$ref_sig" ]; then
-      die "stream mismatch, cannot concat with stream copy:
-  $ref_file: $ref_sig
-  $video: $sig"
+  # Resolution mismatch is only bridgeable by re-encoding. Without
+  # --normalize, refuse (a -c copy concat of mixed resolutions is broken).
+  # With it, scale the smaller clips up to the best resolution and re-encode
+  # only those; the highest-resolution clip is copied untouched.
+  need_reencode=""
+  if [ -z "$uniform_dims" ]; then
+    if [ -z "$normalize" ]; then
+      die "resolution mismatch, cannot concat with stream copy.
+Re-run with --normalize to upscale smaller clips to ${target_w}x${target_h}
+(re-encoding only the clips that differ; the best clip is kept untouched)."
     fi
-  done
+    need_reencode=1
+    output_ext="mkv"
+    mixed=1
+    ref_vcodec=${ref_rest#video=}
+    ref_vcodec=${ref_vcodec%% *}
+    encoder=$(encoder_for "$ref_vcodec") \
+      || die "--normalize can re-encode h264/hevc only, not '$ref_vcodec'"
+    ref_pixfmt=$(ffprobe -v error -select_streams v:0 \
+      -show_entries stream=pix_fmt -of csv=p=0 "$ref_file") || ref_pixfmt=""
+    [ -n "$ref_pixfmt" ] || ref_pixfmt="yuv420p"
+    printf '%s: normalizing to %sx%s; keeping %s untouched\n' \
+      "$prog" "$target_w" "$target_h" "$ref_file" >&2
+  fi
 
   if [ -n "$user_output" ]; then
     resolve_output "$user_output" "$output_ext"
@@ -205,7 +276,15 @@ cmd_concat() {
   n=0
   for video do
     n=$((n + 1))
-    if [ -n "$mixed" ] && [ "${video##*.}" != "mkv" ]; then
+    if [ -n "$need_reencode" ] && [ "$(video_dims "$video")" != "$target_w $target_h" ]; then
+      printf '%s: re-encoding %s -> %sx%s\n' "$prog" "$video" "$target_w" "$target_h" >&2
+      full_path="$remux_dir/$(printf '%03d' "$n").mkv"
+      ffmpeg -hide_banner -v error -i "$video" \
+        -map 0:v:0 -map 0:a:0 \
+        -vf "scale=${target_w}:${target_h}:flags=lanczos,setsar=1" \
+        -c:v "$encoder" -crf "$NORMALIZE_CRF" -preset slow -pix_fmt "$ref_pixfmt" \
+        -c:a copy "$full_path"
+    elif [ -n "$mixed" ] && [ "${video##*.}" != "mkv" ]; then
       printf '%s: remuxing %s -> mkv for concat\n' "$prog" "$video" >&2
       full_path="$remux_dir/$(printf '%03d' "$n").mkv"
       ffmpeg -hide_banner -v error -i "$video" -c copy "$full_path"
@@ -280,6 +359,7 @@ cmd_cut() {
 
 mode_explicit=""
 out_override=""
+normalize=""
 
 # Rotate args: separate flags from positionals while preserving original order
 # of positionals. After the loop, $@ holds positional args only.
@@ -306,6 +386,8 @@ while [ "$i" -gt 0 ]; do
     -o=*)
       out_override="${arg#-o=}"
       [ -n "$out_override" ] || die "-o requires a non-empty argument" ;;
+    -n|--normalize)
+      normalize=1 ;;
     -*)
       die "unknown option: $arg" ;;
     *)
@@ -324,9 +406,10 @@ fi
 case "$mode_explicit" in
   concat)
     [ $# -eq 1 ] || die "concat takes 1 file argument, got $#"
-    cmd_concat "$1" "$out_override"
+    cmd_concat "$1" "$out_override" "$normalize"
     ;;
   cut)
+    [ -z "$normalize" ] || die "--normalize applies to concat only"
     case $# in
       2) cmd_cut "$1" "$2" ""   "$out_override" ;;
       3) cmd_cut "$1" "$2" "$3" "$out_override" ;;
