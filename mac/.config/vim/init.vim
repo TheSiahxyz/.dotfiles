@@ -33,7 +33,7 @@ autocmd BufWritePre *neomutt* %s/^--$/-- /e " dash-dash-space signature delimite
 autocmd BufWritePre * cal cursor(currPos[1], currPos[2])
 
 " When shortcut files are updated, renew bash and ranger configs with new material:
-autocmd BufWritePost bm-files,bm-dirs !bmshortcuts
+autocmd BufWritePost bm-files,bm-dirs !shortcuts
 
 " Run xrdb whenever Xdefaults or Xresources are updated.
 autocmd BufRead,BufNewFile Xresources,Xdefaults,xresources,xdefaults set filetype=xdefaults
@@ -243,8 +243,7 @@ if !exists('g:airline_symbols')
 endif
 let g:airline_symbols.colnr = ' C:'
 let g:airline_symbols.linenr = ' L:'
-let g:airline_symbols.maxlinenr = ' '
-let g:airline#extensions#whitespace#symbol = '!'
+let g:airline_symbols.maxlinenr = '☰ '
 
 " colorscheme
 if isdirectory(expand("${XDG_CONFIG_HOME:-$HOME/.config}/vim/plugged/catppuccin"))
@@ -439,8 +438,8 @@ let g:which_key_map['w']    =   {
 
 " SHORTCUTS ---------------------------------------------------------------- {{{
 
-if filereadable(expand("${XDG_CONFIG_HOME:-$HOME/.config}/nvim/shortcuts.vim"))
-    silent! source ${XDG_CONFIG_HOME:-$HOME/.config}/nvim/shortcuts.vim
+if filereadable(expand("${XDG_CONFIG_HOME:-$HOME/.config}/vim/shortcuts.vim"))
+    silent! source ${XDG_CONFIG_HOME:-$HOME/.config}/vim/shortcuts.vim
 endif
 
 " }}}

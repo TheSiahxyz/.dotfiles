@@ -30,7 +30,7 @@ function fzf_aliases() {
         if [ -n "$line_number" ]; then
             nvim "+$line_number" "$alias_file"
         else
-            scripts_file="${ZDOTDIR:-${XDG_CONFIG_HOME:-${HOME}/.config}/zsh}/7-scripts.zsh"
+            scripts_file="${ZDOTDIR:-${XDG_CONFIG_HOME:-${HOME}/.config}/zsh}/scripts.zsh"
             line_number=$(grep -n "^alias $alias_name=" "$scripts_file" | cut -d':' -f1)
             nvim "+$line_number" "$scripts_file"
         fi
@@ -103,8 +103,8 @@ function fzf_config() {
 # copy file name to clipboard
 alias cpfn=copy_filename
 function copy_filename() {
-    if ! command -v xclip >/dev/null; then
-        echo "Error: 'xclip' is not installed." >&2
+    if ! command -v pbcopy >/dev/null; then
+        echo "Error: 'pbcopy' is not available." >&2
         return 1
     fi
 
@@ -123,7 +123,7 @@ function copy_filename() {
     # Check if a file was found or selected
     if [ -n "$file" ]; then
         local filename=$(basename "$file")
-        echo -n "$filename" | xclip -selection clipboard
+        echo -n "$filename" | pbcopy
         echo "Filename copied to clipboard: $filename"
     else
         echo "No file selected."
@@ -133,8 +133,8 @@ function copy_filename() {
 # copy file contents
 alias cpfc=copy_contents
 function copy_contents() {
-    if ! command -v xclip >/dev/null; then
-        echo "Error: 'xclip' is not installed." >&2
+    if ! command -v pbcopy >/dev/null; then
+        echo "Error: 'pbcopy' is not available." >&2
         return 1
     fi
 
@@ -153,7 +153,7 @@ function copy_contents() {
     # Check if a file was found or selected
     if [ -n "$file" ]; then
         # Use `sed` to delete only the last newline character
-        cat "$file" | sed ':a;N;$!ba;s/\n$//' | xclip -selection clipboard
+        cat "$file" | sed ':a;N;$!ba;s/\n$//' | pbcopy
         echo "Contents of '$file' copied to clipboard."
     else
         echo "No file selected."
@@ -163,19 +163,19 @@ function copy_contents() {
 # copy the current working directory path to the clipboard
 alias cpcp=copy_current_path
 function copy_current_path() {
-    if command -v xclip >/dev/null; then
-        printf "%s" "$PWD" | xclip -selection clipboard
+    if command -v pbcopy >/dev/null; then
+        printf "%s" "$PWD" | pbcopy
         printf "%s\n" "Current working directory '$(basename "$PWD")' path copied to clipboard."
     else
-        printf "%s\n" "Error: 'xclip' command not found. Please install 'xclip' to use this function."
+        printf "%s\n" "Error: 'pbcopy' command not found."
     fi
 }
 
 # copy file real path
 alias cprp=copy_real_path
 function copy_real_path() {
-    if ! command -v xclip >/dev/null; then
-        echo "Error: 'xclip' is not installed." >&2
+    if ! command -v pbcopy >/dev/null; then
+        echo "Error: 'pbcopy' is not available." >&2
         return 1
     fi
 
@@ -194,7 +194,7 @@ function copy_real_path() {
     # Check if a file was found or selected
     if [ -n "$file" ]; then
         local full_path=$(realpath "$file")
-        echo -n "$full_path" | xclip -selection clipboard
+        echo -n "$full_path" | pbcopy
         echo "File path copied to clipboard: $full_path"
     else
         echo "No file selected."
@@ -262,8 +262,10 @@ function ecryptfs_mount() {
 alias gcggg=thesiahxyz_git
 function thesiahxyz_git() {
     choice=$(ssh "$THESIAH_GIT" "ls -a | grep -i \".*\\.git$\"" | fzf --cycle --prompt="  " --height=50% --layout=reverse --border --exit-0)
-    [ -n "$choice" ] && [ -n "$1" ] && git clone "${THESIAH_GIT:-git@${THESIAH:-thesiah.xyz}}":"$choice" "$1" ||
-    [ -n "$choice" ] && git clone "${THESIAH_GIT:-git@${THESIAH:-thesiah.xyz}}":"$choice"
+    [ -d "$HOME/Private/repos" ] || mkdir -p "$HOME/Private/repos"
+    [ -n "$choice" ] && [ -n "$1" ] && cd "$HOME/Private/repos" && git clone "${THESIAH_GIT:-git@${THESIAH:-thesiah.xyz}}":"$choice" "$1" ||
+    [ -n "$choice" ] && cd "$HOME/Private/repos" && git clone "${THESIAH_GIT:-git@${THESIAH:-thesiah.xyz}}":"$choice"
+    cd -
 }
 
 
@@ -273,16 +275,16 @@ function thesiahxyz_git() {
 # go to the path stored in the clipboard
 alias cdp=cd_clipboard_path
 function cd_clipboard_path() {
-    if command -v xclip >/dev/null; then
+    if command -v pbcopy >/dev/null; then
         local target_dir
-        target_dir="$(xclip -o -sel clipboard)"
+        target_dir="$(pbpaste)"
         if [[ -d "${target_dir}" ]]; then
             cd "${target_dir}" && printf "%s\n" "Changed directory to: ${target_dir}"
         else
             printf "%s\n" "Error: Invalid directory path or directory does not exist."
         fi
     else
-        printf "%s\n" "Error: 'xclip' command not found. Please install 'xclip' to use this function."
+        printf "%s\n" "Error: 'pbcopy' command not found."
     fi
 }
 
@@ -369,7 +371,7 @@ function fetch_git_repos_status() {
                 fi
 
                 # Get Git branch and status using __git_ps1
-                GIT_STATUS=$(__git_ps1 "%s")
+                GIT_STATUS=$(__git_ps1 "%s" 2>/dev/null)
 
                 # Colorize the Git status
                 COLORED_GIT_STATUS=$(colorize_git_status "$GIT_STATUS")
@@ -478,7 +480,6 @@ function lfcd () {
     fi
 }
 
-
 ###########################################################################################
 ###########################################################################################
 ### --- MAN --- ###
@@ -568,7 +569,7 @@ function change_nvim_config_dir() {
     echo "$config_path"
 
     # Clear existing configurations if confirmed by the user
-    echo -n "This will overwrite existing configurations. Continue? (y/n) "
+    echo -n "This will overwrite existing configurations. Continue? (y/N) "
     read reply
     if [[ $reply =~ ^[Yy]$ ]]; then
         echo "Clearing existing Neovim configurations..."
@@ -622,7 +623,7 @@ function pass_qr() { qrencode -o "$1".png -t png -Sv 40 < "$1".pgp; }
 ###########################################################################################
 ###########################################################################################
 ### --- PASTE --- ###
-if ls "${ZPLUGINDIR:-${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/zsh}/zsh-autosuggestions" >/dev/null 2>&1; then
+if ls "${ZPLUGINDIR:-${HOME}/.local/share/zsh}/zsh-autosuggestions" >/dev/null 2>&1; then
     autoload -Uz url-quote-magic
     function pasteinit() {
         OLD_SELF_INSERT=${${(s.:.)widgets[self-insert]}[2,3]}
@@ -766,25 +767,29 @@ function create_venv() {
     local env_dir="${XDG_DATA_HOME:-${HOME}/.local/share}/venvs/${1:-venv}"
     local requirements_path="${XDG_DATA_HOME:-${HOME}/.local/share}/venvs"
 
-    # Check if the environment already exists
     # Create the virtual environment
     echo "Creating new virtual environment in '$env_dir'..."
-    python3 -m venv $env_dir
+    python3 -m venv "$env_dir"
 
     # Activate the virtual environment
-    source $env_dir/bin/activate
+    source "$env_dir/bin/activate"
 
     # Optional: Install any default packages
     pip3 install --upgrade pip >/dev/null 2>&1
 
     if [ -f "$requirements_path/default-requirements.txt" ]; then
         echo "Installing packages from '$requirements_path/default-requirements.txt'..."
-        pip3 install -r "$requirements_path/default-requirements.txt" >/dev/null 2>&1
+        if ! pip3 install -r "$requirements_path/default-requirements.txt"; then
+            echo "WARNING: pip failed to install some packages from default-requirements.txt (see errors above)" >&2
+        fi
     fi
 
-    if [ -f "$requirements_path/captured-requirements.txt" ]; then
-        echo "Installing packages from '$requirements_path/captured-requirements.txt'..."
-        pip3 install -r "$requirements_path/captured-requirements.txt" >/dev/null 2>&1
+    # Restore this venv's own previously-captured packages, if any (written by deactive_venv)
+    if [ -f "$env_dir/requirements.txt" ]; then
+        echo "Restoring packages from '$env_dir/requirements.txt'..."
+        if ! pip3 install -r "$env_dir/requirements.txt"; then
+            echo "WARNING: pip failed to install some packages from $env_dir/requirements.txt (see errors above)" >&2
+        fi
     fi
 
     echo "Virtual environment '${1:-venv}' created and activated!"
@@ -793,21 +798,30 @@ function create_venv() {
 # activate or switch venvs
 alias actv=active_venv
 function active_venv() {
+    local venvs_dir="${XDG_DATA_HOME:-${HOME}/.local/share}/venvs"
     local venv="$1"
     if [[ -z "$venv" ]]; then
-        venv=$(find "$XDG_DATA_HOME/venvs" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | fzf)
+        venv=$(find "$venvs_dir" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | fzf)
     fi
-    source "$XDG_DATA_HOME/venvs/$venv/bin/activate"
+    if [[ -z "$venv" ]]; then
+        echo "No venv selected"
+        return 1
+    fi
+    if [[ ! -f "$venvs_dir/$venv/bin/activate" ]]; then
+        echo "venv '$venv' not found in $venvs_dir"
+        return 1
+    fi
+    source "$venvs_dir/$venv/bin/activate"
     python -m ensurepip --upgrade >/dev/null 2>&1
     python -m pip install --upgrade pip >/dev/null 2>&1
-    jupyter kernel --kernel=$venv
+    jupyter kernel --kernel="$venv"
 }
 
 # list venvs
 alias listv=list_venv
 function list_venv() {
     local venvs_dir="${XDG_DATA_HOME:-${HOME}/.local/share}/venvs"
-    local venvs=("$venvs_dir"/*)
+    local venvs=("$venvs_dir"/*(N))
 
     if [ ${#venvs[@]} -eq 0 ]; then
         echo "No venvs"
@@ -825,12 +839,13 @@ function list_venv() {
 # deactivate venv
 alias deactv=deactive_venv
 function deactive_venv() {
-    if [[ "$VIRTUAL_ENV" != "" ]]; then
-        if [[ ! -f "${XDG_DATA_HOME:-${HOME}/.local/share}/venvs/requirements.txt" ]]; then
-            pip3 freeze > "${XDG_DATA_HOME:-${HOME}/.local/share}/venvs/captured-requirements.txt"
-        fi
+    if [[ -n "$VIRTUAL_ENV" ]]; then
+        # Capture this venv's packages into its own folder (not a shared file),
+        # so other venvs are never polluted. create_venv restores from here.
+        pip3 freeze > "$VIRTUAL_ENV/requirements.txt"
+        echo "Captured installed packages to '$VIRTUAL_ENV/requirements.txt'"
         deactivate
-        echo "Virtual environment deactivated and all installed packages captured"
+        echo "Virtual environment deactivated"
     else
         echo "No virtual environment is active."
     fi

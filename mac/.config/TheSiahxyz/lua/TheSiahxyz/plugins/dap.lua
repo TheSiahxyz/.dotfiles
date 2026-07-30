@@ -60,6 +60,29 @@ return {
 				},
 			}
 
+			dap.adapters.codelldb = {
+				type = "server",
+				host = "127.0.0.1",
+				port = "${port}",
+				executable = {
+					command = vim.fn.stdpath("data") .. "/mason/packages/codelldb/extension/adapter/codelldb",
+					args = { "--port", "${port}" },
+				},
+			}
+
+			dap.configurations.rust = {
+				{
+					type = "codelldb",
+					request = "launch",
+					name = "Launch (Rust)",
+					program = function()
+						return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/target/debug/", "file")
+					end,
+					cwd = "${workspaceFolder}",
+					stopOnEntry = false,
+				},
+			}
+
 			for _, language in ipairs({ "javascript", "typescript" }) do
 				dap.configurations[language] = {
 					{
@@ -328,7 +351,7 @@ return {
 			-- You'll need to check that you have the required things installed
 			-- online, please don't ask me how to install them :)
 			ensure_installed = {
-				-- Update this to ensure that you have the debuggers for the langs you want
+				"codelldb", -- rust debugger
 			},
 		},
 		-- mason-nvim-dap is loaded when nvim-dap loads

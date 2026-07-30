@@ -92,15 +92,20 @@ return {
 			require("mason-lspconfig").setup({
 				ensure_installed = {
 					"bashls",
+					"cssls",
 					"dockerls",
 					"docker_compose_language_service",
+					"eslint",
 					"harper_ls",
+					"html",
 					"jdtls",
 					"jsonls",
 					"lua_ls",
 					-- "mutt_ls",
 					"pyright",
 					"ruff",
+					"sqls",
+					"tailwindcss",
 					"ts_ls",
 				},
 				automatic_enable = true,
@@ -135,6 +140,11 @@ return {
 							-- 		disableOrganizeImports = false,
 							-- 	},
 							-- },
+						})
+					end,
+					["hadolint"] = function()
+						lspconfig.hadolint.setup({
+							capabilities = capabilities,
 						})
 					end,
 					["harper_ls"] = function()
@@ -212,8 +222,18 @@ return {
 							-- },
 						})
 					end,
+					["sqls"] = function()
+						lspconfig.sqls.setup({
+							capabilities = capabilities,
+						})
+					end,
+					["sql-formatter"] = function()
+						lspconfig.sql.setup({
+							capabilities = capabilities,
+						})
+					end,
 					["ts_ls"] = function()
-						lspconfig.ruff.setup({
+						lspconfig.ts_ls.setup({
 							capabilities = capabilities,
 						})
 					end,
@@ -223,13 +243,10 @@ return {
 			local lint = require("lint")
 			lint.linters_by_ft = {
 				dockerfile = { "hadolint" },
-				javascript = { "eslint_d" },
-				typescript = { "eslint_d" },
-				javascriptreact = { "eslint_d" },
-				typescriptreact = { "eslint_d" },
-				svelte = { "eslint_d" },
 				python = { "pylint" },
 				sh = { "shellcheck" },
+				sql = { "sqlfluff" },
+				svelte = { "eslint_d" },
 			}
 
 			local lint_augroup = vim.api.nvim_create_augroup("lint", { clear = true })
@@ -246,19 +263,38 @@ return {
 					"black", -- python formatter
 					"debugpy", -- python debuger
 					"eslint_d", -- eslint linter
-					-- "hadolint", -- docker linter
+					"hadolint", -- docker linter
 					"isort", -- python formatter
 					"java-debug-adapter", -- java debugger
 					"java-test", -- java test
 					"js-debug-adapter", -- javascript debugger
 					"markdown-toc", -- markdown toc
 					"prettier", -- prettier formatter
+					"prettierd", -- css, java, javascript, typescript formatter
 					"pylint", -- python linter
 					"ruff", -- python formatter
+					"rust-analyzer", -- rust lsp
 					"shellcheck", -- bash lint
 					"shfmt", -- sh formatter
+					"sqlfluff", -- sql linter
+					"sql-formatter", -- sql formatter
 					"stylua", -- lua formatter
+					"bashls", -- bash lsp
+					"cssls", -- css lsp
+					"dockerls", -- dockerfile lsp
+					"docker_compose_language_service", -- docker compose lsp
+					"eslint", -- eslint lsp
+					"harper_ls", -- grammar lsp
+					"html", -- html lsp
+					"jdtls", -- java lsp
+					"jsonls", -- json lsp
+					"lua_ls", -- lua lsp
+					"pyright", -- python lsp
+					"sqls", -- sql lsp
+					"tailwindcss", -- tailwind lsp
+					"ts_ls", -- typescript lsp
 				},
+				run_on_start = false,
 				integrations = {
 					["mason-lspconfig"] = true,
 					["mason-null-ls"] = false,
@@ -324,20 +360,22 @@ return {
 			require("conform").setup({
 				formatters_by_ft = {
 					bash = { "shfmt" },
-					-- css = { "prettier" },
+					css = { "prettier" },
 					graphql = { "prettier" },
 					html = { "prettier" },
-					-- javascript = { "prettier" },
-					-- javascriptreact = { "prettier" },
-					-- json = { "prettier" },
+					javascript = { "prettier" },
+					javascriptreact = { "prettier" },
+					json = { "prettier" },
 					liquid = { "prettier" },
 					lua = { "stylua" },
 					markdown = { "prettier" },
 					python = { "ruff", "isort", "black" },
+					rust = { "rustfmt" },
 					sh = { "shfmt" },
+					sql = { "sql-formatter" },
 					svelte = { "prettier" },
-					-- typescript = { "prettier" },
-					-- typescriptreact = { "prettier" },
+					typescript = { "prettier" },
+					typescriptreact = { "prettier" },
 					vimwiki = { "prettier" },
 					yaml = { "prettier" },
 					zsh = { "beautysh" },
@@ -350,12 +388,12 @@ return {
 					end
 					local ft = vim.bo[bufnr].filetype
 					local off = {
-						javascript = true,
-						typescript = true,
-						javascriptreact = true,
-						typescriptreact = true,
-						json = true,
-						css = true,
+						javascript = false,
+						typescript = false,
+						javascriptreact = false,
+						typescriptreact = false,
+						json = false,
+						css = false,
 					}
 					if off[ft] then
 						return false

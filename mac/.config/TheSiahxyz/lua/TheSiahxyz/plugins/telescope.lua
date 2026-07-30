@@ -286,7 +286,7 @@ return {
 									},
 								},
 								vimgrep_arguments = {
-									"rg",
+									"/usr/bin/rg",
 									"--color=never",
 									"--no-heading",
 									"--with-filename",
@@ -619,6 +619,18 @@ return {
 							["<M-k"] = actions.nop,
 						},
 					},
+					vimgrep_arguments = {
+						"/usr/bin/rg",
+						"--color=never",
+						"--no-heading",
+						"--with-filename",
+						"--line-number",
+						"--column",
+						"--smart-case",
+						"--follow",
+						"--hidden",
+						"--no-ignore",
+					},
 					file_ignore_patterns = {
 						"node_modules",
 						"yarn.lock",
@@ -632,7 +644,7 @@ return {
 						"%lock%.json",
 					},
 					find_command = {
-						"rg",
+						"/usr/bin/rg",
 						"--files",
 						"--follow",
 						"--hidden",
@@ -668,7 +680,7 @@ return {
 					find_files = {
 						-- `hidden = true` will still show the inside of `.git/` as it's not `.gitignore`d.
 						find_command = {
-							"rg",
+							"/usr/bin/rg",
 							"--files",
 							"--follow",
 							"--hidden",
@@ -678,9 +690,9 @@ return {
 							"--glob",
 							"!**/.git/*/*/*",
 							"--glob",
-							"!**/.next/*/*/*",
+							"!**/.next/*",
 							"--glob",
-							"!**/node_modules/*/*/*",
+							"!**/node_modules/*",
 						},
 					},
 				},
@@ -735,7 +747,7 @@ return {
 				pickers
 					.new({}, {
 						prompt_title = "Find Files",
-						finder = finders.new_oneshot_job({ "fd", "--type", "f" }, {
+						finder = finders.new_oneshot_job({ "/usr/bin/fd", "--type", "f" }, {
 							entry_maker = function(entry)
 								local is_open = opened_files[vim.fn.fnamemodify(entry, ":p")] -- Match absolute paths
 								local displayer = entry_display.create({
@@ -766,7 +778,7 @@ return {
 				require("telescope.builtin").find_files({
 					cwd = vim.fn.expand("~"),
 					find_command = {
-						"rg",
+						"/usr/bin/rg",
 						"--files",
 						"--follow",
 						"--hidden",
@@ -820,7 +832,16 @@ return {
 			vim.keymap.set("n", "<leader>fv", function()
 				require("telescope.builtin").find_files({
 					cwd = vim.fn.stdpath("config"),
-					find_command = { "fd", "--type", "f", "--follow", "--color", "never", "--extension", "lua" },
+					find_command = {
+						"/usr/bin/fd",
+						"--type",
+						"f",
+						"--follow",
+						"--color",
+						"never",
+						"--extension",
+						"lua",
+					},
 				})
 			end, { desc = "Find neovim config files" })
 			vim.keymap.set("n", "<leader>fV", function()
@@ -1061,7 +1082,7 @@ return {
 						-- defaults to {"png", "jpg", "mp4", "webm", "pdf"}
 						filetypes = { "png", "jpg", "mp4", "mkv", "webm", "pdf" },
 						-- find command (defaults to `fd`)
-						find_cmd = "rg",
+						find_cmd = "/usr/bin/rg",
 					},
 				},
 			})

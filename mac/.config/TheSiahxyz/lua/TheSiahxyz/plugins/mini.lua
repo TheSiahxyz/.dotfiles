@@ -475,16 +475,16 @@ return {
 					or vim.fn.fnamemodify(curr_entry.path, ":h") -- Use parent directory if entry is a file
 				-- vim.notify("Current directory: " .. curr_dir, vim.log.levels.INFO)
 				local script = [[
-            tell application "System Events"
-              try
-                set theFile to the clipboard as alias
-                set posixPath to POSIX path of theFile
-                return posixPath
-              on error
-                return "error"
-              end try
-            end tell
-            ]]
+tell application "System Events"
+  try
+    set theFile to the clipboard as alias
+    set posixPath to POSIX path of theFile
+    return posixPath
+  on error
+    return "error"
+  end try
+end tell
+]]
 				local output = vim.fn.has("mac") == 1 and vim.fn.system("osascript -e " .. vim.fn.shellescape(script))
 					or vim.fn.system("xclip -o -selection clipboard")
 				if vim.v.shell_error ~= 0 or output:find("error") then

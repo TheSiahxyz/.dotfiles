@@ -27,7 +27,6 @@ bind-key x pb-delete
 # Macros
 macro a set browser "tsp yt-dlp --embed-metadata -xic -f bestvideo*+bestaudio/best -O after_move:'%(title)s [%(id)s].%(ext)s'" ; open-in-browser ; set browser linkhandler ; -- "Download a file via yt-dlp"
 macro c set browser "clonerepo" ; open-in-browser ; set browser linkhandler ; -- "Clone a git repo"
-macro d set browser "dmenuhandler" ; open-in-browser ; set browser linkhandler ; -- "Open dmenu handler"
 macro e set browser "nvim ~/.config/newsboat/config" ; open-in-browser ; set browser linkhandler ; -- "Open newsboat config"
 macro l set browser "lynx" ; open-in-browser ; set browser linkhandler ; -- "Open link in lynx"
 macro m set browser "mpc add $(yt-dlp -f bestaudio --get-url %u | tail -n 1) && mpc play" ; open-in-browser ; -- "Play link in mpc"

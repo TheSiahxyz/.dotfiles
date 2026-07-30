@@ -90,7 +90,24 @@ return {
 			-- Command or method to open links with
 			-- Options: "netrw", "system" (default OS browser), "clipboard"; or "firefox", "chromium" etc.
 			-- By default, this is "netrw", or "system" if netrw is disabled
-			default_action = "system",
+			-- Use custom function to open URLs asynchronously (prevents blocking)
+			default_action = function(url)
+				-- Use vim.ui.open if available (Neovim 0.10+)
+				if vim.ui.open then
+					vim.ui.open(url)
+				else
+					-- Fallback: detect OS and use appropriate command
+					local cmd
+					if vim.fn.has("mac") == 1 then
+						cmd = "open"
+					elseif vim.fn.has("win32") == 1 then
+						cmd = "start"
+					else
+						cmd = "xdg-open"
+					end
+					vim.fn.jobstart({ cmd, url }, { detach = true })
+				end
+			end,
 			-- Set the register to use when yanking
 			-- Default: + (system clipboard)
 			default_register = "+",

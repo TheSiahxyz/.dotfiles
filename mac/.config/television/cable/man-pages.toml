@@ -1,0 +1,35 @@
+[metadata]
+name = "man-pages"
+description = "Browse and preview system manual pages"
+requirements = ["man", "apropos", "col", "bat"]
+
+[source]
+command = "man -k ."
+
+[ui]
+layout = "landscape"
+
+[ui.preview_panel]
+header = "{0}"
+
+[keybindings]
+ctrl-b = "actions:bat"
+ctrl-v = "actions:nvim"
+
+[preview]
+command = "sh -c \"man $(echo {0} | sed -E 's/^([^ ]+) \\(([^)]+)\\).*/\\2 \\1/') | col -bx | bat -l man -p --color=always\""
+
+[preview.env]
+MANWIDTH = "80"
+MANPAGER = "cat"
+PAGER = "cat"
+
+[actions.bat]
+description = "View with bat"
+command = "echo '{0}' | sed -E 's/^([^ ]+) \\(([^)]+)\\).*/\\2 \\1/' | xargs -r man | col -bx | bat -l man -p"
+mode = "fork"
+
+[actions.nvim]
+description = "Open in Neovim"
+command = "echo '{0}' | sed -E 's/^([^ ]+) \\(([^)]+)\\).*/\\2 \\1/' | xargs -r man | nvim -"
+mode = "fork"

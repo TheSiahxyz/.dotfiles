@@ -114,18 +114,27 @@ zstyle ':fzf-tab:*' switch-group ',' '.'    # switch group using `,` and `.`
 [ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/zshnameddirrc" ] && source "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/zshnameddirrc"
 
 
-### --- AVANTE --- ###
-export AVANTE_ANTHROPIC_API_KEY="$(pass show api/claude/nvim | head -n1)"
-export AVANTE_OPENAI_API_KEY="$(pass show api/chatGPT/nvim | head -n1)"
-# export AVANTE_AZURE_OPENAI_API_KEY="$(pass show api/azure/nvim | head -n1)"
-# export AVANTE_GEMINI_API_KEY="$(pass show api/gemini/nvim | head -n1)"
-# export AVANTE_CO_API_KEY="$(pass show api/cohere/nvim | head -n1)"
-# export AVANTE_AIHUBMIX_API_KEY="$(pass show api/aihubmix/nvim | head -n1)"
-# export AVANTE_MOONSHOT_API_KEY="$(pass show api/moonshot/nvim | head -n1)"
+### --- SECRETS --- ###
+export_pass() {
+    local var="$1" entry="$2" value
+    value="$(pass show "$entry" 2>/dev/null | head -n1)"
+    [ -n "$value" ] && export "$var=$value"
+    return 0
+}
 
+if command -v pass >/dev/null 2>&1 && [ -d "${PASSWORD_STORE_DIR:-${HOME}/.password-store}" ]; then
+    ### --- AVANTE --- ###
+    export_pass AVANTE_ANTHROPIC_API_KEY api/claude/nvim
+    export_pass AVANTE_OPENAI_API_KEY api/chatGPT/nvim
+    # export_pass AVANTE_AZURE_OPENAI_API_KEY api/azure/nvim
+    # export_pass AVANTE_GEMINI_API_KEY api/gemini/nvim
+    # export_pass AVANTE_CO_API_KEY api/cohere/nvim
+    # export_pass AVANTE_AIHUBMIX_API_KEY api/aihubmix/nvim
+    # export_pass AVANTE_MOONSHOT_API_KEY api/moonshot/nvim
 
-### --- OPENAI --- ###
-export OPENAI_API_KEY="$(pass show api/chatGPT/nvim | head -n1)"
+    ### --- OPENAI --- ###
+    export_pass OPENAI_API_KEY api/chatGPT/nvim
+fi
 
 
 ## --- TMUX --- ###

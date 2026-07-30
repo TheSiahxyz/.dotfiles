@@ -1,0 +1,57 @@
+#!/bin/sh
+
+# Define input and output files
+url="https://unicode.org/Public/emoji/latest/emoji-test.txt"
+input_file="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/global/.local/share/thesiah/chars/emoji_raw"
+temp_file="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/global/.local/share/thesiah/chars/emoji_temp"
+output_file="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/global/.local/share/thesiah/chars/emoji"
+
+# Create the directory for output files if it doesn't exist
+mkdir -p "$(dirname "$input_file")"
+
+# Download the emoji file
+echo "Downloading emoji-test.txt from Unicode..."
+if curl -o "$input_file" -L "$url"; then
+  echo "Download complete! File saved to: $input_file"
+else
+  echo "Failed to download emoji"
+  exit 1
+fi
+
+# VS16 (U+FE0F)
+vs16="$(printf '\xEF\xB8\x8F')"
+
+awk '
+    /^[[:space:]]*$/ || /^#/ { next }
+    !/(fully-qualified|component)/ { next }
+    /200D/ { next }
+    $2 ~ /1F3F[BCDEF]/ { next }
+    { print }
+' "$input_file" >"$temp_file"
+
+# Extract + strip VS16
+awk -F'#' '
+    {
+        if (NF >= 2) {
+            full_data = $2
+            gsub(/^[[:space:]]+|[[:space:]]+$/, "", full_data)
+
+            split(full_data, parts, " ")
+            emoji = parts[1]
+
+            description = ""
+            for (i = 3; i <= length(parts); i++) {
+                description = description parts[i] " "
+            }
+
+            gsub(/[[:space:]]+/, " ", description)
+            gsub(/^[[:space:]]+|[[:space:]]+$/, "", description)
+
+            print emoji, description
+        }
+    }
+' "$temp_file" |
+  sed "s/$vs16//g" >"$output_file"
+
+rm -rf "$input_file" "$temp_file"
+echo "Processing complete! File saved to: $output_file"

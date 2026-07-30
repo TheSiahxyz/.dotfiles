@@ -2572,14 +2572,6 @@ config.bind(",nb", "spawn --userscript add-nextcloud-bookmarks")
 config.bind(",nB", "hint links userscript add-nextcloud-bookmarks")
 config.bind(",nc", "spawn --userscript add-nextcloud-cookbook")
 config.bind(",nC", "hint links userscript add-nextcloud-cookbook")
-config.bind(
-    ",pp",
-    "spawn --userscript qute-pass --dmenu-invocation passmenu2 --unfiltered",
-)
-config.bind(
-    ",pn",
-    'spawn --userscript qute-pass --dmenu-invocation passmenu2 --unfiltered --username-pattern "name: (.+)"',
-)
 config.bind(",qh", "open -t qute://help/index.html")
 config.bind(",qc", "open -t qute://help/commands.html#cmd-repeat")
 config.bind(",qr", "spawn --userscript qr")

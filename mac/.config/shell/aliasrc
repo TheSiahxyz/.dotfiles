@@ -12,7 +12,7 @@
 [ -f "$MBSYNCRC" ] && alias mbsync='mbsync -c $MBSYNCRC'
 
 # sudo not required for some system commands
-for command in blkid lsblk mount umount pacman poweroff reboot shutdown su sv updatedb; do
+for command in mount shutdown su umount; do
     alias $command="sudo $command"
 done
 unset command
@@ -42,9 +42,6 @@ alias .....='../../../..'
 
 # abook
 alias abook='abook -f ~/.config/abook/addressbook'
-
-# avante
-alias avt='nvim -c "lua vim.defer_fn(function()require(\"avante.api\").zen_mode()end, 100)"'
 
 # bat
 alias bath='bat cache --build'
@@ -80,10 +77,15 @@ alias 666='chmod -R 666'
 alias 755='chmod -R 755'
 alias 777='chmod -R 777'
 
+# claude
+alias cld='claude'
+alias cldd='claude --dangerously-skip-permissions'
+alias cldr='claude --dangerously-skip-permissions --resume'
+
 # copy
-alias CC='$(fc -l -n -1) | xclip -selection clipboard'
+alias CC='$(fc -l -n -1) | pbcopy'
 ialias cp='cp -iv'
-alias pwdc='pwd | xclip -selection clipboard'
+alias pwdc='pwd | pbcopy'
 
 # curl
 ialias curl='curl --silent --show-error'
@@ -209,7 +211,7 @@ alias dgst='dotbare status'
 alias ff='fastfetch'
 
 # fcitx5-remote
-# alias fr='fcitx5-remote'
+# alias fr='fcitx5-remote' # macOS uses its own input sources
 
 # ffmpeg
 alias ffmpeg='ffmpeg -hide_banner'
@@ -243,7 +245,6 @@ alias hx='hexdump -C'
 # hugo
 alias hss='hugo server --noHTTPCache'
 alias hcl='hugo --cleanDestinationDir'
-alias crl="ssh $THESIAH_SERVER 'cat /var/log/nginx/recordings.access.log'"
 
 # ip
 ialias ip='ip -color=auto'
@@ -259,7 +260,7 @@ alias k9='kill -9'
 alias k15='kill -15'
 
 # lf
-# alias lf='lfub'
+alias lf='lfub'
 
 # mime
 alias mimereset="update-desktop-database ${XDG_DATA_HOME:-${HOME}/.local/share}/applications"
@@ -272,6 +273,9 @@ ialias mv='mv -iv'
 
 # mysql
 alias msr='mysql -u si -p'
+
+# ncmpcpp
+alias mu='ncmpcpp'
 
 # network
 alias wi='sudo wifi-menu'
@@ -295,19 +299,28 @@ alias snv='sudo nvim'
 alias vll='lastfiles -l'
 alias vln='$EDITOR -c '\''execute "edit " . v:oldfiles[0] | normal ''0'\'
 
-# nxsiv
-alias nsxiv='nsxiv -p'
+
+# avante
+alias avt='nvim -c "lua vim.defer_fn(function()require(\"avante.api\").zen_mode()end, 100)"'
+
+# tldr
+alias an='tldr'
+
+# vpn
+alias ovpn='sudo openvpn --config ~/.config/openvpn/thesiah.ovpn'
 
 # obsidian
 alias vo="cd $HOME/Obsidian/SI && nvim Dashboard.md"
 
+# nginx log
+alias crl="ssh $THESIAH_SERVER 'cat /var/log/nginx/recordings.access.log'"
+
 # open
-# alias open='xdg-open'
+# alias open='xdg-open' # macOS ships its own open(1)
 
 # pacman
 command -v pacman > /dev/null 2>&1 && {
   alias -g pcy='pacman -Syu'
-  alias -g pcyr='pacman -Syu && remaps'
   alias -g pcs='pacman -S'
   alias -g pcss='pacman -Ss'
   alias -g pcqs='pacman -Qs'
@@ -381,6 +394,9 @@ alias ref='bmshortcuts >/dev/null; source ${XDG_CONFIG_HOME:-${HOME}/.config}/sh
 # skype
 alias skype='skypeforlinux'
 
+# sql
+alias lsql='env -u PGSERVICEFILE lazysql'
+
 # ssh
 alias gts="ssh $THESIAH_SERVER"
 alias wwr="ssh diary"
@@ -391,11 +407,11 @@ alias sm='setopt no_nomatch && rm -rf *.rej *.orig >/dev/null 2>&1'
 alias smi='setopt no_nomatch && rm -rf *.rej *.orig >/dev/null 2>&1 && unsetopt no_nomatch; sudo make clean install; rm -f config.h'
 
 # suffix
-alias -s {pdf,PDF}='background mupdf'
-alias -s {jpg,JPG,png,PNG}='background gpicview'
-alias -s {ods,ODS,odt,ODT,odp,ODP,doc,DOC,docx,DOCX,xls,XLS,xlsx,XLSX,xlsm,XLSM,ppt,PPT,pptx,PPTX,csv,CSV}='background libreoffice'
-alias -s {html,HTML}='background chromium'
-alias -s {mp4,MP4,mov,MOV,mkv,MKV}='background vlc'
+alias -s {pdf,PDF}='open'
+alias -s {jpg,JPG,png,PNG}='open'
+alias -s {ods,ODS,odt,ODT,odp,ODP,doc,DOC,docx,DOCX,xls,XLS,xlsx,XLSX,xlsm,XLSM,ppt,PPT,pptx,PPTX,csv,CSV}='open'
+alias -s {html,HTML}='open'
+alias -s {mp4,MP4,mov,MOV,mkv,MKV}='open'
 alias -s {zip,ZIP,war,WAR}="unzip -l"
 alias -s {jar,JAR}="java -jar"
 alias -s gz="tar -tf"
@@ -411,10 +427,7 @@ alias ttf='tar -tf'
 # task
 alias tsc='task-switch-context'
 alias twt='taskwarrior-tui'
-alias tasksync='task sync && command pkill -RTMIN+25 ${STATUSBAR:-dwmblocks} && task'
-
-# tldr
-alias an='tldr'
+alias tasksync='task sync && task'
 
 # tmux
 alias sts='tmux source $XDG_CONFIG_HOME/tmux/tmux.conf'
@@ -454,7 +467,7 @@ alias -g L='| less'
 alias -g H='| head'
 alias -g H2='| head -n 20'
 alias -g X='| xargs -I@'
-alias -g C='| xclip -selection clipboard'
+alias -g C='| pbcopy'
 alias -g Fj='| jq .'
 alias -g Fy='| yq .'
 alias -g Fx='| xmllint --format -'
@@ -468,8 +481,9 @@ alias uzl='unzip -l'
 alias vi='vim'
 alias vi.='vim .'
 
-# vpn
-alias ovpn='sudo openvpn --config ~/.config/openvpn/thesiah.ovpn'
+# vnc
+alias vncs='vncserver :1'
+alias xvncs='x11vnc -display :0 -usepw'
 
 # watch
 alias w1='watch -n 1'
@@ -489,18 +503,27 @@ alias xauto='xrandr --auto'
 # xset
 alias xoff='xset s off -dpms'
 
-# yazi
-alias a='yazi'
+# youtube-music
+alias ym='youtube-music'
 
 # zathura
-alias za='zathura'
+# alias za='zathura' # not packaged for macOS
 
 # zsh
 alias sps="source ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/profile"
 alias szs="source ${XDG_CONFIG_HOME:-${HOME}/.config}/zsh/.zshrc"
 
-alias ylogh='ylog -s hidden -c us | grep $(LC_TIME=C date +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
-alias ylogi='ylog -s hidden -c us | grep $(LC_TIME=C date -v-1d +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
-alias ylogt='ylog -s diary -c us | grep $(LC_TIME=C date +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
-alias ylogy='ylog -s diary -c us | grep $(LC_TIME=C date -v-1d +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
+# personal
+alias ylogp='ylog -s peertube -c us | grep $(LC_TIME=C date +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
+alias ylogP='ylog -s peertube -c us | grep $(LC_TIME=C date -v-1d +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
+alias ylogd='ylog -s diary -c us | grep $(LC_TIME=C date +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
+alias ylogD='ylog -s diary -c us | grep $(LC_TIME=C date -v-1d +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
+alias ylogt='ylog -s diary -c us | grep $(LC_TIME=C date -v-2d +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
+alias ylogr='ylog -s recordings -c us | grep $(LC_TIME=C date +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
+alias ylogR='ylog -s recordings -c us | grep $(LC_TIME=C date -v-1d +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
+alias ylogT='ylog -s recordings -c us | grep $(LC_TIME=C date -v-2d +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
 alias ylogu='ylog -s diary -c us'
+alias ylogv='ylog -s videos -c us | grep $(LC_TIME=C date +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
+alias ylogV='ylog -s videos -c us | grep $(LC_TIME=C date -v-1d +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
+alias yloga='ylogd; ylogr; ylogp; ylogv'
+alias ylogA='ylogD; ylogR; ylogP; ylogV'

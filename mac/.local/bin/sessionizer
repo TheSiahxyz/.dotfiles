@@ -9,7 +9,7 @@ sessionizer() {
       --prompt "💡  " \
       --bind "ctrl-a:change-prompt(💡  )+reload(sesh list -d -H --icons)" \
       --bind "ctrl-e:change-prompt(📑  )+reload(sesh list -d -c -H --icons)" \
-      --bind "ctrl-f:change-prompt(🔎  )+reload(sesh list -d -d -z -H --icons)" \
+      --bind "ctrl-f:change-prompt(🔎  )+reload(sesh list -d -z -H --icons)" \
       --bind "ctrl-g:change-prompt(  )+reload(fd -H -d 1 -d -t d -E .Trash -E .git -E .cache . $HOME/Private/repos $HOME/Public/repos | sed 's|$HOME|~|g')" \
       --bind "ctrl-t:change-prompt(🪟  )+reload(sesh list -d -t --icons)" \
       --bind "ctrl-v:execute($EDITOR ${0})+abort" \
@@ -28,8 +28,10 @@ M-cr open in editor
   )" 2>/dev/null
 
   case "$path" in
+  "") ;;
   ^*) sessionizer ;;
-  *) sesh connect "$path" >/dev/null 2>&1 && exit ;;
+  /*|\~*) sesh connect "$path" >/dev/null 2>&1 && exit ;;
+  *) sesh connect "${path#* }" >/dev/null 2>&1 && exit ;;
   esac
 }
 

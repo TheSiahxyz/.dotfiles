@@ -125,7 +125,7 @@ bindkey '^X^X^U' print-unix-timestamp
 
 
 ### --- VI-MODE --- ###
-if [[ -f "${ZPLUGINDIR:-${HOME}/.local/bin/zsh}/zsh-vi-mode/zsh-vi-mode.plugin.zsh" ]]; then
+if [[ -f "${ZPLUGINDIR:-${HOME}/.local/share/zsh}/zsh-vi-mode/zsh-vi-mode.plugin.zsh" ]]; then
     ### --- ZSH-VI-MODE--- ###
     # config
     ZVM_INIT_MODE=sourcing
@@ -163,13 +163,15 @@ if [[ -f "${ZPLUGINDIR:-${HOME}/.local/bin/zsh}/zsh-vi-mode/zsh-vi-mode.plugin.z
         bindkey -s '^B' '^ubc -lq\n'
         bindkey -s '^D' '^ucdi\n'
         bindkey -s '^F' '^ufzffiles\n'
-        bindkey -s '^G' '^uyazi\n'
+        bindkey -s '^G' '^ulf\n'
+        # bindkey -s '^G' '^uyazi\n'
         bindkey -s '^N' '^ulastfiles\n'
         bindkey -s '^O' '^utmo\n'
         bindkey -s '^P' '^ufzfpass\n'
         bindkey -s '^Q' '^uhtop\n'
         bindkey -s '^T' '^usessionizer\n'
-        bindkey -s '^Y' '^uyazicd\n'
+        bindkey -s '^Y' '^ulfcd\n'
+        # bindkey -s '^Y' '^uyazicd\n'
         bindkey -s '^Z' '^upd\n'
         # bindkey -s '^_' '^u\n'
 
@@ -189,10 +191,10 @@ if [[ -f "${ZPLUGINDIR:-${HOME}/.local/bin/zsh}/zsh-vi-mode/zsh-vi-mode.plugin.z
         #  zvm_bind_script viins '^X^]' '^u\n'
         zvm_bind_script viins '^X^_' 'fzffns'
         zvm_bind_script viins '^X^X^B' 'rbackup'
-        zvm_bind_script viins '^X^X^P' 'pcyr'
+        zvm_bind_script viins '^X^X^P' 'brew update && brew upgrade'
         zvm_bind_script viins '^X^X^R' 'rbackup -r'
         zvm_bind_script viins '^X^X^S' 'sshadd'
-        zvm_bind_script viins '^X^X^Y' 'yay -Syu && remaps'
+        zvm_bind_script viins '^X^X^Y' 'brew update && brew upgrade --greedy'
 
         # widgets
         zvm_define_widget sudo-command-line
@@ -309,13 +311,13 @@ else
     bindkey -s '^B' '^ubc -lq\n'
     bindkey -s '^D' '^ucdi\n'
     bindkey -s '^F' '^ufzffiles\n'
-    bindkey -s '^G' '^uyazi\n'
+    bindkey -s '^G' '^ulf\n'
     bindkey -s '^N' '^ulastfiles\n'
     bindkey -s '^O' '^utmo\n'
     bindkey -s '^P' '^ufzfpass\n'
     bindkey -s '^Q' '^uhtop\n'
     bindkey -s '^T' '^usessionizer\n'
-    bindkey -s '^Y' '^uyazicd\n'
+    bindkey -s '^Y' '^ulfcd\n'
     bindkey -s '^Z' '^upd\n'
     bindkey -s '^_' '^ucht\n'
     bindkey -s '^X^A' '^uali\n'
@@ -323,18 +325,20 @@ else
     bindkey -s '^X^D' '^ufD\n'
     bindkey -s '^X^F' '^ugitfiles\n'
     bindkey -s '^X^G' '^urgafiles '
-    bindkey -s '^X^L' '^ugloac\n'
+    bindkey -s '^X^L' '^u\n'
     bindkey -s '^X^N' '^ulastfiles -l\n'
-    # bindkey -s '^X^O' '^u\n'
+    bindkey -s '^X^O' '^ugloac\n'
     bindkey -s '^X^Q' '^ufpkill\n'
     bindkey -s '^X^R' '^ufgst\n'
     bindkey -s '^X^T' '^ugitstagedfiles\n'
     bindkey -s '^X^U' '^ugitupdate\n'
-    # bindkey -s '^X^]' '^u\n'
+    bindkey -s '^X^]' '^uylogd\n'
     bindkey -s '^X^_' '^ufzffns\n'
     bindkey -s '^X^X^B' '^urbackup\n'
-    bindkey -s '^X^X^P' '^upcyr\n'
+    bindkey -s '^X^X^O' '^uylogD\n'
+    bindkey -s '^X^X^P' '^ubrew update && brew upgrade\n'
     bindkey -s '^X^X^R' '^urbackup -r\n'
     bindkey -s '^X^X^S' '^usshadd\n'
-    bindkey -s '^X^X^Y' '^uyay -Syu && remaps\n'
+    bindkey -s '^X^X^Y' '^ubrew update && brew upgrade --greedy\n'
+    bindkey -s '^X^X^]' '^uylogd\n'
 fi

@@ -4,23 +4,6 @@
             "complex_modifications": {
                 "rules": [
                     {
-                        "description": "R_ALT to switch input languages as it is in Windows (especially Korean)",
-                        "manipulators": [
-                            {
-                                "from": { "key_code": "right_alt" },
-                                "to": [
-                                    {
-                                        "key_code": "spacebar",
-                                        "lazy": true,
-                                        "modifiers": ["left_control", "left_alt"],
-                                        "repeat": false
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
                         "description": "Disable Cmd+H Hide (rev 2)",
                         "manipulators": [
                             {
@@ -80,6 +63,12 @@
             ],
             "name": "Default profile",
             "selected": true,
+            "simple_modifications": [
+                {
+                    "from": { "key_code": "right_command" },
+                    "to": [{ "key_code": "f18" }]
+                }
+            ],
             "virtual_hid_keyboard": { "keyboard_type_v2": "ansi" }
         }
     ]

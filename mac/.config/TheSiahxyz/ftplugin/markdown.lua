@@ -1,8 +1,8 @@
 -- Function to check if the current file is in the Obsidian repository
 local function is_in_obsidian_repo()
 	local current_file_path = vim.fn.expand("%:p:h")
-	local home = os.getenv("HOME")
-	local obsidian_path = home .. "/Private/repos/Obsidian/"
+	local user = os.getenv("USER") -- Get the current user's name from the environment variable
+	local obsidian_path = "/home/" .. user .. "/Private/repos/Obsidian/"
 
 	return string.find(current_file_path, obsidian_path) ~= nil
 end
@@ -215,7 +215,17 @@ end
 
 -- Show LSP diagnostics (inlay hints) in a hover window / popup lamw26wmal
 vim.api.nvim_create_autocmd("FileType", {
-	pattern = { "markdown", "mdx", "mdown", "mkd", "mkdn", "mdwn" },
+	pattern = {
+		"markdown",
+		"markdown.mdx",
+		"vimwiki",
+		"quarto",
+		"mdx",
+		"mdown",
+		"mkd",
+		"mkdn",
+		"mdwn",
+	},
 	callback = function()
 		vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
 			buffer = 0,
@@ -231,17 +241,7 @@ vim.api.nvim_create_autocmd("FileType", {
 
 -- FileType autocmd for markdown files
 vim.api.nvim_create_autocmd("FileType", {
-	pattern = {
-		"markdown",
-		"markdown.mdx",
-		"vimwiki",
-		"quarto",
-		"mdx",
-		"mdown",
-		"mkd",
-		"mkdn",
-		"mdwn",
-	},
+	pattern = { "markdown", "mdx", "mdown", "mkd", "mkdn", "mdwn" },
 	callback = function()
 		local ok, in_obsidian = pcall(function()
 			return is_in_obsidian_repo()
@@ -267,6 +267,12 @@ vim.api.nvim_create_autocmd("FileType", {
 		vim.cmd([[iabbrev <buffer> VV ↓]])
 	end,
 })
+
+-- this setting makes markdown auto-set the 80 text width limit when typing
+-- vim.cmd('set fo+=a')
+if is_in_obsidian_repo() then
+	vim.bo.textwidth = 175 -- No limit for Obsidian repository
+end
 
 -- Makrdown.nvim settings
 local markdown_settings = {
@@ -459,21 +465,6 @@ vim.keymap.set(
 
 -- preview
 vim.keymap.set("n", "<leader>mp", ":MarkdownPreview<CR>", { desc = "Markdown preview" })
-
--- snippet
-local ls = require("luasnip")
-
-vim.keymap.set({ "i", "s" }, "<C-n>", function()
-	if ls.choice_active() then
-		ls.change_choice(1)
-	end
-end, { silent = true, desc = "LuaSnip next choice" })
-
-vim.keymap.set({ "i", "s" }, "<C-p>", function()
-	if ls.choice_active() then
-		ls.change_choice(-1)
-	end
-end, { silent = true, desc = "LuaSnip prev choice" })
 
 -- traversal
 vim.keymap.set("n", "<Tab>", "<Plug>Markdown_Fold", { desc = "Tab is for moving around only" })

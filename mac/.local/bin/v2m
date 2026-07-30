@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# Extract MP3 audio from a video file
+
+if [ $# -eq 0 ]; then
+    echo "Usage: video2mp3 <input_file> [output_file]"
+    echo "Example: video2mp3 video.mp4"
+    echo "Example: video2mp3 video.mp4 audio.mp3"
+    exit 1
+fi
+
+INPUT="$1"
+
+# Check that the file exists
+if [ ! -f "$INPUT" ]; then
+    echo "Error: file not found: $INPUT"
+    exit 1
+fi
+
+# Determine the output filename
+if [ $# -eq 2 ]; then
+    OUTPUT="$2"
+else
+    # Strip the extension from the input file and append .mp3
+    OUTPUT="${INPUT%.*}.mp3"
+fi
+
+echo "Converting: $INPUT -> $OUTPUT"
+
+# Extract mp3 with ffmpeg (high quality: 320kbps)
+ffmpeg -i "$INPUT" -vn -acodec libmp3lame -b:a 320k "$OUTPUT"
+
+if [ $? -eq 0 ]; then
+    echo "✓ Done: $OUTPUT"
+else
+    echo "✗ An error occurred"
+    exit 1
+fi

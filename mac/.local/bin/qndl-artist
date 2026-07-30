@@ -1,0 +1,250 @@
+#!/bin/sh
+# qndl-artist — 아티스트 폴더/메타데이터 통일 헬퍼
+export LC_ALL="${LC_ALL:-C.UTF-8}"
+
+MUSIC="${XDG_MUSIC_DIR:-$HOME/Music}"
+ALIASES="${QNDL_ALIASES:-${XDG_CONFIG_HOME:-$HOME/.config}/mpd/artist-aliases.tsv}"
+PLAYLIST="${QNDL_MPD_PLAYLIST:-$HOME/.config/mpd/playlists/entire.m3u}"
+
+# 이름 → 표준명. 맵 정확일치(연쇄 추적) → 기존 폴더 대소문자무시 매칭 → 원본.
+cmd_normalize() {
+  _name="$1"
+  if [ -f "$ALIASES" ]; then
+    _cur="$_name"; _hops=0
+    while [ "$_hops" -lt 20 ]; do
+      _next="$(awk -F'\t' -v n="$_cur" '/^#/ || NF < 2 { next } $1 == n { print $2; exit }' "$ALIASES")"
+      [ -z "$_next" ] && break
+      [ "$_next" = "$_cur" ] && break
+      _cur="$_next"
+      _hops=$((_hops + 1))
+    done
+    if [ "$_cur" != "$_name" ]; then
+      printf '%s\n' "$_cur"
+      return 0
+    fi
+  fi
+  if [ -d "$MUSIC" ]; then
+    _m="$(find "$MUSIC" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' 2>/dev/null |
+      awk -v n="$_name" 'tolower($0) == tolower(n) { print; exit }')"
+    [ -n "$_m" ] && { printf '%s\n' "$_m"; return 0; }
+  fi
+  printf '%s\n' "$_name"
+}
+
+# 후크용: 파일의 현재 아티스트 폴더명을 표준명으로 해석해 apply.
+cmd_apply_download() {
+  _fp="$1"
+  case "$_fp" in
+  "$MUSIC"/*) : ;;
+  *) return 0 ;;   # Music 밖이면 무시
+  esac
+  _rel="${_fp#"$MUSIC"/}"
+  _seg="${_rel%%/*}"
+  _canon="$(cmd_normalize "$_seg")"
+  cmd_apply "$_fp" "$_canon"
+}
+
+# mp3 1개를 표준 폴더로 이동(필요시) + album_artist 설정.
+cmd_apply() {
+  _fp="$1"; _canon="$2"
+  [ -f "$_fp" ] || { printf 'apply: no such file: %s\n' "$_fp" >&2; return 1; }
+  case "$_fp" in
+  "$MUSIC"/*) : ;;
+  *) printf 'apply: not under %s: %s\n' "$MUSIC" "$_fp" >&2; return 1 ;;
+  esac
+  case "$_fp" in
+  *.mp3) : ;;
+  *) return 0 ;;   # mp3 아니면 무시
+  esac
+  _rel="${_fp#"$MUSIC"/}"
+  _artist_seg="${_rel%%/*}"
+  _subpath="${_rel#*/}"          # album/.../title.mp3
+  if [ "$_artist_seg" != "$_canon" ]; then
+    _destdir="$MUSIC/$_canon/$(dirname "$_subpath")"
+    _dest="$_destdir/$(basename "$_fp")"
+    if [ -e "$_dest" ]; then
+      printf 'apply: skip (exists): %s\n' "$_dest" >&2
+      return 0
+    fi
+    mkdir -p "$_destdir"
+    mv "$_fp" "$_dest" || return 1
+    # 빈 원본 앨범/아티스트 폴더 정리 (MUSIC 루트는 지우지 않음)
+    rmdir "$MUSIC/$_artist_seg/$(dirname "$_subpath")" 2>/dev/null || true
+    rmdir "$MUSIC/$_artist_seg" 2>/dev/null || true
+    _fp="$_dest"
+  fi
+  # 태깅은 best-effort: 실패해도 이미 이동은 성공했으므로 전체 실패로 취급하지 않음.
+  _tmp="$(dirname "$_fp")/.qndl-tag-$$.mp3"
+  if ffmpeg -v error -y -i "$_fp" -map 0 -c copy -metadata album_artist="$_canon" "$_tmp" 2>/dev/null &&
+     mv "$_tmp" "$_fp"; then
+    :
+  else
+    rm -f "$_tmp"
+    printf 'apply: tag failed (file kept): %s\n' "$_fp" >&2
+  fi
+  return 0
+}
+
+# MUSIC의 모든 아티스트 폴더를 <name>\t<mp3수>로 출력.
+_artist_counts() {
+  find "$MUSIC" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' 2>/dev/null |
+    while IFS= read -r _d; do
+      _n="$(find "$MUSIC/$_d" -type f -name '*.mp3' 2>/dev/null | wc -l)"
+      printf '%s\t%s\n' "$_d" "$_n"
+    done
+}
+
+# stdin: <name>\t<count>. stdout: 실제 중복 그룹만 <canonical>\t<m1>\t<m2>...
+_group_awk() {
+  awk -F'\t' '
+    function norm(x,   y){ y=tolower(x); gsub(/[^[:alnum:]가-힣]/,"",y); return y }
+    function find(a){ while(parent[a]!=a){ parent[a]=parent[parent[a]]; a=parent[a] } return a }
+    function union(a,b,  ra,rb){ ra=find(a); rb=find(b); if(ra!=rb) parent[rb]=ra }
+    function addtok(idx,chunk,  k){ k=norm(chunk); if(k=="") return; if(k in owner) union(owner[k],idx); else owner[k]=idx }
+    # For a chunk mixing Hangul + Latin without parens (e.g. "김나영 Kim na young"),
+    # also emit the Hangul-only and Latin-only pieces as tokens so it groups with
+    # its paren/split siblings ("Kim Na Young(김나영)", "김나영"). Length guards drop
+    # tiny fragments (e.g. "sg") that would over-merge unrelated artists.
+    function addchunk(idx,chunk,   h,l){
+      addtok(idx, chunk)
+      if (chunk ~ /[가-힣]/ && chunk ~ /[A-Za-z]/) {
+        h=chunk; gsub(/[^가-힣]/,"",h); if (length(h) >= 2) addtok(idx, h)
+        l=tolower(chunk); gsub(/[^a-z0-9]/,"",l); if (length(l) >= 3) addtok(idx, l)
+      }
+    }
+    function caserank(s,  u,l){ u=(s ~ /[A-Z]/); l=(s ~ /[a-z]/); return (u&&l)?2:1 }
+    {
+      name[NR]=$1; cnt[NR]=$2+0; parent[NR]=NR
+      s=$1; gsub(/（/,"(",s); gsub(/）/,")",s); rest=s
+      while (match(rest,/\([^)]*\)/)) {
+        addchunk(NR, substr(rest,RSTART+1,RLENGTH-2))
+        rest=substr(rest,1,RSTART-1) " " substr(rest,RSTART+RLENGTH)
+      }
+      addchunk(NR, rest)
+    }
+    END{
+      for(i=1;i<=NR;i++){ r=find(i); members[r]=members[r] i " " }
+      for(r in members){
+        n=split(members[r], m, " ")
+        real=0; for(j=1;j<=n;j++) if(m[j]!="") real++
+        if(real<2) continue
+        haveEng=0
+        for(j=1;j<=n;j++){ if(m[j]=="") continue; if(name[m[j]] !~ /[가-힣]/) haveEng=1 }
+        best=""; brank=-1; bcnt=-1
+        for(j=1;j<=n;j++){
+          if(m[j]=="") continue
+          nm=name[m[j]]
+          if(haveEng && nm ~ /[가-힣]/) continue
+          cr=caserank(nm); c=cnt[m[j]]
+          if(cr>brank || (cr==brank && c>bcnt) || (cr==brank && c==bcnt && (best=="" || nm<best))){
+            best=nm; brank=cr; bcnt=c
+          }
+        }
+        line=best
+        for(j=1;j<=n;j++){ if(m[j]=="") continue; line=line "\t" name[m[j]] }
+        print line
+      }
+    }
+  '
+}
+
+# stdin(그룹 라인) → 각 그룹의 비표준 멤버 이동 파일 수 계산해 dry-run 한 줄 출력.
+_merge_preview() {
+  while IFS="$(printf '\t')" read -r _canon _rest; do
+    [ -z "$_canon" ] && continue
+    _others=""; _files=0
+    _oldifs="$IFS"; IFS="$(printf '\t')"
+    for _mem in $_rest; do
+      [ "$_mem" = "$_canon" ] && continue
+      _others="${_others:+$_others, }$_mem"
+      _c="$(find "$MUSIC/$_mem" -type f -name '*.mp3' 2>/dev/null | wc -l)"
+      _files=$((_files + _c))
+    done
+    IFS="$_oldifs"
+    [ -z "$_others" ] && continue
+    printf '%s → %s (move %s files)\n' "$_others" "$_canon" "$_files"
+  done
+}
+
+# 맵에 변형→표준 append (이미 있으면 생략).
+_map_add() {
+  _v="$1"; _c="$2"
+  [ -f "$ALIASES" ] || { mkdir -p "$(dirname "$ALIASES")"; : > "$ALIASES"; }
+  awk -F'\t' -v v="$_v" '$1==v{f=1} END{exit f?0:1}' "$ALIASES" && return 0
+  # 파일이 개행으로 끝나지 않으면 마지막 줄과 이어붙는 손상을 방지
+  if [ -s "$ALIASES" ] && [ -n "$(tail -c1 "$ALIASES")" ]; then
+    printf '\n' >> "$ALIASES"
+  fi
+  printf '%s\t%s\n' "$_v" "$_c" >> "$ALIASES"
+}
+
+cmd_merge_apply() {
+  _groups="$1"
+  _failtmp="$(mktemp)" || return 1
+  printf '%s\n' "$_groups" | while IFS="$(printf '\t')" read -r _canon _rest; do
+    [ -z "$_canon" ] && continue
+    _oldifs="$IFS"; IFS="$(printf '\t')"
+    for _mem in $_rest; do
+      [ "$_mem" = "$_canon" ] && continue
+      IFS="$_oldifs"
+      find "$MUSIC/$_mem" -type f -name '*.mp3' 2>/dev/null | while IFS= read -r _f; do
+        cmd_apply "$_f" "$_canon" || printf 'x\n' >> "$_failtmp"
+      done
+      # mp3 외 잔여 파일(cover.jpg 등)도 정경 폴더로 이동해 variant 폴더가 완전히 비워지게 함.
+      # (cmd_apply를 거치지 않는 단순 mv: 재태깅 대상이 아님)
+      find "$MUSIC/$_mem" -type f ! -name '*.mp3' 2>/dev/null | while IFS= read -r _f; do
+        _relsub="${_f#"$MUSIC/$_mem"/}"
+        _destf="$MUSIC/$_canon/$_relsub"
+        if [ -e "$_destf" ]; then
+          printf 'merge: skip residue (exists): %s\n' "$_destf" >&2
+          continue
+        fi
+        mkdir -p "$(dirname "$_destf")"
+        mv "$_f" "$_destf" 2>/dev/null || true
+      done
+      find "$MUSIC/$_mem" -type d -empty -delete 2>/dev/null || true
+      _map_add "$_mem" "$_canon"
+      IFS="$(printf '\t')"
+    done
+    IFS="$_oldifs"
+  done
+  _fails="$(wc -l < "$_failtmp" | tr -d ' ')"
+  rm -f "$_failtmp"
+
+  if command -v mpc >/dev/null 2>&1; then
+    mpc update --wait >/dev/null 2>&1 &&
+      find "$MUSIC" -type f -name '*.mp3' | sed "s|$MUSIC/||" | sort \
+        > "$PLAYLIST" 2>/dev/null || true
+  fi
+  if [ "${_fails:-0}" -gt 0 ]; then
+    printf 'merge --apply 완료 (%s개 실패/스킵).\n' "$_fails"
+  else
+    printf 'merge --apply 완료.\n'
+  fi
+}
+
+cmd_merge() {
+  _apply=0
+  [ "${1:-}" = "--apply" ] && _apply=1
+  _groups="$(_artist_counts | _group_awk)"
+  if [ -z "$_groups" ]; then
+    printf 'No case/paren duplicate groups found.\n'
+    return 0
+  fi
+  if [ "$_apply" -eq 0 ]; then
+    printf '%s\n' "$_groups" | _merge_preview
+    printf '\n(dry-run) 실제 병합하려면: qndl-artist merge --apply\n'
+    return 0
+  fi
+  cmd_merge_apply "$_groups"
+}
+
+_sub="${1:-}"
+[ $# -gt 0 ] && shift
+case "$_sub" in
+normalize) cmd_normalize "$@" ;;
+apply) cmd_apply "$@" ;;
+apply-download) cmd_apply_download "$@" ;;
+merge) cmd_merge "$@" ;;
+*) printf 'usage: qndl-artist {normalize|apply|apply-download|merge} ...\n' >&2; exit 2 ;;
+esac

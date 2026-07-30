@@ -1,15 +1,39 @@
 #!/bin/sh
 
 # Set as a cron job to check for new RSS entries for newsboat.
-# If newsboat is open, sends it an "R" key to refresh.
 
-/usr/bin/notify-send "📰 Updating RSS feeds..."
+notify() {
+	osascript -e "display notification \"$1\" with title \"📰 Newsboat\"" >/dev/null 2>&1
+}
 
-pgrep -f newsboat$ && /usr/bin/xdotool key --window "$(/usr/bin/xdotool search --name "^newsboat$")" R && exit
+# Bail if a previous run is still going. With the fulltext filter a reload takes
+# ~17s+, so back-to-back cron ticks could overlap and a second `-x reload` can't
+# grab the cache.db lock. macOS has no flock(1), so use an atomic mkdir instead.
+LOCKDIR="${TMPDIR:-/tmp}/newsup.lock"
+mkdir "$LOCKDIR" 2>/dev/null || exit
+trap 'rmdir "$LOCKDIR" 2>/dev/null' HUP INT QUIT TERM EXIT
 
-echo 🔃 >/tmp/newsupdate
-pkill -RTMIN+19 "${STATUSBAR:-dwmblocks}"
-/usr/bin/newsboat -x reload
-rm -f /tmp/newsupdate
-pkill -RTMIN+19 "${STATUSBAR:-dwmblocks}"
-/usr/bin/notify-send "📰 RSS feed update complete."
+notify "Updating RSS feeds..."
+
+pgrep -x newsboat >/dev/null 2>&1 && exit
+
+newsboat -x reload
+
+# Prune feeds no longer in the urls file. Editing urls directly (removing or
+# changing a feed) leaves the old feed's items in cache.db; newsboat hides them
+# (not in urls) but any unread counter still counts every unread row, so they
+# show as a phantom count. cleanup-on-quit only fires on a graceful `q` quit, so
+# replicate it here: any rss_feed.rssurl not present in urls is an orphan.
+nb_db="${XDG_DATA_HOME:-${HOME}/.local/share}/newsboat/cache.db"
+nb_urls="${XDG_CONFIG_HOME:-${HOME}/.config}/newsboat/urls"
+tmp_urls="${TMPDIR:-/tmp}/newsup_urls.$$"
+awk '!/^[[:space:]]*#/ && ($1 ~ /^https?:/ || $1 ~ /^filter:/){print $1}' "$nb_urls" |
+	sort -u >"$tmp_urls"
+sqlite3 "$nb_db" "SELECT rssurl FROM rss_feed;" | sort -u |
+	comm -23 - "$tmp_urls" | while IFS= read -r u; do
+		[ -n "$u" ] && sqlite3 "$nb_db" \
+			"DELETE FROM rss_item WHERE feedurl='$u'; DELETE FROM rss_feed WHERE rssurl='$u';"
+	done
+rm -f "$tmp_urls"
+
+notify "RSS feed update complete."

@@ -30,10 +30,12 @@ usage() {
 }
 
 addurls() {
-  url=$(echo | dmenu -i -p "Enter a url: ")
+  printf 'Enter a url: ' >&2
+  read -r url || exit 1
   [ -z "$url" ] && printf "Error: url must be provided\n\n" && exit 0
 
-  description=$(echo | dmenu -i -p "Enter a description of the url: ")
+  printf 'Enter a description of the url: ' >&2
+  read -r description || exit 1
   [ -z "$description" ] && echo "https://$url" >>~/.local/share/thesiah/snippets
   [ -n "$description" ] && echo "$description https://$url" >>~/.local/share/thesiah/snippets
 }
@@ -50,7 +52,7 @@ opentool() {
     exit 1
   fi
 
-  opentool=$(printf "%s\n" "$available_tools" | dmenu -i -p "Choose an open tool:")
+  opentool=$(printf "%s\n" "$available_tools" | fzf --layout=reverse --height 40% --prompt "Choose an open tool: ")
 
   # Set the selected tool to the variable 'open'
   case "$opentool" in
@@ -61,8 +63,8 @@ opentool() {
     *) xdg-open "$1" ;;
     esac
     ;;
-  lynx) setsid -f "$TERMINAL" -e lynx "$1" ;;
-  w3m) setsid -f "$TERMINAL" -e w3m "$1" ;;
+  lynx) nohup "${TERMINAL:-kitty}" -e lynx "$1" >/dev/null 2>&1 & ;;
+  w3m) nohup "${TERMINAL:-kitty}" -e w3m "$1" >/dev/null 2>&1 & ;;
   *) echo "Invalid selection" >&2 && exit 1 ;;
   esac
 }
@@ -82,18 +84,24 @@ openwindow() {
 }
 
 openinbrowser() {
-  # Extract only the default part of the profile name
+  # Resolve the default profile dir from the [Install] section of profiles.ini
   case $BROWSER in
   *firefox*)
-    profiles_ini_path="$HOME/.mozilla/firefox/profiles.ini"
-    profile=$(awk '/\[Install/ {found=1} found && /^Default=/ {split($0, arr, "."); print arr[2]; exit}' "$profiles_ini_path")
-    profile_dir=$(find ~/.mozilla/firefox -type d -name "*.$profile*" | head -n 1)
+    profiles_ini_path="$HOME/Library/Application Support/Firefox/profiles.ini"
+    profile=$(awk -F= '/^\[Install/ {found=1} found && /^Default=/ {print $2; exit}' "$profiles_ini_path")
+    case "$profile" in
+    /*) profile_dir="$profile" ;;
+    *) profile_dir="$HOME/Library/Application Support/Firefox/$profile" ;;
+    esac
     db_path="$profile_dir/places.sqlite"
     ;;
   *librewolf*)
-    profiles_ini_path="$HOME/.librewolf/profiles.ini"
-    profile=$(awk '/\[Install/ {found=1} found && /^Default=/ {split($0, arr, "."); print arr[2]; exit}' "$profiles_ini_path")
-    profile_dir=$(find ~/.librewolf -type d -name "*.$profile*" | head -n 1)
+    profiles_ini_path="$HOME/Library/Application Support/LibreWolf/profiles.ini"
+    profile=$(awk -F= '/^\[Install/ {found=1} found && /^Default=/ {print $2; exit}' "$profiles_ini_path")
+    case "$profile" in
+    /*) profile_dir="$profile" ;;
+    *) profile_dir="$HOME/Library/Application Support/LibreWolf/$profile" ;;
+    esac
     db_path="$profile_dir/places.sqlite"
     ;;
   *qutebrowser*)
@@ -106,8 +114,8 @@ openinbrowser() {
   tmp_file="$(mktemp)"
   cp -f "$db_path" "$tmp_file"
 
-  type dmenu >/dev/null 2>&1 &&
-    selection="dmenu -i -l 20 -p \"Choose a $1 to open:\"" ||
+  type fzf >/dev/null 2>&1 &&
+    selection="fzf --layout=reverse --height 40%% --prompt \"Choose a $1 to open: \"" ||
     selection="fzf-tmux --reverse --cycle --ansi --delimiter='|' --with-nth=1..-2"
 
   cols=$((${COLUMNS:-90} / 3))
@@ -169,7 +177,7 @@ geturls() {
       if ($1 ~ /^https?:\/\//) { alias = substr($0, index($0, $2)) }  # Case 2: URL first
       else { alias = substr($0, 1, length($0) - length($NF) - 1) }    # Case 1: URL last
       print alias
-    }' | dmenu -i -l 50 -p "Choose an alias $1:")
+    }' | fzf --layout=reverse --height 40% --prompt "Choose an alias $1: ")
 
   [ -z "$choice" ] && exit
   url=$(echo "$urls" | grep -v -e '^#' -e '^$' | awk -v choice="$choice" '

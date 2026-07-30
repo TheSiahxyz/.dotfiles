@@ -29,10 +29,28 @@ search_term() {
     echo "Error: 'rga' is not installed." >&2
     exit 1
   fi
+  if ! command -v pbcopy >/dev/null 2>&1; then
+    echo "Error: 'pbcopy' is not available." >&2
+    exit 1
+  fi
 
   # Construct the preview command
   preview_cmd=$(printf "rga %s --pretty --context 10 '%s' {}" "$case_flag" "$*")
-  rga_output=$(rga --follow --no-ignore --hidden --text --max-count=1 ${case_flag:+$case_flag} --files-with-matches --no-messages --glob '!**/.git/*' --glob '!**/.next/*' --glob '!**/node_modules/*' "$*")
+  query="$*"
+  rga_output=$(rga --follow --no-ignore --hidden --text --max-count=1 ${case_flag:+$case_flag} --files-with-matches --no-messages \
+    --glob '!**/.cache/*' \
+    --glob '!**/.git/*' \
+    --glob '!**/.github/*' \
+    --glob '!**/.next/*' \
+    --glob '!**/.venv/*' \
+    --glob '!**/build/*' \
+    --glob '!**/coverage/*' \
+    --glob '!**/dist/*' \
+    --glob '!**/node_modules/*' \
+    --glob '!**/target/*' \
+    --glob '!**/vendor/*' \
+    --glob '!**/venv/*' \
+    "$query")
 
   # Use fzf to select files
   files=$(echo "$rga_output" | fzf-tmux +m --preview="$preview_cmd" --reverse --multi --select-1 --exit-0) || return 1
@@ -44,9 +62,43 @@ search_term() {
   fi
 
   # copy target to the clipboard
-  echo "$@" | pbcopy 2>/dev/null
+  echo "$query" | pbcopy 2>/dev/null
 
-  openfiles "$files"
+  # Open files at matching lines
+  count=$(echo "$files" | wc -l)
+  if [ "$count" -eq 1 ]; then
+    # Find the first matching line number in the selected file
+    line=$(rga --follow --no-ignore --hidden --text --max-count=1 --line-number --no-filename ${case_flag:+$case_flag} --no-messages "$query" "$files" 2>/dev/null | head -1 | cut -d: -f1)
+    case "$line" in
+    '' | *[!0-9]*) openfiles "$files" ;;
+    *) ${EDITOR:-nvim} "+${line}" "$(realpath "$files")" ;;
+    esac
+  else
+    # Multiple files: open at matching lines via quickfix
+    tmpfile=$(mktemp)
+    echo "$files" | while IFS= read -r file; do
+      match=$(rga --follow --no-ignore --hidden --text --max-count=1 --line-number --no-filename ${case_flag:+$case_flag} --no-messages "$query" "$file" 2>/dev/null | head -1)
+      # Entries must be 'path:LINE:non-empty-message' or nvim marks them
+      # invalid and :cc silently keeps the previous buffer in the split
+      linenum=${match%%:*}
+      case "$linenum" in
+      '' | *[!0-9]*) printf '%s:1:no match\n' "$(realpath "$file")" >> "$tmpfile" ;;
+      *) printf '%s:%s\n' "$(realpath "$file")" "$match" >> "$tmpfile" ;;
+      esac
+    done
+    if [ "$count" -lt 5 ]; then
+      ${EDITOR:-nvim} -q "$tmpfile" \
+        -c 'let n=len(getqflist()) | if n >= 2 | vsplit | cc 2 | endif | if n >= 3 | split | cc 3 | endif | if n >= 4 | wincmd h | split | cc 4 | endif | wincmd t'
+    else
+      first_line=$(head -1 "$tmpfile" | cut -d: -f2)
+      file_args=""
+      while IFS=: read -r fpath _; do
+        file_args="$file_args \"$fpath\""
+      done < "$tmpfile"
+      eval "${EDITOR:-nvim}" "+${first_line}" "$file_args"
+    fi
+    rm -f "$tmpfile"
+  fi
 
   # print the file names
   echo "$rga_output"
@@ -64,7 +116,20 @@ list_or_open_project_files() {
   rga_output=""
   for path in $project_paths; do
     if [ -d "$path" ]; then
-      rga_result=$(rga --follow --no-ignore --hidden --text --max-count=1 --files-with-matches --no-messages --glob '!**/.git/*' --glob '!**/.next/*' --glob '!**/node_modules/*' "$project_tag" "$path")
+      rga_result=$(rga --follow --no-ignore --hidden --text --max-count=1 --files-with-matches --no-messages \
+        --glob '!**/.cache/*' \
+        --glob '!**/.git/*' \
+        --glob '!**/.github/*' \
+        --glob '!**/.next/*' \
+        --glob '!**/.venv/*' \
+        --glob '!**/build/*' \
+        --glob '!**/coverage/*' \
+        --glob '!**/dist/*' \
+        --glob '!**/node_modules/*' \
+        --glob '!**/target/*' \
+        --glob '!**/vendor/*' \
+        --glob '!**/venv/*' \
+        "$project_tag" "$path")
       rga_output="$rga_output $rga_result"
     fi
   done
@@ -82,9 +147,36 @@ list_or_open_project_files() {
   if [ "$list_mode" -eq 1 ]; then
     echo "$rga_output"
   else
-    # Otherwise, open the files with nvim
-    set -- "$(printf "%s\n" "$rga_output")"
-    openfiles "$@"
+    # Open files at matching lines
+    file_count=$(echo "$rga_output" | wc -w)
+    if [ "$file_count" -eq 1 ]; then
+      line=$(rga --follow --no-ignore --hidden --text --max-count=1 --line-number --no-filename --no-messages "$project_tag" "$rga_output" 2>/dev/null | head -1 | cut -d: -f1)
+      case "$line" in
+      '' | *[!0-9]*) openfiles "$rga_output" ;;
+      *) ${EDITOR:-nvim} "+${line}" "$(realpath "$rga_output")" ;;
+      esac
+    else
+      # Multiple files: open at matching lines via quickfix
+      tmpfile=$(mktemp)
+      for file in $rga_output; do
+        match=$(rga --follow --no-ignore --hidden --text --max-count=1 --line-number --no-filename --no-messages "$project_tag" "$file" 2>/dev/null | head -1)
+        # Entries must be 'path:LINE:non-empty-message' or nvim marks them
+        # invalid and :cc silently keeps the previous buffer in the split
+        linenum=${match%%:*}
+        case "$linenum" in
+        '' | *[!0-9]*) printf '%s:1:no match\n' "$(realpath "$file")" >> "$tmpfile" ;;
+        *) printf '%s:%s\n' "$(realpath "$file")" "$match" >> "$tmpfile" ;;
+        esac
+      done
+      if [ "$file_count" -lt 5 ]; then
+        ${EDITOR:-nvim} -q "$tmpfile" \
+          -c 'let n=len(getqflist()) | if n >= 2 | vsplit | cc 2 | endif | if n >= 3 | split | cc 3 | endif | if n >= 4 | wincmd h | split | cc 4 | endif | wincmd t'
+      else
+        ${EDITOR:-nvim} -q "$tmpfile" \
+          -c 'silent! for i in range(2,len(getqflist())+1) | execute "silent! cc ".i | endfor | silent! cfirst'
+      fi
+      rm -f "$tmpfile"
+    fi
   fi
 }
 

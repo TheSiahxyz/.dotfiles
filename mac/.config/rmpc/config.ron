@@ -1,0 +1,314 @@
+#![enable(implicit_some)]
+#![enable(unwrap_newtypes)]
+#![enable(unwrap_variant_newtypes)]
+(
+    address: "/tmp/mpd_socket",
+    password: None,
+    theme: "~/.config/rmpc/themes/catppuccin-mocha.ron",
+    cache_dir: Some("~/.cache/rmpc"),
+    lyrics_dir: Some("~/.local/share/lyrics"),
+    on_song_change: ["~/.config/rmpc/scripts/on_song_change"],
+    on_resize: ["~/.config/rmpc/scripts/onresize"],
+    extra_yt_dlp_args: ["--audio-quality", "0"],
+    volume_step: 5,
+    max_fps: 30,
+    scrolloff: 9,
+    wrap_navigation: false,
+    enable_mouse: true,
+    scroll_amount: 1,
+    enable_config_hot_reload: true,
+    enable_lyrics_hot_reload: true,
+    status_update_interval_ms: 1000,
+    rewind_to_start_sec: None,
+    keep_state_on_song_change: true,
+    reflect_changes_to_playlist: false,
+    select_current_song_on_change: false,
+    ignore_leading_the: false,
+    browser_song_sort: [Disc, Track, Artist, Title],
+    directories_sort: SortFormat(group_by_type: true, reverse: false),
+    auto_open_downloads: true,
+    album_art: (
+        method: Auto,
+        max_size_px: (width: 1200, height: 1200),
+        disabled_protocols: ["http://", "https://"],
+        vertical_align: Center,
+        horizontal_align: Center,
+    ),
+    keybinds: (
+        global: {
+            ",":          VolumeDown,
+            ".":          VolumeUp,
+            "0":          SwitchToTab("Queue"),
+            "1":          SwitchToTab("Artists"),
+            "2":          SwitchToTab("Artist"),
+            "3":          SwitchToTab("Albums"),
+            "4":          SwitchToTab("Library"),
+            "5":          SwitchToTab("Playlists"),
+            "6":          SwitchToTab("Lyrics"),
+            "F":          SwitchToTab("Search"),
+            ":":          CommandMode,
+            "<":          PreviousTrack,
+            "<Tab>":      NextTab,
+            "<S-Tab>":    PreviousTab,
+            ">":          NextTrack,
+            "R":          AddRandom,
+            "b":          SeekBack,
+            "f":          SeekForward,
+            "gT":         PreviousTab,
+            "gt":         NextTab,
+            "oP":         Partition(),
+            "?":          ShowHelp,
+            "oI":         ShowCurrentSongInfo,
+            "od":         ShowDownloads,
+            "oo":         ShowOutputs,
+            "op":         ShowDecoders,
+            "q":          Quit,
+            "s":          Stop,
+            "u":          Update,
+            "U":          Rescan,
+            "c":          ToggleConsume,
+            "p":          TogglePause,
+            "v":          ToggleSingle,
+            "x":          ToggleRandom,
+            "z":          ToggleRepeat,
+        },
+        navigation: {
+            "<C-c>":      Close,
+            "<Esc>":      Close,
+            "<CR>":       Confirm,
+            "k":          Up,
+            "<Up>":       Up,
+            "j":          Down,
+            "<Down>":     Down,
+            "h":          Left,
+            "<Left>":     Left,
+            "l":          Right,
+            "<Right>":    Right,
+            "<C-k>":      PaneUp,
+            "<C-Up>":     PaneUp,
+            "<C-j>":      PaneDown,
+            "<C-Down>":   PaneDown,
+            "<C-h>":      PaneLeft,
+            "<C-Left>":   PaneLeft,
+            "<C-l>":      PaneRight,
+            "<C-Right>":  PaneRight,
+            "K":          MoveUp,
+            "J":          MoveDown,
+            "<C-u>":      UpHalf,
+            "<C-d>":      DownHalf,
+            "<C-b>":      PageUp,
+            "<PageUp>":   PageUp,
+            "<C-f>":      PageDown,
+            "<PageDown>": PageDown,
+            "gg":         Top,
+            "G":          Bottom,
+            "<Space>":    Select,
+            "<C-Space>":  InvertSelection,
+            "/":          EnterSearch,
+            "n":          NextResult,
+            "N":          PreviousResult,
+            "a":          Add,
+            "A":          AddAll,
+            "D":          Delete,
+            "<C-r>":      Rename,
+            "i":          FocusInput,
+            "oi":         ShowInfo,
+            "<C-z>":      ContextMenu(),
+            "<C-s>s":     Save(kind: Modal(all: false, duplicates_strategy: Ask)),
+            "<C-s>a":     Save(kind: Modal(all: true, duplicates_strategy: Ask)),
+            "r":          Rate(),
+        },
+        queue: {
+            "a":          AddToPlaylist,
+            "d":          Delete,
+            "D":          DeleteAll,
+            "<CR>":       Play,
+            "C":          JumpToCurrent,
+            "<C-s>":      Save,
+            "X":          Shuffle,
+            "i":          ShowInfo,
+        },
+    ),
+    search: (
+        case_sensitive: false,
+        ignore_diacritics: false,
+        search_button: false,
+        mode: Contains,
+        tags: [
+            (value: "any",         label: "Any Tag"),
+            (value: "title",       label: "Title"),
+            (value: "album",       label: "Album"),
+            (value: "artist",      label: "Artists"),
+            (value: "albumartist", label: "Artist"),
+            (value: "filename",    label: "Filename"),
+            (value: "genre",       label: "Genre"),
+        ],
+    ),
+    artists: (
+        album_display_mode: SplitByDate,
+        album_sort_by: Date,
+        album_date_tags: [Date],
+    ),
+    current_song: (
+        format: "{title}\n{artist}\n{album}",
+        align: Center,
+    ),
+    tabs: [
+        (
+            name: "Queue",
+            pane: Split(
+                direction: Horizontal,
+                panes: [
+                    (
+                        size: "65%",
+                        pane: Split(
+                            direction: Vertical,
+                            panes: [
+                                (
+                                    size: "3",
+                                    borders: "ALL",
+                                    border_symbols: Inherited(parent: Rounded, bottom_left: "├", bottom_right: "┤",),
+                                    pane: Split(
+                                        direction: Horizontal,
+                                        panes: [
+                                            (
+                                                size: "1",
+                                                pane: Pane(Empty())
+                                            ),
+                                            (
+                                                size: "100%",
+                                                pane: Pane(QueueHeader())
+                                            ),
+                                        ]
+                                    )
+                                ),
+                                (
+                                    size: "100%",
+                                    borders: "LEFT | RIGHT | BOTTOM",
+                                    border_symbols: Rounded,
+                                    pane: Split(
+                                        direction: Horizontal,
+                                        panes: [
+                                            (
+                                                size: "1",
+                                                pane: Pane(Empty())
+                                            ),
+                                            (
+                                                size: "100%",
+                                                pane: Pane(Queue)
+                                            ),
+                                        ]
+                                    )
+                                ),
+                            ],
+                        )
+                    ),
+                    (
+                        size: "35%",
+                        pane: Split(
+                            direction: Vertical,
+                            panes: [
+                                (
+                                    size: "100%",
+                                    borders: "LEFT | RIGHT | TOP",
+                                    border_symbols: Rounded,
+                                    pane: Pane(AlbumArt)
+                                ),
+                                (
+                                    size: "7",
+                                    borders: "ALL",
+                                    border_symbols: Inherited(parent: Rounded, top_left: "├", top_right: "┤",),
+                                    border_title: [(kind: Text(" Lyrics "))],
+                                    border_title_alignment: Center,
+                                    pane: Pane(Lyrics)
+                                ),
+                            ],
+                        ),
+                    ),
+                ],
+            ),
+        ),
+        (
+            name: "Artists",
+            borders: "ALL",
+            border_symbols: Rounded,
+            pane: Split(
+                size: "100%",
+                direction: Vertical,
+                panes: [(pane: Pane(Artists), size: "100%", borders: "ALL", border_symbols: Rounded)],
+            )
+        ),
+        (
+            name: "Artist",
+            borders: "ALL",
+            border_symbols: Rounded,
+            pane: Split(
+                size: "100%",
+                direction: Vertical,
+                panes: [(pane: Pane(AlbumArtists), size: "100%", borders: "ALL", border_symbols: Rounded)],
+            )
+        ),
+        (
+            name: "Albums",
+            borders: "ALL",
+            border_symbols: Rounded,
+            pane: Split(
+                size: "100%",
+                direction: Vertical,
+                panes: [(pane: Pane(Albums), size: "100%", borders: "ALL", border_symbols: Rounded)],
+            )
+        ),
+        (
+            name: "Library",
+            borders: "ALL",
+            border_symbols: Rounded,
+            pane: Split(
+                size: "100%",
+                direction: Vertical,
+                panes: [(pane: Pane(Directories), size: "100%", borders: "ALL", border_symbols: Rounded)],
+            )
+        ),
+        (
+            name: "Playlists",
+            borders: "ALL",
+            border_symbols: Rounded,
+            pane: Split(
+                size: "100%",
+                direction: Vertical,
+                panes: [(pane: Pane(Playlists), size: "100%", borders: "ALL", border_symbols: Rounded)],
+            )
+        ),
+        (
+            name: "Lyrics",
+            borders: "ALL",
+            border_symbols: Rounded,
+            pane: Split(
+                direction: Vertical,
+                panes: [
+                    (
+                        size: "30%",
+                        pane: Split(
+                            direction: Horizontal,
+                            panes: [
+                                (pane: Pane(Empty()), size: "43%"),
+                                (pane: Pane(AlbumArt), size: "14%"),
+                                (pane: Pane(Empty()), size: "43%"),
+                            ],
+                        ),
+                    ),
+                    (pane: Pane(Lyrics), size: "70%", vertical_align: Bottom),
+                ],
+            ),
+        ),
+        (
+            name: "Search",
+            borders: "ALL",
+            border_symbols: Rounded,
+            pane: Split(
+                size: "100%",
+                direction: Vertical,
+                panes: [(pane: Pane(Search), size: "100%", borders: "ALL", border_symbols: Rounded)],
+            )
+        ),
+    ],
+)

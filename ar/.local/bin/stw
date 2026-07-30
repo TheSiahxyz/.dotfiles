@@ -28,8 +28,9 @@ stow_package() {
   # Handle conflicts based on resolution strategy
   if [ $status -ne 0 ]; then
     echo "$output" | grep "over existing target is stowed to a different package" | while IFS= read -r line; do
-      conflict_path=$(echo "$line" | sed -E 's/.*\: (.*) =>.*/\1/')
+      conflict_path=$(echo "$line" | sed -E 's/.*: (.*) =>.*/\1/')
       full_path="$HOME/$conflict_path"
+      [ -e "$full_path" ] || continue
       if [ "$resolve_strategy" = "delete" ]; then
         rm -rf "$full_path"
       elif [ "$resolve_strategy" = "move" ]; then
@@ -37,8 +38,9 @@ stow_package() {
       fi
     done
     echo "$output" | grep "over existing target" | while IFS= read -r line; do
-      conflict_path=$(echo "$line" | sed -E 's/.*over existing target\s(.*)\ssince.*/\1/')
+      conflict_path=$(echo "$line" | sed -E 's/.*over existing target[[:space:]](.*)[[:space:]]since.*/\1/')
       full_path="$HOME/$conflict_path"
+      [ -e "$full_path" ] || continue
       if [ "$resolve_strategy" = "delete" ]; then
         rm -rf "$full_path"
       elif [ "$resolve_strategy" = "move" ]; then
@@ -50,6 +52,10 @@ stow_package() {
     output=$(stow --no-folding -S "$target" 2>&1)
     status=$?
   fi
+
+  # Report the real result; a swallowed status hides a failed stow entirely.
+  [ $status -ne 0 ] && printf '%s\n' "$output" >&2
+  return $status
 }
 
 # Ensure running from the correct directory

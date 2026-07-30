@@ -21,23 +21,28 @@ zstyle ':vcs_info:git*+set-message:*' hooks git-untracked git-behind-upstream gi
     fi
 }
 +vi-git-behind-upstream() {
-    if [[ $(git rev-list HEAD..$(git rev-parse --abbrev-ref @{upstream}) --count) -gt 0 ]]; then
+    local upstream=$(git rev-parse --abbrev-ref @{upstream} 2>/dev/null)
+    if [[ -n "$upstream" ]] && [[ $(git rev-list HEAD..$upstream --count 2>/dev/null) -gt 0
+]]; then
         hook_com[misc]+="%{$fg[red]%}<"
     fi
 }
 +vi-git-ahead-upstream() {
-    if [[ $(git rev-list $(git rev-parse --abbrev-ref @{upstream})..HEAD --count) -gt 0 ]]; then
+    local upstream=$(git rev-parse --abbrev-ref @{upstream} 2>/dev/null)
+    if [[ -n "$upstream" ]] && [[ $(git rev-list $upstream..HEAD --count 2>/dev/null) -gt 0
+]]; then
         hook_com[misc]+="%{$fg[green]%}>"
     fi
 }
 +vi-git-diverged-upstream() {
-    local ahead_count=$(git rev-list --count $(git rev-parse --abbrev-ref @{upstream})..HEAD 2>/dev/null)
-    local behind_count=$(git rev-list --count HEAD..$(git rev-parse --abbrev-ref @{upstream}) 2>/dev/null)
+    local upstream=$(git rev-parse --abbrev-ref @{upstream} 2>/dev/null)
+    [[ -z "$upstream" ]] && return
+    local ahead_count=$(git rev-list --count $upstream..HEAD 2>/dev/null)
+    local behind_count=$(git rev-list --count HEAD..$upstream 2>/dev/null)
     if [[ "$ahead_count" -gt 0 && "$behind_count" -gt 0 ]]; then
         hook_com[misc]+="%{$fg[white]%}<>"
     fi
 }
-
 
 ### --- ZSH --- ###
 # GnuPG
@@ -113,16 +118,43 @@ zstyle ':fzf-tab:*' switch-group ',' '.'    # switch group using `,` and `.`
 [ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/shortcutenvrc" ] && source "${XDG_CONFIG_HOME:-$HOME/.config}/shell/shortcutenvrc"
 [ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/zshnameddirrc" ] && source "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/zshnameddirrc"
 
-### --- AVANTE --- ###
-export AVANTE_ANTHROPIC_API_KEY="$(pass show api/claude/nvim | head -n1)"
-export AVANTE_OPENAI_API_KEY="$(pass show api/chatGPT/nvim | head -n1)"
-# export AVANTE_AZURE_OPENAI_API_KEY="$(pass show api/azure/nvim | head -n1)"
-# export AVANTE_GEMINI_API_KEY="$(pass show api/gemini/nvim | head -n1)"
-# export AVANTE_CO_API_KEY="$(pass show api/cohere/nvim | head -n1)"
-# export AVANTE_AIHUBMIX_API_KEY="$(pass show api/aihubmix/nvim | head -n1)"
-# export AVANTE_MOONSHOT_API_KEY="$(pass show api/moonshot/nvim | head -n1)"
 
-### --- OPENAI --- ###
-export OPENAI_API_KEY="$(pass show api/chatGPT/nvim | head -n1)"
+### --- SECRETS --- ###
+export_pass() {
+    local var="$1" entry="$2" value
+    value="$(pass show "$entry" 2>/dev/null | head -n1)"
+    [ -n "$value" ] && export "$var=$value"
+    return 0
+}
 
-. "$(brew --prefix asdf)/libexec/asdf.sh"
+if command -v pass >/dev/null 2>&1 && [ -d "${PASSWORD_STORE_DIR:-${HOME}/.password-store}" ]; then
+    ### --- AVANTE --- ###
+    export_pass AVANTE_ANTHROPIC_API_KEY api/claude/nvim
+    export_pass AVANTE_OPENAI_API_KEY api/chatGPT/nvim
+    # export_pass AVANTE_AZURE_OPENAI_API_KEY api/azure/nvim
+    # export_pass AVANTE_GEMINI_API_KEY api/gemini/nvim
+    # export_pass AVANTE_CO_API_KEY api/cohere/nvim
+    # export_pass AVANTE_AIHUBMIX_API_KEY api/aihubmix/nvim
+    # export_pass AVANTE_MOONSHOT_API_KEY api/moonshot/nvim
+
+    ### --- OPENAI --- ###
+    export_pass OPENAI_API_KEY api/chatGPT/nvim
+fi
+
+### --- ASDF --- ###
+command -v brew >/dev/null 2>&1 && [ -f "$(brew --prefix asdf)/libexec/asdf.sh" ] &&
+    . "$(brew --prefix asdf)/libexec/asdf.sh"
+
+### --- TMUX --- ###
+if command -v tmux >/dev/null 2>&1 && [ -z "$TMUX" ]; then
+    # macOS pgrep has no -a; -l is what makes the filter below work.
+    terminal_count=$(pgrep -u "$USER" -xl "${TERMINAL:-kitty}" 2>/dev/null |
+        grep -Ev 'ncmpcpp|newsboat|pulsemixer|spterm|splf|spcalc|stig|vimwikitodo' | wc -l | tr -d ' ')
+    if [ "${terminal_count:-0}" -le 1 ]; then
+        if ! tmux has-session 2>/dev/null; then
+            exec tmux new-session -s code
+        else
+            exec tmux attach-session
+        fi
+    fi
+fi

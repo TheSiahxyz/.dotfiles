@@ -1,6 +1,8 @@
 # A TOML linter such as https://taplo.tamasfe.dev/ can use this schema to validate your config.
 # If you encounter any issues, please make an issue at https://github.com/yazi-rs/schemas.
-"$schema" = "https://yazi-rs.github.io/schemas/keymap.json"
+# Yazi 26.5.6 rejects this top-level key ("must be a kebab-cased string").
+# Only editor linters consume it, so commenting it out costs nothing at runtime.
+# "$schema" = "https://yazi-rs.github.io/schemas/keymap.json"
 
 [mgr]
 
@@ -190,7 +192,7 @@ run  = "plugin chmod"
 desc = "Chmod on selected files"
 
 [[mgr.prepend_keymap]]
-on   = [ "g", "f"]
+on   = [ "g", "f" ]
 run  = "plugin diff"
 desc = "Diff the selected with the hovered file"
 

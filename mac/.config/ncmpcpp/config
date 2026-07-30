@@ -335,7 +335,7 @@ song_columns_list_format = (20)[cyan]{a} (40)[yellow]{t} (30)[blue]{b} (10)[mage
 ## Note: Custom command that will be executed each time song changes. Useful for
 ## notifications etc.
 ##
-# execute_on_song_change="pkill -RTMIN+11 dwmblocks"
+execute_on_song_change="(~/.config/ncmpcpp/genius-lyrics.py >/dev/null 2>&1 &)"
 #
 ##
 ## Note: Custom command that will be executed each time player state
@@ -343,7 +343,7 @@ song_columns_list_format = (20)[cyan]{a} (40)[yellow]{t} (30)[blue]{b} (10)[mage
 ## state (either unknown, play, pause, or stop) for its duration.
 ##
 #
-# execute_on_player_state_change="pkill -RTMIN+11 dwmblocks"
+# execute_on_player_state_change=""
 #
 #playlist_show_mpd_host = no
 #
@@ -421,7 +421,7 @@ media_library_albums_split_by_date = no
 #
 #cyclic_scrolling = no
 #
-#lyrics_fetchers = tags, genius, tekstowo, plyrics, justsomelyrics, jahlyrics, zeneszoveg, internet
+#lyrics_fetchers = tags, tekstowo, plyrics, justsomelyrics, jahlyrics, zeneszoveg, internet
 #
 #follow_now_playing_lyrics = no
 #

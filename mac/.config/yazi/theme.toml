@@ -3,7 +3,9 @@
 
 # If you want to dynamically override their content based on dark/light mode, you can specify two different flavors
 # for dark and light modes under `[flavor]`, and do so in those flavors instead.
-"$schema" = "https://yazi-rs.github.io/schemas/theme.json"
+# Yazi 26.5.6 rejects this top-level key ("must be a kebab-cased string").
+# Only editor linters consume it, so commenting it out costs nothing at runtime.
+# "$schema" = "https://yazi-rs.github.io/schemas/theme.json"
 
 # vim:fileencoding=utf-8:foldmethod=marker
 
@@ -229,20 +231,20 @@ rules = [
   { mime = "application/vnd.*", is = "link", fg = "#7fcf96", italic = true },
 
   # Special files
-  { name = "*", is = "orphan", fg = "#232136", bg = "#eb6f92" },
-  { name = "*", is = "exec",   fg = "#9ccfd8" },
+  { url = "*", is = "orphan", fg = "#232136", bg = "#eb6f92" },
+  { url = "*", is = "exec",   fg = "#9ccfd8" },
 
   # Symlink fallback
-  # { name = "*", is = "link", fg = "#b5e6ee", italic = true },
-  # { name = "*/", is = "link", fg = "#6bd3ee", italic = true },
+  # { url = "*", is = "link", fg = "#b5e6ee", italic = true },
+  # { url = "*/", is = "link", fg = "#6bd3ee", italic = true },
 
   # Dummy files
-  { name = "*",  is = "dummy", fg = "#232136", bg = "#eb6f92" },
-  { name = "*/", is = "dummy", fg = "#232136", bg = "#eb6f92" },
+  { url = "*",  is = "dummy", fg = "#232136", bg = "#eb6f92" },
+  { url = "*/", is = "dummy", fg = "#232136", bg = "#eb6f92" },
 
   # Fallback
-  { name = "*",  fg = "#e0def4" },
-  { name = "*/", fg = "#3e8fb0" }
+  { url = "*",  fg = "#e0def4" },
+  { url = "*/", fg = "#3e8fb0" }
 ]
 
 # : }}}

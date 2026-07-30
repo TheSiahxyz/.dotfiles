@@ -6,49 +6,55 @@
 # suffix `-otp`. This script automatically appends newly added otps as such.
 
 # For OTP passwords to be generated properly, it is important for the local
-# computer to have its time properly synced. This can be done with the command
-# below which requires the package `ntp`.
+# computer to have its time properly synced.
 
 ifinstalled pass pass-otp || exit 1
+
+notify() {
+	osascript -e "display notification \"$2\" with title \"$1\"" >/dev/null 2>&1
+}
 
 dir="${PASSWORD_STORE_DIR}"
 
 choice="$({
-  echo "🆕add"
-  echo "🕙sync-time"
-  ls "$dir"/*-otp.gpg
-} | sed "s/.*\///;s/-otp.gpg//" | dmenu -p "Pick a 2FA:")"
+	echo "🆕add"
+	echo "🕙sync-time"
+	find "$dir" -type f -iname '*-otp.gpg'
+} | sed "s/.*\///;s/-otp.gpg//" | fzf --layout=reverse --height 40% --prompt "Pick a 2FA: ")"
 
 case $choice in
+"") exit 0 ;;
 🆕add)
-  ifinstalled maim zbar || exit 1
+	ifinstalled zbar || exit 1
 
-  temp=$(mktemp -p "$XDG_RUNTIME_DIR" --suffix=.png)
-  otp="otp-test-script"
-  trap 'rm -f $temp; pass rm -f $otp' HUP INT QUIT TERM PWR EXIT
+	temp="$(mktemp -t otpqr).png"
+	otp="otp-test-script"
+	# no shred(1) on macOS; rm -P overwrites before unlinking.
+	trap 'rm -Pf "$temp"; pass rm -f $otp' HUP INT QUIT TERM EXIT
 
-  notify-send "Scan the image." "Scan the OTP QR code."
+	notify "Scan the image." "Scan the OTP QR code."
 
-  maim -s "$temp" || exit 1
-  info="$(zbarimg -q "$temp")"
-  info="${info#QR-Code:}"
+	screencapture -i "$temp" || exit 1
+	info="$(zbarimg -q "$temp")"
+	info="${info#QR-Code:}"
 
-  if echo "$info" | pass otp insert "$otp"; then
-    while true; do
-      export name="$(echo | dmenu -p "Give this One Time Password a one-word name:")"
-      echo "$name" | grep -q -- "^[A-z0-9-]\+$" && break
-    done
-    pass mv "$otp" "$name-otp"
-    notify-send "Successfully added." "$name-otp has been created."
-  else
-    notify-send "No OTP data found." "Try to scan the image again more precisely."
-  fi
-  ;;
+	if echo "$info" | pass otp insert "$otp"; then
+		while true; do
+			printf 'Give this One Time Password a one-word name: ' >&2
+			read -r name || exit 1
+			[ -z "$name" ] && exit 0
+			echo "$name" | grep -q -- "^[A-z0-9-]\+$" && break
+		done
+		pass mv "$otp" "$name-otp"
+		notify "Successfully added." "$name-otp has been created."
+	else
+		notify "No OTP data found." "Try to scan the image again more precisely."
+	fi
+	;;
 🕙sync-time)
-  ifinstalled ntp || exit 1
-  notify-send -u low "🕙 Synchronizing Time..." "Synching time with remote NTP servers..."
-  updatedata="$(sudo ntpdate pool.ntp.org)" &&
-    notify-send -u low "🕙 Synchronizing Time..." "Done. Time changed by ${updatedata#*offset }"
-  ;;
-*) pass otp -c ${choice}-otp ;;
+	notify "🕙 Synchronizing Time..." "Synching time with remote NTP servers..."
+	sudo sntp -sS pool.ntp.org &&
+		notify "🕙 Synchronizing Time..." "Done."
+	;;
+*) pass otp -c "${choice}"-otp ;;
 esac

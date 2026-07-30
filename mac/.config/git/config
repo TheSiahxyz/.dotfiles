@@ -10,8 +10,6 @@
   branch = bold magenta
   changed = yellow
   untracked = blue
-[commit]
-	gpgSign = false
 [credential]
   helper = cache
   helper = store
@@ -64,11 +62,11 @@
   diffFilter = delta --color-only
 [merge]
   tool = vscode
-	conflictstyle = zdiff3
+  conflictstyle = zdiff3
 [mergetool]
   keepBackup = false
 [mergetool "vscode"]
-	cmd = code --wait --merge $LOCAL $REMOTE $BASE $MERGED
+  cmd = code --wait --merge $LOCAL $REMOTE $BASE $MERGED
 [pager]
   branch = false
   diff = delta
@@ -86,3 +84,16 @@
   name = TheSiahxyz
   email = 164138827+TheSiahxyz@users.noreply.github.com
   signingkey = 67BE7AD056C803BA
+[commit]
+  gpgsign = false
+[credential "https://github.com"]
+	helper = 
+	helper = !/opt/homebrew/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/opt/homebrew/bin/gh auth git-credential
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true

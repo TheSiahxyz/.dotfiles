@@ -1,0 +1,178 @@
+#!/usr/bin/env bash
+# rmev - clean up videos that mpv integrity-check flagged as corrupt.
+#
+# The corrupt list comes from integrity_cache.tsv (current status). A file is
+# only eligible for deletion when its on-disk mtime/size exactly match what the
+# cache recorded. (If the file changed after the scan it is skipped as
+# "changed" and a re-scan is suggested.)
+#
+# Default behaviour:
+#   * Show the target list and ask for y/N confirmation before deleting.
+#   * Use trash-put (trash) if available, otherwise fall back to rm.
+#   * After deletion, remove the entries from integrity_cache.tsv and corrupted.log.
+
+set -euo pipefail
+
+CONFIG_DIR="${MPV_CONFIG_DIR:-$HOME/.config/mpv}"
+CACHE="$CONFIG_DIR/integrity_cache.tsv"
+LOG="$CONFIG_DIR/corrupted.log"
+
+DRY=0
+FORCE=0
+MODE=auto # MODE: auto|trash|rm
+
+usage() {
+  cat <<'EOF'
+Usage: rmev [options]
+
+Delete video files that mpv integrity-check flagged as corrupt.
+
+Options:
+  -n, --dry-run   Show the targets without deleting anything
+  -f, --force     Delete without the confirmation prompt
+  -t, --trash     Move to trash (requires trash-put)
+  -r, --rm        Permanently delete (rm) instead of trashing
+  -h, --help      Show this help
+
+Default: trash if trash-put exists, otherwise rm. Confirms the list first.
+Deleted files are also removed from integrity_cache.tsv and corrupted.log.
+EOF
+}
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+  -n | --dry-run) DRY=1 ;;
+  -f | --force) FORCE=1 ;;
+  -t | --trash) MODE=trash ;;
+  -r | --rm) MODE=rm ;;
+  -h | --help)
+    usage
+    exit 0
+    ;;
+  *)
+    printf 'Unknown option: %s\n\n' "$1" >&2
+    usage >&2
+    exit 2
+    ;;
+  esac
+  shift
+done
+
+if [ ! -f "$CACHE" ]; then
+  printf 'Cache file not found: %s\n' "$CACHE" >&2
+  exit 1
+fi
+
+# Decide deletion method
+if [ "$MODE" = auto ]; then
+  if command -v trash-put >/dev/null 2>&1; then MODE=trash; else MODE=rm; fi
+fi
+if [ "$MODE" = trash ] && ! command -v trash-put >/dev/null 2>&1; then
+  printf 'trash-put not found. Use --rm to delete permanently, or install trash-cli.\n' >&2
+  exit 1
+fi
+
+# Extract entries whose last cached status is corrupt (mtime, size, path).
+# The cache is append-only, so a path may appear on several lines; last wins.
+mapfile -t entries < <(
+  awk -F'\t' '
+        NF>=5 {
+            p=$5; for (i=6; i<=NF; i++) p = p "\t" $i
+            mt[p]=$1; sz[p]=$2; st[p]=$3
+        }
+        END { for (p in st) if (st[p]=="corrupt") printf "%s\t%s\t%s\n", mt[p], sz[p], p }
+    ' "$CACHE"
+)
+
+if [ "${#entries[@]}" -eq 0 ]; then
+  printf 'No files flagged as corrupt.\n'
+  exit 0
+fi
+
+# Select real targets: must exist and match the cached mtime/size.
+targets=()
+skipped=()
+for line in "${entries[@]}"; do
+  mt=${line%%$'\t'*}
+  rest=${line#*$'\t'}
+  sz=${rest%%$'\t'*}
+  path=${rest#*$'\t'}
+
+  if [ ! -e "$path" ]; then
+    skipped+=("missing  | $path")
+    continue
+  fi
+  cur_mt=$(stat -c %Y -- "$path" 2>/dev/null || echo -1)
+  cur_sz=$(stat -c %s -- "$path" 2>/dev/null || echo -1)
+  if [ "$cur_mt" != "$mt" ] || [ "$cur_sz" != "$sz" ]; then
+    skipped+=("changed  | $path  (re-scan needed)")
+    continue
+  fi
+  targets+=("$path")
+done
+
+printf 'Corrupt files (%d):\n' "${#targets[@]}"
+for p in "${targets[@]}"; do printf '  %s\n' "$p"; done
+
+if [ "${#skipped[@]}" -gt 0 ]; then
+  printf '\nSkipped (%d):\n' "${#skipped[@]}"
+  for s in "${skipped[@]}"; do printf '  %s\n' "$s"; done
+fi
+
+if [ "${#targets[@]}" -eq 0 ]; then
+  exit 0
+fi
+
+if [ "$DRY" -eq 1 ]; then
+  printf '\n(dry-run) Nothing deleted.\n'
+  exit 0
+fi
+
+method_label=$([ "$MODE" = trash ] && echo 'move to trash' || echo 'permanently delete')
+if [ "$FORCE" -ne 1 ]; then
+  printf '\n%s %d file(s)? [y/N] ' "$method_label" "${#targets[@]}"
+  read -r ans
+  case "$ans" in
+  y | Y | yes | YES) ;;
+  *)
+    printf 'Cancelled.\n'
+    exit 0
+    ;;
+  esac
+fi
+
+deleted=()
+for p in "${targets[@]}"; do
+  if [ "$MODE" = trash ]; then
+    if trash-put -- "$p"; then deleted+=("$p"); else printf 'Failed: %s\n' "$p" >&2; fi
+  else
+    if rm -f -- "$p"; then deleted+=("$p"); else printf 'Failed: %s\n' "$p" >&2; fi
+  fi
+done
+
+past_label=$([ "$MODE" = trash ] && echo 'moved to trash' || echo 'deleted')
+printf '%d file(s) %s.\n' "${#deleted[@]}" "$past_label"
+
+# Remove deleted entries from the cache and log
+if [ "${#deleted[@]}" -gt 0 ]; then
+  tmpset=$(mktemp)
+  printf '%s\n' "${deleted[@]}" >"$tmpset"
+
+  prune() { # $1: file, $2: field number where the path starts
+    local f="$1" start="$2" tmp
+    [ -f "$f" ] || return 0
+    tmp=$(mktemp)
+    awk -F'\t' -v start="$start" '
+            NR==FNR { del[$0]=1; next }
+            {
+                p=$start; for (i=start+1; i<=NF; i++) p = p "\t" $i
+                if (!(p in del)) print
+            }
+        ' "$tmpset" "$f" >"$tmp"
+    mv "$tmp" "$f"
+  }
+
+  prune "$CACHE" 5 # integrity_cache.tsv: mtime size status errors PATH
+  prune "$LOG" 2   # corrupted.log: timestamp PATH
+  rm -f "$tmpset"
+fi

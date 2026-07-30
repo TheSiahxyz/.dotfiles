@@ -2,12 +2,18 @@
 api.json
 credentials
 
+# ASDF
+.tool-versions
+
 # Backup files
 *~
 *.swp
 
 # Bookmakrs
 .vim-bookmarks
+
+# Claude
+**/.claude/settings.local.json
 
 # Compiled files
 *.class
@@ -85,14 +91,11 @@ Thumbs.db
 shortcutrc
 zshnameddirrc
 
-# Suckless
-dmenu/dmenu
-dmenu/stest
-dwm/dwm
-dwmblocks/dwmblocks
-slock/slock
-st/st
+surf/config.h
 surf/surf
+tabbed/config.h
+tabbed/tabbed
+tabbed/xembed
 
 # Tmux
 */tmux/plugins/
@@ -106,11 +109,6 @@ dht.dat
 # TheSiahxyz
 thesiah.mom
 
-# Video
-*.mp4
-*.mov
-*.heic
-
 # Vim
 */vim/*/
 
@@ -119,5 +117,3 @@ thesiah.mom
 
 # thesiah.mom
 */thesiah/thesiah.mom
-
-**/.claude/settings.local.json

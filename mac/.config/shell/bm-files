@@ -2,16 +2,17 @@
 vab     ${XDG_CONFIG_HOME:-${HOME}/.config}/abook/addressbook                   # Address book config
 vbc     ${XDG_CONFIG_HOME:-${HOME}/.config}/bash/bashrc                         # Bash (shell) config
 vbd     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/bm-dirs                       # A list of bookmarked directories similar to this file
-vae     ${XDG_CONFIG_HOME:-${HOME}/.config}/aerospace/aerospace.toml            # Aerospace config
 vbf     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/bm-files                      # This file, a list of bookmarked files
 vbi     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/inputrc                       # This file is for gnu readline
 vbp     ${XDG_CONFIG_HOME:-${HOME}/.config}/bash/bash_profile                   # Bash profile
 vcr     ${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}/$(whereami)/.config/crons        # Cron job list
+vcs     ${XDG_CONFIG_HOME:-${HOME}/.config}/claude/settings.json                # Claude settings
 vff     ${XDG_CONFIG_HOME:-${HOME}/.config}/fastfetch/config.jsonc              # Fastfetch config
 vga     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/git-aliasrc                   # Git aliases
 vgc     ${XDG_CONFIG_HOME:-${HOME}/.config}/git/config                          # Git config
 vgi     ${XDG_CONFIG_HOME:-${HOME}/.config}/git/ignore                          # Git ignore
-vkk     ${XDG_CONFIG_HOME:-${HOME}/.config}/kitty/kitty.conf                    # Kitty config
+vgn     $HOME/.gnupg/gpg-agent.conf                                             # GNUPG config
+vgs     $HOME/.gnupg/sshcontrol                                                 # GNUPG SSH control config
 vlf     ${XDG_CONFIG_HOME:-${HOME}/.config}/lf/lfrc                             # LF (file browser) config
 vlg     ${XDG_CONFIG_HOME:-${HOME}/.config}/lazygit/config.yml                  # Lazygit config
 vls     ${XDG_CONFIG_HOME:-${HOME}/.config}/lf/scope                            # LF's scope/preview file
@@ -20,15 +21,14 @@ vmi     ${XDG_CONFIG_HOME:-${HOME}/.config}/mpv/input.conf                      
 vmc     ${XDG_CONFIG_HOME:-${HOME}/.config}/mpv/mpv.conf                        # Mpv config
 vmt     ${XDG_CONFIG_HOME:-${HOME}/.config}/mutt/muttrc                         # Mutt (email client) config
 vnb     ${XDG_CONFIG_HOME:-${HOME}/.config}/ncmpcpp/bindings                    # Ncmpcpp (music player) keybinds file
-vnc     ${XDG_CONFIG_HOME:-${HOME}/.config}/nvim/init.lua                       # Nvim init.lua
 vnp     ${XDG_CONFIG_HOME:-${HOME}/.config}/ncmpcpp/config                      # Ncmpcpp (music player) config
 vns     ${XDG_CONFIG_HOME:-${HOME}/.config}/newsboat/config                     # Newsboat config (RSS reader)
 vnu     ${XDG_CONFIG_HOME:-${HOME}/.config}/newsboat/urls                       # Newsboat url (RSS reader)
-vqt     $HOME/.qutebrowser/config.py                                            # Qutebrowser config
+vqt     $HOME/.qutebrowser/config.py               # Qutebrowser config
+vrp     ${XDG_CONFIG_HOME:-${HOME}/.config}/rmpc/config.ron                     # Rmpc config
 vsa     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/aliasrc                       # Aliases used by shell (and potentially other shells)
 vse     ${XDG_CONFIG_HOME:-${HOME}/.config}/sesh/sesh.toml                      # Sesh config
 vsh     $HOME/.ssh/config                                                       # SSH config
-vsk     ${XDG_CONFIG_HOME:-${HOME}/.config}/sketchybar/sketchybarrc             # Sketchybar config
 vsn     ${XDG_DATA_HOME:-${HOME}/.local/share}/thesiah/snippets                 # Snippets
 vsp     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/profile                       # Shell profile used for system
 vss     ${XDG_CONFIG_HOME:-${HOME}/.config}/starship/starship.toml              # Starship
@@ -37,14 +37,18 @@ vtc     ${XDG_CONFIG_HOME:-${HOME}/.config}/task/taskrc                         
 vtm     ${XDG_CONFIG_HOME:-${HOME}/.config}/tmux/tmux.conf                      # Tmux config
 vto     ${XDG_CONFIG_HOME:-${HOME}/.config}/taskopen/taskopenrc                 # Taskopen config
 vtt     ${XDG_CONFIG_HOME:-${HOME}/.config}/transmission-daemon/settings.json   # Transmission-daemon config
+vtv     ${XDG_CONFIG_HOME:-${HOME}/.config}/television/config.toml              # Television config
 vur     ${XDG_DATA_HOME:-${HOME}/.local/share}/thesiah/urls                     # Custom urls
 vvc     ${XDG_CONFIG_HOME:-${HOME}/.config}/vim/vimrc                           # Vim config
 vvi     ${XDG_CONFIG_HOME:-${HOME}/.config}/vim/init.vim                        # Vim init
 vvp     ${XDG_CONFIG_HOME:-${HOME}/.config}/vim/plugins.vim                     # Vim plugins
 vvw     ${XDG_DATA_HOME:-${HOME}/.local/share}/vimwiki/index.md                 # Vimwiki
-vyc     ${XDG_CONFIG_HOME:-${HOME}/.config}/yazi/yazi.toml                      # Yazi config
-vyi     ${XDG_CONFIG_HOME:-${HOME}/.config}/yazi/init.lua                       # Yazi init for plugins
-vyk     ${XDG_CONFIG_HOME:-${HOME}/.config}/yazi/keymap-default.toml            # Yazi key config
+vyk     ${XDG_CONFIG_HOME:-${HOME}/.config}/yazi/keymap-default.toml            # Yazi keymap
+vyz     ${XDG_CONFIG_HOME:-${HOME}/.config}/yazi/yazi.toml                      # Yazi config
 vzc     ${ZDOTDIR:-${XDG_CONFIG_HOME:-${HOME}/.config}/zsh}/.zshrc              # Zsh config
 vzk     ${ZDOTDIR:-${XDG_CONFIG_HOME:-${HOME}/.config}/zsh}/keymaps.zsh         # Zsh keymaps
 vzs     ${ZDOTDIR:-${XDG_CONFIG_HOME:-${HOME}/.config}/zsh}/scripts.zsh         # Zsh scripts
+vae     ${XDG_CONFIG_HOME:-${HOME}/.config}/aerospace/aerospace.toml            # Aerospace config
+vkk     ${XDG_CONFIG_HOME:-${HOME}/.config}/kitty/kitty.conf                    # Kitty config
+vsk     ${XDG_CONFIG_HOME:-${HOME}/.config}/sketchybar/sketchybarrc             # Sketchybar config
+vyi     ${XDG_CONFIG_HOME:-${HOME}/.config}/yazi/init.lua                       # Yazi init for plugins

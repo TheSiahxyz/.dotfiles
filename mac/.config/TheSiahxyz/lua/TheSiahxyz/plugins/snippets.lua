@@ -45,17 +45,17 @@ return {
 				end
 			end, { silent = true, desc = "Previous spot in the snippet" })
 
-			vim.keymap.set({ "i", "x" }, "<A-l>", function()
-				if ls.choice_active() then
-					ls.change_choice(1)
-				end
-			end, { silent = true, desc = "Next snippet choice" })
+		vim.keymap.set({ "i", "s" }, "<C-j>", function()
+			if ls.choice_active() then
+				ls.change_choice(1)
+			end
+		end, { silent = true, desc = "Next snippet choice" })
 
-			vim.keymap.set({ "i", "x" }, "<A-h>", function()
-				if ls.choice_active() then
-					ls.change_choice(-1)
-				end
-			end, { silent = true, desc = "Previous snippet choice" })
+		vim.keymap.set({ "i", "s" }, "<C-k>", function()
+			if ls.choice_active() then
+				ls.change_choice(-1)
+			end
+		end, { silent = true, desc = "Previous snippet choice" })
 		end,
 		keys = {
 			vim.keymap.set("i", "<tab>", function()

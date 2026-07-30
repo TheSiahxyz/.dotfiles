@@ -1,9 +1,6 @@
 #!/bin/bash
 
-# Mounts Android Phones and USB drives (encrypted or not). This script will
-# replace the older `dmenumount` which had extra steps and couldn't handle
-# encrypted drives.
-# TODO: Try decrypt for drives in crtypttab
+# Mounts Android phones, iPhones, USB drives and samba shares.
 # TODO: Add some support for connecting iPhones (although they are annoying).
 
 # Set UTF-8 locale for proper emoji handling on macOS

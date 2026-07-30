@@ -4,7 +4,7 @@
 # also find hidden RSS feeds on various websites, namely Youtube, Reddit,
 # Vimeo, Github, Gitlab and Medium. Gets site url as $1 or (if not present)
 # from X clipboard. Gets tags as $2. If it finds more than one feed, calls
-# dmenu for the user to choose which one to add. I have bound it to a keyboard
+# fzf for the user to choose which one to add. I have bound it to a keyboard
 # shortcut so i copy a site link and easily add its feed to the reader.
 
 # Inspired by and based on the logic of this extension:
@@ -121,6 +121,6 @@ else
   list="$(getlink "$url")"
 fi
 
-[ "$(echo "$list" | wc -l)" -eq 1 ] && chosen_link="$list" || chosen_link=$(printf '%s\n' "${list[@]}" | dmenu -p "Choose a feed:")
+[ "$(echo "$list" | wc -l)" -eq 1 ] && chosen_link="$list" || chosen_link=$(printf '%s\n' "${list[@]}" | fzf --layout=reverse --height 40% --prompt "Choose a feed: ")
 ifinstalled rssadd && rssadd "$chosen_link" "$tags"
 echo "$chosen_link" "$tags"

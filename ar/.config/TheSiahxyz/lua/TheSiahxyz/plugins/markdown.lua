@@ -243,11 +243,9 @@ return {
 			-- "ibhagwan/fzf-lua",
 			-- "echasnovski/mini.pick",
 		},
-		cmd = { "LivePreview start", "LivePreview close", "LivePreview pick", "LivePreview help" },
+		cmd = "LivePreview",
+		opts = { dynamic_root = true, port = 5500 + (vim.uv.os_getpid() % 100) },
 		init = function()
-			if vim.fn.executable("npm") then
-				vim.g.mkdp_filetypes = { "markdown" }
-			end
 			local wk = require("which-key")
 			wk.add({
 				mode = { "n", "v" },
@@ -255,7 +253,16 @@ return {
 			})
 		end,
 		keys = {
-			{ "<leader>mlp", "<Cmd>LivePreview start<CR>", desc = "Markdown live preview" },
+			{
+				"<leader>mlp",
+				function()
+					pcall(vim.cmd, "LivePreview close")
+					vim.defer_fn(function()
+						vim.cmd("LivePreview start")
+					end, 150)
+				end,
+				desc = "Markdown live preview",
+			},
 			{ "<leader>mlx", "<Cmd>LivePreview close<CR>", desc = "Markdown live close" },
 			{ "<leader>mlc", "<Cmd>LivePreview pick<CR>", desc = "Markdown live pick" },
 			{ "<leader>mlh", "<Cmd>LivePreview help<CR>", desc = "Markdown live help" },

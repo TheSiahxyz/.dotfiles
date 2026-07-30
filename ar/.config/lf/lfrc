@@ -248,6 +248,9 @@ cmd extract ${{
   read ans
   [ "$ans" != "y" ] && exit
 
+  # p7zip installs '7z'; the official 7-Zip release installs '7zz'
+  sevenzip=$(command -v 7z || command -v 7zz || command -v 7za || true)
+
   for archive in $fx; do
     [ -e "$archive" ] || continue
     case "$archive" in
@@ -267,6 +270,9 @@ cmd extract ${{
       *.tgz)     name="${base%.tgz}";     type=tar; tar_flag=z;;
       *.tar.xz)  name="${base%.tar.xz}";  type=tar; tar_flag=J;;
       *.txz)     name="${base%.txz}";     type=tar; tar_flag=J;;
+      # zstd has no single-letter tar flag; flagless tar autodetects it
+      *.tar.zst) name="${base%.tar.zst}"; type=tar;;
+      *.tzst)    name="${base%.tzst}";    type=tar;;
       *.tar)     name="${base%.tar}";     type=tar;;
       *.zip|*.jar|*.war|*.7z) name="${base%.*}"; type=7z;;
       *.rar)     name="${base%.rar}";     type=rar;;
@@ -275,15 +281,20 @@ cmd extract ${{
       *.bz2)     bunzip2 "$archive";      continue;;
       *.gz)      gunzip "$archive";       continue;;
       *.xz)      unxz "$archive";         continue;;
+      *.zst)     unzstd "$archive";       continue;;
       *.lzma)    unlzma "$archive";       continue;;
       *.Z)       uncompress "$archive";   continue;;
       *) printf "Unknown archive type: %s\n" "$archive"; continue;;
     esac
 
+    if [ "$type" = 7z ] && [ -z "$sevenzip" ]; then
+      printf "No 7-Zip binary found (install p7zip or 7-zip): %s\n" "$archive"; continue
+    fi
+
     # count only (ASCII) — entry names must not pass through dash's $()
     case "$type" in
       tar) count=$(tar tf "$archive" 2>/dev/null | awk -F/ 'NF{print $1}' | sort -u | grep -c . || true);;
-      7z)  count=$(7z l -slt -ba "$archive" 2>/dev/null | awk -F'= ' '/^Path = /{print $2}' | awk -F/ 'NF{print $1}' | sort -u | grep -c . || true);;
+      7z)  count=$("$sevenzip" l -slt -ba "$archive" 2>/dev/null | awk -F'= ' '/^Path = /{print $2}' | awk -F/ 'NF{print $1}' | sort -u | grep -c . || true);;
       rar) count=$(unrar lb "$archive" 2>/dev/null | awk -F/ 'NF{print $1}' | sort -u | grep -c . || true);;
       *)   count=0;;
     esac
@@ -300,7 +311,7 @@ cmd extract ${{
 
     case "$type" in
       tar) tar x${tar_flag}f "$archive" -C "$target";;
-      7z)  7z x "$archive" -o"$target";;
+      7z)  "$sevenzip" x "$archive" -o"$target";;
       rar) (cd "$target" && unrar x "$archive_abs");;
       cab) (cd "$target" && cabextract "$archive_abs");;
       ace) (cd "$target" && unace x "$archive_abs");;
