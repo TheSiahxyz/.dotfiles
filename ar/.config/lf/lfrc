@@ -21,10 +21,9 @@ set period 1
 set previewer '~/.config/lf/scope'
 set ratios 1:2:3
 set relativenumber true
-set rulerfmt "%a| %p| %m| %c| %s| %v| %f| %i/%t(%h) %P %d"
+set rulerfile '~/.config/lf/ruler'
 set scrolloff 10
 set shellopts '-eu'
-set statfmt "\033[36m%p\033[0m| %M| %c| %u| %g| %S| %t| -> %l"
 set tempmarks '123456'
 set truncatepct 50
 set info custom
@@ -696,7 +695,7 @@ cmd select-music select-mime 'audio/'
 cmd on-select &{{
   eza -ldg --color=always "$f" | {
     IFS= read -r line || line=""
-    lf -remote "send $id set statfmt \"$line\""
+    lf -remote "send $id set user_stat \"$line\""
   }
 }}
 cmd load-select &{{
