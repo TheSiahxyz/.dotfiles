@@ -28,20 +28,30 @@ weatherreportjson="${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport.json"
 # refreshed immediately when the location changes (not just every 3 hours).
 weatherreportloc="${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport.loc"
 
+# A failed fetch must not destroy a usable cached report — a few hours of stale
+# data beats a "❓" in the bar. The marker only appears when nothing is cached.
 error() {
-  rm -f "$weatherreport" "$weatherreportjson"
   # notify-send "⛔ Failed to update 'weather$1'"
+  [ -s "$weatherreportjson" ] && return
   echo "❓: $1"
   exit 1
 }
 
-# Get weather data from Open-Meteo and save it locally.
+# Get weather data from Open-Meteo and save it locally. Two days are requested so
+# a report fetched late in the evening still covers the hours past midnight; see
+# get_hourly_value for how the current hour is located within the arrays.
 getweatherreportjson() {
   lat=$(echo "$location" | cut -d',' -f1)
   lon=$(echo "$location" | cut -d',' -f2)
   tmp=$(timeout --signal=1 10s curl -sf \
-    "https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation_probability,snowfall,wind_speed_10m,weather_code&daily=temperature_2m_min,temperature_2m_max,precipitation_probability_max&timezone=auto&wind_speed_unit=kmh&forecast_days=1") || error "reportjson"
-  echo "$tmp" | jq -e '.hourly' >/dev/null 2>&1 || error "reportjson"
+    "https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation_probability,wind_speed_10m,weather_code&daily=temperature_2m_min,temperature_2m_max,precipitation_probability_max&timezone=auto&wind_speed_unit=kmh&forecast_days=2") || {
+    error "reportjson"
+    return 1
+  }
+  echo "$tmp" | jq -e '.hourly' >/dev/null 2>&1 || {
+    error "reportjson"
+    return 1
+  }
   echo "$tmp" >"$weatherreportjson"
   echo "$location" >"$weatherreportloc"
 }
@@ -49,7 +59,10 @@ getweatherreportjson() {
 # Fetch a text weather report from wttr.in and save it locally.
 getweatherreport() {
   url="${WTTRURL:-wttr.in}"
-  tmp=$(timeout --signal=1 2s curl -sf "$url/${LOCATION:-$location}") || error "weatherreport"
+  tmp=$(timeout --signal=1 2s curl -sf "$url/${LOCATION:-$location}") || {
+    error "weatherreport"
+    return 1
+  }
   echo "$tmp" >"$weatherreport"
 }
 
@@ -58,18 +71,34 @@ checkforecast() {
   [ -s "$1" ] && [ "$(($(date +%s) - $(stat -c %Y "$1")))" -le "$2" ]
 }
 
-get_current_hour() { date +%-H; }
+# Offset from the start of the report to now, in seconds, measured in the
+# forecast location's own timezone. The API labels its rows in that timezone
+# (timezone=auto), which is not necessarily the machine's — so the machine's
+# local hour is not a usable index. Deriving the position from the report's
+# utc_offset_seconds keeps the lookup correct both for a manually pinned foreign
+# location and for a cached report that has outlived the day it was fetched for.
+elapsed_since_report='(.utc_offset_seconds + ($now | tonumber) - (.hourly.time[0] + ":00Z" | fromdateiso8601))'
 
-# Get a value from the current hour's hourly forecast.
+# Get a value from the current hour's hourly forecast. Yields nothing when the
+# report does not span the current time, which callers treat as "no data".
 get_hourly_value() {
-  field="$1"
-  idx=$(get_current_hour)
-  jq -r ".hourly.${field}[${idx}]" "$weatherreportjson"
+  jq -r --arg now "$(date +%s)" --arg field "$1" "
+    ($elapsed_since_report / 3600 | floor) as \$i
+    | if \$i >= 0 and \$i < (.hourly.time | length) then .hourly[\$field][\$i] else empty end
+  " "$weatherreportjson"
+}
+
+# Get a value from the current day's daily forecast, indexed the same way.
+get_daily_value() {
+  jq -r --arg now "$(date +%s)" --arg field "$1" "
+    ($elapsed_since_report / 86400 | floor) as \$d
+    | if \$d >= 0 and \$d < (.daily.time | length) then .daily[\$field][\$d] else empty end
+  " "$weatherreportjson"
 }
 
 getprecip() { get_hourly_value "precipitation_probability"; }
 
-gethighprecip() { jq -r '.hourly.precipitation_probability[]' "$weatherreportjson" | sort -rn | head -1; }
+gethighprecip() { get_daily_value "precipitation_probability_max"; }
 
 getsnow() {
   code=$(get_hourly_value "weather_code")
@@ -85,9 +114,9 @@ gettemp() { get_hourly_value "temperature_2m" | awk '{printf "%.0f", $1}'; }
 
 getfeelslike() { get_hourly_value "apparent_temperature" | awk '{printf "%.0f", $1}'; }
 
-getlowtemp() { jq -r '.daily.temperature_2m_min[0]' "$weatherreportjson" | awk '{printf "%.0f", $1}'; }
+getlowtemp() { get_daily_value "temperature_2m_min" | awk '{printf "%.0f", $1}'; }
 
-gethightemp() { jq -r '.daily.temperature_2m_max[0]' "$weatherreportjson" | awk '{printf "%.0f", $1}'; }
+gethightemp() { get_daily_value "temperature_2m_max" | awk '{printf "%.0f", $1}'; }
 
 gethumidity() {
   humidity=$(get_hourly_value "relative_humidity_2m" | awk '{printf "%.0f", $1}')
@@ -447,8 +476,10 @@ After $secs seconds, new clicks will also automatically update the doppler RADAR
 8) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
-# Refresh if the cached forecast is stale (>3h) or was fetched for a different location.
+# Refresh if the cached forecast is stale (>3h) or was fetched for a different
+# location. This run prints the fresh value itself, so the signal only exists to
+# nudge any other bar instance — it must not delay this one's output.
 if ! checkforecast "$weatherreportjson" "10800" || { [ -n "$location" ] && [ "$(cat "$weatherreportloc" 2>/dev/null)" != "$location" ]; }; then
-  getweatherreportjson && getweatherreport && pkill -RTMIN+10 "${STATUSBAR:-dwmblocks}" && sleep 3
+  getweatherreportjson && getweatherreport && pkill -RTMIN+10 "${STATUSBAR:-dwmblocks}"
 fi
 showweather
