@@ -11,17 +11,64 @@ IFS='
 # Function for escaping cell-phone names.
 escape() { echo "$@" | iconv -cf UTF-8 -t ASCII//TRANSLIT | tr -d '[:punct:]' | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | sed "s/-\+/-/g;s/\(^-\|-\$\)//g"; }
 
+# Like escape(), but keeps internal punctuation as a separator instead of
+# deleting it, so model names such as "SHPP41-2000GM" stay readable.
+slugify() { echo "$@" | iconv -cf UTF-8 -t ASCII//TRANSLIT | tr '[:upper:]' '[:lower:]' | sed "s/[^a-z0-9]\+/-/g;s/^-\+//;s/-\+\$//"; }
+
+# Resolve through device-mapper and partitions to the underlying disk.
+parentdisk() {
+  local cur="$1" parent slave
+  while true; do
+    # -d is essential: without it lsblk also lists the device's children, and
+    # head -1 can pick one, making the walk ping-pong between parent and child.
+    parent="$(sudo lsblk -dno PKNAME "$cur" 2>/dev/null | head -1)"
+    if [ -z "$parent" ]; then
+      # Device-mapper nodes never report PKNAME; follow their sysfs slaves.
+      slave="$(ls "/sys/class/block/$(basename "$(readlink -f "$cur")")/slaves" 2>/dev/null | head -1)"
+      [ -z "$slave" ] && break
+      cur="/dev/$slave"
+      continue
+    fi
+    cur="/dev/$parent"
+  done
+  echo "$cur"
+}
+
+# Product name of the disk backing a device, e.g. "seagate-bup-bk".
+# Empty when the disk reports neither vendor nor model.
+productname() {
+  local disk vendor model
+  disk="$(parentdisk "$1")"
+  vendor="$(slugify "$(sudo lsblk -dno VENDOR "$disk" 2>/dev/null | head -1)")"
+  model="$(slugify "$(sudo lsblk -dno MODEL "$disk" 2>/dev/null | head -1)")"
+  # NVMe models often already carry the vendor; do not repeat it.
+  case "$model" in
+  "$vendor" | "$vendor"-*) vendor="" ;;
+  esac
+  [ -n "$vendor" ] && [ -n "$model" ] && { echo "$vendor-$model"; return; }
+  echo "$model$vendor"
+}
+
+# Directory name for a drive: label first, then product name, then device name.
+drivename() {
+  local name partn parts
+  name="$(sudo lsblk -dno LABEL "$1" 2>/dev/null | head -1)"
+  [ -n "$name" ] && { echo "$name"; return; }
+  name="$(productname "$1")"
+  [ -z "$name" ] && { basename "$1"; return; }
+  # The product name describes the whole disk, so two unlabelled partitions on
+  # one disk would claim the same mountpoint. Suffix them only when ambiguous.
+  parts="$(sudo lsblk -rno TYPE "$(parentdisk "$1")" 2>/dev/null | grep -c '^part$')"
+  partn="$(sudo lsblk -dno PARTN "$1" 2>/dev/null | head -1)"
+  [ "$parts" -gt 1 ] && [ -n "$partn" ] && name="$name-p$partn"
+  echo "$name"
+}
+
 # Determine mount base: /mnt for internal drives, /media/$USER for external.
 mountbase() {
   local dev="$1"
-  # Resolve through device-mapper and partitions to the underlying disk.
-  local cur="$dev"
-  while true; do
-    local parent
-    parent="$(sudo lsblk -no PKNAME "$cur" 2>/dev/null | head -1)"
-    [ -z "$parent" ] && break
-    cur="/dev/$parent"
-  done
+  local cur
+  cur="$(parentdisk "$dev")"
   local hotplug
   hotplug="$(sudo lsblk -dno HOTPLUG "$cur" 2>/dev/null | head -1)"
   printf "[DEBUG mountbase] dev=%s resolved=%s hotplug='%s'\n" "$dev" "$cur" "$hotplug" >&2
@@ -58,8 +105,7 @@ getmount() {
 
 attemptmount() {
   # Attempt to mount without a mountpoint, to see if drive is in fstab.
-  mplabel=$(sudo lsblk -no "label" "$chosen")
-  [ -n "$mplabel" ] || return
+  mplabel="$(drivename "$chosen")"
   local base
   base="$(mountbase "$chosen")"
   mp="$base/$mplabel"
@@ -204,9 +250,8 @@ case "$chosen" in
   chosen="${chosen:1}" # This is a bashism.
   parttype="$(echo "$lsblkoutput" | grep "$chosen")"
   attemptmount || {
-    # Use label or device basename as default mount point.
-    mplabel="$(sudo lsblk -no label "$chosen" | head -1)"
-    [ -z "$mplabel" ] && mplabel="$(basename "$chosen")"
+    # Use label, product name, or device basename as default mount point.
+    mplabel="$(drivename "$chosen")"
     getmount "$(mountbase "$chosen")/$mplabel"
     case "${parttype##* }" in
     vfat) sudo -A mount -t vfat "$chosen" "$mp" -o rw,umask=0000,uid="$(id -u)",gid="$(id -g)" ;;
@@ -228,8 +273,7 @@ case "$chosen" in
   test -b "/dev/mapper/usb$num"
   chosen="/dev/mapper/usb$num"
   attemptmount || {
-    mplabel="$(sudo lsblk -no label "$chosen" | head -1)"
-    [ -z "$mplabel" ] && mplabel="usb$num"
+    mplabel="$(drivename "$chosen")"
     getmount "$(mountbase "$chosen")/$mplabel"
     sudo -A mount "/dev/mapper/usb$num" "$mp" -o uid="$(id -u)",gid="$(id -g)" || sudo -A mount "/dev/mapper/usb$num" "$mp"
   }
