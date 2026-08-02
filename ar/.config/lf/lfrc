@@ -387,14 +387,33 @@ cmd moveto ${{
 	printf "To:\n   %s\n\n\tmove?[Y/n]" "$destpath"
 	read -r ans
 	case "$ans" in [nN]*) exit;; esac
+  # mv can never merge directories: moving a dir onto an existing same-named
+  # dir fails with ENOTEMPTY (same fs) or "unable to remove target" (cross-fs).
+  # Fall back to rsync on that collision. -rt rather than -a because removable
+  # drives are usually NTFS/exFAT and reject Unix ownership/permission bits;
+  # --remove-source-files unlinks each source only after its transfer lands,
+  # then the empty-dir sweep clears the husk (leaving it if anything failed).
+  mvmerge() {
+    _sudo=$1; shift
+    for x in "$@"; do
+      base=${x##*/}
+      if [ -d "$x" ] && [ -d "$destpath/$base" ]; then
+        $_sudo rsync -rt --partial --info=progress2 --remove-source-files \
+          -- "$x/" "$destpath/$base/" &&
+        $_sudo find "$x" -depth -type d -empty -delete
+      else
+        $_sudo mv -iv -- "$x" "$destpath"
+      fi
+    done
+  }
   if [ -w "$destpath" ]; then
-    for x in $fx; do mv -iv "$x" "$destpath"; done &&
+    mvmerge "" $fx &&
     notify-send "🚚 File(s) moved." "File(s) moved to $destpath."
   else
     printf "\nNo write permission on %s. Use sudo?[y/N]" "$destpath"
     read root
     [ "$root" = "y" ] && {
-      for x in $fx; do sudo mv -iv "$x" "$destpath"; done &&
+      mvmerge sudo $fx &&
       notify-send "🚚 File(s) moved (sudo)." "File(s) moved to $destpath."
     }
   fi

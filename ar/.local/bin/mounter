@@ -109,19 +109,22 @@ attemptmount() {
   local base
   base="$(mountbase "$chosen")"
   mp="$base/$mplabel"
-  # Determine mount options based on filesystem type.
+  # FAT, exFAT and NTFS store no ownership on disk, so it has to come from
+  # mount options. Keep the options in an array: IFS is a bare newline in this
+  # script, so an unquoted "-o opts" string never splits on its space and mount
+  # reads the option value as " uid=..." instead. Drivers split options on ","
+  # alone, so the leading space makes "uid" an unknown option; it is dropped and
+  # ownership falls back to the mounting process, which is root under sudo.
   fstype="$(sudo lsblk -no fstype "$chosen" | head -1)"
   case "$fstype" in
-  vfat | exfat) mountopts="-o uid=$(id -u),gid=$(id -g),umask=0000" ;;
-  ntfs*) mountopts="-o uid=$(id -u),gid=$(id -g)" ;;
-  *) mountopts="" ;;
+  vfat | exfat) mountopts=(-o "uid=$(id -u),gid=$(id -g),umask=0000") ;;
+  ntfs*) mountopts=(-o "uid=$(id -u),gid=$(id -g)") ;;
+  *) mountopts=() ;;
   esac
   if [ -d "$mp" ]; then
-    sudo -A mount $mountopts "$chosen" "$mp" >/dev/null 2>&1 || return 1
-  elif [ ! -d "$mp" ]; then
-    getmount "$mp" && sudo -A mount $mountopts "$chosen" "$mp" >/dev/null 2>&1 || return 1
+    sudo -A mount "${mountopts[@]}" "$chosen" "$mp" >/dev/null 2>&1 || return 1
   else
-    sudo -A mount $mountopts "$chosen" >/dev/null 2>&1 || return 1
+    getmount "$mp" && sudo -A mount "${mountopts[@]}" "$chosen" "$mp" >/dev/null 2>&1 || return 1
   fi
 }
 
@@ -248,16 +251,13 @@ case "$chosen" in
 💾*)
   chosen="${chosen%% *}"
   chosen="${chosen:1}" # This is a bashism.
-  parttype="$(echo "$lsblkoutput" | grep "$chosen")"
   attemptmount || {
     # Use label, product name, or device basename as default mount point.
     mplabel="$(drivename "$chosen")"
     getmount "$(mountbase "$chosen")/$mplabel"
-    case "${parttype##* }" in
-    vfat) sudo -A mount -t vfat "$chosen" "$mp" -o rw,umask=0000,uid="$(id -u)",gid="$(id -g)" ;;
-    ext4 | btrfs) sudo -A mount "$chosen" "$mp" ;;
-    *) sudo -A mount "$chosen" "$mp" -o uid="$(id -u)",gid="$(id -g)" ;;
-    esac
+    # attemptmount already picked the options for this filesystem; reusing them
+    # keeps the retry from silently mounting with weaker ones.
+    sudo -A mount "${mountopts[@]}" "$chosen" "$mp"
   }
   notify-send "💾 Drive Mounted." "$chosen mounted to $mp."
   ;;
@@ -275,7 +275,7 @@ case "$chosen" in
   attemptmount || {
     mplabel="$(drivename "$chosen")"
     getmount "$(mountbase "$chosen")/$mplabel"
-    sudo -A mount "/dev/mapper/usb$num" "$mp" -o uid="$(id -u)",gid="$(id -g)" || sudo -A mount "/dev/mapper/usb$num" "$mp"
+    sudo -A mount "${mountopts[@]}" "/dev/mapper/usb$num" "$mp"
   }
   notify-send "🔓 Decrypted drive Mounted." "$chosen decrypted and mounted to $mp."
   ;;
