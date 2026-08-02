@@ -21,7 +21,8 @@
 {{with .Progress}}  {{join . " "}}{{end -}}
 {{with .Cut}}  {{len . | printf "%s %d \033[0m" $.Options.cutfmt}}{{end -}}
 {{with .Copy}}  {{len . | printf "%s %d \033[0m" $.Options.copyfmt}}{{end -}}
-{{with .Select}}  {{len . | printf "%s %d \033[0m" $.Options.selectfmt}}{{end -}}
+{{- /* selsize is published by ~/.config/lf/selsync (save-select in lfrc) */ -}}
+{{with .Select}}  {{$.Options.selectfmt}}{{printf " %d" (len .)}}{{with $.UserOptions.selsize}}{{printf " %s" .}}{{end}} {{printf "\033[0m"}}{{end -}}
 {{with .Visual}}  {{len . | printf "%s %d \033[0m" $.Options.visualfmt}}{{end -}}
 {{with .Filter}}  {{join . " " | printf "\033[7;34m %s \033[0m"}}{{end -}}
 {{printf "  %d/%d(%d) %s " .Index .Total .Hidden .ScrollPercentage -}}

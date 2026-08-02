@@ -686,17 +686,18 @@ cmd select-mime &{{
   done < /tmp/lf-select-mime-q-$$
   [ -n "$batch" ] && lf -remote "send $id toggle $batch"
   rm -f /tmp/lf-select-mime-$$ /tmp/lf-select-mime-q-$$
+  # Persist and publish once the toggles above have been applied.
+  lf -remote "send $id save-select"
 }}
 cmd select-dirs select-mime 'inode/directory'
 cmd select-files select-mime '-inode/directory'
 cmd select-videos select-mime 'video/'
 cmd select-images select-mime 'image/'
 cmd select-music select-mime 'audio/'
+# Debounced: on-select fires on every cursor move, and <space> is `toggle; down`,
+# so an un-throttled remote call here floods lf's server socket. See the script.
 cmd on-select &{{
-  eza -ldg --color=always "$f" | {
-    IFS= read -r line || line=""
-    lf -remote "send $id set user_stat \"$line\""
-  }
+  ~/.config/lf/statline
 }}
 cmd load-select &{{
     if [ $# -eq 1 ] && [ "$1" = "$id" ]; then
@@ -714,9 +715,11 @@ cmd load-select &{{
         lf -remote "send $id toggle $files"
     fi
 }}
+# Writes the selection file immediately, then debounces the `lf -remote` work
+# (instance sync + ruler size). One remote command per burst instead of one per
+# keypress -- the latter deadlocks lf when <space> is held. See the script.
 cmd save-select &{{
-  printf "%s" "$fs" > ~/.local/share/lf/select
-  lf -remote "send load-select $id"
+  ~/.config/lf/selsync
 }}
 cmd alt-paste &{{
   [ -n "$fs" ] && lf -remote "send $id :$1; save-select"
