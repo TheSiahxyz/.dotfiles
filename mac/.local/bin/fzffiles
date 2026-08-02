@@ -88,13 +88,5 @@ files=$(fzf-tmux \
 
 files=$(printf '%s\n' "$files" | sed -e 's/^📄 //' -e 's/^✏️ //' -e 's/^✅ //' -e 's/^❌ //' -e 's/^🔀 //' -e 's/^🗑️ //' -e 's/^❓ //')
 
-if [ -d "$files" ]; then
-  absolute_files=$(realpath $files)
-  if echo "$absolute_files" | while read -r file; do file --mime-type "$file" | grep -q 'video/'; done; then
-    mpv --quiet --loop $absolute_files
-  else
-    openfiles "$absolute_files"
-  fi
-else
-  openfiles "$files"
-fi
+# openfiles routes video/audio to mpv and everything else to the editor.
+openfiles "$files"

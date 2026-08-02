@@ -1,20 +1,59 @@
 #!/bin/sh
 
-if ! command -v nvim >/dev/null 2>&1; then
-  echo "Error: 'nvim' is not installed." >&2
-  exit 1
-fi
+# Open the given files: video/audio go to mpv, everything else to the editor.
 
 IFS='
 '
 
 files=$*
 
+# Media detection: extension first (cheap and reliable for the usual suspects),
+# MIME as fallback. Ambiguous extensions are deliberately left out of the list
+# so the MIME check decides them (.ts is TypeScript as often as it is MPEG-TS).
+is_media() {
+  case "$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')" in
+  *.mp4 | *.mkv | *.webm | *.avi | *.mov | *.wmv | *.flv | *.m4v | *.mpg | *.mpeg | *.m2ts | *.mts | *.m2v | *.vob | *.ogv | *.ogm | *.3gp | *.3g2 | *.rm | *.rmvb | *.asf | *.divx | *.f4v) return 0 ;;
+  *.mp3 | *.flac | *.wav | *.ogg | *.oga | *.opus | *.spx | *.m4a | *.m4b | *.aac | *.ac3 | *.dts | *.wma | *.aiff | *.aif | *.ape | *.wv | *.mka | *.mpc | *.dsf | *.dff | *.tta) return 0 ;;
+  esac
+  case "$(file -bLh --mime-type -- "$1" 2>/dev/null)" in
+  video/* | audio/*) return 0 ;;
+  esac
+  return 1
+}
+
+media_list=""
+editor_list=""
+
 for file in $files; do
-  files_list="$files_list \"$(realpath "$file")\""
+  path=$(realpath "$file" 2>/dev/null) || path=$file
+  if is_media "$path"; then
+    media_list="$media_list$path
+"
+  else
+    editor_list="$editor_list$path
+"
+  fi
 done
 
-eval "set -- $files_list"
+if [ -n "$media_list" ]; then
+  if ! command -v mpv >/dev/null 2>&1; then
+    echo "Error: 'mpv' is not installed." >&2
+    exit 1
+  fi
+  set --
+  for file in $media_list; do set -- "$@" "$file"; done
+  mpv --quiet -- "$@"
+fi
+
+[ -z "$editor_list" ] && exit 0
+
+if ! command -v nvim >/dev/null 2>&1; then
+  echo "Error: 'nvim' is not installed." >&2
+  exit 1
+fi
+
+set --
+for file in $editor_list; do set -- "$@" "$file"; done
 
 count=$#
 
