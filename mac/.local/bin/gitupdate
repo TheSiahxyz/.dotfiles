@@ -70,8 +70,13 @@ else
   message=$(git cherry -v | awk '{$1=$2=""; print $0}' | sed 's/^ *//' | tail -n 1)
 fi
 
+# Remotes whose push failed, so one bad remote does not abort the whole run
+failed=""
+
 if [ "$repo_root" = "${PASSWORD_STORE_DIR:-${HOME}/.password-store}" ]; then
-  pass git remote | xargs -L1 pass git push --all
+  for r in $(pass git remote); do
+    pass git push --all "$r" || failed="$failed $r"
+  done
 else
   # Add and commit changes
   git add --all .
@@ -82,10 +87,19 @@ else
     remote=$(git remote | head -n 1)
   fi
   git pull --rebase "$remote" "$branch"
-  git remote | xargs -L1 git push --all
+  for r in $(git remote); do
+    git push --all "$r" || failed="$failed $r"
+  done
 fi
 
 printf "\n[repo] %s(%s): %s\n" "$(basename "$repo_root")" "$branch" "$message"
 
+if [ -n "$failed" ]; then
+  printf "[fail] push failed:%s\n" "$failed" >&2
+fi
+
 # Return to the original directory
 cd - >/dev/null
+
+# Non-zero exit if any remote rejected the push
+[ -z "$failed" ]
