@@ -22,11 +22,21 @@ status_output=$(gh auth status 2>&1)
 # Use awk to parse multi-line account information and get both active and inactive accounts
 parsed_data=$(printf "%s\n" "$status_output" | awk '
     /Logged in to|Failed to log in to/ {
-        # Extract hostname and username
-        match($0, /(Logged in to|Failed to log in to) ([^ ]+) account ([^ ]+)/, arr)
-        hostname = arr[2]
-        username = arr[3]
-        logged_status = (arr[1] == "Logged in to" ? "✓" : "✗")
+        # Extract hostname and username. POSIX awk has no 3-argument match(),
+        # so locate the "account" keyword and read its neighbours instead:
+        #   "<mark> Logged in to <host> account <user> (<source>)"
+        #   "<mark> Failed to log in to <host> account <user> (<source>)"
+        hostname = ""
+        username = ""
+        for (i = 2; i < NF; i++) {
+            if ($i == "account") {
+                hostname = $(i - 1)
+                username = $(i + 1)
+                break
+            }
+        }
+        if (username == "") next
+        logged_status = (index($0, "Logged in to") ? "✓" : "✗")
         account_key = username "@" hostname
         accounts[account_key] = logged_status
         account_order[++order_count] = account_key
