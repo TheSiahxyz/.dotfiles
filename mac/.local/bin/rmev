@@ -102,8 +102,8 @@ for line in "${entries[@]}"; do
     skipped+=("missing  | $path")
     continue
   fi
-  cur_mt=$(stat -c %Y -- "$path" 2>/dev/null || echo -1)
-  cur_sz=$(stat -c %s -- "$path" 2>/dev/null || echo -1)
+  cur_mt=$(stat -f %m -- "$path" 2>/dev/null || echo -1)
+  cur_sz=$(stat -f %z -- "$path" 2>/dev/null || echo -1)
   if [ "$cur_mt" != "$mt" ] || [ "$cur_sz" != "$sz" ]; then
     skipped+=("changed  | $path  (re-scan needed)")
     continue

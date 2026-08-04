@@ -46,7 +46,10 @@ getYoutubeRss() {
         sed 's|"rssUrl":"||')
     ;;
   *)
-    channel_id="$(curl -sA "Mozilla/5.0" "$url" | grep -Po '"rssUrl":"https://www.youtube.com/feeds/videos.xml\?channel_id=\K(UC[0-9A-Za-z_-]+)')"
+    # BSD grep has no -P/\K, so capture the id with sed instead.
+    channel_id="$(curl -sA "Mozilla/5.0" "$url" |
+      sed -n 's|.*"rssUrl":"https://www\.youtube\.com/feeds/videos\.xml?channel_id=\(UC[0-9A-Za-z_-]*\)".*|\1|p' |
+      head -n 1)"
     feed="https://www.youtube.com/feeds/videos.xml?channel_id=${channel_id}"
     ;;
   esac
@@ -86,7 +89,7 @@ getMediumRss() {
 if [ -n "$1" ]; then
   url="$1"
 else
-  url="$(xclip -selection clipboard -o)"
+  url="$(pbpaste)"
   [ -z "$url" ] && echo "usage: $0 url 'tag1 tag2 tag3'" && exit 1
 fi
 

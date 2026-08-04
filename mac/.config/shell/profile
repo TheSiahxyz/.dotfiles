@@ -18,10 +18,10 @@ fi
 export KEYTIMEOUT=10
 export SUDO_EDITOR=$EDITOR
 export TERM="xterm-256color"
-export TERMINAL="kitty"
-export TERMINAL2="alacritty"
-export TERMINAL_PROG="kitty"
-export TERMINAL2_PROG="alacritty"
+export TERMINAL="wezterm"
+export TERMINAL2="kitty"
+export TERMINAL_PROG="wezterm"
+export TERMINAL2_PROG="kitty"
 export VISUAL=$EDITOR
 
 ###################################################

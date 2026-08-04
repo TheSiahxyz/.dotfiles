@@ -10,7 +10,6 @@
 # py files: runs via python command
 # go files: compiles and runs with "go run"
 # config.def.h files: (For suckless utils) recompiles and installs program.
-# all others: run `sent` to show a presentation
 
 file=$(readlink -f "$1")
 ext="${file##*.}"
@@ -20,7 +19,11 @@ base="${file%.*}"
 cd "$dir" || exit
 
 Ifinstalled() {
-  command -v "$1" >/dev/null || { notify-send "📦 <b>$1</b> must be installed for this function." && exit 1; }
+  command -v "$1" >/dev/null || {
+    osascript -e "display notification \"$1 must be installed for this function.\" with title \"📦 compiler\"" >/dev/null 2>&1
+    printf '📦 %s must be installed for this function.\n' "$1" >&2
+    exit 1
+  }
 }
 
 pandoccmd() {
@@ -76,9 +79,9 @@ rkt) racket "$file" ;;
 rs) cargo build ;;
 sass) sassc -a "$file" "$base".css ;;
 scad) openscad -o "$base".stl "$file" ;;
-sent) setsid -f sent "$file" 2>/dev/null & ;;
 tex) latexmk ;;
 tcl) tclsh "$file" ;;
 vim*) vint "$file" ;;
-*) chmod +x "$file" && sed 1q "$file" | grep "^#!/" | sed "s/^#!//" | xargs -r -I % "$file" ;;
+# BSD xargs has no -r; an empty shebang line would otherwise re-run the file.
+*) chmod +x "$file" && sed 1q "$file" | grep "^#!/" | sed "s/^#!//" | xargs -I % "$file" ;;
 esac

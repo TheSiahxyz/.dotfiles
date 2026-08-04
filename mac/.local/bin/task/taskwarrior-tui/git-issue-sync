@@ -18,19 +18,18 @@ trim_whitespace() {
   echo "$input" | sed 's/^[ \t]*//;s/[ \t]*$//'
 }
 
-# Validate necessary environment variables
+# Load Linear credentials from pass into the environment. They were previously
+# read but never exported, so get_linear_issues() always sent an empty key.
 validate_env_vars() {
-  oldIFS="$IFS"
-  IFS=' '
-  required_vars="api userid"
-  for var in $required_vars; do
-    val=$(pass show "api/linear/$var")
-    if [ -z "$val" ]; then
-      echo "Error: Environment variable $var is not set." >&2
-      exit 1
-    fi
-  done
-  IFS="$oldIFS"
+  LINEAR_API_KEY=$(pass show "api/linear/api")
+  LINEAR_USER_ID=$(pass show "api/linear/userid")
+
+  if [ -z "$LINEAR_API_KEY" ] || [ -z "$LINEAR_USER_ID" ]; then
+    echo "Error: api/linear/api or api/linear/userid is not set in pass." >&2
+    exit 1
+  fi
+
+  export LINEAR_API_KEY LINEAR_USER_ID
 }
 
 # Retrieve and format GitHub issues

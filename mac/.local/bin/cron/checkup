@@ -1,16 +1,41 @@
 #!/bin/sh
 
-# Syncs repositories and downloads updates, meant to be run as a cronjob.
+# Checks for Homebrew package updates, meant to be run as a cronjob.
 
-notify-send "📦 Repository Sync" "Checking for package updates..."
+# macOS cron runs with a minimal PATH, so Homebrew is not reachable by default.
+[ -x /opt/homebrew/bin/brew ] && PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
+[ -x /usr/local/bin/brew ] && PATH="/usr/local/bin:/usr/local/sbin:$PATH"
+export PATH
 
-sudo pacman -Syyuw --noconfirm || notify-send "⛔ Error downloading updates.
-Check your internet connection, if pacman is already running, or run update manually to see errors."
+notify() {
+  osascript -e "display notification \"$1\" with title \"📦 Homebrew\"" >/dev/null 2>&1
+}
 
-pkill -RTMIN+16 "${STATUSBAR:-dwmblocks}"
+command -v brew >/dev/null 2>&1 || {
+  notify "⛔ Homebrew not found."
+  exit 1
+}
 
-if pacman -Qu | grep -v "\[ignored\]"; then
-  notify-send "🎁 Repository Sync" "Updates available. Click statusbar icon (📦) or run sb-popupgrade in terminal for update."
+# Bail if a previous run is still going. `brew update` takes a while and two
+# concurrent runs fight over the same repository. macOS has no flock(1), so use
+# an atomic mkdir instead.
+LOCKDIR="${TMPDIR:-/tmp}/checkup.lock"
+mkdir "$LOCKDIR" 2>/dev/null || exit 0
+trap 'rmdir "$LOCKDIR" 2>/dev/null' HUP INT QUIT TERM EXIT
+
+notify "Checking for package updates..."
+
+brew update --quiet || {
+  notify "⛔ Error updating Homebrew.
+Check your internet connection, or run 'brew update' manually to see errors."
+  exit 1
+}
+
+outdated=$(brew outdated --quiet)
+
+if [ -n "$outdated" ]; then
+  count=$(printf '%s\n' "$outdated" | grep -c .)
+  notify "🎁 $count package(s) outdated. Run 'brew upgrade' to update."
 else
-  notify-send "📦 Repository Sync" "Sync complete. No new packages for update."
+  notify "Sync complete. No new packages for update."
 fi

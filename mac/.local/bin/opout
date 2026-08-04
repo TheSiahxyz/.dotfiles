@@ -14,5 +14,4 @@ case "${*}" in
   open "$target" >/dev/null 2>&1
   ;;
 *.html) open "$basename".html >/dev/null 2>&1 ;;
-*.sent) nohup sent "$1" >/dev/null 2>&1 & ;;
 esac

@@ -1,14 +1,20 @@
 #!/bin/sh
 
 # Podboat sucks. This script replaces it.
-# It reads the newsboat queue, queuing downloads with taskspooler.
-# It also removes the junk from extensions.
+# It reads the newsboat queue and downloads each entry in the background.
+# qndl only speaks music/video/restore/list/kill, so podcast enclosures go
+# straight to curl rather than through the yt-dlp queue.
 queuefile="${XDG_DATA_HOME:-${HOME}/.local/share}/newsboat/queue"
+dldir="${XDG_DOWNLOAD_DIR:-${HOME}/Downloads}"
+
+mkdir -p "$dldir"
 
 while read -r line; do
   [ -z "$line" ] && continue
   url="${line%%[	 ]*}"
-  qndl "$url" "curl -LO"
+  (cd "$dldir" && curl -sLO "$url") >/dev/null 2>&1 &
 done <"$queuefile"
+
+wait
 
 echo >"$queuefile"

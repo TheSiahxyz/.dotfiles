@@ -2572,6 +2572,16 @@ config.bind(",nb", "spawn --userscript add-nextcloud-bookmarks")
 config.bind(",nB", "hint links userscript add-nextcloud-bookmarks")
 config.bind(",nc", "spawn --userscript add-nextcloud-cookbook")
 config.bind(",nC", "hint links userscript add-nextcloud-cookbook")
+# The Arch config drives qute-pass with passmenu2; macOS has no dmenu, so the
+# selection goes through fzfmenu (fzf in a spawned terminal) instead.
+config.bind(
+    ",pp",
+    "spawn --userscript qute-pass --dmenu-invocation fzfmenu --unfiltered",
+)
+config.bind(
+    ",pn",
+    'spawn --userscript qute-pass --dmenu-invocation fzfmenu --unfiltered --username-pattern "name: (.+)"',
+)
 config.bind(",qh", "open -t qute://help/index.html")
 config.bind(",qc", "open -t qute://help/commands.html#cmd-repeat")
 config.bind(",qr", "spawn --userscript qr")

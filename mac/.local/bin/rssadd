@@ -1,18 +1,34 @@
 #!/bin/sh
 
-if echo "$1" | grep -q "https*://\S\+\.[A-Za-z]\+\S*"; then
+# Add an RSS feed to the newsboat urls file, either from a URL argument or by
+# sniffing the feed link out of a local HTML file.
+
+notify() {
+  osascript -e "display notification \"$1\" with title \"📰 rssadd\"" >/dev/null 2>&1
+  printf '%s\n' "$1"
+}
+
+# BSD grep has no \S, so use an explicit "not whitespace" class.
+is_url() { printf '%s' "$1" | grep -qE 'https?://[^[:space:]]+\.[A-Za-z]+'; }
+
+if is_url "$1"; then
   url="$1"
 else
-  url="$(grep -Eom1 '<[^>]+(rel="self"|application/[a-z]+\+xml)[^>]+>' "$1" |
-    grep -o "https?://[^\" ]")"
+  # -E, so `?` is a real quantifier here (the old BRE pattern never matched).
+  url="$(grep -Eom1 '<[^>]+(rel="self"|application/[a-z]+\+xml)[^>]+>' "$1" 2>/dev/null |
+    grep -Eo 'https?://[^" ]+')"
 
-  echo "$url" | grep -q "https*://\S\+\.[A-Za-z]\+\S*" ||
-    notify-send "That doesn't look like a full URL." && exit 1
+  # Grouped so the `exit 1` belongs to the failure branch only; previously the
+  # && bound to the notify call and fired on success too.
+  if ! is_url "$url"; then
+    notify "That doesn't look like a full URL."
+    exit 1
+  fi
 fi
 
 rssfile="${XDG_CONFIG_HOME:-${HOME}/.config}/newsboat/urls"
-if awk '{print $1}' "$rssfile" | grep "^$url$" >/dev/null; then
-  notify-send "You already have this RSS feed."
+if awk '{print $1}' "$rssfile" | grep -qxF "$url"; then
+  notify "You already have this RSS feed."
 else
-  echo "$url $2" >>"$rssfile" && notify-send "RSS feed added."
+  echo "$url $2" >>"$rssfile" && notify "RSS feed added."
 fi

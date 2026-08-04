@@ -1,0 +1,36 @@
+#!/bin/sh
+
+# qute-pass — macOS launcher for the upstream qute-pass userscript.
+#
+# The script itself lives in qute-pass.py, kept byte-identical to the Arch copy
+# so the two configs stay diffable. Everything macOS-specific is here:
+#
+#   * qutebrowser.app is a GUI process, so it inherits a bare launchd PATH.
+#     Homebrew and ~/.local/bin are prepended for the --dmenu-invocation child.
+#   * qute-pass needs the tldextract module, which neither the system nor the
+#     Homebrew interpreter carries, so it runs out of a dedicated venv.
+
+VENV="$HOME/.local/share/qute-pass/venv"
+SCRIPT="$(dirname "$0")/qute-pass.py"
+
+[ -d /opt/homebrew/bin ] && PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
+PATH="$HOME/.local/bin:$PATH"
+export PATH
+
+# Quote an arbitrary string as an AppleScript literal. Backslashes must be
+# escaped before quotes, or the escaping backslashes get escaped themselves.
+osa_str() {
+  printf '"%s"' "$(printf '%s' "$1" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g')"
+}
+
+die() {
+  osascript -e "display notification $(osa_str "$2") with title $(osa_str "$1")" >/dev/null 2>&1
+  printf '%s %s\n' "$1" "$2" >&2
+  exit 1
+}
+
+[ -x "$VENV/bin/python3" ] ||
+  die "⛔ qute-pass venv is missing" \
+    "Run: python3.14 -m venv $VENV && $VENV/bin/pip install tldextract"
+
+exec "$VENV/bin/python3" "$SCRIPT" "$@"

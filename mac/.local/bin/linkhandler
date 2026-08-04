@@ -1,31 +1,41 @@
 #!/bin/sh
 
 # Feed script a url or file location.
-# If an image, it will view in nsxiv,
+# If an image or document, it opens in the default macOS handler,
 # if a video or gif, it will view in mpv
-# if a music file or pdf, it will download,
+# if a music file, it will download,
 # otherwise it opens link in browser.
 
 if [ -z "$1" ]; then
-  url="$(xclip -o)"
+  url="$(pbpaste)"
 else
   url="$1"
 fi
 
+# Cache downloads under the per-user temp dir rather than /tmp.
+tmpdir="${TMPDIR:-/tmp}"
+basename_of() { printf '%s' "$1" | sed "s/.*\///;s/%20/ /g"; }
+
 case "$url" in
 *mkv | *webm | *mp4 | *youtube.com/watch* | *youtube.com/playlist* | *youtube.com/shorts* | *youtu.be* | *hooktube.com* | *bitchute.com* | *videos.thesiah.xyz* | *odysee.com*)
-  setsid -f mpv -quiet "$url" >/dev/null 2>&1
+  nohup mpv --quiet "$url" >/dev/null 2>&1 &
   ;;
-*png | *jpg | *jpe | *jpeg | *gif | *webp)
-  curl -sL "$url" >"/tmp/$(echo "$url" | sed "s/.*\///;s/%20/ /g")" && nsxiv -a "/tmp/$(echo "$url" | sed "s/.*\///;s/%20/ /g")" >/dev/null 2>&1 &
-  ;;
-*pdf | *cbz | *cbr)
-  curl -sL "$url" >"/tmp/$(echo "$url" | sed "s/.*\///;s/%20/ /g")" && zathura "/tmp/$(echo "$url" | sed "s/.*\///;s/%20/ /g")" >/dev/null 2>&1 &
+*png | *jpg | *jpe | *jpeg | *gif | *webp | *pdf | *cbz | *cbr)
+  name="$(basename_of "$url")"
+  curl -sL "$url" >"$tmpdir/$name" && open "$tmpdir/$name" >/dev/null 2>&1 &
   ;;
 *mp3 | *flac | *opus | *mp3?source*)
-  qndl "$url" 'curl -LO' >/dev/null 2>&1
+  # qndl only speaks music/video/restore/list/kill, so a plain file grab goes
+  # straight to curl instead of through the download queue.
+  (cd "${XDG_DOWNLOAD_DIR:-${HOME}/Downloads}" && curl -sLO "$url") >/dev/null 2>&1 &
   ;;
 *)
-  [ -f "$url" ] && setsid -f "${TERMINAL:-st}" -e "$EDITOR" "$url" >/dev/null 2>&1 || setsid -f "${BROWSER}" "$url" >/dev/null 2>&1
+  if [ -f "$url" ]; then
+    open -a "${TERMINAL:-kitty}".app -n --args "${EDITOR:-nvim}" "$url" >/dev/null 2>&1
+  else
+    # BROWSER is "open -a Firefox", so it must stay unquoted to word-split.
+    # shellcheck disable=SC2086
+    ${BROWSER:-open} "$url" >/dev/null 2>&1
+  fi
   ;;
 esac

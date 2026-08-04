@@ -1,0 +1,698 @@
+#!/bin/sh
+
+# qndl — yt-dlp download queue wrapper
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+# Homebrew is not on cron's / launchd's PATH.
+[ -d /opt/homebrew/bin ] && PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
+[ -d /usr/local/bin ] && PATH="/usr/local/bin:/usr/local/sbin:$PATH"
+export PATH
+
+notify() {
+  osascript -e "display notification $(osa_str "$2") with title $(osa_str "$1")" >/dev/null 2>&1
+}
+
+# Quote an arbitrary string as an AppleScript literal. Backslashes must be
+# escaped before quotes, or the escaping backslashes get escaped themselves.
+osa_str() {
+  printf '"%s"' "$(printf '%s' "$1" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g')"
+}
+
+die() {
+  notify "$1" "$2"
+  printf '%s %s\n' "$1" "$2" >&2
+  exit 1
+}
+
+# dmenu has no macOS equivalent, so prompts run through fzf. That needs a
+# terminal — bail loudly rather than hanging when qndl is driven by a
+# non-interactive caller.
+menu() {
+  _mprompt="$1"
+  shift
+  [ -t 0 ] && [ -t 1 ] || {
+    printf 'qndl: "%s" needs an interactive terminal.\n' "$_mprompt" >&2
+    return 1
+  }
+  fzf --prompt "$_mprompt " "$@"
+}
+
+require() {
+  command -v "$1" >/dev/null 2>&1 ||
+    die "⛔ $1 is not installed" "Run: brew install $2"
+}
+
+get_cookies() {
+  # yt-dlp locates the macOS Firefox profile (~/Library/Application Support/
+  # Firefox) on its own, so the bare browser name is enough. BROWSER is
+  # "open -a Firefox" here, hence the case-insensitive match.
+  case "$(printf '%s' "${BROWSER:-}" | tr '[:upper:]' '[:lower:]')" in
+  *firefox*) printf 'firefox' ;;
+  *safari*) printf 'safari' ;;
+  *chrome*) printf 'chrome' ;;
+  *brave*) printf 'brave' ;;
+  esac
+}
+
+normalize_url() {
+  # yt-dlp's `soop` extractor only matches sooplive.co.kr / afreecatv.com,
+  # so rewrite the newer sooplive.com domain to .co.kr.
+  printf '%s' "$1" | sed 's|\.sooplive\.com/|.sooplive.co.kr/|'
+}
+
+to_music_url() {
+  # Route YouTube links through music.youtube.com. The YouTube Music frontend
+  # yields cleaner song metadata (album/track/artist) than the plain video
+  # page. Non-YouTube URLs and already-music.youtube.com links pass through
+  # untouched; youtu.be short links are expanded to a watch?v= form.
+  printf '%s' "$1" | sed -E '
+    s#^(https?://)?(www\.|m\.)?youtube\.com/#https://music.youtube.com/#
+    s#^(https?://)?youtu\.be/([A-Za-z0-9_-]+).*#https://music.youtube.com/watch?v=\2#
+  '
+}
+
+get_url() {
+  for _arg in "$@"; do
+    case "$_arg" in
+    https://* | http://*)
+      normalize_url "$_arg"
+      return 0
+      ;;
+    esac
+  done
+  _clip="$(pbpaste 2>/dev/null)"
+  case "$_clip" in
+  https://* | http://*)
+    normalize_url "$_clip"
+    return 0
+    ;;
+  esac
+  return 1
+}
+
+validate_url() {
+  case "$1" in
+  https://* | http://*) return 0 ;;
+  *) return 1 ;;
+  esac
+}
+
+get_type() {
+  for _arg in "$@"; do
+    case "$_arg" in
+    https://* | http://*) continue ;;
+    -m | --music | m | music)
+      printf 'music'
+      return 0
+      ;;
+    -v | --video | v | video)
+      printf 'video'
+      return 0
+      ;;
+    -r | --restore | r | restore)
+      printf 'restore'
+      return 0
+      ;;
+    -l | --list | l | list)
+      printf 'list'
+      return 0
+      ;;
+    -k | --kill | k | kill)
+      printf 'kill'
+      return 0
+      ;;
+    *)
+      printf '%s' "$_arg"
+      return 0
+      ;;
+    esac
+  done
+}
+
+get_filename() {
+  _url="$1"
+  _cookies="$(get_cookies)"
+  if [ -n "$_cookies" ]; then
+    _fname="$(yt-dlp --simulate --no-playlist --print '%(filename)s' --cookies-from-browser "$_cookies" "$_url" 2>/dev/null | head -n 1)"
+  else
+    _fname="$(yt-dlp --simulate --no-playlist --print '%(filename)s' "$_url" 2>/dev/null | head -n 1)"
+  fi
+  basename "$_fname"
+}
+
+# HH:MM:SS / MM:SS / SS / "inf" → seconds (-1 for inf). awk handles
+# leading zeros (POSIX sh's $((08)) treats them as octal and breaks).
+parse_section_time() {
+  case "$1" in
+  inf) printf -- '-1' ;;
+  *)
+    printf '%s' "$1" | awk -F: '{
+      if (NF == 1) print $1 + 0
+      else if (NF == 2) print ($1 + 0) * 60 + ($2 + 0)
+      else if (NF == 3) print ($1 + 0) * 3600 + ($2 + 0) * 60 + ($3 + 0)
+    }'
+    ;;
+  esac
+}
+
+# seconds → "HH-MM-SS" (filename-safe). -1 → "inf".
+format_seconds() {
+  case "$1" in
+  -1 | inf) printf 'inf' ;;
+  *) printf '%02d-%02d-%02d' $(($1 / 3600)) $(($1 % 3600 / 60)) $(($1 % 60)) ;;
+  esac
+}
+
+# Probe a URL for its multi_video parts. Returns one "<index>|<seconds>"
+# line per part. Single-video URLs return one line with index "NA".
+# Uses '|' rather than a tab because yt-dlp's --print template doesn't
+# interpret backslash escapes (\t lands in output literally).
+get_parts() {
+  _url="$1"
+  _cookies="$(get_cookies)"
+  if [ -n "$_cookies" ]; then
+    yt-dlp --no-warnings --print '%(playlist_index)s|%(duration)s' \
+      --cookies-from-browser "$_cookies" "$_url" 2>/dev/null
+  else
+    yt-dlp --no-warnings --print '%(playlist_index)s|%(duration)s' "$_url" 2>/dev/null
+  fi
+}
+
+enqueue() {
+  _dl_type="$1"
+  _url="$2"
+  _title="$3"
+  shift 3
+
+  _cookies="$(get_cookies)"
+  _music_dir="${XDG_MUSIC_DIR:-$HOME/Music}"
+  _cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/qndl"
+
+  # Build argument list without string concatenation chains
+  set -- \
+    --continue \
+    --embed-metadata \
+    --ignore-errors \
+    --no-force-overwrites \
+    --verbose \
+    "$@"
+
+  if [ -n "$_cookies" ]; then
+    set -- --cookies-from-browser "$_cookies" "$@"
+  fi
+
+  # Quote each arg for safe passage through bash -c
+  _quoted_args=""
+  for _a in "$@"; do
+    _escaped=$(printf '%s' "$_a" | sed "s/'/'\\\\''/g")
+    _quoted_args="$_quoted_args '${_escaped}'"
+  done
+
+  # `--` ends option parsing so URLs whose video ID starts with '-' aren't treated as flags.
+  _ytdl_cmd="yt-dlp${_quoted_args} -- '$(printf '%s' "$_url" | sed "s/'/'\\\\''/g")'"
+
+  _idnum="$(tsp bash -c "$_ytdl_cmd")"
+
+  # tsp output doesn't carry titles; cache them at queue time so `qndl -l/-k`
+  # can show meaningful labels instead of bare URLs.
+  mkdir -p "$_cache_dir"
+  printf '%s\t%s\t%s\n' "$_idnum" "$_dl_type" "${_title:-$_url}" >> "$_cache_dir/titles"
+
+  # tsp -D runs next job only if dependency succeeded (exit 0)
+  # Success notification — runs only if download succeeds
+  tsp -D "$_idnum" osascript \
+    -e "display notification $(osa_str "$_url") with title $(osa_str "✅ ${_dl_type} download complete:")"
+
+  # Failure notification — waits for job, then distinguishes partial-success
+  # (yt-dlp skipped some HLS fragments via --ignore-errors but still produced
+  # a playable output) from full failure. On partial success, also clean up
+  # orphan `<final>.part-Frag*.part` files yt-dlp leaves behind for skipped
+  # fragments.
+  tsp bash -c '
+    _osa() { printf "%s" "$1" | sed -e "s/\\\\/\\\\\\\\/g" -e "s/\"/\\\\\"/g"; }
+    _note() { osascript -e "display notification \"$(_osa "$2")\" with title \"$(_osa "$1")\"" >/dev/null 2>&1; }
+    tsp -w "$1"
+    _exit=$(tsp -i "$1" | sed -n "s/.*exit code //p")
+    { [ -z "$_exit" ] || [ "$_exit" = "0" ]; } && exit 0
+    _log=$(tsp -o "$1" 2>/dev/null)
+    _final=""
+    _skipped=0
+    if [ -n "$_log" ] && [ -f "$_log" ]; then
+      _final=$(grep -oE "\[Merger\] Merging formats into \"[^\"]+\"" "$_log" | tail -n 1 | sed "s/^\[Merger\] Merging formats into \"//; s/\"$//")
+      [ -z "$_final" ] && _final=$(grep "^\[download\] Destination: " "$_log" | tail -n 1 | sed "s/^\[download\] Destination: //")
+      _skipped=$(grep -c "fragment not found; Skipping fragment" "$_log" 2>/dev/null || printf 0)
+    fi
+    if [ -n "$_final" ] && [ -f "$_final" ]; then
+      find "$(dirname "$_final")" -maxdepth 1 -name "$(basename "$_final").part-Frag*.part" -delete 2>/dev/null
+      _note "⚠️ Partial download (${_skipped} fragments lost):" "$2"
+    else
+      _note "❌ Failed to download:" "$2"
+    fi
+  ' -- "$_idnum" "$_url"
+
+  if [ "$_dl_type" = "music" ]; then
+    _playlist="${XDG_CONFIG_HOME:-$HOME/.config}/mpd/playlists/entire.m3u"
+    tsp -D "$_idnum" bash -c "mpc update --wait && find '$_music_dir' -name '*.mp3' | sed 's|$_music_dir/||' | sort > '$_playlist'"
+  fi
+}
+
+# ---------------------------------------------------------------------------
+# Playlist
+# ---------------------------------------------------------------------------
+
+handle_playlist() {
+  _url="$1"
+  _download_type="$2"
+  _output_dir="$3"
+  _base_output_format="$4"
+
+  case "$_url" in
+  *playlist* | *list=*)
+    _pl_choice="$(printf 'playlist\na content' | menu 'Download entire playlist or just this content?')"
+    ;;
+  *)
+    printf '%s\n' '--no-playlist'
+    printf '%s\n' "$_base_output_format"
+    return 0
+    ;;
+  esac
+
+  case "$_pl_choice" in
+  playlist)
+    printf '%s\n' '--yes-playlist'
+    if [ "$_download_type" = "video" ]; then
+      _channel="$(yt-dlp --print '%(channel)s' "$_url" 2>/dev/null | head -n 1 | sed 's/, /,/g;s/[\/:*?"<>| ]/-/g' | tr '[:upper:]' '[:lower:]')"
+      _playlist="$(yt-dlp --print '%(playlist_title)s' "$_url" 2>/dev/null | head -n 1 | sed 's/, /,/g;s/[\/:*?"<>| ]/-/g' | tr '[:upper:]' '[:lower:]')"
+      _subdir="${_channel}/${_playlist}"
+      mkdir -p "${_output_dir}/${_subdir}"
+      printf '%s\n' "${_output_dir}/${_subdir}/%(playlist_index)02d_%(title)s [%(id)s].%(ext)s"
+    else
+      printf '%s\n' "$_base_output_format"
+    fi
+    ;;
+  *)
+    # "a content" or the prompt was cancelled
+    printf '%s\n' '--no-playlist'
+    printf '%s\n' "$_base_output_format"
+    ;;
+  esac
+}
+
+# ---------------------------------------------------------------------------
+# Download Modes
+# ---------------------------------------------------------------------------
+
+download_music() {
+  _url="$(to_music_url "$1")"
+  _output_dir="${XDG_MUSIC_DIR:-$HOME/Music}"
+  _archive="${XDG_DOTFILES_DIR:-$HOME/.dotfiles}/global/Music/.music.txt"
+  _titles="${XDG_DOTFILES_DIR:-$HOME/.dotfiles}/global/Music/.music_titles.txt"
+  _format="${_output_dir}/%(artists.0|Unknown Artist)s/%(album|Unknown Album)s/%(title)s.%(ext)s"
+  _title_fmt="$(printf '%%(id)s\t%%(artists.0|Unknown Artist)s - %%(title)s')"
+
+  _pl_result="$(handle_playlist "$_url" "music" "$_output_dir" "$_format")"
+  _pl_flag="$(printf '%s' "$_pl_result" | head -n 1)"
+  _fmt="$(printf '%s' "$_pl_result" | tail -n 1)"
+
+  _filename="$(get_filename "$_url")"
+  notify "📥 Queuing music download:" "$_filename"
+
+  enqueue "music" "$_url" "$_filename" \
+    "$_pl_flag" \
+    --extract-audio \
+    --audio-format mp3 \
+    --audio-quality 0 \
+    --parse-metadata "%(release_date,upload_date)s:%(meta_date)s" \
+    --download-archive "$_archive" \
+    --print-to-file "$_title_fmt" "$_titles" \
+    --exec "after_move:qndl-artist apply-download %(filepath)q" \
+    --output "$_fmt"
+}
+
+download_video() {
+  _url="$1"
+  _output_dir="${XDG_VIDEOS_DIR:-$HOME/Videos}"
+  _format="${_output_dir}/%(title)s [%(id)s].%(ext)s"
+
+  _video_ext="$(printf 'best\n60fps\n30fps\nsection\nmp4\nmkv' | menu 'Choose an encoding (default: 1080p)')" ||
+    die "⛔ Video encoding selection cancelled" ""
+
+  _format_val=""
+  _recode_ext=""
+  _sections=""
+  case "$_video_ext" in
+  best)
+    _format_val="bestvideo+bestaudio/best"
+    ;;
+  60fps)
+    _format_val="((bv*[fps=60]/bv*)[height<=1080]/(wv*[fps=60]/wv*))+ba/(b[fps=60]/b)[height<=1080]/(w[fps=60]/w)"
+    ;;
+  30fps)
+    _format_val="((bv*[fps=30]/bv*)[height<=1080]/(wv*[fps=30]/wv*))+ba/(b[fps=30]/b)[height<=1080]/(w[fps=30]/w)"
+    ;;
+  section)
+    _format_val="bestvideo+bestaudio/best"
+    # Free-text input, so no fzf list to pick from — prompt on the terminal.
+    [ -t 0 ] || die "⛔ Section input needs an interactive terminal" ""
+    printf 'Section (e.g. 10:00-20:00 or 30:00-inf): ' >&2
+    read -r _sections || die "⛔ Section selection cancelled" ""
+    [ -z "$_sections" ] && die "⛔ No section specified" ""
+    ;;
+  *)
+    _format_val="bestvideo+bestaudio/best"
+    _recode_ext="$_video_ext"
+    ;;
+  esac
+
+  # Non-section paths use the regular playlist prompt + standard filename.
+  if [ -z "$_sections" ]; then
+    _pl_result="$(handle_playlist "$_url" "video" "$_output_dir" "$_format")"
+    _pl_flag="$(printf '%s' "$_pl_result" | head -n 1)"
+    _fmt="$(printf '%s' "$_pl_result" | tail -n 1)"
+    _filename="$(get_filename "$_url")"
+    notify "📥 Queuing video download:" "$_filename"
+  fi
+
+  # Section downloads need special handling for multi_video URLs (e.g. Soop
+  # VODs split into multiple files): yt-dlp's --download-sections is applied
+  # per-part using each part's *local* timeline starting at 00:00:00. So a
+  # global "03:33:00-inf" must be split: each affected part gets its own
+  # locally-translated section, and the user gets one file per part.
+  if [ -n "$_sections" ]; then
+    _filename="$(get_filename "$_url")"
+    notify "🔍 Probing VOD parts…" "$_filename"
+    _parts="$(get_parts "$_url")"
+    _part_count="$(printf '%s\n' "$_parts" | awk 'NF{n++} END{print n+0}')"
+
+    _sec_start_str="${_sections%-*}"
+    _sec_end_str="${_sections#*-}"
+    _sec_start="$(parse_section_time "$_sec_start_str")"
+    _sec_end="$(parse_section_time "$_sec_end_str")"
+
+    if [ "$_part_count" -le 1 ]; then
+      # Single video — pass section straight through.
+      # --abort-on-error overrides enqueue's --ignore-errors so a stuck/failing
+      # download surfaces as a real failure instead of a silent exit 0.
+      # -rw_timeout 30s caps ffmpeg's HLS demuxer from spinning forever on
+      # bad CDN segments (Soop's CDN drops connections regularly).
+      _section_safe="$(printf '%s' "$_sections" | tr ':' '-')"
+      _fmt="${_output_dir}/%(title)s [%(id)s] [${_section_safe}].%(ext)s"
+      notify "📥 Queuing video download:" "$_filename"
+      enqueue "video" "$_url" "$_filename" \
+        --no-playlist \
+        --abort-on-error \
+        --external-downloader-args 'ffmpeg_i:-rw_timeout 30000000' \
+        --buffer-size 1M \
+        --embed-thumbnail \
+        --no-sponsorblock \
+        --format "$_format_val" \
+        --download-sections "*${_sections}" \
+        --output "$_fmt"
+    else
+      # multi_video — translate global section into per-part local sections
+      # and dispatch one job per overlapping part.
+      notify "📥 Queuing $_part_count parts:" "$_filename ($_sections)"
+      _offset=0
+      printf '%s\n' "$_parts" | while IFS='|' read -r _idx _dur; do
+        case "$_dur" in '' | NA) continue ;; esac
+
+        _part_start="$_offset"
+        _part_end=$((_offset + _dur))
+        _offset="$_part_end"
+
+        # Skip parts outside the requested global range.
+        [ "$_sec_end" != "-1" ] && [ "$_sec_end" -le "$_part_start" ] && continue
+        [ "$_sec_start" -ge "$_part_end" ] && continue
+
+        _ls=$((_sec_start - _part_start))
+        [ "$_ls" -lt 0 ] && _ls=0
+        if [ "$_sec_end" = "-1" ]; then
+          _le=-1
+          _yt_end="inf"
+        else
+          _le=$((_sec_end - _part_start))
+          [ "$_le" -gt "$_dur" ] && _le="$_dur"
+          _yt_end="$_le"
+        fi
+
+        _safe_section="$(format_seconds "$_ls")-$(format_seconds "$_le")"
+        _fmt_part="${_output_dir}/%(title)s [%(id)s] [part${_idx}_${_safe_section}].%(ext)s"
+
+        enqueue "video" "$_url" "$_filename (part $_idx)" \
+          --playlist-items "$_idx" \
+          --abort-on-error \
+          --external-downloader-args 'ffmpeg_i:-rw_timeout 30000000' \
+          --buffer-size 1M \
+          --embed-thumbnail \
+          --no-sponsorblock \
+          --format "$_format_val" \
+          --download-sections "*${_ls}-${_yt_end}" \
+          --output "$_fmt_part"
+      done
+    fi
+  elif [ -n "$_recode_ext" ]; then
+    # --http-chunk-size 9M: Soop's CDN closes the connection at exactly 10 MiB
+    # per HTTP GET, which silently truncated ~12 MiB HLS fragments and forced
+    # them to be skipped. Capping per-request bytes under that limit splits
+    # each fragment into multiple Range requests so none hit the cutoff.
+    enqueue "video" "$_url" "$_filename" \
+      "$_pl_flag" \
+      --buffer-size 1M \
+      --http-chunk-size 9M \
+      --embed-thumbnail \
+      --no-sponsorblock \
+      --format "$_format_val" \
+      --recode-video "$_recode_ext" \
+      --output "$_fmt"
+  else
+    enqueue "video" "$_url" "$_filename" \
+      "$_pl_flag" \
+      --buffer-size 1M \
+      --http-chunk-size 9M \
+      --embed-thumbnail \
+      --no-sponsorblock \
+      --format "$_format_val" \
+      --output "$_fmt"
+  fi
+}
+
+restore_archive() {
+  _output_dir="${XDG_MUSIC_DIR:-$HOME/Music}"
+  _archive="${XDG_DOTFILES_DIR:-$HOME/.dotfiles}/global/Music/.music.txt"
+  _titles="${XDG_DOTFILES_DIR:-$HOME/.dotfiles}/global/Music/.music_titles.txt"
+  _format="${_output_dir}/%(artists.0|Unknown Artist)s/%(album|Unknown Album)s/%(title)s.%(ext)s"
+
+  [ ! -f "$_archive" ] && die "⛔ Archive not found" "$_archive"
+
+  # Build menu lines: "Artist - Title  [VIDEOID]" if title is cached, else "[VIDEOID]"
+  # Archive uses space ("youtube ID"); titles file uses tab ("ID<TAB>title").
+  if [ -f "$_titles" ]; then
+    _display="$(awk '
+      NR==FNR {
+        tab = index($0, "\t")
+        if (tab > 0) titles[substr($0, 1, tab-1)] = substr($0, tab+1)
+        next
+      }
+      {
+        sp = index($0, " ")
+        if (sp == 0) next
+        id = substr($0, sp+1)
+        if (id == "") next
+        if (id in titles) print titles[id] "  [" id "]"
+        else print "[" id "]"
+      }
+    ' "$_titles" "$_archive")"
+  else
+    _display="$(awk '$2 != "" { print "[" $2 "]" }' "$_archive")"
+  fi
+  _total="$(printf '%s\n' "$_display" | grep -c .)"
+
+  _choice="$(printf 'all\n%s' "$_display" | menu "Restore which song? ($_total total)")"
+  [ -z "$_choice" ] && return 0
+
+  if [ "$_choice" = "all" ]; then
+    _selected="$(awk '$2 != "" { print $2 }' "$_archive")"
+  else
+    # Extract video ID from trailing "[VIDEOID]" (11-char YouTube id, anchored at end)
+    _selected="$(printf '%s' "$_choice" | sed -n 's/.*\[\([A-Za-z0-9_-]\{11\}\)\][[:space:]]*$/\1/p')"
+    [ -z "$_selected" ] && die "⛔ Could not parse video ID from selection" "$_choice"
+  fi
+
+  _sel_total="$(printf '%s\n' "$_selected" | grep -c .)"
+  notify "⏳ Queueing $_sel_total restore(s)" "via tsp"
+  _tmpfile="$(mktemp)"
+  printf '%s\n' "$_selected" >"$_tmpfile"
+  while IFS= read -r _id; do
+    [ -z "$_id" ] && continue
+    if [ -f "$_titles" ]; then
+      _t="$(awk -F'\t' -v id="$_id" '$1 == id {print $2; exit}' "$_titles")"
+    else
+      _t=""
+    fi
+    enqueue "music" "https://music.youtube.com/watch?v=$_id" "${_t:-$_id}" \
+      --no-playlist \
+      --extract-audio \
+      --audio-format mp3 \
+      --audio-quality 0 \
+      --parse-metadata "%(release_date,upload_date)s:%(meta_date)s" \
+      --exec "after_move:qndl-artist apply-download %(filepath)q" \
+      --output "$_format"
+  done <"$_tmpfile"
+  rm -f "$_tmpfile"
+  notify "✅ All $_sel_total job(s) queued" "tsp will process them sequentially"
+}
+
+
+# ---------------------------------------------------------------------------
+# Listing & Cancellation
+# ---------------------------------------------------------------------------
+
+# Two consecutive tsp IDs after the main download are notification helpers
+# (success via `tsp -D`, failure via separate bash script). Music adds a
+# 3rd helper for `mpc update`. When cancelling a job we remove main + its
+# helpers so stray ❌ notifications don't fire.
+_helper_offset_for() {
+  case "$1" in
+  music) printf '3' ;;
+  *) printf '2' ;;
+  esac
+}
+
+list_queue() {
+  _cache="${XDG_CACHE_HOME:-$HOME/.cache}/qndl/titles"
+  [ -f "$_cache" ] || _cache=/dev/null
+  _tab="$(printf '\t')"
+
+  {
+    printf 'ID\tState\tType\tTitle\tURL\n'
+    tsp | awk -v cache="$_cache" '
+      BEGIN {
+        while ((getline line < cache) > 0) {
+          n = split(line, a, "\t")
+          if (n >= 3) { types[a[1]] = a[2]; titles[a[1]] = a[3] }
+        }
+      }
+      NR == 1 { next }
+      /yt-dlp/ && ($2 == "queued" || $2 == "running") {
+        match($0, /https?:\/\/[^ '\'']+/)
+        url = RSTART ? substr($0, RSTART, RLENGTH) : "-"
+        t = ($1 in types) ? types[$1] : "?"
+        title = ($1 in titles) ? titles[$1] : "-"
+        printf "%s\t%s\t%s\t%s\t%s\n", $1, $2, t, title, url
+      }
+    '
+  } | column -t -s "$_tab"
+}
+
+kill_job() {
+  command -v fzf >/dev/null 2>&1 || die "⛔ fzf not installed" "Install fzf to use qndl -k."
+
+  _cache="${XDG_CACHE_HOME:-$HOME/.cache}/qndl/titles"
+  [ -f "$_cache" ] || _cache=/dev/null
+
+  # Build fzf input: <id>\t<displayed line>. --with-nth hides column 1, cut grabs it back.
+  _entries="$(tsp | awk -v cache="$_cache" '
+    BEGIN {
+      while ((getline line < cache) > 0) {
+        n = split(line, a, "\t")
+        if (n >= 3) { types[a[1]] = a[2]; titles[a[1]] = a[3] }
+      }
+    }
+    /yt-dlp/ && ($2 == "queued" || $2 == "running") {
+      match($0, /https?:\/\/[^ '\'']+/)
+      url = RSTART ? substr($0, RSTART, RLENGTH) : "-"
+      t = ($1 in types) ? types[$1] : "?"
+      title = ($1 in titles) ? titles[$1] : "-"
+      printf "%s\t[%s] %-9s %-5s %s :: %s\n", $1, t, $2, $1, title, url
+    }
+  ')"
+
+  [ -z "$_entries" ] && die "⛔ No active downloads" "Nothing to cancel."
+
+  _selected="$(printf '%s\n' "$_entries" |
+    fzf -m \
+      --with-nth=2.. \
+      --delimiter='\t' \
+      --prompt='Cancel: ' \
+      --header='TAB to mark multiple, Enter to confirm' |
+    cut -f1)"
+
+  [ -z "$_selected" ] && return 0
+
+  _ids_file="$(mktemp)"
+  printf '%s\n' "$_selected" >"$_ids_file"
+
+  _killed=0
+  while IFS= read -r _id; do
+    [ -z "$_id" ] && continue
+
+    _t="$(awk -F'\t' -v id="$_id" '$1 == id {print $2; exit}' "$_cache" 2>/dev/null)"
+    _max="$(_helper_offset_for "${_t:-video}")"
+
+    _off=0
+    while [ "$_off" -le "$_max" ]; do
+      _target=$((_id + _off))
+      # `-r` for queued, `-k` for running; only one applies, ignore the other's error.
+      tsp -r "$_target" 2>/dev/null
+      tsp -k "$_target" 2>/dev/null
+      _off=$((_off + 1))
+    done
+    _killed=$((_killed + 1))
+  done <"$_ids_file"
+
+  # Drop cancelled IDs from the title cache in one pass.
+  if [ -f "$_cache" ] && [ "$_cache" != "/dev/null" ]; then
+    _new_cache="$(mktemp)"
+    awk -F'\t' 'NR==FNR { drop[$1]=1; next } !($1 in drop)' \
+      "$_ids_file" "$_cache" >"$_new_cache"
+    mv "$_new_cache" "$_cache"
+  fi
+
+  rm -f "$_ids_file"
+
+  notify "🗑️ Cancelled $_killed download(s)" "Helper notifications removed too."
+}
+
+# ---------------------------------------------------------------------------
+# Entry Point
+# ---------------------------------------------------------------------------
+
+main() {
+  require yt-dlp yt-dlp
+  require tsp task-spooler
+
+  _type="$(get_type "$@")"
+
+  case "$_type" in
+  music)
+    _url="$(get_url "$@")" || die "⛔ No URL provided" "Pass a URL or copy one to the clipboard."
+    validate_url "$_url" || die "⛔ Invalid URL format" "$_url"
+    download_music "$_url"
+    ;;
+  video)
+    _url="$(get_url "$@")" || die "⛔ No URL provided" "Pass a URL or copy one to the clipboard."
+    validate_url "$_url" || die "⛔ Invalid URL format" "$_url"
+    download_video "$_url"
+    ;;
+  restore)
+    restore_archive
+    ;;
+  list)
+    list_queue
+    ;;
+  kill)
+    kill_job
+    ;;
+  "")
+    die "⛔ No type specified" "Provide: music, video, restore, list, or kill."
+    ;;
+  *)
+    die "⛔ Invalid type: $_type" "Recognized types: music, video, restore, list, kill."
+    ;;
+  esac
+}
+
+main "$@"

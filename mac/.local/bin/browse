@@ -17,15 +17,7 @@ usage() {
 search_tool="web"
 search_engine="searx"
 
-# Determine the open command based on the operating system
-case "$(uname -s)" in
-Darwin)
-  open_cmd='open'
-  ;;
-*)
-  open_cmd='xdg-open'
-  ;;
-esac
+open_cmd='open'
 
 # Check the first argument for flags or help using case
 case "$1" in
@@ -56,8 +48,8 @@ search_query="$*"
 # Execute the corresponding search tool using case
 case $search_tool in
 ddgr)
-  # Run DuckDuckGo search in the terminal
-  setsid -f "$TERMINAL" -e ddgr "$search_query"
+  # Run DuckDuckGo search in a detached terminal window
+  open -a "${TERMINAL:-kitty}".app -n --args ddgr "$search_query"
   ;;
 web)
   # Construct the URL based on the search engine

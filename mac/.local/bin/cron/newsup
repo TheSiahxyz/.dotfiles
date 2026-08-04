@@ -2,6 +2,11 @@
 
 # Set as a cron job to check for new RSS entries for newsboat.
 
+# macOS cron runs with a minimal PATH, so Homebrew's newsboat is not reachable.
+[ -d /opt/homebrew/bin ] && PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
+[ -d /usr/local/bin ] && PATH="/usr/local/bin:/usr/local/sbin:$PATH"
+export PATH
+
 notify() {
 	osascript -e "display notification \"$1\" with title \"📰 Newsboat\"" >/dev/null 2>&1
 }
@@ -13,9 +18,11 @@ LOCKDIR="${TMPDIR:-/tmp}/newsup.lock"
 mkdir "$LOCKDIR" 2>/dev/null || exit
 trap 'rmdir "$LOCKDIR" 2>/dev/null' HUP INT QUIT TERM EXIT
 
-notify "Updating RSS feeds..."
-
+# Newsboat holds an exclusive lock on cache.db while it runs, so `-x reload`
+# would fail. Bail before announcing anything.
 pgrep -x newsboat >/dev/null 2>&1 && exit
+
+notify "Updating RSS feeds..."
 
 newsboat -x reload
 

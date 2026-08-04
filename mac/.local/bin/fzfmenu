@@ -1,0 +1,80 @@
+#!/bin/sh
+
+# fzfmenu — dmenu-compatible chooser for macOS.
+#
+# Reads newline-separated items on stdin and prints the selected one on stdout;
+# prints nothing when the selection is cancelled. dmenu has no macOS
+# equivalent, so the choosing runs through fzf. GUI callers (qutebrowser
+# userscripts, Automator, launchd) have no controlling terminal, so fzf is
+# hosted in a throwaway terminal window via xdg-terminal-exec there.
+
+set -e
+
+# Homebrew is not on launchd's PATH, and GUI apps inherit that bare PATH.
+[ -d /opt/homebrew/bin ] && PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
+[ -d /usr/local/bin ] && PATH="/usr/local/bin:/usr/local/sbin:$PATH"
+PATH="$HOME/.local/bin:$PATH"
+export PATH
+
+usage() {
+  echo "Choose one of the lines on stdin, dmenu-style, using fzf."
+  echo ""
+  echo "Usage: ... | ${0##*/} [-p PROMPT] [fzf options...]"
+  echo ""
+  echo "Options:"
+  echo "  -p PROMPT   : Prompt shown left of the input field"
+  echo "  -h, --help  : Show this message"
+  echo ""
+  echo "Environment:"
+  echo "  TERMINAL    : Terminal used when there is no tty; see"
+  echo "                xdg-terminal-exec, which does the launching"
+  exit 0
+}
+
+prompt=""
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+  -h | --help) usage ;;
+  -p)
+    prompt="$2"
+    shift 2
+    ;;
+  *) break ;;
+  esac
+done
+[ -n "$prompt" ] && set -- --prompt "$prompt " "$@"
+
+command -v fzf >/dev/null 2>&1 || {
+  echo "${0##*/}: fzf is not installed. Run: brew install fzf" >&2
+  exit 1
+}
+
+# fzf drives its UI through /dev/tty, so a controlling terminal is all that is
+# needed — stdin being a pipe is expected here, not a disqualifier.
+if [ -c /dev/tty ] && (exec 2>/dev/null 3<"/dev/tty"); then
+  exec fzf "$@"
+fi
+
+# Quote a string as a single-quoted sh word, for a command line that the
+# terminal hands to a second shell to re-parse.
+shquote() {
+  printf "'%s'" "$(printf '%s' "$1" | sed "s/'/'\\\\''/g")"
+}
+
+items="$(mktemp)"
+selection="$(mktemp)"
+trap 'rm -f "$items" "$selection"' EXIT INT TERM
+
+cat >"$items"
+
+command="fzf"
+for arg in "$@"; do
+  command="$command $(shquote "$arg")"
+done
+command="$command < $(shquote "$items") > $(shquote "$selection")"
+
+# The terminal replaces our stdio, so both ends of the pipeline travel through
+# temp files. A cancelled or failed selection just leaves $selection empty.
+xdg-terminal-exec sh -c "$command" >/dev/null 2>&1 || true
+
+cat "$selection"

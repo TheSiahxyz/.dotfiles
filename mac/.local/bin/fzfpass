@@ -11,7 +11,7 @@ usage() {
   echo "  -h, --help  : Show this message"
   echo ""
   echo "Shortcuts:"
-  echo "  return     - echo password and copy to clipboard (wayland only)"
+  echo "  return     - echo password and copy to clipboard"
   echo "  ctrl+a     - new password (named as per the prompt)"
   echo "  ctrl+e     - edit selected password"
   echo "  ctrl+g     - regenerate selected password"
@@ -72,17 +72,7 @@ else
   echo "$password"
 
   if [ -n "$password" ]; then
-    case "$(uname)" in
-    Darwin*)
-      printf "%s" "$password" | pbcopy # Use pbcopy on macOS
-      ;;
-    Linux*)
-      printf "%s" "$password" | xclip -selection clipboard # Use xclip on Linux
-      ;;
-    *)
-      echo "Unsupported operating system"
-      ;;
-    esac
+    printf "%s" "$password" | pbcopy
     sleep 0.1
   fi
 fi

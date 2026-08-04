@@ -1,3 +1,44 @@
 #!/bin/sh
 
-"$TERMINAL" -e "$@"
+# xdg-terminal-exec — run a command in a new terminal window.
+#
+# The single place that knows how to launch a terminal on this machine. How you
+# hand a terminal a command is not standardised: wezterm documents
+# `wezterm start -- PROG`, while kitty and alacritty take the dmenu-era
+# `-e PROG` and treat a `--` as the program name.
+
+set -e
+
+# Homebrew is not on launchd's PATH, and GUI callers inherit that bare PATH.
+[ -d /opt/homebrew/bin ] && PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
+[ -d /usr/local/bin ] && PATH="/usr/local/bin:/usr/local/sbin:$PATH"
+export PATH
+
+# Tried in order when $TERMINAL is unset or not installed.
+TERMINAL_CANDIDATES="wezterm kitty alacritty"
+
+[ "$#" -gt 0 ] || {
+  echo "Usage: ${0##*/} COMMAND [ARGS...]" >&2
+  exit 1
+}
+
+# $TERMINAL is exported by the shell profile, but GUI callers (qutebrowser
+# userscripts, Automator, launchd) never inherit it.
+terminal="$TERMINAL"
+if [ -z "$terminal" ] || ! command -v "$terminal" >/dev/null 2>&1; then
+  for candidate in $TERMINAL_CANDIDATES; do
+    if command -v "$candidate" >/dev/null 2>&1; then
+      terminal="$candidate"
+      break
+    fi
+  done
+fi
+command -v "$terminal" >/dev/null 2>&1 || {
+  echo "${0##*/}: no terminal found (tried \$TERMINAL, $TERMINAL_CANDIDATES)." >&2
+  exit 1
+}
+
+case "${terminal##*/}" in
+wezterm) exec "$terminal" start -- "$@" ;;
+*) exec "$terminal" -e "$@" ;;
+esac

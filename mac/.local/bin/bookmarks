@@ -12,7 +12,7 @@ usage() {
   echo "  -o        : Get a URL from snippets/urls and open it in a new browser window"
   echo "  -p        : Get a URL from snippets/urls and open it in a private browser window"
   echo "  -s        : Open browser history"
-  echo "  -t        : Get a URL from snippets/urls and type it using xdotool"
+  echo "  -t        : Get a URL from snippets/urls and type it at the cursor"
   echo "  -v        : Open a browser bookmark in private browser window"
   echo ""
   echo "Programs:"
@@ -42,7 +42,6 @@ addurls() {
 
 opentool() {
   available_tools=""
-  command -v xdg-open 2>/dev/null | grep -v "alias" -q && available_tools="$available_tools xdg-open"
   command -v open 2>/dev/null | grep -v "alias" -q && available_tools="$available_tools open"
   command -v lynx 2>/dev/null | grep -v "alias" -q && available_tools="$available_tools lynx"
   command -v w3m 2>/dev/null | grep -v "alias" -q && available_tools="$available_tools w3m"
@@ -56,15 +55,9 @@ opentool() {
 
   # Set the selected tool to the variable 'open'
   case "$opentool" in
-  xdg-open) xdg-open "$1" ;;
-  open)
-    case "$(uname -s)" in
-    Darwin) open "$1" ;;
-    *) xdg-open "$1" ;;
-    esac
-    ;;
-  lynx) nohup "${TERMINAL:-kitty}" -e lynx "$1" >/dev/null 2>&1 & ;;
-  w3m) nohup "${TERMINAL:-kitty}" -e w3m "$1" >/dev/null 2>&1 & ;;
+  open) open "$1" ;;
+  lynx) open -a "${TERMINAL:-kitty}".app -n --args lynx "$1" ;;
+  w3m) open -a "${TERMINAL:-kitty}".app -n --args w3m "$1" ;;
   *) echo "Invalid selection" >&2 && exit 1 ;;
   esac
 }
@@ -189,17 +182,19 @@ geturls() {
 }
 
 copytoclipboard() {
-  if command -v xclip >/dev/null 2>&1; then
-    printf "%s" "$url" | xclip -selection clipboard
-  elif command -v clipcopy >/dev/null 2>&1; then
-    printf "%s" "$url" | clipcopy
-  elif command -v xsel >/dev/null 2>&1; then
-    printf "%s" "$url" | xsel --clipboard --input
-  else
-    echo "Clipboard utility not found. Install xclip, clipcopy, or xsel." >&2
-    exit 1
-  fi
-  notify-send "'$choice' copied in clipbaord" "$url"
+  printf "%s" "$url" | pbcopy
+  osascript -e "display notification \"$url\" with title \"'$choice' copied to clipboard\"" >/dev/null 2>&1
+}
+
+# xdotool has no macOS equivalent; System Events keystroke is the stand-in.
+# It needs Accessibility permission for the calling app (System Settings →
+# Privacy & Security → Accessibility).
+typeurl() {
+  osascript -e "tell application \"System Events\" to keystroke \"$(printf '%s' "$url" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g')\"" ||
+    {
+      echo "Could not type the URL. Grant Accessibility permission to your terminal." >&2
+      exit 1
+    }
 }
 
 [ $# -eq 0 ] && usage && exit 1
@@ -212,7 +207,7 @@ while getopts "abchopstv" opt; do
   o) geturls "to open in $BROWSER" && openwindow ;;
   p) geturls "to open in private $BROWSER" && openwindow private ;;
   s) openinbrowser "history" ;;
-  t) geturls "to type under cursor" && xdotool type "$url" ;;
+  t) geturls "to type under cursor" && typeurl ;;
   v) openinbrowser "private bookmark" ;;
   h | *) usage && exit 0 ;;
   esac

@@ -24,7 +24,7 @@ cmd_normalize() {
     fi
   fi
   if [ -d "$MUSIC" ]; then
-    _m="$(find "$MUSIC" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' 2>/dev/null |
+    _m="$(find "$MUSIC" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed 's|.*/||' |
       awk -v n="$_name" 'tolower($0) == tolower(n) { print; exit }')"
     [ -n "$_m" ] && { printf '%s\n' "$_m"; return 0; }
   fi
@@ -87,7 +87,7 @@ cmd_apply() {
 
 # MUSIC의 모든 아티스트 폴더를 <name>\t<mp3수>로 출력.
 _artist_counts() {
-  find "$MUSIC" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' 2>/dev/null |
+  find "$MUSIC" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed 's|.*/||' |
     while IFS= read -r _d; do
       _n="$(find "$MUSIC/$_d" -type f -name '*.mp3' 2>/dev/null | wc -l)"
       printf '%s\t%s\n' "$_d" "$_n"

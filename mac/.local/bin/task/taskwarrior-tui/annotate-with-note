@@ -9,14 +9,20 @@ notes_dir="$HOME/Private/repos/Obsidian/SI/Notes"
 # List of subdirectories to search in
 subdirs="areas meetings projects resources reviews"
 
-# Construct the find command with the subdirectories
-search_paths=""
+# Build find's path list as separate arguments. Collecting them into one
+# quoted string made find receive a single bogus path and always fail.
+set --
 for subdir in $subdirs; do
-  search_paths="$search_paths $notes_dir/$subdir"
+  [ -d "$notes_dir/$subdir" ] && set -- "$@" "$notes_dir/$subdir"
 done
 
+if [ $# -eq 0 ]; then
+  echo "No note directories found under $notes_dir. Exiting."
+  exit 1
+fi
+
 # Find files in the specified subdirectories and show fzf dialog to select an existing note
-filepath=$(find "$search_paths" -type f -name '*.md' | fzf --preview "bat --color=always {}")
+filepath=$(find "$@" -type f -name '*.md' | fzf --preview "bat --color=always {}")
 
 # If fzf was cancelled, exit the script
 if [ -z "$filepath" ]; then
