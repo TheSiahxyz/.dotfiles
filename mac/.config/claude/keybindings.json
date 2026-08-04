@@ -1,0 +1,36 @@
+{
+  "$schema": "https://www.schemastore.org/claude-code-keybindings.json",
+  "$docs": "https://code.claude.com/docs/en/keybindings",
+  "bindings": [
+    {
+      "context": "Global",
+      "bindings": {
+        "ctrl+t": null,
+        "ctrl+o": null,
+        "ctrl+]": null,
+
+        "ctrl+x t": "app:toggleTodos",
+        "ctrl+x o": "app:toggleTranscript",
+        "ctrl+x a": "app:openArtifact",
+        "ctrl+x b": "app:toggleBrief"
+      }
+    },
+    {
+      "context": "Chat",
+      "bindings": {
+        "ctrl+g": null,
+        "ctrl+s": null,
+
+        "ctrl+x e": "chat:externalEditor",
+        "ctrl+x s": "chat:stash",
+        "ctrl+x f": "chat:fastMode"
+      }
+    },
+    {
+      "context": "Scroll",
+      "bindings": {
+        "ctrl+x c": "selection:copy"
+      }
+    }
+  ]
+}
