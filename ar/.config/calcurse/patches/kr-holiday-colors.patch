@@ -1,0 +1,93 @@
+--- a/src/calcurse.h
++++ b/src/calcurse.h
+@@ -107,6 +107,7 @@
+ #define ATTR_MIDDLE   4
+ #define ATTR_HIGH     5
+ #define ATTR_HIGHEST  6
++#define ATTR_HOLIDAY  7	/* weekends and public holidays: plain red */
+ 
+ #define STATUSHEIGHT  2
+ #define MAX_NOTESIZ   40
+--- a/src/custom.c
++++ b/src/custom.c
+@@ -43,8 +43,8 @@
+ #include "calcurse.h"
+ 
+ struct attribute {
+-	int color[7];
+-	int nocolor[7];
++	int color[8];
++	int nocolor[8];
+ };
+ 
+ static struct attribute attr;
+@@ -72,6 +72,7 @@
+ 	attr.color[ATTR_LOWEST] = COLOR_PAIR(COLR_YELLOW);
+ 	attr.color[ATTR_TRUE] = COLOR_PAIR(COLR_GREEN);
+ 	attr.color[ATTR_FALSE] = COLOR_PAIR(COLR_RED);
++	attr.color[ATTR_HOLIDAY] = COLOR_PAIR(COLR_RED);
+ 
+ 	attr.nocolor[ATTR_HIGHEST] = A_BOLD;
+ 	attr.nocolor[ATTR_HIGH] = A_REVERSE;
+@@ -80,6 +81,7 @@
+ 	attr.nocolor[ATTR_LOWEST] = A_BOLD;
+ 	attr.nocolor[ATTR_TRUE] = A_BOLD;
+ 	attr.nocolor[ATTR_FALSE] = A_DIM;
++	attr.nocolor[ATTR_HOLIDAY] = A_BOLD;
+ }
+ 
+ /* Apply window attribute */
+--- a/src/day.c
++++ b/src/day.c
+@@ -697,17 +697,17 @@
+ 	const time_t t = date2sec(day, 0, 0);
+ 
+ 	if (LLIST_FIND_FIRST(&eventlist, (time_t *)&t, event_inday))
+-		return ATTR_TRUE;
++		return ATTR_HOLIDAY;	/* all-day event = public holiday */
+ 
+ 	LLIST_TS_LOCK(&alist_p);
+ 	if (LLIST_TS_FIND_FIRST(&alist_p, (time_t *)&t, apoint_inday)) {
+ 		LLIST_TS_UNLOCK(&alist_p);
+-		return ATTR_TRUE;
++		return ATTR_LOW;	/* timed appointment = personal entry */
+ 	}
+ 	LLIST_TS_UNLOCK(&alist_p);
+ 
+ 	if (LLIST_FIND_FIRST(&recur_elist, (time_t *)&t, recur_event_inday))
+-		return ATTR_LOW;
++		return ATTR_TRUE;	/* yearly recurring event = commemorative day */
+ 
+ 	LLIST_TS_LOCK(&recur_alist_p);
+ 	if (LLIST_TS_FIND_FIRST(&recur_alist_p, (time_t *)&t,
+--- a/src/ui-calendar.c
++++ b/src/ui-calendar.c
+@@ -456,8 +456,12 @@
+ 		/* Set day colours. */
+ 		if (date_cmp(&c_day, current_day) == 0)
+ 			attr = ATTR_LOWEST;
+-		else
++		else if (day_attr)
+ 			attr = day_attr;
++		else if (t.tm_wday == 0 || t.tm_wday == 6)
++			attr = ATTR_HOLIDAY;
++		else
++			attr = 0;
+ 
+ 		WINS_CALENDAR_LOCK;
+ 		/* Print week number. */
+@@ -537,10 +541,10 @@
+ 			attr = ATTR_LOWEST;
+ 		else if (t.tm_mday == slctd_day.dd)
+ 			attr = ATTR_MIDDLE;
+-		else if (item_this_day == 1)
+-			attr = ATTR_LOW;
+-		else if (item_this_day == 2)
+-			attr = ATTR_TRUE;
++		else if (item_this_day)
++			attr = item_this_day;
++		else if (t.tm_wday == 0 || t.tm_wday == 6)
++			attr = ATTR_HOLIDAY;
+ 		else
+ 			attr = 0;
+ 
