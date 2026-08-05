@@ -705,7 +705,7 @@ vim.keymap.set("t", "<C-h>", "<Cmd>wincmd h<cr>", { desc = "Move to left window"
 vim.keymap.set("t", "<C-j>", "<Cmd>wincmd j<cr>", { desc = "Move to window below" })
 vim.keymap.set("t", "<C-k>", "<Cmd>wincmd k<cr>", { desc = "Move to window above" })
 vim.keymap.set("t", "<C-l>", "<Cmd>wincmd l<cr>", { desc = "Move to right window" })
-vim.keymap.set("t", "<C-Space>l", "clear<cr>", { silent = true, desc = "Clear terminal" })
+vim.keymap.set("t", "<M-z>l", "clear<cr>", { silent = true, desc = "Clear terminal" })
 vim.keymap.set("t", "<C-\\>", "<C-\\><C-n>iexit<cr>", { desc = "Close terminal" })
 vim.keymap.set("t", "<C-/>", "<Cmd>close<cr>", { desc = "Close terminal" })
 vim.keymap.set("t", "<C-_>", "<Cmd>close<cr>", { desc = "Close terminal" })

@@ -96,7 +96,7 @@ return {
 								["<Del>"] = fb_actions.remove,
 								["<C-o>"] = fb_actions.open,
 								["<C-h>"] = fb_actions.goto_parent_dir,
-								["<C-Space>"] = fb_actions.goto_home_dir,
+								["<M-z>"] = fb_actions.goto_home_dir,
 								["<C-w>"] = fb_actions.goto_cwd,
 								["<C-g>"] = fb_actions.change_cwd,
 								["<C-f>"] = fb_actions.toggle_browser,
@@ -282,7 +282,7 @@ return {
 										["<C-w>"] = lga_actions.quote_prompt(),
 										["<C-i>"] = lga_actions.quote_prompt({ postfix = " --iglob " }),
 										-- freeze the current list and start a fuzzy search in the frozen list
-										["<C-space>"] = actions.to_fuzzy_refine,
+										["<M-b>"] = actions.to_fuzzy_refine,
 									},
 								},
 								vimgrep_arguments = {
@@ -554,6 +554,91 @@ return {
 				-- This respects picker-specific behavior (e.g. jumping to lnum for grep).
 				actions.select_default(prompt_bufnr)
 			end
+
+			local function refine_by_filename(prompt_bufnr)
+				local picker = actions_state.get_current_picker(prompt_bufnr)
+				local line = actions_state.get_current_line()
+
+				local results = {}
+				for entry in picker.manager:iter() do
+					local name = entry.filename or entry.path or (type(entry.value) == "string" and entry.value)
+					if name then
+						table.insert(results, setmetatable({ ordinal = name }, { __index = entry }))
+					end
+				end
+
+				if vim.tbl_isempty(results) then
+					vim.notify("No file results to filter", vim.log.levels.WARN)
+					return
+				end
+
+				actions_state.get_current_history():append(line, picker)
+
+				local layout = picker.layout or {}
+				if layout.prompt and layout.prompt.border then
+					layout.prompt.border:change_title(string.format("File name (%s)", line))
+				end
+				if layout.results and layout.results.border then
+					layout.results.border:change_title(string.format("%d results", #results))
+				end
+
+				picker.sorter:_destroy()
+				picker.sorter = require("telescope.config").values.generic_sorter({})
+				picker.sorter:_init()
+
+				picker:refresh(
+					require("telescope.finders").new_table({
+						results = results,
+						entry_maker = function(x)
+							return x
+						end,
+					}),
+					{ reset_prompt = true }
+				)
+			end
+
+			local function live_grep_in_results(prompt_bufnr)
+				local picker = actions_state.get_current_picker(prompt_bufnr)
+				local line = actions_state.get_current_line()
+
+				local files, seen = {}, {}
+				for entry in picker.manager:iter() do
+					local path = entry.path or entry.filename
+					if type(path) == "string" and not seen[path] then
+						seen[path] = true
+						table.insert(files, path)
+					end
+				end
+
+				if vim.tbl_isempty(files) then
+					vim.notify("No files in the current results", vim.log.levels.WARN)
+					return
+				end
+
+				local conf = require("telescope.config").values
+				local title = line ~= "" and line or (picker.prompt_title or "results")
+				actions.close(prompt_bufnr)
+
+				require("telescope.pickers")
+					.new({}, {
+						prompt_title = string.format("Grep in %d files", #files),
+						results_title = string.format("from: %s", title),
+						finder = require("telescope.finders").new_job(function(prompt)
+							if not prompt or prompt == "" then
+								return nil
+							end
+							local cmd = vim.deepcopy(conf.vimgrep_arguments)
+							table.insert(cmd, "--")
+							table.insert(cmd, prompt)
+							vim.list_extend(cmd, files)
+							return cmd
+						end, require("telescope.make_entry").gen_from_vimgrep({}), nil, nil),
+						previewer = conf.grep_previewer({}),
+						sorter = require("telescope.sorters").highlighter_only({}),
+					})
+					:find()
+			end
+
 			require("telescope").setup({
 				defaults = {
 					mappings = {
@@ -586,6 +671,9 @@ return {
 							["<C-o><C-l>"] = actions.insert_original_cline,
 							["<M-f>"] = actions.nop,
 							["<M-k>"] = actions.nop,
+							["<M-w>"] = refine_by_filename,
+							["<M-n>"] = live_grep_in_results,
+							["<M-b>"] = actions.to_fuzzy_refine,
 							["<CR>"] = telescope_open_single_or_multi,
 						},
 						n = {
@@ -615,8 +703,11 @@ return {
 							["<M-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
 							["<C-t>"] = open_with_trouble,
 							["<C-z>"] = actions.select_horizontal,
-							["<M-f"] = actions.nop,
-							["<M-k"] = actions.nop,
+							["<M-f>"] = actions.nop,
+							["<M-k>"] = actions.nop,
+							["<M-w>"] = { refine_by_filename, opts = { desc = "Filter results by file name" } },
+							["<M-n>"] = { live_grep_in_results, opts = { desc = "Live grep within results" } },
+							["<M-b>"] = { actions.to_fuzzy_refine, opts = { desc = "Fuzzy refine results" } },
 						},
 					},
 					vimgrep_arguments = {

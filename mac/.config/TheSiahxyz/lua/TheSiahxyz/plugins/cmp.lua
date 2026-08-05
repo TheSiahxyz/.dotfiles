@@ -46,7 +46,7 @@ return {
 					["<C-n>"] = cmp.mapping.select_next_item(), -- next suggestion
 					["<C-d>"] = cmp.mapping.scroll_docs(-4),
 					["<C-u>"] = cmp.mapping.scroll_docs(4),
-					["<C-Space>"] = cmp.mapping.complete(), -- show completion suggestions
+					["<M-z>"] = cmp.mapping.complete(), -- show completion suggestions
 					["<C-x>"] = cmp.mapping.abort(), -- close completion window
 					["<C-c>"] = cmp.mapping.close(),
 					["<CR>"] = cmp.mapping.confirm({
