@@ -345,6 +345,36 @@ function fetch_git_repos_status() {
             echo -e "\033[33m${status}\033[0m"  # Apply yellow color to the status
         }
 
+        # __git_ps1 only prints the ahead/behind marker when the branch has an
+        # upstream configured. Fall back to origin -- or the sole/first remote
+        # when there is no origin -- so repos without tracking info still report
+        # divergence.
+        fallback_upstream() {
+            git rev-parse --abbrev-ref '@{upstream}' >/dev/null 2>&1 && return
+            local branch remote ref counts behind ahead
+            branch=$(git symbolic-ref --short HEAD 2>/dev/null) || return
+            if git remote | grep -qx origin; then
+                remote=origin
+            else
+                remote=$(git remote | head -n1)
+            fi
+            [ -n "$remote" ] || return
+            ref="refs/remotes/$remote/$branch"
+            git rev-parse --verify --quiet "$ref" >/dev/null || return
+            counts=$(git rev-list --left-right --count "$ref...HEAD" 2>/dev/null) || return
+            behind=${counts%%[[:space:]]*}
+            ahead=${counts##*[[:space:]]}
+            if [ "$behind" = 0 ] && [ "$ahead" = 0 ]; then
+                echo " ="
+            elif [ "$behind" = 0 ]; then
+                echo " >"
+            elif [ "$ahead" = 0 ]; then
+                echo " <"
+            else
+                echo " <>"
+            fi
+        }
+
         update_time() {
             timestamp_file="${HOME}/.cache/gitreposupdate"
             current_time=$(date +%s)
@@ -363,7 +393,7 @@ function fetch_git_repos_status() {
                 cd "$DIR" || continue
 
                 if $update; then
-                    if [ "$(dirname $DIR)" = ".password-store" ]; then
+                    if [ "$(basename "$DIR")" = ".password-store" ]; then
                         pass git fetch >/dev/null 2>&1
                     else
                         git fetch --all --prune --jobs=10 >/dev/null 2>&1
@@ -371,7 +401,7 @@ function fetch_git_repos_status() {
                 fi
 
                 # Get Git branch and status using __git_ps1
-                GIT_STATUS=$(__git_ps1 "%s" 2>/dev/null)
+                GIT_STATUS="$(__git_ps1 "%s" 2>/dev/null)$(fallback_upstream)"
 
                 # Colorize the Git status
                 COLORED_GIT_STATUS=$(colorize_git_status "$GIT_STATUS")
