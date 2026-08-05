@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Prints the current volume or 🔇 if muted.
+# Prints the current volume, 🔇 if muted or 🚫 if there is no real output device.
 
 case $BLOCK_BUTTON in
 1)
@@ -8,7 +8,7 @@ case $BLOCK_BUTTON in
   pkill -RTMIN+4 "${STATUSBAR:-dwmblocks}"
   ;;
 2) wpctl set-mute @DEFAULT_SINK@ toggle ;;
-3) notify-send "📢 Volume module" "\- Shows volume 🔊, 🔇 if muted
+3) notify-send "📢 Volume module" "\- Shows volume 🔊, 🔇 if muted, 🚫 if no output device
 - Middle click to mute
 - Scroll to change" ;;
 4) wpctl set-volume @DEFAULT_SINK@ 1%+ ;;
@@ -18,7 +18,14 @@ esac
 
 pidof -x sb-audioup >/dev/null 2>&1 || sb-audioup >/dev/null 2>&1 &
 
-vol="$(wpctl get-volume @DEFAULT_AUDIO_SINK@)"
+vol="$(wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null)"
+
+# Without any usable output, pipewire falls back to the virtual "Dummy Output"
+# sink, whose volume is meaningless. Print 🚫 for that and for no sink at all.
+sink="$(wpctl inspect @DEFAULT_AUDIO_SINK@ 2>/dev/null)"
+case "$vol$sink" in
+"" | *'factory.name = "support.null-audio-sink"'*) echo 🚫 && exit ;;
+esac
 
 # If muted, print 🔇 and exit.
 [ "$vol" != "${vol%\[MUTED\]}" ] && echo 🔇 && exit
