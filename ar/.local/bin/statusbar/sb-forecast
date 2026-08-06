@@ -170,10 +170,12 @@ showweather() {
   [ -n "$(gettemp)" ] && echo "$icon$(gettemp)°"
 }
 
-# Resolve the current location to a "City, Country" name via BigDataCloud reverse
-# geocoding (free, no API key). Cached and only re-fetched when the coordinates
-# change, so it never hits the network on routine statusbar refreshes. Falls back
-# to the raw coordinates if the lookup fails.
+# Resolve the current location to a "Place, Country" name via BigDataCloud reverse
+# geocoding (free, no API key). Locality is preferred over city so the name lands
+# on the neighbourhood ("Yegwan-dong") rather than the whole metropolis ("Seoul");
+# the broader fields are only fallbacks for coordinates with no locality. Cached
+# and only re-fetched when the coordinates change, so it never hits the network on
+# routine statusbar refreshes. Falls back to the raw coordinates if the lookup fails.
 getlocname() {
   [ -z "$location" ] && return
   if [ -s "$locationnamefile" ] && [ "$(head -n1 "$locationnamefile")" = "$location" ]; then
@@ -184,7 +186,7 @@ getlocname() {
   lon=$(echo "$location" | cut -d',' -f2)
   name=$(timeout --signal=1 5s curl -sfL \
     "https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en" 2>/dev/null |
-    jq -r '([.city, .locality, .principalSubdivision] | map(select(. != null and . != "")) | .[0]) as $p | [$p, .countryName] | map(select(. != null and . != "")) | join(", ")' 2>/dev/null)
+    jq -r '([.locality, .city, .principalSubdivision] | map(select(. != null and . != "")) | .[0]) as $p | [$p, .countryName] | map(select(. != null and . != "")) | join(", ")' 2>/dev/null)
   if [ -n "$name" ]; then
     mkdir -p "${XDG_CACHE_HOME:-${HOME}/.cache}/statusbar"
     printf '%s\n%s\n' "$location" "$name" >"$locationnamefile"
