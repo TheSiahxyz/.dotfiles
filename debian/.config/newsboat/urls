@@ -7,8 +7,8 @@
 "query:No Content:content = \"\""                                               "Query"
 " "
 "--- TheSiahxyz ---"
-https://github.com/TheSiahxyz/.dotfiles/commits/master.atom                     "~TheSiahxyz dotfiles"  Git
-https://github.com/TheSiahxyz/suckless/commits/master.atom                      "~TheSiahxyz suckless"  Git
+filter:~/.config/newsboat/gitdiff.py:https://github.com/TheSiahxyz/.dotfiles/commits/master.atom     "~TheSiahxyz dotfiles"        Git
+filter:~/.config/newsboat/gitdiff.py:https://github.com/TheSiahxyz/suckless/commits/master.atom      "~TheSiahxyz suckless"        Git
 " "
 "--- News ---"
 https://www.archlinux.org/feeds/news/                                           "~Arch"                 Distro      Linux     Tech
@@ -18,21 +18,21 @@ https://artixlinux.org/feed.php                                                 
 https://lukesmith.xyz/rss.xml                                                   "~Luke Smith"           Blog
 " "
 "--- Git ---"
-https://github.com/LukeSmithxyz/voidrice/commits/master.atom                    "~Luke Smith dotfiles"              Git
-https://github.com/LukeSmithxyz/mutt-wizard/commits/master.atom                 "~Luke Smith mutt-wizard"           Git
-https://github.com/LukeSmithxyz/emailwiz/commits/master.atom                    "~Luke Smith email-wizard"          Git
-https://github.com/LukeSmithxyz/landchad/commits.atom                           "~Luke Smith landchad"              Git
-https://github.com/BreadOnPenguins/dots/commits.atom                            "~Bread on Penguins dotfiles"       Git
-https://github.com/sunaku/glove80-keymaps/commits/main.atom                     "~Glove80 keymaps"                  Git
-https://github.com/rothgar/awesome-tmux/commits.atom                            "~Tmux awesome"                     Git
+filter:~/.config/newsboat/gitdiff.py:https://github.com/LukeSmithxyz/voidrice/commits/master.atom    "~Luke Smith dotfiles"        Git
+filter:~/.config/newsboat/gitdiff.py:https://github.com/LukeSmithxyz/mutt-wizard/commits/master.atom "~Luke Smith mutt-wizard"     Git
+filter:~/.config/newsboat/gitdiff.py:https://github.com/LukeSmithxyz/emailwiz/commits/master.atom    "~Luke Smith email-wizard"    Git
+filter:~/.config/newsboat/gitdiff.py:https://github.com/LukeSmithxyz/landchad/commits.atom           "~Luke Smith landchad"        Git
+filter:~/.config/newsboat/gitdiff.py:https://github.com/BreadOnPenguins/dots/commits.atom            "~Bread on Penguins dotfiles" Git
+filter:~/.config/newsboat/gitdiff.py:https://github.com/sunaku/glove80-keymaps/commits/main.atom     "~Glove80 keymaps"            Git
+filter:~/.config/newsboat/gitdiff.py:https://github.com/rothgar/awesome-tmux/commits.atom            "~Tmux awesome"               Git
 " "
 "--- Suckless ---"
-https://git.suckless.org/dmenu/atom.xml                                         "~Dmenu"                Suckless
-https://git.suckless.org/dwm/atom.xml                                           "~Dwm"                  Suckless
-https://git.suckless.org/slock/atom.xml                                         "~Slock"                Suckless
-https://git.suckless.org/st/atom.xml                                            "~St"                   Suckless
-https://git.suckless.org/surf/atom.xml                                          "~Surf"                 Suckless
-https://git.suckless.org/tabbed/atom.xml                                        "~Tabbed"               Suckless
+filter:~/.config/newsboat/gitdiff.py:https://git.suckless.org/dmenu/atom.xml                         "~Dmenu"                      Suckless
+filter:~/.config/newsboat/gitdiff.py:https://git.suckless.org/dwm/atom.xml                           "~Dwm"                        Suckless
+filter:~/.config/newsboat/gitdiff.py:https://git.suckless.org/slock/atom.xml                         "~Slock"                      Suckless
+filter:~/.config/newsboat/gitdiff.py:https://git.suckless.org/st/atom.xml                            "~St"                         Suckless
+filter:~/.config/newsboat/gitdiff.py:https://git.suckless.org/surf/atom.xml                          "~Surf"                       Suckless
+filter:~/.config/newsboat/gitdiff.py:https://git.suckless.org/tabbed/atom.xml                        "~Tabbed"                     Suckless
 " "
 "--- Odysee ---"
 https://odysee.com/$/rss/@Odysee:8                                              "~Odysee"               Odysee

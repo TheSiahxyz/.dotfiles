@@ -28,6 +28,7 @@ bind-key x pb-delete
 macro a set browser "tsp yt-dlp --embed-metadata -xic -f bestvideo*+bestaudio/best -O after_move:'%(title)s [%(id)s].%(ext)s'" ; open-in-browser ; set browser linkhandler ; -- "Download a file via yt-dlp"
 macro c set browser "clonerepo" ; open-in-browser ; set browser linkhandler ; -- "Clone a git repo"
 macro e set browser "nvim ~/.config/newsboat/config" ; open-in-browser ; set browser linkhandler ; -- "Open newsboat config"
+macro g set browser "~/.config/newsboat/gitdiff.py --raw %u | delta --paging=never --width=variable | less -RS" ; open-in-browser ; set browser linkhandler ; -- "Read commit diff in a pager (arrows scroll sideways)"
 macro l set browser "lynx" ; open-in-browser ; set browser linkhandler ; -- "Open link in lynx"
 macro m set browser "mpc add $(yt-dlp -f bestaudio --get-url %u | tail -n 1) && mpc play" ; open-in-browser ; -- "Play link in mpc"
 macro M set browser "qndl -m" ; open-in-browser ; set browser linkhandler ; -- "Download a music file via taskspooler"
@@ -67,3 +68,12 @@ highlight article "^Date:.*$" default default
 highlight article "^Links:\\ *$" color5 default
 highlight article "^Link:.*$" color12 default
 highlight article "(mailto|ftp)?:?\\ ?[a-zA-Z0-9]+@[a-zA-Z0-9]+.?[a-zA-Z0-9]*.?[a-zA-Z0-9]*" color3 default
+
+# Commit diffs (git feeds piped through gitdiff.py)
+# General +/- first, then the header forms so they win where both match.
+highlight article "^\\+.*$" color2 default
+highlight article "^-.*$" color1 default
+highlight article "^@@.*@@.*$" color6 default
+highlight article "^(diff --git|index |--- |\\+\\+\\+ ).*$" color11 default bold
+highlight article "^(commit|parent) [0-9a-f]{7,40}" color3 default bold
+highlight article "^Diffstat:$" color5 default bold
