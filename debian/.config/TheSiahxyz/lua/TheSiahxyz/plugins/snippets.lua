@@ -45,13 +45,16 @@ return {
 				end
 			end, { silent = true, desc = "Previous spot in the snippet" })
 
-			vim.keymap.set({ "i", "x" }, "<A-l>", function()
+			-- Insert mode <C-j>/<C-k> is owned by the tmux mappings in plugins/init.lua,
+			-- which fall through to change_choice() when a choice node is active. Mapping
+			-- them here too would make the winner depend on plugin load order.
+			vim.keymap.set("s", "<C-j>", function()
 				if ls.choice_active() then
 					ls.change_choice(1)
 				end
 			end, { silent = true, desc = "Next snippet choice" })
 
-			vim.keymap.set({ "i", "x" }, "<A-h>", function()
+			vim.keymap.set("s", "<C-k>", function()
 				if ls.choice_active() then
 					ls.change_choice(-1)
 				end

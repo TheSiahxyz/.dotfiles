@@ -68,8 +68,24 @@ return {
 
 			vim.keymap.set("i", "<C-h>", "<cmd>lua require('tmux').move_left()<cr>", { desc = "Move to left" })
 			vim.keymap.set("i", "<C-l>", "<cmd>lua require('tmux').move_right()<cr>", { desc = "Move to right" })
-			vim.keymap.set("i", "<C-j>", "<cmd>lua require('tmux').move_bottom()<cr>", { desc = "Move to bottom" })
-			vim.keymap.set("i", "<C-k>", "<cmd>lua require('tmux').move_top()<cr>", { desc = "Move to top" })
+			-- <C-j>/<C-k> are shared with LuaSnip choice cycling (see plugins/snippets.lua).
+			-- Handle both here so the behaviour does not depend on plugin load order.
+			vim.keymap.set("i", "<C-j>", function()
+				local ls = package.loaded["luasnip"]
+				if ls and ls.choice_active() then
+					ls.change_choice(1)
+				else
+					require("tmux").move_bottom()
+				end
+			end, { silent = true, desc = "Next snippet choice or move to bottom" })
+			vim.keymap.set("i", "<C-k>", function()
+				local ls = package.loaded["luasnip"]
+				if ls and ls.choice_active() then
+					ls.change_choice(-1)
+				else
+					require("tmux").move_top()
+				end
+			end, { silent = true, desc = "Previous snippet choice or move to top" })
 			vim.keymap.set("n", "<C-left>", function()
 				require("tmux").resize_left()
 			end, { desc = "Decrease window width" })
