@@ -42,6 +42,154 @@ cmd_apply_download() {
   _seg="${_rel%%/*}"
   _canon="$(cmd_normalize "$_seg")"
   cmd_apply "$_fp" "$_canon"
+  _final="$_fp"
+  [ "$_seg" != "$_canon" ] && _final="$MUSIC/$_canon/${_rel#*/}"
+  _verify_tags "$_final"
+}
+
+_tag_value() {
+  command -v ffprobe >/dev/null 2>&1 || return 0
+  ffprobe -v error -show_entries format_tags="$2" \
+    -of default=noprint_wrappers=1:nokey=1 "$1" 2>/dev/null | head -n 1
+}
+
+_dedupe_list() {
+  printf '%s\n' "$1" | awk -F', ' '{
+    out = ""
+    for (i = 1; i <= NF; i++) {
+      if ($i == "" || ($i in seen)) continue
+      seen[$i] = 1
+      out = (out == "") ? $i : out ", " $i
+    }
+    print out
+  }'
+}
+
+_missing_tags() {
+  _mt_f="$1"
+  [ -f "$_mt_f" ] || return 0
+  command -v ffprobe >/dev/null 2>&1 || return 0
+  _mt_out="$(ffprobe -v error -show_entries format_tags=title,artist \
+    -of default=noprint_wrappers=1 "$_mt_f" 2>/dev/null)"
+  _mt_miss=""
+  case "$_mt_out" in
+  *"TAG:title="?*) : ;;
+  *) _mt_miss="title" ;;
+  esac
+  case "$_mt_out" in
+  *"TAG:artist="?*) : ;;
+  *) _mt_miss="${_mt_miss:+$_mt_miss, }artist" ;;
+  esac
+  printf '%s' "$_mt_miss"
+}
+
+_verify_tags() {
+  _vt_f="$1"
+  _vt_miss="$(_missing_tags "$_vt_f")"
+  [ -z "$_vt_miss" ] && return 0
+
+  _vt_rel="${_vt_f#"$MUSIC"/}"
+  _vt_log="${XDG_CACHE_HOME:-$HOME/.cache}/qndl/untagged.log"
+  mkdir -p "$(dirname "$_vt_log")" 2>/dev/null &&
+    printf '%s\t%s\t%s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$_vt_miss" "$_vt_rel" \
+      >> "$_vt_log" 2>/dev/null
+  command -v notify-send >/dev/null 2>&1 &&
+    notify-send -u critical -- "⚠️ 태그 누락 ($_vt_miss)" "$_vt_rel"
+  printf 'verify: missing tags (%s): %s\n' "$_vt_miss" "$_vt_f" >&2
+  return 0
+}
+
+_retag_one() {
+  _ro_mode="$1"; _ro_f="$2"
+  _ro_rel="${_ro_f#"$MUSIC"/}"
+  case "$_ro_rel" in
+  */*/*)
+    _ro_pa="${_ro_rel%%/*}"
+    _ro_rest="${_ro_rel#*/}"
+    _ro_pb="${_ro_rest%%/*}"
+    _ro_pt="${_ro_rest##*/}"
+    ;;
+  */*)
+    _ro_pa="${_ro_rel%%/*}"
+    _ro_pb=""
+    _ro_pt="${_ro_rel##*/}"
+    ;;
+  *) return 0 ;;
+  esac
+  _ro_pt="${_ro_pt%.mp3}"
+  [ "$_ro_pa" = "Unknown Artist" ] && _ro_pa=""
+  [ "$_ro_pb" = "Unknown Album" ] && _ro_pb=""
+
+  _ro_ct="$(_tag_value "$_ro_f" title)"
+  _ro_ca="$(_tag_value "$_ro_f" artist)"
+  _ro_cb="$(_tag_value "$_ro_f" album)"
+
+  _ro_nt="$_ro_ct"; _ro_na="$_ro_ca"; _ro_nb="$_ro_cb"
+  [ -z "$_ro_nt" ] && _ro_nt="$_ro_pt"
+  [ -z "$_ro_na" ] && _ro_na="$_ro_pa"
+  [ -z "$_ro_nb" ] && [ -n "$_ro_pb" ] && _ro_nb="$_ro_pb"
+  _ro_na="$(_dedupe_list "$_ro_na")"
+
+  [ "$_ro_nt" = "$_ro_ct" ] && [ "$_ro_na" = "$_ro_ca" ] && [ "$_ro_nb" = "$_ro_cb" ] && return 0
+
+  if [ "$_ro_mode" = "apply" ]; then
+    _ro_tmp="$(dirname "$_ro_f")/.qndl-retag-$$.mp3"
+    if ffmpeg -v error -y -i "$_ro_f" -map 0 -c copy \
+        -metadata title="$_ro_nt" -metadata artist="$_ro_na" -metadata album="$_ro_nb" \
+        "$_ro_tmp" 2>/dev/null && mv "$_ro_tmp" "$_ro_f"; then
+      :
+    else
+      rm -f "$_ro_tmp"
+      printf 'retag: failed (원본 유지): %s\n' "$_ro_rel" >&2
+      return 1
+    fi
+  fi
+
+  printf '%s\n' "$_ro_rel"
+  [ "$_ro_nt" != "$_ro_ct" ] && printf '  title  : %s → %s\n' "${_ro_ct:-(없음)}" "$_ro_nt"
+  [ "$_ro_na" != "$_ro_ca" ] && printf '  artist : %s → %s\n' "${_ro_ca:-(없음)}" "$_ro_na"
+  [ "$_ro_nb" != "$_ro_cb" ] && printf '  album  : %s → %s\n' "${_ro_cb:-(없음)}" "$_ro_nb"
+  return 0
+}
+
+cmd_retag() {
+  command -v ffprobe >/dev/null 2>&1 ||
+    { printf 'retag: ffprobe가 없습니다.\n' >&2; return 1; }
+  _mode="plan"
+  [ "${1:-}" = "--apply" ] && _mode="apply"
+  _tmp="$(mktemp)" || return 1
+  find "$MUSIC" -type f -name '*.mp3' 2>/dev/null | sort | while IFS= read -r _f; do
+    _retag_one "$_mode" "$_f"
+  done > "$_tmp"
+  _n="$(grep -c '^[^ ]' "$_tmp" 2>/dev/null || true)"
+  [ -s "$_tmp" ] && cat "$_tmp"
+  rm -f "$_tmp"
+  if [ "$_mode" = "plan" ]; then
+    printf '\n(dry-run) 대상 %s개. 실제 적용: qndl-artist retag --apply\n' "$_n"
+  else
+    printf '\nretag --apply 완료: %s개.\n' "$_n"
+    if command -v mpc >/dev/null 2>&1; then
+      mpc update --wait >/dev/null 2>&1 || true
+    fi
+  fi
+  return 0
+}
+
+cmd_verify() {
+  command -v ffprobe >/dev/null 2>&1 ||
+    { printf 'verify: ffprobe가 없습니다.\n' >&2; return 1; }
+  _tmp="$(mktemp)" || return 1
+  find "$MUSIC" -type f -name '*.mp3' 2>/dev/null | sort | while IFS= read -r _f; do
+    _miss="$(_missing_tags "$_f")"
+    [ -n "$_miss" ] && printf '%s\t%s\n' "$_miss" "${_f#"$MUSIC"/}"
+  done > "$_tmp"
+  _total="$(find "$MUSIC" -type f -name '*.mp3' 2>/dev/null | wc -l | tr -d ' ')"
+  _n="$(wc -l < "$_tmp" | tr -d ' ')"
+  [ "$_n" -gt 0 ] && cat "$_tmp"
+  rm -f "$_tmp"
+  printf '태그 누락 %s개 / 전체 %s개\n' "$_n" "$_total"
+  [ "$_n" -gt 0 ] && return 1
+  return 0
 }
 
 # mp3 1개를 표준 폴더로 이동(필요시) + album_artist 설정.
@@ -75,7 +223,11 @@ cmd_apply() {
   fi
   # 태깅은 best-effort: 실패해도 이미 이동은 성공했으므로 전체 실패로 취급하지 않음.
   _tmp="$(dirname "$_fp")/.qndl-tag-$$.mp3"
-  if ffmpeg -v error -y -i "$_fp" -map 0 -c copy -metadata album_artist="$_canon" "$_tmp" 2>/dev/null &&
+  _art="$(_tag_value "$_fp" artist)"
+  _art_dd="$(_dedupe_list "$_art")"
+  set -- -metadata album_artist="$_canon"
+  [ -n "$_art_dd" ] && [ "$_art_dd" != "$_art" ] && set -- "$@" -metadata artist="$_art_dd"
+  if ffmpeg -v error -y -i "$_fp" -map 0 -c copy "$@" "$_tmp" 2>/dev/null &&
      mv "$_tmp" "$_fp"; then
     :
   else
@@ -246,5 +398,7 @@ normalize) cmd_normalize "$@" ;;
 apply) cmd_apply "$@" ;;
 apply-download) cmd_apply_download "$@" ;;
 merge) cmd_merge "$@" ;;
-*) printf 'usage: qndl-artist {normalize|apply|apply-download|merge} ...\n' >&2; exit 2 ;;
+verify) cmd_verify "$@" ;;
+retag) cmd_retag "$@" ;;
+*) printf 'usage: qndl-artist {normalize|apply|apply-download|merge|verify|retag} ...\n' >&2; exit 2 ;;
 esac
