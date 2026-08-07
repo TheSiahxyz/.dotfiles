@@ -121,7 +121,7 @@ pick_files() {
   fi
   # access logs
   if [ "$SCOPE" = "access" ] || [ "$SCOPE" = "all" ]; then
-    for q in "$LOG_DIR/access.log" "$LOG_DIR/access.log".*; do
+    for q in "$LOG_DIR/main/access.log" "$LOG_DIR/main/access.log"-*; do
       [ -e "$q" ] && printf "%s\n" "$q"
     done
   fi

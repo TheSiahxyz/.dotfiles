@@ -19,9 +19,15 @@ export SSH_AUTH_SOCK="/run/user/$(id -u)/gnupg/S.gpg-agent.ssh"
 fetch_logs() {
   kr_today=$(TZ=Asia/Seoul LC_TIME=C date +%d/%b)
   kr_yesterday=$(TZ=Asia/Seoul LC_TIME=C date -d 'yesterday' +%d/%b)
+  # recordings/videos 는 어떤 vhost 도 쓰지 않는 고아 로그라 제외한다.
+  # 제외 IP: 본인 회선, 그리고 서버 자신의 IP — 서버에서 돌린 curl 은
+  # 미국으로 판정되어 us.log 에 들어가므로 그냥 두면 접속으로 잡힌다.
   ssh -o BatchMode=yes -o ConnectTimeout=10 root@thesiah.xyz \
-    "cat /var/log/nginx/diary/us.log /var/log/nginx/recordings/us.log /var/log/nginx/peertube/us.log /var/log/nginx/videos/us.log 2>/dev/null" \
-    2>/dev/null | grep -E "$kr_today|$kr_yesterday" | grep -E '[0-9]{2}:[0-9]{2}:[0-9]{2} ' | grep -v '59\.19\.56\.8' | sort -u
+    "cat /var/log/nginx/diary/us.log /var/log/nginx/diary/kr.log \
+         /var/log/nginx/media/us.log /var/log/nginx/media/kr.log \
+         /var/log/nginx/peertube/us.log /var/log/nginx/peertube/kr.log 2>/dev/null" \
+    2>/dev/null | grep -E "$kr_today|$kr_yesterday" | grep -E '[0-9]{2}:[0-9]{2}:[0-9]{2} ' |
+    grep -vE '^(59\.19\.56\.8|2a02:4780:10:212c::1) ' | sort -u
 }
 
 update() {
@@ -70,7 +76,7 @@ case $BLOCK_BUTTON in
   fi
   ;;
 3)
-  notify-send "🌐 Ylog module" "\- Shows new nginx log entries (diary/recordings/peertube/videos US)
+  notify-send "🌐 Ylog module" "\- Shows new nginx log entries (diary/media/peertube, US+KR)
 - Updates every 30 minutes
 - Left click: show all current entries
 - Middle click: show new entries & mark seen"
