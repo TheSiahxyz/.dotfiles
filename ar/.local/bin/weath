@@ -5,42 +5,97 @@
 
 weatherreport="${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport"
 
-formats() {
-  [ "$MANPAGER" = "less -s" ] && pager=true || pager=false
-  [ "$pager" = "false" ] && {
-    export MANPAGER='less -s'
-    export LESS="R"
-    export LESS_TERMCAP_mb="$(printf '%b' '[1;31m')"
-    export LESS_TERMCAP_md="$(printf '%b' '[1;36m')"
-    export LESS_TERMCAP_me="$(printf '%b' '[0m')"
-    export LESS_TERMCAP_so="$(printf '%b' '[01;44;33m')"
-    export LESS_TERMCAP_se="$(printf '%b' '[0m')"
-    export LESS_TERMCAP_us="$(printf '%b' '[1;32m')"
-    export LESS_TERMCAP_ue="$(printf '%b' '[0m')"
-    export LESSOPEN="| /usr/bin/highlight -O ansi %s 2>/dev/null"
-  }
-  setsid -f "$TERMINAL" less -S "$1" >/dev/null 2>&1
-  [ "$pager" = "false" ] && {
-    export MANPAGER="sh -c 'col -bx | bat -l man -p'"
-    export MANROFFOPT="-c"
-  }
+# wttr.in draws a fixed 125-column layout, so only the height can be made to fit
+# the window. The report is regular enough to trim by line count: a constant
+# block on top (the "Weather report" line, a blank, and five lines of current
+# conditions), then exactly ten lines per forecast day, then a footer whose
+# "Location:" line is the only part worth keeping. Dropping whole days off the
+# end is the only trim that leaves the tables intact.
+headerlines=7
+daylines=10
+maxdays=3
+
+# Print the report trimmed to the tallest whole number of days that fits on one
+# screen. Measures the terminal itself, so it must run inside the window that
+# will display the result rather than in the process that spawns it.
+fit() {
+  # A tiling window manager resizes the window after mapping it; measuring
+  # straight away would read the terminal's start-up geometry, not the final one.
+  [ -n "$2" ] && sleep "$2"
+  rows="$(stty size 2>/dev/null </dev/tty | cut -d' ' -f1)"
+  [ -n "$rows" ] || rows=24
+  # less keeps the bottom line for its own prompt, and the appended "Location:"
+  # line costs one more.
+  days=$(((rows - 2 - headerlines) / daylines))
+  [ "$days" -gt "$maxdays" ] && days="$maxdays"
+  [ "$days" -lt 0 ] && days=0
+  head -n $((headerlines + days * daylines)) "$1"
+  grep -m1 '^Location:' "$1"
+}
+
+# Show a report in a pager in its own terminal window. The trim depends on that
+# window's height, which is unknowable from here, so re-invoke through --fit on
+# the inside. $2 is a scratch file to delete once the pager exits, if any.
+show() {
+  # shellcheck disable=SC2016 # the positionals belong to the inner shell
+  setsid -f "$TERMINAL" -e sh -c \
+    'export LESS=R LESSOPEN=
+     # Trap rather than a trailing rm: closing the window from the window
+     # manager kills the terminal outright, and anything after the pager never
+     # gets to run.
+     [ -n "$2" ] && trap "rm -f \"$2\"" EXIT HUP INT TERM
+     "$0" --fit "$1" | less -SR' \
+    "$self" "$1" "$2" >/dev/null 2>&1
+}
+
+# Download a report to a file. Never route it through a command substitution:
+# dash reserves byte 0x82 as an internal marker and escapes every occurrence,
+# which corrupts '│' (U+2502) — the character wttr.in draws its table borders
+# with — into a stray '━' followed by an invalid byte.
+fetch() {
+  curl -sfm 5 -o "$2" "${WTTRURL:-wttr.in}/$1"
+}
+
+scratch() {
+  mktemp "${TMPDIR:-/tmp}/weath.XXXXXX"
+}
+
+self="$(command -v -- "$0" || echo "$0")"
+
+# Internal entry point, invoked inside the spawned terminal by show().
+[ "$1" = '--fit' ] && {
+  fit "$2" 0.2
+  exit
 }
 
 if [ "$1" = 'cp' ]; then
-  # shellcheck disable=SC2015
-  [ -z "$2" ] && sed 's/\x1b\[[^m]*m//g' "$weatherreport" | xclip -selection clipboard &&
-    notify-send "Weather forecast for '${LOCATION:-$(head -n 1 "$weatherreport" | cut -d' ' -f3-)}' copied to clipboard." ||
-    { data="$(curl -sfm 5 "${WTTRURL:-wttr.in}/$2?T")" &&
-      notify-send "🌞Weather forecast for '$2' copied to clipboard." &&
-      echo "$data" | xclip -selection clipboard ||
-      notify-send '🥶Failed to get weather forecast!' 'Check your internet connection and the supplied location.'; }
+  if [ -z "$2" ]; then
+    sed 's/\x1b\[[^m]*m//g' "$weatherreport" | xclip -selection clipboard &&
+      notify-send "Weather forecast for '${LOCATION:-$(head -n 1 "$weatherreport" | cut -d' ' -f3-)}' copied to clipboard."
+  else
+    tmp="$(scratch)"
+    if fetch "$2?T" "$tmp"; then
+      xclip -selection clipboard <"$tmp" &&
+        notify-send "🌞Weather forecast for '$2' copied to clipboard."
+    else
+      notify-send '🥶Failed to get weather forecast!' 'Check your internet connection and the supplied location.'
+    fi
+    rm -f "$tmp"
+  fi
 else
   [ -n "$2" ] &&
     notify-send "⛔Invalid option '$1'! The only valid option is 'cp'." &&
     exit 1
 
-  # shellcheck disable=SC2015
-  [ -z "$1" ] && formats "$weatherreport" ||
-    data="$(curl -sfm 5 "${WTTRURL:-wttr.in}/$1")" && echo "$data" | formats - ||
-    notify-send '❗Failed to get weather forecast!' 'Check your internet connection and the supplied location.'
+  if [ -z "$1" ]; then
+    show "$weatherreport" ''
+  else
+    tmp="$(scratch)"
+    if fetch "$1" "$tmp"; then
+      show "$tmp" "$tmp"
+    else
+      rm -f "$tmp"
+      notify-send '❗Failed to get weather forecast!' 'Check your internet connection and the supplied location.'
+    fi
+  fi
 fi

@@ -5,25 +5,49 @@
 
 weatherreport="${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport"
 
-formats() {
-  [ "$MANPAGER" = "less -s" ] && pager=true || pager=false
-  [ "$pager" = "false" ] && {
-    export MANPAGER='less -s'
-    export LESS="R"
-    export LESS_TERMCAP_mb="$(printf '%b' '[1;31m')"
-    export LESS_TERMCAP_md="$(printf '%b' '[1;36m')"
-    export LESS_TERMCAP_me="$(printf '%b' '[0m')"
-    export LESS_TERMCAP_so="$(printf '%b' '[01;44;33m')"
-    export LESS_TERMCAP_se="$(printf '%b' '[0m')"
-    export LESS_TERMCAP_us="$(printf '%b' '[1;32m')"
-    export LESS_TERMCAP_ue="$(printf '%b' '[0m')"
-    export LESSOPEN="| /usr/bin/highlight -O ansi %s 2>/dev/null"
-  }
-  less -S "$1"
-  [ "$pager" = "false" ] && {
-    export MANPAGER="sh -c 'col -bx | bat -l man -p'"
-    export MANROFFOPT="-c"
-  }
+# wttr.in draws a fixed 125-column layout, so only the height can be made to fit
+# the window. The report is regular enough to trim by line count: a constant
+# block on top (the "Weather report" line, a blank, and five lines of current
+# conditions), then exactly ten lines per forecast day, then a footer whose
+# "Location:" line is the only part worth keeping. Dropping whole days off the
+# end is the only trim that leaves the tables intact.
+headerlines=7
+daylines=10
+maxdays=3
+
+# Print the report trimmed to the tallest whole number of days that fits on one
+# screen.
+fit() {
+  rows="$(stty size 2>/dev/null </dev/tty | cut -d' ' -f1)"
+  [ -n "$rows" ] || rows=24
+  # less keeps the bottom line for its own prompt, and the appended "Location:"
+  # line costs one more.
+  days=$(((rows - 2 - headerlines) / daylines))
+  [ "$days" -gt "$maxdays" ] && days="$maxdays"
+  [ "$days" -lt 0 ] && days=0
+  head -n $((headerlines + days * daylines)) "$1"
+  grep -m1 '^Location:' "$1"
+}
+
+# Unlike the Linux variant this pages in the terminal it was launched from, so
+# the size is already known and there is no second process to hand the trim to.
+show() {
+  LESS='R'
+  LESSOPEN=''
+  export LESS LESSOPEN
+  fit "$1" | less -SR
+}
+
+# Download a report to a file rather than through a command substitution, which
+# is not binary-safe in every /bin/sh: dash reserves byte 0x82 as an internal
+# marker and escapes every occurrence, corrupting the U+2502 vertical bar that
+# wttr.in draws its table borders with.
+fetch() {
+  curl -sfm 5 -o "$2" "${WTTRURL:-wttr.in}/$1"
+}
+
+scratch() {
+  mktemp "${TMPDIR:-/tmp}/weath.XXXXXX"
 }
 
 notify() {
@@ -39,12 +63,14 @@ if [ "$1" = 'cp' ]; then
     sed "s/$(printf '\033')\[[^m]*m//g" "$weatherreport" | pbcopy &&
       notify '🌞Weather forecast copied' "${LOCATION:-$(head -n 1 "$weatherreport" | cut -d' ' -f3-)}"
   else
-    if data="$(curl -sfm 5 "${WTTRURL:-wttr.in}/$2?T")"; then
-      printf '%s' "$data" | pbcopy
+    tmp="$(scratch)"
+    if fetch "$2?T" "$tmp"; then
+      pbcopy <"$tmp"
       notify '🌞Weather forecast copied' "$2"
     else
       notify '🥶Failed to get weather forecast!' "$fail"
     fi
+    rm -f "$tmp"
   fi
 else
   if [ -n "$2" ]; then
@@ -53,10 +79,15 @@ else
   fi
 
   if [ -z "$1" ]; then
-    formats "$weatherreport"
-  elif data="$(curl -sfm 5 "${WTTRURL:-wttr.in}/$1")"; then
-    printf '%s' "$data" | formats -
+    show "$weatherreport"
   else
-    notify '❗Failed to get weather forecast!' "$fail"
+    tmp="$(scratch)"
+    # Trap rather than a trailing rm, so a signal during paging still cleans up.
+    trap 'rm -f "$tmp"' EXIT HUP INT TERM
+    if fetch "$1" "$tmp"; then
+      show "$tmp"
+    else
+      notify '❗Failed to get weather forecast!' "$fail"
+    fi
   fi
 fi

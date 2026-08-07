@@ -56,14 +56,21 @@ getweatherreportjson() {
   echo "$location" >"$weatherreportloc"
 }
 
-# Fetch a text weather report from wttr.in and save it locally.
+# Fetch a text weather report from wttr.in and save it locally. curl writes the
+# file directly rather than handing its output to a command substitution: dash
+# reserves byte 0x82 as an internal marker and escapes every occurrence, which
+# corrupts '│' (U+2502) — the character wttr.in draws its table borders with —
+# into a stray '━' followed by an invalid byte. The download lands on a scratch
+# file first so a truncated transfer cannot replace a good cached report.
 getweatherreport() {
   url="${WTTRURL:-wttr.in}"
-  tmp=$(timeout --signal=1 2s curl -sf "$url/${LOCATION:-$location}") || {
+  tmp="$weatherreport.part"
+  timeout --signal=1 2s curl -sfo "$tmp" "$url/${LOCATION:-$location}" || {
+    rm -f "$tmp"
     error "weatherreport"
     return 1
   }
-  echo "$tmp" >"$weatherreport"
+  mv -f "$tmp" "$weatherreport"
 }
 
 # Forecast should be updated every 3 hours, but set 86400 to check once a day for reliability.
@@ -434,24 +441,10 @@ showdoppler() { setsid -f mpv --no-osc --loop=inf --no-terminal "$doppler"; }
 
 case $BLOCK_BUTTON in
 1)
-  [ "$MANPAGER" = "less -s" ] && pager=true || pager=false
-  [ "$pager" = "false" ] && {
-    export MANPAGER='less -s'
-    export LESS="R"
-    export LESS_TERMCAP_mb="$(printf '%b' '\033[1;31m')"
-    export LESS_TERMCAP_md="$(printf '%b' '\033[1;36m')"
-    export LESS_TERMCAP_me="$(printf '%b' '\033[0m')"
-    export LESS_TERMCAP_so="$(printf '%b' '\033[01;44;33m')"
-    export LESS_TERMCAP_se="$(printf '%b' '\033[0m')"
-    export LESS_TERMCAP_us="$(printf '%b' '\033[1;32m')"
-    export LESS_TERMCAP_ue="$(printf '%b' '\033[0m')"
-    export LESSOPEN="| /usr/bin/highlight -O ansi %s 2>/dev/null"
-  }
-  setsid -f "$TERMINAL" -e less -Sf "${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport"
-  [ "$pager" = "false" ] && {
-    export MANPAGER="sh -c 'col -bx | bat -l man -p'"
-    export MANROFFOPT="-c"
-  }
+  # weath owns the presentation, including trimming the report to the height of
+  # the window it opens. Duplicating the pager invocation here only let the two
+  # views drift apart.
+  weath
   ;;
 2)
   [ ! -f "$radarloc" ] && pickloc && getdoppler
