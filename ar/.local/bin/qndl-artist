@@ -1,6 +1,6 @@
 #!/bin/sh
 # qndl-artist — 아티스트 폴더/메타데이터 통일 헬퍼
-export LC_ALL="${LC_ALL:-C.UTF-8}"
+export LC_ALL=C.UTF-8
 
 MUSIC="${XDG_MUSIC_DIR:-$HOME/Music}"
 ALIASES="${QNDL_ALIASES:-${XDG_CONFIG_HOME:-$HOME/.config}/mpd/artist-aliases.tsv}"
@@ -53,62 +53,8 @@ _tag_value() {
     -of default=noprint_wrappers=1:nokey=1 "$1" 2>/dev/null | head -n 1
 }
 
-_dedupe_list() {
-  printf '%s\n' "$1" | awk -F', ' '{
-    out = ""
-    for (i = 1; i <= NF; i++) {
-      if ($i == "" || ($i in seen)) continue
-      seen[$i] = 1
-      out = (out == "") ? $i : out ", " $i
-    }
-    print out
-  }'
-}
-
-_load_artist_dirs() {
-  [ -n "$_ARTIST_DIRS" ] && return 0
-  _ARTIST_DIRS="$(find "$MUSIC" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' 2>/dev/null)"
-}
-
-_tag_desc() {
-  command -v ffprobe >/dev/null 2>&1 || return 0
-  ffprobe -v error -show_entries format_tags=description \
-    -of default=noprint_wrappers=1:nokey=1 "$1" 2>/dev/null
-}
-
-_performers() {
-  QA_LIST="$1" QA_TITLE="$2" QA_DESC="$3" QA_KNOWN="$_ARTIST_DIRS" awk '
-    function strip_prod(t,  re) {
-      re = "\\([^()]*[Pp][Rr][Oo][Dd][^()]*\\)"
-      while (match(t, re)) t = substr(t, 1, RSTART - 1) " " substr(t, RSTART + RLENGTH)
-      return t
-    }
-    BEGIN {
-      perf = ""; staff = ""
-      d = split(ENVIRON["QA_DESC"], dl, "\n")
-      for (j = 1; j <= d; j++) {
-        c = index(dl[j], ":")
-        if (c < 2) continue
-        role = tolower(substr(dl[j], 1, c - 1))
-        names = " " tolower(substr(dl[j], c + 1)) " "
-        if (role ~ /performer|vocal/) perf = perf names
-        else if (role ~ /composer|lyricist|arranger|author|writer/) staff = staff names
-      }
-      lt = tolower(strip_prod(ENVIRON["QA_TITLE"]))
-      k = split(ENVIRON["QA_KNOWN"], kn, "\n")
-      for (j = 1; j <= k; j++) if (kn[j] != "") known[tolower(kn[j])] = 1
-      n = split(ENVIRON["QA_LIST"], a, ", ")
-      out = ""
-      for (i = 1; i <= n; i++) {
-        if (a[i] == "") continue
-        if (out == "") { out = a[i]; continue }
-        la = tolower(a[i])
-        if (length(a[i]) >= 2 && index(staff, la) > 0 && index(perf, la) == 0 &&
-            index(lt, la) == 0 && !(la in known)) continue
-        out = out ", " a[i]
-      }
-      print out
-    }'
+_primary_artist() {
+  printf '%s\n' "$1" | awk -F', ' '{ print $1 }'
 }
 
 _missing_tags() {
@@ -174,13 +120,7 @@ _retag_one() {
   [ -z "$_ro_nt" ] && _ro_nt="$_ro_pt"
   [ -z "$_ro_na" ] && _ro_na="$_ro_pa"
   [ -z "$_ro_nb" ] && [ -n "$_ro_pb" ] && _ro_nb="$_ro_pb"
-  _ro_na="$(_dedupe_list "$_ro_na")"
-  if [ "$_RETAG_PERF" = "1" ]; then
-    _load_artist_dirs
-    _ro_desc=""
-    case "$_ro_na" in *", "*) _ro_desc="$(_tag_desc "$_ro_f")" ;; esac
-    _ro_na="$(_performers "$_ro_na" "$_ro_nt" "$_ro_desc")"
-  fi
+  _ro_na="$(_primary_artist "$_ro_na")"
 
   [ "$_ro_nt" = "$_ro_ct" ] && [ "$_ro_na" = "$_ro_ca" ] && [ "$_ro_nb" = "$_ro_cb" ] && return 0
 
@@ -208,13 +148,7 @@ cmd_retag() {
   command -v ffprobe >/dev/null 2>&1 ||
     { printf 'retag: ffprobe가 없습니다.\n' >&2; return 1; }
   _mode="plan"
-  _RETAG_PERF=0
-  for _arg in "$@"; do
-    case "$_arg" in
-    --apply) _mode="apply" ;;
-    --performers) _RETAG_PERF=1 ;;
-    esac
-  done
+  [ "${1:-}" = "--apply" ] && _mode="apply"
   _tmp="$(mktemp)" || return 1
   find "$MUSIC" -type f -name '*.mp3' 2>/dev/null | sort | while IFS= read -r _f; do
     _retag_one "$_mode" "$_f"
@@ -282,7 +216,7 @@ cmd_apply() {
   # 태깅은 best-effort: 실패해도 이미 이동은 성공했으므로 전체 실패로 취급하지 않음.
   _tmp="$(dirname "$_fp")/.qndl-tag-$$.mp3"
   _art="$(_tag_value "$_fp" artist)"
-  _art_dd="$(_dedupe_list "$_art")"
+  _art_dd="$(_primary_artist "$_art")"
   set -- -metadata album_artist="$_canon"
   [ -n "$_art_dd" ] && [ "$_art_dd" != "$_art" ] && set -- "$@" -metadata artist="$_art_dd"
   if ffmpeg -v error -y -i "$_fp" -map 0 -c copy "$@" "$_tmp" 2>/dev/null &&
@@ -458,5 +392,5 @@ apply-download) cmd_apply_download "$@" ;;
 merge) cmd_merge "$@" ;;
 verify) cmd_verify "$@" ;;
 retag) cmd_retag "$@" ;;
-*) printf 'usage: qndl-artist {normalize|apply|apply-download|merge|verify|retag [--apply] [--performers]} ...\n' >&2; exit 2 ;;
+*) printf 'usage: qndl-artist {normalize|apply|apply-download|merge|verify|retag [--apply]} ...\n' >&2; exit 2 ;;
 esac
