@@ -5,37 +5,10 @@
 
 weatherreport="${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport"
 
-# wttr.in draws a fixed 125-column layout, so only the height can be made to fit
-# the window. The report is regular enough to trim by line count: a constant
-# block on top (the "Weather report" line, a blank, and five lines of current
-# conditions), then exactly ten lines per forecast day, then a footer whose
-# "Location:" line is the only part worth keeping. Dropping whole days off the
-# end is the only trim that leaves the tables intact.
-headerlines=7
-daylines=10
-maxdays=3
-
-# Print the report trimmed to the tallest whole number of days that fits on one
-# screen. Measures the terminal itself, so it must run inside the window that
-# will display the result rather than in the process that spawns it.
-fit() {
-  # A tiling window manager resizes the window after mapping it; measuring
-  # straight away would read the terminal's start-up geometry, not the final one.
-  [ -n "$2" ] && sleep "$2"
-  rows="$(stty size 2>/dev/null </dev/tty | cut -d' ' -f1)"
-  [ -n "$rows" ] || rows=24
-  # less keeps the bottom line for its own prompt, and the appended "Location:"
-  # line costs one more.
-  days=$(((rows - 2 - headerlines) / daylines))
-  [ "$days" -gt "$maxdays" ] && days="$maxdays"
-  [ "$days" -lt 0 ] && days=0
-  head -n $((headerlines + days * daylines)) "$1"
-  grep -m1 '^Location:' "$1"
-}
-
-# Show a report in a pager in its own terminal window. The trim depends on that
-# window's height, which is unknowable from here, so re-invoke through --fit on
-# the inside. $2 is a scratch file to delete once the pager exits, if any.
+# Show a report in a pager in its own terminal window. The pager shows however
+# many days wttr.in put in the report; trimming to what fits only ever hid a day
+# the pager could have scrolled to. $2 is a scratch file to delete once the
+# pager exits, if any.
 show() {
   # shellcheck disable=SC2016 # the positionals belong to the inner shell
   setsid -f "$TERMINAL" -e sh -c \
@@ -44,8 +17,8 @@ show() {
      # manager kills the terminal outright, and anything after the pager never
      # gets to run.
      [ -n "$2" ] && trap "rm -f \"$2\"" EXIT HUP INT TERM
-     "$0" --fit "$1" | less -SR' \
-    "$self" "$1" "$2" >/dev/null 2>&1
+     less -SR "$1"' \
+    weath "$1" "$2" >/dev/null 2>&1
 }
 
 # Download a report to a file. Never route it through a command substitution:
@@ -58,14 +31,6 @@ fetch() {
 
 scratch() {
   mktemp "${TMPDIR:-/tmp}/weath.XXXXXX"
-}
-
-self="$(command -v -- "$0" || echo "$0")"
-
-# Internal entry point, invoked inside the spawned terminal by show().
-[ "$1" = '--fit' ] && {
-  fit "$2" 0.2
-  exit
 }
 
 if [ "$1" = 'cp' ]; then

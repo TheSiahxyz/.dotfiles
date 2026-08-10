@@ -5,37 +5,14 @@
 
 weatherreport="${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport"
 
-# wttr.in draws a fixed 125-column layout, so only the height can be made to fit
-# the window. The report is regular enough to trim by line count: a constant
-# block on top (the "Weather report" line, a blank, and five lines of current
-# conditions), then exactly ten lines per forecast day, then a footer whose
-# "Location:" line is the only part worth keeping. Dropping whole days off the
-# end is the only trim that leaves the tables intact.
-headerlines=7
-daylines=10
-maxdays=3
-
-# Print the report trimmed to the tallest whole number of days that fits on one
-# screen.
-fit() {
-  rows="$(stty size 2>/dev/null </dev/tty | cut -d' ' -f1)"
-  [ -n "$rows" ] || rows=24
-  # less keeps the bottom line for its own prompt, and the appended "Location:"
-  # line costs one more.
-  days=$(((rows - 2 - headerlines) / daylines))
-  [ "$days" -gt "$maxdays" ] && days="$maxdays"
-  [ "$days" -lt 0 ] && days=0
-  head -n $((headerlines + days * daylines)) "$1"
-  grep -m1 '^Location:' "$1"
-}
-
-# Unlike the Linux variant this pages in the terminal it was launched from, so
-# the size is already known and there is no second process to hand the trim to.
+# Unlike the Linux variant this pages in the terminal it was launched from. The
+# pager shows however many days wttr.in put in the report; trimming to what fits
+# only ever hid a day the pager could have scrolled to.
 show() {
   LESS='R'
   LESSOPEN=''
   export LESS LESSOPEN
-  fit "$1" | less -SR
+  less -SR "$1"
 }
 
 # Download a report to a file rather than through a command substitution, which
