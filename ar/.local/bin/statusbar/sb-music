@@ -5,15 +5,48 @@ shopt -s extglob
 MPD_HOST="${MPD_HOST:-/tmp/mpd_socket}"
 export MPD_HOST
 
-truncate_string() {
-  local input="$1"
-  local max_length="$2"
-  if [ "${#input}" -gt "$max_length" ]; then
-    local truncated="${input:0:$((max_length - 2))}"
-    echo "${truncated%%+( )}.."
-  else
-    echo "$input"
+# Two limits clip this block downstream. Both cut from the tail, neither marks
+# the cut, and they count in different units:
+#   dwmblocks  MAX_BLOCK_OUTPUT_LENGTH chars, per block        (src/block.c:106)
+#   dwm        stext[256] -> strncpy(.., 255) bytes, whole bar (dwm.c:381)
+# The play mode indicators and the elapsed time sit at the end of the line, so
+# they are the first things to vanish on a long title. Truncating here instead
+# keeps them, and marks the cut with "..".
+#
+# The byte figure is this block's share of dwm's 255: the other blocks measured
+# ~156 B, and the ones that are usually empty (sb-ylog, sb-ticker, sb-mailbox,
+# ...) still need room for when they do fire. Raise it only alongside stext.
+BLOCK_MAX_BYTES=80
+
+max_chars="$(grep 'MAX_BLOCK_OUTPUT_LENGTH' ~/.local/src/suckless/dwmblocks/config.def.h | awk '{print $3}')"
+max_chars="${max_chars:-50}"
+max_bytes="$BLOCK_MAX_BYTES"
+
+# ${#var} counts characters under a UTF-8 locale and bytes under C.
+byte_len() {
+  local LC_ALL=C
+  echo "${#1}"
+}
+
+# Trim to fit a character budget and a byte budget at once, marking the cut.
+fit_string() {
+  local input="$1" max_length="$2" max_size="$3" out n
+  [ -z "$input" ] && return
+  if [ "${#input}" -le "$max_length" ] && [ "$(byte_len "$input")" -le "$max_size" ]; then
+    printf '%s' "$input"
+    return
   fi
+
+  n=$((max_length - 2))
+  [ "$n" -gt "${#input}" ] && n="${#input}"
+  [ "$n" -lt 1 ] && n=1
+  out="${input:0:n}"
+  while [ "$n" -gt 1 ] && [ "$(byte_len "$out..")" -gt "$max_size" ]; do
+    n=$((n - 1))
+    out="${input:0:n}"
+  done
+
+  printf '%s..' "${out%%+( )}"
 }
 
 signal="$(awk -F', *' -v name="${0##*/}" '$2 ~ name {print $3+0}' "${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwmblocks/config.def.h")"
@@ -23,47 +56,78 @@ signal="$(awk -F', *' -v name="${0##*/}" '$2 ~ name {print $3+0}' "${XDG_SOURCES
   pidof -x sb-playerctlup >/dev/null 2>&1 || sb-playerctlup >/dev/null 2>&1 &
 }
 
-screen_width=$(xrandr | awk '/\*/ {split($1, res, "x"); print res[1]; exit}')
-if [ "$screen_width" -le 2048 ]; then
-  length="$(grep 'MAX_BLOCK_OUTPUT_LENGTH' ~/.local/src/suckless/dwmblocks/config.def.h | awk '{print $3}')"
-  max_length="${length:+$((length / 3))}"
-  max_length="${max_length:-15}"
-fi
-
 status() {
-  if ps -C mpd >/dev/null 2>&1; then
-    local artist title prefix indicators current_time total_time
-    artist=$(mpc current -f %artist%)
-    title=$(mpc current -f %title%)
+  ps -C mpd >/dev/null 2>&1 || return
 
-    if [ "$screen_width" -le 2048 ]; then
-      artist=$(truncate_string "$artist" "$max_length")
-      title=$(truncate_string "$title" "$max_length")
-    fi
+  local artist title prefix indicators elapsed current_time total_time
+  local fields fixed_chars fixed_bytes share_chars share_bytes
+  local artist_chars artist_bytes title_chars title_bytes
 
-    case "$(mpc status %state%)" in
-    "playing") prefix="🎵" ;;
-    "paused") prefix="⏸" ;;
-    *) return ;;
-    esac
+  case "$(mpc status %state%)" in
+  "playing") prefix="🎵" ;;
+  "paused") prefix="⏸" ;;
+  *) return ;;
+  esac
 
-    indicators=""
-    [ "$(mpc status %single%)" = "on" ] && indicators="${indicators}🔂"
-    [ "$(mpc status %random%)" = "on" ] && indicators="${indicators}🔀"
-    [ "$(mpc status %repeat%)" = "on" ] && indicators="${indicators}🔁"
+  indicators=""
+  [ "$(mpc status %single%)" = "on" ] && indicators="${indicators}🔂"
+  [ "$(mpc status %random%)" = "on" ] && indicators="${indicators}🔀"
+  [ "$(mpc status %repeat%)" = "on" ] && indicators="${indicators}🔁"
 
-    case "$signal" in
-    0)
-      echo "$prefix$artist - $title${indicators:+$indicators}"
-      ;;
-    [1-9]*)
-      current_time=$(mpc status %currenttime%)
-      total_time=$(mpc status %totaltime%)
-      echo "$prefix$artist - $title ${current_time:+$current_time/}$total_time${indicators:+$indicators}"
-      ;;
-    *) return ;;
-    esac
+  elapsed=""
+  case "$signal" in
+  0) ;;
+  [1-9]*)
+    current_time=$(mpc status %currenttime%)
+    total_time=$(mpc status %totaltime%)
+    elapsed=" ${current_time:+$current_time/}$total_time"
+    ;;
+  *) return ;;
+  esac
+
+  artist=$(mpc current -f %artist%)
+  title=$(mpc current -f %title%)
+
+  fields=0
+  [ -n "$artist" ] && fields=$((fields + 1))
+  [ -n "$title" ] && fields=$((fields + 1))
+  [ "$fields" -eq 0 ] && return
+
+  # Spend the budget on the fixed parts first - they are what the downstream
+  # cuts would eat - then split the remainder evenly between artist and title.
+  fixed_chars=$((${#prefix} + ${#indicators} + ${#elapsed}))
+  fixed_bytes=$(($(byte_len "$prefix") + $(byte_len "$indicators") + $(byte_len "$elapsed")))
+  if [ "$fields" -eq 2 ]; then
+    fixed_chars=$((fixed_chars + 3)) # " - "
+    fixed_bytes=$((fixed_bytes + 3))
   fi
+
+  share_chars=$(((max_chars - fixed_chars) / fields))
+  share_bytes=$(((max_bytes - fixed_bytes) / fields))
+  [ "$share_chars" -lt 3 ] && share_chars=3
+  [ "$share_bytes" -lt 3 ] && share_bytes=3
+
+  artist_chars=$share_chars artist_bytes=$share_bytes
+  title_chars=$share_chars title_bytes=$share_bytes
+
+  # An even split would leave room unused whenever one field is short, so hand
+  # whatever the shorter field does not need to the other one.
+  if [ "$fields" -eq 2 ]; then
+    if [ "${#artist}" -lt "$share_chars" ]; then
+      title_chars=$((title_chars + share_chars - ${#artist}))
+      title_bytes=$((title_bytes + share_bytes - $(byte_len "$artist")))
+    elif [ "${#title}" -lt "$share_chars" ]; then
+      artist_chars=$((artist_chars + share_chars - ${#title}))
+      artist_bytes=$((artist_bytes + share_bytes - $(byte_len "$title")))
+    fi
+    [ "$title_bytes" -lt 3 ] && title_bytes=3
+    [ "$artist_bytes" -lt 3 ] && artist_bytes=3
+  fi
+
+  artist=$(fit_string "$artist" "$artist_chars" "$artist_bytes")
+  title=$(fit_string "$title" "$title_chars" "$title_bytes")
+
+  echo "$prefix${artist:+$artist${title:+ - }}$title$elapsed$indicators"
 }
 
 playerctl_status() {
@@ -104,12 +168,50 @@ playerctl_status() {
 
     [ -z "$artist" ] && [ -z "$title" ] && continue
 
-    if [ -n "$max_length" ]; then
-      artist=$(truncate_string "$artist" "$max_length")
-      title=$(truncate_string "$title" "$max_length")
+    # Same split as the mpd side, over whatever budget mpd left behind. The
+    # separators cost too, so charge them before sizing the fields.
+    local fields=0 sep=0 fixed_chars fixed_bytes share_chars share_bytes
+    local artist_chars artist_bytes title_chars title_bytes entry
+    [ -n "$artist" ] && fields=$((fields + 1))
+    [ -n "$title" ] && fields=$((fields + 1))
+    [ -n "$output" ] && sep=3 # " | " between players
+
+    fixed_chars=$((${#prefix} + sep))
+    fixed_bytes=$(($(byte_len "$prefix") + sep))
+    if [ "$fields" -eq 2 ]; then
+      fixed_chars=$((fixed_chars + 3)) # " - "
+      fixed_bytes=$((fixed_bytes + 3))
     fi
 
-    output="${output:+$output | }${prefix}${artist:+$artist - }${title}"
+    # No room left for anything meaningful - stop rather than emit a stub that
+    # dwmblocks would shear off anyway.
+    [ $((rem_chars - fixed_chars)) -lt 4 ] && break
+    [ $((rem_bytes - fixed_bytes)) -lt 4 ] && break
+
+    share_chars=$(((rem_chars - fixed_chars) / fields))
+    share_bytes=$(((rem_bytes - fixed_bytes) / fields))
+
+    artist_chars=$share_chars artist_bytes=$share_bytes
+    title_chars=$share_chars title_bytes=$share_bytes
+    if [ "$fields" -eq 2 ]; then
+      if [ "${#artist}" -lt "$share_chars" ]; then
+        title_chars=$((title_chars + share_chars - ${#artist}))
+        title_bytes=$((title_bytes + share_bytes - $(byte_len "$artist")))
+      elif [ "${#title}" -lt "$share_chars" ]; then
+        artist_chars=$((artist_chars + share_chars - ${#title}))
+        artist_bytes=$((artist_bytes + share_bytes - $(byte_len "$title")))
+      fi
+      [ "$title_bytes" -lt 3 ] && title_bytes=3
+      [ "$artist_bytes" -lt 3 ] && artist_bytes=3
+    fi
+
+    artist=$(fit_string "$artist" "$artist_chars" "$artist_bytes")
+    title=$(fit_string "$title" "$title_chars" "$title_bytes")
+
+    entry="${prefix}${artist:+$artist${title:+ - }}${title}"
+    output="${output:+$output | }$entry"
+    rem_chars=$((rem_chars - sep - ${#entry}))
+    rem_bytes=$((rem_bytes - sep - $(byte_len "$entry")))
   done < <(playerctl -l 2>/dev/null)
 
   echo "$output"
@@ -118,6 +220,15 @@ playerctl_status() {
 mpd_output=""
 if ps -C mpd >/dev/null 2>&1 && ! mpc status %state% 2>/dev/null | grep -q "stopped"; then
   mpd_output=$(status)
+fi
+
+# Both sources share one block, so the browser player gets what mpd left over
+# rather than a second full budget.
+rem_chars=$max_chars
+rem_bytes=$max_bytes
+if [ -n "$mpd_output" ]; then
+  rem_chars=$((rem_chars - ${#mpd_output} - 1))
+  rem_bytes=$((rem_bytes - $(byte_len "$mpd_output") - 1))
 fi
 
 playerctl_output=$(playerctl_status)
