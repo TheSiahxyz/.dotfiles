@@ -42,7 +42,7 @@ if [ -n "$media_list" ]; then
   fi
   set --
   for file in $media_list; do set -- "$@" "$file"; done
-  mpv --quiet -- "$@"
+  setsid -f mpv --x11-name=video --really-quiet -- "$@"
 fi
 
 [ -z "$editor_list" ] && exit 0

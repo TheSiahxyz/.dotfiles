@@ -173,7 +173,10 @@ export NOTMUCH_CONFIG="$XDG_CONFIG_HOME/notmuch/default/config"
 
 ### --- NPM --- ###
 export NPM_CONFIG_USERCONFIG="~/.config/npm/.npmrc"
-command -v npm >/dev/null 2>&1 && export PATH="$(find -L ~/.local/share/npm -mindepth 2 -name bin -type d -print 2>/dev/null | sort -u | paste -s -d ':' -):$PATH"
+# Only the global bin -- npm links package executables there itself. A recursive
+# find also drags in nested node_modules/*/bin, which shadowed /usr/bin: the
+# @openai/codex package ships a DotSlash stub named 'rg' that broke ripgrep.
+command -v npm >/dev/null 2>&1 && [ -d "$HOME/.local/share/npm/global/bin" ] && export PATH="$HOME/.local/share/npm/global/bin:$PATH"
 
 ### --- NVM --- ###
 export NVM_DIR="$XDG_CONFIG_HOME/nvm"
