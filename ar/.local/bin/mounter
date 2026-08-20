@@ -50,9 +50,15 @@ productname() {
 }
 
 # Directory name for a drive: label first, then product name, then device name.
+# lsblk always escapes LABEL, so any byte that is not printable ASCII arrives as
+# the literal text "\xNN"; printf '%b' turns that back into the real bytes.
+# slugify then forces the result to ASCII so mountpoints stay typeable whatever
+# codepage the label was written in. FAT records no encoding for its label, so a
+# CP949 or CP932 one cannot be decoded reliably -- those slugify to nothing and
+# fall through to the product name below.
 drivename() {
   local name partn parts
-  name="$(sudo lsblk -dno LABEL "$1" 2>/dev/null | head -1)"
+  name="$(slugify "$(printf '%b' "$(sudo lsblk -dno LABEL "$1" 2>/dev/null | head -1)")")"
   [ -n "$name" ] && { echo "$name"; return; }
   name="$(productname "$1")"
   [ -z "$name" ] && { basename "$1"; return; }
@@ -79,36 +85,53 @@ mountbase() {
   fi
 }
 
-# Function for prompting user for a mountpoint.
-getmount() {
-  [ -z "$1" ] && mp="$(find "/media/$USER" /mnt -mindepth 1 -maxdepth 1 -type d 2>/dev/null | dmenu -i -p "Mount this drive where?")" || mp="$1"
-  test -n "$mp"
-  # Ensure the /media/$USER base exists and is owned by the user before any
-  # mountpoint is created under it. Otherwise `sudo mkdir -p` would create the
-  # base as root and only the leaf would get chowned below.
-  case "$mp" in
-  "/media/$USER"/*)
-    if [ ! -d "/media/$USER" ]; then
-      sudo -A mkdir -p "/media/$USER" && sudo -A chown "$USER":"$(id -gn)" "/media/$USER"
-    elif [ "$(stat -c '%U' "/media/$USER")" != "$USER" ]; then
-      sudo -A chown "$USER":"$(id -gn)" "/media/$USER"
-    fi
-    ;;
+# Ensure the /media/$USER base exists and is owned by the user before any
+# mountpoint is created under it. Otherwise `sudo mkdir -p` would create the
+# base as root and only the leaf would get chowned below.
+ensurebase() {
+  case "$1" in
+  "/media/$USER"/*) ;;
+  *) return 0 ;;
   esac
-  if [ ! -d "$mp" ]; then
-    mkdiryn=$(printf "Yes\nNo" | dmenu -i -p "$mp does not exist. Create it?")
-    [ "$mkdiryn" = "Yes" ] && (mkdir -p "$mp" 2>/dev/null || { sudo -A mkdir -p "$mp" && sudo -A chown "$USER":"$(id -gn)" "$mp"; })
-  elif [ "$(stat -c '%U' "$mp")" != "$USER" ]; then
+  if [ ! -d "/media/$USER" ]; then
+    sudo -A mkdir -p "/media/$USER" && sudo -A chown "$USER":"$(id -gn)" "/media/$USER"
+  elif [ "$(stat -c '%U' "/media/$USER")" != "$USER" ]; then
+    sudo -A chown "$USER":"$(id -gn)" "/media/$USER"
+  fi
+}
+
+# Function for prompting user for a mountpoint. An argument is a proposed path;
+# answering "No" to creating it drops back to the picker, where dmenu accepts a
+# path typed by hand. Without an argument the picker is used straight away.
+# Returns non-zero when the user cancels, so callers abort rather than ask again.
+getmount() {
+  mp="$1"
+  while :; do
+    if [ -z "$mp" ]; then
+      mp="$(find "/media/$USER" /mnt -mindepth 1 -maxdepth 1 -type d 2>/dev/null |
+        dmenu -i -p "Mount this drive where?")"
+      if [ -z "$mp" ]; then return 1; fi
+    fi
+    ensurebase "$mp"
+    if [ -d "$mp" ]; then break; fi
+    mkdiryn="$(printf "Yes\nNo" | dmenu -i -p "$mp does not exist. Create it?")"
+    if [ "$mkdiryn" = "Yes" ]; then
+      mkdir -p "$mp" 2>/dev/null ||
+        { sudo -A mkdir -p "$mp" && sudo -A chown "$USER":"$(id -gn)" "$mp"; } ||
+        return 1
+      break
+    fi
+    # Escaping the prompt cancels outright. "No" discards the proposal and loops
+    # back to the picker instead of asking about the same path a second time.
+    if [ -z "$mkdiryn" ]; then return 1; fi
+    mp=""
+  done
+  if [ "$(stat -c '%U' "$mp")" != "$USER" ]; then
     sudo -A chown "$USER":"$(id -gn)" "$mp"
   fi
 }
 
 attemptmount() {
-  # Attempt to mount without a mountpoint, to see if drive is in fstab.
-  mplabel="$(drivename "$chosen")"
-  local base
-  base="$(mountbase "$chosen")"
-  mp="$base/$mplabel"
   # FAT, exFAT and NTFS store no ownership on disk, so it has to come from
   # mount options. Keep the options in an array: IFS is a bare newline in this
   # script, so an unquoted "-o opts" string never splits on its space and mount
@@ -121,11 +144,11 @@ attemptmount() {
   ntfs*) mountopts=(-o "uid=$(id -u),gid=$(id -g)") ;;
   *) mountopts=() ;;
   esac
-  if [ -d "$mp" ]; then
-    sudo -A mount "${mountopts[@]}" "$chosen" "$mp" >/dev/null 2>&1 || return 1
-  else
-    getmount "$mp" && sudo -A mount "${mountopts[@]}" "$chosen" "$mp" >/dev/null 2>&1 || return 1
-  fi
+  # getmount stays silent when the proposed directory already exists, so this
+  # only prompts when there is something to decide. Cancelling aborts outright:
+  # the caller's fallback retries the mount, never the mountpoint choice.
+  getmount "$(mountbase "$chosen")/$(drivename "$chosen")" || exit 1
+  sudo -A mount "${mountopts[@]}" "$chosen" "$mp" >/dev/null 2>&1
 }
 
 notify-send -t 10000 "🔎 Searching drives to mount..."
@@ -159,7 +182,16 @@ allluks="$(echo "$lsblkoutput" | grep crypto_LUKS)"
 # Get a list of the LUKS drive UUIDs already decrypted.
 decrypted="$(find /dev/disk/by-id/dm-uuid-CRYPT-LUKS2-* | sed "s|.*LUKS2-||;s|-.*||")"
 # Functioning for formatting drives correctly for dmenu:
-filter() { sed "s/ /:/g" | awk -F':' '$7==""{printf "%s%s (%s) %s\n",$1,$3,$5,$6}'; }
+# The trailing name comes from drivename() rather than lsblk's LABEL column: that
+# column is escaped, so a non-ASCII label would show up as literal "\xNN" here.
+# Routing it through drivename() also makes the listed name match the directory
+# the drive will actually be mounted at.
+filter() {
+  sed "s/ /:/g" | awk -F':' '$7==""{printf "%s\t%s\t%s\n",$1,$3,$5}' |
+    while IFS="$(printf '\t')" read -r icon dev size; do
+      printf "%s%s (%s) %s\n" "$icon" "$dev" "$size" "$(drivename "$dev")"
+    done
+}
 
 # Get only LUKS drives that are not decrypted.
 unopenedluks="$(for drive in $allluks; do
@@ -251,14 +283,11 @@ case "$chosen" in
 💾*)
   chosen="${chosen%% *}"
   chosen="${chosen:1}" # This is a bashism.
-  attemptmount || {
-    # Use label, product name, or device basename as default mount point.
-    mplabel="$(drivename "$chosen")"
-    getmount "$(mountbase "$chosen")/$mplabel"
-    # attemptmount already picked the options for this filesystem; reusing them
-    # keeps the retry from silently mounting with weaker ones.
-    sudo -A mount "${mountopts[@]}" "$chosen" "$mp"
-  }
+  # attemptmount settled the mountpoint and silenced mount to test it. Retry
+  # unsilenced so mount's own diagnostic reaches the terminal; nothing is asked
+  # again, and the options it already picked are reused so the retry cannot
+  # silently mount with weaker ones.
+  attemptmount || sudo -A mount "${mountopts[@]}" "$chosen" "$mp"
   notify-send "💾 Drive Mounted." "$chosen mounted to $mp."
   ;;
 🔒*)
@@ -272,11 +301,7 @@ case "$chosen" in
   # Check if now decrypted.
   test -b "/dev/mapper/usb$num"
   chosen="/dev/mapper/usb$num"
-  attemptmount || {
-    mplabel="$(drivename "$chosen")"
-    getmount "$(mountbase "$chosen")/$mplabel"
-    sudo -A mount "${mountopts[@]}" "/dev/mapper/usb$num" "$mp"
-  }
+  attemptmount || sudo -A mount "${mountopts[@]}" "/dev/mapper/usb$num" "$mp"
   notify-send "🔓 Decrypted drive Mounted." "$chosen decrypted and mounted to $mp."
   ;;
 📱*)
@@ -305,7 +330,9 @@ case "$chosen" in
   else
     notify-send "❌ Failed to mount samba" "$chosen
   Check if $(whoami) is added to samba user list."
-    sudo rm -rf "$mp"
+    # rmdir, not rm -rf: getmount can now fail by cancellation, in which case
+    # $mp is empty or a directory that was never ours to delete.
+    [ -n "$mp" ] && sudo rmdir "$mp" 2>/dev/null
     exit
   fi
   notify-send "📡 Samba successfully mounted to" "$mp"
