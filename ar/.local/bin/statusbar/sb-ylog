@@ -16,6 +16,15 @@ mkdir -p "$CACHE_DIR"
 
 export SSH_AUTH_SOCK="/run/user/$(id -u)/gnupg/S.gpg-agent.ssh"
 
+# 봇/스캐너 판별 규칙 (nginx 로그의 마지막 필드가 User-Agent 다).
+# 1) 스스로 정체를 밝히는 크롤러, HTTP 클라이언트 라이브러리, 빈 UA
+BOT_UA_KEYWORDS='bot|spider|crawler|crawl|slurp|scrapy|censys|shodan|zgrab|masscan|nmap|netcraft|expanse|internetmeasurement|paloaltonetworks|checker|monitor|uptime|pingdom|statuscake|site24x7|headlesschrome|phantomjs|puppeteer|playwright|selenium|go-http-client|python-requests|python-urllib|libwww-perl|java/|apache-httpclient|guzzlehttp|okhttp|node-fetch|axios|aiohttp|httpx|postmanruntime|insomnia|curl/|wget/|facebookexternalhit|meta-externalagent|semrush|ahrefs|thesiah-|logrotate-'
+BOT_UA_RE="(\"[^\"]*(${BOT_UA_KEYWORDS})[^\"]*\"|\"-\"|\"Mozilla/5\.0\"|\"\")\$"
+
+# 2) UA 를 브라우저로 위장한 취약점 스캐너는 요청 경로로 걸러낸다.
+#    이 서버의 어떤 vhost 도 PHP/WordPress 를 제공하지 않으므로 전부 스캔이다.
+SCAN_PATH_RE='"[A-Z]+ [^"]*(\.php|\.asp|\.jsp|wp-admin|wp-content|wp-includes|wp-login|wlwmanifest|xmlrpc|/\.(env|git|aws|ssh|svn|vscode)|phpmyadmin|/cgi-bin/|/boaform|/hnap1|/autodiscover|/owa/|/telescope/|/actuator|/solr/|/druid/|/geoserver|/_ignition|/eval-stdin|/shell|\.sql|\.bak)'
+
 fetch_logs() {
   kr_today=$(TZ=Asia/Seoul LC_TIME=C date +%d/%b)
   kr_yesterday=$(TZ=Asia/Seoul LC_TIME=C date -d 'yesterday' +%d/%b)
@@ -27,7 +36,8 @@ fetch_logs() {
          /var/log/nginx/media/us.log /var/log/nginx/media/kr.log \
          /var/log/nginx/peertube/us.log /var/log/nginx/peertube/kr.log 2>/dev/null" \
     2>/dev/null | grep -E "$kr_today|$kr_yesterday" | grep -E '[0-9]{2}:[0-9]{2}:[0-9]{2} ' |
-    grep -vE '^(59\.19\.56\.8|2a02:4780:10:212c::1) ' | sort -u
+    grep -vE '^(59\.19\.56\.8|2a02:4780:10:212c::1) ' |
+    grep -viE "$BOT_UA_RE" | grep -viE "$SCAN_PATH_RE" | sort -u
 }
 
 update() {
@@ -77,6 +87,7 @@ case $BLOCK_BUTTON in
   ;;
 3)
   notify-send "🌐 Ylog module" "\- Shows new nginx log entries (diary/media/peertube, US+KR)
+- Bots & vuln scanners are filtered out
 - Updates every 30 minutes
 - Left click: show all current entries
 - Middle click: show new entries & mark seen"
