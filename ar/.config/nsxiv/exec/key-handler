@@ -1,14 +1,52 @@
 #!/bin/sh
 
+# nsxiv passes the pressed key as $1 and the selected file(s) on stdin.
+
+bmdirs="${XDG_CONFIG_HOME:-$HOME/.config}/shell/bm-dirs"
+
+# Ask once for a destination bookmark, reused for every file in the batch.
+# bm-dirs holds shell expressions (${XDG_PICTURES_DIR:-...}, $HOME/...), so it
+# must be expanded the same way ~/.local/bin/shortcuts does it -- a plain
+# `sed s|~|$HOME|` leaves the literal ${...} and every copy/move is cancelled.
+askdestdir() {
+  [ -n "$destdir" ] && return 0
+  destdir="$(eval "echo \"$(cat "$bmdirs")\"" |
+    sed 's/#.*$//; /^[[:space:]]*$/d' |
+    awk '{ sub(/^[ \t]*[^ \t]+[ \t]+/, ""); sub(/[ \t]+$/, ""); print }' |
+    dmenu -l 20 -i -p "$1")"
+  [ -z "$destdir" ] && exit 0 # cancelled at the prompt
+  if [ ! -d "$destdir" ]; then
+    notify-send "$destdir is not a directory, cancelled."
+    exit 1
+  fi
+}
+
+# Edit in place via a temp file: a failed or interrupted magick run would
+# otherwise truncate the original image.
+edit() {
+  ext="${file##*.}"
+  [ "$ext" = "$file" ] && ext="png"
+  tmp="${TMPDIR:-/tmp}/nsxiv-$$.$ext"
+  if magick "$file" "$@" "$tmp" 2>/dev/null && [ -s "$tmp" ]; then
+    cat "$tmp" >"$file"
+    rm -f "$tmp"
+    return 0
+  fi
+  rm -f "$tmp"
+  notify-send "Failed to edit $file."
+  return 1
+}
+
 while read -r file; do
   case "$1" in
   "h")
     notify-send "Macro <C-x> key bindings:" "\- b: Set as wallpaper
 - c: Copy file
 - d: Delete file
-- h: Help key bindings
+- e: Edit this key-handler
 - f: Flip file horizontally
 - g: Edit in GIMP
+- h: Help key bindings
 - i: Show file information
 - m: Move file
 - r: Rotate file 90 degrees
@@ -20,37 +58,45 @@ while read -r file; do
     ;;
   "b") setbg "$file" & ;;
   "c")
-    [ -z "$destdir" ] && destdir="$(sed "s/#.*$//;/^\s*$/d" ${XDG_CONFIG_HOME:-$HOME/.config}/shell/bm-dirs | awk '{print $2}' | dmenu -l 20 -i -p "Copy file(s) to where?" | sed "s|~|$HOME|g")"
-    [ ! -d "$destdir" ] && notify-send "$destdir is not a directory, cancelled." && exit
-    cp "$file" "$destdir" && notify-send -i "$(readlink -f "$file")" "$file copied to $destdir." &
+    askdestdir "Copy file(s) to where?"
+    cp -- "$file" "$destdir" &&
+      notify-send -i "$(readlink -f "$file")" "$file copied to $destdir." &
     ;;
   "d")
-    [ "$(printf "No\\nYes" | dmenu -i -p "Really delete $file?")" = "Yes" ] && rm "$file" && notify-send "$file deleted."
+    [ "$(printf 'No\nYes' | dmenu -i -p "Really delete $file?")" = "Yes" ] &&
+      rm -f -- "$file" && notify-send "$file deleted."
     ;;
-  "f") magick "$file" -flop "$file" ;;
+  "e")
+    setsid -f "${TERMINAL:-st}" -e "${EDITOR:-vim}" "$0" >/dev/null 2>&1
+    exit 0
+    ;;
+  "f") edit -flop ;;
   "g") ifinstalled gimp && setsid -f gimp "$file" ;;
   "i") notify-send "File information" "$(mediainfo "$file" | sed "s/[ ]\+:/:/g;s/: /: <b>/;s/$/<\/b>/" | grep "<b>")" ;;
   "m")
-    [ -z "$destdir" ] && destdir="$(sed "s/#.*$//;/^\s*$/d" ${XDG_CONFIG_HOME:-$HOME/.config}/shell/bm-dirs | awk '{print $2}' | dmenu -l 20 -i -p "Move file(s) to where?" | sed "s|~|$HOME|g")"
-    [ ! -d "$destdir" ] && notify-send "$destdir is not a directory, cancelled." && exit
-    mv "$file" "$destdir" && notify-send -i "$(readlink -f "$file")" "$file moved to $destdir." &
+    askdestdir "Move file(s) to where?"
+    mv -- "$file" "$destdir" &&
+      notify-send -i "$(readlink -f "$destdir/${file##*/}")" "$file moved to $destdir." &
     ;;
-  "r") magick "$file" -rotate 90 "$file" ;;
-  "R") magick "$file" -rotate -90 "$file" ;;
+  "r") edit -rotate 90 ;;
+  "R") edit -rotate -90 ;;
   "s")
-    size="$(echo "" | dmenu -i -p "Enter a size to resize $file ($(identify -format "%wx%h" $file)): ")"
-    magick "$file" -resize "$size" "$file" && notify-send "$file size has changed to $size."
+    size="$(echo "" | dmenu -i -p "Enter a size to resize $file ($(magick identify -format '%wx%h' "$file" 2>/dev/null)): ")"
+    [ -z "$size" ] && continue
+    edit -resize "$size" && notify-send "$file size has changed to $size."
     ;;
   "S")
-    resolution="$(printf low\\nmedium\\nhigh | dmenu -i -p "Choose a resolution: ")"
+    resolution="$(printf 'low\nmedium\nhigh' | dmenu -i -p "Choose a resolution: ")"
     case "$resolution" in
-    low) magick "$file" -resample 72 "$file" ;;
-    medium) magick "$file" -resample 150 "$file" ;;
-    high) magick "$file" -resample 300 "$file" ;;
-    esac && notify-send "Changed $file resolution to $resolution."
+    low) dpi=72 ;;
+    medium) dpi=150 ;;
+    high) dpi=300 ;;
+    *) continue ;;
+    esac
+    edit -resample "$dpi" && notify-send "Changed $file resolution to $resolution."
     ;;
   "y")
-    printf "%s" "$file" | tr -d '\n' | xclip -selection clipboard &&
+    printf '%s' "$file" | xclip -selection clipboard &&
       notify-send "$file copied to clipboard" &
     ;;
   "Y")
