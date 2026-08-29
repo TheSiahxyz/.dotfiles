@@ -25,6 +25,47 @@ BOT_UA_RE="(\"[^\"]*(${BOT_UA_KEYWORDS})[^\"]*\"|\"-\"|\"Mozilla/5\.0\"|\"\")\$"
 #    이 서버의 어떤 vhost 도 PHP/WordPress 를 제공하지 않으므로 전부 스캔이다.
 SCAN_PATH_RE='"[A-Z]+ [^"]*(\.php|\.asp|\.jsp|wp-admin|wp-content|wp-includes|wp-login|wlwmanifest|xmlrpc|/\.(env|git|aws|ssh|svn|vscode)|phpmyadmin|/cgi-bin/|/boaform|/hnap1|/autodiscover|/owa/|/telescope/|/actuator|/solr/|/druid/|/geoserver|/_ignition|/eval-stdin|/shell|\.sql|\.bak)'
 
+# 3) 서브리소스 요청은 접속 1건을 수십 줄로 부풀린다 (Jellyfin 번들 하나에 30줄).
+#    사람이 "방문했다"고 볼 수 있는 건 문서 요청뿐이므로 부수 요청은 전부 뺀다.
+ASSET_PATH_RE='"[A-Z]+ [^" ?]*\.(js|mjs|css|map|json|xml|txt|png|jpe?g|gif|svg|ico|webp|avif|woff2?|ttf|otf|eot|mp4|m4s|m3u8|webm)([?" ]|$)'
+
+# 4) 페이지 뷰로 인정할 응답 코드만 남긴다.
+#    301/302 는 리다이렉트일 뿐이고(사람은 뒤이어 200 을 남긴다), 401/403/404 는
+#    인증벽에 막힌 스캐너다. 실제 로그에서 이 셋이 530줄 중 491줄을 차지했다.
+PAGEVIEW_STATUS_RE='HTTP/[0-9.]+" (200|206|304) '
+
+# 5) 브라우저를 자칭하지만 UA 가 구조적으로 틀렸거나 버전이 낡은 자동화 트래픽.
+#    - 진짜 크롬은 "AppleWebKit/537.36 (KHTML, like Gecko)" 와 "Safari/537.36" 을 항상 붙인다.
+#      둘 중 하나라도 없으면서 Chrome/ 을 자칭하면 위조다.
+#    - 스캐너는 UA 버전을 하드코딩해 두므로 몇 년씩 뒤처진다. 실사용 하한선을 둔다.
+#    - 삼성인터넷/웨일/엣지 등 파생 브라우저는 크롬 버전이 원래 뒤처지므로 버전 검사에서 제외한다.
+CHROME_MIN=130
+FIREFOX_MIN=125
+
+drop_implausible_ua() {
+  awk -v cmin="$CHROME_MIN" -v fmin="$FIREFOX_MIN" '
+    {
+      ua = $0
+      sub(/^.*" "/, "", ua)   # 마지막 따옴표 필드 = User-Agent
+      sub(/"$/, "", ua)
+
+      if (ua ~ /Chrome\//) {
+        if (ua !~ /AppleWebKit\/537\.36 \(KHTML, like Gecko\)/) next
+        if (ua !~ /Safari\/537\.36/) next
+      }
+
+      derived = (ua ~ /(SamsungBrowser|Edge?A?|EdgiOS|OPR|Opera|Whale|YaBrowser|Vivaldi|Brave|CriOS|FxiOS)\//)
+
+      if (!derived && match(ua, /Chrome\/[0-9]+/) &&
+          substr(ua, RSTART + 7, RLENGTH - 7) + 0 < cmin) next
+      if (!derived && match(ua, /Firefox\/[0-9]+/) &&
+          substr(ua, RSTART + 8, RLENGTH - 8) + 0 < fmin) next
+
+      print
+    }
+  '
+}
+
 fetch_logs() {
   kr_today=$(TZ=Asia/Seoul LC_TIME=C date +%d/%b)
   kr_yesterday=$(TZ=Asia/Seoul LC_TIME=C date -d 'yesterday' +%d/%b)
@@ -37,7 +78,9 @@ fetch_logs() {
          /var/log/nginx/peertube/us.log /var/log/nginx/peertube/kr.log 2>/dev/null" \
     2>/dev/null | grep -E "$kr_today|$kr_yesterday" | grep -E '[0-9]{2}:[0-9]{2}:[0-9]{2} ' |
     grep -vE '^(59\.19\.56\.8|2a02:4780:10:212c::1) ' |
-    grep -viE "$BOT_UA_RE" | grep -viE "$SCAN_PATH_RE" | sort -u
+    grep -viE "$BOT_UA_RE" | grep -viE "$SCAN_PATH_RE" |
+    grep -viE "$ASSET_PATH_RE" | grep -E "$PAGEVIEW_STATUS_RE" |
+    drop_implausible_ua | sort -u
 }
 
 update() {
@@ -87,7 +130,8 @@ case $BLOCK_BUTTON in
   ;;
 3)
   notify-send "🌐 Ylog module" "\- Shows new nginx log entries (diary/media/peertube, US+KR)
-- Bots & vuln scanners are filtered out
+- Bots, vuln scanners & spoofed browser UAs are filtered out
+- Only real page views count (assets and 3xx/4xx are dropped)
 - Updates every 30 minutes
 - Left click: show all current entries
 - Middle click: show new entries & mark seen"
