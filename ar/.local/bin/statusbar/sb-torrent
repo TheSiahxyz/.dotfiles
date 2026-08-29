@@ -9,8 +9,8 @@ case $BLOCK_BUTTON in
 Module shows number of torrents:
 🛑: paused
 🕰: idle (seeds needed)
-⬆️: uploading (unfinished)
-⬇️: downloading
+🔼: uploading (unfinished)
+🔽: downloading
 ✅: done
 🌱: done and seeding" ;;
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
@@ -28,8 +28,8 @@ transmission-remote -l | {
     esac done
   [ $stopped -gt 0 ] && torrents="$torrents 🛑$stopped"
   [ $idle -gt 0 ] && torrents="$torrents 🕰$idle"
-  [ $upload -gt 0 ] && torrents="$torrents ⬆️$upload"
-  [ $download -gt 0 ] && torrents="$torrents ⬇️$download"
+  [ $upload -gt 0 ] && torrents="$torrents 🔼$upload"
+  [ $download -gt 0 ] && torrents="$torrents 🔽$download"
   [ $complete -gt 0 ] && torrents="$torrents ✅$complete"
   [ $seeding -gt 0 ] && torrents="$torrents 🌱$seeding"
   printf "%s\n" "${torrents# }"
