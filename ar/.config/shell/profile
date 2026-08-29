@@ -214,7 +214,7 @@ export PIPX_BIN_DIR="$XDG_SCRIPTS_HOME"
 export PIPX_MAN_DIR="$XDG_DATA_HOME/man"
 
 ### --- QT --- ###
-export QT_QPA_PLATFORMTHEME="gtk2" # Have QT use gtk2 theme.
+export QT_QPA_PLATFORMTHEME="gtk3"
 
 ### --- RUST --- ###
 export RUSTUP_HOME="$XDG_DATA_HOME/rustup"

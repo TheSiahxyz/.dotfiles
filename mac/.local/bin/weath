@@ -5,6 +5,16 @@
 
 weatherreport="${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport"
 
+notify() {
+  osascript -e "display notification \"$2\" with title \"$1\"" >/dev/null 2>&1
+  printf '%s %s\n' "$1" "$2"
+}
+
+fail() {
+  notify "$1" "$2"
+  exit 1
+}
+
 # Unlike the Linux variant this pages in the terminal it was launched from. The
 # pager shows however many days wttr.in put in the report; trimming to what fits
 # only ever hid a day the pager could have scrolled to.
@@ -19,52 +29,66 @@ show() {
 # is not binary-safe in every /bin/sh: dash reserves byte 0x82 as an internal
 # marker and escapes every occurrence, corrupting the U+2502 vertical bar that
 # wttr.in draws its table borders with.
+#
+# 'F' drops the trailing "Follow @igor_chubin" advertisement; 'T' asks for plain
+# text with no escape codes, which is what the clipboard wants and what makes
+# the sed below unnecessary on this path.
 fetch() {
-  curl -sfm 5 -o "$2" "${WTTRURL:-wttr.in}/$1"
+  curl -sfm 5 -o "$2" "${WTTRURL:-wttr.in}/$1?F${copy:+T}"
 }
 
 scratch() {
   mktemp "${TMPDIR:-/tmp}/weath.XXXXXX"
 }
 
-notify() {
-  osascript -e "display notification \"$2\" with title \"$1\"" >/dev/null 2>&1
-  printf '%s %s\n' "$1" "$2"
+# The cached report is fetched without 'F' or 'T', so strip here what those
+# flags would have removed. Both copy paths then yield the same text. BSD sed
+# has no \x escapes; match the literal ESC via a printf'd class.
+plaincache() {
+  sed -e "s/$(printf '\033')\[[^m]*m//g" -e '/^Follow /d' "$weatherreport"
 }
 
-fail='Check your internet connection and the supplied location.'
+# wttr.in closes a report with the place name it actually resolved to; the
+# header only ever carries the coordinates the report was requested for.
+cachedlocation() {
+  name="$(sed -n 's/^Location: \(.*\) \[[^]]*\]$/\1/p' "$weatherreport" | tail -n 1)"
+  [ -z "$name" ] && name="$(head -n 1 "$weatherreport" | cut -d' ' -f3-)"
+  echo "$name"
+}
 
-if [ "$1" = 'cp' ]; then
-  if [ -z "$2" ]; then
-    # BSD sed has no \x escapes; match the literal ESC via a printf'd class.
-    sed "s/$(printf '\033')\[[^m]*m//g" "$weatherreport" | pbcopy &&
-      notify '🌞Weather forecast copied' "${LOCATION:-$(head -n 1 "$weatherreport" | cut -d' ' -f3-)}"
+# Consume 'cp' up front so the location is always $1 and a stray extra argument
+# is always $2 — otherwise 'weath cp Seoul junk' would silently ignore 'junk'.
+[ "$1" = 'cp' ] && copy=true && shift
+
+[ -n "$2" ] &&
+  fail '⛔Invalid option' "'$1'! The only valid option is 'cp'."
+
+if [ -z "$1" ]; then
+  # No location given: reuse the cached report. Guard it — 'sed missing-file |
+  # pbcopy' exits 0 on pbcopy's behalf, so without this an absent cache would
+  # wipe the clipboard and still report success.
+  [ -s "$weatherreport" ] ||
+    fail '❓No cached weather forecast!' 'Fetch one first, or pass a location.'
+
+  if [ -n "$copy" ]; then
+    plaincache | pbcopy &&
+      notify '🌞Weather forecast copied' "${LOCATION:-$(cachedlocation)}"
   else
-    tmp="$(scratch)"
-    if fetch "$2?T" "$tmp"; then
-      pbcopy <"$tmp"
-      notify '🌞Weather forecast copied' "$2"
-    else
-      notify '🥶Failed to get weather forecast!' "$fail"
-    fi
-    rm -f "$tmp"
+    show "$weatherreport"
   fi
 else
-  if [ -n "$2" ]; then
-    notify '⛔Invalid option' "'$1'! The only valid option is 'cp'."
-    exit 1
-  fi
+  tmp="$(scratch)" ||
+    fail '❗Failed to get weather forecast!' "Could not create a scratch file in '${TMPDIR:-/tmp}'."
+  # Trap rather than a trailing rm, so a signal during paging still cleans up.
+  trap 'rm -f "$tmp"' EXIT HUP INT TERM
 
-  if [ -z "$1" ]; then
-    show "$weatherreport"
+  fetch "$1" "$tmp" ||
+    fail '❗Failed to get weather forecast!' 'Check your internet connection and the supplied location.'
+
+  if [ -n "$copy" ]; then
+    pbcopy <"$tmp" &&
+      notify '🌞Weather forecast copied' "$1"
   else
-    tmp="$(scratch)"
-    # Trap rather than a trailing rm, so a signal during paging still cleans up.
-    trap 'rm -f "$tmp"' EXIT HUP INT TERM
-    if fetch "$1" "$tmp"; then
-      show "$tmp"
-    else
-      notify '❗Failed to get weather forecast!' "$fail"
-    fi
+    show "$tmp"
   fi
 fi

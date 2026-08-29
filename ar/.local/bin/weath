@@ -5,6 +5,13 @@
 
 weatherreport="${XDG_CACHE_HOME:-${HOME}/.cache}/weatherreport"
 
+# Every failure path ends in a notification: this is bound to a key and to a
+# statusbar click, so anything written to stderr is written to nobody.
+fail() {
+  notify-send "$1" "$2"
+  exit 1
+}
+
 # Show a report in a pager in its own terminal window. The pager shows however
 # many days wttr.in put in the report; trimming to what fits only ever hid a day
 # the pager could have scrolled to. $2 is a scratch file to delete once the
@@ -25,42 +32,66 @@ show() {
 # dash reserves byte 0x82 as an internal marker and escapes every occurrence,
 # which corrupts '│' (U+2502) — the character wttr.in draws its table borders
 # with — into a stray '━' followed by an invalid byte.
+#
+# 'F' drops the trailing "Follow @igor_chubin" advertisement; 'T' asks for plain
+# text with no escape codes, which is what the clipboard wants and what makes
+# the sed below unnecessary on this path.
 fetch() {
-  curl -sfm 5 -o "$2" "${WTTRURL:-wttr.in}/$1"
+  curl -sfm 5 -o "$2" "${WTTRURL:-wttr.in}/$1?F${copy:+T}"
 }
 
 scratch() {
   mktemp "${TMPDIR:-/tmp}/weath.XXXXXX"
 }
 
-if [ "$1" = 'cp' ]; then
-  if [ -z "$2" ]; then
-    sed 's/\x1b\[[^m]*m//g' "$weatherreport" | xclip -selection clipboard &&
-      notify-send "Weather forecast for '${LOCATION:-$(head -n 1 "$weatherreport" | cut -d' ' -f3-)}' copied to clipboard."
+# The cached report is fetched by sb-forecast without 'F' or 'T', so strip here
+# what those flags would have removed. Both copy paths then yield the same text.
+plaincache() {
+  sed -e 's/\x1b\[[^m]*m//g' -e '/^Follow /d' "$weatherreport"
+}
+
+# wttr.in closes a report with the place name it actually resolved to; the
+# header only ever carries the coordinates the report was requested for.
+cachedlocation() {
+  name="$(sed -n 's/^Location: \(.*\) \[[^]]*\]$/\1/p' "$weatherreport" | tail -n 1)"
+  [ -z "$name" ] && name="$(head -n 1 "$weatherreport" | cut -d' ' -f3-)"
+  echo "$name"
+}
+
+# Consume 'cp' up front so the location is always $1 and a stray extra argument
+# is always $2 — otherwise 'weath cp Seoul junk' would silently ignore 'junk'.
+[ "$1" = 'cp' ] && copy=true && shift
+
+[ -n "$2" ] &&
+  fail "⛔Invalid option '$1'!" "The only valid option is 'cp'."
+
+if [ -z "$1" ]; then
+  # No location given: reuse the report sb-forecast keeps cached. Guard it —
+  # 'sed missing-file | xclip' exits 0 on xclip's behalf, so without this an
+  # absent cache would wipe the clipboard and still report success.
+  [ -s "$weatherreport" ] ||
+    fail '❓No cached weather forecast!' 'Wait for the statusbar to fetch one, or pass a location.'
+
+  if [ -n "$copy" ]; then
+    plaincache | xclip -selection clipboard &&
+      notify-send "🌞Weather forecast for '${LOCATION:-$(cachedlocation)}' copied to clipboard."
   else
-    tmp="$(scratch)"
-    if fetch "$2?T" "$tmp"; then
-      xclip -selection clipboard <"$tmp" &&
-        notify-send "🌞Weather forecast for '$2' copied to clipboard."
-    else
-      notify-send '🥶Failed to get weather forecast!' 'Check your internet connection and the supplied location.'
-    fi
-    rm -f "$tmp"
+    show "$weatherreport" ''
   fi
 else
-  [ -n "$2" ] &&
-    notify-send "⛔Invalid option '$1'! The only valid option is 'cp'." &&
-    exit 1
+  tmp="$(scratch)" ||
+    fail '❗Failed to get weather forecast!' "Could not create a scratch file in '${TMPDIR:-/tmp}'."
 
-  if [ -z "$1" ]; then
-    show "$weatherreport" ''
+  if ! fetch "$1" "$tmp"; then
+    rm -f "$tmp"
+    fail '❗Failed to get weather forecast!' 'Check your internet connection and the supplied location.'
+  fi
+
+  if [ -n "$copy" ]; then
+    xclip -selection clipboard <"$tmp" &&
+      notify-send "🌞Weather forecast for '$1' copied to clipboard."
+    rm -f "$tmp"
   else
-    tmp="$(scratch)"
-    if fetch "$1" "$tmp"; then
-      show "$tmp" "$tmp"
-    else
-      rm -f "$tmp"
-      notify-send '❗Failed to get weather forecast!' 'Check your internet connection and the supplied location.'
-    fi
+    show "$tmp" "$tmp"
   fi
 fi

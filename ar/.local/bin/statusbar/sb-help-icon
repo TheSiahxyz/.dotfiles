@@ -3,14 +3,11 @@
 # The clickable help menu. Middle click to restart wm.
 
 # If dwm is running, use dwm's readme and restart.
-pidof dwm >/dev/null &&
-  READMEFILE=/usr/local/share/dwm/thesiah.mom
-restartwm() { pkill -HUP dwm; } ||
-  restartwm() { i3 restart; }
+pidof dwm >/dev/null && READMEFILE=/usr/local/share/dwm/thesiah.mom
 
 case $BLOCK_BUTTON in
 1) groff -mom "${READMEFILE:-${XDG_DATA_HOME:-${HOME}/.local/share}/thesiah/thesiah.mom}" -Tpdf | zathura - ;;
-2) restartwm ;;
+2) pkill -HUP dwm ;;
 3) notify-send "❓ Help module" "\- Left click to open THESIAH guide
 - Middle click to refresh window manager
 - Shift + Middle click to run system action
@@ -19,4 +16,5 @@ case $BLOCK_BUTTON in
 7) sysact ;;
 8) slock ;;
 esac
-echo "❓"
+
+printf "❓\n"
