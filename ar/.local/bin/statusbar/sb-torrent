@@ -27,7 +27,7 @@ transmission-remote -l | {
     *%*) download=$((download + 1)) ;;
     esac done
   [ $stopped -gt 0 ] && torrents="$torrents 🛑$stopped"
-  [ $idle -gt 0 ] && torrents="$torrents 🕰️$idle"
+  [ $idle -gt 0 ] && torrents="$torrents 🕰$idle"
   [ $upload -gt 0 ] && torrents="$torrents ⬆️$upload"
   [ $download -gt 0 ] && torrents="$torrents ⬇️$download"
   [ $complete -gt 0 ] && torrents="$torrents ✅$complete"
