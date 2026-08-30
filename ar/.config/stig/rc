@@ -1,2 +1,3 @@
 set tui.theme themerc
 set columns.torrents marked,downloaded,size,uploaded,ratio,seeds,peers,status,eta,%downloaded,rate-down,rate-up,name
+bind --context torrent 't f' tab filelist
