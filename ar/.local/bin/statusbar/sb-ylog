@@ -16,37 +16,33 @@ mkdir -p "$CACHE_DIR"
 
 export SSH_AUTH_SOCK="/run/user/$(id -u)/gnupg/S.gpg-agent.ssh"
 
-# 봇/스캐너 판별 규칙 (nginx 로그의 마지막 필드가 User-Agent 다).
-# 1) 스스로 정체를 밝히는 크롤러, HTTP 클라이언트 라이브러리, 빈 UA
 BOT_UA_KEYWORDS='bot|spider|crawler|crawl|slurp|scrapy|censys|shodan|zgrab|masscan|nmap|netcraft|expanse|internetmeasurement|paloaltonetworks|checker|monitor|uptime|pingdom|statuscake|site24x7|headlesschrome|phantomjs|puppeteer|playwright|selenium|go-http-client|python-requests|python-urllib|libwww-perl|java/|apache-httpclient|guzzlehttp|okhttp|node-fetch|axios|aiohttp|httpx|postmanruntime|insomnia|curl/|wget/|facebookexternalhit|meta-externalagent|semrush|ahrefs|thesiah-|logrotate-'
 BOT_UA_RE="(\"[^\"]*(${BOT_UA_KEYWORDS})[^\"]*\"|\"-\"|\"Mozilla/5\.0\"|\"\")\$"
 
-# 2) UA 를 브라우저로 위장한 취약점 스캐너는 요청 경로로 걸러낸다.
-#    이 서버의 어떤 vhost 도 PHP/WordPress 를 제공하지 않으므로 전부 스캔이다.
 SCAN_PATH_RE='"[A-Z]+ [^"]*(\.php|\.asp|\.jsp|wp-admin|wp-content|wp-includes|wp-login|wlwmanifest|xmlrpc|/\.(env|git|aws|ssh|svn|vscode)|phpmyadmin|/cgi-bin/|/boaform|/hnap1|/autodiscover|/owa/|/telescope/|/actuator|/solr/|/druid/|/geoserver|/_ignition|/eval-stdin|/shell|\.sql|\.bak)'
 
-# 3) 서브리소스 요청은 접속 1건을 수십 줄로 부풀린다 (Jellyfin 번들 하나에 30줄).
-#    사람이 "방문했다"고 볼 수 있는 건 문서 요청뿐이므로 부수 요청은 전부 뺀다.
 ASSET_PATH_RE='"[A-Z]+ [^" ?]*\.(js|mjs|css|map|json|xml|txt|png|jpe?g|gif|svg|ico|webp|avif|woff2?|ttf|otf|eot|mp4|m4s|m3u8|webm)([?" ]|$)'
 
-# 4) 페이지 뷰로 인정할 응답 코드만 남긴다.
-#    301/302 는 리다이렉트일 뿐이고(사람은 뒤이어 200 을 남긴다), 401/403/404 는
-#    인증벽에 막힌 스캐너다. 실제 로그에서 이 셋이 530줄 중 491줄을 차지했다.
+RENDER_ASSET_RE='"[A-Z]+ [^" ?]*\.(js|mjs|css|png|jpe?g|gif|svg|webp|avif|woff2?|ttf|otf|eot|mp3|mp4|m4s|m3u8|webm)([?" ]|$)'
+
 PAGEVIEW_STATUS_RE='HTTP/[0-9.]+" (200|206|304) '
 
-# 5) 브라우저를 자칭하지만 UA 가 구조적으로 틀렸거나 버전이 낡은 자동화 트래픽.
-#    - 진짜 크롬은 "AppleWebKit/537.36 (KHTML, like Gecko)" 와 "Safari/537.36" 을 항상 붙인다.
-#      둘 중 하나라도 없으면서 Chrome/ 을 자칭하면 위조다.
-#    - 스캐너는 UA 버전을 하드코딩해 두므로 몇 년씩 뒤처진다. 실사용 하한선을 둔다.
-#    - 삼성인터넷/웨일/엣지 등 파생 브라우저는 크롬 버전이 원래 뒤처지므로 버전 검사에서 제외한다.
 CHROME_MIN=130
 FIREFOX_MIN=125
+
+require_render_assets() {
+  RENDER_ASSET_RE="$RENDER_ASSET_RE" awk '
+    BEGIN { re = ENVIRON["RENDER_ASSET_RE"] }
+    { line[NR] = $0; owner[NR] = $1; if ($0 ~ re) rendered[$1] = 1 }
+    END { for (i = 1; i <= NR; i++) if (owner[i] in rendered) print line[i] }
+  '
+}
 
 drop_implausible_ua() {
   awk -v cmin="$CHROME_MIN" -v fmin="$FIREFOX_MIN" '
     {
       ua = $0
-      sub(/^.*" "/, "", ua)   # 마지막 따옴표 필드 = User-Agent
+      sub(/^.*" "/, "", ua)
       sub(/"$/, "", ua)
 
       if (ua ~ /Chrome\//) {
@@ -69,9 +65,6 @@ drop_implausible_ua() {
 fetch_logs() {
   kr_today=$(TZ=Asia/Seoul LC_TIME=C date +%d/%b)
   kr_yesterday=$(TZ=Asia/Seoul LC_TIME=C date -d 'yesterday' +%d/%b)
-  # recordings/videos 는 어떤 vhost 도 쓰지 않는 고아 로그라 제외한다.
-  # 제외 IP: 본인 회선, 그리고 서버 자신의 IP — 서버에서 돌린 curl 은
-  # 미국으로 판정되어 us.log 에 들어가므로 그냥 두면 접속으로 잡힌다.
   ssh -o BatchMode=yes -o ConnectTimeout=10 root@thesiah.xyz \
     "cat /var/log/nginx/diary/us.log /var/log/nginx/diary/kr.log \
          /var/log/nginx/media/us.log /var/log/nginx/media/kr.log \
@@ -79,12 +72,12 @@ fetch_logs() {
     2>/dev/null | grep -E "$kr_today|$kr_yesterday" | grep -E '[0-9]{2}:[0-9]{2}:[0-9]{2} ' |
     grep -vE '^(59\.19\.56\.8|2a02:4780:10:212c::1) ' |
     grep -viE "$BOT_UA_RE" | grep -viE "$SCAN_PATH_RE" |
+    require_render_assets |
     grep -viE "$ASSET_PATH_RE" | grep -E "$PAGEVIEW_STATUS_RE" |
     drop_implausible_ua | sort -u
 }
 
 update() {
-  # Prevent concurrent updates
   if [ -f "$LOCK" ]; then
     kill -0 "$(cat "$LOCK")" 2>/dev/null && return
   fi
@@ -94,7 +87,6 @@ update() {
   total=$(wc -l <"$CURR")
 
   if [ -f "$PREV" ]; then
-    # Find lines in curr that are not in prev
     comm -23 "$CURR" "$PREV" >"$NEW"
   else
     cp "$CURR" "$NEW"
@@ -132,18 +124,17 @@ case $BLOCK_BUTTON in
   notify-send "🌐 Ylog module" "\- Shows new nginx log entries (diary/media/peertube, US+KR)
 - Bots, vuln scanners & spoofed browser UAs are filtered out
 - Only real page views count (assets and 3xx/4xx are dropped)
+- A visit must actually load CSS/JS, so headless scanners are dropped
 - Updates every 30 minutes
 - Left click: show all current entries
 - Middle click: show new entries & mark seen"
   ;;
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 *)
-  # Regular update (called by dwmblocks interval)
   update
   ;;
 esac
 
-# Display
 if [ -s "$NEW" ]; then
   count=$(wc -l <"$NEW")
   printf "🍞%s\n" "$count"
