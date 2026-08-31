@@ -85,8 +85,8 @@ files=$(fzf \
   --bind "ctrl-v:change-prompt( 🔒 )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . $HOME/Private | sort)" \
   --bind 'ctrl-/:change-prompt( ❓ )+reload(echo "^a all
 ^b public
-^c configs
 ^d .dotfiles
+^f configs
 ^g git
 ^o home
 ^x desktop
