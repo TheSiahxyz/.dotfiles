@@ -3,7 +3,7 @@
 # A wrapper for the arkenfox-updater that runs it on all pre-existing Arkenfox
 # user.js files on the machine.
 
-# On installation of LARBS, this file is copied to /usr/local/lib/ where it is
+# On installation of THESIAH, this file is copied to /usr/local/lib/ where it is
 # run by a pacman hook set up. The user should not have to run this manually.
 
 # Search for all Firefox and Librewolf profiles using Arkenfox.
