@@ -3,7 +3,7 @@
 # The famous "get a menu of emojis to copy" script.
 
 # Get user selection via dmenu from emoji file.
-chosen="$(cat "${XDG_DATA_HOME:-$HOME/.local/share}"/larbs/chars/* |
+chosen="$(cat "${XDG_DATA_HOME:-$HOME/.local/share}"/thesiah/chars/* |
   { while read -r line; do echo "${line%%;*}"; done | dmenu -i -l 30; })"
 chosen="${chosen%% *}"
 
