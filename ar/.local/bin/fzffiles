@@ -61,13 +61,13 @@ files=$(fzf \
   --prompt " 💡 " \
   --bind "ctrl-a:change-prompt( ⚡ )+reload(fd -H -L -t f -E .Trash -E .git -E .cache -E node_modules -E .next -E dist -E build -E coverage -E target -E vendor -E .venv -E venv . $PWD | sort)" \
   --bind "ctrl-b:change-prompt( 🌎 )+reload(fd -H -L -t f -E .Trash -E .git -E .cache -E node_modules -E .next -E dist -E build -E coverage -E target -E vendor -E .venv -E venv . ${XDG_PUBLICSHARE_DIR:-${HOME}/Public} | sort)" \
-  --bind "ctrl-d:change-prompt( ⚙️ )+reload(fd -H -L -t f -E .Trash -E .git -E .cache -E node_modules -E .next -E dist -E build -E coverage -E target -E vendor -E .venv -E venv . ${XDG_DOTFILES_DIR:-${HOME}/.dotfiles} | sort)" \
-  --bind "ctrl-f:change-prompt( 🗂️ )+reload(fd -H -L -t f -E .Trash -E .git -E .cache -E node_modules -E .next -E dist -E build -E coverage -E target -E vendor -E .venv -E venv . ${XDG_CONFIG_HOME:-${HOME}/.config} | sort)" \
+  --bind "ctrl-d:change-prompt( ⚙️  )+reload(fd -H -L -t f -E .Trash -E .git -E .cache -E node_modules -E .next -E dist -E build -E coverage -E target -E vendor -E .venv -E venv . ${XDG_DOTFILES_DIR:-${HOME}/.dotfiles} | sort)" \
+  --bind "ctrl-f:change-prompt( 🗂️  )+reload(fd -H -L -t f -E .Trash -E .git -E .cache -E node_modules -E .next -E dist -E build -E coverage -E target -E vendor -E .venv -E venv . ${XDG_CONFIG_HOME:-${HOME}/.config} | sort)" \
   --bind "ctrl-g:change-prompt(  )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . $HOME/Private/repos $HOME/Public/repos | sort)" \
   --bind "ctrl-o:change-prompt( 🏠 )+reload(fd -H -t f -E .Trash -E .git -E .cache -E node_modules -E .next -E dist -E build -E coverage -E target -E vendor -E .venv -E venv -E venvs -E npm -E pnpm -E Trash -E wine -E asdf . $HOME)" \
-  --bind "ctrl-x:change-prompt( 🖥️ )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . ${XDG_DESKTOP_DIR:-${HOME}/Desktop} | sort)" \
+  --bind "ctrl-x:change-prompt( 🖥️  )+reload(fd -H -L -t f -E .Trash -E .git -E .cache . ${XDG_DESKTOP_DIR:-${HOME}/Desktop} | sort)" \
   --bind "ctrl-r:change-prompt( 👟 )+reload(fd -H -L -t f -E .Trash -E .git -E .cache -E zsh . ${XDG_SCRIPTS_HOME:-${HOME}/.local/bin} | sort)" \
-  --bind "ctrl-s:change-prompt( 🛠  )+reload(find ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless -maxdepth 2 -type f -not -path '*/.git/*' | sort)" \
+  --bind "ctrl-s:change-prompt( 🛠 )+reload(find ${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless -maxdepth 2 -type f -not -path '*/.git/*' | sort)" \
   --bind "ctrl-u:change-prompt( 📝 )+reload(if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then top=\$(git rev-parse --show-toplevel 2>/dev/null); git -C \"\$top\" status --porcelain | awk -v root=\"\$top\" '{
     staged=substr(\$0,1,1);
     unstaged=substr(\$0,2,1);
