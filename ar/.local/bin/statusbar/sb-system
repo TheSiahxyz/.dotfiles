@@ -12,13 +12,13 @@ SHOW_DISK=1
 INTERVAL_CPU=5
 INTERVAL_CPUBARS=15
 INTERVAL_MEMORY=60
-INTERVAL_DISK=10800
+INTERVAL_DISK=60
 
 # Disk mountpoint (only used if SHOW_DISK=1)
 DISK_LOCATION=${1:-/}
 
 # Cache directory
-CACHE_DIR=/tmp/sb-system
+CACHE_DIR=${XDG_CACHE_HOME:-$HOME/.cache}/sb-system
 mkdir -p "$CACHE_DIR"
 
 # Clear stale caches on first run (e.g. dwmblocks restart)
