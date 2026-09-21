@@ -11,6 +11,7 @@ EXCLUDES="59.19.56.8" # default exclude pattern
 ADD_EXCLUDES=""
 LINE_LIMIT=500 # default number of lines when TARGET=all
 DATE_FILTER="" # date filter: "2" = 2 days ago, "~2" = last 2 days to today
+DROP_FORGED=1  # 1 = drop iOS Safari UAs whose OS/Version pair is forged
 
 usage() {
   cat <<'EOF'
@@ -39,6 +40,9 @@ Options:
                 videos     : videos.* logs only
 
   -n           Disable Firefox exclusion (by default, Firefox lines are excluded)
+
+  -u           Keep forged iOS Safari UAs (by default, lines whose iOS version
+               and Safari Version/ don't match are dropped)
 
   -x PATTERN   Add extra exclude pattern (can be repeated)
                 e.g. -x bot -x '192\.0\.2\.1'
@@ -70,12 +74,13 @@ EOF
   exit 0
 }
 
-while getopts "t:c:s:nx:l:d:h" opt; do
+while getopts "t:c:s:nux:l:d:h" opt; do
   case "$opt" in
   t) TARGET="$OPTARG" ;;
   c) COUNTRY="$OPTARG" ;;
   s) SCOPE="$OPTARG" ;;
   n) EXCL_FIREFOX=1 ;;
+  u) DROP_FORGED=0 ;;
   x) ADD_EXCLUDES="${ADD_EXCLUDES}
 $OPTARG" ;;
   l) LINE_LIMIT="$OPTARG" ;;
@@ -99,6 +104,7 @@ ESC_TARGET="'"$esc_target"'"
 EXCL_FIREFOX='"$EXCL_FIREFOX"'
 LINE_LIMIT='"$LINE_LIMIT"'
 DATE_FILTER="'"$DATE_FILTER"'"
+DROP_FORGED='"$DROP_FORGED"'
 
 # collect files
 pick_files() {
@@ -291,7 +297,7 @@ if [ -f "$RESULTS_TMP" ] && [ -s "$RESULTS_TMP" ]; then
     fi
   fi
 
-  awk -v date_filter="${DATE_FILTER:-}" -v target_date="${TARGET_DATE:-}" -v start_date="${START_DATE:-}" "
+  awk -v drop_forged="$DROP_FORGED" -v date_filter="${DATE_FILTER:-}" -v target_date="${TARGET_DATE:-}" -v start_date="${START_DATE:-}" "
     function parse_date(date_str,    parts, month_num) {
       # date_str format: \"DD/MMM/YYYY\"
       split(date_str, parts, \"/\")
@@ -335,6 +341,23 @@ if [ -f "$RESULTS_TMP" ] && [ -s "$RESULTS_TMP" ]; then
     }
     {
       line = \$0
+
+      # iOS Safari: Version/ major tracks the OS major. Safari 26+ freezes the
+      # OS token at a two-part 18_x, so a patch-level 18_x_y with Version/26 is forged.
+      if (drop_forged) {
+        ua = line
+        sub(/^.*\" \"/, \"\", ua)
+        sub(/\"\$/, \"\", ua)
+        if (ua !~ /(SamsungBrowser|Edge?A?|EdgiOS|OPR|Opera|Whale|YaBrowser|Vivaldi|Brave|CriOS|FxiOS)\\// &&
+            match(ua, /OS [0-9_]+ like Mac OS X/) && match(ua, /Version\\/[0-9]+/)) {
+          vmaj = substr(ua, RSTART + 8, RLENGTH - 8) + 0
+          match(ua, /OS [0-9_]+ like/)
+          nos = split(substr(ua, RSTART + 3, RLENGTH - 8), os, \"_\")
+          if (vmaj >= 26) {
+            if (os[1] != vmaj && !(os[1] == 18 && nos == 2)) next
+          } else if (os[1] != vmaj) next
+        }
+      }
 
       # Extract datetime [DD/MMM/YYYY:HH:MM:SS
       datetime = \"\"

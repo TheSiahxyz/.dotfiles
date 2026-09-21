@@ -57,6 +57,18 @@ drop_implausible_ua() {
       if (!derived && match(ua, /Firefox\/[0-9]+/) &&
           substr(ua, RSTART + 8, RLENGTH - 8) + 0 < fmin) next
 
+      # iOS Safari: Version/ major tracks the OS major. Safari 26+ freezes the
+      # OS token at a two-part 18_x, so a patch-level 18_x_y with Version/26 is forged.
+      if (!derived && match(ua, /OS [0-9_]+ like Mac OS X/) &&
+          match(ua, /Version\/[0-9]+/)) {
+        vmaj = substr(ua, RSTART + 8, RLENGTH - 8) + 0
+        match(ua, /OS [0-9_]+ like/)
+        nos = split(substr(ua, RSTART + 3, RLENGTH - 8), os, "_")
+        if (vmaj >= 26) {
+          if (os[1] != vmaj && !(os[1] == 18 && nos == 2)) next
+        } else if (os[1] != vmaj) next
+      }
+
       print
     }
   '
