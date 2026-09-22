@@ -16,7 +16,7 @@ mkdir -p "$CACHE_DIR"
 
 export SSH_AUTH_SOCK="/run/user/$(id -u)/gnupg/S.gpg-agent.ssh"
 
-BOT_UA_KEYWORDS='bot|spider|crawler|crawl|slurp|scrapy|censys|shodan|zgrab|masscan|nmap|netcraft|expanse|internetmeasurement|paloaltonetworks|checker|monitor|uptime|pingdom|statuscake|site24x7|headlesschrome|phantomjs|puppeteer|playwright|selenium|go-http-client|python-requests|python-urllib|libwww-perl|java/|apache-httpclient|guzzlehttp|okhttp|node-fetch|axios|aiohttp|httpx|postmanruntime|insomnia|curl/|wget/|facebookexternalhit|meta-externalagent|semrush|ahrefs|thesiah-|logrotate-'
+BOT_UA_KEYWORDS='bot|spider|crawler|crawl|slurp|scrapy|censys|shodan|zgrab|masscan|nmap|netcraft|expanse|internetmeasurement|paloaltonetworks|checker|monitor|uptime|pingdom|statuscake|site24x7|headlesschrome|phantomjs|puppeteer|playwright|selenium|go-http-client|python-requests|python-urllib|libwww-perl|java/|apache-httpclient|guzzlehttp|okhttp|node-fetch|axios|aiohttp|httpx|postmanruntime|insomnia|curl/|wget/|facebookexternalhit|meta-externalagent|semrush|ahrefs|rootevidence|thesiah-|logrotate-'
 BOT_UA_RE="(\"[^\"]*(${BOT_UA_KEYWORDS})[^\"]*\"|\"-\"|\"Mozilla/5\.0\"|\"\")\$"
 
 SCAN_PATH_RE='"[A-Z]+ [^"]*(\.php|\.asp|\.jsp|wp-admin|wp-content|wp-includes|wp-login|wlwmanifest|xmlrpc|/\.(env|git|aws|ssh|svn|vscode)|phpmyadmin|/cgi-bin/|/boaform|/hnap1|/autodiscover|/owa/|/telescope/|/actuator|/solr/|/druid/|/geoserver|/_ignition|/eval-stdin|/shell|\.sql|\.bak)'
@@ -27,14 +27,31 @@ RENDER_ASSET_RE='"[A-Z]+ [^" ?]*\.(js|mjs|css|png|jpe?g|gif|svg|webp|avif|woff2?
 
 PAGEVIEW_STATUS_RE='HTTP/[0-9.]+" (200|206|304) '
 
+# Opening a URL and leaving without logging in leaves only an auth prompt (401)
+# or a redirect, with no CSS/JS. Browsers reach us over TLS as HTTP/2+, while
+# nearly all scanners speak HTTP/1.1, so the protocol separates the two.
+BOUNCE_RE='"GET [^"]* HTTP/[23](\.0)?" (401|30[1-8]) '
+
 CHROME_MIN=130
 FIREFOX_MIN=125
 
-require_render_assets() {
-  RENDER_ASSET_RE="$RENDER_ASSET_RE" awk '
-    BEGIN { re = ENVIRON["RENDER_ASSET_RE"] }
-    { line[NR] = $0; owner[NR] = $1; if ($0 ~ re) rendered[$1] = 1 }
-    END { for (i = 1; i <= NR; i++) if (owner[i] in rendered) print line[i] }
+# Keep real page views of visitors whose browser loaded CSS/JS, plus bounce
+# landings of visitors who never got that far.
+keep_visits() {
+  RENDER_ASSET_RE="$RENDER_ASSET_RE" ASSET_PATH_RE="$ASSET_PATH_RE" \
+    PAGEVIEW_STATUS_RE="$PAGEVIEW_STATUS_RE" BOUNCE_RE="$BOUNCE_RE" awk '
+    BEGIN {
+      render = ENVIRON["RENDER_ASSET_RE"]; asset = tolower(ENVIRON["ASSET_PATH_RE"])
+      view = ENVIRON["PAGEVIEW_STATUS_RE"]; bounce = ENVIRON["BOUNCE_RE"]
+    }
+    { line[NR] = $0; owner[NR] = $1; if ($0 ~ render) rendered[$1] = 1 }
+    END {
+      for (i = 1; i <= NR; i++) {
+        if (tolower(line[i]) ~ asset) continue
+        if (owner[i] in rendered) { if (line[i] ~ view) print line[i] }
+        else if (line[i] ~ bounce) print line[i]
+      }
+    }
   '
 }
 
@@ -80,13 +97,12 @@ fetch_logs() {
   ssh -o BatchMode=yes -o ConnectTimeout=10 root@thesiah.xyz \
     "cat /var/log/nginx/diary/us.log /var/log/nginx/diary/kr.log \
          /var/log/nginx/media/us.log /var/log/nginx/media/kr.log \
-         /var/log/nginx/peertube/us.log /var/log/nginx/peertube/kr.log 2>/dev/null" \
+         /var/log/nginx/peertube/us.log /var/log/nginx/peertube/kr.log \
+         /var/log/nginx/recordings/us.log /var/log/nginx/recordings/kr.log 2>/dev/null" \
     2>/dev/null | grep -E "$kr_today|$kr_yesterday" | grep -E '[0-9]{2}:[0-9]{2}:[0-9]{2} ' |
     grep -vE '^(59\.19\.56\.8|2a02:4780:10:212c::1) ' |
     grep -viE "$BOT_UA_RE" | grep -viE "$SCAN_PATH_RE" |
-    require_render_assets |
-    grep -viE "$ASSET_PATH_RE" | grep -E "$PAGEVIEW_STATUS_RE" |
-    drop_implausible_ua | sort -u
+    keep_visits | drop_implausible_ua | sort -u
 }
 
 update() {
@@ -133,10 +149,10 @@ case $BLOCK_BUTTON in
   fi
   ;;
 3)
-  notify-send "🌐 Ylog module" "\- Shows new nginx log entries (diary/media/peertube, US+KR)
+  notify-send "🌐 Ylog module" "\- Shows new nginx log entries (diary/media/peertube/recordings, US+KR)
 - Bots, vuln scanners & spoofed browser UAs are filtered out
-- Only real page views count (assets and 3xx/4xx are dropped)
-- A visit must actually load CSS/JS, so headless scanners are dropped
+- Page views count only if the browser loaded CSS/JS (drops headless scanners)
+- Visits that just opened the URL (login prompt/redirect, HTTP/2) also count
 - Updates every 30 minutes
 - Left click: show all current entries
 - Middle click: show new entries & mark seen"
