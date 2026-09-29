@@ -64,7 +64,7 @@ for arg in "$@"; do
   -q) mode="queue" ;;
   esac
 
-  ((i + 1))
+  ((i++))
 done
 
 # Main Menu
@@ -97,8 +97,13 @@ case "$mode" in
   mpc play 2>/dev/null
   ;;
 "playlist")
+  # Dedupe: dmenu prints an item twice if it's Ctrl+Enter'd and then Enter'd
+  mapfile -t playlists < <(d_playlist | awk 'NF && !seen[$0]++')
+  ((${#playlists[@]})) || exit
   mpc clear
-  mpc load "$(d_playlist)" 2>/dev/null || exit
+  for p in "${playlists[@]}"; do
+    mpc load "$p" 2>/dev/null
+  done
   mpc random on
   mpc repeat on
   mpc play 2>/dev/null
