@@ -880,7 +880,6 @@ map <c-x> :clear; unselect; save-select
 map Cc compress
 
 # Copy
-# map yy %cp -ri -- $fs .; clear
 map Cp copyto; clear; save-select
 map Y $printf "%s" "$fx" | xclip -selection clipboard; clear; save-select
 map yb yank-basename
