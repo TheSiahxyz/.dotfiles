@@ -108,6 +108,7 @@
       "Edit(**/.password-store/**/*)"
     ]
   },
+  "model": "opus",
   "hooks": {
     "Notification": [
       {
@@ -158,6 +159,5 @@
   },
   "tui": "fullscreen",
   "skipDangerousModePermissionPrompt": true,
-  "agentPushNotifEnabled": true,
-  "model": "sonnet"
+  "agentPushNotifEnabled": true
 }
