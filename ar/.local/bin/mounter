@@ -219,43 +219,39 @@ smbips="$(sudo arp-scan --interface=eth0 --interface=wlan0 --localnet 2>/dev/nul
 # Get currently mounted CIFS shares
 mountedsmbs="$(grep 'cifs' /etc/mtab)"
 
-for smbip in $smbips; do
-  win=$(
-    smbclient -L "$smbip" -U% -A /dev/stdin <<EOF 2>/dev/null | awk '/Disk/ {print $1}' | grep -vEi '(ADMIN|\w)\$'
-username=$(whoami)
-password=$(pass show default/windows)
-EOF
-  )
-  mac=$(
-    smbclient -L "$smbip" -U% -A /dev/stdin <<EOF 2>/dev/null | awk '/Disk/ {print $1}' | grep -vEi '(ADMIN|\w)\$|Macintosh'
-username=$(whoami)
-password=$(pass show default/mac)
-EOF
-  )
-  linux=$(
-    smbclient -L "$smbip" -U% -A /dev/stdin <<EOF 2>/dev/null | awk '/Disk/ {print $1}' | grep -vEi '(ADMIN|\w)\$|Macintosh'
-username=$(whoami)
-password=$(pass show default/default)
-EOF
-  )
-  while IFS= read -r share; do
-    if ! echo "$smbshares" | grep -q "$share"; then
-      smbshares+="//$smbip/$share"$'\n'
-    fi
-  done <<<"$win"
-  while IFS= read -r share; do
-    if ! echo "$smbshares" | grep -q "$share"; then
-      smbshares+="//$smbip/$share"$'\n'
-    fi
-  done <<<"$mac"
-  while IFS= read -r share; do
-    if ! echo "$smbshares" | grep -q "$share"; then
-      smbshares+="//$smbip/$share"$'\n'
-    fi
-  done <<<"$linux"
+# Keep only hosts with the SMB port open. On a host without Samba, smbclient
+# waits out its own ~5s connect timeout, three times per host, so on a busy
+# network dmenu took minutes to appear. Probe every host at once, 1s each.
+smbips="$(for ip in $smbips; do
+  timeout 1 bash -c ': </dev/tcp/$1/445' _ "$ip" 2>/dev/null && echo "$ip" &
 done
+wait)"
 
-smbshares="$(echo "$smbshares" | sed '/^$/d')"
+# List one host's disk shares with one password; $3 is the share-name filter.
+listshares() {
+  timeout 5 smbclient -L "$1" -U% -A /dev/stdin <<EOF 2>/dev/null | awk '/Disk/ {print $1}' | grep -vEi "$3"
+username=$smbuser
+password=$2
+EOF
+}
+
+# Read each password once, and only when there is a host to ask, so pass is
+# never prompted for on a network without Samba. Hosts are queried in parallel.
+if [ -n "$smbips" ]; then
+  smbuser="$(whoami)"
+  pwwin="$(pass show default/windows)"
+  pwmac="$(pass show default/mac)"
+  pwlinux="$(pass show default/default)"
+  smbshares="$(for smbip in $smbips; do
+    {
+      listshares "$smbip" "$pwwin" '(ADMIN|\w)\$'
+      listshares "$smbip" "$pwmac" '(ADMIN|\w)\$|Macintosh'
+      listshares "$smbip" "$pwlinux" '(ADMIN|\w)\$|Macintosh'
+    } | sed "/^$/d;s|^|//$smbip/|" &
+  done
+  wait)"
+  smbshares="$(echo "$smbshares" | sort -u | sed '/^$/d')"
+fi
 
 [ -n "$smbshares" ] && smbs="$(echo "$smbshares" | while IFS= read -r smb; do
   [ -n "$mountedsmbs" ] && for mountedsmb in $mountedsmbs; do
