@@ -36,32 +36,52 @@ confirm=$(printf "Yes\nNo" | dmenu -i -p "Delete $selected_relpath and update mp
 	exit 0
 }
 
-# Remove video_id line from .music.txt and .music_titles.txt (fixed-string match)
+# Rewrite a file without the given lines. Matching is exact and literal
+# (grep -Fx), so spaces, quotes, [], (), $, \ etc. in names are safe and a path
+# never removes a longer one that merely contains it. Writing back with `cat >`
+# follows symlinks instead of replacing them with plain files.
+remove_lines_from() {
+	_file="$1"
+	shift
+	[ -f "$_file" ] || return 0
+	grep -Fxq "$@" "$_file" || return 0
+	_tmp="$(mktemp)" || return 1
+	grep -Fxv "$@" "$_file" | sed '/^$/d' >"$_tmp"
+	cat "$_tmp" >"$_file"
+	_rc=$?
+	rm -f "$_tmp"
+	return "$_rc"
+}
+
+# Exact-match .music.txt ("youtube <id>") and .music_titles.txt ("<id>\t<title>")
 remove_id_from() {
 	_file="$1"
 	[ -f "$_file" ] || return 0
+	awk -v id="$video_id" '$1 == id || $2 == id { found = 1 } END { exit !found }' "$_file" || return 0
 	_tmp="$(mktemp)" || return 1
-	grep -Fv "$video_id" "$_file" >"$_tmp" && mv "$_tmp" "$_file"
+	awk -v id="$video_id" '!($1 == id || $2 == id)' "$_file" >"$_tmp"
+	cat "$_tmp" >"$_file"
+	_rc=$?
+	rm -f "$_tmp"
+	return "$_rc"
 }
 
 if remove_id_from "$music_txt" && remove_id_from "$music_titles"; then
 	# Remove the relative path from every playlist (entire.m3u + genre lists like
-	# jpop/kpop/pop). -F avoids regex pitfalls with [], (), etc.
-	# These .m3u files are symlinks into the dotfiles repo, so write the result
-	# back with `cat > "$playlist"` (which follows the symlink) instead of
-	# `mv`/`sed -i`, both of which would replace the symlink with a plain file.
+	# jpop/kpop/pop). They are symlinks into the dotfiles repo, and
+	# remove_lines_from writes through them, so the linked file is updated.
 	for playlist in "$playlist_dir"/*.m3u; do
 		[ -e "$playlist" ] || continue
-		if grep -Fq "$selected_relpath" "$playlist"; then
-			_pl_tmp="$(mktemp)" || continue
-			grep -Fv "$selected_relpath" "$playlist" | sed '/^$/d' > "$_pl_tmp"
-			cat "$_pl_tmp" > "$playlist"
-			rm -f "$_pl_tmp"
-		fi
+		remove_lines_from "$playlist" -e "$selected_relpath"
 	done
 
-	# Delete the actual music file
+	# Delete the actual music file, then any directories it leaves empty
+	# (album, then artist), stopping at the music directory itself.
 	if rm "$selected_file"; then
+		_dir="${selected_file%/*}"
+		while [ "$_dir" != "$music_dir" ] && rmdir "$_dir" 2>/dev/null; do
+			_dir="${_dir%/*}"
+		done
 		mpc update >/dev/null
 		notify-send " Success to delete:" "$selected_relpath"
 	else
