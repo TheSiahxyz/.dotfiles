@@ -35,6 +35,27 @@ BOUNCE_RE='"GET [^"]* HTTP/[23](\.0)?" (401|30[1-8]) '
 CHROME_MIN=130
 FIREFOX_MIN=125
 
+# Visitors come from carriers (Korea Telecom, SK Broadband, AT&T) or from an
+# employer's network. A hosting company's address means someone rented a server
+# there, so it is a crawler. Matched against the ASN owner's name, since the
+# registered netblock often names the upstream carrier instead.
+ASN_DB="$CACHE_DIR/ip2asn.tsv.gz"
+ASN_DB_URL='https://iptoasn.com/data/ip2asn-combined.tsv.gz'
+ASN_DB_MAX_AGE_DAYS=7
+
+DATACENTER_ORG_RE='hosting|cloud|colo|vps|server|datacenter|data cent|dedicated|lease|cdn|akamai|amazon|google|microsoft|azure|ovh|digitalocean|linode|vultr|hetzner|oracle|alibaba|tencent|scaleway|ionos|netcup|contabo|m247|level3|censys|quickpacket|carinet|web2objects|upcloud|logicweb|modmc|blnwx|hr-customer|choopa|datapacket|zenlayer|psychz|hivelocity|frantech|racknerd|interserver|namecheap|godaddy'
+
+update_asn_db() {
+  [ -n "$(find "$ASN_DB" -mtime "-$ASN_DB_MAX_AGE_DAYS" 2>/dev/null)" ] && return
+  curl -fsS --max-time 120 -o "$ASN_DB.part" "$ASN_DB_URL" 2>/dev/null || return
+  # A truncated download would silently pass every address, so sanity-check it.
+  if zcat "$ASN_DB.part" 2>/dev/null | tail -1 | grep -q '	'; then
+    mv "$ASN_DB.part" "$ASN_DB"
+  else
+    rm -f "$ASN_DB.part"
+  fi
+}
+
 # Crawlers that scrape a page's JS mistake code fragments for links and request
 # paths like "/*" or "/web/+(r=r.replace(/". A browser never builds such a URL,
 # so one of them condemns every line from that address.
@@ -53,6 +74,50 @@ drop_malformed_path_ips() {
     }
     END { for (i = 1; i <= NR; i++) if (!(ip[i] in bad)) print line[i] }
   '
+}
+
+drop_datacenter_ips() {
+  [ -s "$ASN_DB" ] || { cat; return; }
+  lines="$CACHE_DIR/lines.$$"
+  cat >"$lines"
+  zcat "$ASN_DB" | awk -F'\t' -v re="$DATACENTER_ORG_RE" '
+    function pad(g,  l) { g = tolower(g); l = length(g); return substr("0000" g, l + 1, 4) }
+    function v4key(a,  p) { split(a, p, "."); return (((p[1] * 256 + p[2]) * 256 + p[3]) * 256 + p[4]) }
+    # Zero-padded hex digits so a plain string compare orders addresses.
+    function v6key(a,  head, tail, L, R, nl, nr, i, out) {
+      if (index(a, "::")) {
+        head = substr(a, 1, index(a, "::") - 1); tail = substr(a, index(a, "::") + 2)
+        nl = (head == "") ? 0 : split(head, L, ":")
+        nr = (tail == "") ? 0 : split(tail, R, ":")
+        for (i = 1; i <= nl; i++) out = out pad(L[i])
+        for (i = 0; i < 8 - nl - nr; i++) out = out "0000"
+        for (i = 1; i <= nr; i++) out = out pad(R[i])
+        return out
+      }
+      nr = split(a, R, ":")
+      for (i = 1; i <= nr; i++) out = out pad(R[i])
+      return out
+    }
+    FNR == NR {
+      split($0, f, " "); line[++n] = $0; lip[n] = f[1]
+      if (!(f[1] in seen)) {
+        seen[f[1]] = 1
+        if (index(f[1], ":")) k6[f[1]] = v6key(f[1]); else k4[f[1]] = v4key(f[1])
+      }
+      next
+    }
+    {
+      if (index($1, ":")) {
+        s = v6key($1); e = v6key($2)
+        for (ip in k6) if (!(ip in org) && k6[ip] "" >= s "" && k6[ip] "" <= e "") org[ip] = $5
+      } else {
+        s = v4key($1); e = v4key($2)
+        for (ip in k4) if (!(ip in org) && k4[ip] >= s && k4[ip] <= e) org[ip] = $5
+      }
+    }
+    END { for (i = 1; i <= n; i++) if (tolower(org[lip[i]]) !~ re) print line[i] }
+  ' "$lines" /dev/stdin
+  rm -f "$lines"
 }
 
 # Keep real page views of visitors whose browser loaded CSS/JS, plus bounce
@@ -123,7 +188,8 @@ fetch_logs() {
     grep -vE '^(119\.192\.254\.114|2a02:4780:10:212c::1) ' |
     grep -vE '^[0-9a-fA-F:]+:: ' |
     grep -viE "$BOT_UA_RE" | grep -viE "$SCAN_PATH_RE" |
-    drop_malformed_path_ips | keep_visits | drop_implausible_ua | sort -u
+    drop_malformed_path_ips | drop_datacenter_ips |
+    keep_visits | drop_implausible_ua | sort -u
 }
 
 update() {
@@ -132,6 +198,7 @@ update() {
   fi
   echo $$ >"$LOCK"
 
+  update_asn_db
   fetch_logs >"$CURR" 2>/dev/null
   total=$(wc -l <"$CURR")
 
@@ -172,6 +239,7 @@ case $BLOCK_BUTTON in
 3)
   notify-send "🌐 Ylog module" "\- Shows new nginx log entries (diary/media/peertube/recordings, US+KR)
 - Bots, vuln scanners & spoofed browser UAs are filtered out
+- Hosting-company addresses are dropped (ASN owner via iptoasn.com)
 - Page views count only if the browser loaded CSS/JS (drops headless scanners)
 - Visits that just opened the URL (login prompt/redirect, HTTP/2) also count
 - Updates every 30 minutes
