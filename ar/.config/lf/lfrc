@@ -118,7 +118,7 @@ cmd copyto ${{
 cmd yank-dirname $dirname -- "$f" | head -c-1 | xclip -i -selection clipboard
 cmd yank-path $printf '%s' "$fx" | xclip -i -selection clipboard
 cmd yank-basename $basename -a -- $fx | head -c-1 | xclip -i -selection clipboard
-cmd yank-basename-without-extension &basename -a -- $fx | cut -d. -f1 | head -c-1 | xclip -i -selection clipboard
+cmd yank-basename-without-extension &basename -a -- $fx | sed 's/\(.\)\.[^.]*$/\1/' | head -c-1 | xclip -i -selection clipboard
 
 # Create
 cmd mkdir %{{
