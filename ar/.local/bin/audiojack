@@ -1,0 +1,227 @@
+#!/bin/sh
+
+# Choose which analog headphone jack (front, rear or both) gets sound.
+# On some HDA codecs both jacks share one PCM stream and mixer switches
+# cannot separate them, so the unwanted jack's pin is marked "not
+# connected" via user_pin_configs, the codec is reconfigured and the
+# pin's output is switched off (the driver leaves unused pins as they were).
+# Not persistent across reboots; use hdajackretask "Install boot override"
+# for that.
+
+PIN_UNUSED=0x411111f0
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/audiojack"
+
+usage() {
+  echo "usage: ${0##*/} front|rear|both|status" >&2
+  exit 1
+}
+
+# Print "<pin> <config>" for headphone-out jacks at the given location
+# (front|rear), read from the codec's original BIOS pin configs.
+hp_pins() {
+  awk -v want="$2" '{
+		cfg = strtonum($2)
+		conn = int(cfg / 2^30) % 4      # 1 = no physical connection
+		loc = int(cfg / 2^24) % 64      # 1 = rear, 2 = front
+		dev = int(cfg / 2^20) % 16      # 2 = headphone out
+		if (conn == 1 || dev != 2) next
+		if ((want == "front" && loc == 2) || (want == "rear" && loc == 1)) print $1, $2
+	}' "$1/init_pin_configs"
+}
+
+# Codec sysfs dir that has both a front and a rear headphone jack.
+find_codec() {
+  for c in /sys/class/sound/hwC*D*; do
+    [ -r "$c/init_pin_configs" ] || continue
+    [ -n "$(hp_pins "$c" front)" ] && [ -n "$(hp_pins "$c" rear)" ] && {
+      echo "$c"
+      return 0
+    }
+  done
+  return 1
+}
+
+# Shell commands (run as root in one sudo call, so the password is asked
+# once) that store pin configs, reconfigure the codec and silence the
+# disabled pins. The kernel parses only one line per user_pin_configs write.
+root_script() {
+  codec=$1 enable=$2
+  off_pins=""
+  for side in front rear; do
+    while read -r pin cfg; do
+      [ -n "$pin" ] || continue
+      case "$enable" in
+      both | "$side") echo "echo '$pin $cfg' >$codec/user_pin_configs" ;;
+      *)
+        echo "echo '$pin $PIN_UNUSED' >$codec/user_pin_configs"
+        off_pins="$off_pins $pin"
+        ;;
+      esac
+    done <<-EOF
+			$(hp_pins "$codec" "$side")
+		EOF
+  done
+  echo "echo 1 >$codec/reconfig || exit 1"
+  for pin in $off_pins; do
+    echo "hda-verb /dev/snd/${codec##*/} $pin SET_PIN_WIDGET_CONTROL 0 >/dev/null 2>&1"
+  done
+}
+
+# PipeWire card name for an ALSA card number (e.g. alsa_card.pci-...).
+pw_card() {
+  pactl list cards | awk -v num="$1" '
+		/^\tName:/ { name = $2 }
+		/alsa.card = / { gsub(/"/, "", $3); if ($3 == num) { print name; exit } }'
+}
+
+pw_active_profile() {
+  pactl list cards | awk -v card="$1" '
+		/^\tName:/ { cur = $2 }
+		cur == card && /Active Profile:/ { print $3; exit }'
+}
+
+# Wait up to ~10s for a command to succeed, polling every 0.1s.
+wait_for() {
+  tries=0
+  until "$@"; do
+    tries=$((tries + 1))
+    [ "$tries" -ge 100 ] && return 1
+    sleep 0.1
+  done
+}
+
+# Store a volume for a card route in wireplumber's state (while it is
+# stopped), so it starts at that volume instead of switching to it later.
+# wpctl volumes are cubic; the state file keeps linear channel volumes.
+set_route_volume() {
+  routes="${XDG_STATE_HOME:-$HOME/.local/state}/wireplumber/default-routes"
+  [ -w "$routes" ] || return 0
+  lin=$(awk -v v="$3" 'BEGIN { printf "%.6f", v * v * v }')
+  tmp=$(mktemp) || return 0
+  awk -v key="$1:output:$2=" -v lin="$lin" '
+		index($0, key) == 1 { sub(/"channelVolumes":\[[^]]*\]/, "\"channelVolumes\":[" lin ", " lin "]") }
+		{ print }' "$routes" >"$tmp" && cat "$tmp" >"$routes"
+  rm -f "$tmp"
+}
+
+pid_gone() { ! kill -0 "$1" 2>/dev/null; }
+card_present() { [ -n "$(pw_card "$1")" ]; }
+sink_present() { pactl list sinks short | awk '{ print $2 }' | grep -qx "$1"; }
+
+# reconfig fails while any process has the card open. The profile set to
+# off makes pipewire release it, and only wireplumber (which still holds
+# the mixer) is restarted; pipewire itself keeps running, so apps keep
+# their streams and are relinked once the card is back.
+apply() {
+  codec=$1 enable=$2
+  num=${codec##*/hwC}
+  num=${num%%D*}
+  card=$(pw_card "$num")
+  [ -n "$card" ] || {
+    echo "no pipewire card for ALSA card $num" >&2
+    return 1
+  }
+  profile=$(pw_active_profile "$card")
+  sink=$(pactl get-default-sink)
+  port=$(pactl list sinks | awk -v s="$sink" '
+		/^\tName:/ { cur = $2 }
+		cur == s && /Active Port:/ { print $3; exit }')
+  volume=$(wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk '{ print $2 }')
+
+  # Both jacks are one PipeWire port, so wireplumber cannot keep a volume
+  # per jack; remember the outgoing mode's volume and reuse the target's.
+  mkdir -p "$STATE_DIR"
+  [ -n "$volume" ] && echo "$volume" >"$STATE_DIR/$(current_mode "$codec")"
+  [ -s "$STATE_DIR/$enable" ] && volume=$(cat "$STATE_DIR/$enable")
+
+  wp=$(pgrep -xo wireplumber)
+  [ -n "$wp" ] || {
+    echo "wireplumber not running" >&2
+    return 1
+  }
+  envf=$(mktemp) || return 1
+  cat "/proc/$wp/environ" >"$envf"
+  [ -s "$envf" ] || {
+    echo "failed to save wireplumber environment" >&2
+    rm -f "$envf"
+    return 1
+  }
+
+  pactl set-card-profile "$card" off
+  kill "$wp"
+  wait_for pid_gone "$wp" || {
+    kill -9 "$wp"
+    sleep 1
+  }
+
+  [ -n "$port" ] && [ -n "$volume" ] && set_route_volume "$card" "$port" "$volume"
+  root_script "$codec" "$enable" | sudo sh
+  status=$?
+  [ "$status" -eq 0 ] || echo "reconfig failed (card still busy?)" >&2
+
+  xargs -0 -a "$envf" sh -c 'exec setsid env -i "$@" wireplumber </dev/null >/dev/null 2>&1 &' _
+  rm -f "$envf"
+  wait_for card_present "$num" || {
+    echo "card did not come back; restart wireplumber" >&2
+    return 1
+  }
+  card=$(pw_card "$num")
+
+  # wireplumber remembers the "off" profile and restores its own saved
+  # volume once the sink appears, so put back what was in use after that.
+  [ -n "$profile" ] && [ "$profile" != off ] &&
+    pactl set-card-profile "$card" "$profile"
+  [ -n "$sink" ] && wait_for sink_present "$sink" && {
+    pactl set-default-sink "$sink"
+    [ -n "$volume" ] && pactl set-sink-volume "$sink" "$(awk -v v="$volume" 'BEGIN { printf "%d%%", v * 100 + 0.5 }')"
+  }
+  return "$status"
+}
+
+# front, rear or both (pins not overridden count as on).
+current_mode() {
+  front=$(show_status "$1" | grep -c '^front.*: on')
+  rear=$(show_status "$1" | grep -c '^rear.*: on')
+  if [ "$front" -gt 0 ] && [ "$rear" -eq 0 ]; then
+    echo front
+  elif [ "$rear" -gt 0 ] && [ "$front" -eq 0 ]; then
+    echo rear
+  else
+    echo both
+  fi
+}
+
+show_status() {
+  codec=$1
+  for side in front rear; do
+    hp_pins "$codec" "$side" | while read -r pin cfg; do
+      cur=$(awk -v p="$pin" '$1 == p { print $2 }' "$codec/user_pin_configs")
+      if [ -z "$cur" ] || [ "$((cur))" -eq "$((cfg))" ]; then
+        state=on
+      else
+        state=off
+      fi
+      echo "$side ($pin): $state"
+    done
+  done
+}
+
+[ $# -eq 1 ] || usage
+codec=$(find_codec) || {
+  echo "no codec with both front and rear headphone jacks found" >&2
+  exit 1
+}
+
+case "$1" in
+status) show_status "$codec" ;;
+front | rear | both)
+  command -v hda-verb >/dev/null || {
+    echo "hda-verb not found (install alsa-tools)" >&2
+    exit 1
+  }
+  apply "$codec" "$1" || exit 1
+  pkill -RTMIN+4 "${STATUSBAR:-dwmblocks}" 2>/dev/null
+  show_status "$codec"
+  ;;
+*) usage ;;
+esac
