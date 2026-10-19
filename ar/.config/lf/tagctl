@@ -1,0 +1,150 @@
+#!/bin/sh
+# Tag helpers for lf. lf (r42) only draws tags: no command selects, filters or
+# jumps by them, and they are not exported to shell commands. Everything here
+# works off the tags file instead.
+#
+# WHY EDITING THE TAGS FILE IS SAFE
+#
+# lf keeps tags in memory, rewrites the whole file from that map on every
+# `tag`/`tag-toggle`, then broadcasts `sync`, which makes every instance clear
+# its map and re-read the file. So after changing the file here, broadcasting
+# `sync` leaves all instances agreeing with it; skipping the broadcast would let
+# the next tag command in a stale instance resurrect the removed entries.
+#
+# Format: one `path:tag` per line, split on the LAST colon (as lf does).
+#
+# Usage: tagctl select-here [tag] | select-all [tag] | jump | clear-here | prune
+
+set -eu
+
+tags="${XDG_DATA_HOME:-$HOME/.local/share}/lf/tags"
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT HUP INT TERM
+
+# Paths tagged directly inside directory $1 ('' = anywhere), restricted to tag
+# $2 when non-empty. Paths that no longer exist are skipped.
+tagged() {
+    [ -f "$tags" ] || return 0
+    awk -v dir="$1" -v want="$2" '
+        BEGIN { prefix = (dir == "/") ? "/" : dir "/" }
+        match($0, /:[^:]*$/) {
+            path = substr($0, 1, RSTART - 1)
+            tag = substr($0, RSTART + 1)
+            if (want != "" && tag != want) next
+            if (dir != "" && (index(path, prefix) != 1 ||
+                index(substr(path, length(prefix) + 1), "/"))) next
+            print path
+        }' "$tags" |
+        while IFS= read -r path; do
+            if [ -e "$path" ] || [ -L "$path" ]; then
+                printf '%s\n' "$path"
+            fi
+        done
+}
+
+# Replace the selection with the paths on stdin. Toggles are batched because a
+# single remote command per file floods lf's server socket (see selsync).
+select_paths() {
+    sed 's/\\/\\\\/g;s/"/\\"/g' >"$tmp/quoted"
+    if [ ! -s "$tmp/quoted" ]; then
+        lf -remote "send $id echo no tagged files"
+        return 0
+    fi
+    lf -remote "send $id unselect"
+    batch=""
+    while IFS= read -r quoted; do
+        candidate="$batch \"$quoted\""
+        if [ ${#candidate} -gt 8000 ] && [ -n "$batch" ]; then
+            lf -remote "send $id toggle $batch"
+            batch="\"$quoted\""
+        else
+            batch="$candidate"
+        fi
+    done <"$tmp/quoted"
+    lf -remote "send $id toggle $batch"
+    lf -remote "send $id save-select"
+}
+
+# Rewrite the tags file keeping only lines whose path passes `keep`, then make
+# every instance reload it. Prints the number of removed tags.
+rewrite_tags() {
+    [ -f "$tags" ] || { echo 0; return 0; }
+    : >"$tmp/new"
+    removed=0
+    while IFS= read -r line || [ -n "$line" ]; do
+        if keep "${line%:*}"; then
+            printf '%s\n' "$line" >>"$tmp/new"
+        else
+            removed=$((removed + 1))
+        fi
+    done <"$tags"
+    # Redirect instead of mv to keep the file's inode and 0600 mode.
+    cat "$tmp/new" >"$tags"
+    lf -remote "send sync"
+    echo "$removed"
+}
+
+# clear-here: drop tags of entries directly inside $PWD.
+keep_outside_pwd() {
+    [ "${1%/*}" != "$PWD" ] && { [ "$PWD" != / ] || [ -n "${1%/*}" ]; }
+}
+
+# prune: drop tags whose file is gone but whose directory still exists, so tags
+# on an unmounted drive survive.
+keep_unless_stale() {
+    parent="${1%/*}"
+    [ -e "$1" ] || [ -L "$1" ] || [ ! -d "${parent:-/}" ]
+}
+
+case "${1:-}" in
+select-here)
+    tagged "$PWD" "${2:-}" | select_paths
+    ;;
+select-all)
+    tagged "" "${2:-}" | select_paths
+    ;;
+jump)
+    tagged "" "" >"$tmp/paths"
+    # Show "tag<TAB>path" in tags-file order, existing paths only.
+    awk 'NR == FNR { ok[$0] = 1; next }
+        match($0, /:[^:]*$/) {
+            path = substr($0, 1, RSTART - 1)
+            if (path in ok) print substr($0, RSTART + 1) "\t" path
+        }' "$tmp/paths" "$tags" >"$tmp/menu" 2>/dev/null || :
+    if [ ! -s "$tmp/menu" ]; then
+        lf -remote "send $id echo no tagged files"
+        exit 0
+    fi
+    # Tags are one column wide, so a tabstop of 2 leaves a single space.
+    fzf --reverse --delimiter='\t' --tabstop=2 --prompt='tag> ' <"$tmp/menu" >"$tmp/pick" || exit 0
+    cut -f2- "$tmp/pick" | sed 's/\\/\\\\/g;s/"/\\"/g' | {
+        IFS= read -r target || exit 0
+        lf -remote "send $id select \"$target\""
+    }
+    ;;
+clear-here)
+    tagged "$PWD" "" >"$tmp/here"
+    count=$(wc -l <"$tmp/here")
+    if [ "$count" -eq 0 ]; then
+        lf -remote "send $id echo no tagged files here"
+        exit 0
+    fi
+    clear; tput cup $(($(tput lines)/3)); tput bold
+    cat "$tmp/here"
+    printf "\nclear %s tag(s) in this directory?[y/N]" "$count"
+    read -r ans || ans=""
+    [ "$ans" = "y" ] || exit 0
+    keep() { keep_outside_pwd "$1"; }
+    removed=$(rewrite_tags)
+    lf -remote "send $id echo cleared $removed tag(s)"
+    ;;
+prune)
+    keep() { keep_unless_stale "$1"; }
+    removed=$(rewrite_tags)
+    lf -remote "send $id echo pruned $removed stale tag(s)"
+    ;;
+*)
+    echo "usage: tagctl select-here|select-all [tag] | jump | clear-here | prune" >&2
+    exit 2
+    ;;
+esac

@@ -724,6 +724,15 @@ cmd select-files select-mime '-inode/directory'
 cmd select-videos select-mime 'video/'
 cmd select-images select-mime 'image/'
 cmd select-music select-mime 'audio/'
+
+# Tags: lf only draws them, so selecting/jumping/clearing goes through the tags
+# file. An optional argument limits tag-select* to one tag character.
+cmd tag-remove :tag; tag-toggle
+cmd tag-select &~/.config/lf/tagctl select-here "$@"
+cmd tag-select-all &~/.config/lf/tagctl select-all "$@"
+cmd tag-jump ${{ ~/.config/lf/tagctl jump }}
+cmd tag-clear-here ${{ ~/.config/lf/tagctl clear-here }}
+cmd tag-prune &~/.config/lf/tagctl prune
 # Debounced: on-select fires on every cursor move, and <space> is `toggle; down`,
 # so an un-throttled remote call here floods lf's server socket. See the script.
 cmd on-select &{{
@@ -1000,8 +1009,15 @@ map sn :set sortby natural; set info
 map ss :set sortby size; set info size
 map st :set sortby time; set info time
 
-# Tag
+# Tag (ts/tt/tk/tr* are bookmarks from shortcutrc)
 map tg tag-toggle
+map tc push :tag<space>
+map tu tag-remove
+map ta tag-select
+map tA tag-select-all
+map tf tag-jump
+map tU tag-clear-here
+map tP tag-prune
 
 # Traversal
 map fa $fzf | { IFS= read -r sel || exit 0; lf -remote "send $id select \"$sel\""; }
