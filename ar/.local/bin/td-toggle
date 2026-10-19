@@ -11,4 +11,4 @@ pidof transmission-daemon >/dev/null &&
     transmission-daemon && notify-send "transmission-daemon enabled."; }
 
 sleep 3
-pkill -RTMIN+7 "${STATUSBAR:-dwmblocks}"
+pkill -RTMIN+17 "${STATUSBAR:-dwmblocks}"

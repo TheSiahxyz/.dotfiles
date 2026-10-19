@@ -7,7 +7,7 @@
 pidof transmission-daemon >/dev/null || {
   transmission-daemon &&
     notify-send "Starting transmission daemon..." &&
-    sleep 3 && pkill -RTMIN+7 "${STATUSBAR:-dwmblocks}"
+    sleep 3 && pkill -RTMIN+17 "${STATUSBAR:-dwmblocks}"
 }
 
 directory="$HOME/Torrents"
