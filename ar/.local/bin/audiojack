@@ -104,6 +104,21 @@ set_route_volume() {
   rm -f "$tmp"
 }
 
+# Put the profile back into wireplumber's state (while it is stopped):
+# setting it off to release the card is saved there, and wireplumber would
+# otherwise start the card with no profile.
+set_saved_profile() {
+  profiles="${XDG_STATE_HOME:-$HOME/.local/state}/wireplumber/default-profile"
+  [ -w "$profiles" ] || return 0
+  tmp=$(mktemp) || return 0
+  awk -v key="$1=" -v prof="$2" '
+		index($0, key) == 1 { $0 = key prof }
+		{ print }' "$profiles" >"$tmp" && cat "$tmp" >"$profiles"
+  rm -f "$tmp"
+}
+
+set_profile() { pactl set-card-profile "$1" "$2" 2>/dev/null; }
+
 pid_gone() { ! kill -0 "$1" 2>/dev/null; }
 card_present() { [ -n "$(pw_card "$1")" ]; }
 sink_present() { pactl list sinks short | awk '{ print $2 }' | grep -qx "$1"; }
@@ -154,6 +169,7 @@ apply() {
     sleep 1
   }
 
+  [ -n "$profile" ] && [ "$profile" != off ] && set_saved_profile "$card" "$profile"
   [ -n "$port" ] && [ -n "$volume" ] && set_route_volume "$card" "$port" "$volume"
   root_script "$codec" "$enable" | sudo sh
   status=$?
@@ -167,10 +183,11 @@ apply() {
   }
   card=$(pw_card "$num")
 
-  # wireplumber remembers the "off" profile and restores its own saved
-  # volume once the sink appears, so put back what was in use after that.
+  # The card can show up before it accepts a profile ("No such entity"),
+  # so keep trying until it does.
   [ -n "$profile" ] && [ "$profile" != off ] &&
-    pactl set-card-profile "$card" "$profile"
+    [ "$(pw_active_profile "$card")" != "$profile" ] &&
+    { wait_for set_profile "$card" "$profile" || echo "failed to restore profile $profile" >&2; }
   [ -n "$sink" ] && wait_for sink_present "$sink" && {
     pactl set-default-sink "$sink"
     [ -n "$volume" ] && pactl set-sink-volume "$sink" "$(awk -v v="$volume" 'BEGIN { printf "%d%%", v * 100 + 0.5 }')"
