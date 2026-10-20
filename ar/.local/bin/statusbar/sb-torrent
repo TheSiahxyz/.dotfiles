@@ -9,28 +9,62 @@ case $BLOCK_BUTTON in
 Module shows number of torrents:
 🛑: paused
 🕰: idle (seeds needed)
+🧲: waiting for magnet metadata
 🔼: uploading (unfinished)
-🔽: downloading
+🔽: downloading (receiving data)
 ✅: done
 🌱: done and seeding" ;;
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
-transmission-remote -l | {
-  stopped=0 seeding=0 complete=0 idle=0 upload=0 download=0
-  while read -r torrent; do case "$torrent" in
-    *Stopped*) stopped=$((stopped + 1)) ;;
-    *Seeding*) seeding=$((seeding + 1)) ;;
-    *100%*) complete=$((complete + 1)) ;;
-    *Idle*) idle=$((idle + 1)) ;;
-    *Uploading*) upload=$((upload + 1)) ;;
-    *%*) download=$((download + 1)) ;;
-    esac done
-  [ $stopped -gt 0 ] && torrents="$torrents 🛑$stopped"
-  [ $idle -gt 0 ] && torrents="$torrents 🕰$idle"
-  [ $upload -gt 0 ] && torrents="$torrents 🔼$upload"
-  [ $download -gt 0 ] && torrents="$torrents 🔽$download"
-  [ $complete -gt 0 ] && torrents="$torrents ✅$complete"
-  [ $seeding -gt 0 ] && torrents="$torrents 🌱$seeding"
-  printf "%s\n" "${torrents# }"
-}
+# Counts match what stig reports: a torrent is downloading/uploading when it is
+# actually moving data, not merely when transmission says it would like to.
+transmission-remote -l | awk '
+  # Column positions shift ("Have" may be "None", "ETA" may be "22 hrs"), so
+  # anchor on the status keyword: Up, Down and Ratio always precede it.
+  function status_field(   i) {
+    for (i = 3; i <= NF; i++)
+      if ($i ~ /^(Stopped|Idle|Downloading|Seeding|Uploading|Verifying|Checking|Finished|Queued|Up)$/)
+        return i
+    return 0
+  }
+
+  NR == 1 || /^Sum:/ { next }
+
+  {
+    s = status_field()
+    if (!s)
+      next
+    status = $s
+    up = $(s - 3) + 0
+    down = $(s - 2) + 0
+    progress = $2
+
+    if (status == "Stopped")
+      stopped++
+    else if (progress == "n/a")
+      magnet++
+    else if (status == "Seeding")
+      seeding++
+    else if (progress == "100%")
+      complete++
+    else if (down > 0)
+      download++
+    else if (up > 0)
+      upload++
+    else
+      idle++
+  }
+
+  END {
+    if (stopped)  out = out " 🛑" stopped
+    if (idle)     out = out " 🕰" idle
+    if (magnet)   out = out " 🧲" magnet
+    if (upload)   out = out " 🔼" upload
+    if (download) out = out " 🔽" download
+    if (complete) out = out " ✅" complete
+    if (seeding)  out = out " 🌱" seeding
+    sub(/^ /, "", out)
+    print out
+  }
+'

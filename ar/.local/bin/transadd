@@ -4,10 +4,13 @@
 
 # transmission-daemon sometimes fails to take remote requests in its first moments, hence the sleep.
 
+# Refresh the statusbar torrent block (signal 17 in dwmblocks config.def.h).
+sigstatus() { pkill -RTMIN+17 "${STATUSBAR:-dwmblocks}" 2>/dev/null; return 0; }
+
 pidof transmission-daemon >/dev/null || {
   transmission-daemon &&
     notify-send "Starting transmission daemon..." &&
-    sleep 3 && pkill -RTMIN+17 "${STATUSBAR:-dwmblocks}"
+    sleep 3 && sigstatus
 }
 
 directory="$HOME/Torrents"
@@ -16,7 +19,7 @@ directory="$HOME/Torrents"
   URL=$(xclip -selection clipboard -o)
   case "$URL" in
   http://* | https://* | magnet:?*)
-    transmission-remote -a "$URL" && notify-send "🔽 Torrent added."
+    transmission-remote -a "$URL" && notify-send "🔽 Torrent added." && sigstatus
     exit 0
     ;;
   *)
@@ -24,10 +27,10 @@ directory="$HOME/Torrents"
     filtered_files=$(ls "$directory"/*.torrent 2>/dev/null | sed "s|^$directory/||" | sed 's/\.torrent$//' | grep -vF "$added_torrents")
     [ -n "$filtered_files" ] && {
       choice=$(echo "$filtered_files" | dmenu -i -l 20 -p "Select Torrent:")
-      [ -n "$choice" ] && transmission-remote -a "$directory/$choice.torrent" && notify-send "🔽 Torrent added."
+      [ -n "$choice" ] && transmission-remote -a "$directory/$choice.torrent" && notify-send "🔽 Torrent added." && sigstatus
     } || notify-send "🤷 No new torrent found."
     ;;
   esac
 } || {
-  transmission-remote -a "$@" && notify-send "🔽 Torrent added." "$TR_TORRENT_NAME"
+  transmission-remote -a "$@" && notify-send "🔽 Torrent added." "$TR_TORRENT_NAME" && sigstatus
 }
