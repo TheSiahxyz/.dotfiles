@@ -77,7 +77,10 @@ drop_malformed_path_ips() {
 }
 
 drop_datacenter_ips() {
-  [ -s "$ASN_DB" ] || { cat; return; }
+  [ -s "$ASN_DB" ] || {
+    cat
+    return
+  }
   lines="$CACHE_DIR/lines.$$"
   cat >"$lines"
   zcat "$ASN_DB" | awk -F'\t' -v re="$DATACENTER_ORG_RE" '

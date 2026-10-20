@@ -18,7 +18,10 @@ for monitor in $monitors; do
   case "$monitor" in
   *DP* | *DisplayPort* | *HDMI*)
     b=$(echo "$xrandr_verbose" | grep -i "^$monitor connected" -A5 | grep -i "Brightness:" | cut -d ' ' -f2)
-    [ -n "$b" ] && { monitor_brightness=$(printf "%.0f" "$(echo "$b * 100" | bc -l)"); break; }
+    [ -n "$b" ] && {
+      monitor_brightness=$(printf "%.0f" "$(echo "$b * 100" | bc -l)")
+      break
+    }
     ;;
   esac
 done

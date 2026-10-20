@@ -26,12 +26,12 @@ esac
 # a feed from urls, purge its leftover items so the count stays accurate:
 #   newsboat (open and quit once — cleanup-on-quit prunes orphaned feeds)
 if [ -f /tmp/newsupdate ]; then
-	cat /tmp/newsupdate
+  cat /tmp/newsupdate
 else
-	db="${XDG_DATA_HOME:-${HOME}/.local/share}/newsboat/cache.db"
-	count=$(sqlite3 "file:${db}?mode=ro&immutable=1" \
-		"SELECT count(*) FROM rss_item WHERE unread=1 AND deleted=0;" 2>/dev/null)
-	[ "${count:-0}" -gt 0 ] 2>/dev/null && printf '📰%s' "$count"
-	cat "${XDG_CONFIG_HOME:-${HOME}/.config}"/newsboat/.update 2>/dev/null
-	echo
+  db="${XDG_DATA_HOME:-${HOME}/.local/share}/newsboat/cache.db"
+  count=$(sqlite3 "file:${db}?mode=ro&immutable=1" \
+    "SELECT count(*) FROM rss_item WHERE unread=1 AND deleted=0;" 2>/dev/null)
+  [ "${count:-0}" -gt 0 ] 2>/dev/null && printf '📰%s' "$count"
+  cat "${XDG_CONFIG_HOME:-${HOME}/.config}"/newsboat/.update 2>/dev/null
+  echo
 fi

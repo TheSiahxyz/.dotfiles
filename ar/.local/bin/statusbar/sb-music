@@ -267,8 +267,8 @@ case $BLOCK_BUTTON in
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 9) playerctl prev ;;
 10) playerctl next ;;
-16) mpc seek -5 ;;            # horizontal scroll left
-17) mpc seek +5 ;;            # horizontal scroll right
-18) playerctl position 5- ;;  # shift + horizontal scroll left
-19) playerctl position 5+ ;;  # shift + horizontal scroll right
+16) mpc seek -5 ;;           # horizontal scroll left
+17) mpc seek +5 ;;           # horizontal scroll right
+18) playerctl position 5- ;; # shift + horizontal scroll left
+19) playerctl position 5+ ;; # shift + horizontal scroll right
 esac
