@@ -4,5 +4,13 @@ ifinstalled stig transmission-cli || exit 1
 
 ! pidof transmission-daemon >/dev/null && transmission-daemon && notify-send "Starting torrent daemon..."
 
-"${TERMINAL:-st}" -n stig -e stig
-pkill -RTMIN+17 "${STATUSBAR:-dwmblocks}"
+sigbar() { pkill -RTMIN+17 "${STATUSBAR:-dwmblocks}"; }
+
+# sb-torrent has no interval, so keep refreshing it while stig is open.
+"${TERMINAL:-st}" -n stig -e stig &
+term=$!
+while kill -0 "$term" 2>/dev/null; do
+	sigbar
+	sleep 5
+done
+sigbar
