@@ -1,0 +1,129 @@
+#!/bin/sh
+# wowf — World of Warcraft: Forever launcher (Battle.net prefix shared with d2r)
+#
+# Checks each requirement in order, fills in whatever is missing, then launches WoW Forever.
+#   1. Packages: lutris, umu-launcher, wine      → install via pacman if missing
+#   2. Battle.net registered in Lutris           → run the Lutris installer wizard if not
+#   3. Wow.exe present in the Battle.net prefix  → open Battle.net and ask to install if not
+#   4. Launch: umu-run Battle.net Launcher.exe --exec="launch WOWF"
+#      (the Lutris entry is pinned to D2R via "launch OSI", so umu-run is called directly
+#       with the same prefix/Proton that Lutris uses)
+#
+# Usage: wowf            check, then launch
+#        wowf --check    print check results only and exit
+#        wowf --help
+
+set -u
+
+GAME_SLUG=battlenet
+PKGS="lutris umu-launcher wine"
+DEFAULT_PREFIX="$HOME/Games/$GAME_SLUG"
+LAUNCHER_REL="drive_c/Program Files (x86)/Battle.net/Battle.net Launcher.exe"
+WOW_EXE_REL="drive_c/Program Files (x86)/World of Warcraft/_forever_/Wow.exe"
+LAUNCH_CODE=WOWF
+CHECK_ONLY=0
+
+case "${1:-}" in
+--check | -c) CHECK_ONLY=1 ;;
+--help | -h)
+  sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'
+  exit 0
+  ;;
+"") ;;
+*)
+  printf 'wowf: unknown option: %s\n' "$1" >&2
+  exit 2
+  ;;
+esac
+
+msg() {
+  printf '%s\n' "$*"
+  command -v notify-send >/dev/null 2>&1 && notify-send "🎮 WoW Forever" "$*"
+}
+
+die() {
+  msg "$*"
+  exit 1
+}
+
+# When started without a terminal (e.g. from dmenu) and sudo input is needed,
+# re-run self inside a terminal.
+ensure_tty() {
+  [ -t 0 ] && return 0
+  exec "${TERMINAL:-st}" -e "$0"
+}
+
+missing_pkgs() {
+  for p in $PKGS; do
+    pacman -Qq "$p" >/dev/null 2>&1 || printf '%s ' "$p"
+  done
+}
+
+install_pkgs() {
+  missing=$(missing_pkgs)
+  [ -z "$missing" ] && return 0
+  [ "$CHECK_ONLY" -eq 1 ] && {
+    printf '[packages]   missing: %s\n' "$missing"
+    return 1
+  }
+  ensure_tty
+  msg "Installing packages: $missing"
+  # shellcheck disable=SC2086
+  sudo pacman -S --needed $missing || die "Package install failed: $missing"
+}
+
+# Look up the install directory for the slug in the Lutris DB.
+# Prints an empty string if the game is not registered.
+lutris_game_dir() {
+  lutris -l -o 2>/dev/null | awk -F'|' -v slug="$GAME_SLUG" '
+    { gsub(/^ +| +$/, "", $3); gsub(/^ +| +$/, "", $5) }
+    $3 == slug { print $5; exit }'
+}
+
+install_battlenet() {
+  dir=$(lutris_game_dir)
+  [ -n "$dir" ] && [ -d "$dir" ] && return 0
+  [ "$CHECK_ONLY" -eq 1 ] && {
+    printf '[Battle.net] not registered in Lutris (or prefix missing)\n'
+    return 1
+  }
+  msg "Battle.net not found. Opening the Lutris installer; install to $DEFAULT_PREFIX (recommended)."
+  lutris "lutris:install/$GAME_SLUG"
+  dir=$(lutris_game_dir)
+  if [ -z "$dir" ] || [ ! -d "$dir" ]; then
+    die "Battle.net install did not finish. Complete the installer, then run wowf again."
+  fi
+}
+
+# Start Battle.net in the shared prefix; extra args are passed to the launcher.
+run_battlenet() {
+  prefix=$(lutris_game_dir)
+  prefix=${prefix:-$DEFAULT_PREFIX}
+  cd "$prefix" || die "Cannot enter prefix: $prefix"
+  WINEPREFIX="$prefix" GAMEID=umu-default PROTONPATH=GE-Proton STORE=none \
+    WINEDLLOVERRIDES='locationapi=d' \
+    exec umu-run "$prefix/$LAUNCHER_REL" "$@" >/dev/null 2>&1
+}
+
+check_wow() {
+  dir=$(lutris_game_dir)
+  [ -f "${dir:-$DEFAULT_PREFIX}/$WOW_EXE_REL" ] && return 0
+  [ "$CHECK_ONLY" -eq 1 ] && {
+    printf '[WoW]        Wow.exe missing: %s/%s\n' "${dir:-$DEFAULT_PREFIX}" "$WOW_EXE_REL"
+    return 1
+  }
+  msg "WoW Forever is not installed yet. Pick 'WoW Forever' in Battle.net, install it, then run wowf again."
+  run_battlenet
+}
+
+status=0
+install_pkgs || status=1
+install_battlenet || status=1
+check_wow || status=1
+
+if [ "$CHECK_ONLY" -eq 1 ]; then
+  [ "$status" -eq 0 ] && printf 'All set: %s/%s\n' "$(lutris_game_dir)" "$WOW_EXE_REL"
+  exit "$status"
+fi
+
+run_battlenet --exec="launch $LAUNCH_CODE"
