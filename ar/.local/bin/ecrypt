@@ -5,42 +5,67 @@ mount_encrypted() {
     -o ecryptfs_cipher=aes,ecryptfs_key_bytes=32,ecryptfs_passthrough=no,ecryptfs_enable_filename_crypto=yes,ecryptfs_sig=$ecryptfs_sig,ecryptfs_fnek_sig=$fnek_sig,key=passphrase:passphrase_passwd=$(printf '%s' "$passphrase")
 }
 
-attempt_mount() {
-  if mount | grep -q " $2 "; then
-    if sudo umount "$2"; then
-      notify-send "🔒 Locked: $3"
-      pkill -RTMIN+1 dwmblocks
-    else
-      notify-send "❗ Unable to lock" "Mounted: $3"
-    fi
+is_mounted() {
+  mount | grep -q " $1 "
+}
+
+lock() {
+  if sudo umount "$1"; then
+    notify-send "🔒 Locked: $2"
   else
-    ecryptfs_sig=$(pass show encryption/ecryptfs-sig-"$4")
-    fnek_sig=$ecryptfs_sig
-    passphrase=$(pass show encryption/ecryptfs)
-    [ -z "$passphrase" ] && {
-      notify-send "❌ Failed to retrieve passphrase."
-      exit 1
-    }
-    if mount_encrypted "$1" "$2"; then
-      notify-send "🔑 Unlocked: $3"
-      pkill -RTMIN+1 dwmblocks
-    fi
+    notify-send "❗ Unable to lock" "Mounted: $2"
   fi
 }
 
-targets="$HOME/.secret"
-mounts="$HOME/Secret"
-pw="default"
-[ -d "$targets" ] || mkdir -p "$targets"
-[ -d "$mounts" ] || mkdir -p "$mounts"
+unlock() {
+  ecryptfs_sig=$(pass show encryption/ecryptfs-sig-"$4")
+  fnek_sig=$ecryptfs_sig
+  passphrase=$(pass show encryption/ecryptfs)
+  [ -z "$passphrase" ] && {
+    notify-send "❌ Failed to retrieve passphrase."
+    exit 1
+  }
+  mount_encrypted "$1" "$2" && notify-send "🔑 Unlocked: $3"
+}
 
-set -- $mounts # Set positional parameters to mounts
-i=1
-for target in $targets; do
-  mp=$(eval echo "\$$i")            # Get the mount point using indirect expansion
-  path=$(basename "$mp")            # Extract last directory component
-  pw=$(echo "$pw" | cut -d' ' -f$i) # Get the corresponding passthrough option
+# target:mountpoint:sig (one per line)
+entries="$HOME/.secret:$HOME/Secret:default
+/media/si/thesiahxyz:$HOME/SecretUSB:default"
 
-  attempt_mount "$target" "$mp" "$path" "$pw"
-  i=$((i + 1))
-done
+# Keep only targets that are available (drives plugged in)
+available=""
+while IFS=: read -r target mp sig; do
+  case "$target" in
+  /media/* | /mnt/*) [ -n "$(ls -A "$target" 2>/dev/null)" ] || continue ;;
+  *) [ -d "$target" ] || mkdir -p "$target" ;;
+  esac
+  [ -d "$mp" ] || mkdir -p "$mp"
+  available="$available$target:$mp:$sig
+"
+done <<EOF
+$entries
+EOF
+
+# Lock everything only when all available targets are unlocked;
+# otherwise unlock the remaining ones so the states never diverge.
+all_mounted=1
+while IFS=: read -r target mp sig; do
+  [ -n "$target" ] || continue
+  is_mounted "$mp" || all_mounted=0
+done <<EOF
+$available
+EOF
+
+while IFS=: read -r target mp sig; do
+  [ -n "$target" ] || continue
+  name=$(basename "$mp")
+  if [ "$all_mounted" -eq 1 ]; then
+    lock "$mp" "$name"
+  elif ! is_mounted "$mp"; then
+    unlock "$target" "$mp" "$name" "$sig"
+  fi
+done <<EOF
+$available
+EOF
+
+pkill -RTMIN+1 dwmblocks
