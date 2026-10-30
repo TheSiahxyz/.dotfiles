@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Show wifi 🛜 and percent strength or 📡 if none.
-# Show 🌐 if connected to ethernet or ❎ if none.
+# Show 🌐 if connected to ethernet, 🔌 if plugged in but inactive, or ❎ if none.
 # Show 🛰 if a vpn connection is active
 # Show 🇰🇷 country flag via geoip lookup
 
@@ -58,6 +58,7 @@ case $BLOCK_BUTTON in
 📡: no wifi connection
 🛜: wifi connection with quality
 ❎: no ethernet
+🔌: ethernet plugged in but inactive
 🌐: ethernet working
 🛰: vpn is active
 🏳: ip geolocation (country flag)
@@ -106,7 +107,13 @@ fi
 
 # Ethernet
 if [ "$SHOW_ETH" = 1 ]; then
-  grep -q 'up' /sys/class/net/e*/operstate && ethericon="🌐" || ethericon="❎"
+  if nmcli -t -f TYPE,STATE device | grep -qx 'ethernet:connected'; then
+    ethericon="🌐"
+  elif grep -q 'up' /sys/class/net/e*/operstate 2>/dev/null; then
+    ethericon="🔌"
+  else
+    ethericon="❎"
+  fi
   [ -n "$ethericon" ] && icons="${icons}$ethericon "
 fi
 
