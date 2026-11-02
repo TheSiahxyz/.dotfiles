@@ -20,7 +20,8 @@ vm=$(printf "%s\n" "$vmlist" | dmenu -i -p "$choice which VM?")
 case "$choice" in
 start)
   virsh --connect qemu:///system start "$vm" &&
-    setsid -f virt-viewer --connect qemu:///system "$vm" >/dev/null 2>&1
+    setsid -f virt-viewer --connect qemu:///system \
+      --spice-usbredir-auto-redirect-filter='-1,-1,-1,-1,0' "$vm" >/dev/null 2>&1
   ;;
 shutdown)
   virsh --connect qemu:///system shutdown "$vm"
