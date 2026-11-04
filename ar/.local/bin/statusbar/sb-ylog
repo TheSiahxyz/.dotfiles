@@ -194,12 +194,17 @@ drop_implausible_ua() {
 fetch_logs() {
   kr_today=$(TZ=Asia/Seoul LC_TIME=C date +%d/%b)
   kr_yesterday=$(TZ=Asia/Seoul LC_TIME=C date -d 'yesterday' +%d/%b)
+  # The server sees this machine's public address on the SSH session itself, so
+  # it is sent back as the first line and our own visits are dropped by it. The
+  # static list below covers addresses this machine is not currently behind.
   ssh -o BatchMode=yes -o ConnectTimeout=10 root@thesiah.xyz \
-    "cat /var/log/nginx/diary/us.log /var/log/nginx/diary/kr.log \
+    "echo \"MYIP \${SSH_CLIENT%% *}\"
+     cat /var/log/nginx/diary/us.log /var/log/nginx/diary/kr.log \
          /var/log/nginx/media/us.log /var/log/nginx/media/kr.log \
          /var/log/nginx/peertube/us.log /var/log/nginx/peertube/kr.log \
          /var/log/nginx/recordings/us.log /var/log/nginx/recordings/kr.log 2>/dev/null" \
-    2>/dev/null | grep -E "$kr_today|$kr_yesterday" | grep -E '[0-9]{2}:[0-9]{2}:[0-9]{2} ' |
+    2>/dev/null | awk 'NR == 1 && $1 == "MYIP" { me = $2; next } me == "" || $1 != me' |
+    grep -E "$kr_today|$kr_yesterday" | grep -E '[0-9]{2}:[0-9]{2}:[0-9]{2} ' |
     grep -vE '^(119\.192\.254\.114|2a02:4780:10:212c::1) ' |
     grep -vE '^[0-9a-fA-F:]+:: ' |
     drop_automation_ips | grep -viE "$BOT_UA_RE" | grep -viE "$SCAN_PATH_RE" |
