@@ -29,6 +29,7 @@ vim.opt.mouse = "a"
 vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.scrolloff = 8
+vim.opt.shada = "!,'100,<50,s10,h"
 vim.opt.shiftwidth = 2
 vim.opt.showmode = false
 vim.opt.signcolumn = "yes"
