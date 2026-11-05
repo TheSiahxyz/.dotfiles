@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# Copy stdin (or the arguments) to the clipboard of the terminal you are
+# sitting at, via the OSC 52 escape sequence. Works over SSH and inside tmux
+# (needs `set -g set-clipboard on`, which tmux.conf sets), with no X server.
+
+if [ "$#" -gt 0 ]; then
+  data=$(printf '%s' "$*" | base64 | tr -d '\n')
+else
+  data=$(base64 | tr -d '\n')
+fi
+
+printf '\033]52;c;%s\a' "$data" >/dev/tty

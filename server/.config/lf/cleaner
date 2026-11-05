@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# No image previews on the server, so there is nothing to clean up.
+exit 0

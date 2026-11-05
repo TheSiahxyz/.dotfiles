@@ -1,0 +1,905 @@
+### --- Basic Settings --- ###
+set autoquit true
+set cleaner '~/.config/lf/cleaner'
+set dircache false
+set dircounts true
+set dirfirst true
+set dirpreviews false
+set drawbox true
+set dupfilefmt '%f_%n'
+set hidden false
+set hiddenfiles ".*:*.aux:*.log:*.bbl:*.bcf:*.blg:*.run.xml:*.smi:*.srt:*.ass"
+set history false
+set icons true
+set ifs "\n"
+set ignorecase true
+set incsearch true
+set incfilter true
+set mouse true
+set number true
+set period 1
+set previewer '~/.config/lf/scope'
+set ratios 1:2:3
+set relativenumber true
+set rulerfile '~/.config/lf/ruler'
+set scrolloff 10
+set shellopts '-eu'
+set tempmarks '123456'
+set truncatepct 50
+set info custom
+
+### --- Custom Functions --- ###
+# Chmod
+cmd chmods ${{
+  options=$(printf "x\nu+x\na+x\n000\n644\n666\n755\n777")
+  choice=$(printf "%s" "$options" | fzf)
+  case "$choice" in
+    "x") mod="+x";;
+    "u+x") mod="u+x";;
+    "a+x") mod="a+x";;
+    "000") mod="000";;
+    "644") mod="644";;
+    "666") mod="666";;
+    "755") mod="755";;
+    "777") mod="777";;
+  esac
+  for file in $fx; do
+    chmod -R $mod "$file"
+  done
+  printf "Permissions set to $mod for selected files/directories."
+  lf -remote "send $id reload"
+}}
+
+# Compress
+cmd compress ${{
+  clear; tput cup $(($(tput lines)/3)); tput bold
+  set -f
+  printf "%s\n\t" "$fx"
+  printf "compress?[y/N]"
+  read ans
+  [ $ans = "y" ] && {
+    printf "%s\n\t" "$fx"
+    printf "file name: "
+    read ans
+    mkdir $ans && {
+      cp -r $fx $ans
+      tar czf $ans.tar.gz $ans
+      rm -rf $ans
+    } || {
+      printf "%s\n\t" "$fx"
+      printf "Permissions needs.\n"
+      printf "Continue in root?[y/N]"
+      read root
+      [ $root = "y" ] && {
+        printf "Compressing $ans...\n"
+        sudo mkdir $ans
+        sudo cp -r $fx $ans
+        sudo tar czf $ans.tar.gz $ans
+        sudo rm -rf $ans
+      }
+    }
+  }
+}}
+
+# Copy
+cmd copyto ${{
+  set -f
+  clear; tput cup $(($(tput lines)/3))
+	tmpdest=$(mktemp)
+	{
+	  sed -e 's/\s*#.*//' -e '/^$/d' -e 's/^\S*\s*//' "${XDG_CONFIG_HOME:-$HOME/.config}/shell/bm-dirs"
+	  findmnt -rno TARGET | grep -E "^/mnt/|^/media/$USER/" | while read -r m; do
+	    printf '%s\n' "$m"
+	    find "$m" -mindepth 1 -maxdepth 2 -type d -not -name '.*' 2>/dev/null || true
+	  done
+	} | awk '!seen[$0]++' | fzf --layout=reverse --height 40% --prompt 'Copy to where? ' > "$tmpdest" || true
+	IFS= read -r dest < "$tmpdest" || dest=""
+	rm -f "$tmpdest"
+	[ -z "$dest" ] && exit
+	case "$dest" in "~"*) destpath="$HOME${dest#?}";; *) destpath="$dest";; esac
+	clear; tput cup $(($(tput lines)/3)); tput bold
+	echo "From:"
+	echo "$fx" | sed 's/^/   /'
+	printf "To:\n   %s\n\n\tcopy?[y/N]" "$destpath"
+	read -r ans
+	[ "$ans" != "y" ] && exit
+  if [ -w "$destpath" ]; then
+    for x in $fx; do cp -ivr "$x" "$destpath"; done &&
+    lf -remote "send $id echo 📋 File(s) copied. File(s) copied to $destpath."
+  else
+    printf "\nNo write permission on %s. Use sudo?[y/N]" "$destpath"
+    read root
+    [ "$root" = "y" ] && {
+      for x in $fx; do sudo cp -ivr "$x" "$destpath"; done &&
+      lf -remote "send $id echo 📋 File(s) copied (sudo). File(s) copied to $destpath."
+    }
+  fi
+}}
+cmd yank-dirname $dirname -- "$f" | head -c-1 | clip
+cmd yank-path $printf '%s' "$fx" | clip
+cmd yank-basename $basename -a -- $fx | head -c-1 | clip
+cmd yank-basename-without-extension &basename -a -- $fx | sed 's/\(.\)\.[^.]*$/\1/' | head -c-1 | clip
+
+# Create
+cmd mkdir %{{
+    IFS=" "
+    file="$*"
+    mkdir -p -- "$file"
+    printf '%s' "$file" | sed 's/\\/\\\\/g;s/"/\\"/g' | {
+        IFS= read -r quoted || quoted="$file"
+        lf -remote "send $id cd \"$quoted\""
+    }
+}}
+cmd touch %{{
+    IFS=" "
+    file="$*"
+    case "$file" in
+        /*) ;;
+        *) file="$PWD/$file" ;;
+    esac
+    dir="${file%/*}"
+    [ "$dir" != "$file" ] && mkdir -p -- "$dir"
+    touch -- "$file"
+    printf '%s' "$file" | sed 's/\\/\\\\/g;s/"/\\"/g' | {
+        IFS= read -r quoted || quoted="$file"
+        lf -remote "send $id :select \"$quoted\"; \$\$EDITOR \"$quoted\""
+    }
+}}
+cmd link %{{
+  set --
+  while IFS= read -r line || [ -n "$line" ]; do
+    set -- "$@" "$line"
+  done < ~/.local/share/lf/files
+  mode="$1"
+  shift
+  if [ "$#" -lt 1 ]; then
+    lf -remote "send $id echo no files to link"
+    exit 0
+  fi
+  case "$mode" in
+    # symbolically copy mode is indicating a soft link
+    copy) ln -sr -t . -- "$@";;
+    # while a move mode is indicating a hard link
+    move) ln -t . -- "$@";;
+  esac
+  rm ~/.local/share/lf/files
+  lf -remote "send clear"
+}}
+
+# Cut
+cmd cut-add %{{
+  sed '1s/.*/move/' "$XDG_DATA_HOME/lf/files" > "$XDG_DATA_HOME/lf/files.tmp"
+  mv "$XDG_DATA_HOME/lf/files.tmp" "$XDG_DATA_HOME/lf/files"
+  echo "$fx" >> "$XDG_DATA_HOME/lf/files"
+  lf -remote "send $id unselect"
+  lf -remote "send $id sync"
+}}
+cmd cut-remove %{{
+  sed '1s/.*/move/' "$XDG_DATA_HOME/lf/files" > "$XDG_DATA_HOME/lf/files.tmp"
+  mv "$XDG_DATA_HOME/lf/files.tmp" "$XDG_DATA_HOME/lf/files"
+  echo "$fx" | while read -r file; do
+    sed "\|$file|d" "$XDG_DATA_HOME/lf/files" > "$XDG_DATA_HOME/lf/files.tmp"
+    mv "$XDG_DATA_HOME/lf/files.tmp" "$XDG_DATA_HOME/lf/files"
+  done
+  lf -remote "send $id unselect"
+  lf -remote "send $id sync"
+}}
+
+# Delete
+cmd delete ${{
+  clear; tput cup $(($(tput lines)/3)); tput bold
+  set -f
+  printf "%s\n\t" "$fx"
+  printf "delete?[y/N]"
+  read ans
+  [ $ans = "y" ] && {
+    rm -rf -- $fx 2>/dev/null || {
+      printf "sudo delete?[y/N]"
+      read ans
+      [ $ans = "y" ] && sudo rm -rf -- $fx
+    }
+  }
+}}
+
+cmd trash ${{
+  set -f
+  trash-put -- $fx 2>/dev/null || {
+    printf "sudo trash?[y/N]"
+    read ans
+    [ "${ans:-}" = "y" ] && sudo trash-put -- $fx
+  }
+}}
+
+cmd restore_trash ${{
+  trash-restore
+}}
+
+
+# Extract
+cmd extract ${{
+  clear; tput cup $(($(tput lines)/3)); tput bold
+  set -f
+  printf "%s\n\t" "$fx"
+  printf "extract?[y/N]"
+  read ans
+  [ "$ans" != "y" ] && exit
+
+  # p7zip installs '7z'; the official 7-Zip release installs '7zz'
+  sevenzip=$(command -v 7z || command -v 7zz || command -v 7za || true)
+
+  for archive in $fx; do
+    [ -e "$archive" ] || continue
+    case "$archive" in
+      /*) archive_abs="$archive";;
+      *)  archive_abs="$PWD/$archive";;
+    esac
+    base="${archive##*/}"
+    tar_flag=""
+    type=""
+    name=""
+    case "$base" in
+      *.tar.bz2) name="${base%.tar.bz2}"; type=tar; tar_flag=j;;
+      *.tar.bz)  name="${base%.tar.bz}";  type=tar; tar_flag=j;;
+      *.tbz2)    name="${base%.tbz2}";    type=tar; tar_flag=j;;
+      *.tbz)     name="${base%.tbz}";     type=tar; tar_flag=j;;
+      *.tar.gz)  name="${base%.tar.gz}";  type=tar; tar_flag=z;;
+      *.tgz)     name="${base%.tgz}";     type=tar; tar_flag=z;;
+      *.tar.xz)  name="${base%.tar.xz}";  type=tar; tar_flag=J;;
+      *.txz)     name="${base%.txz}";     type=tar; tar_flag=J;;
+      # zstd has no single-letter tar flag; flagless tar autodetects it
+      *.tar.zst) name="${base%.tar.zst}"; type=tar;;
+      *.tzst)    name="${base%.tzst}";    type=tar;;
+      *.tar)     name="${base%.tar}";     type=tar;;
+      *.zip|*.jar|*.war|*.7z) name="${base%.*}"; type=7z;;
+      *.rar)     name="${base%.rar}";     type=rar;;
+      *.exe)     name="${base%.exe}";     type=cab;;
+      *.ace)     name="${base%.ace}";     type=ace;;
+      *.bz2)     bunzip2 "$archive";      continue;;
+      *.gz)      gunzip "$archive";       continue;;
+      *.xz)      unxz "$archive";         continue;;
+      *.zst)     unzstd "$archive";       continue;;
+      *.lzma)    unlzma "$archive";       continue;;
+      *.Z)       uncompress "$archive";   continue;;
+      *) printf "Unknown archive type: %s\n" "$archive"; continue;;
+    esac
+
+    if [ "$type" = 7z ] && [ -z "$sevenzip" ]; then
+      printf "No 7-Zip binary found (install p7zip or 7-zip): %s\n" "$archive"; continue
+    fi
+
+    # count only (ASCII) — entry names must not pass through dash's $()
+    case "$type" in
+      tar) count=$(tar tf "$archive" 2>/dev/null | awk -F/ 'NF{print $1}' | sort -u | grep -c . || true);;
+      7z)  count=$("$sevenzip" l -slt -ba "$archive" 2>/dev/null | awk -F'= ' '/^Path = /{print $2}' | awk -F/ 'NF{print $1}' | sort -u | grep -c . || true);;
+      rar) count=$(unrar lb "$archive" 2>/dev/null | awk -F/ 'NF{print $1}' | sort -u | grep -c . || true);;
+      *)   count=0;;
+    esac
+
+    target="."
+    if [ "$count" != "1" ]; then
+      printf "\n'%s' has %s top-level entries.\nExtract into folder '%s'? [Y/n] " "$base" "$count" "$name"
+      read folder_ans
+      if [ "$folder_ans" != "n" ] && [ "$folder_ans" != "N" ]; then
+        mkdir -p -- "$name"
+        target="$name"
+      fi
+    fi
+
+    case "$type" in
+      tar) tar x${tar_flag}f "$archive" -C "$target";;
+      7z)  "$sevenzip" x "$archive" -o"$target";;
+      rar) (cd "$target" && unrar x "$archive_abs");;
+      cab) (cd "$target" && cabextract "$archive_abs");;
+      ace) (cd "$target" && unace x "$archive_abs");;
+    esac
+  done
+}}
+
+# Git
+cmd git-root %{{
+  { git rev-parse --show-toplevel 2>/dev/null || true; } | {
+    IFS= read -r root || root=""
+    if [ -n "$root" ]; then
+      lf -remote "send $id cd \"$root\""
+    else
+      lf -remote "send $id echo 'Not in a git repository'"
+    fi
+  }
+}}
+
+cmd on-cd &{{
+  command -v zoxide >/dev/null 2>&1 && zoxide add "$PWD"
+  bash -c '
+  # display git repository status in your prompt
+  for p in /usr/lib/git-core/git-sh-prompt /usr/share/git/completion/git-prompt.sh; do [ -f "$p" ] && . "$p" && break; done
+  GIT_PS1_SHOWDIRTYSTATE=auto
+  GIT_PS1_SHOWSTASHSTATE=auto
+  GIT_PS1_SHOWUNTRACKEDFILES=auto
+  GIT_PS1_SHOWUPSTREAM=auto
+  git=$(__git_ps1 " (%s)")
+
+  fmt="\033[32;1m%u@%h\033[0m:\033[34;1m%d\033[0m\033[1m%f$git\033[0m"
+  lf -remote "send $id set promptfmt \"$fmt\""
+  '
+}}
+
+cmd on-load &{{
+    dir="${1%/*}"
+    cd "${dir:-/}" || exit 1
+    [ "$(git rev-parse --is-inside-git-dir 2>/dev/null)" = false ] || exit 0
+    cmds=""
+    for file in "$@"; do
+        case "$file" in
+            */.git|*/.git/*) continue;;
+        esac
+        status=$(git status --porcelain --ignored -- "$file" | cut -c1-2 | head -n1)
+        if [ -n "$status" ]; then
+            cmds="${cmds}addcustominfo \"${file}\" \"$status\"; "
+        else
+            cmds="${cmds}addcustominfo \"${file}\" ''; "
+        fi
+    done
+    if [ -n "$cmds" ]; then
+        lf -remote "send $id :$cmds"
+    fi
+}}
+
+# iPython
+cmd create-ipynb ${{
+  clear; tput cup $(($(tput lines)/3)); tput bold
+  printf "File Name: "
+  read ans
+  vipy $ans
+}}
+
+# Move
+cmd moveto ${{
+  set -f
+  clear; tput cup $(($(tput lines)/3))
+	tmpdest=$(mktemp)
+	{
+	  sed -e 's/\s*#.*//' -e '/^$/d' -e 's/^\S*\s*//' "${XDG_CONFIG_HOME:-$HOME/.config}/shell/bm-dirs"
+	  findmnt -rno TARGET | grep -E "^/mnt/|^/media/$USER/" | while read -r m; do
+	    printf '%s\n' "$m"
+	    find "$m" -mindepth 1 -maxdepth 2 -type d -not -name '.*' 2>/dev/null || true
+	  done
+	} | awk '!seen[$0]++' | fzf --layout=reverse --height 40% --prompt 'Move to where? ' > "$tmpdest" || true
+	IFS= read -r dest < "$tmpdest" || dest=""
+	rm -f "$tmpdest"
+	[ -z "$dest" ] && exit
+	case "$dest" in "~"*) destpath="$HOME${dest#?}";; *) destpath="$dest";; esac
+	clear; tput cup $(($(tput lines)/3)); tput bold
+	echo "From:"
+	echo "$fx" | sed 's/^/   /'
+	printf "To:\n   %s\n\n\tmove?[Y/n]" "$destpath"
+	read -r ans
+	case "$ans" in [nN]*) exit;; esac
+  # mv can never merge directories: moving a dir onto an existing same-named
+  # dir fails with ENOTEMPTY (same fs) or "unable to remove target" (cross-fs).
+  # Fall back to rsync on that collision. -rt rather than -a because removable
+  # drives are usually NTFS/exFAT and reject Unix ownership/permission bits;
+  # --remove-source-files unlinks each source only after its transfer lands,
+  # then the empty-dir sweep clears the husk (leaving it if anything failed).
+  mvmerge() {
+    _sudo=$1; shift
+    for x in "$@"; do
+      base=${x##*/}
+      if [ -d "$x" ] && [ -d "$destpath/$base" ]; then
+        $_sudo rsync -rt --partial --info=progress2 --remove-source-files \
+          -- "$x/" "$destpath/$base/" &&
+        $_sudo find "$x" -depth -type d -empty -delete
+      else
+        $_sudo mv -iv -- "$x" "$destpath"
+      fi
+    done
+  }
+  if [ -w "$destpath" ]; then
+    mvmerge "" $fx &&
+    lf -remote "send $id echo 🚚 File(s) moved. File(s) moved to $destpath."
+  else
+    printf "\nNo write permission on %s. Use sudo?[y/N]" "$destpath"
+    read root
+    [ "$root" = "y" ] && {
+      mvmerge sudo $fx &&
+      lf -remote "send $id echo 🚚 File(s) moved (sudo). File(s) moved to $destpath."
+    }
+  fi
+}}
+
+# MPV
+# Play videos in lf's on-screen order. $fx arrives in selection (toggle) order,
+# not display order, so re-sort it here following the active sort settings
+# (lf_sortby/lf_reverse/lf_dirfirst). GNU sort can't reproduce lf's natural
+# sort (lowercase -> digit runs compared as ints -> C-locale byte order), so we
+# port lf's sort logic inline in python: stable natural base sort, then the
+# chosen key (mtime/atime/ctime/btime/size via stat, ext, or name), then a full
+# reversal like lf's reverse, then dirfirst. Both branches — the current
+# selection ($fx, e.g. set via `sv`) and the whole-dir video glob — go through
+# the same sort, so playback order always matches what lf displays.
+# NOTE: names flow through stdin, never captured via $() (dash $() corrupts UTF-8).
+
+# Open
+cmd open ${{
+  # Server: everything opens in the terminal.
+  case $(file -bL --mime-type -- "$f") in
+  inode/x-empty|text/*|application/json|application/xml|application/javascript|application/x-*sh|application/x-subrip|application/pgp-encrypted|application/toml|application/yaml) $EDITOR $fx ;;
+  application/zip|application/x-tar|application/gzip|application/x-*compressed-tar|application/x-bzip2|application/x-xz|application/zstd|application/x-7z-compressed|application/x-rar)
+    case $f in
+    *.zip) unzip -l -- "$f" ;;
+    *) tar -tvf "$f" ;;
+    esac | less ;;
+  *)
+    if grep -Iq . -- "$f" 2>/dev/null; then $EDITOR $fx
+    else { file -L -- "$f"; stat -L -- "$f"; } | less
+    fi ;;
+  esac
+}}
+
+# Rename
+cmd bulkrename ${{
+  tmpfile_old="$(mktemp)"
+  tmpfile_new="$(mktemp)"
+  tmpfile_failed="$(mktemp)"
+
+  # List basenames in lf's on-screen order, following the active sort settings
+  # (lf_sortby/lf_reverse/lf_dirfirst): stable
+  # natural base sort, then the chosen key (mtime/atime/ctime/btime/size via
+  # stat, ext, or name), then a full reversal like lf's reverse, then dirfirst
+  # (basenames are relative to $PWD, so stat/isdir resolve correctly).
+  # GNU sort can't reproduce lf's natural sort, so lf's naturalCmp is ported
+  # inline in python.
+  # NOTE: avoid command substitution over multibyte data — dash's $() corrupts
+  # UTF-8 chars straddling its 128-byte read buffer (stray 0x81 CTLESC bytes);
+  # names are only ever piped through stdin, never captured with $().
+  lfsort() {
+    python3 -c '
+import sys, os, unicodedata, functools
+sortby = sys.argv[1] if len(sys.argv) > 1 else "natural"
+rev = len(sys.argv) > 2 and sys.argv[2] == "true"
+dirfirst = len(sys.argv) > 3 and sys.argv[3] == "true"
+def key(b):
+    s = b.decode("utf-8", "surrogateescape").lower()
+    s = unicodedata.normalize("NFD", s)
+    s = "".join(c for c in s if unicodedata.category(c) != "Mn")
+    return s.encode("utf-8", "surrogateescape")
+def isd(c):
+    return 48 <= c <= 57
+def cmp(a, b):
+    n1 = len(a); n2 = len(b); i = 0; j = 0
+    while True:
+        if i >= n1 and j >= n2: return 0
+        if i >= n1: return -1
+        if j >= n2: return 1
+        p = i; d1 = isd(a[i])
+        while i < n1 and isd(a[i]) == d1: i += 1
+        t1 = a[p:i]
+        q = j; d2 = isd(b[j])
+        while j < n2 and isd(b[j]) == d2: j += 1
+        t2 = b[q:j]
+        if d1 and d2:
+            u = int(t1); v = int(t2)
+            if u != v: return -1 if u < v else 1
+            if len(t1) != len(t2): return -1 if len(t1) < len(t2) else 1
+        if t1 != t2: return -1 if t1 < t2 else 1
+def statkey(p):
+    try:
+        st = os.stat(p)
+    except OSError:
+        return 0
+    if sortby == "size": return st.st_size
+    if sortby == "time": return st.st_mtime
+    if sortby == "atime": return st.st_atime
+    if sortby == "ctime": return st.st_ctime
+    if sortby == "btime": return getattr(st, "st_birthtime", st.st_ctime)
+    return 0
+def extkey(p):
+    name = p.rsplit(b"/", 1)[-1]
+    i = name.rfind(b".")
+    return key(name[i:]) if i > 0 else b""
+data = sys.stdin.buffer.read().split(b"\n")
+lines = [x for x in data if x]
+dec = [(key(x), x) for x in lines]
+dec.sort(key=functools.cmp_to_key(lambda x, y: cmp(x[0], y[0])))
+if sortby == "name":
+    dec.sort(key=lambda t: t[0])
+elif sortby == "ext":
+    dec.sort(key=lambda t: (extkey(t[1]), t[0]))
+elif sortby in ("size", "time", "atime", "ctime", "btime"):
+    dec.sort(key=lambda t: statkey(t[1]))
+if rev:
+    dec.reverse()
+if dirfirst:
+    dec.sort(key=lambda t: not os.path.isdir(t[1]))
+sys.stdout.buffer.write(b"\n".join(v for _, v in dec) + (b"\n" if dec else b""))
+' "${lf_sortby:-natural}" "${lf_reverse:-false}" "${lf_dirfirst:-true}"
+  }
+  if [ -n "$fs" ]; then
+    printf '%s\n' "$fs" | xargs -d '\n' -r basename -a -- | lfsort > "$tmpfile_old"
+  elif [ "$lf_hidden" = "true" ]; then
+    find . -mindepth 1 -maxdepth 1 -printf '%f\n' | lfsort > "$tmpfile_old"
+  else
+    find . -mindepth 1 -maxdepth 1 ! -name '.*' -printf '%f\n' | lfsort > "$tmpfile_old"
+  fi
+  cp "$tmpfile_old" "$tmpfile_new"
+  $EDITOR "$tmpfile_new"
+
+  [ "$(wc -l < "$tmpfile_old")" -eq "$(wc -l < "$tmpfile_new")" ] || { rm -f "$tmpfile_old" "$tmpfile_new" "$tmpfile_failed"; exit 1; }
+
+  paste "$tmpfile_old" "$tmpfile_new" | while IFS="$(printf '\t')" read -r src dst
+  do
+    [ "$src" = "$dst" ] || [ -e "$dst" ] ||
+      mv -- "$src" "$dst" 2>/dev/null ||
+      printf '%s\t%s\n' "$src" "$dst" >> "$tmpfile_failed"
+  done
+
+  if [ -s "$tmpfile_failed" ]; then
+    clear; tput cup $(($(tput lines)/3)); tput bold
+    cut -f1 "$tmpfile_failed"
+    printf "Permission needed for %s file(s). Rename with sudo?[y/N]" "$(wc -l < "$tmpfile_failed")"
+    read -r ans
+    [ "$ans" = "y" ] && while IFS="$(printf '\t')" read -r src dst
+    do
+      sudo mv -- "$src" "$dst"
+    done < "$tmpfile_failed"
+  fi
+
+  rm -f "$tmpfile_old" "$tmpfile_new" "$tmpfile_failed"
+  lf -remote "send $id unselect"
+}}
+
+# Samba
+cmd share-samba ${{
+  printf "%s\n\t" "$fx"
+  printf "Share this folder?[y/N]"
+  read ans
+  [ $ans = "y" ] && dmenusamba "$f"
+}}
+
+# Select
+cmd select-mime &{{
+  set -f
+  [ "$#" -eq 0 ] && exit
+
+  case "$1" in
+    -*)
+      pattern="${1#-}"
+      find "$PWD" -mindepth 1 -maxdepth 1 \
+        $([ "$lf_hidden" = false ] && printf '%s\n' ! -name '.*') -print |
+        file -L --mime-type -f - | grep -v "$pattern" | cut -d: -f1 |
+        sort -f > /tmp/lf-select-mime-$$
+      ;;
+    *)
+      find "$PWD" -mindepth 1 -maxdepth 1 \
+        $([ "$lf_hidden" = false ] && printf '%s\n' ! -name '.*') -print |
+        file -L --mime-type -f - | grep "$1" | cut -d: -f1 |
+        sort -f > /tmp/lf-select-mime-$$
+      ;;
+  esac
+
+  [ -s /tmp/lf-select-mime-$$ ] || { rm -f /tmp/lf-select-mime-$$; exit; }
+
+  lf -remote "send $id unselect"
+  sed 's/\\/\\\\/g;s/"/\\"/g' /tmp/lf-select-mime-$$ > /tmp/lf-select-mime-q-$$
+  batch=""
+  while IFS= read -r quoted; do
+    candidate="$batch \"$quoted\""
+    if [ ${#candidate} -gt 8000 ]; then
+      lf -remote "send $id toggle $batch"
+      batch="\"$quoted\""
+    else
+      batch="$candidate"
+    fi
+  done < /tmp/lf-select-mime-q-$$
+  [ -n "$batch" ] && lf -remote "send $id toggle $batch"
+  rm -f /tmp/lf-select-mime-$$ /tmp/lf-select-mime-q-$$
+  # Persist and publish once the toggles above have been applied.
+  lf -remote "send $id save-select"
+}}
+cmd select-dirs select-mime 'inode/directory'
+cmd select-files select-mime '-inode/directory'
+cmd select-videos select-mime 'video/'
+cmd select-images select-mime 'image/'
+cmd select-music select-mime 'audio/'
+
+# Tags: lf only draws them, so selecting/jumping/clearing goes through the tags
+# file. An optional argument limits tag-select* to one tag character.
+cmd tag-remove :tag; tag-toggle
+cmd tag-select &~/.config/lf/tagctl select-here "$@"
+cmd tag-select-all &~/.config/lf/tagctl select-all "$@"
+cmd tag-jump ${{ ~/.config/lf/tagctl jump }}
+cmd tag-clear-here ${{ ~/.config/lf/tagctl clear-here }}
+cmd tag-prune &~/.config/lf/tagctl prune
+# Debounced: on-select fires on every cursor move, and <space> is `toggle; down`,
+# so an un-throttled remote call here floods lf's server socket. See the script.
+cmd on-select &{{
+  ~/.config/lf/statline
+}}
+cmd load-select &{{
+    if [ $# -eq 1 ] && [ "$1" = "$id" ]; then
+        exit
+    fi
+    lf -remote "send $id unselect"
+    if [ -s ~/.local/share/lf/select ]; then
+        tmpq=$(mktemp)
+        sed 's/\\/\\\\/g;s/"/\\"/g;s/^/"/;s/$/"/' ~/.local/share/lf/select > "$tmpq"
+        files=""
+        while IFS= read -r line || [ -n "$line" ]; do
+            files="$files $line"
+        done < "$tmpq"
+        rm -f "$tmpq"
+        lf -remote "send $id toggle $files"
+    fi
+}}
+# Writes the selection file immediately, then debounces the `lf -remote` work
+# (instance sync + ruler size). One remote command per burst instead of one per
+# keypress -- the latter deadlocks lf when <space> is held. See the script.
+cmd save-select &{{
+  ~/.config/lf/selsync
+}}
+cmd alt-paste &{{
+  [ -n "$fs" ] && lf -remote "send $id :$1; save-select"
+  lf -remote "send $id paste" || {
+    clear; tput cup $(($(tput lines)/3)); tput bold
+    set -f
+    printf "%s\n\t" "$fx"
+    printf "Permissions needs.\n"
+    printf "Continue in root?[y/N]"
+    read root
+    [ $root = "y" ] && sudo lf -remote "send $id paste"
+  }
+
+  lf -remote "send $id :clear"
+}}
+
+# Traversal
+cmd fzf ${{
+  tmpsel=$(mktemp)
+  find . -name "$1" | fzf > "$tmpsel" || true
+  IFS= read -r sel < "$tmpsel" || sel=""
+  rm -f "$tmpsel"
+  if [ -n "$sel" ]; then nvim -- "$sel"; fi
+}}
+cmd fzf_search ${{
+  RG_PREFIX="rg --column --line-number --no-heading --color=always --smart-case "
+  FZF_DEFAULT_COMMAND="$RG_PREFIX ''" \
+    fzf --bind "change:reload:$RG_PREFIX {q} || true" \
+    --ansi --layout=reverse --header 'Search in files' \
+    | cut -d':' -f1 | sed 's/\\/\\\\/g;s/"/\\"/g' | {
+      IFS= read -r res || res=""
+      if [ -n "$res" ]; then lf -remote "send $id select \"$res\""; fi
+    }
+}}
+# Fuzzy-pick files. Tab/S-Tab marks multiple; a single pick just moves the
+# cursor, several picks replace the selection and park the cursor on the first.
+# Names go through stdin only -- never $() -- to dodge dash's multibyte bug.
+cmd fzf_files ${{
+  find . -type f | fzf -m --reverse --header 'Tab: mark, Enter: confirm' \
+    | sed 's/\\/\\\\/g;s/"/\\"/g' | {
+      IFS= read -r first || exit 0
+      if IFS= read -r second; then
+        lf -remote "send $id unselect"
+        lf -remote "send $id toggle \"$first\""
+        lf -remote "send $id toggle \"$second\""
+        while IFS= read -r sel; do
+          lf -remote "send $id toggle \"$sel\""
+        done
+      fi
+      lf -remote "send $id select \"$first\""
+    }
+}}
+cmd z %{{
+	{ zoxide query --exclude $PWD $@ 2>/dev/null || true; } | sed 's/\\/\\\\/g;s/"/\\"/g' | {
+		IFS= read -r result || result=""
+		if [ -n "$result" ]; then lf -remote "send $id cd \"$result\""; fi
+	}
+}}
+cmd zi ${{
+	{ zoxide query -i 2>/dev/null || true; } | sed 's/\\/\\\\/g;s/"/\\"/g' | {
+		IFS= read -r result || result=""
+		if [ -n "$result" ]; then lf -remote "send $id cd \"$result\""; fi
+	}
+}}
+cmd follow_link %{{
+  { readlink -- "$f" || true; } | sed 's/\\/\\\\/g;s/"/\\"/g' | {
+    IFS= read -r target || target=""
+    if [ -n "$target" ]; then lf -remote "send ${id} select \"$target\""; fi
+  }
+}}
+cmd lastfiles ${{
+  tmplist=$(mktemp)
+  tmpsel=$(mktemp)
+  nvim -u NONE --headless +'lua io.write(table.concat(vim.v.oldfiles, "\n") .. "\n")' +qa > "$tmplist"
+  while IFS= read -r file; do
+    [ -f "$file" ] && printf "%s\n" "$file"
+  done < "$tmplist" | fzf --reverse > "$tmpsel" || lf -remote "send $id reload"
+  IFS= read -r file < "$tmpsel" || file=""
+  rm -f "$tmplist" "$tmpsel"
+  if [ -n "$file" ]; then $EDITOR "$file"; fi
+}}
+cmd edit-config ${{
+  $EDITOR ~/.config/lf/lfrc
+  lf -remote "send $id source ~/.config/lf/lfrc"
+}}
+
+cmd wine-run ${{
+  if [ "$(file -bL --mime-type -- "$f")" = "application/vnd.microsoft.portable-executable" ]; then
+    file="${f##*/}"
+    file="${file%.*}"
+    export WINEPREFIX="${WINEPREFIX:-${XDG_DATA_HOME:-${HOME}/.local/share}/wine}/$file"
+    wine $f
+  fi
+}}
+
+# Wallpaper
+
+### --- Bindings --- ###
+# Unbinding
+map b
+map c
+map d
+map f
+map g
+map H
+map M
+map p
+map s
+map t
+map v
+map w
+map y
+map z
+
+# Shortcuts
+source ~/.config/lf/shortcutrc
+
+# Chmod
+map zx chmods
+
+# Clear && Unselect
+map <c-l> :clear; unselect; save-select
+map <c-x> :clear; unselect; save-select
+
+# Compress
+map Cc compress
+
+# Copy
+map Cp copyto; clear; save-select
+map Y $printf "%s" "$fx" | clip; clear; save-select
+map yb yank-basename
+map yd yank-dirname
+map yl $printf "%s" "$fx" | sed -E 's/^.+\[/https:\/\/piped.video\/watch?v=/' | sed -E 's/\]\..+//' | clip
+map yn yank-basename-without-extension
+map yp yank-path
+map yt $printf "%s" "$fx" | sed -E 's/^.+\[/https:\/\/www.youtube.com\/watch?v=/' | sed -E 's/\]\..+//' | clip
+map yy copy
+
+# Create
+map Md push :mkdir<space>
+map Mf push :touch<space>
+map Ml link
+
+# Cut
+map dd cut-add
+map dr cut-remove
+
+# Delete
+map D trash; clear; save-select
+map <delete> delete; clear; save-select
+
+# Drag & Drop
+
+# Editor
+map <enter> $$EDITOR "$f"
+map <c-v> push :!nvim<space>
+map vlf edit-config
+map vll lastfiles
+map vln $nvim -u NONE --headless +'lua io.write(vim.v.oldfiles[1] .. "\n")' +qa | { IFS= read -r file || exit 0; if [ -f "$file" ]; then $EDITOR "$file" < /dev/tty; fi; }
+
+# Extract
+map E extract; clear; save-select
+
+# Info
+map za set info size:time
+map zc set info custom
+map zh set hidden!
+map zn set info
+map zr set reverse!
+map zs set info size
+map zt set info time
+
+# iPython
+map Mi create-ipynb
+
+# Move
+map Mv moveto; clear; save-select
+
+# MPV
+
+
+# Open
+map O $mimeopen "$f"
+map o open
+map <c-o> $mimeopen --ask "$f"
+
+# Paste
+map PP alt-paste cut
+map pp alt-paste copy
+
+# Preview
+map zd set dirpreviews!
+map zp set preview!
+
+# Program
+map x $$f
+map X !$f
+
+# Quit
+map <esc> quit
+map <c-c> quit
+
+# Rename
+map a :rename; cmd-right # after extension
+map A :rename; cmd-end # at the very end
+map B bulkrename
+map r :rename; cmd-delete-home # filename
+map R :rename; cmd-end; cmd-delete-home # entire filename
+map i :rename # before extension
+map I :rename; cmd-home # at the very beginning
+
+# Redraw && Reload
+map <c-r> :redraw; reload
+
+# Restore
+map U restore_trash
+
+# Samba
+map SMB share-samba
+
+# Select
+map <space> :toggle; down; save-select
+map sd select-dirs
+map sf select-files
+map si :invert; save-select
+map sm select-music
+map sp select-images
+map su :unselect; save-select
+map sU :glob-unselect; save-select
+map sv select-videos
+
+# Sort
+map sa :set sortby atime; set info atime
+map sb :set sortby btime; set info btime
+map sc :set sortby ctime; set info ctime
+map se :set sortby ext; set info
+map sn :set sortby natural; set info
+map ss :set sortby size; set info size
+map st :set sortby time; set info time
+
+# Tag (ts/tt/tk/tr* are bookmarks from shortcutrc)
+map tg tag-toggle
+map tc push :tag<space>
+map tu tag-remove
+map ta tag-select
+map tA tag-select-all
+map tf tag-jump
+map tU tag-clear-here
+map tP tag-prune
+
+# Traversal
+map fa $fzf | { IFS= read -r sel || exit 0; lf -remote "send $id select \"$sel\""; }
+map fb $sed -e 's/\s*#.*//' -e '/^$/d' -e 's/^\S*\s*//' ${XDG_CONFIG_HOME:-$HOME/.config}/shell/bm-dirs | fzf | { IFS= read -r d || exit 0; case "$d" in "~"*) d="$HOME${d#?}";; esac; lf -remote "send $id cd \"$d\""; }
+map fD zi
+map fd $find . -type d | fzf | { IFS= read -r sel || exit 0; lf -remote "send $id select \"$sel\""; }
+map ff fzf_files
+map gl follow_link
+map gc git-root
+map <c-f> fzf_search
+map <c-z> z
+
+# Wallpaper
+
+# Wine
+map wi wine-run
+
+load-select
+on-cd

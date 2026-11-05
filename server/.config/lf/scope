@@ -1,0 +1,37 @@
+#!/bin/sh
+
+# File preview handler for lf (server: text-only, no image previews).
+# Debian packages bat as `batcat`; falls back to plain cat without either.
+
+set -C -f
+
+width=$(($4 - 2))
+
+text() {
+  if command -v bat >/dev/null 2>&1; then
+    bat -p --theme ansi --terminal-width "$width" -f "$1"
+  elif command -v batcat >/dev/null 2>&1; then
+    batcat -p --theme ansi --terminal-width "$width" -f "$1"
+  else
+    cat -- "$1"
+  fi
+}
+
+case "$(file --dereference --brief --mime-type -- "$1")" in
+text/troff) man ./ "$1" | col -b ;;
+text/* | */xml | application/json | application/java* | application/x-ndjson | inode/x-empty) text "$1" ;;
+application/gzip) zcat -- "$1" ;;
+application/zip) unzip -l -- "$1" ;;
+application/x-tar | application/x-*compressed-tar | application/x-bzip2 | application/x-xz | application/zstd) tar -tvf "$1" ;;
+application/pgp-encrypted) gpg -d -- "$1" ;;
+*)
+  # Unknown type: show text files as text, anything else as file info.
+  if grep -Iq . -- "$1" 2>/dev/null; then
+    text "$1"
+  else
+    file -L -- "$1"
+    stat -L -- "$1"
+  fi
+  ;;
+esac
+exit 1

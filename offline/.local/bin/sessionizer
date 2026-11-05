@@ -1,0 +1,40 @@
+#!/bin/sh
+
+# Pick a tmux session or a directory and switch to it.
+# Server version: needs only tmux and fzf (no sesh/zoxide/fd).
+# Candidates: running sessions, bookmarked dirs (shell/bm-dirs), git repos in /var/www.
+# Bound in tmux.conf through `display-popup -E`, so plain fzf has a tty.
+
+command -v fzf >/dev/null 2>&1 || { echo "sessionizer: fzf not found (it ships in ~/.local/bin of these dotfiles)" >&2 && exit 1; }
+
+bmdirs="${XDG_CONFIG_HOME:-${HOME}/.config}/shell/bm-dirs"
+
+candidates() {
+  tmux list-sessions -F '#S' 2>/dev/null
+  [ -f "$bmdirs" ] && awk '!/^[ \t]*#/ && NF >= 2 {print $2}' "$bmdirs" | while IFS= read -r d; do
+    d=$(eval "printf '%s' \"$d\"")
+    [ -d "$d" ] && printf '%s\n' "$d"
+  done
+  find /var/www -mindepth 1 -maxdepth 3 -type d -name .git -prune 2>/dev/null | sed 's|/\.git$||'
+}
+
+sel=$(candidates | awk '!seen[$0]++' | fzf \
+  --no-sort --cycle --ignore-case --reverse --border=sharp \
+  --border-label "╢ TheSiahxyz ╟" --prompt "💡  " \
+  --header "enter: switch/create  ^x: kill session" \
+  --bind 'ctrl-x:execute-silent(tmux kill-session -t "={}")+abort') || exit 0
+
+case "$sel" in
+/*)
+  # A directory: reuse or create a session named after it.
+  name=$(basename "$sel" | tr '.:' '__')
+  tmux has-session -t "=$name" 2>/dev/null || tmux new-session -ds "$name" -c "$sel"
+  ;;
+*) name="$sel" ;;
+esac
+
+if [ -n "$TMUX" ]; then
+  tmux switch-client -t "=$name"
+else
+  tmux attach-session -t "=$name"
+fi

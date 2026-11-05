@@ -4,12 +4,16 @@
 #	Run by itself, set the wallpaper (at X start).
 #	If given a file, set that as the new wallpaper.
 #	If given a directory, choose random file in it.
+#	If given a video, play it as a live wallpaper (see `bgvid`).
 #	If wal is installed, also generates a colorscheme.
 
 # Location of link to wallpaper link.
 wallloc="${XDG_DATA_HOME:-${HOME}/.local/share}/wallpapers"
 bgloc="$wallloc/bg"
-vidloc="$wallloc/video/1/filename00001.jpg"
+# Link to the video wallpaper (exists only while a video is the wallpaper)
+# and a still frame of it used for pywal, notifications and the root window.
+vidloc="$wallloc/bgvid"
+vidframe="$wallloc/bgvid.png"
 
 # Configuration files of applications that have their themes changed by pywal.
 dunstconf="${XDG_CONFIG_HOME:-${HOME}/.config}/dunst/dunstrc"
@@ -27,14 +31,10 @@ shift $((OPTIND - 1))
 
 [ -d "$wallloc" ] || mkdir -p "$wallloc"
 
-[ "$(ls "$wallloc/video" 2>/dev/null)" ] && {
-  [ -n "$(pgrep -f "wallset")" ] && pgrep -f "wallset" | xargs kill
-  wallset -r 2>/dev/null
-  wallset -q 2>/dev/null
-  rm -rf "$wallloc/video"
-}
-
 [ -f ~/.fehbg ] && rm -f ~/.fehbg
+
+# Stop a running video wallpaper (only its own processes, via pidfile).
+bgvid stop
 
 # xwallpaper only parses PNG and JPEG, so anything else (avif, webp, gif...)
 # is converted to PNG first and the link points at the conversion.
@@ -52,26 +52,32 @@ linkbg() {
   esac
 }
 
-trueloc="$(readlink -f "$1")" &&
+# Grab a still frame of the video: pywal colors, notification icon, and the
+# root-window fallback shown until mpv draws (and to pseudo-transparent apps).
+# Seeks 1s in to skip black intro frames; retries from 0 for very short clips.
+linkvid() {
+  rm -f "$vidframe"
+  { ffmpeg -nostdin -loglevel error -y -ss 1 -i "$1" -frames:v 1 "$vidframe" && [ -s "$vidframe" ]; } ||
+    { ffmpeg -nostdin -loglevel error -y -i "$1" -frames:v 1 "$vidframe" && [ -s "$vidframe" ]; } || {
+    [ -z "$silent" ] && notify-send "🎞️ Error" "Could not read that video."
+    return 1
+  }
+  ln -sf "$1" "$vidloc"
+  ln -sf "$vidframe" "$bgloc"
+}
+
+if [ -n "$1" ]; then
+  trueloc="$(readlink -f "$1")" || exit 1
   case "$(file --mime-type -b "$trueloc")" in
-  image/*) linkbg "$trueloc" && [ -z "$silent" ] && notify-send -i "$bgloc" "Changing wallpaper..." ;;
-  inode/directory) linkbg "$(find -L "$trueloc" -iregex '.*.\(jpg\|jpeg\|png\|gif\|avif\|webp\)' -type f | shuf -n 1)" && [ -z "$silent" ] && notify-send -i "$bgloc" "Random Wallpaper chosen." ;;
-  video/*)
-    mkdir -p "$wallloc/video" 2>/dev/null
-    if [ ! "${trueloc##*.}" = "mp4" ] || [ "$(($(mediainfo --Output="General;%Duration%" "$trueloc")))" -gt 10000 ]; then
-      notify-send "⌛ Converting video for wallpaper..." && ffmpeg -i "$trueloc" -t 3 "$wallloc/video/bg.mp4" 2>/dev/null
-    else
-      cp "$trueloc" "$wallloc/video/bg.mp4" 2>/dev/null
-    fi
-    trueloc="$wallloc/video/bg.mp4"
-    wallset --video "$trueloc" >/dev/null 2>&1 && [ -z "$silent" ] && notify-send -i "$vidloc" "Changing wallpaper..."
-    exit
-    ;;
+  image/*) linkbg "$trueloc" && rm -f "$vidloc" && [ -z "$silent" ] && notify-send -i "$bgloc" "Changing wallpaper..." ;;
+  inode/directory) linkbg "$(find -L "$trueloc" -iregex '.*.\(jpg\|jpeg\|png\|gif\|avif\|webp\)' -type f | shuf -n 1)" && rm -f "$vidloc" && [ -z "$silent" ] && notify-send -i "$bgloc" "Random Wallpaper chosen." ;;
+  video/*) linkvid "$trueloc" && [ -z "$silent" ] && notify-send -i "$bgloc" "Changing to video wallpaper..." ;;
   *)
-    [ -z "$silent" ] && notify-send "🖼️ Error" "Not a valid image or directory."
+    [ -z "$silent" ] && notify-send "🖼️ Error" "Not a valid image, directory or video."
     exit 1
     ;;
   esac
+fi
 
 # If pywal is installed, use it.
 if command -v wal >/dev/null 2>&1; then
@@ -83,5 +89,16 @@ else
 fi
 
 xwallpaper --zoom "$bgloc"
+
+# A video is the wallpaper (set now, or in a previous session): play it.
+# If the video was moved/deleted, drop the link and keep the still frame.
+if [ -L "$vidloc" ]; then
+  if [ -e "$vidloc" ]; then
+    bgvid start "$(readlink -f "$vidloc")"
+  else
+    rm -f "$vidloc"
+  fi
+fi
+
 # If running, dwm hit the key to refresh the color scheme.
 pidof dwm >/dev/null && xdotool key ctrl+F5

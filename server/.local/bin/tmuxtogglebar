@@ -1,0 +1,6 @@
+#!/bin/sh
+
+case "$(tmux show-option -gqv status)" in
+on) tmux set-option -g status off ;;
+off) tmux set-option -g status on ;;
+esac

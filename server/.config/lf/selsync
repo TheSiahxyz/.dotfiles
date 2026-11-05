@@ -1,0 +1,77 @@
+#!/bin/sh
+# Persist the lf selection, sync it to other instances, and publish its total
+# size to the ruler as the `user_selsize` option (see ~/.config/lf/ruler).
+#
+# WHY THIS IS A SCRIPT AND NOT INLINE lfrc SHELL
+#
+# lf (r42) deadlocks when its server socket is flooded. Every `lf -remote` is a
+# round-trip through $XDG_RUNTIME_DIR/lf.sock; when save-select fires one per
+# keypress and <space> is held down, the server stops draining connections and
+# the UI stops responding -- including to quit -- while `lf -remote` helpers
+# pile up in the hundreds. Reproduced with 300 rapid toggles across two
+# instances: 300 stuck helpers, unresponsive UI. The pristine config without
+# any size display wedges the same way, so this is not specific to the ruler.
+#
+# The selection file is therefore written on every call -- that part is cheap
+# and involves no IPC -- while everything that needs the server is deferred
+# behind a debounce plus a single-flight lock. A burst of N toggles costs one
+# broadcast instead of N.
+
+set -u
+
+sel="${XDG_DATA_HOME:-$HOME/.local/share}/lf/select"
+lock="${XDG_RUNTIME_DIR:-/tmp}/lf-selsync.lock"
+
+# Coalescing window. Long enough to swallow held-key repeats, short enough that
+# the ruler and other instances still feel immediate.
+debounce=0.3
+
+# Age in minutes after which a lock is assumed abandoned (its owner was killed
+# before the trap could run) and is reclaimed by the next toggle.
+stale_after=+1
+
+mkdir -p "${sel%/*}" 2>/dev/null
+printf '%s' "${fs-}" >"$sel"
+
+if ! mkdir "$lock" 2>/dev/null; then
+    [ -n "$(find "$lock" -maxdepth 0 -mmin "$stale_after" 2>/dev/null)" ] &&
+        rmdir "$lock" 2>/dev/null
+    exit 0
+fi
+trap 'rmdir "$lock" 2>/dev/null' EXIT HUP INT TERM
+
+# Identity of the selection file, used to detect writes that landed while we
+# were busy so the final published value is never stale.
+stamp() {
+    stat -c '%s:%.9Y' "$sel" 2>/dev/null || printf 'none'
+}
+
+# A wedged lf must never leave the lock behind, hence the timeout.
+remote() {
+    timeout 5 lf -remote "$1" 2>/dev/null || true
+}
+
+total_size() {
+    # awk, not `tr '\n' '\0'`: the selection file has no trailing newline, so tr
+    # would hand du a final entry without its NUL terminator.
+    awk 'NR>0{printf "%s%c", $0, 0}' "$sel" |
+        du -scb --files0-from=- 2>/dev/null | tail -n 1 | cut -f1
+}
+
+while :; do
+    sleep "$debounce"
+    before=$(stamp)
+
+    # Pull the other instances onto the current selection.
+    [ -n "${id-}" ] && remote "send load-select $id"
+
+    if [ -s "$sel" ]; then
+        total=$(total_size)
+        [ -n "${total:-}" ] &&
+            remote "send set user_selsize \"$(numfmt --to=iec --format='%.1f' -- "$total")\""
+    else
+        remote "send set user_selsize \"\""
+    fi
+
+    [ "$(stamp)" = "$before" ] && break
+done

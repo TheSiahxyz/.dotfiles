@@ -1,0 +1,121 @@
+#!/bin/sh
+
+# Live (video) wallpaper for X11/dwm: mpv plays inside an xwinwrap window
+# that sits below every other window, like a wallpaper.
+# Normally driven by `setbg <video>`; usable by hand too.
+#
+#   bgvid start <video>   play <video> as wallpaper (replaces a running one)
+#   bgvid stop            stop it
+#   bgvid pause|play|toggle
+#   bgvid status
+#
+# While running, playback pauses automatically when the desktop is covered.
+# BGVID_PAUSE selects when:
+#   any        (default) any window visible on the current tag
+#   fullscreen only while a fullscreen window is visible
+#   never      always play
+
+rundir="${XDG_RUNTIME_DIR:-/tmp/bgvid-$(id -u)}"
+pidfile="$rundir/bgvid.pid"
+sock="$rundir/bgvid.sock"
+mode="${BGVID_PAUSE:-any}"
+
+mkdir -p "$rundir"
+
+ipc() {
+  [ -S "$sock" ] && printf '%s\n' "$1" | socat - "UNIX-CONNECT:$sock" >/dev/null 2>&1
+}
+
+running() {
+  [ -S "$sock" ] && pgrep -f -- "--input-ipc-server=$sock" >/dev/null
+}
+
+stop() {
+  # Only kill processes recorded by us that still look like ours.
+  if [ -f "$pidfile" ]; then
+    while read -r pid; do
+      case "$(tr '\0' ' ' <"/proc/$pid/cmdline" 2>/dev/null)" in
+      *xwinwrap* | *bgvid*) kill "$pid" 2>/dev/null ;;
+      esac
+    done <"$pidfile"
+    rm -f "$pidfile"
+  fi
+  # mpv is identified by its unique IPC socket path.
+  pkill -f -- "--input-ipc-server=$sock" 2>/dev/null
+  rm -f "$sock"
+}
+
+# 0 if the wallpaper should pause right now.
+covered() {
+  wins="$(xprop -root _NET_CLIENT_LIST 2>/dev/null | sed -n 's/.*# //p' | tr -d ',')"
+  for w in $wins; do
+    # dwm hides windows of other tags by moving them off-screen (negative x),
+    # so "visible" = mapped and at least partly on screen.
+    vis="$(xwininfo -id "$w" 2>/dev/null | awk '
+      /Absolute upper-left X:/ {x=$NF} /Absolute upper-left Y:/ {y=$NF}
+      /Width:/ {w=$NF} /Height:/ {h=$NF} /Map State:/ {m=$NF}
+      END { if (m == "IsViewable" && x + w > 0 && y + h > 0) print 1 }')"
+    [ -n "$vis" ] || continue
+    case "$mode" in
+    any) return 0 ;;
+    fullscreen) xprop -id "$w" _NET_WM_STATE 2>/dev/null | grep -q _NET_WM_STATE_FULLSCREEN && return 0 ;;
+    esac
+  done
+  return 1
+}
+
+watch() {
+  [ "$mode" = never ] && exit 0
+  state=""
+  # Give mpv a moment to create its socket.
+  i=0
+  while [ ! -S "$sock" ] && [ "$i" -lt 20 ]; do sleep 0.5 && i=$((i + 1)); done
+  while running; do
+    if covered; then new=true; else new=false; fi
+    if [ "$new" != "$state" ]; then
+      ipc "{\"command\":[\"set_property\",\"pause\",$new]}" && state="$new"
+    fi
+    sleep 1
+  done
+}
+
+start() {
+  vid="$(readlink -f "$1" 2>/dev/null)"
+  [ -f "$vid" ] || { echo "bgvid: no such file: $1" >&2 && exit 1; }
+  for dep in xwinwrap mpv socat; do
+    command -v "$dep" >/dev/null 2>&1 || {
+      notify-send "🎞️ Video wallpaper" "$dep is not installed." 2>/dev/null
+      echo "bgvid: $dep is not installed" >&2
+      exit 1
+    }
+  done
+  stop
+
+  # --config=no: keep the user's mpv.conf/scripts (resume, autoload playlists,
+  # OSC...) out of the wallpaper. --panscan=1 fills the screen like
+  # `xwallpaper --zoom` (crops instead of letterboxing).
+  setsid xwinwrap -ov -ni -b -nf -fs -- \
+    mpv -wid WID --config=no --load-scripts=no \
+    --loop-file=inf --no-audio --hwdec=auto-safe --panscan=1.0 \
+    --osc=no --osd-level=0 --no-input-default-bindings --input-vo-keyboard=no \
+    --no-terminal --input-ipc-server="$sock" "$vid" \
+    </dev/null >/dev/null 2>&1 &
+  echo "$!" >"$pidfile"
+
+  setsid "$0" watch </dev/null >/dev/null 2>&1 &
+  echo "$!" >>"$pidfile"
+}
+
+case "$1" in
+start) start "$2" ;;
+stop) stop ;;
+watch) watch ;;
+pause) ipc '{"command":["set_property","pause",true]}' ;;
+play) ipc '{"command":["set_property","pause",false]}' ;;
+toggle) ipc '{"command":["cycle","pause"]}' ;;
+status) running && echo "playing: $(readlink -f "${XDG_DATA_HOME:-$HOME/.local/share}/wallpapers/bgvid")" || echo "stopped" ;;
+*)
+  sed -n '6,11s/^# \{0,1\}//p' "$0" >&2
+  exit 1
+  ;;
+esac
