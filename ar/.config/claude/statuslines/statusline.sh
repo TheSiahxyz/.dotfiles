@@ -203,18 +203,24 @@ detect_language_info() {
 # CCUSAGE DATA FETCHING (with caching)
 # ============================================================
 
+# On/off switch for ccusage ($/day, block time left). Each refresh costs
+# ~56 CPU-seconds, so it is off by default. Set to 1 (or export
+# STATUSLINE_CCUSAGE=1) to re-enable.
+readonly CCUSAGE_ENABLED="${STATUSLINE_CCUSAGE:-0}"
 readonly CCUSAGE_CACHE_FILE="${SCRIPT_DIR}/.ccusage_cache"
 readonly CCUSAGE_LOCK_FILE="${SCRIPT_DIR}/.ccusage_refresh.lock"
-readonly CCUSAGE_CACHE_TTL=60     # seconds before cache is considered stale
+readonly CCUSAGE_CACHE_TTL=300    # seconds before cache is considered stale (each refresh burns ~40s of CPU)
 readonly CCUSAGE_LOCK_TTL=300     # seconds before a stuck refresh lock is reclaimed
 readonly CCUSAGE_FETCH_TIMEOUT=90 # safety net per ccusage call (normal: ~40s)
 
-# Run `npx ccusage ...`, bounded by a timeout when available
+# Run ccusage (global install preferred, npx fallback), bounded by a timeout when available
 _ccusage_call() {
+  local -a cmd=(npx ccusage)
+  command -v ccusage >/dev/null 2>&1 && cmd=(ccusage)
   if command -v timeout >/dev/null 2>&1; then
-    timeout "$CCUSAGE_FETCH_TIMEOUT" npx ccusage "$@" 2>/dev/null
+    timeout "$CCUSAGE_FETCH_TIMEOUT" "${cmd[@]}" "$@" 2>/dev/null
   else
-    npx ccusage "$@" 2>/dev/null
+    "${cmd[@]}" "$@" 2>/dev/null
   fi
 }
 
@@ -769,7 +775,7 @@ main() {
 
   # Get ccusage data (daily cost, remaining time, etc.)
   local ccusage_data="" daily_cost="" remaining_minutes="" projected_cost="" block_cost="" ccusage_burn_rate=""
-  if check_jq; then
+  if [[ "$CCUSAGE_ENABLED" == 1 ]] && check_jq; then
     ccusage_data=$(get_ccusage_data "$session_id" 2>/dev/null || echo "")
     if [[ -n "$ccusage_data" ]]; then
       IFS='|' read -r daily_cost remaining_minutes projected_cost block_cost ccusage_burn_rate <<<"$ccusage_data"
