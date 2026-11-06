@@ -32,3 +32,7 @@ user_pref("ui.context_menus.after_mouseup", true);
 user_pref("ui.key.menuAccessKeyFocuses", false);
 // Alt key change
 user_pref("ui.key.menuAccessKey", -1);
+// Dark mode: report a dark system theme (the "System theme - auto" browser
+// theme follows it) and ask websites for their dark mode (0=dark, 1=light, 2=follow browser theme)
+user_pref("ui.systemUsesDarkTheme", 1);
+user_pref("layout.css.prefers-color-scheme.content-override", 0);
