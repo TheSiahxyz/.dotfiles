@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# Single instance: sb-volume/sb-mic (or concurrent runs) may race past pidof.
+exec 9>"${XDG_RUNTIME_DIR:-/tmp}/sb-audioup.lock"
+flock -n 9 || exit 0
+
 # Updates the volume and mic statusbar modules when audio devices change
 # (e.g. bluetooth/usb device connect/disconnect, volume/mute changed outside dwm)
 

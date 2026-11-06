@@ -52,8 +52,8 @@ fit_string() {
 signal="$(awk -F', *' -v name="${0##*/}" '$2 ~ name {print $3+0}' "${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless/dwmblocks/config.def.h")"
 
 [ "$signal" -eq 0 ] && {
-  pidof -x sb-mpdup >/dev/null 2>&1 || sb-mpdup >/dev/null 2>&1 &
-  pidof -x sb-playerctlup >/dev/null 2>&1 || sb-playerctlup >/dev/null 2>&1 &
+  { pidof -x sb-mpdup || sb-mpdup; } >/dev/null 2>&1 &
+  { pidof -x sb-playerctlup || sb-playerctlup; } >/dev/null 2>&1 &
 }
 
 status() {
