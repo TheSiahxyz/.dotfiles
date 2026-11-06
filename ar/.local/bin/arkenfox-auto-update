@@ -8,8 +8,8 @@
 
 # Search for all Firefox and Librewolf profiles using Arkenfox.
 profiles="$(grep -sH "arkenfox user.js" \
-  /home/*/.librewolf/*.default/user.js \
-  /home/*/.mozilla/firefox/*.default/user.js)"
+  /home/*/.librewolf/*/user.js \
+  /home/*/.mozilla/firefox/*/user.js)"
 
 IFS='
 '

@@ -1,0 +1,75 @@
+#!/bin/sh
+
+# Install THESIAH's browser add-ons for Firefox and LibreWolf through
+# enterprise policies (ExtensionSettings). Policy-installed add-ons go into
+# every profile, update from AMO and need no "enable this add-on?" approval.
+#
+# On Linux the browser reads /etc/<browser>/policies/policies.json *instead of*
+# the packaged /usr/lib/<browser>/distribution/policies.json when it exists, so
+# the packaged policies are merged in to keep them. A pacman hook re-runs this
+# after browser upgrades so changes to the packaged policies are picked up.
+#
+# Usage: sudo browser-policies   (after editing the add-on list below)
+
+# <add-on ID> <AMO slug>
+addons="
+uBlock0@raymondhill.net                        ublock-origin
+{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}         adblock-plus
+addon@darkreader.org                           darkreader
+enhancerforyoutube@maximerf.addons.mozilla.org enhancer-for-youtube
+idcac-pub@guus.ninja                           istilldontcareaboutcookies
+languagetool-webextension@languagetool.org     languagetool
+{c5867acc-54c9-4074-9574-04d8818d53e8}         livemarks
+{b86e4813-687a-43e6-ab65-0bde4ab75758}         localcdn-fork-of-decentraleyes
+passff@invicem.pro                             passff
+sponsorBlocker@ajay.app                        sponsorblock
+{b9db16a4-6edc-47ec-a1f4-b86292ed211d}         video-downloadhelper
+{d7742d87-e61d-4b78-b8a1-b469842139fa}         vimium-ff
+"
+
+browsers="firefox librewolf"
+libdir="${BROWSER_POLICIES_LIBDIR:-/usr/lib}"
+etcdir="${BROWSER_POLICIES_ETCDIR:-/etc}"
+self="/usr/local/lib/thesiah/browser-policies"
+
+die() {
+  echo "${0##*/}: $*" >&2
+  exit 1
+}
+
+[ -n "$BROWSER_POLICIES_ETCDIR" ] || [ "$(id -u)" -eq 0 ] || die "run as root (sudo ${0##*/})."
+command -v jq >/dev/null 2>&1 || die "jq is required."
+
+# Keep the copy the pacman hook runs in sync with the one being run
+if [ -z "$BROWSER_POLICIES_ETCDIR" ] && ! cmp -s "$0" "$self"; then
+  install -Dm755 "$0" "$self" || die "failed to install $self"
+fi
+
+ours="$(printf '%s\n' "$addons" | jq -Rn '
+  [inputs | select(test("\\S")) | [splits("\\s+")] | map(select(length > 0))]
+  | map({
+      key: .[0],
+      value: {
+        install_url: "https://addons.mozilla.org/firefox/downloads/latest/\(.[1])/latest.xpi",
+        installation_mode: "normal_installed"
+      }
+    })
+  | {policies: {ExtensionSettings: from_entries}}')" || die "failed to build the add-on list"
+
+for b in $browsers; do
+  [ -d "$libdir/$b" ] || continue
+  dist="$libdir/$b/distribution/policies.json"
+  out="$etcdir/$b/policies/policies.json"
+  mkdir -p "${out%/*}" || die "failed to create ${out%/*}"
+
+  if [ -f "$dist" ]; then
+    printf '%s' "$ours" | jq -s '.[0] * .[1]' "$dist" - >"$out.tmp"
+  else
+    printf '%s\n' "$ours" >"$out.tmp"
+  fi && mv "$out.tmp" "$out" || {
+    rm -f "$out.tmp"
+    die "failed to write $out"
+  }
+  chmod 644 "$out"
+  echo "Wrote $out"
+done
