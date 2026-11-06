@@ -62,6 +62,21 @@ create_profile() {
       [ -e "$src/$f" ] || [ -L "$src/$f" ] || continue
       cp -a "$src/$f" "$root/$new/" || echo "${0##*/}: warning: failed to copy $f" >&2
     done
+
+    # Profile-specific overrides (e.g. ~/.config/browser/work.js for $USER.work)
+    # are appended after thesiah.js. arkenfox-updater appends every *.js in a
+    # user-overrides.js directory in order, so updates keep them.
+    cfg="${XDG_CONFIG_HOME:-$HOME/.config}/browser"
+    extra="$cfg/${new#*.}.js"
+    dir="$root/$new/user-overrides.js"
+    if [ -f "$extra" ] && [ -f "$cfg/thesiah.js" ] && [ -f "$root/$new/arkenfox.js" ]; then
+      [ -L "$dir" ] && rm "$dir"
+      mkdir -p "$dir"
+      ln -sfn "$cfg/thesiah.js" "$dir/00-thesiah.js"
+      ln -sfn "$extra" "$dir/10-${new#*.}.js"
+      cat "$root/$new/arkenfox.js" "$dir"/*.js >"$root/$new/user.js" ||
+        echo "${0##*/}: warning: failed to rebuild user.js" >&2
+    fi
     echo "Created profile $new (settings copied from $home_profile)"
   else
     echo "Created empty profile $new"
