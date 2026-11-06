@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
-"""Fetch lyrics from Genius for the current (or given) song and write them
+"""Fetch lyrics (Genius, then Bugs) for the current (or given) song and write them
 in the flat `<artist> - <title>.txt` form that ncmpcpp reads.
 
 Why this exists: ncmpcpp 0.10.1's built-in Genius scraper stops at the first
 </div> inside the lyrics container. Genius now nests a LyricsHeader div there,
 so ncmpcpp only captures the header ("N Contributors<title> Lyrics") and drops
 the actual lyrics. This script parses the current Genius structure correctly.
+If Genius has no match (common for Korean tracks), it falls back to Bugs
+(music.bugs.co.kr).
 
 Usage:
-    genius-lyrics.py                # uses `mpc current` for artist/title
-    genius-lyrics.py "Artist" "Title"
-    genius-lyrics.py --force ...    # refetch even if a good file already exists
+    fetch-lyrics.py                 # uses `mpc current` for artist/title
+    fetch-lyrics.py  "Artist" "Title"
+    fetch-lyrics.py  --force ...    # refetch even if a good file already exists
 
 Designed to be safe to call from ncmpcpp's execute_on_song_change: it never
 raises to the caller, runs quietly, and skips songs that already have lyrics.
@@ -130,6 +132,61 @@ def extract_lyrics(page: str) -> str:
     return html.unescape(text).strip()
 
 
+_PAREN_RE = re.compile(r"\s*[\(\[][^\)\]]*[\)\]]")
+
+
+def bugs_lyrics(artist: str, title: str):
+    """Fallback for Korean tracks Genius lacks: search Bugs and scrape the
+    plain lyrics block (<div class="lyricsContainer"><p><xmp>...</xmp>)."""
+    base_title = _PAREN_RE.sub("", title).strip() or title
+    q = urllib.parse.quote(f"{artist} {base_title}")
+    try:
+        page = get(f"https://music.bugs.co.kr/search/track?q={q}")
+    except Exception:
+        return None
+
+    want_full, want_base = _norm(title), _norm(base_title)
+    exact, loose = [], []
+    for m in re.finditer(r'<tr[^>]*trackId="(\d+)"[^>]*>(.*?)</tr>', page, re.S | re.I):
+        row = m.group(2)
+        t = re.search(r'<p class="title"[^>]*>\s*<a[^>]*title="([^"]*)"', row)
+        a = re.search(r'<p class="artist"[^>]*>\s*<a[^>]*title="([^"]*)"', row)
+        if not t or not a:
+            continue
+        hit_title, hit_artist = html.unescape(t.group(1)), html.unescape(a.group(1))
+        if not _artist_matches(artist, hit_artist):
+            continue
+        if _norm(hit_title) == want_full:
+            exact.append(m.group(1))
+        elif _norm(_PAREN_RE.sub("", hit_title)) == want_base and "inst" not in hit_title.casefold():
+            loose.append(m.group(1))
+
+    for track_id in (exact + loose)[:3]:
+        try:
+            track = get(f"https://music.bugs.co.kr/track/{track_id}")
+        except Exception:
+            continue
+        m = re.search(r'<div class="lyricsContainer">.*?<xmp>(.*?)</xmp>', track, re.S)
+        if m:
+            text = html.unescape(m.group(1)).strip()
+            if len(text) >= MIN_VALID_LEN:
+                return text
+    return None
+
+
+def genius_lyrics(artist: str, title: str):
+    url = genius_url(artist, title)
+    if not url:
+        return None
+    try:
+        lyrics = extract_lyrics(get(url))
+    except Exception:
+        return None
+    if len(lyrics) < MIN_VALID_LEN or BROKEN_RE.match(lyrics):
+        return None  # don't overwrite with garbage
+    return lyrics
+
+
 def write_atomic(path: str, content: str) -> None:
     os.makedirs(os.path.dirname(path), exist_ok=True)
     tmp = path + ".tmp"
@@ -154,15 +211,9 @@ def main(argv) -> int:
     if not needs_fetch(path, force):
         return 0
 
-    url = genius_url(artist, title)
-    if not url:
+    lyrics = genius_lyrics(artist, title) or bugs_lyrics(artist, title)
+    if not lyrics:
         return 0
-    try:
-        lyrics = extract_lyrics(get(url))
-    except Exception:
-        return 0
-    if len(lyrics) < MIN_VALID_LEN or BROKEN_RE.match(lyrics):
-        return 0  # don't overwrite with garbage
 
     write_atomic(path, lyrics)
     return 0
