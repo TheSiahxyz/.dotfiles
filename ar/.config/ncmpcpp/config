@@ -422,6 +422,10 @@ media_library_albums_split_by_date = no
 #cyclic_scrolling = no
 #
 #lyrics_fetchers = tags, tekstowo, plyrics, justsomelyrics, jahlyrics, zeneszoveg, internet
+## Built-in web fetchers rarely find Korean tracks and "internet" just shows the
+## first Google hit (often YouTube). fetch-lyrics.py (execute_on_song_change)
+## downloads lyrics instead, so only read embedded tags here.
+lyrics_fetchers = tags
 #
 #follow_now_playing_lyrics = no
 #
