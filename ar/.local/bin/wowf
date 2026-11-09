@@ -17,8 +17,7 @@ set -u
 
 GAME_SLUG=battlenet
 PKGS="lutris umu-launcher wine python-protobuf"
-XDG_DATA_HOME="$HOME/.local/share"
-DEFAULT_PREFIX="$XDG_DATA_HOME/wine"
+DEFAULT_PREFIX="$HOME/Games/$GAME_SLUG"
 LAUNCHER_REL="drive_c/Program Files (x86)/Battle.net/Battle.net Launcher.exe"
 WOW_EXE_REL="drive_c/Program Files (x86)/World of Warcraft/_forever_/Wow.exe"
 LAUNCH_CODE=WOWF
