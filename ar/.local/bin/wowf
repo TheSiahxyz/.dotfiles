@@ -16,7 +16,7 @@
 set -u
 
 GAME_SLUG=battlenet
-PKGS="lutris umu-launcher wine"
+PKGS="lutris umu-launcher wine python-protobuf"
 XDG_DATA_HOME="$HOME/.local/share"
 DEFAULT_PREFIX="$XDG_DATA_HOME/wine"
 LAUNCHER_REL="drive_c/Program Files (x86)/Battle.net/Battle.net Launcher.exe"
