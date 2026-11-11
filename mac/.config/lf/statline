@@ -1,0 +1,69 @@
+#!/bin/sh
+# Publish the `eza -ldg` line for the file under the cursor as lf's `user_stat`
+# option, which ~/.config/lf/ruler renders on the left of the ruler.
+#
+# Debounced for the same reason as selsync: on-select fires on every cursor
+# move, and <space> is bound to `toggle; down`, so holding it issues one
+# `lf -remote` per keypress. lf (r42) deadlocks when its server socket is
+# flooded that way -- at ~300 rapid presses the instance stops responding to
+# quit even though it still answers other remote commands.
+#
+# Unlike selsync this is per-instance state, so the scratch file, the lock and
+# the published option are all keyed by $id: two lf windows have different
+# cursors and must not overwrite each other's stat line.
+#
+# macOS port of ar/.config/lf/statline: BSD stat instead of `stat -c`, and
+# perl's alarm instead of timeout(1), which macOS does not ship.
+
+set -u
+
+: "${id:?on-select must be run by lf, which exports \$id}"
+
+run="${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}"
+run="${run%/}"
+cur="$run/lf-statline.$id.cur"
+lock="$run/lf-statline.$id.lock"
+
+# Shorter than selsync's window: the stat line tracks the cursor, so it should
+# settle almost immediately once scrolling stops.
+debounce=0.15
+
+# Age in minutes after which a lock is assumed abandoned and reclaimed.
+stale_after=+1
+
+# Last write wins: the debounced run below publishes whichever file the cursor
+# ended on, not the one it started from.
+printf '%s' "${f-}" >"$cur"
+
+if ! mkdir "$lock" 2>/dev/null; then
+    [ -n "$(find "$lock" -maxdepth 0 -mmin "$stale_after" 2>/dev/null)" ] &&
+        rmdir "$lock" 2>/dev/null
+    exit 0
+fi
+trap 'rmdir "$lock" 2>/dev/null; rm -f "$cur"' EXIT HUP INT TERM
+
+# size:mtime (with nanoseconds) of the scratch file.
+stamp() {
+    stat -f '%z:%Fm' "$cur" 2>/dev/null || printf 'none'
+}
+
+# A wedged lf must never leave the lock behind, hence the 5 second limit.
+remote() {
+    perl -e 'alarm shift; exec @ARGV' 5 lf -remote "$1" 2>/dev/null || true
+}
+
+while :; do
+    sleep "$debounce"
+    before=$(stamp)
+
+    file=$(cat "$cur" 2>/dev/null)
+    if [ -n "$file" ]; then
+        line=$(eza -ldg --color=always -- "$file" 2>/dev/null | head -n 1)
+        # The value travels inside a double-quoted lf command, so a filename
+        # containing a quote or backslash would otherwise corrupt the command.
+        line=$(printf '%s' "$line" | sed 's/\\/\\\\/g; s/"/\\"/g')
+        remote "send $id set user_stat \"$line\""
+    fi
+
+    [ "$(stamp)" = "$before" ] && break
+done

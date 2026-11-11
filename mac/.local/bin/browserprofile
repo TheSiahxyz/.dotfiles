@@ -1,108 +1,201 @@
 #!/bin/sh
 
-# Define the profile paths
+# Profile directory names (relative to the browser's profile root)
 work_profile="$USER.work"
 home_profile="$USER.default"
 tmux_profile="$USER.tmux"
 
 usage() {
-  echo "Update the default profile in profiles.ini for Firefox or Librewolf."
-  echo ""
-  echo "Usage: ${0##*/} <browser> [<profile_type>]"
-  echo ""
-  echo "Options:"
-  echo "  -h              : Show this help message."
-  echo "  <browser>       : The browser to configure."
-  echo "                    Accepted values:"
-  echo "                      -f/firefox"
-  echo "                      -l/librewolf"
-  echo "  <profile_type>  : (Optional) If not specified, the default profile will be used."
-  echo "                    Accepted values:"
-  echo "                      work: Sets the work profile ($work_profile)"
-  echo "                      default: Sets the home profile ($home_profile)"
-  echo "                      tmux: Sets the home profile ($tmux_profile)"
-  echo ""
-  echo "Examples:"
-  echo "  ${0##*/} -f -w    # Set the work profile for Firefox"
-  echo "  ${0##*/} -l -d    # Set the default profile for Librewolf"
-  echo "  ${0##*/} -f -d    # Set the default profile for Firefox"
-  echo "  ${0##*/} -f -t    # Set the tmux profile for Firefox"
+  cat <<EOF
+Update the default profile in profiles.ini for Firefox or LibreWolf.
+
+Usage: ${0##*/} <browser> [<profile_type>]
+
+Options:
+  -h, --help      : Show this help message.
+  <browser>       : The browser to configure.
+                    Accepted values:
+                      -f/--firefox/firefox
+                      -l/--librewolf/librewolf
+  <profile_type>  : (Optional) If not specified, the default profile will be used.
+                    Accepted values:
+                      -w/--work/work       : Sets the work profile ($work_profile)
+                      -d/--default/default : Sets the home profile ($home_profile)
+                      -t/--tmux/tmux       : Sets the tmux profile ($tmux_profile)
+
+Examples:
+  ${0##*/} -f -w    # Set the work profile for Firefox
+  ${0##*/} -l -d    # Set the default profile for LibreWolf
+  ${0##*/} -f       # Set the default profile for Firefox
+  ${0##*/} -f -t    # Set the tmux profile for Firefox
+EOF
+}
+
+die() {
+  echo "${0##*/}: $*" >&2
+  exit 1
+}
+
+lower() {
+  printf '%s' "$1" | tr '[:upper:]' '[:lower:]'
+}
+
+# Print the first directory among the arguments that holds a profiles.ini
+first_dir() {
+  for d in "$@"; do
+    [ -f "$d/profiles.ini" ] && { printf '%s' "$d"; return 0; }
+  done
+  return 1
+}
+
+# Create a missing profile directory. The browser fills an empty profile on
+# first launch; arkenfox user.js, overrides and userChrome are copied from the
+# home profile. Add-ons come from enterprise policies (browser-policies).
+create_profile() {
+  root=$1
+  new=$2
+  src="$root/$home_profile"
+
+  mkdir -m 700 "$root/$new" || die "failed to create $root/$new"
+  if [ -d "$src" ] && [ "$new" != "$home_profile" ]; then
+    for f in arkenfox.js user-overrides.js user.js chrome; do
+      [ -e "$src/$f" ] || [ -L "$src/$f" ] || continue
+      cp -a "$src/$f" "$root/$new/" || echo "${0##*/}: warning: failed to copy $f" >&2
+    done
+
+    # Profile-specific overrides (e.g. ~/.config/browser/work.js for $USER.work)
+    # are appended after thesiah.js. arkenfox-updater appends every *.js in a
+    # user-overrides.js directory in order, so updates keep them.
+    cfg="${XDG_CONFIG_HOME:-$HOME/.config}/browser"
+    extra="$cfg/${new#*.}.js"
+    dir="$root/$new/user-overrides.js"
+    if [ -f "$extra" ] && [ -f "$cfg/thesiah.js" ] && [ -f "$root/$new/arkenfox.js" ]; then
+      [ -L "$dir" ] && rm "$dir"
+      mkdir -p "$dir"
+      ln -sfn "$cfg/thesiah.js" "$dir/00-thesiah.js"
+      ln -sfn "$extra" "$dir/10-${new#*.}.js"
+      cat "$root/$new/arkenfox.js" "$dir"/*.js >"$root/$new/user.js" ||
+        echo "${0##*/}: warning: failed to rebuild user.js" >&2
+    fi
+    echo "Created profile $new (settings copied from $home_profile)"
+  else
+    echo "Created empty profile $new"
+  fi
 }
 
 update_profiles_ini() {
-  case "$1" in
-  -f | --firefox | firefox) profiles_ini_path="$HOME/.mozilla/firefox/profiles.ini" ;;
-  -l | --librewolf | librewolf) profiles_ini_path="$HOME/.librewolf/profiles.ini" ;;
-  *)
-    echo "Invalid browser type. Please use 'firefox' or 'librewolf'."
-    return 1
-    ;;
-  esac
-
-  profile_to_set=$2
-
-  # Backup current profiles.ini
-  cp "$profiles_ini_path" "$profiles_ini_path.bak"
-
-  # Update the profiles.ini
-  awk -v profile="$profile_to_set" '
-    /^\[Install/ {
-        print
-        found=1
-        next
-    }
-    found && /^Default=/ {
-        sub(/=.*/, "=" profile)
-        print
-        next
-    }
-    {
-        print
-    }' "$profiles_ini_path" >"$profiles_ini_path.tmp" && mv "$profiles_ini_path.tmp" "$profiles_ini_path"
-
-  echo "Updated profiles.ini to use profile: $profile_to_set"
-}
-
-# Main function
-update_profile() {
   browser=$1
-  profile_type=$2
+  profile=$2
 
-  # Check if a browser is provided
-  if [ -z "$browser" ]; then
-    usage && exit 1
-  fi
-
-  # Convert profile_type to lowercase for case-insensitive comparison
-  if [ -n "$profile_type" ]; then
-    profile_type=$(echo "$profile_type" | tr '[:upper:]' '[:lower:]')
-  else
-    # Set to "default" if profile_type is not given
-    profile_type="default"
-  fi
-
-  # Set the profile based on the input
-  case "$profile_type" in
-  -w | --work | work)
-    update_profiles_ini "$browser" "$work_profile"
+  case "$browser" in
+  -f | --firefox | firefox)
+    proc=firefox
+    root=$(first_dir "$HOME/Library/Application Support/Firefox" "$HOME/.mozilla/firefox")
     ;;
-  -d | --default | default)
-    update_profiles_ini "$browser" "$home_profile"
-    ;;
-  -t | --tmux | tmux)
-    update_profiles_ini "$browser" "$tmux_profile"
+  -l | --librewolf | librewolf)
+    proc=librewolf
+    root=$(first_dir "$HOME/Library/Application Support/librewolf" "$HOME/.librewolf")
     ;;
   *)
-    echo "Invalid profile type. Please use 'work' or 'default'."
-    return 1
+    usage >&2
+    die "invalid browser '$browser'. Use firefox (-f) or librewolf (-l)."
+    ;;
+  esac
+
+  [ -n "$root" ] || die "profiles.ini for $proc not found."
+  ini="$root/profiles.ini"
+
+  # A running browser rewrites profiles.ini and would undo the change
+  if pgrep -u "$(id -u)" -x "$proc|$proc-bin" >/dev/null 2>&1; then
+    die "$proc is running. Close it first, then run this again."
+  fi
+
+  [ -d "$root/$profile" ] || create_profile "$root" "$profile"
+
+  cp "$ini" "$ini.bak" || die "failed to back up $ini"
+
+  # [Install*] : Default=<profile path>  (what the browser actually launches)
+  # [Profile*] : drop every Default= line, then mark the matching profile with
+  #              Default=1. If no section has Path=<profile>, register it.
+  tmp="$ini.tmp.$$"
+  awk -v profile="$profile" '
+    function flush_install() {
+      if (section ~ /^\[Install/ && !install_default) print "Default=" profile
+    }
+    { last = $0 }
+    /^\[/ {
+      flush_install()
+      section = $0
+      install_default = 0
+      if (section ~ /^\[Profile[0-9]+\]$/) {
+        n = section
+        gsub(/[^0-9]/, "", n)
+        if (n + 0 > max) max = n + 0
+        seen_profile = 1
+      }
+      print
+      next
+    }
+    section ~ /^\[Install/ && /^Default=/ {
+      print "Default=" profile
+      install_default = 1
+      next
+    }
+    section ~ /^\[Profile/ && /^Default=/ { next }
+    section ~ /^\[Profile/ && $0 == "Path=" profile {
+      print
+      print "Default=1"
+      matched = 1
+      next
+    }
+    { print }
+    END {
+      flush_install()
+      if (!matched) {
+        idx = seen_profile ? max + 1 : 0
+        name = profile
+        sub(/^[^.]*\./, "", name)
+        if (last != "") print ""
+        printf "[Profile%d]\nName=%s\nIsRelative=1\nPath=%s\nDefault=1\n", idx, name, profile
+      }
+    }' "$ini" >"$tmp" && mv "$tmp" "$ini" || {
+    rm -f "$tmp"
+    die "failed to update $ini"
+  }
+
+  # Keep installs.ini in sync (older builds read the default from here)
+  if [ -f "$root/installs.ini" ]; then
+    tmp="$root/installs.ini.tmp.$$"
+    awk -v profile="$profile" '
+      /^Default=/ { print "Default=" profile; next }
+      { print }' "$root/installs.ini" >"$tmp" && mv "$tmp" "$root/installs.ini" || rm -f "$tmp"
+  fi
+
+  echo "Updated $ini to use profile: $profile"
+}
+
+update_profile() {
+  browser=$(lower "$1")
+  profile_type=$(lower "${2:-default}")
+
+  [ -n "$browser" ] || { usage >&2; exit 1; }
+
+  case "$profile_type" in
+  -w | --work | work) update_profiles_ini "$browser" "$work_profile" ;;
+  -d | --default | default) update_profiles_ini "$browser" "$home_profile" ;;
+  -t | --tmux | tmux) update_profiles_ini "$browser" "$tmux_profile" ;;
+  *)
+    usage >&2
+    die "invalid profile type '$2'. Use work, default or tmux."
     ;;
   esac
 }
 
-# Check for help flag
-if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
-  usage && exit 0
-fi
+case "$1" in
+-h | --help)
+  usage
+  exit 0
+  ;;
+esac
 
-# Execute the main function with arguments passed to the script
 update_profile "$1" "$2"

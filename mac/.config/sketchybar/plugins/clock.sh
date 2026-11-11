@@ -1,19 +1,15 @@
 #!/usr/bin/env bash
 
-# Source colors for consistent theming
+# Clock label plus the date popup rows (created once in sketchybarrc).
+
 source "$CONFIG_DIR/colors.sh"
 
-# Get current time and date
-TIME=$(date "+%I:%M %p")
-DATE=$(date "+%a %d %b")
+if [ "$SENDER" = "mouse.exited.global" ]; then
+  sketchybar --set clock popup.drawing=off
+  exit 0
+fi
 
-# Format the label with both time and date
-LABEL="$TIME  $DATE"
-
-# Set the clock with enhanced styling
-sketchybar --set "$NAME" label="$LABEL" \
-                        icon="󰅐" \
-                        icon.color=$YELLOW \
-                        label.color=$WHITE \
-                        label.font="SF Pro:Medium:13.0"
-
+sketchybar --set clock label="$(date '+%I:%M %p  %a %d %b')" \
+  --set clock.full_date label="$(date '+%A, %B %d, %Y')" \
+  --set clock.week label="$(date '+Week %V')" \
+  --set clock.day_of_year label="$(date '+Day %j of %Y')"

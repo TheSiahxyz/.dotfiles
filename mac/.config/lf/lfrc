@@ -21,10 +21,9 @@ set period 1
 set previewer '~/.config/lf/scope'
 set ratios 1:2:3
 set relativenumber true
-set rulerfmt "%a| %p| %m| %c| %s| %v| %f| %i/%t(%h) %P %d"
+set rulerfile '~/.config/lf/ruler'
 set scrolloff 10
 set shellopts '-eu'
-set statfmt "\033[36m%p\033[0m| %M| %c| %u| %g| %S| %t| -> %l"
 set tempmarks '123456'
 set truncatepct 50
 set info custom
@@ -119,7 +118,7 @@ cmd copyto ${{
 cmd yank-dirname $dirname -- "$f" | tr -d '\n' | pbcopy
 cmd yank-path $printf '%s' "$fx" | pbcopy
 cmd yank-basename $basename -a -- $fx | tr -d '\n' | pbcopy
-cmd yank-basename-without-extension &basename -a -- $fx | cut -d. -f1 | tr -d '\n' | pbcopy
+cmd yank-basename-without-extension &basename -a -- $fx | sed 's/\(.\)\.[^.]*$/\1/' | tr -d '\n' | pbcopy
 
 # Create
 cmd mkdir %{{
@@ -673,11 +672,20 @@ cmd select-files select-mime '-inode/directory'
 cmd select-videos select-mime 'video/'
 cmd select-images select-mime 'image/'
 cmd select-music select-mime 'audio/'
+
+# Tags: lf only draws them, so selecting/jumping/clearing goes through the tags
+# file. An optional argument limits tag-select* to one tag character.
+cmd tag-remove :tag; tag-toggle
+cmd tag-select &~/.config/lf/tagctl select-here "$@"
+cmd tag-select-all &~/.config/lf/tagctl select-all "$@"
+cmd tag-jump ${{ ~/.config/lf/tagctl jump }}
+cmd tag-clear-here ${{ ~/.config/lf/tagctl clear-here }}
+cmd tag-prune &~/.config/lf/tagctl prune
+
+# Debounced: on-select fires on every cursor move, and <space> is `toggle; down`,
+# so an un-throttled remote call here floods lf's server socket. See the script.
 cmd on-select &{{
-  eza -ldg --color=always "$f" | {
-    IFS= read -r line || line=""
-    lf -remote "send $id set statfmt \"$line\""
-  }
+  ~/.config/lf/statline
 }}
 cmd load-select &{{
     if [ $# -eq 1 ] && [ "$1" = "$id" ]; then
@@ -696,8 +704,7 @@ cmd load-select &{{
     fi
 }}
 cmd save-select &{{
-  printf "%s" "$fs" > ~/.local/share/lf/select
-  lf -remote "send load-select $id"
+  ~/.config/lf/selsync
 }}
 cmd alt-paste &{{
   [ -n "$fs" ] && lf -remote "send $id :$1; save-select"
@@ -730,6 +737,24 @@ cmd fzf_search ${{
     | cut -d':' -f1 | sed 's/\\/\\\\/g;s/"/\\"/g' | {
       IFS= read -r res || res=""
       if [ -n "$res" ]; then lf -remote "send $id select \"$res\""; fi
+    }
+}}
+# Fuzzy-pick files. Tab/S-Tab marks multiple; a single pick just moves the
+# cursor, several picks replace the selection and park the cursor on the first.
+# Names go through stdin only -- never $() -- to dodge dash's multibyte bug.
+cmd fzf_files ${{
+  find . -type f | fzf -m --reverse --header 'Tab: mark, Enter: confirm' \
+    | sed 's/\\/\\\\/g;s/"/\\"/g' | {
+      IFS= read -r first || exit 0
+      if IFS= read -r second; then
+        lf -remote "send $id unselect"
+        lf -remote "send $id toggle \"$first\""
+        lf -remote "send $id toggle \"$second\""
+        while IFS= read -r sel; do
+          lf -remote "send $id toggle \"$sel\""
+        done
+      fi
+      lf -remote "send $id select \"$first\""
     }
 }}
 cmd z %{{
@@ -810,7 +835,6 @@ map <c-x> :clear; unselect; save-select
 map Cc compress
 
 # Copy
-# map yy %cp -ri -- $fs .; clear
 map Cp copyto; clear; save-select
 map Y $printf "%s" "$fx" | pbcopy; clear; save-select
 map yb yank-basename
@@ -930,15 +954,22 @@ map sn :set sortby natural; set info
 map ss :set sortby size; set info size
 map st :set sortby time; set info time
 
-# Tag
+# Tag (ts/tt/tk/tr* are bookmarks from shortcutrc)
 map tg tag-toggle
+map tc push :tag<space>
+map tu tag-remove
+map ta tag-select
+map tA tag-select-all
+map tf tag-jump
+map tU tag-clear-here
+map tP tag-prune
 
 # Traversal
 map fa $fzf | { IFS= read -r sel || exit 0; lf -remote "send $id select \"$sel\""; }
 map fb $sed -e 's/\s*#.*//' -e '/^$/d' -e 's/^\S*\s*//' ${XDG_CONFIG_HOME:-$HOME/.config}/shell/bm-dirs | fzf | { IFS= read -r d || exit 0; case "$d" in "~"*) d="$HOME${d#?}";; esac; lf -remote "send $id cd \"$d\""; }
 map fD zi
 map fd $find . -type d | fzf | { IFS= read -r sel || exit 0; lf -remote "send $id select \"$sel\""; }
-map ff $find . -type f | fzf | { IFS= read -r sel || exit 0; lf -remote "send $id select \"$sel\""; }
+map ff fzf_files
 map fm fm
 map gl follow_link
 map gc git-root

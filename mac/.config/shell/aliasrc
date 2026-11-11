@@ -497,12 +497,6 @@ alias w3m="w3m -config ${XDG_CONFIG_HOME:-${HOME}/.config}/w3m/config"
 # xprog
 alias progn='xprop | awk '\''/^WM_CLASS/{sub(/.* = /, "instance:"); sub(/, /, "\nclass:"); print} /^WM_NAME/{sub(/.* = /, "title:"); print}'\'''
 
-# xrandr
-alias xauto='xrandr --auto'
-
-# xset
-alias xoff='xset s off -dpms'
-
 # youtube-music
 alias ym='youtube-music'
 

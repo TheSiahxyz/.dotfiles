@@ -12,6 +12,16 @@
                                     "key_code": "h",
                                     "modifiers": { "mandatory": ["command"] }
                                 },
+                                "conditions": [
+                                    {
+                                        "bundle_identifiers": [
+                                            "^net\\.kovidgoyal\\.kitty$",
+                                            "^org\\.alacritty$",
+                                            "^com\\.github\\.wez\\.wezterm$"
+                                        ],
+                                        "type": "frontmost_application_unless"
+                                    }
+                                ],
                                 "type": "basic"
                             }
                         ]

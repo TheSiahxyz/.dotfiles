@@ -8,7 +8,9 @@ source "$CONFIG_DIR/icons.sh"
 if [ "$SENDER" = "front_app_switched" ]; then
     APP_NAME="$INFO"
 else
-    APP_NAME=$(yabai -m query --windows --window | jq -r '.app' 2>/dev/null || echo "$(osascript -e 'tell application "System Events" to get name of first application process whose frontmost is true')")
+    # Startup / forced update: no event payload, so ask AeroSpace.
+    APP_NAME="$(aerospace list-windows --focused --format '%{app-name}' 2>/dev/null | head -n 1)"
+    [ -n "$APP_NAME" ] || APP_NAME="$(osascript -e 'tell application "System Events" to get name of first application process whose frontmost is true' 2>/dev/null)"
 fi
 
 # Icon mapping for common applications

@@ -87,7 +87,6 @@ config.hyperlink_rules = wezterm.default_hyperlink_rules()
 -- Alt+c/v intentionally unbound: tmux owns M- in its root table.
 config.keys = {
   -- Tabs are off; keep the default tab bindings from spawning invisible tabs.
-  { key = "t",        mods = "CMD",        action = act.DisableDefaultAssignment },
   { key = "T",        mods = "CTRL|SHIFT", action = act.DisableDefaultAssignment },
 
   { key = "c",        mods = "CMD",        action = act.CopyTo("Clipboard") },
@@ -95,16 +94,6 @@ config.keys = {
   { key = "C",        mods = "CTRL|SHIFT", action = act.CopyTo("Clipboard") },
   { key = "V",        mods = "CTRL|SHIFT", action = act.PasteFrom("Clipboard") },
   { key = "Insert",   mods = "SHIFT",      action = act.PasteFrom("PrimarySelection") },
-
-  { key = "K",        mods = "ALT|SHIFT",  action = act.IncreaseFontSize },
-  { key = "J",        mods = "ALT|SHIFT",  action = act.DecreaseFontSize },
-  { key = "+",        mods = "ALT|SHIFT",  action = act.ResetFontSize },
-
-  { key = "f",        mods = "ALT",        action = act.ToggleFullScreen },
-  -- macOS habit: same chord as the system Enter Full Screen menu item.
-  { key = "f",        mods = "CTRL|CMD",   action = act.ToggleFullScreen },
-  { key = "F11",      mods = "NONE",       action = act.ToggleFullScreen },
-  { key = "Return",   mods = "ALT|SHIFT",  action = act.SpawnWindow },
 
   { key = "PageUp",   mods = "SHIFT",      action = act.ScrollByPage(-1) },
   { key = "PageDown", mods = "SHIFT",      action = act.ScrollByPage(1) },
@@ -141,5 +130,81 @@ config.mouse_bindings = {
     action = act.Nop,
   },
 }
+
+-- ---------------------------------------------------------------------------
+-- Same keys as st (~/.local/src/suckless/st/config.def.h), with CMD standing
+-- in for st's Alt. kitty.conf and alacritty.toml carry the identical set.
+-- (AeroSpace owns Option, exactly as dwm owns Super on Linux.)
+-- Not available in wezterm: copy last command output (st Alt+o).
+-- ---------------------------------------------------------------------------
+local url_patterns = { "(https?://|file://|git://|ssh://|ftp://|mailto:)\\S+" }
+
+local function change_opacity(delta)
+  return wezterm.action_callback(function(window)
+    local overrides = window:get_config_overrides() or {}
+    if delta == 0 then
+      overrides.window_background_opacity = nil
+    else
+      local current = overrides.window_background_opacity or config.window_background_opacity
+      overrides.window_background_opacity = math.max(0.1, math.min(1.0, current + delta))
+    end
+    window:set_config_overrides(overrides)
+  end)
+end
+
+local open_url = act.QuickSelectArgs({
+  label = "open url",
+  patterns = url_patterns,
+  action = wezterm.action_callback(function(window, pane)
+    wezterm.open_with(window:get_selection_text_for_pane(pane))
+  end),
+})
+local copy_url = act.QuickSelectArgs({ label = "copy url", patterns = url_patterns })
+
+local st_keys = {
+  -- clipboard                            st: Alt+c / Alt+v / Alt+Shift+v
+  { key = "V", mods = "CMD|SHIFT", action = act.PasteFrom("PrimarySelection") },
+  -- font size                            st: Alt+Shift+k / j / +
+  { key = "K", mods = "CMD|SHIFT", action = act.IncreaseFontSize },
+  { key = "J", mods = "CMD|SHIFT", action = act.DecreaseFontSize },
+  { key = "+", mods = "CMD|SHIFT", action = act.ResetFontSize },
+  -- fullscreen, new terminal             st: Alt+f, F11, Alt+Shift+Return
+  { key = "f", mods = "CMD", action = act.ToggleFullScreen },
+  { key = "F11", mods = "NONE", action = act.ToggleFullScreen },
+  { key = "Return", mods = "CMD|SHIFT", action = act.SpawnWindow },
+  -- scrollback                           st: Alt+y/e line, Alt+u/d page
+  { key = "y", mods = "CMD", action = act.ScrollByLine(-1) },
+  { key = "e", mods = "CMD", action = act.ScrollByLine(1) },
+  { key = "u", mods = "CMD", action = act.ScrollByPage(-1) },
+  { key = "d", mods = "CMD", action = act.ScrollByPage(1) },
+  { key = "PageUp", mods = "CMD", action = act.ScrollByLine(-1) },
+  { key = "PageDown", mods = "CMD", action = act.ScrollByLine(1) },
+  { key = "PageUp", mods = "CMD|SHIFT", action = act.ScrollByPage(-1) },
+  { key = "PageDown", mods = "CMD|SHIFT", action = act.ScrollByPage(1) },
+  -- opacity                              st: Alt+a / Alt+s / Alt+=
+  { key = "a", mods = "CMD", action = change_opacity(-0.025) },
+  { key = "s", mods = "CMD", action = change_opacity(0.025) },
+  { key = "=", mods = "CMD", action = change_opacity(0) },
+  -- URLs                                 st: Alt+r, Alt+Shift+c, Alt+Ctrl+o
+  { key = "r", mods = "CMD", action = copy_url },
+  { key = "C", mods = "CMD|SHIFT", action = copy_url },
+  { key = "o", mods = "CMD|CTRL", action = open_url },
+  -- keyboard selection                   st: Ctrl+Shift+Escape
+  { key = "Escape", mods = "CTRL|SHIFT", action = act.ActivateCopyMode },
+}
+
+-- Every other CMD+key reaches the program as Alt+key, like st passes on every
+-- Alt+key it has no shortcut for. tmux (M-h/j/k/l, M-g, M-t) and nvim
+-- (<M-...>) rely on this.
+for c in ("bghijklmnpqtwxz0123456789/.,;\\"):gmatch(".") do
+  table.insert(st_keys, { key = c, mods = "CMD", action = act.SendString("\x1b" .. c) })
+end
+for c in ("BEGHILMNPQTUWXYZ<>"):gmatch(".") do
+  table.insert(st_keys, { key = c, mods = "CMD|SHIFT", action = act.SendString("\x1b" .. c) })
+end
+
+for _, key in ipairs(st_keys) do
+  table.insert(config.keys, key)
+end
 
 return config

@@ -284,8 +284,8 @@ local function open_github_link(use_root)
 	end
 
 	-- Open the URL in the default browser
-	local command = "xdg-open " .. vim.fn.shellescape(github_url)
-	vim.fn.system(command)
+	-- vim.ui.open picks open / xdg-open / start for the current OS (Neovim 0.10+)
+	vim.ui.open(github_url)
 
 	-- Print the opened URL
 	print("Opened GitHub link: " .. github_url)

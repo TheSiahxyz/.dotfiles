@@ -1,13 +1,17 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Modern aesthetic sketchybar configuration with aerospace integration
-# Colors and icons are defined in separate files for better organization
+# SketchyBar with AeroSpace integration.
+# Colors and icons live in separate files; every script is in plugins/.
+#
+# Rules this config follows (each one fixed a real bug):
+#   - an item whose script must run while it is hidden needs updates=on
+#   - popup items are created once here, never from a click script
+#   - nothing polls faster than it has to; prefer events over update_freq
 
 source "$CONFIG_DIR/colors.sh"
 source "$CONFIG_DIR/icons.sh"
 
 PLUGIN_DIR="$CONFIG_DIR/plugins"
-ITEM_DIR="$CONFIG_DIR/items"
 
 ##### Bar Appearance #####
 sketchybar --bar position=top height=42 \
@@ -47,9 +51,25 @@ default=(
 
 sketchybar --default "${default[@]}"
 
+##### Custom Events #####
+sketchybar --add event aerospace_workspace_change \
+  --add event aerospace_mode_change \
+  --add event input_change AppleSelectedInputSourcesChangedNotification
+
+# popup_item <parent> <name> <icon> <icon color> <label> <command>
+# A popup row that runs <command> and closes the popup.
+popup_item() {
+  sketchybar --add item "$2" "popup.$1" \
+    --set "$2" icon="$3" \
+    icon.color="$4" \
+    label="$5" \
+    background.drawing=off \
+    click_script="$6; sketchybar --set $1 popup.drawing=off"
+}
+
 ##### Left Side Items #####
 
-# Apple Logo
+# Apple Logo (click: menu, mouse leaves the bar: close)
 sketchybar --add item apple.logo left \
   --set apple.logo icon=$APPLE \
   icon.font="SF Pro:Black:16.0" \
@@ -57,53 +77,53 @@ sketchybar --add item apple.logo left \
   padding_right=12 \
   padding_left=4 \
   label.drawing=off \
-  click_script="$PLUGIN_DIR/apple.sh"
+  click_script="sketchybar --set apple.logo popup.drawing=toggle" \
+  script="sketchybar --set apple.logo popup.drawing=off" \
+  --subscribe apple.logo mouse.exited.global
 
-# Aerospace Display-Aware Workspaces
-sketchybar --add event aerospace_workspace_change
+popup_item apple.logo apple.prefs "󰒓" $BLUE "System Settings" "open -a 'System Settings'"
+popup_item apple.logo apple.activity "󰖚" $GREEN "Activity Monitor" "open -a 'Activity Monitor'"
+popup_item apple.logo apple.lock "󰌾" $RED "Lock Screen" "pmset displaysleepnow"
+popup_item apple.logo apple.sleep "󰤄" $YELLOW "Sleep" "pmset sleepnow"
 
-# Monitor 1 Workspace Indicator (Primary - Built-in Display)
-sketchybar --add item monitor_1_workspace left \
-  --subscribe monitor_1_workspace aerospace_workspace_change \
-  --set monitor_1_workspace \
-  icon="M1:4" \
-  icon.font="SF Pro:Medium:12.0" \
-  icon.color=$GREY \
-  icon.padding_left=8 \
-  icon.padding_right=8 \
-  label.drawing=off \
+# AeroSpace workspaces: one chip per monitor (ws.1 .. ws.3). The script runs on
+# ws.1 only and fills in every chip; see plugins/aerospace.sh.
+for i in 1 2 3; do
+  sketchybar --add item ws.$i left \
+    --set ws.$i drawing=off \
+    icon.font="SF Pro:Semibold:12.0" \
+    icon.color=$GREY \
+    icon.align=center \
+    icon.padding_left=4 \
+    icon.padding_right=4 \
+    label.drawing=off \
+    padding_left=4 \
+    padding_right=4 \
+    background.color=$BACKGROUND_1 \
+    background.corner_radius=6 \
+    background.height=26 \
+    background.drawing=on
+done
+
+sketchybar --set ws.1 updates=on script="$PLUGIN_DIR/aerospace.sh" \
+  --subscribe ws.1 aerospace_workspace_change display_change system_woke
+
+# AeroSpace binding mode (only drawn while a chord is pending, hence updates=on)
+sketchybar --add item mode left \
+  --set mode drawing=off \
+  updates=on \
+  icon.drawing=off \
+  label.font="SF Pro:Semibold:12.0" \
+  label.color=$BLACK \
+  label.padding_left=8 \
+  label.padding_right=8 \
   padding_left=4 \
   padding_right=4 \
-  background.color=$BACKGROUND_1 \
-  background.corner_radius=6 \
-  background.height=26 \
+  background.color=$YELLOW \
+  background.border_width=0 \
   background.drawing=on \
-  script="$PLUGIN_DIR/aerospace_display.sh"
-
-# Monitor 2 Workspace Indicator (External - MAG 274UPF E2)
-sketchybar --add item monitor_2_workspace left \
-  --subscribe monitor_2_workspace aerospace_workspace_change \
-  --set monitor_2_workspace \
-  icon="M2:1" \
-  icon.font="SF Pro:Medium:12.0" \
-  icon.color=$GREY \
-  icon.padding_left=8 \
-  icon.padding_right=8 \
-  label.drawing=off \
-  padding_left=4 \
-  padding_right=4 \
-  background.color=$BACKGROUND_1 \
-  background.corner_radius=6 \
-  background.height=26 \
-  background.drawing=on \
-  script="$PLUGIN_DIR/aerospace_display.sh"
-
-# Monitor Connection Watcher (detects when monitors are connected/disconnected)
-sketchybar --add item monitor_watcher left \
-  --set monitor_watcher \
-  drawing=off \
-  update_freq=5 \
-  script="$PLUGIN_DIR/monitor_watcher.sh"
+  script="$PLUGIN_DIR/aerospace_mode.sh" \
+  --subscribe mode aerospace_mode_change
 
 # Separator
 sketchybar --add item separator left \
@@ -130,54 +150,38 @@ sketchybar --add item front_app left \
   script="$PLUGIN_DIR/front_app.sh" \
   --subscribe front_app front_app_switched
 
-# YouTube Music
+# YouTube Music (hidden while the app is not running, hence updates=on)
 sketchybar --add item music left \
   --set music icon=􁁒 \
+  drawing=off \
+  updates=on \
   icon.padding_left=8 \
   icon.padding_right=2 \
   label.padding_right=8 \
   label.font="Hack Nerd Font:Bold:12.0" \
-  label="Loading…" \
   label.align=left \
   label.max_chars=20 \
-  update_freq=1 \
+  update_freq=5 \
   script="$PLUGIN_DIR/youtube-music.sh" \
-  background.image.scale=0.9 \
-  background.image.corner_radius=8 \
-  background.image.border_color="$TRANSPARENT" \
   background.color="$TRANSPARENT" \
+  background.border_color="$TRANSPARENT" \
   scroll_texts=on \
   padding_right=0 \
-  click_script="curl -s -X POST 0.0.0.0:26538/api/v1/toggle-play && $PLUGIN_DIR/youtube-music.sh"
+  click_script="curl -s -m 2 -X POST 127.0.0.1:26538/api/v1/toggle-play; $PLUGIN_DIR/youtube-music.sh"
 
-# YouTube Music Album
+# YouTube Music album art
 sketchybar --add item music-artwork left \
-  label.padding_right=8 \
-  label="" \
+  --set music-artwork drawing=off \
+  icon.drawing=off \
+  label.drawing=off \
   width=20 \
   background.image.scale=0.09 \
   background.image.corner_radius=8 \
-  background.image.border_color="$TRANSPARENT" \
+  background.image.drawing=on \
   background.color="$TRANSPARENT" \
-  display=1 \
+  background.border_color="$TRANSPARENT" \
   padding_right=16 \
-  click_script="curl -s -X POST 0.0.0.0:26538/api/v1/toggle-play && $PLUGIN_DIR/youtube-music.sh"
-
-# Now Playing
-# sketchybar --add item now_playing right \
-#   --set now_playing icon.font="SF Pro:Semibold:12.0" \
-#   icon.padding_left=8 \
-#   icon.padding_right=6 \
-#   label.font="SF Pro:Medium:12.0" \
-#   label.padding_left=4 \
-#   label.padding_right=8 \
-#   update_freq=2 \
-#   script="$PLUGIN_DIR/now_playing.sh" \
-#   background.color=$BACKGROUND_1 \
-#   background.drawing=on \
-#   drawing=off \
-#   padding_left=4 \
-#   padding_right=4
+  click_script="curl -s -m 2 -X POST 127.0.0.1:26538/api/v1/toggle-play; $PLUGIN_DIR/youtube-music.sh"
 
 ##### Right Side Items #####
 
@@ -186,17 +190,18 @@ sketchybar --add item calendar right \
   --set calendar icon.font="SF Pro:Semibold:12.0" \
   icon.padding_left=8 \
   icon.padding_right=6 \
-  label.font="SF Pro:Medium:10.0" \
+  label.font="SF Pro:Medium:12.0" \
   label.padding_left=4 \
   label.padding_right=8 \
-  label.max_chars=25 \
-  update_freq=86400 \
+  label.max_chars=28 \
+  update_freq=900 \
   script="$PLUGIN_DIR/calendar.sh" \
   background.color=$BACKGROUND_1 \
   background.drawing=on \
   background.height=26 \
   padding_left=4 \
-  padding_right=4
+  padding_right=4 \
+  --subscribe calendar system_woke
 
 # Clock
 sketchybar --add item clock right \
@@ -205,7 +210,7 @@ sketchybar --add item clock right \
   icon.color=$YELLOW \
   icon.padding_left=8 \
   icon.padding_right=6 \
-  label.font="SF Pro:Medium:12.0" \
+  label.font="SF Pro:Medium:13.0" \
   label.color=$WHITE \
   label.padding_left=4 \
   label.padding_right=8 \
@@ -215,7 +220,12 @@ sketchybar --add item clock right \
   background.drawing=on \
   padding_left=4 \
   padding_right=4 \
-  click_script="$PLUGIN_DIR/clock_click.sh"
+  click_script="sketchybar --set clock popup.drawing=toggle" \
+  --subscribe clock system_woke mouse.exited.global
+
+popup_item clock clock.full_date "󰸘" $YELLOW "" "open -a Calendar"
+popup_item clock clock.week "󰸗" $BLUE "" "true"
+popup_item clock clock.day_of_year "󰸙" $GREEN "" "true"
 
 # WiFi Status
 sketchybar --add item wifi right \
@@ -223,12 +233,13 @@ sketchybar --add item wifi right \
   icon.padding_left=8 \
   icon.padding_right=8 \
   label.drawing=off \
-  update_freq=10 \
+  update_freq=60 \
   script="$PLUGIN_DIR/wifi.sh" \
   background.color=$BACKGROUND_1 \
   background.drawing=on \
   padding_left=4 \
-  padding_right=4
+  padding_right=4 \
+  --subscribe wifi wifi_change system_woke
 
 # Bluetooth Status
 sketchybar --add item bluetooth right \
@@ -236,28 +247,29 @@ sketchybar --add item bluetooth right \
   icon.padding_left=9 \
   icon.padding_right=9 \
   label.drawing=off \
-  update_freq=10 \
+  update_freq=60 \
   script="$PLUGIN_DIR/bluetooth.sh" \
   background.color=$BACKGROUND_1 \
   background.drawing=on \
   padding_left=4 \
-  padding_right=4
+  padding_right=4 \
+  --subscribe bluetooth system_woke
 
-# Input Source
+# Input Source (event driven; the slow poll is only a safety net)
 sketchybar --add item input_source right \
   --set input_source icon.font="SF Pro:Semibold:15.0" \
-  icon.font="SF Pro:Semibold:15.0" \
   icon.padding_left=8 \
   icon.padding_right=10 \
   label.drawing=off \
-  update_freq=1 \
+  update_freq=30 \
   script="$PLUGIN_DIR/get_input_source.sh" \
   background.color=$BACKGROUND_1 \
   background.drawing=on \
   padding_left=4 \
-  padding_right=4
+  padding_right=4 \
+  --subscribe input_source input_change system_woke
 
-# Volume
+# Volume (click: popup with mute toggle and slider)
 sketchybar --add item volume right \
   --set volume icon.font="SF Pro:Semibold:15.0" \
   icon.color=$ACCENT_PRIMARY \
@@ -269,13 +281,38 @@ sketchybar --add item volume right \
   background.drawing=on \
   padding_left=4 \
   padding_right=4 \
-  click_script="$PLUGIN_DIR/volume_click.sh" \
-  popup.background.border_width=2 \
-  popup.background.corner_radius=6 \
-  popup.background.border_color=$POPUP_BORDER_COLOR \
-  popup.background.color=$POPUP_BACKGROUND_COLOR \
+  click_script="sketchybar --set volume popup.drawing=toggle" \
   popup.horizontal=on \
-  --subscribe volume volume_change
+  --subscribe volume volume_change mouse.exited.global
+
+sketchybar --add item volume.mute popup.volume \
+  --set volume.mute icon="󰕾" \
+  icon.color=$GREEN \
+  label.drawing=off \
+  background.drawing=off \
+  padding_left=8 \
+  padding_right=2 \
+  click_script="osascript -e 'set volume output muted not (output muted of (get volume settings))'; sketchybar --trigger volume_change"
+
+sketchybar --add slider volume.slider popup.volume 120 \
+  --set volume.slider slider.highlight_color=$ACCENT_PRIMARY \
+  slider.background.height=6 \
+  slider.background.corner_radius=3 \
+  slider.background.color=$BACKGROUND_2 \
+  slider.knob.drawing=off \
+  background.drawing=off \
+  padding_left=4 \
+  padding_right=4 \
+  script="$PLUGIN_DIR/volume_slider.sh" \
+  --subscribe volume.slider mouse.clicked
+
+sketchybar --add item volume.percent popup.volume \
+  --set volume.percent icon.drawing=off \
+  label.font="SF Pro:Medium:11.0" \
+  label.color=$WHITE \
+  background.drawing=off \
+  padding_left=2 \
+  padding_right=8
 
 # Battery
 sketchybar --add item battery right \
@@ -283,7 +320,7 @@ sketchybar --add item battery right \
   icon.color=$ACCENT_SECONDARY \
   icon.padding_left=8 \
   icon.padding_right=6 \
-  label.font="SF Pro:Medium:12.0" \
+  label.font="SF Pro:Medium:13.0" \
   label.color=$WHITE \
   label.padding_left=4 \
   label.padding_right=8 \
@@ -308,22 +345,6 @@ sketchybar --add item pritunl right \
   padding_left=4 \
   padding_right=4 \
   click_script="open -a Pritunl"
-
-# Weather
-# sketchybar --add item weather right \
-#   --set weather icon="󰖕" \
-#   icon.font="SF Pro:Semibold:15.0" \
-#   icon.color=$BLUE \
-#   icon.padding_left=8 \
-#   icon.padding_right=6 \
-#   label.padding_left=4 \
-#   label.padding_right=8 \
-#   update_freq=1800 \
-#   script="$PLUGIN_DIR/weather.sh" \
-#   background.color=$BACKGROUND_1 \
-#   background.drawing=on \
-#   padding_left=4 \
-#   padding_right=4
 
 ##### Finalize Setup #####
 sketchybar --update

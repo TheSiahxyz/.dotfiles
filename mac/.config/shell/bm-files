@@ -32,7 +32,6 @@ vsh     $HOME/.ssh/config                                                       
 vsn     ${XDG_DATA_HOME:-${HOME}/.local/share}/thesiah/snippets                 # Snippets
 vsp     ${XDG_CONFIG_HOME:-${HOME}/.config}/shell/profile                       # Shell profile used for system
 vss     ${XDG_CONFIG_HOME:-${HOME}/.config}/starship/starship.toml              # Starship
-vsx     ${XDG_CONFIG_HOME:-${HOME}/.config}/nsxiv/exec/key-handler              # Nsxiv (image viewer) key/script handler
 vtc     ${XDG_CONFIG_HOME:-${HOME}/.config}/task/taskrc                         # Task config
 vtm     ${XDG_CONFIG_HOME:-${HOME}/.config}/tmux/tmux.conf                      # Tmux config
 vto     ${XDG_CONFIG_HOME:-${HOME}/.config}/taskopen/taskopenrc                 # Taskopen config

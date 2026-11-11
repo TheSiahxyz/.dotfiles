@@ -104,9 +104,8 @@ else
     event_title="${event_title:0:15}..."
   fi
 
-  # Create multi-line label using actual newline
-  LABEL="$event_title
-$event_time"
+  # sketchybar labels are single-line; a newline renders as a broken glyph.
+  LABEL="$event_title · $event_time"
 fi
 
 # Update the Calendar item
@@ -114,5 +113,4 @@ sketchybar --set "$NAME" icon="$ICON" \
   icon.color="$COLOR" \
   label="$LABEL" \
   label.color=$WHITE \
-  label.font="SF Pro:Medium:12.0" \
-  label.max_chars=20
+  label.font="SF Pro:Medium:12.0"

@@ -40,7 +40,6 @@ cyz             ${XDG_CONFIG_HOME:-${HOME}/.config}/yazi
 czc             ${XDG_CONFIG_HOME:-${HOME}/.config}/zsh
 cae             ${XDG_CONFIG_HOME:-${HOME}/.config}/aerospace
 csk             ${XDG_CONFIG_HOME:-${HOME}/.config}/sketchybar
-cyb             ${XDG_CONFIG_HOME:-${HOME}/.config}/yabai
 cqt             $HOME/.qutebrowser
 gdc             ${XDG_DOCUMENTS_DIR:-${HOME}/Documents}
 gdk             ${XDG_DESKTOP_DIR:-${HOME}/Desktop}

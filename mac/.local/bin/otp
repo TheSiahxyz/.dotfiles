@@ -20,7 +20,7 @@ choice="$({
 	echo "🆕add"
 	echo "🕙sync-time"
 	find "$dir" -type f -iname '*-otp.gpg'
-} | sed "s/.*\///;s/-otp.gpg//" | fzf --layout=reverse --height 40% --prompt "Pick a 2FA: ")"
+} | sed "s|^$dir/||;s|-otp.gpg$||" | fzf --layout=reverse --height 40% --prompt "Pick a 2FA: ")"
 
 case $choice in
 "") exit 0 ;;
@@ -43,7 +43,7 @@ case $choice in
 			printf 'Give this One Time Password a one-word name: ' >&2
 			read -r name || exit 1
 			[ -z "$name" ] && exit 0
-			echo "$name" | grep -q -- "^[A-z0-9-]\+$" && break
+			echo "$name" | grep -q -- "^[A-Za-z0-9-]\+$" && break
 		done
 		pass mv "$otp" "$name-otp"
 		notify "Successfully added." "$name-otp has been created."
