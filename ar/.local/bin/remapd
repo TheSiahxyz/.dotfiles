@@ -2,23 +2,32 @@
 
 device_ids() { xinput list --id-only 2>/dev/null | sort; }
 
+# Run remaps once X's device list has stopped changing. Comparing against a
+# snapshot taken before the event is not enough: if another device was removed
+# in the meantime the list differs at once, and remaps would run before X has
+# added the new keyboard.
 run_remaps_settled() {
-  before=$1
+  prev=$(device_ids)
   i=0
-  while [ "$i" -lt 15 ]; do
-    [ "$(device_ids)" != "$before" ] && break
-    sleep 0.1
+  while [ "$i" -lt 10 ]; do
+    sleep 0.5
+    cur=$(device_ids)
+    [ "$cur" = "$prev" ] && break
+    prev=$cur
     i=$((i + 1))
   done
-  sleep 0.3
   remaps
 }
 
 remaps
-while :; do
-  before=$(device_ids)
-  # Wake on a USB device bind, or on a Bluetooth input device appearing
-  # (BLE keyboards show up under /uhid/, classic ones under /bluetooth/).
-  grep -qP -m1 '[^un]bind.+\/[^:]+\(usb\)|\badd\s+\S*\/(uhid|bluetooth)\/\S+\/input\d+ \(input\)' <(udevadm monitor -u -t seat -s input -s usb)
-  run_remaps_settled "$before"
-done
+# Wake on a USB device bind, or on a Bluetooth input device appearing
+# (BLE keyboards show up under /uhid/, classic ones under /bluetooth/).
+# One monitor stays up for the whole session, so events that arrive while
+# remaps is running are queued instead of lost.
+udevadm monitor -u -t seat -s input -s usb |
+  grep --line-buffered -P '[^un]bind.+\/[^:]+\(usb\)|\badd\s+\S*\/(uhid|bluetooth)\/\S+\/input\d+ \(input\)' |
+  while read -r _; do
+    # Swallow the rest of the burst: one device fires several matching events.
+    while read -r -t 0.3 _; do :; done
+    run_remaps_settled
+  done
