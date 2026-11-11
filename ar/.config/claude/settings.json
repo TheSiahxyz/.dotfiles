@@ -108,7 +108,7 @@
       "Edit(**/.password-store/**/*)"
     ]
   },
-  "model": "opus",
+  "model": "fable",
   "hooks": {
     "Notification": [
       {
