@@ -147,6 +147,9 @@ on-mode-changed = ['exec-and-forget /opt/homebrew/opt/sketchybar/bin/sketchybar 
     # Super+b <key>: bookmark chords
     alt-b = 'mode bookmarks'
 
+    # Super+d: dmenu_run -> Alfred if installed, otherwise Spotlight
+    alt-d = 'exec-and-forget $HOME/.local/bin/dmenu_run'
+
     # Super+p: passmenu (fzfpass here)
     alt-p = 'exec-and-forget /Applications/kitty.app/Contents/MacOS/kitty -o confirm_os_window_close=0 --title "pass" /bin/zsh -lc "fzfpass"'
 
@@ -372,7 +375,15 @@ run = ['layout floating']
 if.app-id = 'com.dygmalab.bazecor'
 run = ['layout floating']
 
-# Must come before the generic kitty rule.
+# The next two rules must come before the generic kitty rule.
+#
+# Chooser windows (alt-p, alt-b ..., alt-F6..F9) float over the current
+# workspace like dmenu does, instead of being sent to workspace 1.
+[[on-window-detected]]
+if.app-id = 'net.kovidgoyal.kitty'
+if.window-title-regex-substring = '^(pass|bookmarks|qndl|transadd|stw|mounter)$'
+run = ['layout floating']
+
 # (alt-space v w opens kitty with --title "vimwiki"; the app name is still "kitty".)
 [[on-window-detected]]
 if.app-id = 'net.kovidgoyal.kitty'

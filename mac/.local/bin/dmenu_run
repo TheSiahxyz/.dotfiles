@@ -1,0 +1,21 @@
+#!/bin/sh
+
+# dmenu_run for macOS: open the application launcher.
+#
+# dwm binds Super+d to dmenu_run; AeroSpace binds alt-d to this. dmenu has no
+# macOS port, so this opens Alfred when it is installed and Spotlight otherwise.
+
+for app in "/Applications/Alfred.app" "$HOME/Applications/Alfred.app" "/Applications/Alfred 4.app"; do
+  if [ -d "$app" ]; then
+    # `search` is Alfred's own AppleScript command: it shows the Alfred bar.
+    name="$(basename "$app" .app)"
+    osascript -e "tell application \"$name\" to search \"\"" >/dev/null 2>&1 && exit 0
+  fi
+done
+
+# Spotlight has no command-line or AppleScript entry point, so press its
+# shortcut (Cmd+Space, the macOS default; change the line below if yours
+# differs). The short wait lets go of the Option key that triggered this:
+# a modifier still held down would be added to the synthetic keystroke.
+sleep 0.3
+osascript -e 'tell application "System Events" to keystroke space using command down' >/dev/null 2>&1
