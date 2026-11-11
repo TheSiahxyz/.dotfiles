@@ -17,22 +17,28 @@ xinput list | grep 'id=' | while read -r line; do
     case "$(echo "$line" | grep -oE '.*id=' | sed 's/ id=.*//')" in
     *"Lite-On Tech Lenovo USB Travel Keyboard with Ultra Nav"*)
       setxkbmap -device "$keyboard" -option
-      setxkbmap -device "$keyboard" -option caps:ctrl_modifier,ctrl:swap_lwin_lctl
+      setxkbmap -device "$keyboard" -option ctrl:nocaps,ctrl:swap_lwin_lctl
       ;;
     *"Magic keyboard"*)
       setxkbmap -device "$keyboard" -option
-      setxkbmap -device "$keyboard" -option caps:ctrl_modifier
+      setxkbmap -device "$keyboard" -option ctrl:nocaps
       ;;
     *"HHKB"*)
       setxkbmap -device "$keyboard" -option
       setxkbmap -device "$keyboard" -option altwin:menu_win
+      ;;
+    *"Lenovo TrackPoint Keyboard II"*)
+      # Left Alt/Win are swapped at the kernel level by
+      # /etc/udev/hwdb.d/90-lenovo-tpkb2-swap-alt-win.hwdb, so Wine games see a real Alt.
+      setxkbmap -device "$keyboard" -option
+      setxkbmap -device "$keyboard" -option ctrl:nocaps,altwin:menu_win
       ;;
     *"Glove80"*)
       setxkbmap -device "$keyboard" -option
       ;;
     *)
       setxkbmap -device "$keyboard" -option
-      setxkbmap -device "$keyboard" -option caps:ctrl_modifier,altwin:menu_win,altwin:swap_lalt_lwin
+      setxkbmap -device "$keyboard" -option ctrl:nocaps,altwin:menu_win,altwin:swap_lalt_lwin
       ;;
     esac
   }
