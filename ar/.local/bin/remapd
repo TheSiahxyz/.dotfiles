@@ -17,6 +17,8 @@ run_remaps_settled() {
 remaps
 while :; do
   before=$(device_ids)
-  grep -qP -m1 '[^un]bind.+\/[^:]+\(usb\)' <(udevadm monitor -u -t seat -s input -s usb)
+  # Wake on a USB device bind, or on a Bluetooth input device appearing
+  # (BLE keyboards show up under /uhid/, classic ones under /bluetooth/).
+  grep -qP -m1 '[^un]bind.+\/[^:]+\(usb\)|\badd\s+\S*\/(uhid|bluetooth)\/\S+\/input\d+ \(input\)' <(udevadm monitor -u -t seat -s input -s usb)
   run_remaps_settled "$before"
 done
