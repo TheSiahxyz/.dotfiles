@@ -100,6 +100,11 @@ run_battlenet() {
   prefix=$(lutris_game_dir)
   prefix=${prefix:-$DEFAULT_PREFIX}
   cd "$prefix" || die "Cannot enter prefix: $prefix"
+  # ntsync uses one fd per sync object; with a low hard nofile limit (4096 on
+  # non-systemd distros) Battle.net dies with "DuplicateHandle ... Too many open files".
+  if [ "$(ulimit -Hn)" != unlimited ] && [ "$(ulimit -Hn)" -lt 524288 ]; then
+    export PROTON_NO_NTSYNC=1
+  fi
   WINEPREFIX="$prefix" GAMEID=umu-default PROTONPATH=GE-Proton STORE=none \
     WINEDLLOVERRIDES='locationapi=d' \
     exec umu-run "$prefix/$LAUNCHER_REL" "$@" >/dev/null 2>&1
