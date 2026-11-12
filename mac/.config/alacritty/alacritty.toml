@@ -142,6 +142,10 @@ bindings = [
   { key = "\\", mods = "Command", chars = "\u001b\\" },
   { key = "<", mods = "Command|Shift", chars = "\u001b<" },
   { key = ">", mods = "Command|Shift", chars = "\u001b>" },
+  { key = "'", mods = "Command", chars = "\u001b'" },
+  { key = "-", mods = "Command", chars = "\u001b-" },
+  { key = "`", mods = "Command", chars = "\u001b`" },
+  { key = "Back", mods = "Command", chars = "\u001b\u007f" },
 ]
 
 [hints]

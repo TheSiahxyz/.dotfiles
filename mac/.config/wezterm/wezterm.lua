@@ -196,9 +196,10 @@ local st_keys = {
 -- Every other CMD+key reaches the program as Alt+key, like st passes on every
 -- Alt+key it has no shortcut for. tmux (M-h/j/k/l, M-g, M-t) and nvim
 -- (<M-...>) rely on this.
-for c in ("bghijklmnpqtwxz0123456789/.,;\\"):gmatch(".") do
+for c in ("bghijklmnpqtwxz0123456789/.,;\\'-`"):gmatch(".") do
   table.insert(st_keys, { key = c, mods = "CMD", action = act.SendString("\x1b" .. c) })
 end
+table.insert(st_keys, { key = "Backspace", mods = "CMD", action = act.SendString("\x1b\x7f") })
 for c in ("BEGHILMNPQTUWXYZ<>"):gmatch(".") do
   table.insert(st_keys, { key = c, mods = "CMD|SHIFT", action = act.SendString("\x1b" .. c) })
 end
