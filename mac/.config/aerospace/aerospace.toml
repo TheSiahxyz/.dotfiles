@@ -411,6 +411,10 @@ if.app-id = 'com.microsoft.VSCode'
 run = ['move-node-to-workspace 6']
 
 [[on-window-detected]]
+if.app-id = 'com.blizzard.worldofwarcraft'
+run = ['move-node-to-workspace 6']
+
+[[on-window-detected]]
 if.app-id = 'com.microsoft.Excel'
 run = ['move-node-to-workspace 7']
 

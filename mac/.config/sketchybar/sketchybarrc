@@ -86,14 +86,17 @@ popup_item apple.logo apple.activity "󰖚" $GREEN "Activity Monitor" "open -a '
 popup_item apple.logo apple.lock "󰌾" $RED "Lock Screen" "pmset displaysleepnow"
 popup_item apple.logo apple.sleep "󰤄" $YELLOW "Sleep" "pmset sleepnow"
 
-# AeroSpace workspaces: one chip per monitor (ws.1 .. ws.3). The script runs on
-# ws.1 only and fills in every chip; see plugins/aerospace.sh.
-for i in 1 2 3; do
+# AeroSpace workspaces: one chip per workspace that has a window (dwm style).
+# WS_SLOTS must match MAX_SLOTS in plugins/aerospace.sh (one per workspace).
+# The script runs on ws.1 only and fills in every chip.
+WS_SLOTS=21
+for i in $(seq 1 $WS_SLOTS); do
   sketchybar --add item ws.$i left \
     --set ws.$i drawing=off \
     icon.font="SF Pro:Semibold:12.0" \
     icon.color=$GREY \
     icon.align=center \
+    icon.width=32 \
     icon.padding_left=4 \
     icon.padding_right=4 \
     label.drawing=off \
@@ -106,7 +109,8 @@ for i in 1 2 3; do
 done
 
 sketchybar --set ws.1 updates=on script="$PLUGIN_DIR/aerospace.sh" \
-  --subscribe ws.1 aerospace_workspace_change display_change system_woke
+  --subscribe ws.1 aerospace_workspace_change display_change system_woke \
+  space_windows_change front_app_switched
 
 # AeroSpace binding mode (only drawn while a chord is pending, hence updates=on)
 sketchybar --add item mode left \

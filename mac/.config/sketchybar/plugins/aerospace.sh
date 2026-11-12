@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
 
-# Workspace indicator: one chip per connected monitor showing the workspace
-# that is visible on it. Runs on ws.1 only and updates every ws.N slot, so a
-# workspace change costs one script run instead of one per chip.
+# Workspace indicator, dwm style: one chip per workspace that has a window,
+# plus whatever workspace is currently visible (so an empty focused workspace
+# still shows). The focused one is highlighted. Runs on ws.1 only and updates
+# every ws.N slot, so a change costs one script run instead of one per chip.
 #
-# Monitor ids are whatever AeroSpace reports right now (they are renumbered
-# when displays are plugged in or rearranged), so nothing is hard-coded and
-# nothing is cached: the visible workspace is asked for directly.
+# Slots are filled left to right in AeroSpace's own workspace order; nothing
+# is cached, AeroSpace is asked on every event.
 
 source "$CONFIG_DIR/colors.sh"
 
-MAX_SLOTS=3
+# Must match the number of ws.N items created in sketchybarrc.
+MAX_SLOTS=21
 
 command -v aerospace >/dev/null 2>&1 || exit 0
 
@@ -18,28 +19,24 @@ command -v aerospace >/dev/null 2>&1 || exit 0
 focused="${FOCUSED_WORKSPACE:-}"
 [ -n "$focused" ] || focused="$(aerospace list-workspaces --focused 2>/dev/null)"
 
-# "<id> | <name>" per line, ordered left to right.
-monitors="$(aerospace list-monitors 2>/dev/null)"
-[ -n "$monitors" ] || exit 0
-count="$(printf '%s\n' "$monitors" | grep -c .)"
+all="$(aerospace list-workspaces --all 2>/dev/null)"
+[ -n "$all" ] || exit 0
+occupied="$(aerospace list-workspaces --monitor all --empty no 2>/dev/null)"
+visible="$(aerospace list-workspaces --monitor all --visible 2>/dev/null)"
+
+# is_listed <name> <newline separated list>
+is_listed() {
+  printf '%s\n' "$2" | grep -qxF -- "$1"
+}
 
 args=()
 slot=0
-while IFS= read -r line; do
-  [ -n "$line" ] || continue
+while IFS= read -r ws; do
+  [ -n "$ws" ] || continue
+  is_listed "$ws" "$occupied" || is_listed "$ws" "$visible" || [ "$ws" = "$focused" ] || continue
+
   slot=$((slot + 1))
   [ "$slot" -le "$MAX_SLOTS" ] || break
-
-  id="${line%% *}"
-  ws="$(aerospace list-workspaces --monitor "$id" --visible 2>/dev/null | head -n 1)"
-
-  if [ "$count" -gt 1 ]; then
-    text="M$slot:$ws"
-    width=52
-  else
-    text="$ws"
-    width=32
-  fi
 
   if [ "$ws" = "$focused" ]; then
     color="$WHITE"
@@ -51,16 +48,15 @@ while IFS= read -r line; do
 
   args+=(--set "ws.$slot"
     drawing=on
-    icon="$text"
-    icon.width="$width"
+    icon="$ws"
     icon.color="$color"
     background.color="$bg"
     click_script="aerospace workspace $ws")
 done <<EOF
-$monitors
+$all
 EOF
 
-# Hide the slots of monitors that are not connected.
+# Hide the unused slots.
 while [ "$slot" -lt "$MAX_SLOTS" ]; do
   slot=$((slot + 1))
   args+=(--set "ws.$slot" drawing=off)
