@@ -60,7 +60,7 @@ expand-alias-and-accept-line() {
 # zle -N accept-line expand-alias-and-accept-line
 
 
-bindkey '^X ' expand-alias-space   # ctrl-x, space to bypass completion (ctrl-space is the tmux prefix)
+bindkey '^X ' expand-alias-space   # ctrl-x, space: expand the alias before the cursor (ctrl-space is the tmux prefix)
 bindkey ' '  magic-space
 bindkey -M isearch ' ' magic-space
 
