@@ -441,7 +441,7 @@ showdoppler() { setsid -f mpv --no-osc --loop=inf --no-terminal "$doppler"; }
 
 case $BLOCK_BUTTON in
 1)
-  # weath owns the presentation, including trimming the report to the height of
+  # weath owns the presentation, including fitting the report to the width of
   # the window it opens. Duplicating the pager invocation here only let the two
   # views drift apart.
   weath

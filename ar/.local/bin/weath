@@ -14,18 +14,77 @@ fail() {
 
 # Show a report in a pager in its own terminal window. The pager shows however
 # many days wttr.in put in the report; trimming to what fits only ever hid a day
-# the pager could have scrolled to. $2 is a scratch file to delete once the
-# pager exits, if any.
+# the pager could have scrolled to. Width is another matter - see fit(). $2 is a
+# scratch file to delete once the pager exits, if any. The window runs this
+# script again with --view, which is where the width is known.
 show() {
-  # shellcheck disable=SC2016 # the positionals belong to the inner shell
-  setsid -f "$TERMINAL" -e sh -c \
-    'export LESS=R LESSOPEN=
-     # Trap rather than a trailing rm: closing the window from the window
-     # manager kills the terminal outright, and anything after the pager never
-     # gets to run.
-     [ -n "$2" ] && trap "rm -f \"$2\"" EXIT HUP INT TERM
-     less -SR "$1"' \
-    weath "$1" "$2" >/dev/null 2>&1
+  setsid -f "$TERMINAL" -e "$0" --view "$1" "$2" >/dev/null 2>&1
+}
+
+# Print report $1 fitted to a terminal $2 columns wide.
+#
+# A day's table is 125 columns - four 31-column panels - which is more than a
+# full-screen terminal has here, and a pager can only chop it mid-panel. So the
+# table is cut after the last whole panel that fits, Night going first. The
+# date sits in a box straddling the middle of the table's top edge; once the cut
+# reaches into that box it is rebuilt as a plain line above a plain edge.
+# Colour codes take no room and are copied through. The advert wttr.in appends
+# is dropped.
+fit() {
+  awk -v width="$2" '
+    function plain(s) { gsub(/\033\[[0-9;]*m/, "", s); return s }
+    # The first n columns of s, closed off with the edge character.
+    function cutline(s, n, edge,    out, k) {
+      for (k = 1; k < n && s != "";) {
+        if (match(s, /^\033\[[0-9;]*m/)) {
+          out = out substr(s, 1, RLENGTH); s = substr(s, RLENGTH + 1)
+        } else {
+          out = out substr(s, 1, 1); s = substr(s, 2); k++
+        }
+      }
+      return out "\033[0m" edge
+    }
+    /^Follow / { next }
+    { line[++n] = $0 }
+    END {
+      while (n && plain(line[n]) ~ /^[[:space:]]*$/) n--
+      for (i = 1; i <= n && rule == ""; i++)
+        if (plain(line[i]) ~ /^├/) rule = plain(line[i])
+      if (length(rule) > width)
+        for (i = 2; i <= width; i++)
+          if (substr(rule, i, 1) == "┼") cut = i
+      for (i = 1; i <= n; i++) {
+        p = plain(line[i])
+        if (!cut) {
+          print line[i]
+        } else if (p ~ /^ +┌─+┐$/ && i + 2 <= n) {
+          if (cut > length(p)) {
+            print p
+            print cutline(line[i + 1], cut, "┐")
+            print cutline(line[i + 2], cut, "│")
+          } else {
+            date = plain(line[i + 1])
+            sub(/^[^┤]*┤ */, "", date); sub(/ *├.*$/, "", date)
+            top = rule; sub(/^├/, "┌", top); gsub(/┼/, "┬", top)
+            names = plain(line[i + 2])
+            gsub(/[└─┘]/, " ", names); gsub(/┬/, "│", names)
+            print " " date
+            print cutline(top, cut, "┐")
+            print cutline(names, cut, "│")
+          }
+          i += 2
+        } else if (p ~ /^├/) {
+          print cutline(line[i], cut, "┤")
+        } else if (p ~ /^└/) {
+          print cutline(line[i], cut, "┘")
+        } else if (p ~ /^│/) {
+          print cutline(line[i], cut, "│")
+        } else {
+          print line[i]
+        }
+      }
+    }
+  ' "$1"
 }
 
 # Download a report to a file. Never route it through a command substitution:
@@ -57,6 +116,40 @@ cachedlocation() {
   [ -z "$name" ] && name="$(head -n 1 "$weatherreport" | cut -d' ' -f3-)"
   echo "$name"
 }
+
+# What show() runs inside the window it opens: report $2 in a pager, re-fitted
+# whenever the window changes width, deleting scratch file $3 on the way out.
+#
+# Fitting once is not enough: st starts the shell at its own default size and
+# dwm tiles the window afterwards - a few milliseconds later, or not until the
+# tag is viewed if the window opened on a hidden one. less repaints on a resize
+# but cannot re-cut the panels, so a watcher restarts it with a fresh fit.
+if [ "$1" = '--view' ]; then
+  report="$2"
+  discard="$3"
+  view="$(scratch)" || exit 1
+  # Trap rather than a trailing rm: closing the window from the window manager
+  # kills the terminal outright, and anything after the pager never gets to run.
+  cleanup() { rm -f "$view" "$view.resized" ${discard:+"$discard"}; }
+  trap cleanup EXIT
+  trap 'exit 0' HUP INT TERM
+  export LESS=R LESSOPEN=
+  while :; do
+    cols="$(tput cols)"
+    fit "$report" "$cols" >"$view"
+    (
+      while [ "$(tput cols)" = "$cols" ]; do sleep 0.2; done
+      : >"$view.resized"
+      pkill -P $$ -x less
+    ) &
+    watcher=$!
+    less -SR "$view"
+    kill "$watcher" 2>/dev/null
+    [ -e "$view.resized" ] || break # less was quit, not restarted
+    rm -f "$view.resized"
+  done
+  exit 0
+fi
 
 # Consume 'cp' up front so the location is always $1 and a stray extra argument
 # is always $2 — otherwise 'weath cp Seoul junk' would silently ignore 'junk'.

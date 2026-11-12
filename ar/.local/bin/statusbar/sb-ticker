@@ -44,8 +44,113 @@ updateprice() {
   return 1
 }
 
+# Print the cached table fitted to a terminal $1 columns wide.
+#
+# The site rules off every row and appends blank lines and adverts, which
+# roughly doubles the height, so only the rule under the header survives. The
+# table is 121 columns - more than even a full-screen terminal has here - so it
+# is cut after the last whole column that fits, dropping the ranges on the
+# right before anything else. Colour codes take no room and are copied through.
+#
+# The site also puts "$" in front of every price whatever it is priced in, so a
+# Samsung share reads "$208,000.00". Rows come back in the order the tickers
+# were asked for, which lets the symbol say what the sign should be: won for the
+# Korean exchanges, the quote currency for an exchange rate (the three letters
+# before "=X"), a trailing "%" for the Treasury yield indices, nothing for other
+# indices and foreign listings (points, or a currency this cannot tell), and
+# the dollar left alone for the rest.
+fittable() {
+  awk -v width="$1" -v tickers="$tickers" '
+    function currency(t,    quote) {
+      if (t ~ /^\^(IRX|FVX|TNX|TYX)$/) return "%"
+      if (t ~ /=X$/) {
+        quote = substr(t, length(t) - 4, 3)
+        return quote in money ? money[quote] : ""
+      }
+      if (t ~ /\.K[SQ]$|-KRW$/) return "₩"
+      if (t ~ /^\^|\./) return ""
+      return "$"
+    }
+    BEGIN {
+      split(tickers, ticker, ",")
+      money["KRW"] = "₩"; money["USD"] = "$"; money["EUR"] = "€"
+      money["GBP"] = "£"; money["JPY"] = "¥"; money["CNY"] = "¥"
+    }
+    { plain = $0; gsub(/\033\[[0-9;]*m/, "", plain) }
+    plain ~ /^[[:space:]]*$/ { next }
+    plain ~ /TIP:|DISCLAIMER|twitter:/ { next }
+    plain ~ /^├/ { if (rules++) next }
+    plain ~ /^│/ && rows++ { # every row after the header, in ticker order
+      sign = currency(ticker[rows - 1])
+      if (sign == "%") {
+        # The sign moves from the front of each number to the back: same width.
+        $0 = gensub(/\$([0-9][0-9.,]*)/, "\\1%", "g")
+      } else if (sign != "" && sign != "$") {
+        gsub(/\$/, sign)
+      } else if (sign == "") {
+        # Dropping the sign narrows the cell; pad it back so the borders line up.
+        cells = split($0, cell, "│"); $0 = ""
+        for (c = 1; c <= cells; c++) {
+          gone = gsub(/\$/, "", cell[c])
+          $0 = $0 (c > 1 ? "│" : "") cell[c] sprintf("%*s", gone, "")
+        }
+      }
+      plain = $0; gsub(/\033\[[0-9;]*m/, "", plain)
+    }
+    plain ~ /^┌/ && length(plain) > width {
+      for (i = 2; i <= width; i++)
+        if (substr(plain, i, 1) == "┬") cut = i
+    }
+    cut && plain ~ /^[┌├└│]/ {
+      edge = substr(plain, 1, 1)
+      edge = edge == "┌" ? "┐" : edge == "├" ? "┤" : edge == "└" ? "┘" : "│"
+      out = ""; rest = $0
+      for (n = 1; n < cut && rest != "";) {
+        if (match(rest, /^\033\[[0-9;]*m/)) {
+          out = out substr(rest, 1, RLENGTH); rest = substr(rest, RLENGTH + 1)
+        } else {
+          out = out substr(rest, 1, 1); rest = substr(rest, 2); n++
+        }
+      }
+      print out edge
+      next
+    }
+    { print }
+  ' "$pricefile"
+}
+
+# What the left click runs inside the window it opens: the table in a pager,
+# re-fitted whenever the window changes width. q closes it.
+#
+# Fitting once is not enough: st starts the shell at its own default size (62
+# columns here) and dwm tiles the window afterwards - a few milliseconds later,
+# or not until the tag is viewed if the window opened on a hidden one. less
+# repaints on a resize but cannot re-cut the columns, so a watcher restarts it
+# with a freshly fitted table. less gets -R, not -r: with -r it cannot measure a
+# line and wraps the table.
+if [ "$1" = "--view" ]; then
+  view="$(mktemp "${XDG_RUNTIME_DIR:-/tmp}/sb-ticker.XXXXXX")"
+  trap 'rm -f "$view" "$view.resized"' EXIT
+  trap 'exit 0' HUP INT TERM
+  while :; do
+    cols="$(tput cols)"
+    fittable "$cols" >"$view"
+    (
+      while [ "$(tput cols)" = "$cols" ]; do sleep 0.2; done
+      : >"$view.resized"
+      pkill -P $$ -x less
+    ) &
+    watcher=$!
+    LESS='' LESSOPEN='' less -SR "$view"
+    kill "$watcher" 2>/dev/null
+    [ -e "$view.resized" ] || break # less was quit, not restarted
+    rm -f "$view.resized"
+  done
+  exit 0
+fi
+
 case $BLOCK_BUTTON in
-1) setsid "$TERMINAL" -e less -Srf "$pricefile" ;;
+1) [ -s "$pricefile" ] && setsid -f "$TERMINAL" -e "$0" --view ;;
 2)
   notify-send -u low "Updating..." "Updating prices"
   updateme="1"
