@@ -17,8 +17,9 @@ tickerfile="${XDG_CONFIG_HOME:-$HOME/.config}/tickers"
 
 [ -f "$tickerfile" ] && tickers="$(cat "$tickerfile")" || tickers="^GSPC,^DJI,^IXIC"
 
+# True when the cache needs fetching: missing, empty, or from an earlier hour.
 checkprice() {
-  [ -s "$pricefile" ] && [ "$(stat -c %y "$pricefile" 2>/dev/null |
+  [ ! -s "$pricefile" ] || [ "$(stat -c %y "$pricefile" 2>/dev/null |
     cut -d':' -f1)" != "$(date '+%Y-%m-%d %H')" ]
 }
 
@@ -30,7 +31,12 @@ getchange() {
   done
 }
 
-updateprice() { curl -sfm 10 "$url/$tickers" --output "$pricefile" || rm -f "$pricefile"; }
+# The site redirects http to https, hence -L. Download to a scratch file so a
+# failed fetch leaves the previous prices in place.
+updateprice() {
+  curl -sfLm 10 "https://$url/$tickers" --output "$pricefile.part" &&
+    mv -f "$pricefile.part" "$pricefile" || rm -f "$pricefile.part"
+}
 
 case $BLOCK_BUTTON in
 1) setsid "$TERMINAL" -e less -Srf "$pricefile" ;;
@@ -46,8 +52,7 @@ RIGHT MOUSE BUTTON: Get stock overview" ;;
 6) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
-[ -n "$updateme" ] && updateprice
+# Fetch before printing, so a refresh shows up in this run's output.
+{ [ -n "$updateme" ] || checkprice; } && updateprice
 
-[ -f "$pricefile" ] && getchange
-
-checkprice && updateprice
+[ -s "$pricefile" ] && getchange

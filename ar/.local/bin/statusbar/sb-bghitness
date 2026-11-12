@@ -1,10 +1,14 @@
 #!/bin/sh
 
+# No backlight device (desktop, external monitor only): nothing to show.
+set -- /sys/class/backlight/*/brightness
+[ -r "$1" ] || exit 0
+
 # current brightness
-curr_brightness=$(cat /sys/class/backlight/*/brightness)
+curr_brightness=$(cat "$1")
 
 # max_brightness
-max_brightness=$(cat /sys/class/backlight/*/max_brightness)
+max_brightness=$(cat "${1%/*}/max_brightness")
 
 # brightness percentage
 brightness_per=$((100 * curr_brightness / max_brightness))

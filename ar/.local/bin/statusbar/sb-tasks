@@ -5,7 +5,7 @@ now=$(date +%s)
 in_one_hour=$(date -d "+1 hour" +%s)
 
 # Check for tasks due in the next hour
-tasks_due_today=$(task due:tomorrow _ids)
+tasks_due_today=$(task due.after:now due.before:now+1h _ids)
 tasks_due_count=0
 tasks_due_list=""
 
