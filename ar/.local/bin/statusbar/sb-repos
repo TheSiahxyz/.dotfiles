@@ -1,16 +1,16 @@
 #!/bin/bash
 
 # Directories containing Git repositories
-dotfiles_repos="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}"
-suckless_repos="${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless"
 private_repos="$HOME/Private/repos"
 public_repos="${XDG_PUBLICSHARE_DIR:-${HOME}/Public}/repos"
+suckless_repos="${XDG_SOURCES_HOME:-${HOME}/.local/src}/suckless"
+dotfiles_repos="${XDG_DOTFILES_DIR:-${HOME}/.dotfiles}"
 
 # Icon indicators
-dotfiles_icon="⚙"
-suckless_icon="🛠"
-private_icon="🏠"
 public_icon="🏢"
+private_icon="🏠"
+suckless_icon="🛠"
+dotfiles_icon="⚙"
 
 # Function to parse Git status and format symbols
 get_git_status_symbols() {
@@ -91,37 +91,37 @@ check_single_repo_status() {
 }
 
 # Check statuses for repositories
-dotfiles_result=$(check_single_repo_status "$dotfiles_repos" "$dotfiles_icon")
-dotfiles_status="${dotfiles_result%%|*}"
-dotfiles_changes="${dotfiles_result#*|}"
-
-suckless_result=$(check_single_repo_status "$suckless_repos" "$suckless_icon")
-suckless_status="${suckless_result%%|*}"
-suckless_changes="${suckless_result#*|}"
+public_result=$(check_multi_repo_status "$public_repos" "$public_icon")
+public_status="${public_result%%|*}"
+public_changes="${public_result#*|}"
 
 private_result=$(check_multi_repo_status "$private_repos" "$private_icon")
 private_status="${private_result%%|*}"
 private_changes="${private_result#*|}"
 
-public_result=$(check_multi_repo_status "$public_repos" "$public_icon")
-public_status="${public_result%%|*}"
-public_changes="${public_result#*|}"
+suckless_result=$(check_single_repo_status "$suckless_repos" "$suckless_icon")
+suckless_status="${suckless_result%%|*}"
+suckless_changes="${suckless_result#*|}"
+
+dotfiles_result=$(check_single_repo_status "$dotfiles_repos" "$dotfiles_icon")
+dotfiles_status="${dotfiles_result%%|*}"
+dotfiles_changes="${dotfiles_result#*|}"
 
 [ -f /tmp/gitsync ] && rm -f /tmp/gitsync
 
 # Combine statuses
 output=""
-[ -n "$dotfiles_status" ] && output+="$dotfiles_status "
-[ -n "$suckless_status" ] && output+="$suckless_status "
-[ -n "$private_status" ] && output+="$private_status "
 [ -n "$public_status" ] && output+="$public_status "
+[ -n "$private_status" ] && output+="$private_status "
+[ -n "$suckless_status" ] && output+="$suckless_status "
+[ -n "$dotfiles_status" ] && output+="$dotfiles_status "
 
 # Trim trailing spaces and display output
 output="${output% }"
 [ -n "$output" ] && (cat /tmp/gitsync 2>/dev/null || echo "$output")
 
 openrepos() {
-  all_changed_repos="$dotfiles_changes"$'\n'"$suckless_changes"$'\n'"$private_changes"$'\n'"$public_changes"
+  all_changed_repos="$public_changes"$'\n'"$private_changes"$'\n'"$suckless_changes"$'\n'"$dotfiles_changes"
   repos_cleaned="$(echo "$all_changed_repos" | grep -v '^$')"
 
   if [ -n "$repos_cleaned" ]; then
