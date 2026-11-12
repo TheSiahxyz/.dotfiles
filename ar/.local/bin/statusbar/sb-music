@@ -143,7 +143,7 @@ playerctl_status() {
     spotify | rhythmbox | audacious | clementine | strawberry) play_icon="🎵" ;;
     vlc | mpv | totem | celluloid) play_icon="🎬" ;;
     firefox | chromium | chrome) play_icon="📺" ;;
-    *) play_icon="▶️" ;;
+    *) play_icon="▶" ;;
     esac
 
     local prefix

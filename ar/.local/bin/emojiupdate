@@ -18,8 +18,10 @@ else
   exit 1
 fi
 
-# VS16 (U+FE0F)
-vs16="$(printf '\xEF\xB8\x8F')"
+# VS16 (U+FE0F). Octal, not \x: POSIX printf has no hex escape, and dash turns
+# '\xEF\xB8\x8F' into three other characters, so the sed below matched nothing
+# and every VS16 survived into the list.
+vs16="$(printf '\357\270\217')"
 
 awk '
     /^[[:space:]]*$/ || /^#/ { next }
