@@ -216,7 +216,7 @@ enqueue() {
   _ytdl_cmd="yt-dlp${_quoted_args} -- '$(printf '%s' "$_url" | sed "s/'/'\\\\''/g")'"
 
   _idnum="$(tsp bash -c "$_ytdl_cmd")"
-  pkill -RTMIN+16 "${STATUSBAR:-dwmblocks}"
+  pkill -RTMIN+24 "${STATUSBAR:-dwmblocks}"
 
   # tsp output doesn't carry titles; cache them at queue time so `qndl -l/-k`
   # can show meaningful labels instead of bare URLs.
@@ -653,7 +653,7 @@ kill_job() {
   rm -f "$_ids_file"
 
   notify "🗑️ Cancelled $_killed download(s)" "Helper notifications removed too."
-  pkill -RTMIN+16 "${STATUSBAR:-dwmblocks}"
+  pkill -RTMIN+24 "${STATUSBAR:-dwmblocks}"
 }
 
 # ---------------------------------------------------------------------------

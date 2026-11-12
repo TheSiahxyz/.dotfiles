@@ -96,7 +96,7 @@ fi
 # Return to the original directory
 cd - >/dev/null
 
-command -v dwmblocks >/dev/null 2>&1 && pkill -RTMIN+13 "${STATUSBAR:-dwmblocks}"
+command -v dwmblocks >/dev/null 2>&1 && pkill -RTMIN+21 "${STATUSBAR:-dwmblocks}"
 
 # Non-zero exit if any remote rejected the push
 [ -z "$failed" ]

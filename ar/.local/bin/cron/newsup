@@ -14,7 +14,7 @@ flock -n 9 || exit
 pgrep -x newsboat && /usr/bin/xdotool key --window "$(/usr/bin/xdotool search --name "^newsboat$")" R && exit
 
 echo "📰$(/usr/bin/newsboat -x print-unread | awk '{print $1}')🔃" >/tmp/newsupdate
-pkill -RTMIN+14 "${STATUSBAR:-dwmblocks}"
+pkill -RTMIN+22 "${STATUSBAR:-dwmblocks}"
 /usr/bin/newsboat -x reload
 
 # Prune feeds no longer in the urls file. Editing urls directly (removing or
@@ -36,5 +36,5 @@ awk '!/^[[:space:]]*#/ && ($1 ~ /^https?:/ || $1 ~ /^filter:/){print $1}' "$nb_u
 rm -f /tmp/newsup_urls.$$
 
 rm -f /tmp/newsupdate
-pkill -RTMIN+14 "${STATUSBAR:-dwmblocks}"
+pkill -RTMIN+22 "${STATUSBAR:-dwmblocks}"
 /usr/bin/notify-send "📰 RSS feed update complete."

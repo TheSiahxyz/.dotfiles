@@ -1,5 +1,5 @@
 #!/bin/sh
 
 # Called by transmission-daemon hooks to refresh the sb-torrent block.
-pkill -RTMIN+17 "${STATUSBAR:-dwmblocks}"
+pkill -RTMIN+25 "${STATUSBAR:-dwmblocks}"
 exit 0

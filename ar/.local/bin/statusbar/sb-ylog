@@ -251,7 +251,7 @@ case $BLOCK_BUTTON in
 2)
   if [ -s "$NEW" ]; then
     mark_seen
-    pkill -RTMIN+21 "${STATUSBAR:-dwmblocks}"
+    pkill -RTMIN+19 "${STATUSBAR:-dwmblocks}"
   else
     notify-send "🌐 Ylog" "No new entries."
   fi

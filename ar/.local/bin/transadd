@@ -4,8 +4,8 @@
 
 # transmission-daemon sometimes fails to take remote requests in its first moments, hence the sleep.
 
-# Refresh the statusbar torrent block (signal 17 in dwmblocks config.def.h).
-sigstatus() { pkill -RTMIN+17 "${STATUSBAR:-dwmblocks}" 2>/dev/null; return 0; }
+# Refresh the statusbar torrent block (signal 25 in dwmblocks config.def.h).
+sigstatus() { pkill -RTMIN+25 "${STATUSBAR:-dwmblocks}" 2>/dev/null; return 0; }
 
 pidof transmission-daemon >/dev/null || {
   transmission-daemon &&

@@ -3,8 +3,8 @@
 # Usage
 #   sb-ticker
 # Sample output
-#   ^DJI: 0.09%
-#   CL=F: -1.88%
+#   📈0.09%     (first ticker is up)
+#   📉-1.88%    (first ticker is down)
 # Description
 #   displays/retrieves the latest percent-change in stock market quotes listed in $XDG_CONFIG_HOME/tickers.
 #       defaults to S&P 500, Dow Jones Industrial, and the Nasdaq
@@ -33,9 +33,15 @@ getchange() {
 
 # The site redirects http to https, hence -L. Download to a scratch file so a
 # failed fetch leaves the previous prices in place.
+# One unknown symbol makes the site answer 200 with an apology instead of the
+# table, for every ticker in the request - so require the table header before
+# accepting the download.
 updateprice() {
   curl -sfLm 10 "https://$url/$tickers" --output "$pricefile.part" &&
-    mv -f "$pricefile.part" "$pricefile" || rm -f "$pricefile.part"
+    grep -q 'Stock Name' "$pricefile.part" &&
+    mv -f "$pricefile.part" "$pricefile" && return 0
+  rm -f "$pricefile.part"
+  return 1
 }
 
 case $BLOCK_BUTTON in
@@ -53,6 +59,23 @@ RIGHT MOUSE BUTTON: Get stock overview" ;;
 esac
 
 # Fetch before printing, so a refresh shows up in this run's output.
-{ [ -n "$updateme" ] || checkprice; } && updateprice
+# A failed fetch is flagged with ❗ rather than passed off as current: the value
+# shown next to it is then whatever the last successful fetch left behind.
+stale=""
+if [ -n "$updateme" ] || checkprice; then
+  updateprice || stale="❗"
+fi
 
-[ -s "$pricefile" ] && getchange
+# The bar gets one line: the first ticker's change, 📈 when up and 📉 when down.
+# The symbol name is left to the right-click notification.
+first=""
+if [ -s "$pricefile" ]; then
+  first="$(getchange | head -n1)"
+  first="${first#*: }"
+fi
+case "$first" in
+"%" | "") [ -n "$stale" ] && printf '📊%s\n' "$stale" ;; # nothing to show
+-*) printf '📉%s%s\n' "$first" "$stale" ;;
+*) printf '📈%s%s\n' "$first" "$stale" ;;
+esac
+exit 0

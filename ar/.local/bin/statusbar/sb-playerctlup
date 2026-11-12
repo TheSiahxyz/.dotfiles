@@ -6,7 +6,7 @@ flock -n 9 || exit 0
 
 # Updates the music statusbar module when a playerctl-compatible player changes
 
-signal() { kill -52 $(pidof "${STATUSBAR:-dwmblocks}") 2>/dev/null; }
+signal() { kill -60 $(pidof "${STATUSBAR:-dwmblocks}") 2>/dev/null; }
 
 playerctl -aF status 2>/dev/null | while read -r _; do signal; done &
 playerctl -aF metadata -f '{{playerName}}{{title}}' 2>/dev/null | while read -r _; do signal; done &

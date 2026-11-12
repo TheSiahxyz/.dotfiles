@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 # ── dwmblocks signal ─────────────────────────────────────────────────────────
-pkill -RTMIN+21 dwmblocks
+pkill -RTMIN+26 dwmblocks
 
 # ── Desktop notification ──────────────────────────────────────────────────────
 TMP_DIR="/tmp/rmpc"
