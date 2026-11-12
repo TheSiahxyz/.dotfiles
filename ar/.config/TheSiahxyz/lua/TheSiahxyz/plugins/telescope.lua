@@ -489,7 +489,7 @@ return {
 					{ "<leader>tg", "<Cmd>GenTocGFM<CR>", desc = "Generate ToC to GFM" },
 					{ "<leader>tr", "<Cmd>GenTocRedcarpet<CR>", desc = "Generate ToC to Redcarpet" },
 					{ "<leader>tl", "<Cmd>GenTocGitLab<CR>", desc = "Generate ToC to Gitlab" },
-					{ "<leader>tm", "<Cmd>GenTocMarked<CR>", desc = "Generate ToC to Marked" },
+					{ "<leader>tM", "<Cmd>GenTocMarked<CR>", desc = "Generate ToC to Marked" },
 				},
 			},
 			{

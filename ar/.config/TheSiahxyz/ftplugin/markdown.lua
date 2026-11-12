@@ -130,6 +130,10 @@ end
 -- And the markdown-toc plugin installed as a LazyExtra
 -- Function to update the Markdown TOC with customizable headings
 local function update_markdown_toc(heading2, heading3)
+	if vim.fn.executable("markdown-toc") ~= 1 then
+		vim.notify("markdown-toc is not installed (run :MasonInstall markdown-toc)", vim.log.levels.ERROR)
+		return
+	end
 	-- local path = vim.fn.expand("%") -- Expands the current file name to a full path
 	local path = vim.api.nvim_buf_get_name(0)
 	local bufnr = 0 -- The current buffer number, 0 references the current active buffer
@@ -188,7 +192,11 @@ local function update_markdown_toc(heading2, heading3)
 	-- I want my bulletpoints to be created only as "-" so passing that option as
 	-- an argument according to the docs
 	-- https://github.com/jonschlinkert/markdown-toc?tab=readme-ov-file#optionsbullets
-	vim.fn.system('markdown-toc --bullets "-" -i "' .. path .. '"')
+	local output = vim.fn.system({ "markdown-toc", "--bullets", "-", "-i", path })
+	if vim.v.shell_error ~= 0 then
+		vim.notify("markdown-toc failed: " .. output, vim.log.levels.ERROR)
+		return
+	end
 	vim.cmd("edit!") -- Reloads the file to reflect the changes made by markdown-toc
 	vim.cmd("silent write") -- Silently save the file
 	vim.notify("TOC updated and file saved", vim.log.levels.INFO)
