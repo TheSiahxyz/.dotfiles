@@ -1,3 +1,41 @@
+-- live-preview.nvim renders headings without ids, so TOC links (#anchor) have
+-- no target in the browser. This script adds GitHub-style ids to headings on
+-- every render so in-page links work.
+local LIVE_PREVIEW_HEADING_ID_SCRIPT = [[
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+	const body = document.querySelector(".markdown-body");
+	if (!body) return;
+	const slugify = (text) =>
+		text.trim().toLowerCase().replace(/[^\p{L}\p{N}\p{M}\s_-]/gu, "").replace(/\s/g, "-");
+	const addHeadingIds = () => {
+		const seen = new Map();
+		body.querySelectorAll("h1, h2, h3, h4, h5, h6").forEach((heading) => {
+			const base = slugify(heading.textContent);
+			const count = seen.get(base) || 0;
+			seen.set(base, count + 1);
+			heading.id = count === 0 ? base : base + "-" + count;
+		});
+	};
+	new MutationObserver(addHeadingIds).observe(body, { childList: true, subtree: true });
+	addHeadingIds();
+});
+</script>
+]]
+
+local function inject_live_preview_heading_ids()
+	local template = require("livepreview.template")
+	local md2html = template.md2html
+	template.md2html = function(md)
+		local html = md2html(md)
+		local head_end = html:find("</head>", 1, true)
+		if not head_end then
+			return html
+		end
+		return html:sub(1, head_end - 1) .. LIVE_PREVIEW_HEADING_ID_SCRIPT .. html:sub(head_end)
+	end
+end
+
 -- Select the current cell
 local function select_cell()
 	local bufnr = vim.api.nvim_get_current_buf()
@@ -245,6 +283,10 @@ return {
 		},
 		cmd = "LivePreview",
 		opts = { dynamic_root = true, port = 5500 + (vim.uv.os_getpid() % 100) },
+		config = function(_, opts)
+			require("livepreview").setup(opts)
+			inject_live_preview_heading_ids()
+		end,
 		init = function()
 			local wk = require("which-key")
 			wk.add({

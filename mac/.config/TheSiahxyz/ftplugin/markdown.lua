@@ -124,6 +124,30 @@ local function make_heading_content()
 	vim.notify("Headings transformed into content format", vim.log.levels.INFO)
 end
 
+-- markdown-toc percent-encodes non-ASCII anchors (e.g. Korean headings),
+-- which breaks in-buffer link following. Decode them inside the TOC block.
+local function decode_toc_anchors(bufnr)
+	local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+	local is_in_toc = false
+	local decoded = vim.tbl_map(function(line)
+		if line:match("^%s*<!%-%-%s*tocstop%s*%-%->%s*$") then
+			is_in_toc = false
+		elseif line:match("^%s*<!%-%-%s*toc%s*%-%->%s*$") then
+			is_in_toc = true
+		elseif is_in_toc then
+			return (
+				line:gsub("%(#[^)]*%)", function(anchor)
+					return (anchor:gsub("%%(%x%x)", function(hex)
+						return string.char(tonumber(hex, 16))
+					end))
+				end)
+			)
+		end
+		return line
+	end, lines)
+	vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, decoded)
+end
+
 -- Generate/update a Markdown TOC
 -- To generate the TOC I use the markdown-toc plugin
 -- https://github.com/jonschlinkert/markdown-toc
@@ -198,6 +222,7 @@ local function update_markdown_toc(heading2, heading3)
 		return
 	end
 	vim.cmd("edit!") -- Reloads the file to reflect the changes made by markdown-toc
+	decode_toc_anchors(bufnr)
 	vim.cmd("silent write") -- Silently save the file
 	vim.notify("TOC updated and file saved", vim.log.levels.INFO)
 	-- -- In case a cleanup is needed, leaving this old code here as a reference
@@ -489,13 +514,23 @@ vim.keymap.set(
 vim.keymap.set("n", "]c", "<Plug>Markdown_MoveToCurHeader", { desc = "Go to Current header" })
 vim.keymap.set("n", "]u", "<Plug>Markdown_MoveToParentHeader", { desc = "Go to parent header (Up)" })
 vim.keymap.set("n", "<C-]>", "<Plug>Markdown_Checkbox", { desc = "Toggle checkboxes" })
-vim.keymap.set("n", "Tab", "<Plug>Markdown_Fold", { desc = "Fold headers/lists" })
-vim.keymap.set("n", "Return", "<Plug>Markdown_FollowLink", { desc = "Follow links" })
-vim.keymap.set("i", "Tab", "<Plug>Markdown_Jump", { desc = "Indent new bullets, jump through empty fields in links" })
+vim.keymap.set("n", "<Tab>", "<Plug>Markdown_Fold", { buffer = true, desc = "Fold headers/lists" })
+vim.keymap.set("n", "<CR>", "<Plug>Markdown_FollowLink", { buffer = true, desc = "Follow links" })
+vim.keymap.set(
+	"i",
+	"<Tab>",
+	"<Plug>Markdown_Jump",
+	{ buffer = true, desc = "Indent new bullets, jump through empty fields in links" }
+)
 vim.keymap.set({ "i", "v" }, "<C-\\>", "<Plug>Markdown_CreateLink", { desc = "Create new links" })
 vim.keymap.set("i", "<C-o>", "<Plug>Markdown_NewLineAbove", { desc = "New line above, overrides default" })
 vim.keymap.set("i", "<C-b>", "<Plug>Markdown_NewLineBelow", { desc = "New line below, overrides default" })
-vim.keymap.set("i", "Return", "<Plug>Markdown_NewLineBelow", { desc = "New line below, overrides default" })
+vim.keymap.set(
+	"i",
+	"<CR>",
+	"<Plug>Markdown_NewLineBelow",
+	{ buffer = true, desc = "New line below, overrides default" }
+)
 -- jump to the first line of the TOC
 vim.keymap.set("n", "<leader>mm", function()
 	-- Save the current cursor position
