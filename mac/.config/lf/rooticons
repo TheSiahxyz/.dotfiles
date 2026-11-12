@@ -189,7 +189,7 @@ fi                    📃
 *.xcplayground        
 *.rproj               󰗆
 *.sol                 󰡪
-*.pem                 
+*.pem                 
 *gruntfile.coffee     
 *gruntfile.js         
 *gruntfile.ls         

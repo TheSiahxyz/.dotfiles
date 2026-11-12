@@ -37,7 +37,7 @@ config.send_composed_key_when_left_alt_is_pressed = false
 config.send_composed_key_when_right_alt_is_pressed = true
 
 -- Font
-config.font = wezterm.font("FiraCode Nerd Font Mono")
+config.font = wezterm.font("Hack Nerd Font Mono")
 config.font_size = 12.0
 
 -- Cursor: constant easing gives alacritty's hard blink instead of a fade.

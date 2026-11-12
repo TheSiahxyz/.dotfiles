@@ -23,9 +23,9 @@ Vagrantfile                 
 *.ejs                       
 *.css                       
 *.less                      
-*.md                        
+*.md                        
 *.mdx                       
-*.markdown                  
+*.markdown                  
 *.rmd                       
 *.json                      
 *.webmanifest               
@@ -132,7 +132,7 @@ Vagrantfile                 
 *.r                         󰟔
 *.rproj                     󰗆
 *.sol                       󰡪
-*.pem                       
+*.pem                       
 *gruntfile.coffee           
 *gruntfile.js               
 *gruntfile.ls               
@@ -241,7 +241,7 @@ Vagrantfile                 
 *.esd                       
 *.mjpg                      
 *.mjpeg                     
-*.gif                       
+*.gif                       
 *.pbm                       
 *.pgm                       
 *.ppm                       
