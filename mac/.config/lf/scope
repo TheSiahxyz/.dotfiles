@@ -26,7 +26,7 @@ image() {
 thumb_cache() {
   printf '%s/lf/thumb.%s' \
     "${XDG_CACHE_HOME:-$HOME/.cache}" \
-    "$(stat -f '%N%i%HT%z%B%m' -- "$(readlink -f "$1")" | shasum -a 256 | cut -d' ' -f1)"
+    "$(/usr/bin/stat -f '%N%i%HT%z%B%m' -- "$(readlink -f "$1")" | shasum -a 256 | cut -d' ' -f1)"
 }
 
 # Note that the cache file name is a function of file information, meaning if

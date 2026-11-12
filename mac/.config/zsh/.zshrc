@@ -99,7 +99,7 @@ zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#) ([0-9a-z-
 zstyle ':completion:*:git-checkout:*' sort false    # disable sort when completing `git checkout`
 zstyle ':completion:*:descriptions' format '[%d]'   # set descriptions format to enable group support
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}   # set list-colors to enable filename colorizing
-zstyle ':fzf-tab:complete:cd:*' fzf-preview 'exa -1 --color=always $realpath'   # preview directory's content with exa when completing cd
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath'   # preview directory's content with exa when completing cd
 zstyle ':fzf-tab:*' switch-group ',' '.'    # switch group using `,` and `.`
 
 

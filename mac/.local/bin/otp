@@ -27,10 +27,12 @@ case $choice in
 🆕add)
 	ifinstalled zbar || exit 1
 
-	temp="$(mktemp -t otpqr).png"
+	# System mktemp/rm by path: GNU coreutils, first in PATH when installed,
+	# rejects `mktemp -t name` and has no `rm -P`.
+	temp="$(/usr/bin/mktemp -t otpqr).png"
 	otp="otp-test-script"
 	# no shred(1) on macOS; rm -P overwrites before unlinking.
-	trap 'rm -Pf "$temp"; pass rm -f $otp' HUP INT QUIT TERM EXIT
+	trap '/bin/rm -Pf "$temp"; pass rm -f $otp' HUP INT QUIT TERM EXIT
 
 	notify "Scan the image." "Scan the OTP QR code."
 

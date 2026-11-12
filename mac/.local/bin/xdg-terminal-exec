@@ -15,7 +15,7 @@ set -e
 export PATH
 
 # Tried in order when $TERMINAL is unset or not installed.
-TERMINAL_CANDIDATES="wezterm kitty alacritty"
+TERMINAL_CANDIDATES="kitty wezterm alacritty"
 
 [ "$#" -gt 0 ] || {
   echo "Usage: ${0##*/} COMMAND [ARGS...]" >&2

@@ -445,30 +445,24 @@ function help() { "$@" --help 2>&1 | bathelp; }
 ###########################################################################################
 ###########################################################################################
 ### --- KEYS --- ###
-# list setxkbmap options
-alias xkey=xset_options
-function xset_options() { grep --color -E "$1" /usr/share/X11/xkb/rules/base.lst; }
-
-# print raw xev key events
-alias keys=xev_raw_key_event
-function xev_raw_key_event() {
-    xev -event keyboard | awk '
-    /^KeyPress/,/^KeyRelease/ {
-        if ($0 ~ /keysym/) print $0
-    }'
+# list the enabled keyboard input sources (Linux: setxkbmap options)
+alias xkey=input_sources
+function input_sources() {
+    defaults read com.apple.HIToolbox AppleEnabledInputSources 2>/dev/null |
+        grep -E "KeyboardLayout Name|Input Mode|Bundle ID" | grep --color -E "${1:-.}"
 }
 
-# print aligned xev key events
-alias key=xev_aligned_key_event
-function xev_aligned_key_event() {
-    xev -event keyboard | awk '
-    /^(KeyPress|KeyRelease)/ {
-        event_type = $1
-    }
-    /keysym/ {
-        gsub(/\),$/, "", $7)
-        printf "%-12s %-3s %s\n", event_type, $4, $7
-    }'
+# print key events as the terminal receives them (Linux: xev).
+# kitty has a dedicated viewer; elsewhere `cat -v` echoes the escape sequences
+# (finish with ctrl-c).
+alias keys=show_key_events
+alias key=show_key_events
+function show_key_events() {
+    if (( ${+commands[kitten]} )) && [[ -n "$KITTY_WINDOW_ID" ]]; then
+        kitten show-key
+    else
+        cat -v
+    fi
 }
 
 

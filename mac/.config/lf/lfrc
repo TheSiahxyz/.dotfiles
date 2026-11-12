@@ -596,11 +596,12 @@ sys.stdout.buffer.write(b"\n".join(v for _, v in dec) + (b"\n" if dec else b""))
 ' "${lf_sortby:-natural}" "${lf_reverse:-false}" "${lf_dirfirst:-true}"
   }
   if [ -n "$fs" ]; then
-    printf '%s\n' "$fs" | xargs -d '\n' -r basename -a -- | lfsort > "$tmpfile_old"
+    # sed instead of `xargs -d` / `find -printf`: both are GNU-only.
+    printf '%s\n' "$fs" | sed 's|.*/||' | lfsort > "$tmpfile_old"
   elif [ "$lf_hidden" = "true" ]; then
-    find . -mindepth 1 -maxdepth 1 -printf '%f\n' | lfsort > "$tmpfile_old"
+    find . -mindepth 1 -maxdepth 1 | sed 's|^\./||' | lfsort > "$tmpfile_old"
   else
-    find . -mindepth 1 -maxdepth 1 ! -name '.*' -printf '%f\n' | lfsort > "$tmpfile_old"
+    find . -mindepth 1 -maxdepth 1 ! -name '.*' | sed 's|^\./||' | lfsort > "$tmpfile_old"
   fi
   cp "$tmpfile_old" "$tmpfile_new"
   $EDITOR "$tmpfile_new"

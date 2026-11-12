@@ -5,9 +5,6 @@
 # Use neovim for vim if present.
 [ -x "$(command -v nvim)" ] && alias vd="nvim -d"
 
-# Use $XINITRC variable if file exists.
-[ -f "$XINITRC" ] && alias startx='startx $XINITRC'
-
 # Use $MBSYNCRC variable if file exists to sync mailbox.
 [ -f "$MBSYNCRC" ] && alias mbsync='mbsync -c $MBSYNCRC'
 
@@ -17,23 +14,6 @@ for command in mount shutdown su umount; do
 done
 unset command
 
-case "$(readlink -f /sbin/init)" in
-*systemd*)
-  # journal
-  alias -g jctl='journalctl -xe'
-  alias -g jctlou='sudo journalctl -b -n 200 -f'
-  alias -g rpi='systemctl --user restart wireplumber pipewire pipewire-pulse pipewire-jack'
-  alias -g sctl='systemctl'
-  alias -g sctlss='systemctl status'
-  alias -g sctle='systemctl enable'
-  alias -g sctld='systemctl disable'
-  alias -g sctlr='systemctl restart'
-  alias -g sctls='systemctl start'
-  alias -g sctlt='systemctl stop'
-  alias -g sctldr='systemctl daemon-reload'
-  alias -g tctl='timedatectl'
-  ;;
-esac
 
 # Go back
 alias ...='../..'
@@ -184,27 +164,27 @@ alias dgst='dotbare status'
   ialias ltdr='eza --icons -TDr -L'
   ialias ltr='eza --icons -Tr -L'
 } || {
-  ialias l='/usr/bin/ls -h --color=always --group-directories-first'
-  ialias la='/usr/bin/ls -alh --color=always --group-directories-first'
-  ialias ll='/usr/bin/ls -lh --color=always --group-directories-first'
-  ialias lla='/usr/bin/ls -aFls --color=always --group-directories-first'
-  ialias llf='/usr/bin/ls -Fls --color=always --group-directories-first'
-  ialias lm='/usr/bin/ls -alh --color=always --group-directories-first | more'
-  ialias lr='/usr/bin/ls -hlR --color=always --group-directories-first'
-  ialias lra='/usr/bin/ls -ahlR --color=always --group-directories-first'
-  ialias ls='/usr/bin/ls -AFh --color=always --group-directories-first'
-  ialias llsa='/usr/bin/ls -hlru --color=always --group-directories-first'
-  ialias llsc='/usr/bin/ls -hclr --color=always --group-directories-first'
-  ialias lld='/usr/bin/ls -l --color=always | grep "^d"'
-  ialias llda='/usr/bin/ls -la --color=always | grep "^d"'
-  ialias llse='/usr/bin/ls -BhlX --color=always --group-directories-first'
-  ialias llsf='/usr/bin/ls -l --color=always | grep -v "^d"'
-  ialias llsfa='/usr/bin/ls -la --color=always | grep -v "^d"'
-  ialias llsm='/usr/bin/ls -hlr --time=ctime --color=always --group-directories-first'
-  ialias llsn='/usr/bin/ls -alp --color=always --group-directories-first'
-  ialias llss='/usr/bin/ls -hlrS --color=always --group-directories-first'
-  ialias llst='/usr/bin/ls -hlrt --color=always --group-directories-first'
-  ialias lw='/usr/bin/ls -Ahx --color=always --group-directories-first'
+  ialias l='command ls -h --color=always --group-directories-first'
+  ialias la='command ls -alh --color=always --group-directories-first'
+  ialias ll='command ls -lh --color=always --group-directories-first'
+  ialias lla='command ls -aFls --color=always --group-directories-first'
+  ialias llf='command ls -Fls --color=always --group-directories-first'
+  ialias lm='command ls -alh --color=always --group-directories-first | more'
+  ialias lr='command ls -hlR --color=always --group-directories-first'
+  ialias lra='command ls -ahlR --color=always --group-directories-first'
+  ialias ls='command ls -AFh --color=always --group-directories-first'
+  ialias llsa='command ls -hlru --color=always --group-directories-first'
+  ialias llsc='command ls -hclr --color=always --group-directories-first'
+  ialias lld='command ls -l --color=always | grep "^d"'
+  ialias llda='command ls -la --color=always | grep "^d"'
+  ialias llse='command ls -BhlX --color=always --group-directories-first'
+  ialias llsf='command ls -l --color=always | grep -v "^d"'
+  ialias llsfa='command ls -la --color=always | grep -v "^d"'
+  ialias llsm='command ls -hlr --time=ctime --color=always --group-directories-first'
+  ialias llsn='command ls -alp --color=always --group-directories-first'
+  ialias llss='command ls -hlrS --color=always --group-directories-first'
+  ialias llst='command ls -hlrt --color=always --group-directories-first'
+  ialias lw='command ls -Ahx --color=always --group-directories-first'
 }
 
 # fastfetch
@@ -247,7 +227,6 @@ alias hss='hugo server --noHTTPCache'
 alias hcl='hugo --cleanDestinationDir'
 
 # ip
-ialias ip='ip -color=auto'
 alias whatsmyip='curl -s ifconfig.me | xargs'
 
 # jupyter
@@ -356,8 +335,6 @@ alias rsc='rsync -vrazPlu'
 alias rscd='rsync -vrazPlu --delete'
 alias rscr='rsync -vrazPlu --remove-source-files'
 
-# rules
-alias rrr='sudo udevadm control --reload-rules'
 
 # samba
 # alias winip="[ ! -d /media/$USER/hdd >/dev/null 2>&1 ] && mkdir -p /media/$USER/hdd >/dev/null 2>&1; sudo mount -t cifs //$(pass show smb/hdd) /media/$USER/hdd -o username=\"si\",password=\"$(pass show default/default)vers=2.0\""
@@ -495,7 +472,7 @@ ialias wget --hsts-file="${XDG_CACHE_HOME:-${HOME}/.cache}/wget-hsts"
 alias w3m="w3m -config ${XDG_CONFIG_HOME:-${HOME}/.config}/w3m/config"
 
 # xprog
-alias progn='xprop | awk '\''/^WM_CLASS/{sub(/.* = /, "instance:"); sub(/, /, "\nclass:"); print} /^WM_NAME/{sub(/.* = /, "title:"); print}'\'''
+# (X11 only) alias progn='xprop | awk '\''/^WM_CLASS/{sub(/.* = /, "instance:"); sub(/, /, "\nclass:"); print} /^WM_NAME/{sub(/.* = /, "title:"); print}'\'''
 
 # youtube-music
 alias ym='youtube-music'
@@ -509,15 +486,15 @@ alias szs="source ${XDG_CONFIG_HOME:-${HOME}/.config}/zsh/.zshrc"
 
 # personal
 alias ylogp='ylog -s peertube -c us | grep $(LC_TIME=C date +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
-alias ylogP='ylog -s peertube -c us | grep $(LC_TIME=C date -v-1d +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
+alias ylogP='ylog -s peertube -c us | grep $(LC_TIME=C /bin/date -v-1d +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
 alias ylogd='ylog -s diary -c us | grep $(LC_TIME=C date +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
-alias ylogD='ylog -s diary -c us | grep $(LC_TIME=C date -v-1d +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
-alias ylogt='ylog -s diary -c us | grep $(LC_TIME=C date -v-2d +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
+alias ylogD='ylog -s diary -c us | grep $(LC_TIME=C /bin/date -v-1d +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
+alias ylogt='ylog -s diary -c us | grep $(LC_TIME=C /bin/date -v-2d +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
 alias ylogr='ylog -s recordings -c us | grep $(LC_TIME=C date +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
-alias ylogR='ylog -s recordings -c us | grep $(LC_TIME=C date -v-1d +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
-alias ylogT='ylog -s recordings -c us | grep $(LC_TIME=C date -v-2d +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
+alias ylogR='ylog -s recordings -c us | grep $(LC_TIME=C /bin/date -v-1d +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
+alias ylogT='ylog -s recordings -c us | grep $(LC_TIME=C /bin/date -v-2d +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
 alias ylogu='ylog -s diary -c us'
 alias ylogv='ylog -s videos -c us | grep $(LC_TIME=C date +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
-alias ylogV='ylog -s videos -c us | grep $(LC_TIME=C date -v-1d +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
+alias ylogV='ylog -s videos -c us | grep $(LC_TIME=C /bin/date -v-1d +%d/%b) | grep -E "[0-9]{2}:[0-9]{2}:[0-9]{2} "'
 alias yloga='ylogd; ylogr; ylogp; ylogv'
 alias ylogA='ylogD; ylogR; ylogP; ylogV'

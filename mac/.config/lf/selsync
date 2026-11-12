@@ -45,7 +45,9 @@ trap 'rmdir "$lock" 2>/dev/null' EXIT HUP INT TERM
 # Identity of the selection file, used to detect writes that landed while we
 # were busy so the final published value is never stale.
 stamp() {
-    stat -f '%z:%Fm' "$sel" 2>/dev/null || printf 'none'
+    # /usr/bin/stat: the profile puts GNU coreutils first in PATH when it is
+    # installed, and GNU stat has a different -f.
+    /usr/bin/stat -f '%z:%Fm' "$sel" 2>/dev/null || printf 'none'
 }
 
 # A wedged lf must never leave the lock behind, hence the 5 second limit.

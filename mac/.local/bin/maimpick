@@ -28,7 +28,7 @@ case "$(printf '%s\n' "$options" | fzf --layout=reverse --height 40% --prompt "S
 		osascript -e 'display notification "tesseract must be installed for OCR." with title "📦 Dependency missing"'
 		exit 1
 	}
-	tmpfile="$(mktemp -t ocr).png"
+	tmpfile="$(/usr/bin/mktemp -t ocr).png"
 	trap 'rm -f "$tmpfile"' HUP INT QUIT TERM EXIT
 	screencapture -i "$tmpfile" && tesseract "$tmpfile" - -l eng | pbcopy
 	;;

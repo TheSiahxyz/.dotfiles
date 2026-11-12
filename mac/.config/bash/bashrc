@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# macOS version of ar/.config/bash/bashrc. Linux-only pieces (systemd, /proc,
+# distro detection, GNU-only flags) are replaced with their macOS counterparts.
+# Flags are kept to the ones BSD and GNU tools share, because the profile puts
+# GNU coreutils first in PATH when it is installed.
+
 [[ $- != *i* ]] && return
 
 #######################################################
@@ -16,11 +21,12 @@ PROMPT_COMMAND="history -a"
 unset GREP_OPTIONS
 
 set -o vi
-shopt -s autocd       # goto without cd
-shopt -s direxpand    # expend directory name
-shopt -s cdspell      # ignore case cd
-shopt -s checkwinsize # Check the window size after each command and, if necessary, update the values of LINES and COLUMNS
-shopt -s histappend   # Causes bash to append to history instead of overwriting it so if you start a new terminal, you have old session history
+# autocd and direxpand need bash 4+; macOS ships 3.2 as /bin/bash.
+shopt -s autocd 2>/dev/null    # goto without cd
+shopt -s direxpand 2>/dev/null # expend directory name
+shopt -s cdspell               # ignore case cd
+shopt -s checkwinsize          # Check the window size after each command and, if necessary, update the values of LINES and COLUMNS
+shopt -s histappend            # Causes bash to append to history instead of overwriting it so if you start a new terminal, you have old session history
 
 # Completion settings
 # Ignore case on auto-completion
@@ -43,10 +49,9 @@ alias \
   snano="sedit" \
   spico="sedit"
 
-# mount ISO files
-# mount -o loop /home/NAMEOFISO.iso /home/ISOMOUNTDIR/
-# umount /home/NAMEOFISO.iso
-# (Both commands done as root only.)
+# mount disk images
+# hdiutil attach NAMEOFIMAGE.iso
+# hdiutil detach /Volumes/NAMEOFVOLUME
 
 #######################################################
 # GENERAL ALIASES
@@ -57,17 +62,11 @@ alias \
   sbp="source ~/.config/bash/bash_profile" \
   sbs="source ~/.config/bash/bashrc"
 
-# Prosody
-alias p="prosodyctl"
+# Services (Linux: systemctl)
+alias s="brew services"
 
-# Systemctl
-alias s="systemctl"
-
-# Journalctl
-alias j="journalctl -xe"
-
-# nextcloud
-alias occ="sudo -u www-data php /var/www/nextcloud/occ"
+# System log (Linux: journalctl -xe)
+alias j="log show --last 10m --style compact"
 
 # alias to show the date
 alias da="date '+%Y-%m-%d %A %T %Z'"
@@ -81,7 +80,7 @@ alias \
   multitail="multitail --no-repeat -c" \
   mv="mv -i" \
   ping="ping -c 10" \
-  ps="ps auxf" \
+  ps="ps aux" \
   rm="rm -iv" \
   svi="sudo vi" \
   v="vim" \
@@ -95,31 +94,38 @@ alias \
   .....='../../../..'
 
 # Remove a directory and all files
-alias rmd="/bin/rm --recursive --force --verbose "
+alias rmd="/bin/rm -rfv "
 
 # multiple directory listing commands
+# GNU ls (coreutils) when it is the ls in PATH, the system BSD ls otherwise.
+if command ls --group-directories-first -d . >/dev/null 2>&1; then
+  __ls="command ls --color=always --group-directories-first"
+  alias llse="$__ls -BhlX" # sort by extension: GNU only
+else
+  __ls="command ls -G"
+fi
 alias \
-  l='/usr/bin/ls -h --color=always --group-directories-first' \
-  la='/usr/bin/ls -alh --color=always --group-directories-first' \
-  ll='/usr/bin/ls -lh --color=always --group-directories-first' \
-  lla='/usr/bin/ls -aFls --color=always --group-directories-first' \
-  llf='/usr/bin/ls -Fls --color=always --group-directories-first' \
-  lm='/usr/bin/ls -alh --color=always --group-directories-first | more' \
-  lr='/usr/bin/ls -hlR --color=always --group-directories-first' \
-  lra='/usr/bin/ls -ahlR --color=always --group-directories-first' \
-  ls='/usr/bin/ls -AFh --color=always --group-directories-first' \
-  llsa='/usr/bin/ls -hlru --color=always --group-directories-first' \
-  llsc='/usr/bin/ls -hclr --color=always --group-directories-first' \
-  lld='/usr/bin/ls -l --color=always | grep "^d"' \
-  llda='/usr/bin/ls -la --color=always | grep "^d"' \
-  llse='/usr/bin/ls -BhlX --color=always --group-directories-first' \
-  llsf='/usr/bin/ls -l --color=always | grep -v "^d"' \
-  llsfa='/usr/bin/ls -la --color=always | grep -v "^d"' \
-  llsm='/usr/bin/ls -hlr --time=ctime --color=always --group-directories-first' \
-  llsn='/usr/bin/ls -alp --color=always --group-directories-first' \
-  llss='/usr/bin/ls -hlrS --color=always --group-directories-first' \
-  llst='/usr/bin/ls -hlrt --color=always --group-directories-first' \
-  lw='/usr/bin/ls -Ahx --color=always --group-directories-first'
+  l="$__ls -h" \
+  la="$__ls -alh" \
+  ll="$__ls -lh" \
+  lla="$__ls -aFls" \
+  llf="$__ls -Fls" \
+  lm="$__ls -alh | more" \
+  lr="$__ls -hlR" \
+  lra="$__ls -ahlR" \
+  ls="$__ls -AFh" \
+  llsa="$__ls -hlru" \
+  llsc="$__ls -hclr" \
+  lld="$__ls -l | grep '^d'" \
+  llda="$__ls -la | grep '^d'" \
+  llsf="$__ls -l | grep -v '^d'" \
+  llsfa="$__ls -la | grep -v '^d'" \
+  llsm="$__ls -hlrc" \
+  llsn="$__ls -alp" \
+  llss="$__ls -hlrS" \
+  llst="$__ls -hlrt" \
+  lw="$__ls -Ahx"
+unset __ls
 
 # alias chmod commands
 alias \
@@ -135,8 +141,7 @@ alias h="history | grep "
 
 # Search running processes
 alias \
-  ps="ps auxf" \
-  psg="ps auxf | grep " \
+  psg="ps aux | grep " \
   topcpu="/bin/ps -eo pcpu,pid,user,args | sort -k 1 -r | head -10"
 
 # Search files in the current folder
@@ -148,25 +153,25 @@ alias countfiles="for t in files links directories; do echo \`find . -type \${t:
 # To see if a command is aliased, a file, or a built-in command
 alias checkcommand="type -t"
 
-# Show current network connections to the server
-alias ipview="netstat -anpl | grep :80 | awk '{print $5}' | cut -d':' -f1 | sort | uniq -c | sort -n | sed -e 's/^ *//' -e 's/ *$//'"
+# Show current network connections to port 80 (remote address, count)
+alias ipview="netstat -anp tcp | awk '\$4 ~ /\\.80\$/ {print \$5}' | sed 's/\\.[0-9]*\$//' | sort | uniq -c | sort -n | sed -e 's/^ *//' -e 's/ *\$//'"
 
-# Show open ports
-alias openports="netstat -nape --inet"
+# Show open (listening) ports
+alias openports="sudo lsof -nP -iTCP -sTCP:LISTEN"
 
 # Alias for safe and forced reboots
 alias \
   rebootsafe="sudo shutdown -r now" \
-  rebootforce="sudo shutdown -r -n now"
+  rebootforce="sudo reboot -q"
 
 # Alias to show disk space and space used in a folder
 alias \
-  diskspace="du -S | sort -n -r |more" \
-  folders="du -h --max-depth=1" \
+  diskspace="du -k | sort -n -r | more" \
+  folders="du -h -d 1" \
   folderssort="find . -maxdepth 1 -type d -print0 | xargs -0 du -sk | sort -rn" \
   tree="tree -CAhF --dirsfirst" \
   treed="tree -CAFd" \
-  mountedinfo="df -hT"
+  mountedinfo="df -h"
 
 # Alias for archives
 alias \
@@ -185,17 +190,12 @@ alias sha1="openssl sha1"
 
 # Shell
 alias \
-  tobash="sudo chsh $USER -s /bin/bash && 'Now log out.'" \
-  tozsh="sudo chsh $USER -s /bin/zsh && 'Now log out.'" \
-  tofish="sudo chsh $USER -s /bin/fish && 'Now log out.'"
-
-# VIMRC
-alias \
-  v="vim" \
-  vi="vim"
+  tobash="chsh -s /bin/bash && echo 'Now log out.'" \
+  tozsh="chsh -s /bin/zsh && echo 'Now log out.'" \
+  tofish="chsh -s /opt/homebrew/bin/fish && echo 'Now log out.'"
 
 # wget
-alias wget=wget --hsts-file="~/.cache/wget-hsts"
+alias wget='wget --hsts-file="$HOME/.cache/wget-hsts"'
 
 # rsync
 alias \
@@ -203,11 +203,11 @@ alias \
   rscd="rsync -vrazPlu --delete" \
   rscr="rsync -vrazPlu --remove-source-files"
 
-# tor
-alias torh="cat /var/lib/tor/hidden_service/hostname"
+# tor (Homebrew)
+alias torh="cat /opt/homebrew/var/lib/tor/hidden_service/hostname"
 
-# nginx
-alias ngx="cd /etc/nginx"
+# nginx (Homebrew)
+alias ngx="cd /opt/homebrew/etc/nginx"
 
 #######################################################
 # SPECIAL FUNCTIONS
@@ -216,7 +216,8 @@ alias ngx="cd /etc/nginx"
 # lfcd
 lfcd() {
   tmp="$(mktemp -uq)"
-  trap 'rm -f $tmp >/dev/null 2>&1 && trap - HUP INT QUIT TERM PWR EXIT' HUP INT QUIT TERM PWR EXIT
+  # no PWR signal on macOS
+  trap 'rm -f $tmp >/dev/null 2>&1 && trap - HUP INT QUIT TERM EXIT' HUP INT QUIT TERM EXIT
   lf -last-dir-path="$tmp" "$@"
   if [ -f "$tmp" ]; then
     dir="$(cat "$tmp")"
@@ -287,24 +288,10 @@ ftext() {
   grep -iIHrn --color=always "$1" . | less -r
 }
 
-# Copy file with a progress bar
+# Copy file with a progress bar (Linux version drives cp through strace,
+# which macOS does not have; rsync shows the progress instead)
 cpf() {
-  set -e
-  strace -q -ewrite cp -- "${1}" "${2}" 2>&1 |
-    awk '{
-	count += $NF
-	if (count % 10 == 0) {
-		percent = count / total_size * 100
-		printf "%3d%% [", percent
-		for (i=0;i<=percent;i++)
-			printf "="
-			printf ">"
-			for (i=percent;i<100;i++)
-				printf " "
-				printf "]\r"
-			}
-		}
-	END { print "" }' total_size=$(stat -c '%s' "${1}") count=0
+  rsync -ah --progress -- "${1}" "${2}"
 }
 
 # Copy and go to the directory
@@ -360,183 +347,94 @@ pwdtail() {
 
 # Show the current distribution
 distribution() {
-  local dtype
-  # Assume unknown
-  dtype="unknown"
-
-  # First test against Fedora / RHEL / CentOS / generic Redhat derivative
-  if [ -r /etc/rc.d/init.d/functions ]; then
-    source /etc/rc.d/init.d/functions
-    [ zz$(type -t passed 2>/dev/null) == "zzfunction" ] && dtype="redhat"
-
-  # Then test against SUSE (must be after Redhat,
-  # I've seen rc.status on Ubuntu I think? TODO: Recheck that)
-  elif [ -r /etc/rc.status ]; then
-    source /etc/rc.status
-    [ zz$(type -t rc_reset 2>/dev/null) == "zzfunction" ] && dtype="suse"
-
-  # Then test against Debian, Ubuntu and friends
-  elif [ -r /lib/lsb/init-functions ]; then
-    source /lib/lsb/init-functions
-    [ zz$(type -t log_begin_msg 2>/dev/null) == "zzfunction" ] && dtype="debian"
-
-  # Then test against Gentoo
-  elif [ -r /etc/init.d/functions.sh ]; then
-    source /etc/init.d/functions.sh
-    [ zz$(type -t ebegin 2>/dev/null) == "zzfunction" ] && dtype="gentoo"
-
-  # For Mandriva we currently just test if /etc/mandriva-release exists
-  # and isn't empty (TODO: Find a better way :)
-  elif [ -s /etc/mandriva-release ]; then
-    dtype="mandriva"
-
-  # For Slackware we currently just test if /etc/slackware-version exists
-  elif [ -s /etc/slackware-version ]; then
-    dtype="slackware"
-
-  fi
-  echo $dtype
+  echo "macos"
 }
 
 # Show the current version of the operating system
 ver() {
-  local dtype
-  dtype=$(distribution)
-
-  if [ $dtype == "redhat" ]; then
-    if [ -s /etc/redhat-release ]; then
-      cat /etc/redhat-release && uname -a
-    else
-      cat /etc/issue && uname -a
-    fi
-  elif [ $dtype == "suse" ]; then
-    cat /etc/SuSE-release
-  elif [ $dtype == "debian" ]; then
-    lsb_release -a
-    # sudo cat /etc/issue && sudo cat /etc/issue.net && sudo cat /etc/lsb_release && sudo cat /etc/os-release # Linux Mint option 2
-  elif [ $dtype == "gentoo" ]; then
-    cat /etc/gentoo-release
-  elif [ $dtype == "mandriva" ]; then
-    cat /etc/mandriva-release
-  elif [ $dtype == "slackware" ]; then
-    cat /etc/slackware-version
-  else
-    if [ -s /etc/issue ]; then
-      cat /etc/issue
-    else
-      echo "Error: Unknown distribution"
-      exit 1
-    fi
-  fi
+  sw_vers && uname -a
 }
 
 # Automatically install the needed support files for this .bashrc file
 install_bashrc_support() {
-  local dtype
-  dtype=$(distribution)
-
-  if [ $dtype == "redhat" ]; then
-    sudo yum install multitail tree joe
-  elif [ $dtype == "suse" ]; then
-    sudo zypper install multitail
-    sudo zypper install tree
-    sudo zypper install joe
-  elif [ $dtype == "debian" ]; then
-    sudo apt-get install multitail tree joe
-  elif [ $dtype == "gentoo" ]; then
-    sudo emerge multitail
-    sudo emerge tree
-    sudo emerge joe
-  elif [ $dtype == "mandriva" ]; then
-    sudo urpmi multitail
-    sudo urpmi tree
-    sudo urpmi joe
-  elif [ $dtype == "slackware" ]; then
-    echo "No install support for Slackware"
+  if command -v brew >/dev/null 2>&1; then
+    brew install multitail tree joe
   else
-    echo "Unknown distribution"
+    echo "Homebrew is not installed: https://brew.sh"
   fi
 }
 
 # Show current network information
 netinfo() {
   echo "--------------- Network Information ---------------"
-  /sbin/ifconfig | awk /'inet addr/ {print $2}'
-  echo ""
-  /sbin/ifconfig | awk /'Bcast/ {print $3}'
-  echo ""
-  /sbin/ifconfig | awk /'inet addr/ {print $4}'
-
-  /sbin/ifconfig | awk /'HWaddr/ {print $4,$5}'
+  ifconfig | awk '
+    /^[a-z0-9]+:/ { iface = $1 }
+    /inet / && $2 != "127.0.0.1" {
+      printf "%s %s", iface, $2
+      for (i = 3; i < NF; i++) {
+        if ($i == "netmask") printf "  netmask %s", $(i + 1)
+        if ($i == "broadcast") printf "  broadcast %s", $(i + 1)
+      }
+      print ""
+    }
+    /ether / { printf "%s MAC %s\n", iface, $2 }'
   echo "---------------------------------------------------"
 }
 
 # IP address lookup
 alias whatismyip="whatsmyip"
 function whatsmyip() {
-  # Dumps a list of all IP addresses for every device
-  # /sbin/ifconfig |grep -B1 "inet addr" |awk '{ if ( $1 == "inet" ) { print $2 } else if ( $2 == "Link" ) { printf "%s:" ,$1 } }' |awk -F: '{ print $1 ": " $3 }';
-
-  # Internal IP Lookup
+  # Internal IP Lookup (address of the interface that holds the default route)
   echo -n "Internal IP: "
-  /sbin/ifconfig eth0 | grep "inet addr" | awk -F: '{print $2}' | awk '{print $1}'
+  ipconfig getifaddr "$(route -n get default 2>/dev/null | awk '/interface:/ {print $2}')"
 
   # External IP Lookup
   echo -n "External IP: "
-  wget http://smart-ip.net/myip -O - -q
+  curl -s ifconfig.me
+  echo
 }
 
-# View Apache logs
+# View Apache logs (Homebrew httpd)
 apachelog() {
-  if [ -f /etc/httpd/conf/httpd.conf ]; then
-    cd /var/log/httpd && ls -xAh && multitail --no-repeat -c -s 2 /var/log/httpd/*_log
-  else
-    cd /var/log/apache2 && ls -xAh && multitail --no-repeat -c -s 2 /var/log/apache2/*.log
-  fi
+  cd /opt/homebrew/var/log/httpd && ls -xAh && multitail --no-repeat -c -s 2 /opt/homebrew/var/log/httpd/*log
 }
 
 # Edit the Apache configuration
 apacheconfig() {
-  if [ -f /etc/httpd/conf/httpd.conf ]; then
-    sedit /etc/httpd/conf/httpd.conf
-  elif [ -f /etc/apache2/apache2.conf ]; then
-    sedit /etc/apache2/apache2.conf
+  if [ -f /opt/homebrew/etc/httpd/httpd.conf ]; then
+    edit /opt/homebrew/etc/httpd/httpd.conf
+  elif [ -f /etc/apache2/httpd.conf ]; then
+    sedit /etc/apache2/httpd.conf
   else
     echo "Error: Apache config file could not be found."
     echo "Searching for possible locations:"
-    sudo updatedb && locate httpd.conf && locate apache2.conf
+    mdfind -name httpd.conf
   fi
 }
 
 # Edit the PHP configuration file
 phpconfig() {
-  if [ -f /etc/php.ini ]; then
+  local ini
+  ini="$(command ls /opt/homebrew/etc/php/*/php.ini 2>/dev/null | tail -n 1)"
+  if [ -n "$ini" ]; then
+    edit "$ini"
+  elif [ -f /etc/php.ini ]; then
     sedit /etc/php.ini
-  elif [ -f /etc/php/php.ini ]; then
-    sedit /etc/php/php.ini
-  elif [ -f /etc/php5/php.ini ]; then
-    sedit /etc/php5/php.ini
-  elif [ -f /usr/bin/php5/bin/php.ini ]; then
-    sedit /usr/bin/php5/bin/php.ini
-  elif [ -f /etc/php5/apache2/php.ini ]; then
-    sedit /etc/php5/apache2/php.ini
   else
     echo "Error: php.ini file could not be found."
     echo "Searching for possible locations:"
-    sudo updatedb && locate php.ini
+    mdfind -name php.ini
   fi
 }
 
 # Edit the MySQL configuration file
 mysqlconfig() {
-  if [ -f /etc/my.cnf ]; then
+  if [ -f /opt/homebrew/etc/my.cnf ]; then
+    edit /opt/homebrew/etc/my.cnf
+  elif [ -f /etc/my.cnf ]; then
     sedit /etc/my.cnf
-  elif [ -f /etc/mysql/my.cnf ]; then
-    sedit /etc/mysql/my.cnf
   elif [ -f /usr/local/etc/my.cnf ]; then
     sedit /usr/local/etc/my.cnf
-  elif [ -f /usr/bin/mysql/my.cnf ]; then
-    sedit /usr/bin/mysql/my.cnf
   elif [ -f ~/my.cnf ]; then
     sedit ~/my.cnf
   elif [ -f ~/.my.cnf ]; then
@@ -544,7 +442,7 @@ mysqlconfig() {
   else
     echo "Error: my.cnf file could not be found."
     echo "Searching for possible locations:"
-    sudo updatedb && locate my.cnf
+    mdfind -name my.cnf
   fi
 }
 
@@ -568,7 +466,8 @@ trim() {
 #######################################################
 # Set command prompt
 #######################################################
-alias cpu="grep 'cpu ' /proc/stat | awk '{usage=(\$2+\$4)*100/(\$2+\$4+\$5)} END {print usage}' | awk '{printf(\"%.1f\n\", \$1)}'"
+# Total CPU use in percent of all cores (Linux reads /proc/stat)
+alias cpu="/bin/ps -A -o %cpu | awk -v n=\"\$(sysctl -n hw.ncpu)\" '{s+=\$1} END {printf(\"%.1f\n\", s/n)}'"
 function __setprompt {
   local LAST_COMMAND=$? # Must come first!
 
@@ -633,9 +532,9 @@ function __setprompt {
     PS1=""
   fi
 
-  # Date
+  # Date (%p, not the GNU-only %P)
   PS1+="\[${DARKGRAY}\](\[${CYAN}\]\$(date +%a) $(date +%b-'%-m')" # Date
-  PS1+="${BLUE} $(date +'%-I':%M:%S%P)\[${DARKGRAY}\])-"           # Time
+  PS1+="${BLUE} $(date +'%-I':%M:%S%p)\[${DARKGRAY}\])-"           # Time
 
   # CPU
   PS1+="(\[${MAGENTA}\]CPU $(cpu)%"
@@ -643,8 +542,8 @@ function __setprompt {
   # Jobs
   PS1+="\[${DARKGRAY}\]:\[${MAGENTA}\]\j"
 
-  # Network Connections (for a server - comment out for non-server)
-  PS1+="\[${DARKGRAY}\]:\[${MAGENTA}\]Net $(awk 'END {print NR}' /proc/net/tcp)"
+  # Network Connections (Linux counts the lines of /proc/net/tcp)
+  PS1+="\[${DARKGRAY}\]:\[${MAGENTA}\]Net $(netstat -anp tcp 2>/dev/null | grep -c ESTABLISHED)"
 
   PS1+="\[${DARKGRAY}\])-"
 
@@ -661,10 +560,10 @@ function __setprompt {
   PS1+="\[${DARKGRAY}\]:\[${BROWN}\]\w\[${DARKGRAY}\])-"
 
   # Total size of files in current directory
-  PS1+="(\[${GREEN}\]$(/bin/ls -lah | /bin/grep -m 1 total | /bin/sed 's/total //')\[${DARKGRAY}\]:"
+  PS1+="(\[${GREEN}\]$(/bin/ls -lah | /usr/bin/grep -m 1 total | /usr/bin/sed 's/total //')\[${DARKGRAY}\]:"
 
   # Number of files
-  PS1+="\[${GREEN}\]\$(/bin/ls -A -1 | /usr/bin/wc -l)\[${DARKGRAY}\])"
+  PS1+="\[${GREEN}\]\$(/bin/ls -A -1 | /usr/bin/wc -l | tr -d ' ')\[${DARKGRAY}\])"
 
   # Skip to the next line
   PS1+="\n"
@@ -698,7 +597,8 @@ bind '"\C-g":"lfcd\n"'
 # SOURCE
 #######################################################
 
-eval "$(dircolors)"
+# dircolors is GNU coreutils; the BSD ls is coloured through CLICOLOR instead.
+command -v dircolors >/dev/null 2>&1 && eval "$(dircolors)"
 
 [ -f "${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/bash-preexec" ] && . "${XDG_SCRIPTS_HOME:-${HOME}/.local/bin}/bash-preexec"
 [ -f "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/rootshortcutrc" ] && . "${XDG_CONFIG_HOME:-${HOME}/.config}/shell/rootshortcutrc"

@@ -44,7 +44,9 @@ trap 'rmdir "$lock" 2>/dev/null; rm -f "$cur"' EXIT HUP INT TERM
 
 # size:mtime (with nanoseconds) of the scratch file.
 stamp() {
-    stat -f '%z:%Fm' "$cur" 2>/dev/null || printf 'none'
+    # /usr/bin/stat: the profile puts GNU coreutils first in PATH when it is
+    # installed, and GNU stat has a different -f.
+    /usr/bin/stat -f '%z:%Fm' "$cur" 2>/dev/null || printf 'none'
 }
 
 # A wedged lf must never leave the lock behind, hence the 5 second limit.
