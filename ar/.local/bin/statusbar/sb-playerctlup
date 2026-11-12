@@ -1,21 +1,42 @@
 #!/bin/sh
 
-# Single instance: sb-volume/sb-mic (or concurrent runs) may race past pidof.
-exec 9>"${XDG_RUNTIME_DIR:-/tmp}/sb-playerctlup.lock"
+# Updates the music statusbar module when a playerctl-compatible player changes
+
+# Run in our own process group. Otherwise we share the X session's group and
+# cleanup() below could not reach the watchers without hitting everything else.
+[ "$(ps -o pgid= -p $$ | tr -d ' ')" = "$$" ] || exec setsid "$0" "$@"
+
+# Single instance: sb-music (or concurrent runs) may race past pidof.
+lock="${XDG_RUNTIME_DIR:-/tmp}/sb-playerctlup.lock"
+exec 9>>"$lock"
 flock -n 9 || exit 0
 
-# Updates the music statusbar module when a playerctl-compatible player changes
+# The watchers do not die with this shell: playerctl ignores SIGPIPE and none
+# of them notice a dead reader until the next player event. Take them along.
+cleanup() {
+  trap - EXIT INT TERM HUP
+  kill 0
+}
+trap cleanup EXIT INT TERM HUP
+
+# A SIGKILLed predecessor never ran cleanup(); its watchers are still sitting
+# in its process group, which it left behind in the lock file.
+read -r stale <"$lock"
+[ "$stale" -gt 1 ] 2>/dev/null && pkill -g "$stale" -x 'playerctl|dbus-monitor'
+echo $$ >"$lock"
 
 signal() { kill -60 $(pidof "${STATUSBAR:-dwmblocks}") 2>/dev/null; }
 
-playerctl -aF status 2>/dev/null | while read -r _; do signal; done &
-playerctl -aF metadata -f '{{playerName}}{{title}}' 2>/dev/null | while read -r _; do signal; done &
+# 9>&-: the watchers must not inherit the lock. A watcher that outlives this
+# shell would keep holding it, and every later start would exit at flock above.
+playerctl -aF status 2>/dev/null 9>&- | while read -r _; do signal; done 9>&- &
+playerctl -aF metadata -f '{{playerName}}{{title}}' 2>/dev/null 9>&- | while read -r _; do signal; done 9>&- &
 
-dbus-monitor --session "interface='org.freedesktop.DBus.Properties',member='PropertiesChanged',arg0='org.mpris.MediaPlayer2.Player'" 2>/dev/null |
+dbus-monitor --session "interface='org.freedesktop.DBus.Properties',member='PropertiesChanged',arg0='org.mpris.MediaPlayer2.Player'" 2>/dev/null 9>&- |
   while read -r line; do
     case "$line" in
     *PropertiesChanged*) signal ;;
     esac
-  done &
+  done 9>&- &
 
 wait

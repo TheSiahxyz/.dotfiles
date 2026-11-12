@@ -10,7 +10,14 @@ flock -n 9 || exit 0
 MPD_HOST="${MPD_HOST:-/tmp/mpd_socket}"
 export MPD_HOST
 
+# 9>&-: mpc must not inherit the lock. If this shell is killed, the blocked
+# `mpc idle` lives on until the next mpd event, and while it held the lock
+# every restart exited at flock above.
+# sleep: with mpd down `mpc idle` fails at once, which would spin this loop.
 while :; do
-  mpc idle >/dev/null || continue
+  mpc idle >/dev/null 9>&- || {
+    sleep 1 9>&-
+    continue
+  }
   kill -60 $(pidof "${STATUSBAR:-dwmblocks}") 2>/dev/null
 done

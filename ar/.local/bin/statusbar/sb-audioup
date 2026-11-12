@@ -10,7 +10,10 @@ flock -n 9 || exit 0
 volume() { pkill -RTMIN+4 "${STATUSBAR:-dwmblocks}" 2>/dev/null; }
 mic() { pkill -RTMIN+5 "${STATUSBAR:-dwmblocks}" 2>/dev/null; }
 
-pactl subscribe 2>/dev/null | while read -r line; do
+# 9>&-: pactl must not inherit the lock. If this shell is killed, pactl lives
+# on until its next write fails, and while it held the lock every restart
+# exited at flock above.
+pactl subscribe 2>/dev/null 9>&- | while read -r line; do
   case "$line" in
   *" on sink #"*) volume ;;
   *" on source #"*) mic ;;
@@ -19,4 +22,4 @@ pactl subscribe 2>/dev/null | while read -r line; do
     mic
     ;;
   esac
-done
+done 9>&-
