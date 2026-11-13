@@ -35,7 +35,6 @@ start-at-login = true
 persistent-workspaces = [
     '1', '2', '3', '4', '5', '6', '7', '8', '9', '10',
     '11', '12', '13', '14', '15', '16', '17', '18', '19', '20',
-    'E',
 ]
 
 # Normalizations. See: https://nikitabobko.github.io/AeroSpace/guide#normalization
@@ -123,6 +122,10 @@ on-mode-changed = ['exec-and-forget /opt/homebrew/opt/sketchybar/bin/sketchybar 
 
     # Super+Ctrl+f: togglefullscr
     alt-ctrl-f = 'fullscreen'
+    # Alt+Ctrl+f: togglefloating (also alt-t f). dwm's Alt is cmd here; this
+    # also keeps cmd-ctrl-f from triggering the native macOS fullscreen, which
+    # moves the window to a Space AeroSpace cannot manage.
+    cmd-ctrl-f = 'layout floating tiling'
 
     # Super+Return: terminal
     alt-enter = 'exec-and-forget open -na Kitty'
@@ -174,7 +177,8 @@ on-mode-changed = ['exec-and-forget /opt/homebrew/opt/sketchybar/bin/sketchybar 
     alt-minus = 'volume down'
     alt-equal = 'volume up'
 
-    # Super+1..9: view tag (alt-0 is workspace 10 here; dwm's "view all" has no equivalent)
+    # Super+1..9: view tag. alt-0 is workspace 10, the Finder workspace (dwm's
+    # "view all" has no equivalent).
     alt-1 = 'workspace 1'
     alt-2 = 'workspace 2'
     alt-3 = 'workspace 3'
@@ -184,8 +188,7 @@ on-mode-changed = ['exec-and-forget /opt/homebrew/opt/sketchybar/bin/sketchybar 
     alt-7 = 'workspace 7'
     alt-8 = 'workspace 8'
     alt-9 = 'workspace 9'
-    alt-0 = 'workspace 10'
-    alt-f = 'workspace E' # Finder
+    alt-0 = 'workspace 10' # Finder
 
     # Super+Shift+1..9: tag (send the window, stay here)
     alt-shift-1 = 'move-node-to-workspace 1'
@@ -266,8 +269,7 @@ on-mode-changed = ['exec-and-forget /opt/homebrew/opt/sketchybar/bin/sketchybar 
     w = ['mode main', 'exec-and-forget /Applications/kitty.app/Contents/MacOS/kitty -o allow_remote_control=yes -o confirm_os_window_close=0 --title "weather" /bin/zsh -lc "less -SRf ~/.cache/weatherreport; /Applications/kitty.app/Contents/MacOS/kitten @ close-window --self"']
     k = ['mode main', 'exec-and-forget open -na KakaoTalk']
     z = ['mode main', 'exec-and-forget open -a zoom.us']
-    enter = ['mode main', 'exec-and-forget open -na Cursor']             # dwm: zeditor
-    shift-enter = ['mode main', 'exec-and-forget open -na "Visual Studio Code"']
+    enter = ['mode main', 'exec-and-forget open -na Zed']             # dwm: zeditor
     backspace = ['mode main', 'exec-and-forget pmset displaysleepnow']    # dwm: slock
     d = 'mode apps-d'
     t = 'mode apps-t'
@@ -365,7 +367,7 @@ on-mode-changed = ['exec-and-forget /opt/homebrew/opt/sketchybar/bin/sketchybar 
 # ----------------------------------------------------------------------------
 [[on-window-detected]]
 if.app-id = 'com.apple.finder'
-run = ['move-node-to-workspace E']
+run = ['move-node-to-workspace 10']
 
 [[on-window-detected]]
 if.app-id = 'com.apple.weather'
@@ -388,62 +390,68 @@ run = ['layout floating']
 [[on-window-detected]]
 if.app-id = 'net.kovidgoyal.kitty'
 if.window-title-regex-substring = 'vimwiki'
-run = ['move-node-to-workspace 16']
+run = ['move-node-to-workspace 17']
 
+# ncmpcpp goes with the other music apps on the second monitor
+[[on-window-detected]]
+if.app-id = 'net.kovidgoyal.kitty'
+if.window-title-regex-substring = '^ncmpcpp$'
+run = ['move-node-to-workspace 15']
+
+# dwm: terminal -> tag 1
 [[on-window-detected]]
 if.app-id = 'net.kovidgoyal.kitty'
 run = ['move-node-to-workspace 1']
 
+# The main monitor (1-10) is for work only; everything else lives on 11-20.
 [[on-window-detected]]
 if.app-id = 'org.mozilla.firefox'
 run = ['move-node-to-workspace 2']
 
+# Zed (dwm keeps it on tag 1 of the second monitor; workspace 4 here)
 [[on-window-detected]]
-if.app-id = 'com.brave.Browser'
-run = ['move-node-to-workspace 3']
-
-[[on-window-detected]]
-if.app-name-regex-substring = 'cursor'
+if.app-id = 'dev.zed.Zed'
 run = ['move-node-to-workspace 4']
 
 [[on-window-detected]]
-if.app-id = 'com.microsoft.VSCode'
-run = ['move-node-to-workspace 6']
-
-[[on-window-detected]]
 if.app-id = 'com.blizzard.worldofwarcraft'
-run = ['move-node-to-workspace 6']
+run = ['move-node-to-workspace 16']
 
 [[on-window-detected]]
 if.app-id = 'com.microsoft.Excel'
-run = ['move-node-to-workspace 7']
+run = ['move-node-to-workspace 3']
 
 [[on-window-detected]]
 if.app-id = 'com.microsoft.Word'
-run = ['move-node-to-workspace 7']
+run = ['move-node-to-workspace 3']
 
 [[on-window-detected]]
 if.app-id = 'com.microsoft.Powerpoint'
-run = ['move-node-to-workspace 7']
+run = ['move-node-to-workspace 3']
 
 [[on-window-detected]]
 if.app-id = 'org.jkiss.dbeaver.core.product'
-run = ['move-node-to-workspace 8']
+run = ['move-node-to-workspace 5']
 
 [[on-window-detected]]
 if.app-id = 'com.electron.dockerdesktop'
-run = ['move-node-to-workspace 9']
+run = ['move-node-to-workspace 6']
 
 [[on-window-detected]]
 if.app-id = 'com.microsoft.Outlook'
-run = ['move-node-to-workspace 10']
+run = ['move-node-to-workspace 9']
 
 [[on-window-detected]]
 if.app-id = 'com.microsoft.teams2'
-run = ['move-node-to-workspace 10']
+run = ['move-node-to-workspace 9']
 
 [[on-window-detected]]
 if.app-id = 'com.apple.Terminal'
+run = ['move-node-to-workspace 11']
+
+# dwm: second terminal -> tag 1 on the second monitor
+[[on-window-detected]]
+if.app-id = 'com.github.wez.wezterm'
 run = ['move-node-to-workspace 11']
 
 [[on-window-detected]]
@@ -480,12 +488,12 @@ run = ['move-node-to-workspace 17']
 
 [[on-window-detected]]
 if.app-id = 'com.kakao.KakaoTalkMac'
-run = ['move-node-to-workspace 20']
+run = ['move-node-to-workspace 19']
 
 [[on-window-detected]]
 if.app-id = 'com.hnc.Discord'
-run = ['move-node-to-workspace 20']
+run = ['move-node-to-workspace 19']
 
 [[on-window-detected]]
 if.app-id = 'com.tdesktop.Telegram'
-run = ['move-node-to-workspace 20']
+run = ['move-node-to-workspace 19']
