@@ -144,17 +144,3 @@ fi
 ### --- ASDF --- ###
 command -v brew >/dev/null 2>&1 && [ -f "$(brew --prefix asdf)/libexec/asdf.sh" ] &&
     . "$(brew --prefix asdf)/libexec/asdf.sh"
-
-### --- TMUX --- ###
-if command -v tmux >/dev/null 2>&1 && [ -z "$TMUX" ]; then
-    # macOS pgrep has no -a; -l is what makes the filter below work.
-    terminal_count=$(pgrep -u "$USER" -xl "${TERMINAL:-kitty}" 2>/dev/null |
-        grep -Ev 'ncmpcpp|newsboat|pulsemixer|spterm|splf|spcalc|stig|vimwikitodo' | wc -l | tr -d ' ')
-    if [ "${terminal_count:-0}" -le 1 ]; then
-        if ! tmux has-session 2>/dev/null; then
-            exec tmux new-session -s code
-        else
-            exec tmux attach-session
-        fi
-    fi
-fi
