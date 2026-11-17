@@ -1,3 +1,5 @@
+let s:config_home = empty($XDG_CONFIG_HOME) ? $HOME . '/.config' : $XDG_CONFIG_HOME
+
 " AUTOCMD ---------------------------------------------------------------- {{{
 
 " Close with q
@@ -39,17 +41,6 @@ autocmd BufWritePost bm-files,bm-dirs !shortcuts
 " Which key description
 autocmd! User vim-which-key call which_key#register('<Space>', 'g:which_key_map')
 let g:which_key_map = {}
-
-" }}}
-
-
-" BACKUP ----------------------------------------------------------------- {{{
-
-if version >= 703
-    set undodir=${XDG_CONFIG_HOME:-$HOME/.config}/vim/undodir
-    set undofile
-    set undoreload=10000
-endif
 
 " }}}
 
@@ -240,25 +231,27 @@ let g:airline_symbols.linenr = ' L:'
 let g:airline_symbols.maxlinenr = '☰ '
 
 " colorscheme
-if isdirectory(expand("${XDG_CONFIG_HOME:-$HOME/.config}/vim/plugged/catppuccin"))
+if isdirectory(s:config_home . '/vim/plugged/catppuccin')
     let g:airline_theme = 'catppuccin_mocha'
     colorscheme catppuccin_mocha
 endif
 
 " fzf
 let g:fzf_vim = {}
-let $FZF_DEFAULT_OPTS = "--layout=default --preview-window 'right:60%' --preview 'bat --style=numbers --line-range :300 {}'
-              \ --bind ctrl-y:preview-up,
-              \        ctrl-e:preview-down,
-              \        ctrl-b:preview-page-up,
-              \        ctrl-f:preview-page-down,
-              \        ctrl-u:preview-half-page-up,
-              \        ctrl-d:preview-half-page-down,
-              \        shift-up:preview-top,
-              \        shift-down:preview-bottom,
-              \        alt-up:half-page-up,
-              \        alt-down:half-page-down
-              \ "
+" fzf --bind 값은 쉼표 뒤 공백을 허용하지 않으므로 join()으로 붙임
+let s:fzf_binds = join([
+              \ 'ctrl-y:preview-up',
+              \ 'ctrl-e:preview-down',
+              \ 'ctrl-b:preview-page-up',
+              \ 'ctrl-f:preview-page-down',
+              \ 'ctrl-u:preview-half-page-up',
+              \ 'ctrl-d:preview-half-page-down',
+              \ 'shift-up:preview-top',
+              \ 'shift-down:preview-bottom',
+              \ 'alt-up:half-page-up',
+              \ 'alt-down:half-page-down',
+              \ ], ',')
+let $FZF_DEFAULT_OPTS = "--layout=default --preview-window 'right:60%' --preview 'bat --style=numbers --line-range :300 {}' --bind " . s:fzf_binds
 
 " tmux
 if exists('$TMUX')
@@ -431,8 +424,6 @@ let g:which_key_map['w']    =   {
 
 " SHORTCUTS ---------------------------------------------------------------- {{{
 
-if filereadable(expand("${XDG_CONFIG_HOME:-$HOME/.config}/vim/shortcuts.vim"))
-    silent! source ${XDG_CONFIG_HOME:-$HOME/.config}/vim/shortcuts.vim
-endif
+" shortcuts.vim은 vimrc의 SHORTCUTS 블록에서 읽음
 
 " }}}

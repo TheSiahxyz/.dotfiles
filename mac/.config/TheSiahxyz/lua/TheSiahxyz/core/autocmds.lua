@@ -5,6 +5,24 @@ end
 local autocmd = vim.api.nvim_create_autocmd
 local home = os.getenv("HOME")
 
+-- pass 임시 파일(평문 비밀번호)은 undo/swap/backup/shada로 디스크에 남기지 않음
+-- 경로: /dev/shm/pass.XXXX/XXXX-이름.txt (macOS 등 /dev/shm이 없으면 $TMPDIR 또는 /tmp)
+autocmd({ "BufNewFile", "BufReadPre" }, {
+	group = augroup("pass_secure"),
+	pattern = {
+		"/dev/shm/pass.?*/?*.txt",
+		"/tmp/pass.?*/?*.txt",
+		((os.getenv("TMPDIR") or "/tmp"):gsub("/$", "")) .. "/pass.?*/?*.txt",
+	},
+	callback = function()
+		vim.opt_local.undofile = false
+		vim.opt_local.swapfile = false
+		vim.opt.backup = false
+		vim.opt.writebackup = false
+		vim.opt.shada = ""
+	end,
+})
+
 -- Change the color of symlink files to distinguish between directory and symlink files
 autocmd("FileType", {
 	group = augroup("highlight_linked_files"),

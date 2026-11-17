@@ -14,7 +14,8 @@ if $USER != "root"
 
     set backupdir=$XDG_CONFIG_HOME/vim/backup   | call mkdir(&backupdir, 'p')
     set directory=$XDG_CONFIG_HOME/vim/swap     | call mkdir(&directory, 'p')
-    set undodir=$XDG_DATA_HOME/history/vim_history  | call mkdir(&undodir,   'p')
+    " nvim은 history/vim_history를 씀. 두 에디터의 undo 파일 형식이 달라 분리함
+    set undodir=$XDG_DATA_HOME/vim/undo         | call mkdir(&undodir,   'p')
     set viewdir=$XDG_CONFIG_HOME/vim/view       | call mkdir(&viewdir,   'p')
 else
     set runtimepath^=/root/.config/vim
@@ -30,7 +31,7 @@ else
 
     set backupdir=/root/.config/vim/backup  | call mkdir(&backupdir, 'p')
     set directory=/root/.config/vim/swap    | call mkdir(&directory, 'p')
-    set undodir=/root/.local/share/history/vim_history  | call mkdir(&undodir, 'p')
+    set undodir=/root/.local/share/vim/undo     | call mkdir(&undodir, 'p')
     set viewdir=/root/.config/vim/view      | call mkdir(&viewdir,   'p')
 endif
 
@@ -290,6 +291,11 @@ highlight SpellCap ctermfg=75 guifg=#9D7CD8 gui=undercurl guisp=#9D7CD8
 highlight SpellRare ctermfg=81 guifg=#0DB9D7 gui=undercurl guisp=#0DB9D7
 highlight SpellLocal ctermfg=142 guifg=#FAB387 gui=undercurl guisp=#FAB387
 
+" pass 임시 파일(비밀번호)은 swap/backup/undo로 디스크에 남기지 않음
+" 경로: /dev/shm/pass.XXXX/XXXX-이름.txt (macOS 등 /dev/shm이 없으면 $TMPDIR 또는 /tmp)
+autocmd BufNewFile,BufReadPre /dev/shm/pass.?*/?*.txt,/tmp/pass.?*/?*.txt,$TMPDIR/pass.?*/?*.txt
+      \ setlocal noswapfile nobackup nowritebackup noundofile viminfo=
+
 " Avoids updating the screen before commands are completed
 set lazyredraw
 
@@ -382,8 +388,8 @@ set wildignore=*.docx,*.jpg,*.png,*.gif,*.pdf,*.pyc,*.exe,*.flv,*.img,*.xlsx
 
 " If Vim version is equal to or greater than 7.3 enable undo file.
 " This allows you to undo changes to a file even after saving it.
+" undodir은 맨 위 VIM ENV에서 정함
 if version >= 703
-    set undodir=~/.config/vim/backup
     set undofile
     set undoreload=10000
 endif
