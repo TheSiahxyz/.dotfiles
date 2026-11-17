@@ -23,12 +23,18 @@ checkprice() {
     cut -d':' -f1)" != "$(date '+%Y-%m-%d %H')" ]
 }
 
+# One "Name: change%" line per ticker, named as the table names it ("S&P 500",
+# not "^GSPC" - Yahoo's symbols mean little to a reader). Read from the table
+# rows themselves, so a name always sits next to its own number.
 getchange() {
-  mapfile -t changes < <(sed -e 's/  / /g' "$pricefile" | grep -oe '[m-]\+[0-9]\+\.[0-9]\+' | sed 's/[m ]/;/g')
-  IFS=',' read -ra ticker <<<"$tickers"
-  for idx in "${!ticker[@]}"; do
-    printf "%s: %s%%\n" "${ticker[$idx]}" "${changes[$idx]//;/}"
-  done
+  awk -F'│' '
+    { gsub(/\033\[[0-9;]*m/, "") }
+    /^│/ && rows++ { # skip the header row
+      name = $2; pct = $5
+      gsub(/^ +| +$/, "", name); gsub(/^ +| +$/, "", pct)
+      printf "%s: %s%%\n", name, pct
+    }
+  ' "$pricefile"
 }
 
 # The site redirects http to https, hence -L. Download to a scratch file so a
@@ -155,7 +161,7 @@ case $BLOCK_BUTTON in
   notify-send -u low "Updating..." "Updating prices"
   updateme="1"
   ;;
-3) notify-send "Current prices:" "Current stock prices:\n<b>$(getchange)</b>
+3) notify-send "Current prices:" "<b>$(getchange | sed 's/&/\&amp;/g; s/</\&lt;/g')</b>
 
 LEFT MOUSE BUTTON: show price file
 MIDDLE MOUSE BUTTON: update stock prices
