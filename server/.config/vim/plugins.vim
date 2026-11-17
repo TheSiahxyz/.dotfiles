@@ -1,4 +1,5 @@
-if getfsize(expand("${XDG_CONFIG_HOME:-$HOME/.config}/vim/autoload/plug.vim")) <= 0
+let s:vimdir = (empty($XDG_CONFIG_HOME) ? $HOME . '/.config' : $XDG_CONFIG_HOME) . '/vim'
+if getfsize(s:vimdir . '/autoload/plug.vim') <= 0
     echo "Downloading junegunn/vim-plug to manage plugins..."
     silent !mkdir -p ${XDG_CONFIG_HOME:-$HOME/.config}/vim/plugged/
     silent !curl -fLo ${XDG_CONFIG_HOME:-$HOME/.config}/vim/autoload/plug.vim --create-dirs "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
