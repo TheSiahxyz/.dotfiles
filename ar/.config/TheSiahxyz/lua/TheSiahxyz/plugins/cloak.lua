@@ -22,8 +22,11 @@ return {
 						".env*",
 						"wrangler.toml",
 						".dev.vars",
-						"address*",
-						"*api*",
+						"address*.{txt,key,env,conf,ini}",
+						"address{,es}",
+						-- Only secret-looking "api" files, not source code like api-client.ts.
+						"*api*.{txt,key,env,conf,ini}",
+						"*api*{key,keys,token,secret}",
 					},
 					-- Match an equals sign and any character after it.
 					-- This can also be a table of patterns to cloak,
