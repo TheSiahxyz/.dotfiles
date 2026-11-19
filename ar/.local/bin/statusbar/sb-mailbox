@@ -8,7 +8,7 @@ case $BLOCK_BUTTON in
   setsid -w -f "$TERMINAL" -e neomutt
   pkill -RTMIN+23 "${STATUSBAR:-dwmblocks}"
   ;;
-2) setsid -f mw -Y >/dev/null ;;
+2) setsid -f sh -c 'mw -Y >/dev/null 2>&1; pkill -RTMIN+23 "${STATUSBAR:-dwmblocks}"' ;;
 3) notify-send "📬 Mail module" "\- Shows unread mail
 - Shows 🔃 if syncing mail
 - Left click opens neomutt
