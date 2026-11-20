@@ -103,6 +103,11 @@ get_daily_value() {
   " "$weatherreportjson"
 }
 
+# Round to the nearest integer. printf's %.0f keeps the sign of a value that
+# rounds to zero (-0.3 → "-0"); converting the rounded string to an integer
+# drops it, so a near-zero reading shows as a plain 0.
+round() { awk '{printf "%d", sprintf("%.0f", $1)}'; }
+
 getprecip() { get_hourly_value "precipitation_probability"; }
 
 gethighprecip() { get_daily_value "precipitation_probability_max"; }
@@ -115,18 +120,18 @@ getsnow() {
   esac
 }
 
-getwind() { get_hourly_value "wind_speed_10m" | awk '{printf "%.0f", $1}'; }
+getwind() { get_hourly_value "wind_speed_10m" | round; }
 
-gettemp() { get_hourly_value "temperature_2m" | awk '{printf "%.0f", $1}'; }
+gettemp() { get_hourly_value "temperature_2m" | round; }
 
-getfeelslike() { get_hourly_value "apparent_temperature" | awk '{printf "%.0f", $1}'; }
+getfeelslike() { get_hourly_value "apparent_temperature" | round; }
 
-getlowtemp() { get_daily_value "temperature_2m_min" | awk '{printf "%.0f", $1}'; }
+getlowtemp() { get_daily_value "temperature_2m_min" | round; }
 
-gethightemp() { get_daily_value "temperature_2m_max" | awk '{printf "%.0f", $1}'; }
+gethightemp() { get_daily_value "temperature_2m_max" | round; }
 
 gethumidity() {
-  humidity=$(get_hourly_value "relative_humidity_2m" | awk '{printf "%.0f", $1}')
+  humidity=$(get_hourly_value "relative_humidity_2m" | round)
   case "$humidity" in
   [0-9] | [1-2][0-9]) echo "🏜: $humidity%" ;;
   [3-4][0-9]) echo "🌲: $humidity%" ;;
