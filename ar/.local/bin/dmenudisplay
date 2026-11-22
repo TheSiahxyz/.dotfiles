@@ -109,13 +109,12 @@ twoscreen() { # If multi-monitor is selected and there are two screens.
         --output "$secondary" $(dir_flag "$direction") "$primary" $secondary_res --scale 1.0x1.0
       ;;
     above | below)
-      # --above/--below left-align by default; compute positions to right-align.
+      # Stack vertically and left-align (x=0 for both).
       # Each display keeps its native resolution/DPI (X11 has no real per-monitor
       # DPI, so the cursor may catch where the pixel widths differ — accepted).
       set -- $(res_wh "$primary" "$primary_res"); pw=$1; ph=$2
       set -- $(res_wh "$secondary" "$secondary_res"); sw=$1; sh=$2
-      maxw=$pw; [ "$sw" -gt "$maxw" ] && maxw=$sw
-      px=$((maxw - pw)); sx=$((maxw - sw))
+      px=0; sx=0
       if [ "$direction" = "above" ]; then py=$sh; sy=0; else py=0; sy=$ph; fi
       xrandr --output "$primary" --primary --mode "${pw}x${ph}" --scale 1.0x1.0 --pos "${px}x${py}" \
         --output "$secondary" --mode "${sw}x${sh}" --scale 1.0x1.0 --pos "${sx}x${sy}"
@@ -142,12 +141,11 @@ morescreen() { # If multi-monitor is selected and there are more than two screen
     ;;
   above | below)
     # Stack vertically (secondary on the chosen side, tertiary opposite) and
-    # right-align all three. Each display keeps its native resolution/DPI.
+    # left-align all three (x=0). Each display keeps its native resolution/DPI.
     set -- $(res_wh "$primary" "$primary_res"); pw=$1; ph=$2
     set -- $(res_wh "$secondary" "$secondary_res"); sw=$1; sh=$2
     set -- $(res_wh "$tertiary" "$tertiary_res"); tw=$1; th=$2
-    maxw=$pw; [ "$sw" -gt "$maxw" ] && maxw=$sw; [ "$tw" -gt "$maxw" ] && maxw=$tw
-    px=$((maxw - pw)); sx=$((maxw - sw)); tx=$((maxw - tw))
+    px=0; sx=0; tx=0
     if [ "$direction" = "above" ]; then
       sy=0; py=$sh; ty=$((sh + ph)) # secondary top, primary middle, tertiary bottom
     else
