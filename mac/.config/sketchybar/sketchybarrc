@@ -74,8 +74,8 @@ sketchybar --add item apple.logo left \
   --set apple.logo icon=$APPLE \
   icon.font="SF Pro:Black:16.0" \
   icon.color=$ACCENT_SECONDARY \
-  padding_right=12 \
-  padding_left=4 \
+  padding_right=0 \
+  padding_left=0 \
   label.drawing=off \
   click_script="sketchybar --set apple.logo popup.drawing=toggle" \
   script="sketchybar --set apple.logo popup.drawing=off" \
@@ -100,8 +100,8 @@ for i in $(seq 1 $WS_SLOTS); do
     icon.padding_left=4 \
     icon.padding_right=4 \
     label.drawing=off \
-    padding_left=4 \
-    padding_right=4 \
+    padding_left=0 \
+    padding_right=0 \
     background.color=$BACKGROUND_1 \
     background.corner_radius=0 \
     background.height=24 \
@@ -121,8 +121,8 @@ sketchybar --add item mode left \
   label.color=$BLACK \
   label.padding_left=8 \
   label.padding_right=8 \
-  padding_left=4 \
-  padding_right=4 \
+  padding_left=0 \
+  padding_right=0 \
   background.color=$YELLOW \
   background.border_width=0 \
   background.drawing=on \
@@ -134,8 +134,8 @@ sketchybar --add item separator left \
   --set separator icon="󰇙" \
   icon.font="SF Pro:Regular:16.0" \
   icon.color=$ACCENT_TERTIARY \
-  padding_left=12 \
-  padding_right=8 \
+  padding_left=0 \
+  padding_right=0 \
   label.drawing=off
 
 # Front App
@@ -149,8 +149,8 @@ sketchybar --add item front_app left \
   label.color=$WHITE \
   label.padding_left=4 \
   label.padding_right=8 \
-  padding_left=8 \
-  padding_right=8 \
+  padding_left=0 \
+  padding_right=0 \
   background.color=$DWM_SEL_BG \
   background.drawing=on \
   script="$PLUGIN_DIR/front_app.sh" \
@@ -205,8 +205,8 @@ sketchybar --add item calendar right \
   background.color=$BACKGROUND_1 \
   background.drawing=on \
   background.height=24 \
-  padding_left=4 \
-  padding_right=4 \
+  padding_left=0 \
+  padding_right=0 \
   --subscribe calendar system_woke
 
 # Clock
@@ -224,8 +224,8 @@ sketchybar --add item clock right \
   script="$PLUGIN_DIR/clock.sh" \
   background.color=$BACKGROUND_1 \
   background.drawing=on \
-  padding_left=4 \
-  padding_right=4 \
+  padding_left=0 \
+  padding_right=0 \
   click_script="sketchybar --set clock popup.drawing=toggle" \
   --subscribe clock system_woke mouse.exited.global
 
@@ -243,8 +243,8 @@ sketchybar --add item wifi right \
   script="$PLUGIN_DIR/wifi.sh" \
   background.color=$BACKGROUND_1 \
   background.drawing=on \
-  padding_left=4 \
-  padding_right=4 \
+  padding_left=0 \
+  padding_right=0 \
   --subscribe wifi wifi_change system_woke
 
 # Bluetooth Status
@@ -257,8 +257,8 @@ sketchybar --add item bluetooth right \
   script="$PLUGIN_DIR/bluetooth.sh" \
   background.color=$BACKGROUND_1 \
   background.drawing=on \
-  padding_left=4 \
-  padding_right=4 \
+  padding_left=0 \
+  padding_right=0 \
   --subscribe bluetooth system_woke
 
 # Input Source (event driven; the slow poll is only a safety net)
@@ -271,8 +271,8 @@ sketchybar --add item input_source right \
   script="$PLUGIN_DIR/get_input_source.sh" \
   background.color=$BACKGROUND_1 \
   background.drawing=on \
-  padding_left=4 \
-  padding_right=4 \
+  padding_left=0 \
+  padding_right=0 \
   --subscribe input_source input_change system_woke
 
 # Volume (click: popup with mute toggle and slider)
@@ -285,8 +285,8 @@ sketchybar --add item volume right \
   script="$PLUGIN_DIR/volume.sh" \
   background.color=$BACKGROUND_1 \
   background.drawing=on \
-  padding_left=4 \
-  padding_right=4 \
+  padding_left=0 \
+  padding_right=0 \
   click_script="sketchybar --set volume popup.drawing=toggle" \
   popup.horizontal=on \
   --subscribe volume volume_change mouse.exited.global
@@ -334,8 +334,8 @@ sketchybar --add item battery right \
   script="$PLUGIN_DIR/battery.sh" \
   background.color=$BACKGROUND_1 \
   background.drawing=on \
-  padding_left=4 \
-  padding_right=4 \
+  padding_left=0 \
+  padding_right=0 \
   --subscribe battery system_woke power_source_change
 
 # Pritunl VPN
@@ -348,8 +348,8 @@ sketchybar --add item pritunl right \
   label.drawing=off \
   background.color=$BACKGROUND_1 \
   background.drawing=on \
-  padding_left=4 \
-  padding_right=4 \
+  padding_left=0 \
+  padding_right=0 \
   click_script="open -a Pritunl"
 
 ##### Finalize Setup #####
