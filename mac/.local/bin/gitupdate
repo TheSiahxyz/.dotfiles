@@ -36,17 +36,26 @@ generate_message() {
 # Check for changes in the working directory
 changes=$(git status --porcelain)
 
-# Check for unpushed commits
-unpushed=$(git cherry -v | wc -l)
+# Check for unpushed commits (against upstream)
+unpushed=$(git cherry -v 2>/dev/null | wc -l)
 
-[ -z "$changes" ] && [ "$unpushed" -eq 0 ] && exit
+# Get the current Git branch name
+branch=$(git symbolic-ref -q HEAD | sed -e 's|^refs/heads/||')
+
+# Remotes that lack HEAD (missing branch or behind), e.g. home behind while origin is current
+behind=""
+for r in $(git remote); do
+  if ! git rev-parse -q --verify "refs/remotes/$r/$branch" >/dev/null ||
+    [ "$(git rev-list --count "refs/remotes/$r/$branch..HEAD")" -gt 0 ]; then
+    behind="$behind $r"
+  fi
+done
+
+[ -z "$changes" ] && [ "$unpushed" -eq 0 ] && [ -z "$behind" ] && exit
 
 # Save current directory and change to the Git repo root
 repo_root=$(git rev-parse --show-toplevel || echo ".")
 cd "$repo_root" || exit
-
-# Get the current Git branch name
-branch=$(git symbolic-ref -q HEAD | sed -e 's|^refs/heads/||')
 
 # Generate default commit message if there are changes
 if [ -n "$changes" ] && [ "$unpushed" -eq 0 ]; then
@@ -62,7 +71,8 @@ if [ -n "$changes" ] && [ "$unpushed" -eq 0 ]; then
   fi
   message="${1:-$default}"
 else
-  message=$(git cherry -v | awk '{$1=$2=""; print $0}' | sed 's/^ *//' | tail -n 1)
+  message=$(git cherry -v 2>/dev/null | awk '{$1=$2=""; print $0}' | sed 's/^ *//' | tail -n 1)
+  [ -n "$message" ] || message=$(git log -1 --format=%s)
 fi
 
 # Remotes whose push failed, so one bad remote does not abort the whole run
@@ -74,8 +84,10 @@ if [ "$repo_root" = "${PASSWORD_STORE_DIR:-${HOME}/.password-store}" ]; then
   done
 else
   # Add and commit changes
-  git add --all .
-  git commit -m "$message"
+  if [ -n "$changes" ]; then
+    git add --all .
+    git commit -m "$message"
+  fi
   if git remote | grep -qx origin; then
     remote=origin
   else
