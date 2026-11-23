@@ -14,14 +14,14 @@ source "$CONFIG_DIR/icons.sh"
 PLUGIN_DIR="$CONFIG_DIR/plugins"
 
 ##### Bar Appearance #####
-sketchybar --bar position=top height=42 \
+sketchybar --bar position=top height=24 \
   color=$BAR_COLOR \
   border_width=0 \
   corner_radius=0 \
   margin=0 \
   blur_radius=0 \
-  padding_left=16 \
-  padding_right=16 \
+  padding_left=0 \
+  padding_right=0 \
   shadow=off \
   sticky=on \
   topmost=window
@@ -33,18 +33,18 @@ default=(
   icon.color=$ICON_COLOR
   icon.padding_left=6
   icon.padding_right=6
-  label.font="SF Pro:Semibold:13.0"
+  label.font="Hack Nerd Font Mono:Regular:12.0"
   label.color=$LABEL_COLOR
   label.padding_left=6
   label.padding_right=6
   padding_left=8
   padding_right=8
-  background.height=26
-  background.corner_radius=6
-  background.border_width=1
+  background.height=24
+  background.corner_radius=0
+  background.border_width=0
   background.border_color=$BACKGROUND_2
   popup.background.border_width=2
-  popup.background.corner_radius=6
+  popup.background.corner_radius=0
   popup.background.border_color=$POPUP_BORDER_COLOR
   popup.background.color=$POPUP_BACKGROUND_COLOR
 )
@@ -93,18 +93,18 @@ WS_SLOTS=21
 for i in $(seq 1 $WS_SLOTS); do
   sketchybar --add item ws.$i left \
     --set ws.$i drawing=off \
-    icon.font="SF Pro:Semibold:12.0" \
+    icon.font="Hack Nerd Font Mono:Regular:12.0" \
     icon.color=$GREY \
     icon.align=center \
-    icon.width=32 \
+    icon.width=24 \
     icon.padding_left=4 \
     icon.padding_right=4 \
     label.drawing=off \
     padding_left=4 \
     padding_right=4 \
     background.color=$BACKGROUND_1 \
-    background.corner_radius=6 \
-    background.height=26 \
+    background.corner_radius=0 \
+    background.height=24 \
     background.drawing=on
 done
 
@@ -117,7 +117,7 @@ sketchybar --add item mode left \
   --set mode drawing=off \
   updates=on \
   icon.drawing=off \
-  label.font="SF Pro:Semibold:12.0" \
+  label.font="Hack Nerd Font Mono:Regular:12.0" \
   label.color=$BLACK \
   label.padding_left=8 \
   label.padding_right=8 \
@@ -145,12 +145,14 @@ sketchybar --add item front_app left \
   icon.color=$ACCENT_QUATERNARY \
   icon.padding_left=6 \
   icon.padding_right=8 \
-  label.font="SF Pro:Medium:13.0" \
+  label.font="Hack Nerd Font Mono:Regular:12.0" \
   label.color=$WHITE \
   label.padding_left=4 \
   label.padding_right=8 \
   padding_left=8 \
   padding_right=8 \
+  background.color=$DWM_SEL_BG \
+  background.drawing=on \
   script="$PLUGIN_DIR/front_app.sh" \
   --subscribe front_app front_app_switched
 
@@ -162,7 +164,7 @@ sketchybar --add item music left \
   icon.padding_left=8 \
   icon.padding_right=2 \
   label.padding_right=8 \
-  label.font="Hack Nerd Font:Bold:12.0" \
+  label.font="Hack Nerd Font Mono:Regular:12.0" \
   label.align=left \
   label.max_chars=20 \
   update_freq=5 \
@@ -184,17 +186,17 @@ sketchybar --add item music-artwork left \
   background.image.drawing=on \
   background.color="$TRANSPARENT" \
   background.border_color="$TRANSPARENT" \
-  padding_right=16 \
+  padding_right=0 \
   click_script="curl -s -m 2 -X POST 127.0.0.1:26538/api/v1/toggle-play; $PLUGIN_DIR/youtube-music.sh"
 
 ##### Right Side Items #####
 
 # Calendar Events
 sketchybar --add item calendar right \
-  --set calendar icon.font="SF Pro:Semibold:12.0" \
+  --set calendar icon.font="Hack Nerd Font Mono:Regular:12.0" \
   icon.padding_left=8 \
   icon.padding_right=6 \
-  label.font="SF Pro:Medium:12.0" \
+  label.font="Hack Nerd Font Mono:Regular:12.0" \
   label.padding_left=4 \
   label.padding_right=8 \
   label.max_chars=28 \
@@ -202,7 +204,7 @@ sketchybar --add item calendar right \
   script="$PLUGIN_DIR/calendar.sh" \
   background.color=$BACKGROUND_1 \
   background.drawing=on \
-  background.height=26 \
+  background.height=24 \
   padding_left=4 \
   padding_right=4 \
   --subscribe calendar system_woke
@@ -214,7 +216,7 @@ sketchybar --add item clock right \
   icon.color=$YELLOW \
   icon.padding_left=8 \
   icon.padding_right=6 \
-  label.font="SF Pro:Medium:13.0" \
+  label.font="Hack Nerd Font Mono:Regular:12.0" \
   label.color=$WHITE \
   label.padding_left=4 \
   label.padding_right=8 \
@@ -312,7 +314,7 @@ sketchybar --add slider volume.slider popup.volume 120 \
 
 sketchybar --add item volume.percent popup.volume \
   --set volume.percent icon.drawing=off \
-  label.font="SF Pro:Medium:11.0" \
+  label.font="Hack Nerd Font Mono:Regular:12.0" \
   label.color=$WHITE \
   background.drawing=off \
   padding_left=2 \
@@ -324,7 +326,7 @@ sketchybar --add item battery right \
   icon.color=$ACCENT_SECONDARY \
   icon.padding_left=8 \
   icon.padding_right=6 \
-  label.font="SF Pro:Medium:13.0" \
+  label.font="Hack Nerd Font Mono:Regular:12.0" \
   label.color=$WHITE \
   label.padding_left=4 \
   label.padding_right=8 \

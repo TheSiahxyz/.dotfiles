@@ -39,11 +39,11 @@ while IFS= read -r ws; do
   [ "$slot" -le "$MAX_SLOTS" ] || break
 
   if [ "$ws" = "$focused" ]; then
-    color="$WHITE"
-    bg="$BACKGROUND_2"
+    color="$TAG_SEL_FG"
+    bg="$TAG_SEL_BG"
   else
-    color="$GREY"
-    bg="$BACKGROUND_1"
+    color="$TAG_NORM_FG"
+    bg="$TAG_NORM_BG"
   fi
 
   args+=(--set "ws.$slot"

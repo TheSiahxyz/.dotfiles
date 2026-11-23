@@ -81,7 +81,7 @@ on-mode-changed = ['exec-and-forget /opt/homebrew/opt/sketchybar/bin/sketchybar 
 [gaps]
     inner.horizontal =  15
     inner.vertical =    15
-    outer.top =         [{ monitor."built-in" = 10 }, { monitor."main" = 44 }, { monitor."secondary" = 44 }, { monitor."1" = 44 }, { monitor."2" = 44 }, { monitor."3" = 44 }, 10]
+    outer.top =         [{ monitor."built-in" = 10 }, { monitor."main" = 32 }, { monitor."secondary" = 32 }, { monitor."1" = 32 }, { monitor."2" = 32 }, { monitor."3" = 32 }, 10]
     outer.left =        10
     outer.bottom =      10
     outer.right =       10

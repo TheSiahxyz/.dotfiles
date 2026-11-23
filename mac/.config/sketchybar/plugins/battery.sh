@@ -45,4 +45,4 @@ sketchybar --set "$NAME" icon="$ICON" \
                         icon.color="$COLOR" \
                         label="$BATTERY_LEVEL%" \
                         label.color=$WHITE \
-                        label.font="SF Pro:Medium:13.0"
+                        label.font="Hack Nerd Font Mono:Regular:12.0"
