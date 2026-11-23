@@ -20,8 +20,8 @@ sketchybar --bar position=top height=24 \
   corner_radius=0 \
   margin=0 \
   blur_radius=0 \
-  padding_left=0 \
-  padding_right=0 \
+  padding_left=16 \
+  padding_right=16 \
   shadow=off \
   sticky=on \
   topmost=window
@@ -172,7 +172,7 @@ sketchybar --add item music left \
   background.color="$TRANSPARENT" \
   background.border_color="$TRANSPARENT" \
   scroll_texts=on \
-  padding_right=0 \
+  padding_right=16 \
   click_script="curl -s -m 2 -X POST 127.0.0.1:26538/api/v1/toggle-play; $PLUGIN_DIR/youtube-music.sh"
 
 # YouTube Music album art
@@ -186,7 +186,7 @@ sketchybar --add item music-artwork left \
   background.image.drawing=on \
   background.color="$TRANSPARENT" \
   background.border_color="$TRANSPARENT" \
-  padding_right=0 \
+  padding_right=16 \
   click_script="curl -s -m 2 -X POST 127.0.0.1:26538/api/v1/toggle-play; $PLUGIN_DIR/youtube-music.sh"
 
 ##### Right Side Items #####

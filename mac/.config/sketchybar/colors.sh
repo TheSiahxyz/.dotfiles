@@ -9,7 +9,7 @@ export DWM_SEL_BG=0xff005577   # selbgcolor / seltagbgcolor / selinfobgcolor
 export TAG_SEL_FG=0xffffffff   # seltagfgcolor
 export TAG_SEL_BG=$DWM_SEL_BG
 export TAG_NORM_FG=0xffcccccc  # normtagfgcolor
-export TAG_NORM_BG=0x00000000  # unselected tags have no background
+export TAG_NORM_BG=$DWM_BG      # unselected tags: plain bar colour
 export STATUS_FG=0xffeeeeee    # normstatusfgcolor / selfgcolor
 export DWM_BORDER=0xff444444   # normbordercolor
 export DWM_SEL_BORDER=0xff770000 # selbordercolor
@@ -37,10 +37,11 @@ export BATTERY_3=$ORANGE
 export BATTERY_4=$RED
 export BATTERY_5=0xffcc241d
 
-# General bar colours. Items sit directly on the bar, as dwmblocks text does.
-export BAR_COLOR=$DWM_BG
+# General bar colours. Each item is a chip in the dwm bar colour; the space
+# between the chips stays empty.
+export BAR_COLOR=$TRANSPARENT                 # the bar itself is see-through; only the chips are drawn
 export BAR_BORDER_COLOR=$DWM_BORDER
-export BACKGROUND_1=$TRANSPARENT
+export BACKGROUND_1=$DWM_BG
 export BACKGROUND_2=$DWM_BORDER
 export ICON_COLOR=$STATUS_FG
 export LABEL_COLOR=$STATUS_FG
