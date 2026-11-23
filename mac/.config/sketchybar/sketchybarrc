@@ -129,15 +129,15 @@ sketchybar --add item mode left \
   script="$PLUGIN_DIR/aerospace_mode.sh" \
   --subscribe mode aerospace_mode_change
 
-# Separator
+# Separator. Centred by hand in a 24pt slot: sketchybar sizes the icon by its
+# ink (5pt) but draws from the glyph origin, and this glyph has ~3pt of empty
+# space on its left, so icon.align=center lands it ~2pt too far right.
 sketchybar --add item separator left \
   --set separator icon="󰇙" \
   icon.font="Hack Nerd Font Mono:Regular:16.0" \
   icon.color=$ACCENT_TERTIARY \
-  icon.width=24 \
-  icon.align=center \
-  icon.padding_left=0 \
-  icon.padding_right=0 \
+  icon.padding_left=7 \
+  icon.padding_right=12 \
   padding_left=0 \
   padding_right=0 \
   label.drawing=off
@@ -149,10 +149,10 @@ sketchybar --add item front_app left \
   icon.font="SF Pro:Semibold:15.0" \
   icon.color=$ACCENT_QUATERNARY \
   icon.padding_left=6 \
-  icon.padding_right=8 \
+  icon.padding_right=4 \
   label.font="Hack Nerd Font Mono:Regular:12.0" \
   label.color=$WHITE \
-  label.padding_left=4 \
+  label.padding_left=0 \
   label.padding_right=8 \
   padding_left=0 \
   padding_right=0 \
@@ -201,9 +201,9 @@ sketchybar --add item music-artwork left \
 sketchybar --add item calendar right \
   --set calendar icon.font="Hack Nerd Font Mono:Regular:12.0" \
   icon.padding_left=8 \
-  icon.padding_right=6 \
+  icon.padding_right=4 \
   label.font="Hack Nerd Font Mono:Regular:12.0" \
-  label.padding_left=4 \
+  label.padding_left=0 \
   label.padding_right=8 \
   label.max_chars=28 \
   update_freq=900 \
@@ -221,10 +221,10 @@ sketchybar --add item clock right \
   icon.font="SF Pro:Semibold:15.0" \
   icon.color=$YELLOW \
   icon.padding_left=8 \
-  icon.padding_right=6 \
+  icon.padding_right=4 \
   label.font="Hack Nerd Font Mono:Regular:12.0" \
   label.color=$WHITE \
-  label.padding_left=4 \
+  label.padding_left=0 \
   label.padding_right=8 \
   update_freq=10 \
   script="$PLUGIN_DIR/clock.sh" \
@@ -331,10 +331,10 @@ sketchybar --add item battery right \
   --set battery icon.font="SF Pro:Semibold:15.0" \
   icon.color=$ACCENT_SECONDARY \
   icon.padding_left=8 \
-  icon.padding_right=6 \
+  icon.padding_right=4 \
   label.font="Hack Nerd Font Mono:Regular:12.0" \
   label.color=$WHITE \
-  label.padding_left=4 \
+  label.padding_left=0 \
   label.padding_right=8 \
   update_freq=120 \
   script="$PLUGIN_DIR/battery.sh" \
