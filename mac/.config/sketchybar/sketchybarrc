@@ -14,7 +14,14 @@ source "$CONFIG_DIR/icons.sh"
 PLUGIN_DIR="$CONFIG_DIR/plugins"
 
 ##### Bar Appearance #####
-sketchybar --bar position=top height=24 \
+# The bar floats BAR_Y_OFFSET below the screen edge and ends BAR_Y_OFFSET above
+# the window border, so the gaps match the 4pt AeroSpace leaves at the sides.
+# (Windows cannot start higher than the 33pt notch: see outer.top in aerospace.toml.)
+BAR_HEIGHT=27
+BAR_Y_OFFSET=4
+
+sketchybar --bar position=top height=$BAR_HEIGHT \
+  y_offset=$BAR_Y_OFFSET \
   color=$BAR_COLOR \
   border_width=0 \
   corner_radius=0 \
@@ -39,7 +46,7 @@ default=(
   label.padding_right=6
   padding_left=8
   padding_right=8
-  background.height=24
+  background.height=$BAR_HEIGHT
   background.corner_radius=0
   background.border_width=0
   background.border_color=$BACKGROUND_2
@@ -104,7 +111,7 @@ for i in $(seq 1 $WS_SLOTS); do
     padding_right=0 \
     background.color=$BACKGROUND_1 \
     background.corner_radius=0 \
-    background.height=24 \
+    background.height=$BAR_HEIGHT \
     background.drawing=on
 done
 
@@ -210,7 +217,7 @@ sketchybar --add item calendar right \
   script="$PLUGIN_DIR/calendar.sh" \
   background.color=$BACKGROUND_1 \
   background.drawing=on \
-  background.height=24 \
+  background.height=$BAR_HEIGHT \
   padding_left=0 \
   padding_right=0 \
   --subscribe calendar system_woke

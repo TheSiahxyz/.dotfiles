@@ -79,12 +79,12 @@ on-mode-changed = ['exec-and-forget /opt/homebrew/opt/sketchybar/bin/sketchybar 
     20 = '2'
 
 [gaps]
-    inner.horizontal =  15
-    inner.vertical =    15
-    outer.top =         [{ monitor."built-in" = 10 }, { monitor."main" = 32 }, { monitor."secondary" = 32 }, { monitor."1" = 32 }, { monitor."2" = 32 }, { monitor."3" = 32 }, 10]
-    outer.left =        10
-    outer.bottom =      10
-    outer.right =       10
+    inner.horizontal =  8
+    inner.vertical =    8
+    outer.top =         [{ monitor."built-in" = 4 }, { monitor."main" = 28 }, { monitor."secondary" = 28 }, { monitor."1" = 28 }, { monitor."2" = 28 }, { monitor."3" = 28 }, 6]
+    outer.left =        6
+    outer.bottom =      6
+    outer.right =       6
 
 [exec]
     inherit-env-vars = true
