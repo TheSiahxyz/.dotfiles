@@ -4,11 +4,18 @@
 source "$CONFIG_DIR/colors.sh"
 source "$CONFIG_DIR/icons.sh"
 
+# An empty workspace has no front app. macOS keeps the previous app frontmost
+# there (and fires no front_app_switched), so ask AeroSpace instead.
+if [ "$(aerospace list-windows --workspace focused --count 2>/dev/null)" = "0" ]; then
+    sketchybar --set "$NAME" drawing=off
+    exit 0
+fi
+
 # Get the current application
 if [ "$SENDER" = "front_app_switched" ]; then
     APP_NAME="$INFO"
 else
-    # Startup / forced update: no event payload, so ask AeroSpace.
+    # Startup, workspace change, window opened/closed: no app payload, so ask AeroSpace.
     APP_NAME="$(aerospace list-windows --focused --format '%{app-name}' 2>/dev/null | head -n 1)"
     [ -n "$APP_NAME" ] || APP_NAME="$(osascript -e 'tell application "System Events" to get name of first application process whose frontmost is true' 2>/dev/null)"
 fi
@@ -100,7 +107,8 @@ case $APP_NAME in
 esac
 
 # Update the front_app item
-sketchybar --set "$NAME" icon="$ICON" \
+sketchybar --set "$NAME" drawing=on \
+                        icon="$ICON" \
                         icon.color=$ACCENT_QUATERNARY \
                         label="$APP_NAME" \
                         label.color=$WHITE
