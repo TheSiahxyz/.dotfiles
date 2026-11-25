@@ -84,6 +84,30 @@ return {
 				},
 			})
 
+			-- mason-lspconfig v2 ignores `handlers` below and starts servers via
+			-- vim.lsp.enable(), which reads vim.lsp.config(). Configure harper here.
+			vim.lsp.config("harper_ls", {
+				filetypes = { "markdown", "python" },
+				settings = {
+					["harper-ls"] = {
+						linters = {
+							ToDoHyphen = false,
+							-- Flags every word not in its dictionary (bytes, R8, ...)
+							SpellCheck = false,
+							SentenceCapitalization = false,
+							-- "This quote has no termination."
+							UnclosedQuotes = false,
+							OrthographicConsistency = false,
+							LongSentences = false,
+						},
+						isolateEnglish = true,
+						markdown = {
+							IgnoreLinkTitle = true,
+						},
+					},
+				},
+			})
+
 			require("mason").setup({
 				pip = {
 					use_python3_host_prog = true,
@@ -153,14 +177,20 @@ return {
 							capabilities = capabilities,
 							filetypes = { "markdown", "python" },
 							settings = {
-								ToDoHyphen = false,
-								-- SentenceCapitalization = true,
-								-- SpellCheck = true,
-								isolateEnglish = true,
-								markdown = {
-									-- [ignores this part]()
-									-- [[ also ignores my marksman links ]]
-									IgnoreLinkTitle = true,
+								-- harper only reads options nested under "harper-ls"
+								["harper-ls"] = {
+									linters = {
+										ToDoHyphen = false,
+										-- SentenceCapitalization = true,
+										-- Flags every word not in its dictionary (bytes, R8, ...)
+										SpellCheck = false,
+									},
+									isolateEnglish = true,
+									markdown = {
+										-- [ignores this part]()
+										-- [[ also ignores my marksman links ]]
+										IgnoreLinkTitle = true,
+									},
 								},
 							},
 						})
