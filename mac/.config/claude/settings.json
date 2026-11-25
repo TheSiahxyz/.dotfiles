@@ -108,7 +108,7 @@
       "Edit(**/.password-store/**/*)"
     ]
   },
-  "model": "fable",
+  "model": "opus",
   "hooks": {
     "Notification": [
       {
@@ -159,7 +159,8 @@
   },
   "tui": "fullscreen",
   "skipDangerousModePermissionPrompt": true,
-  "agentPushNotifEnabled": true,
+  "theme": "dark",
   "editorMode": "vim",
-  "theme": "dark"
+  "inputNeededNotifEnabled": true,
+  "agentPushNotifEnabled": true
 }

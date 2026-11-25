@@ -31,7 +31,10 @@ sketchybar --bar position=top height=$BAR_HEIGHT \
   padding_right=16 \
   shadow=off \
   sticky=on \
-  topmost=window
+  topmost=on
+# topmost=on (status level), not =window: since macOS 27.2.1 the auto-hidden
+# menu bar (MenuBarAgent, layer 25) stays on screen as an invisible window and
+# swallows every click on a bar that sits below it.
 
 ##### Changing Defaults #####
 default=(
