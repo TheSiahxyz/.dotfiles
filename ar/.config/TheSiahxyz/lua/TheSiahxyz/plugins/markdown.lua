@@ -190,6 +190,17 @@ return {
 			-- require("obsidian").get_client().opts.ui.enable = false
 			-- vim.api.nvim_buf_clear_namespace(0, vim.api.nvim_get_namespaces()["ObsidianUI"], 0, -1)
 			require("render-markdown").setup({
+				-- Render only in these modes; insert/visual show raw markdown
+				render_modes = { "n", "c", "t" },
+				-- Keep the cursor line rendered too (default un-renders it)
+				anti_conceal = {
+					enabled = false,
+				},
+				-- Also keep native conceal (**, `, link brackets) on the cursor line
+				-- in normal/command mode (default '' reveals it on the cursor line)
+				win_options = {
+					concealcursor = { rendered = "nc" },
+				},
 				bullet = {
 					-- Turn on / off list bullet rendering
 					enabled = false,
