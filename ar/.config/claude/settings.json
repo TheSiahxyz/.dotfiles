@@ -10,7 +10,8 @@
     "MAX_MCP_OUTPUT_TOKENS": "60000",
     "MAX_THINKING_TOKENS": "10000",
     "NEXT_PUBLIC_APP_ENV": "development",
-    "NODE_ENV": "development"
+    "NODE_ENV": "development",
+    "CLAUDE_CODE_ENABLE_CFC": "1"
   },
   "includeCoAuthoredBy": false,
   "permissions": {
@@ -147,7 +148,8 @@
     "pyright-lsp@claude-plugins-official": true,
     "superpowers@claude-plugins-official": true,
     "typescript-lsp@claude-plugins-official": true,
-    "github@claude-plugins-official": true
+    "github@claude-plugins-official": true,
+    "figma@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "ecc": {
