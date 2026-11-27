@@ -1,0 +1,372 @@
+#!/usr/bin/env -S python3 -I
+"""Dump the open tab URLs of Firefox/LibreWolf, or reopen a saved list.
+
+Usage:
+  browsertabs get  [-b BROWSER] [-p PROFILE] [-m PATTERN]... [-o FILE] [-a]
+  browsertabs open [-b BROWSER] [FILE]        (FILE omitted -> stdin)
+  browsertabs videos [-b BROWSER] [-j N] [FILE]
+  browsertabs ps   [-c] [FILE]
+  browsertabs dl     [-b BROWSER] [-j N] [-f FORMAT] [-d DIR] [FILE]
+
+get     reads sessionstore-backups/recovery.jsonlz4 (updated ~every 15s while
+        the browser runs; sessionstore.jsonlz4 is used once it is closed).
+open    opens the first URL in a new window and the rest as tabs in it.
+ps      prints a PowerShell command that opens the URLs as tabs in a
+        Windows Firefox (e.g. in a VM); -c copies it to the clipboard so
+        it can be pasted into the guest's PowerShell via SPICE.
+videos  asks yt-dlp which URLs hold a video (embedded ones included) and
+        prints the video page URLs.
+dl      same extraction, then downloads N videos at a time with yt-dlp.
+        Per-video logs: ~/.cache/browsertabs/logs/
+
+  -b  firefox | librewolf   (default: basename of $BROWSER, else librewolf)
+      for videos/dl this picks the cookie source
+  -p  profile name/dir substring (default: every profile with a session)
+  -o  write to FILE instead of stdout
+  -a  include about:/moz-extension: pages too
+  -m  only URLs matching this glob, e.g. 'https://javeve.tv/video/*'
+      (repeatable: a URL matching any pattern is kept)
+  -j  parallel jobs (default: 3 for dl, 8 for extraction)
+  -f  yt-dlp format (default: bestvideo+bestaudio/best)
+  -d  output dir (default: $XDG_VIDEOS_DIR or ~/Videos)
+
+Example: browsertabs get -m 'https://javeve.tv/video/*' | browsertabs dl -j 4
+"""
+import argparse
+import configparser
+import fnmatch
+import json
+import os
+import shutil
+import subprocess
+import sys
+import time
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+
+HOME = Path.home()
+ROOTS = {
+    "librewolf": HOME / ".librewolf",
+    "firefox": HOME / ".mozilla" / "firefox",
+}
+MAGIC = b"mozLz40\0"
+SESSION_FILES = ("sessionstore-backups/recovery.jsonlz4", "sessionstore.jsonlz4")
+SKIP_PREFIXES = ("about:", "moz-extension:", "chrome:")
+TAB_DELAY_SEC = 0.5
+PROBE_JOBS = 8
+DL_JOBS = 3
+PROBE_TIMEOUT_SEC = 90
+DEFAULT_FORMAT = "bestvideo+bestaudio/best"
+LOG_DIR = Path(os.environ.get("XDG_CACHE_HOME", HOME / ".cache")) / "browsertabs" / "logs"
+
+
+def die(msg):
+    sys.exit(f"browsertabs: {msg}")
+
+
+def read_varlen(src, i, base):
+    """LZ4 length extension: keep adding bytes while they are 255."""
+    while True:
+        b = src[i]
+        i += 1
+        base += b
+        if b != 255:
+            return base, i
+
+
+def lz4_block_decompress(src, size):
+    """Minimal LZ4 block-format decoder (what mozlz4 wraps)."""
+    out = bytearray()
+    i, n = 0, len(src)
+    while i < n:
+        token = src[i]
+        i += 1
+        lit = token >> 4
+        if lit == 15:
+            lit, i = read_varlen(src, i, lit)
+        out += src[i:i + lit]
+        i += lit
+        if i >= n:
+            break
+        offset = src[i] | (src[i + 1] << 8)
+        i += 2
+        if offset == 0 or offset > len(out):
+            raise ValueError("corrupt lz4 data")
+        mlen = token & 15
+        if mlen == 15:
+            mlen, i = read_varlen(src, i, mlen)
+        mlen += 4
+        start = len(out) - offset
+        if offset >= mlen:
+            out += out[start:start + mlen]
+        else:  # overlapping match: copy byte by byte
+            for k in range(mlen):
+                out.append(out[start + k])
+    if len(out) != size:
+        raise ValueError("lz4 size mismatch")
+    return bytes(out)
+
+
+def read_mozlz4(path):
+    data = path.read_bytes()
+    if data[:8] != MAGIC:
+        raise ValueError(f"{path}: not a mozlz4 file")
+    size = int.from_bytes(data[8:12], "little")
+    return json.loads(lz4_block_decompress(data[12:], size))
+
+
+def default_browser():
+    name = os.path.basename(os.environ.get("BROWSER", ""))
+    return name if name in ROOTS else "librewolf"
+
+
+def profile_dirs(browser, wanted):
+    root = ROOTS[browser]
+    ini = root / "profiles.ini"
+    if not ini.is_file():
+        die(f"no profiles.ini in {root}")
+    cfg = configparser.ConfigParser(interpolation=None)
+    cfg.read(ini)
+    dirs = []
+    for sec in cfg.sections():
+        if not sec.startswith("Profile") or "Path" not in cfg[sec]:
+            continue
+        name, rel = cfg[sec].get("Name", ""), cfg[sec]["Path"]
+        if wanted and wanted not in name and wanted not in rel:
+            continue
+        relative = cfg[sec].get("IsRelative", "1") == "1"
+        dirs.append(root / rel if relative else Path(rel))
+    return dirs
+
+
+def session_file(profile):
+    found = [profile / f for f in SESSION_FILES if (profile / f).is_file()]
+    return max(found, key=lambda p: p.stat().st_mtime) if found else None
+
+
+def tab_urls(session, include_all):
+    for win in session.get("windows", []):
+        for tab in win.get("tabs", []):
+            entries = tab.get("entries") or []
+            if not entries:
+                continue
+            idx = min(max(tab.get("index", len(entries)), 1), len(entries))
+            url = entries[idx - 1].get("url", "")
+            if url and (include_all or not url.startswith(SKIP_PREFIXES)):
+                yield url
+
+
+def cmd_get(args):
+    urls = []
+    for prof in profile_dirs(args.browser, args.profile):
+        sf = session_file(prof)
+        if sf is None:
+            continue
+        try:
+            urls += tab_urls(read_mozlz4(sf), args.all)
+        except (OSError, ValueError) as e:
+            print(f"browsertabs: skip {sf}: {e}", file=sys.stderr)
+    if not urls:
+        die(f"no open tabs found for {args.browser}")
+    if args.match:
+        urls = [u for u in urls
+                if any(fnmatch.fnmatchcase(u, m) for m in args.match)]
+        if not urls:
+            die(f"no open tabs match {' '.join(args.match)}")
+    lines = list(dict.fromkeys(urls))  # dedupe, keep order
+    text = "\n".join(lines) + "\n"
+    if args.output:
+        Path(args.output).write_text(text)
+        print(f"{len(lines)} URLs -> {args.output}", file=sys.stderr)
+    else:
+        sys.stdout.write(text)
+
+
+def read_url_list(path):
+    """URLs from FILE or stdin: one per line, blanks and #comments skipped."""
+    try:
+        src = open(path) if path else sys.stdin
+    except OSError as e:
+        die(str(e))
+    with src:
+        urls = [l.strip() for l in src if l.strip() and not l.startswith("#")]
+    if not urls:
+        die("no URLs given")
+    return list(dict.fromkeys(urls))
+
+
+def cmd_open(args):
+    urls = read_url_list(args.file)
+    exe = shutil.which(args.browser) or die(f"{args.browser} not found")
+    quiet = {"stdout": subprocess.DEVNULL, "stderr": subprocess.DEVNULL}
+    subprocess.Popen([exe, "--new-window", urls[0]], **quiet)
+    if len(urls) > 1:
+        time.sleep(TAB_DELAY_SEC)  # let the new window become the target
+        subprocess.Popen([exe, *urls[1:]], **quiet)
+    print(f"opened {len(urls)} URLs in {args.browser}", file=sys.stderr)
+
+
+def powershell_open(urls):
+    # single-quoted here-string: taken literally, no escaping needed
+    body = "\n".join(urls)
+    return ("$u = @'\n" + body + "\n'@ -split \"`r?`n\" | ? { $_ }\n"
+            "Start-Process firefox -ArgumentList $u\n")
+
+
+def cmd_ps(args):
+    urls = read_url_list(args.file)
+    cmd = powershell_open(urls)
+    if not args.clip:
+        sys.stdout.write(cmd)
+        return
+    shutil.which("xclip") or die("xclip not found")
+    subprocess.run(["xclip", "-selection", "clipboard"], input=cmd,
+                   text=True, check=True)
+    print(f"PowerShell command for {len(urls)} URLs copied to clipboard", file=sys.stderr)
+
+
+# --- video extraction / parallel download (yt-dlp) -------------------------
+
+def install_default_profile(browser):
+    """Profile the browser actually launches ([Install*] Default=)."""
+    cfg = configparser.ConfigParser(interpolation=None)
+    cfg.read(ROOTS[browser] / "profiles.ini")
+    for sec in cfg.sections():
+        if sec.startswith("Install") and "Default" in cfg[sec]:
+            rel = cfg[sec]["Default"]
+            return Path(rel) if rel.startswith("/") else ROOTS[browser] / rel
+    return None
+
+
+def cookie_args(browser):
+    # yt-dlp reads LibreWolf cookies as a Firefox profile given by path
+    prof = install_default_profile(browser)
+    spec = f"firefox:{prof}" if prof and prof.is_dir() else "firefox"
+    return ["--cookies-from-browser", spec]
+
+
+def normalize_url(url):
+    # yt-dlp's soop extractor only knows sooplive.co.kr (same as qndl)
+    return url.replace(".sooplive.com/", ".sooplive.co.kr/")
+
+
+def videos_in(info, url):
+    """Video URLs from yt-dlp's -J output; feeds/channels/playlists are skipped
+    unless they are a plain web page with embedded videos (Generic)."""
+    if info.get("_type", "video") == "video":
+        return [info.get("webpage_url") or url]
+    if info.get("_type") == "url":
+        return [info["url"]]
+    if info.get("extractor_key") == "Generic":
+        return [e["url"] for e in info.get("entries") or [] if e.get("url")]
+    print(f"  skip list ({info.get('extractor_key')}): {url}", file=sys.stderr)
+    return []
+
+
+def probe(url, cookies):
+    """Video URLs yt-dlp finds at url ([] if none)."""
+    url = normalize_url(url)
+    cmd = ["yt-dlp", "-J", "--flat-playlist", "--no-playlist", "--no-warnings",
+           *cookies, "--", url]
+    try:
+        res = subprocess.run(cmd, capture_output=True, text=True,
+                             timeout=PROBE_TIMEOUT_SEC)
+    except subprocess.TimeoutExpired:
+        print(f"  timeout: {url}", file=sys.stderr)
+        return []
+    if res.returncode != 0:
+        return []  # not a video page
+    try:
+        info = json.loads(res.stdout)
+    except json.JSONDecodeError:
+        return []
+    return [v for v in videos_in(info, url) if v.startswith("http")]
+
+
+def extract_videos(urls, cookies, jobs):
+    print(f"checking {len(urls)} URLs for videos...", file=sys.stderr)
+    with ThreadPoolExecutor(max_workers=jobs) as pool:
+        found = pool.map(lambda u: probe(u, cookies), urls)
+        videos = [v for vs in found for v in vs]
+    videos = list(dict.fromkeys(videos))
+    print(f"{len(videos)} video(s) found", file=sys.stderr)
+    return videos
+
+
+def notify(title, body=""):
+    if shutil.which("notify-send"):
+        subprocess.run(["notify-send", "--", title, body],
+                       stderr=subprocess.DEVNULL)
+
+
+def download(url, num, total, opts):
+    log = LOG_DIR / f"{time.strftime('%Y%m%d-%H%M%S')}-{num:03d}.log"
+    cmd = ["yt-dlp", "--no-playlist", "--continue", "--no-overwrites",
+           "--embed-metadata", "--http-chunk-size", "9M",
+           "--format", opts.format,
+           "--output", str(Path(opts.dir) / "%(title)s [%(id)s].%(ext)s"),
+           *opts.cookies, "--", normalize_url(url)]
+    print(f"[{num}/{total}] start  {url}", file=sys.stderr)
+    with open(log, "w") as fh:
+        rc = subprocess.run(cmd, stdout=fh, stderr=subprocess.STDOUT).returncode
+    state = "done " if rc == 0 else f"FAIL ({rc}) log: {log}"
+    print(f"[{num}/{total}] {state} {url}", file=sys.stderr)
+    return rc == 0
+
+
+def cmd_videos(args):
+    shutil.which("yt-dlp") or die("yt-dlp not found")
+    urls = read_url_list(args.file)
+    videos = extract_videos(urls, cookie_args(args.browser), args.jobs or PROBE_JOBS)
+    if args.cmd == "videos":
+        sys.stdout.write("".join(v + "\n" for v in videos))
+        return
+    if not videos:
+        die("nothing to download")
+    LOG_DIR.mkdir(parents=True, exist_ok=True)
+    Path(args.dir).mkdir(parents=True, exist_ok=True)
+    args.cookies = cookie_args(args.browser)
+    total = len(videos)
+    with ThreadPoolExecutor(max_workers=args.jobs or DL_JOBS) as pool:
+        ok = sum(pool.map(lambda iv: download(iv[1], iv[0], total, args),
+                          enumerate(videos, 1)))
+    summary = f"{ok}/{total} downloaded -> {args.dir}"
+    print(summary, file=sys.stderr)
+    notify("📥 browsertabs dl", summary)
+    if ok < total:
+        sys.exit(1)
+
+
+def main():
+    ap = argparse.ArgumentParser(prog="browsertabs", usage=__doc__)
+    sub = ap.add_subparsers(dest="cmd", required=True)
+    g = sub.add_parser("get")
+    g.add_argument("-b", "--browser", choices=ROOTS, default=default_browser())
+    g.add_argument("-p", "--profile")
+    g.add_argument("-o", "--output")
+    g.add_argument("-a", "--all", action="store_true")
+    g.add_argument("-m", "--match", action="append", metavar="PATTERN")
+    o = sub.add_parser("open")
+    o.add_argument("-b", "--browser", choices=ROOTS, default=default_browser())
+    o.add_argument("file", nargs="?")
+    ps = sub.add_parser("ps")
+    ps.add_argument("-c", "--clip", action="store_true")
+    ps.add_argument("file", nargs="?")
+    videos_dir = os.environ.get("XDG_VIDEOS_DIR", str(HOME / "Videos"))
+    for name in ("videos", "dl"):
+        v = sub.add_parser(name)
+        v.add_argument("-b", "--browser", choices=ROOTS, default=default_browser())
+        v.add_argument("-j", "--jobs", type=int)
+        v.add_argument("-f", "--format", default=DEFAULT_FORMAT)
+        v.add_argument("-d", "--dir", default=videos_dir)
+        v.add_argument("file", nargs="?")
+    args = ap.parse_args()
+    if getattr(args, "jobs", None) is not None and args.jobs < 1:
+        die("-j must be >= 1")
+    handlers = {"get": cmd_get, "open": cmd_open, "ps": cmd_ps,
+                "videos": cmd_videos, "dl": cmd_videos}
+    handlers[args.cmd](args)
+
+
+if __name__ == "__main__":
+    main()
