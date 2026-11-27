@@ -18,7 +18,7 @@
 # Exec = /usr/bin/pkill -RTMIN+19 dwmblocks # Or i3blocks if using i3.
 
 case $BLOCK_BUTTON in
-1) setsid -f "$TERMINAL" -e sb-popupgrade && remaps ;;
+1) setsid -f "$TERMINAL" -e sb-popupgrade ;;
 2) notify-send "$(/usr/bin/pacman -Qu)" "$(/usr/bin/yay -Qu --aur)" ;;
 3) notify-send "🎁 Upgrade module" "📦: number of upgradable 'pacman' packages
 🧰: number of upgradable 'yay' packages

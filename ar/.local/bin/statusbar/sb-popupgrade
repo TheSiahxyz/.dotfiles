@@ -4,7 +4,7 @@ printf "Beginning upgrade.\n"
 
 sudo pacman -Syu
 
-command -v yay >/dev/null 2>&1 && yay -Su
+command -v yay >/dev/null 2>&1 && yay -Su && remaps
 
 pkill -RTMIN+19 "${STATUSBAR:-dwmblocks}"
 
